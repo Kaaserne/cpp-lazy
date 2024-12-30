@@ -3,9 +3,8 @@
 #ifndef LZ_RANDOM_HPP
 #define LZ_RANDOM_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/random.hpp"
-
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/random.hpp>
 #include <random>
 
 namespace lz {
@@ -17,7 +16,7 @@ public:
 
 private:
     using seed_array = std::array<result_type, N>;
-    seed_array _seed{};
+    seed_array _seed;
 
     template<class Iter>
     LZ_CONSTEXPR_CXX_20 void create(Iter begin, Iter end) {

@@ -3,40 +3,83 @@
 #ifndef LZ_ZIP_LONGEST_ITERATOR_HPP
 #define LZ_ZIP_LONGEST_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/optional.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
+#include <Lz/optional.hpp>
 
 namespace lz {
 namespace detail {
+
+template<class>
+struct optional_iter_tuple_value_type_helper;
+
+template<class... Iterators>
+struct optional_iter_tuple_value_type_helper<std::tuple<Iterators...>> {
+    using type = std::tuple<optional<val_t<Iterators>>...>;
+};
+
+template<class IterTuple>
+using optional_value_type_iter_tuple_t = typename optional_iter_tuple_value_type_helper<IterTuple>::type;
+
+template<bool>
+struct reference_or_value_type_helper;
+
+template<>
+struct reference_or_value_type_helper<true /* is lvalue reference */> {
+    template<class Ref, class>
+    using type = std::reference_wrapper<typename std::remove_reference<Ref>::type>;
+};
+
+template<>
+struct reference_or_value_type_helper<false /* is lvalue reference */> {
+    template<class, class Val>
+    using type = Val;
+};
+
+template<class Ref, class Val>
+using reference_or_value_type =
+    typename reference_or_value_type_helper<std::is_lvalue_reference<Ref>::value>::template type<Ref, Val>;
+
+template<class>
+struct optional_iter_tuple_ref_type_helper;
+
+template<class... Iterators>
+struct optional_iter_tuple_ref_type_helper<std::tuple<Iterators...>> {
+    using type = std::tuple<optional<reference_or_value_type<ref_t<Iterators>, val_t<Iterators>>>...>;
+};
+
+template<class IterTuple>
+using optional_iter_tuple_ref_type = typename optional_iter_tuple_ref_type_helper<IterTuple>::type;
+
 template<bool, class...>
 class zip_longest_iterator;
 
-template<class... Iterators>
-class zip_longest_iterator<false /*is random access*/, Iterators...>
-    : public iter_base<zip_longest_iterator<false, Iterators...>, std::tuple<optional<val_t<Iterators>>...>,
-                       fake_ptr_proxy<std::tuple<optional<val_t<Iterators>>...>>, common_type<diff_type<Iterators>...>,
-                       std::forward_iterator_tag> {
+template<class IterTuple, class SentinelTuple>
+class zip_longest_iterator<false /*is bidirectional access*/, IterTuple, SentinelTuple>
+    : public iter_base<zip_longest_iterator<false, IterTuple, SentinelTuple>, optional_iter_tuple_ref_type<IterTuple>,
+                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+                       std::forward_iterator_tag, default_sentinel> {
 public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = std::tuple<optional<val_t<Iterators>>...>;
-    using difference_type = common_type<diff_type<Iterators>...>;
-    using reference = value_type;
+    using value_type = optional_value_type_iter_tuple_t<IterTuple>;
+    using difference_type = iter_tuple_diff_type_t<IterTuple>;
+    using reference = optional_iter_tuple_ref_type<IterTuple>;
     using pointer = fake_ptr_proxy<value_type>;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<sizeof...(Iterators)>;
-    std::tuple<Iterators...> _iterators{};
-    std::tuple<Iterators...> _end{};
+    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
+    IterTuple _iterators;
+    SentinelTuple _end;
 
-    template<class I>
-    LZ_CONSTEXPR_CXX_20 optional<val_t<I>> deref_one(const I& iterator, const I& end) const {
-        return iterator == end ? optional<val_t<I>>{} : optional<val_t<I>>(*iterator);
+    template<class I, class S>
+    LZ_CONSTEXPR_CXX_20 optional<reference_or_value_type<ref_t<I>, val_t<I>>> deref_one(const I& iterator, const S& end) const {
+        return iterator == end ? optional<reference_or_value_type<ref_t<I>, val_t<I>>>{}
+                               : optional<reference_or_value_type<ref_t<I>, val_t<I>>>(*iterator);
     }
 
-    template<class I>
-    LZ_CONSTEXPR_CXX_20 void increment_one(I& iterator, const I& end) const {
+    template<class I, class S>
+    LZ_CONSTEXPR_CXX_20 void increment_one(I& iterator, const S& end) const {
         if (iterator == end) {
             return;
         }
@@ -52,8 +95,8 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 value_type dereference(index_sequence<I...>) const {
-        return value_type{ deref_one(std::get<I>(_iterators), std::get<I>(_end))... };
+    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence<I...>) const {
+        return reference{ deref_one(std::get<I>(_iterators), std::get<I>(_end))... };
     }
 
     template<std::size_t... I>
@@ -63,20 +106,29 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
+        // Cannot use auto here. Compiler is unable to deduce the type
         const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(other._iterators))... };
         const auto end = std::end(expander);
         return std::find(std::begin(expander), end, false) == end;
     }
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_20 bool eq(index_sequence<I...>) const {
+        // Cannot use auto here. Compiler is unable to deduce the type
+        const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(_end))... };
+        const auto end = std::end(expander);
+        return detail::find(std::begin(expander), end, false) == end;
+    }
+
 public:
-    LZ_CONSTEXPR_CXX_20 explicit zip_longest_iterator(std::tuple<Iterators...> iterators, std::tuple<Iterators...> end) :
+    LZ_CONSTEXPR_CXX_20 explicit zip_longest_iterator(IterTuple iterators, SentinelTuple end) :
         _iterators(std::move(iterators)),
         _end(std::move(end)) {
     }
 
     constexpr zip_longest_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 value_type dereference() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
@@ -91,29 +143,34 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& b) const {
         return eq(b, make_idx_sequence_for_this());
     }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+        return eq(make_idx_sequence_for_this());
+    }
 };
 
-template<class... Iterators>
-class zip_longest_iterator<true /*is random access*/, Iterators...>
-    : public iter_base<zip_longest_iterator<true, Iterators...>, std::tuple<optional<val_t<Iterators>>...>,
-                       fake_ptr_proxy<std::tuple<optional<val_t<Iterators>>...>>, common_type<diff_type<Iterators>...>,
-                       std::random_access_iterator_tag> {
+template<class IterTuple>
+class zip_longest_iterator<true /*is bidirectional access*/, IterTuple, IterTuple>
+    : public iter_base<zip_longest_iterator<true, IterTuple, IterTuple>, optional_iter_tuple_ref_type<IterTuple>,
+                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+                       iter_tuple_iter_cat_t<IterTuple>> {
 public:
-    using iterator_category = common_type<iter_cat_t<Iterators>...>;
-    using value_type = std::tuple<optional<val_t<Iterators>>...>;
-    using difference_type = common_type<diff_type<Iterators>...>;
-    using reference = value_type;
+    using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
+    using value_type = optional_value_type_iter_tuple_t<IterTuple>;
+    using difference_type = iter_tuple_diff_type_t<IterTuple>;
+    using reference = optional_iter_tuple_ref_type<IterTuple>;
     using pointer = fake_ptr_proxy<value_type>;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<sizeof...(Iterators)>;
-    std::tuple<Iterators...> _begin{};
-    std::tuple<Iterators...> _iterators{};
-    std::tuple<Iterators...> _end{};
+    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
+    IterTuple _begin;
+    IterTuple _iterators;
+    IterTuple _end;
 
     template<class I>
-    LZ_CONSTEXPR_CXX_20 optional<val_t<I>> deref_one(const I& iterator, const I& end) const {
-        return iterator == end ? optional<val_t<I>>{} : optional<val_t<I>>(*iterator);
+    LZ_CONSTEXPR_CXX_20 optional<reference_or_value_type<ref_t<I>, val_t<I>>> deref_one(const I& iterator, const I& end) const {
+        return iterator == end ? optional<reference_or_value_type<ref_t<I>, val_t<I>>>{}
+                               : optional<reference_or_value_type<ref_t<I>, val_t<I>>>(*iterator);
     }
 
     template<class I>
@@ -124,17 +181,9 @@ private:
         ++iterator;
     }
 
-    template<class I>
-    LZ_CONSTEXPR_CXX_20 void decrement_one(I& iterator, const I& begin) const {
-        if (iterator == begin) {
-            return;
-        }
-        --iterator;
-    }
-
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 value_type dereference(index_sequence<I...>) const {
-        return value_type{ deref_one(std::get<I>(_iterators), std::get<I>(_end))... };
+    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence<I...>) const {
+        return reference{ deref_one(std::get<I>(_iterators), std::get<I>(_end))... };
     }
 
     template<std::size_t... I>
@@ -214,8 +263,7 @@ private:
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 explicit zip_longest_iterator(std::tuple<Iterators...> begin, std::tuple<Iterators...> iterators,
-                                                      std::tuple<Iterators...> end) :
+    LZ_CONSTEXPR_CXX_20 explicit zip_longest_iterator(IterTuple begin, IterTuple iterators, IterTuple end) :
         _begin(std::move(begin)),
         _iterators(std::move(iterators)),
         _end(std::move(end)) {
@@ -223,7 +271,7 @@ public:
 
     constexpr zip_longest_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 value_type dereference() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
@@ -252,7 +300,7 @@ public:
         return minus(other, make_idx_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 value_type operator[](const difference_type offset) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference operator[](const difference_type offset) const {
         return *(*this + offset);
     }
 

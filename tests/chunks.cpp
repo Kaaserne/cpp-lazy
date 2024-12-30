@@ -158,7 +158,7 @@ TEST_CASE("Chunks to containers", "[Chunk][To container]") {
     auto chunked = lz::chunks(v, 3);
     using value_type_t = decltype(chunked.begin())::value_type;
     SECTION("To array") {
-        std::array<std::array<int, 3>, 3> arrays{};
+        std::array<std::array<int, 3>, 3> arrays;
         chunked.transform_to(arrays.begin(), [](value_type_t chunk) { return chunk.template to<std::array<int, 3>>(); });
 
         std::array<std::array<int, 3>, 3> expected = { std::array<int, 3>{ 1, 2, 3 }, std::array<int, 3>{ 4, 5, 6 },
@@ -168,7 +168,7 @@ TEST_CASE("Chunks to containers", "[Chunk][To container]") {
     }
 
     SECTION("To vector") {
-        std::vector<std::vector<int>> vectors{};
+        std::vector<std::vector<int>> vectors;
         chunked.transform_to(std::back_inserter(vectors), [](value_type_t chunk) { return chunk.to_vector(); });
 
         std::vector<std::vector<int>> expected = { std::vector<int>{ 1, 2, 3 }, std::vector<int>{ 4, 5, 6 },
@@ -178,7 +178,7 @@ TEST_CASE("Chunks to containers", "[Chunk][To container]") {
     }
 
     SECTION("To other container using to<>()") {
-        std::list<std::list<int>> lists{};
+        std::list<std::list<int>> lists;
         chunked.transform_to(std::inserter(lists, lists.begin()),
                             [](value_type_t chunk) { return chunk.template to<std::list<int>>(); });
 

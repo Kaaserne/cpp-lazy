@@ -3,10 +3,10 @@
 #ifndef LZ_LOOP_ITERATOR_HPP
 #define LZ_LOOP_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -17,9 +17,9 @@ class loop_iterator
 
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _begin{};
-    Iterator _iterator{};
-    S _end{};
+    Iterator _begin;
+    Iterator _iterator;
+    S _end;
 
 public:
     using reference = typename traits::reference;

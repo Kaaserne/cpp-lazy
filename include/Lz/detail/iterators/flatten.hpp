@@ -3,8 +3,8 @@
 #ifndef LZ_FLATTEN_ITERATOR_HPP
 #define LZ_FLATTEN_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -95,9 +95,9 @@ class flatten_wrapper
           common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
           sentinel_selector<common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>, flatten_wrapper<Iterator, S>>> {
 
-    Iterator _begin{};
-    Iterator _current{};
-    S _end{};
+    Iterator _begin;
+    Iterator _current;
+    S _end;
 
     using traits = std::iterator_traits<Iterator>;
 

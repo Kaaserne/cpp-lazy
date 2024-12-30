@@ -3,13 +3,13 @@
 #ifndef LZ_ANY_VIEW_HPP
 #define LZ_ANY_VIEW_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/any_view_helpers.hpp"
-#include "Lz/detail/iterators/anyview/any_impl.hpp"
-#include "Lz/detail/procs.hpp"
-
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/any_view_helpers.hpp>
+#include <Lz/detail/iterators/anyview/any_impl.hpp>
+#include <Lz/detail/procs.hpp>
 #include <iterator>
 #include <memory>
+
 
 namespace lz {
 /**
@@ -38,8 +38,7 @@ private:
     using base = detail::basic_iterable<it>;
 
     template<class Iterable>
-    using any_iter_impl = detail::any_iterator_impl<decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>()))), T,
-                                                    Reference, IterCat, DiffType>;
+    using any_iter_impl = detail::any_iterator_impl<iter_t<Iterable>, sentinel_t<Iterable>, T, Reference, IterCat, DiffType>;
 
 public:
     any_iterable() = default;

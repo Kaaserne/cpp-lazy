@@ -1,11 +1,16 @@
-#include "Lz/exclusive_scan.hpp"
-
+#include <Lz/exclusive_scan.hpp>
+#include <Lz/generate.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <list>
 #include <numeric>
 
-// TODO: write exclusivescan tests for sentinel
+TEST_CASE("Exclusive scan with sentinels") {
+    auto generator = lz::generate([](int& i) { return i++; }, 5, 0);
+    auto scan = lz::exclusive_scan(generator, 0);
+    auto expected = { 0, 0, 1, 3, 6 };
+    CHECK(lz::equal(scan, expected));
+}
 
 TEST_CASE("ExclusiveScan basic functionality", "[ExclusiveScan][Basic functionality]") {
     int arr[] = { 3, 1, 4, 1, 5, 9, 2, 6 };

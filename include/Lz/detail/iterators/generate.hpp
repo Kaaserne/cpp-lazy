@@ -3,29 +3,27 @@
 #ifndef LZ_GENERATE_ITERATOR_HPP
 #define LZ_GENERATE_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/detail/procs.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/detail/procs.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
-// TODO: Remove current and amount for one variable and check if 0
 template<class GeneratorFunc, class... Args>
 class generate_iterator : public iter_base<generate_iterator<GeneratorFunc, Args...>, tuple_invoker_ret<GeneratorFunc, Args...>,
                                            fake_ptr_proxy<tuple_invoker_ret<GeneratorFunc, Args...>>, std::ptrdiff_t,
                                            std::forward_iterator_tag, default_sentinel> {
 
-    mutable std::tuple<Args...> _args{};
-    std::size_t _current{};
-    std::size_t _amount{};
-    mutable tuple_invoker<GeneratorFunc, Args...> _tupleInvoker{};
-    bool _is_inf_loop{ false };
+    mutable std::tuple<Args...> _args;
+    std::size_t _current;
+    mutable tuple_invoker<GeneratorFunc, Args...> _tupleInvoker;
+    bool _is_inf_loop;
 
 public:
     using iterator_category = std::forward_iterator_tag;
     using reference = tuple_invoker_ret<GeneratorFunc, Args...>;
-    using value_type = decay<reference>;
+    using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
@@ -34,7 +32,7 @@ public:
     LZ_CONSTEXPR_CXX_14
     generate_iterator(const std::size_t amount, GeneratorFunc generator_func, const bool is_inf_loop, std::tuple<Args...> args) :
         _args(std::move(args)),
-        _amount(amount),
+        _current(amount),
         _tupleInvoker(make_expand_fn(std::move(generator_func), make_index_sequence<sizeof...(Args)>())),
         _is_inf_loop(is_inf_loop) {
     }
@@ -49,7 +47,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         if (!_is_inf_loop) {
-            ++_current;
+            --_current;
         }
     }
 
@@ -59,7 +57,7 @@ public:
     }
 
     LZ_NODISCARD constexpr bool eq(default_sentinel) const noexcept {
-        return _current == _amount;
+        return _current == 0;
     }
 };
 } // namespace detail

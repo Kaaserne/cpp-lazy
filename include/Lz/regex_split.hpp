@@ -3,10 +3,10 @@
 #ifndef LZ_REGEX_SPLIT_HPP
 #define LZ_REGEX_SPLIT_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/regex_split.hpp"
-
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/regex_split.hpp>
 #include <regex>
+
 
 namespace lz {
 

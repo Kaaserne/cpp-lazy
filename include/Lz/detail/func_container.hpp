@@ -3,9 +3,9 @@
 #ifndef LZ_FUNCTION_CONTAINER_HPP
 #define LZ_FUNCTION_CONTAINER_HPP
 
-#include "Lz/detail/traits.hpp"
-
+#include <Lz/detail/traits.hpp>
 #include <type_traits>
+
 
 namespace lz {
 namespace detail {

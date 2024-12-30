@@ -1,8 +1,23 @@
 #include <Lz/group_by.hpp>
+#include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 
-// TODO: write groupby tests for sentinel
+TEST_CASE("Group by with sentinels") {
+    auto cstr = lz::c_string("aaabbccccd");
+    auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
+    auto it = grouper.begin();
+
+    CHECK(lz::equal(it->second, lz::c_string("aaa")));
+    ++it;
+    CHECK(lz::equal(it->second, lz::c_string("bb")));
+    ++it;
+    CHECK(lz::equal(it->second, lz::c_string("cccc")));
+    ++it;
+    CHECK(lz::equal(it->second, lz::c_string("d")));
+    ++it;
+    CHECK(it == grouper.end());
+}
 
 TEST_CASE("GroupBy changing and creating elements", "[GroupBy][Basic functionality]") {
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };

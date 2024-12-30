@@ -27,7 +27,7 @@ class variant {
         none,
         t,
         t2,
-    } _state{};
+    } _state;
 
     union types {
         T _t;

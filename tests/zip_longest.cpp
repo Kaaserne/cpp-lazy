@@ -1,6 +1,31 @@
+#include <Lz/c_string.hpp>
 #include <Lz/zip_longest.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+
+TEST_CASE("Zip longest with sentinels") {
+    auto cstr = lz::c_string("Hello");
+    auto cstr2 = lz::c_string("Hello1");
+    auto cstr3 = lz::c_string("S");
+    auto longest = lz::zip_longest(cstr, cstr2, cstr3);
+    static_assert(!std::is_same<decltype(longest.begin()), decltype(longest.end())>::value, "should be sentine");
+    CHECK(longest.distance() == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
+
+    auto begin = longest.begin();
+    CHECK(*begin == std::make_tuple('H', 'H', 'S'));
+    ++begin;
+    CHECK(*begin == std::make_tuple('e', 'e', lz::optional<char>()));
+    ++begin;
+    CHECK(*begin == std::make_tuple('l', 'l', lz::optional<char>()));
+    ++begin;
+    CHECK(*begin == std::make_tuple('l', 'l', lz::optional<char>()));
+    ++begin;
+    CHECK(*begin == std::make_tuple('o', 'o', lz::optional<char>()));
+    ++begin;
+    CHECK(*begin == std::make_tuple(lz::optional<char>(), '1', lz::optional<char>()));
+    ++begin;
+    CHECK(begin == longest.end());
+}
 
 TEST_CASE("zip_longest_iterable changing and creating elements", "[zip_longest_iterable][Basic functionality]") {
     std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7 };
@@ -13,7 +38,7 @@ TEST_CASE("zip_longest_iterable changing and creating elements", "[zip_longest_i
     static_assert(lz::detail::is_ra<decltype(ra.begin())>::value, "");
 
     SECTION("Unequal lengths") {
-        CHECK(std::distance(fwd.begin(), fwd.end()) == 7);
+        CHECK(lz::distance(fwd.begin(), fwd.end()) == 7);
         CHECK(std::distance(ra.begin(), ra.end()) == 7);
     }
 
@@ -60,11 +85,11 @@ TEST_CASE("zip_longest_iterable changing and creating elements", "[zip_longest_i
         }
     }
 
-    SECTION("Should not be by ref") {
+    SECTION("Should be by ref") {
         auto begin = ra.begin();
-        auto&& first = std::get<0>(*begin);
-        first = 2000;
-        CHECK(v[0] != *first);
+        std::reference_wrapper<int> ref_wrapper = std::get<0>(*begin).value();
+        ref_wrapper.get() = 2000;
+        CHECK(v[0] == ref_wrapper.get());
     }
 }
 
@@ -171,4 +196,65 @@ TEST_CASE("zip_longest_iterable binary operations", "[zip_longest_iterable][Bina
         CHECK(begin + 5 >= end);
         CHECK(begin <= end - 5);
     }
+}
+
+template<class... T>
+using opt_actual_t = std::tuple<lz::optional<std::reference_wrapper<T>>...>;
+
+template<class... T>
+using opt_expected_t = std::tuple<lz::optional<T>...>;
+
+template<class... T>
+struct zip_longest_comparer {
+    bool operator()(const opt_expected_t<T...>& a, const opt_expected_t<T...>& b) {
+        return a == b;
+    }
+};
+
+TEST_CASE("Zip longest iterable to container", "[zip_longest_iterable][To container]") {
+    std::array<int, 4> a = { 1, 2, 3, 4 };
+    std::list<float> b = { 1.f, 2.f, 3.f, 4.f, 5.f };
+    std::vector<char> c = { 'a', 'b', 'c', 'd', 'f', 'g' };
+    auto zipper = lz::zip_longest(a, b, c);
+
+    SECTION("To array") {
+        auto to_arr = zipper.to<std::array<opt_actual_t<int, float, char>, 6>>();
+        std::array<opt_expected_t<int, float, char>, 6> expected = {
+            std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
+            std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
+        };
+        CHECK(std::equal(to_arr.begin(), to_arr.end(), expected.begin(), zip_longest_comparer<int, float, char>{}));
+    }
+
+    SECTION("To vector") {
+        auto to_vec = zipper.to_vector();
+        (void)(to_vec);
+        std::vector<opt_expected_t<int, float, char>> expected = {
+            std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
+            std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
+        };
+        CHECK(std::equal(to_vec.begin(), to_vec.end(), expected.begin(), zip_longest_comparer<int, float, char>{}));
+    }
+
+    SECTION("To other container using to<>()") {
+        auto to_list = zipper.to<std::list<opt_actual_t<int, float, char>>>();
+        std::list<opt_expected_t<int, float, char>> expected = {
+            std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
+            std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
+        };
+        CHECK(std::equal(to_list.begin(), to_list.end(), expected.begin(), zip_longest_comparer<int, float, char>{}));
+    }
+
+    // SECTION("To map") {
+    //     auto toMap = zipper.to_map([](const auto& tup) { return std::make_pair(std::get<0>(tup), std::get<1>(tup)); });
+    //     std::map<int, lz::optional<float>> expected = { { 1, 1.f }, { 2, 2.f }, { 3, 3.f }, { 4, 4.f }, { 0, 5.f } };
+    //     CHECK(toMap == expected);
+    // }
+
+    // SECTION("To unordered map") {
+    //     auto toUnorderedMap =
+    //         zipper.to_unordered_map([](const auto& tup) { return std::make_pair(std::get<0>(tup), std::get<1>(tup)); });
+    //     std::unordered_map<int, lz::optional<float>> expected = { { 1, 1.f }, { 2, 2.f }, { 3, 3.f }, { 4, 4.f }, { 0, 5.f } };
+    //     CHECK(toUnorderedMap == expected);
+    // }
 }

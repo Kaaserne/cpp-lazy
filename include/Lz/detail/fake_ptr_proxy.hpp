@@ -3,9 +3,9 @@
 #ifndef LZ_FAKE_POINTER_PROXY_HPP
 #define LZ_FAKE_POINTER_PROXY_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
 #include <memory>
+
 
 namespace lz {
 namespace detail {

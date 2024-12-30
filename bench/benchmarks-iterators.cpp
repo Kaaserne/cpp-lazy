@@ -7,8 +7,8 @@ namespace {
 constexpr std::size_t size_policy = 32;
 
 void CartesianProduct(benchmark::State& state) {
-    std::array<int, size_policy / 8> a{};
-    std::array<char, size_policy / 4> b{};
+    std::array<int, size_policy / 8> a;
+    std::array<char, size_policy / 4> b;
 
     for (auto _ : state) {
         for (auto&& tup : lz::cartesian_product(a, b)) {
@@ -66,7 +66,7 @@ void CString(benchmark::State& state) {
 }
 
 void Enumerate(benchmark::State& state) {
-    std::array<int, size_policy> arr{};
+    std::array<int, size_policy> arr;
 
     for (auto _ : state) {
         for (auto pair : lz::enumerate(arr)) {
@@ -108,7 +108,7 @@ void ExclusiveScan(benchmark::State& state) {
 }
 
 void Filter(benchmark::State& state) {
-    std::array<int, size_policy> arr{};
+    std::array<int, size_policy> arr;
 
     for (auto _ : state) {
         for (int filtered : lz::filter(arr, [](const int i) noexcept { return i == 0; })) {
@@ -118,7 +118,7 @@ void Filter(benchmark::State& state) {
 }
 
 void Flatten(benchmark::State& state) {
-    std::array<std::array<int, size_policy / 4>, size_policy / 8> arr{};
+    std::array<std::array<int, size_policy / 4>, size_policy / 8> arr;
     for (auto _ : state) {
         for (auto&& val : lz::flatten(arr)) {
             benchmark::DoNotOptimize(val);
@@ -213,7 +213,7 @@ void JoinWhere(benchmark::State& state) {
 }
 
 void Map(benchmark::State& state) {
-    std::array<int, size_policy> arr{};
+    std::array<int, size_policy> arr;
 
     for (auto _ : state) {
         for (int mapped : lz::map(arr, [](const int i) noexcept { return i == 0 ? 10 : 5; })) {
@@ -289,7 +289,7 @@ void TakeWhile(benchmark::State& state) {
 
 void TakeEvery(benchmark::State& state) {
     constexpr size_t offset = 2;
-    std::array<int, size_policy * offset> array{};
+    std::array<int, size_policy * offset> array;
 
     for (auto _ : state) {
         for (int taken : lz::take_every(array, offset)) {
@@ -327,10 +327,10 @@ void Unique(benchmark::State& state) {
 }
 
 void Zip4(benchmark::State& state) {
-    std::array<int, size_policy> arr_a{};
-    std::array<int, size_policy> arr_b{};
-    std::array<int, size_policy> arr_c{};
-    std::array<int, size_policy> arr_d{};
+    std::array<int, size_policy> arr_a;
+    std::array<int, size_policy> arr_b;
+    std::array<int, size_policy> arr_c;
+    std::array<int, size_policy> arr_d;
 
     for (auto _ : state) {
         for (auto tuple : lz::zip(arr_a, arr_b, arr_c, arr_d)) {
@@ -340,9 +340,9 @@ void Zip4(benchmark::State& state) {
 }
 
 void Zip3(benchmark::State& state) {
-    std::array<int, size_policy> arr_a{};
-    std::array<int, size_policy> arr_b{};
-    std::array<int, size_policy> arr_c{};
+    std::array<int, size_policy> arr_a;
+    std::array<int, size_policy> arr_b;
+    std::array<int, size_policy> arr_c;
 
     for (auto _ : state) {
         for (auto tuple : lz::zip(arr_a, arr_b, arr_c)) {
@@ -352,8 +352,8 @@ void Zip3(benchmark::State& state) {
 }
 
 void Zip2(benchmark::State& state) {
-    std::array<int, size_policy> arr_a{};
-    std::array<int, size_policy> arr_b{};
+    std::array<int, size_policy> arr_a;
+    std::array<int, size_policy> arr_b;
 
     for (auto _ : state) {
         for (auto tuple : lz::zip(arr_a, arr_b)) {
@@ -363,10 +363,10 @@ void Zip2(benchmark::State& state) {
 }
 
 void ZipLongest4(benchmark::State& state) {
-    std::array<int, size_policy> arr_a{};
-    std::array<int, size_policy - 1> arr_b{};
-    std::array<int, size_policy - 2> arr_c{};
-    std::array<int, size_policy - 3> arr_d{};
+    std::array<int, size_policy> arr_a;
+    std::array<int, size_policy - 1> arr_b;
+    std::array<int, size_policy - 2> arr_c;
+    std::array<int, size_policy - 3> arr_d;
 
     for (auto _ : state) {
         for (auto tuple : lz::zip_longest(arr_a, arr_b, arr_c, arr_d)) {
@@ -376,9 +376,9 @@ void ZipLongest4(benchmark::State& state) {
 }
 
 void ZipLongest3(benchmark::State& state) {
-    std::array<int, size_policy> arr_a{};
-    std::array<int, size_policy - 1> arr_b{};
-    std::array<int, size_policy - 2> arr_c{};
+    std::array<int, size_policy> arr_a;
+    std::array<int, size_policy - 1> arr_b;
+    std::array<int, size_policy - 2> arr_c;
 
     for (auto _ : state) {
         for (auto tuple : lz::zip_longest(arr_a, arr_b, arr_c)) {
@@ -388,8 +388,8 @@ void ZipLongest3(benchmark::State& state) {
 }
 
 void ZipLongest2(benchmark::State& state) {
-    std::array<int, size_policy> arr_a{};
-    std::array<int, size_policy - 1> arr_b{};
+    std::array<int, size_policy> arr_a;
+    std::array<int, size_policy - 1> arr_b;
 
     for (auto _ : state) {
         for (auto tuple : lz::zip_longest(arr_a, arr_b)) {

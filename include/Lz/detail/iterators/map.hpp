@@ -3,10 +3,10 @@
 #ifndef LZ_MAP_ITERATOR_HPP
 #define LZ_MAP_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,14 +15,14 @@ class map_iterator
     : public iter_base<map_iterator<Iterator, S, Function>, func_container_ret_type<Function, Iterator>,
                        fake_ptr_proxy<func_container_ret_type<Function, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>,
                        sentinel_selector<iter_cat_t<Iterator>, map_iterator<Iterator, S, Function>, S>> {
-    Iterator _iterator{};
-    func_container<Function> _function{};
+    Iterator _iterator;
+    func_container<Function> _function;
 
     using traits = std::iterator_traits<Iterator>;
 
 public:
     using reference = decltype(_function(*_iterator));
-    using value_type = decay<reference>;
+    using value_type = decay_t<reference>;
     using iterator_category = typename traits::iterator_category;
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;

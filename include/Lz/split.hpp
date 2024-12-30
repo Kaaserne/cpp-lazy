@@ -3,25 +3,10 @@
 #ifndef LZ_STRING_SPLITTER_HPP
 #define LZ_STRING_SPLITTER_HPP
 
-#include "Lz/c_string.hpp"
-#include "Lz/detail/iterators/split.hpp"
+#include <Lz/c_string.hpp>
+#include <Lz/detail/iterators/split.hpp>
 
 namespace lz {
-
-namespace detail {
-
-template<class Iterator, class S>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_view to_string_view(const basic_iterable<Iterator, S>& view,
-                                                            std::random_access_iterator_tag) {
-    return string_view(&*(view.begin()), static_cast<std::size_t>(view.distance()));
-}
-
-template<class Iterator, class S>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_view to_string_view(const basic_iterable<Iterator, S>& view, std::forward_iterator_tag) {
-    return string_view(&*(view.begin()));
-}
-
-} // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
@@ -48,10 +33,6 @@ public:
  * @{
  */
 
-template<class Iterable, class CharT>
-using string_splitter = split_iterable<iter_t<Iterable>, sentinel_t<Iterable>,
-                                       detail::c_string_iterator<CharT, std::forward_iterator_tag>, default_sentinel>;
-
 template<class Iterable, class Iterable2>
 using regular_splitter = split_iterable<iter_t<Iterable>, sentinel_t<Iterable>, iter_t<Iterable2>, sentinel_t<Iterable2>>;
 
@@ -63,6 +44,10 @@ split(Iterable&& iterable, Iterable2&& delimiter) {
 }
 
 template<class Iterable, class CharT>
+using string_splitter = split_iterable<iter_t<Iterable>, sentinel_t<Iterable>,
+                                       detail::c_string_iterator<const CharT*, std::forward_iterator_tag>, default_sentinel>;
+
+template<class Iterable, class CharT>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_splitter<Iterable, CharT> split(Iterable&& iterable, const CharT* delimiter) {
     auto string = lz::c_string(delimiter);
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
@@ -70,8 +55,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_splitter<Iterable, CharT> split(Iterable
 }
 
 template<class Iterator, class S>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_view to_string_view(const basic_iterable<Iterator, S>& view) {
-    return detail::to_string_view(view, iter_cat_t<Iterator>{});
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 basic_string_view<val_t<Iterator>> to_string_view(const basic_iterable<Iterator, S>& view) {
+    static_assert(detail::is_ra<Iterator>::value, "Iterator must be at least a random access iterator");
+    return basic_string_view<val_t<Iterator>>(std::addressof(*std::begin(view)), static_cast<std::size_t>(view.distance()));
 }
 
 // End of group

@@ -3,8 +3,8 @@
 #ifndef LZ_GENERATE_WHILE_HPP
 #define LZ_GENERATE_WHILE_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/generate_while.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/generate_while.hpp>
 
 namespace lz {
 
@@ -48,12 +48,12 @@ public:
  * @return A generator iterator view object.
  */
 template<class GeneratorFunc, class... Args>
-LZ_NODISCARD constexpr generate_while_iterable<detail::decay<GeneratorFunc>, detail::decay<Args>...>
+LZ_NODISCARD constexpr generate_while_iterable<detail::decay_t<GeneratorFunc>, detail::decay_t<Args>...>
 generate_while(GeneratorFunc&& generator_func, Args&&... args) {
     using Pair = decltype(generator_func(args...));
     using PairFirst = decltype(std::get<0>(std::declval<Pair>()));
 
-    static_assert(std::is_convertible<detail::decay<PairFirst>, bool>::value,
+    static_assert(std::is_convertible<detail::decay_t<PairFirst>, bool>::value,
                   "Function must return a std::pair compatible object (i.e. object::first, object::second), where object::first "
                   "returns a bool like object.");
     return { std::forward<GeneratorFunc>(generator_func), std::make_tuple(std::forward<Args>(args)...) };

@@ -3,11 +3,10 @@
 #ifndef LZ_FILTER_ITERATOR_HPP
 #define LZ_FILTER_ITERATOR_HPP
 
-#include "Lz/detail/algorithm.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/algorithm.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -29,21 +28,18 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<std::is_same<I, S>::value, I> find(I first, I last) {
-        return std::find_if(std::move(first), std::move(last), _predicate);
-    }
+    LZ_CONSTEXPR_CXX_20 Iterator find(Iterator first, S last) {
+        using detail::find_if;
+        using std::find_if;
 
-    template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<!std::is_same<I, S>::value, I> find(I first, S last) {
-        return detail::find_if(std::move(first), std::move(last), _predicate);
+        return find_if(std::move(first), std::move(last), _predicate);
     }
 
 private:
-    Iterator _begin{};
-    Iterator _iterator{};
-    S _end{};
-    mutable func_container<UnaryPredicate> _predicate{};
+    Iterator _begin;
+    Iterator _iterator;
+    S _end;
+    mutable func_container<UnaryPredicate> _predicate;
 
 public:
     LZ_CONSTEXPR_CXX_20 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :

@@ -3,8 +3,7 @@
 #ifndef LZ_OPTIONAL_HPP
 #define LZ_OPTIONAL_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
 #include <type_traits>
 
 #ifdef __cpp_lib_optional
@@ -12,20 +11,32 @@
 #endif // __cpp_lib_optional
 
 namespace lz {
-namespace detail {
 #ifdef __cpp_lib_optional
 template<class T>
 using optional = std::optional<T>;
+
+using nullopt_t = std::nullopt_t;
+
+constexpr inline nullopt_t nullopt = std::nullopt;
 #else
+
+struct nullopt_t {
+    struct init {};
+    constexpr nullopt_t(init) noexcept {
+    }
+};
+
+constexpr nullopt_t nullopt{ nullopt_t::init{} };
+
 template<class T>
 class optional {
     static_assert(!std::is_array<T>::value && std::is_object<T>::value, "T may not be an array and must be an object");
 
     union {
         typename std::remove_const<T>::type _value;
-        std::uint8_t _dummy{};
+        std::uint8_t _dummy;
     };
-    bool _has_value{ false };
+    bool _has_value;
 
     template<class U>
     void construct(U&& obj) noexcept(noexcept(::new(static_cast<void*>(std::addressof(_value))) T(std::forward<U>(obj)))) {
@@ -34,7 +45,10 @@ class optional {
     }
 
 public:
-    constexpr optional() noexcept {
+    constexpr optional() noexcept : optional(nullopt) {
+    }
+
+    constexpr optional(nullopt_t) noexcept : _has_value(false) {
     }
 
     template<class U = T>
@@ -57,8 +71,7 @@ public:
     }
 
     template<class U = T>
-    LZ_CONSTEXPR_CXX_14 optional&
-    operator=(U&& value) noexcept {
+    LZ_CONSTEXPR_CXX_14 optional& operator=(U&& value) noexcept {
         if (_has_value) {
             _value = std::forward<U>(value);
         }
@@ -104,8 +117,37 @@ public:
         return bool(*this) ? std::move(this->value()) : static_cast<T>(std::forward<U>(v));
     }
 };
+
+template<class T>
+LZ_CONSTEXPR_CXX_14 bool operator==(const optional<T>& lhs, const optional<T>& rhs) {
+    return bool(lhs) != bool(rhs) ? false : !bool(lhs) ? true : *lhs == *rhs;
+}
+
+template<class T>
+LZ_CONSTEXPR_CXX_14 bool operator!=(const optional<T>& lhs, const optional<T>& rhs) {
+    return !(lhs == rhs);
+}
+
+template<class T>
+LZ_CONSTEXPR_CXX_14 bool operator<(const optional<T>& lhs, const optional<T>& rhs) {
+    return !rhs ? false : !lhs ? true : *lhs < *rhs;
+}
+
+template<class T>
+LZ_CONSTEXPR_CXX_14 bool operator>(const optional<T>& lhs, const optional<T>& rhs) {
+    return rhs < lhs;
+}
+
+template<class T>
+LZ_CONSTEXPR_CXX_14 bool operator<=(const optional<T>& lhs, const optional<T>& rhs) {
+    return !(rhs < lhs);
+}
+
+template<class T>
+LZ_CONSTEXPR_CXX_14 bool operator>=(const optional<T>& lhs, const optional<T>& rhs) {
+    return !(lhs < rhs);
+}
 #endif // __cpp_lib_optional
-} // namespace detail
 } // namespace lz
 
 #endif

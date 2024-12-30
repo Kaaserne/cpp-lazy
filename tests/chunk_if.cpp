@@ -6,7 +6,18 @@
 #include <iostream>
 #include <list>
 
-// TODO: write chunk if with sentinels
+TEST_CASE("Chunk if with sentinels") {
+    auto cstr = lz::c_string("hello world; this is a message;;");
+    auto chunked = lz::chunk_if(cstr, [](char c) { return c == ';'; });
+    auto it = chunked.begin();
+    auto expected = { "hello world", " this is a message", "", "" };
+    for (const auto& str : expected) {
+        CHECK(lz::equal(*it, lz::c_string(str)));
+        ++it;
+    }
+    CHECK(lz::distance(chunked.begin(), chunked.end()) == 4);
+    CHECK(it == chunked.end());
+}
 
 TEST_CASE("chunk_if changing and creating elements", "[chunk_if][Basic functionality]") {
     std::string s = "hello world; this is a message;;";

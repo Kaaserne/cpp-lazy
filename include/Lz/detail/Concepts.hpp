@@ -3,7 +3,7 @@
 #ifndef LZ_CONCEPTS_HPP
 #define LZ_CONCEPTS_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
+#include <Lz/detail/compiler_checks.hpp>
 
 #ifdef LZ_HAS_CONCEPTS
 #include <concepts>

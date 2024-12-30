@@ -3,10 +3,9 @@
 #ifndef LZ_REGEX_SPLIT_ITERATOR_HPP
 #define LZ_REGEX_SPLIT_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -28,7 +27,7 @@ public:
     using reference = value_type;
 
 private:
-    RegexTokenIter _current{};
+    RegexTokenIter _current;
 
 public:
     constexpr regex_split_iterator() = default;

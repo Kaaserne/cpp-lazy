@@ -3,25 +3,25 @@
 #ifndef LZ_EXCLUSIVE_SCAN_ITERATOR_HPP
 #define LZ_EXCLUSIVE_SCAN_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
 class exclusive_scan_iterator : public iter_base<exclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
                                                  diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
-    mutable T _reducer{};
-    Iterator _iterator{};
-    S _end{};
-    func_container<BinaryOp> _binary_op{};
+    mutable T _reducer;
+    Iterator _iterator;
+    S _end;
+    func_container<BinaryOp> _binary_op;
 
     using traits = std::iterator_traits<Iterator>;
 
 public:
     using reference = T&;
-    using value_type = decay<reference>;
+    using value_type = decay_t<reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 

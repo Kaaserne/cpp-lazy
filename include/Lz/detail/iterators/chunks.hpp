@@ -3,10 +3,9 @@
 #ifndef LZ_CHUNKS_ITERATOR_HPP
 #define LZ_CHUNKS_ITERATOR_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 #include <cmath>
 
 namespace lz {
@@ -27,10 +26,10 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _sub_range_begin{};
-    Iterator _sub_range_end{};
-    S _end{};
-    difference_type _chunk_size{};
+    Iterator _sub_range_begin;
+    Iterator _sub_range_end;
+    S _end;
+    difference_type _chunk_size;
 
     LZ_CONSTEXPR_CXX_20 void next_chunk() {
         for (difference_type count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
@@ -89,11 +88,11 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _begin{};
-    Iterator _sub_range_begin{};
-    Iterator _sub_range_end{};
-    Iterator _end{};
-    difference_type _chunk_size{};
+    Iterator _begin;
+    Iterator _sub_range_begin;
+    Iterator _sub_range_end;
+    Iterator _end;
+    difference_type _chunk_size;
 
 #ifdef __cpp_if_constexpr
     LZ_CONSTEXPR_CXX_20 void next_chunk() {
@@ -220,6 +219,10 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const chunks_iterator& rhs) const noexcept {
         LZ_ASSERT(_chunk_size == rhs._chunk_size, "incompatible iterators: different chunk sizes");
         return _sub_range_begin == rhs._sub_range_begin;
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+        return _sub_range_begin == _end;
     }
 
     LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type offset) {

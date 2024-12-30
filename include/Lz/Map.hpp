@@ -3,8 +3,8 @@
 #ifndef LZ_MAP_HPP
 #define LZ_MAP_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/map.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/map.hpp>
 
 namespace lz {
 
@@ -52,7 +52,7 @@ public:
  * `for (auto... lz::map(...))`.
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class Function>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay<Function>>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay_t<Function>>
 map(Iterable&& iterable, Function&& function) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::forward<Function>(function) };

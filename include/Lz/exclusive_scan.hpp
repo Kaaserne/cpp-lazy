@@ -3,9 +3,9 @@
 #ifndef LZ_EXCLUSIVE_SCAN_HPP
 #define LZ_EXCLUSIVE_SCAN_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/exclusive_scan.hpp"
-#include "Lz/detail/traits.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/exclusive_scan.hpp>
+#include <Lz/detail/traits.hpp>
 
 namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
@@ -53,10 +53,10 @@ public:
  * @return An exclusive scan view object.
  */
 // clang-format off
-template<LZ_CONCEPT_ITERABLE Iterable, class T = value_iterable_t<Iterable>,
-         class BinaryOp = MAKE_BIN_PRED(std::plus, detail::decay<T>)>
+template<LZ_CONCEPT_ITERABLE Iterable, class T = val_iterable_t<Iterable>,
+         class BinaryOp = MAKE_BIN_PRED(std::plus, detail::decay_t<T>)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-exclusive_scan_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay<T>, detail::decay<BinaryOp>>
+exclusive_scan_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay_t<T>, detail::decay_t<BinaryOp>>
 exclusive_scan(Iterable&& iterable, T&& init = {}, BinaryOp&& binary_op = {}) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::forward<T>(init), std::forward<BinaryOp>(binary_op) };

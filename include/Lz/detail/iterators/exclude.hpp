@@ -3,9 +3,9 @@
 #ifndef LZ_EXCLUDE_ITERATOR_HPP
 #define LZ_EXCLUDE_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -23,15 +23,16 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator{};
-    difference_type _index{};
-    difference_type _from{};
-    difference_type _to{};
+    Iterator _iterator;
+    difference_type _index;
+    difference_type _from;
+    difference_type _to;
 
 public:
     LZ_CONSTEXPR_CXX_20
     exclude_iterator(Iterator begin, S end, const difference_type from, const difference_type to) :
         _iterator(std::move(begin)),
+        _index(0),
         _from(from),
         _to(to) {
         if (_iterator != end && _from == 0) {

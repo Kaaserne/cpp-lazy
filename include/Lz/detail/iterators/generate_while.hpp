@@ -3,11 +3,11 @@
 #ifndef LZ_GENERATE_WHILE_ITERATOR_HPP
 #define LZ_GENERATE_WHILE_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/detail/procs.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/detail/procs.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -29,7 +29,7 @@ class generate_while_iterator
 public:
     using iterator_category = std::forward_iterator_tag;
     using reference = tup_element<1, fn_return_type>;
-    using value_type = decay<reference>;
+    using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 

@@ -3,10 +3,9 @@
 #ifndef LZ_DETAIL_PROCS_HPP
 #define LZ_DETAIL_PROCS_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/detail/traits.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/detail/traits.hpp>
 #include <array> // std::get
 #include <cstddef>
 #include <iterator>
@@ -82,7 +81,7 @@ constexpr const T* end(const T (&array)[N]) noexcept {
 template<class Fn, std::size_t... I>
 struct tuple_expand {
 private:
-    func_container<Fn> _fn{};
+    func_container<Fn> _fn;
 
 public:
     constexpr tuple_expand() = default;

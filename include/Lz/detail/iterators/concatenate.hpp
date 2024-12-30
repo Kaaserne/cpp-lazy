@@ -3,10 +3,9 @@
 #ifndef LZ_CONCATENATE_ITERATOR_HPP
 #define LZ_CONCATENATE_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 #include <numeric>
 
 namespace lz {
@@ -25,7 +24,7 @@ struct plus_plus {
 };
 
 template<class Tuple, class SentinelTuple, std::size_t I>
-struct plus_plus<Tuple, SentinelTuple, I, enable_if<I == std::tuple_size<decay<Tuple>>::value>> {
+struct plus_plus<Tuple, SentinelTuple, I, enable_if<I == std::tuple_size<Tuple>::value>> {
     LZ_CONSTEXPR_CXX_20 void operator()(const Tuple& /*iterators*/, const SentinelTuple& /*end*/) const {
     }
 };
@@ -39,7 +38,7 @@ struct equal_to {
 };
 
 template<class Tuple, class SentinelTuple, std::size_t I>
-struct equal_to<Tuple, SentinelTuple, I, enable_if<I == std::tuple_size<decay<Tuple>>::value - 1>> {
+struct equal_to<Tuple, SentinelTuple, I, enable_if<I == std::tuple_size<Tuple>::value - 1>> {
     LZ_CONSTEXPR_CXX_20 bool operator()(const Tuple& iterators, const SentinelTuple& end) const noexcept {
         return std::get<I>(iterators) == std::get<I>(end);
     }
@@ -134,7 +133,7 @@ struct plus_is_n {
 };
 
 template<class Tuple, std::size_t I>
-struct plus_is_n<Tuple, I, enable_if<I == std::tuple_size<decay<Tuple>>::value - 1>> {
+struct plus_is_n<Tuple, I, enable_if<I == std::tuple_size<Tuple>::value - 1>> {
     template<class DifferenceType>
     LZ_CONSTEXPR_CXX_14 void operator()(Tuple& /*iterators*/, const Tuple& /*end*/, const DifferenceType /*offset*/) const {
     }
@@ -176,7 +175,7 @@ template<class Tuple, class SentinelTuple, std::size_t I>
 struct deref {
     LZ_CONSTEXPR_CXX_20 auto operator()(const Tuple& iterators, const SentinelTuple& end) const
         -> decltype(*std::get<I>(iterators)) {
-        if constexpr (I == std::tuple_size_v<decay<Tuple>> - 1) {
+        if constexpr (I == std::tuple_size_v<Tuple> - 1) {
             static_cast<void>(end);
             return *std::get<I>(iterators);
         }
@@ -243,7 +242,7 @@ template<class Tuple, std::size_t I>
 struct plus_is_n {
     template<class DifferenceType>
     LZ_CONSTEXPR_CXX_20 void operator()(Tuple& iterators, const Tuple& end, const DifferenceType offset) const {
-        if constexpr (I == std::tuple_size_v<decay<Tuple>> - 1) {
+        if constexpr (I == std::tuple_size_v<decay_t<Tuple>> - 1) {
             static_cast<void>(iterators);
             static_cast<void>(end);
             static_cast<void>(offset);
@@ -269,43 +268,22 @@ struct plus_is_n {
 template<class Tuple>
 using first_it = tup_element<0, Tuple>;
 
-template<typename Tuple>
-struct iter_cat_tuple_helper;
-
-template<typename... Iterators>
-struct iter_cat_tuple_helper<std::tuple<Iterators...>> {
-    using type = common_type<iter_cat_t<Iterators>...>;
-};
-
-template<typename Tuple>
-struct diff_type_tuple_helper;
-
-template<typename... Iterators>
-struct diff_type_tuple_helper<std::tuple<Iterators...>> {
-    using type = common_type<diff_type<Iterators>...>;
-};
-
-template<class Tuple>
-using iter_cat_tuple = typename iter_cat_tuple_helper<Tuple>::type;
-
-template<class Tuple>
-using diff_type_tuple = typename diff_type_tuple_helper<Tuple>::type;
-
 template<class IterTuple, class SentinelTuple>
 class concatenate_iterator
     : public iter_base<concatenate_iterator<IterTuple, SentinelTuple>, ref_t<first_it<IterTuple>>,
-                       fake_ptr_proxy<ref_t<first_it<IterTuple>>>, diff_type_tuple<IterTuple>, iter_cat_tuple<IterTuple>,
-                       sentinel_selector<iter_cat_tuple<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
+                       fake_ptr_proxy<ref_t<first_it<IterTuple>>>, iter_tuple_diff_type_t<IterTuple>,
+                       iter_tuple_iter_cat_t<IterTuple>,
+                       sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
 
-    IterTuple _iterators{};
-    IterTuple _begin{};
-    SentinelTuple _end{};
+    IterTuple _iterators;
+    IterTuple _begin;
+    SentinelTuple _end;
 
     using first_tuple_iterator = std::iterator_traits<first_it<IterTuple>>;
 
 public:
     using value_type = typename first_tuple_iterator::value_type;
-    using difference_type = diff_type_tuple<IterTuple>;
+    using difference_type = iter_tuple_diff_type_t<IterTuple>;
     using reference = typename first_tuple_iterator::reference;
     using pointer = fake_ptr_proxy<reference>;
 

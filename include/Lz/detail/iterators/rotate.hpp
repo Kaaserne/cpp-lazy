@@ -3,9 +3,8 @@
 #ifndef LZ_ROTATE_ITERATOR_HPP
 #define LZ_ROTATE_ITERATOR_HPP
 
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 #include <iterator>
 
 namespace lz {
@@ -26,9 +25,9 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    Iterator _iterator{};
-    Iterator _begin{};
-    S _end{};
+    Iterator _iterator;
+    Iterator _begin;
+    S _end;
     bool _full_rotation{ false };
 
 public:

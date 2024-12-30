@@ -3,10 +3,9 @@
 #ifndef LZ_EXCEPT_ITERATOR_HPP
 #define LZ_EXCEPT_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -25,37 +24,20 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator{};
-    IteratorToExcept _to_except_begin{};
-    S2 _to_except_end{};
-    S _end{};
-    mutable func_container<BinaryPredicate> _predicate{};
+    Iterator _iterator;
+    IteratorToExcept _to_except_begin;
+    S2 _to_except_end;
+    S _end;
+    mutable func_container<BinaryPredicate> _predicate;
 
-    template<class T = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<std::is_same<T, S>::value && std::is_same<IteratorToExcept, S2>::value> find_next() {
-        _iterator = std::find_if(std::move(_iterator), _end, [this](const value_type& value) {
-            return !std::binary_search(_to_except_begin, _to_except_end, value, _predicate);
-        });
-    }
+    LZ_CONSTEXPR_CXX_20 void find_next() {
+        using detail::binary_search;
+        using detail::find_if;
+        using std::binary_search;
+        using std::find_if;
 
-    template<class T = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<!std::is_same<T, S>::value && std::is_same<IteratorToExcept, S2>::value> find_next() {
-        _iterator = detail::find_if(std::move(_iterator), _end, [this](const value_type& value) {
-            return !std::binary_search(_to_except_begin, _to_except_end, value, _predicate);
-        });
-    }
-
-    template<class T = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<std::is_same<T, S>::value && !std::is_same<IteratorToExcept, S2>::value> find_next() {
-        _iterator = std::find_if(std::move(_iterator), _end, [this](const value_type& value) {
-            return !detail::binary_search(_to_except_begin, _to_except_end, value, _predicate);
-        });
-    }
-
-    template<class T = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<!std::is_same<T, S>::value && !std::is_same<IteratorToExcept, S2>::value> find_next() {
-        _iterator = detail::find_if(std::move(_iterator), _end, [this](const value_type& value) {
-            return !detail::binary_search(_to_except_begin, _to_except_end, value, _predicate);
+        _iterator = find_if(std::move(_iterator), _end, [this](const value_type& value) {
+            return !binary_search(_to_except_begin, _to_except_end, value, _predicate);
         });
     }
 

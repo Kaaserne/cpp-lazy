@@ -3,42 +3,42 @@
 #ifndef LZ_LZ_HPP
 #define LZ_LZ_HPP
 
-#include "Lz/algorithm.hpp"
-#include "Lz/any_iterable.hpp"
-#include "Lz/c_string.hpp"
-#include "Lz/cartesian_product.hpp"
-#include "Lz/chunk_if.hpp"
-#include "Lz/chunks.hpp"
-#include "Lz/concatenate.hpp"
-#include "Lz/drop_while.hpp"
-#include "Lz/drop.hpp"
-#include "Lz/enumerate.hpp"
-#include "Lz/except.hpp"
-#include "Lz/exclude.hpp"
-#include "Lz/exclusive_scan.hpp"
-#include "Lz/filter.hpp"
-#include "Lz/flatten.hpp"
-#include "Lz/generate.hpp"
-#include "Lz/generate_while.hpp"
-#include "Lz/group_by.hpp"
-#include "Lz/inclusive_scan.hpp"
-#include "Lz/iter_tools.hpp"
-#include "Lz/join.hpp"
-#include "Lz/join_where.hpp"
-#include "Lz/loop.hpp"
-#include "Lz/map.hpp"
-#include "Lz/random.hpp"
-#include "Lz/range.hpp"
-#include "Lz/regex_split.hpp"
-#include "Lz/repeat.hpp"
-#include "Lz/rotate.hpp"
-#include "Lz/slice.hpp"
-#include "Lz/split.hpp"
-#include "Lz/take.hpp"
-#include "Lz/take_every.hpp"
-#include "Lz/unique.hpp"
-#include "Lz/zip.hpp"
-#include "Lz/zip_longest.hpp"
+#include <Lz/algorithm.hpp>
+#include <Lz/any_iterable.hpp>
+#include <Lz/c_string.hpp>
+#include <Lz/cartesian_product.hpp>
+#include <Lz/chunk_if.hpp>
+#include <Lz/chunks.hpp>
+#include <Lz/concatenate.hpp>
+#include <Lz/drop.hpp>
+#include <Lz/drop_while.hpp>
+#include <Lz/enumerate.hpp>
+#include <Lz/except.hpp>
+#include <Lz/exclude.hpp>
+#include <Lz/exclusive_scan.hpp>
+#include <Lz/filter.hpp>
+#include <Lz/flatten.hpp>
+#include <Lz/generate.hpp>
+#include <Lz/generate_while.hpp>
+#include <Lz/group_by.hpp>
+#include <Lz/inclusive_scan.hpp>
+#include <Lz/iter_tools.hpp>
+#include <Lz/join.hpp>
+#include <Lz/join_where.hpp>
+#include <Lz/loop.hpp>
+#include <Lz/map.hpp>
+#include <Lz/random.hpp>
+#include <Lz/range.hpp>
+#include <Lz/regex_split.hpp>
+#include <Lz/repeat.hpp>
+#include <Lz/rotate.hpp>
+#include <Lz/slice.hpp>
+#include <Lz/split.hpp>
+#include <Lz/take.hpp>
+#include <Lz/take_every.hpp>
+#include <Lz/unique.hpp>
+#include <Lz/zip.hpp>
+#include <Lz/zip_longest.hpp>
 
 namespace lz {
 
@@ -188,31 +188,29 @@ public:
         return chain(lz::reverse(*this));
     }
 
+    using chain_iterator = detail::zip_iterator<std::tuple<Iterator, Iterator>, std::tuple<S, S>>;
+
     //! See iter_tools.hpp `reverse` for documentation.
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<detail::zip_iterator<Iterator, Iterator>> pairwise() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<chain_iterator> pairwise() const {
         return chain(lz::pairwise(*this));
     }
 
-    // clang-format off
+    template<class... Iterables>
+    using cartesian_product_iterator =
+        detail::cartesian_product_iterator<std::tuple<Iterator, iter_t<Iterables>...>, std::tuple<S, sentinel_t<Iterables>...>>;
 
     //! See cartesian_product.hpp for documentation
     template<class... Iterables>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20
-    chain_iterable<detail::cartesian_product_iterator<
-        std::tuple<Iterator, iter_t<Iterables>...>, std::tuple<S, sentinel_t<Iterables>...>>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<cartesian_product_iterator<Iterables...>>
     cartesian_product(Iterables&&... iterables) const {
         return chain(lz::cartesian_product(*this, std::forward<Iterables>(iterables)...));
     }
 
-
+    using flatten_iterator = detail::flatten_iterator<Iterator, S, detail::count_dims<std::iterator_traits<Iterator>>::value - 1>;
     //! See flatten.hpp for documentation
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<
-        detail::flatten_iterator<Iterator, S, detail::count_dims<std::iterator_traits<Iterator>>::value - 1>> 
-    flatten() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<flatten_iterator> flatten() const {
         return chain(lz::flatten(*this));
     }
-
-    // clang-format on
 
     //! See loop.hpp for documentation
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<detail::loop_iterator<Iterator, S>> loop() const {
@@ -229,7 +227,7 @@ public:
     //! See inclusive_scan.hpp for documentation.
     template<class T = value_type, class BinaryOp = MAKE_BIN_PRED(std::plus, val_t<iterator>)>
     LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_20 chain_iterable<detail::inclusive_scan_iterator<Iterator, S, detail::decay<T>, detail::decay<BinaryOp>>>
+    LZ_CONSTEXPR_CXX_20 chain_iterable<detail::inclusive_scan_iterator<Iterator, S, detail::decay_t<T>, detail::decay_t<BinaryOp>>>
     inclusive_scan(T&& init = {}, BinaryOp&& binary_op = {}) const {
         return chain(lz::inclusive_scan(*this, std::forward<T>(init), std::forward<BinaryOp>(binary_op)));
     }
@@ -237,7 +235,7 @@ public:
     //! See exclusive_scan.hpp for documentation.
     template<class T = value_type, class BinaryOp = MAKE_BIN_PRED(std::plus, val_t<iterator>)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20
-    chain_iterable<detail::exclusive_scan_iterator<Iterator, S, detail::decay<T>, detail::decay<BinaryOp>>>
+    chain_iterable<detail::exclusive_scan_iterator<Iterator, S, detail::decay_t<T>, detail::decay_t<BinaryOp>>>
     exclusive_scan(T&& init = {}, BinaryOp&& binary_op = {}) const {
         return chain(lz::exclusive_scan(*this, std::forward<T>(init), std::forward<BinaryOp>(binary_op)));
     }

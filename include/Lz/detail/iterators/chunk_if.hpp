@@ -3,11 +3,11 @@
 #ifndef LZ_CHUNK_IF_ITERATOR_HPP
 #define LZ_CHUNK_IF_ITERATOR_HPP
 
-#include "Lz/detail/algorithm.hpp"
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/algorithm.hpp>
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -25,22 +25,16 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _sub_range_begin{};
-    Iterator _sub_range_end{};
+    Iterator _sub_range_begin;
+    Iterator _sub_range_end;
     bool _trailing_empty{ true };
-    S _end{};
-    mutable func_container<UnaryPredicate> _predicate{};
+    S _end;
+    mutable func_container<UnaryPredicate> _predicate;
 
-    // Overload for when the iterator is a sentinel
-    template<class T = Iterator>
-    enable_if<!std::is_same<T, S>::value> find_next() {
-        _sub_range_end = detail::find_if(_sub_range_end, _end, _predicate);
-    }
-
-    // Overload for when the iterator is not a sentinel
-    template<class T = Iterator>
-    enable_if<std::is_same<T, S>::value> find_next() {
-        _sub_range_end = std::find_if(_sub_range_end, _end, _predicate);
+    LZ_CONSTEXPR_CXX_20 void find_next() {
+        using detail::find_if;
+        using std::find_if;
+        _sub_range_end = find_if(_sub_range_end, _end, _predicate);
     }
 
 public:
@@ -82,7 +76,7 @@ public:
         }
 
         if (_predicate(*prev)) {
-            _sub_range_begin = _sub_range_end = _trailing_empty ? std::move(prev) : _end;
+            _sub_range_begin = _sub_range_end = _trailing_empty ? std::move(prev) : _sub_range_end;
             _trailing_empty = false;
             return;
         }

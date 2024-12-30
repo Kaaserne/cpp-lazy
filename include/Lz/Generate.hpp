@@ -3,8 +3,8 @@
 #ifndef LZ_GENERATE_HPP
 #define LZ_GENERATE_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/generate.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/generate.hpp>
 
 namespace lz {
 
@@ -47,7 +47,7 @@ public:
  * @return A generator iterator view object.
  */
 template<class GeneratorFunc, class... Args>
-LZ_NODISCARD constexpr generate_iterable<detail::decay<GeneratorFunc>, detail::decay<Args>...>
+LZ_NODISCARD constexpr generate_iterable<detail::decay_t<GeneratorFunc>, detail::decay_t<Args>...>
 generate(GeneratorFunc&& generator_func, const std::size_t amount = (std::numeric_limits<std::size_t>::max)(), Args&&... args) {
     return { std::forward<GeneratorFunc>(generator_func), amount, amount == (std::numeric_limits<std::size_t>::max)(),
              std::make_tuple(std::forward<Args>(args)...) };

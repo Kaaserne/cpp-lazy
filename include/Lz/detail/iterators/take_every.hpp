@@ -3,10 +3,10 @@
 #ifndef LZ_TAKE_EVERY_ITERATOR_HPP
 #define LZ_TAKE_EVERY_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -23,9 +23,9 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    Iterator _iterator{};
-    S _end{};
-    difference_type _offset{};
+    Iterator _iterator;
+    S _end;
+    difference_type _offset;
 
 public:
     LZ_CONSTEXPR_CXX_20
@@ -73,10 +73,10 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    Iterator _begin{};
-    Iterator _iterator{};
-    Iterator _end{};
-    difference_type _offset{};
+    Iterator _begin;
+    Iterator _iterator;
+    Iterator _end;
+    difference_type _offset;
 
 #ifdef __cpp_if_constexpr
     LZ_CONSTEXPR_CXX_20 void advance() noexcept {

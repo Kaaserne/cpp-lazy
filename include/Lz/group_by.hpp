@@ -3,8 +3,8 @@
 #ifndef LZ_GROUP_BY_HPP
 #define LZ_GROUP_BY_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/group_by.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/group_by.hpp>
 
 namespace lz {
 
@@ -37,7 +37,7 @@ public:
  * `[](string a, string b) { return a.length() == b.length() }` to make groups where sizes of the strings are equal.
  * @return A group_by_iterable iterator view object.
  */
-template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::equal_to, value_iterable_t<Iterable>)>
+template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::equal_to, val_iterable_t<Iterable>)>
 group_by_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
 group_by(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),

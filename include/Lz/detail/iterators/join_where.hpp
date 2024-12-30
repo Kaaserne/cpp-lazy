@@ -3,10 +3,10 @@
 #ifndef LZ_JOIN_WHERE_ITERATOR_HPP
 #define LZ_JOIN_WHERE_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -23,70 +23,28 @@ private:
     using value_type_b = typename traits_b::value_type;
     using ref_type_a = typename traits_a::reference;
 
-    using selector_a_ret_val = decay<func_ret_type<SelectorA, ref_type_a>>;
+    using selector_a_ret_val = decay_t<func_ret_type<SelectorA, ref_type_a>>;
 
-    IterA _iter_a{};
-    IterB _iter_b{};
-    IterB _begin_b{};
-    SA _end_a{};
-    SB _end_b{};
+    IterA _iter_a;
+    IterB _iter_b;
+    IterB _begin_b;
+    SA _end_a;
+    SB _end_b;
 
-    mutable func_container<SelectorA> _selector_a{};
-    mutable func_container<SelectorB> _selector_b{};
-    mutable func_container<ResultSelector> _result_selector{};
+    mutable func_container<SelectorA> _selector_a;
+    mutable func_container<SelectorB> _selector_b;
+    mutable func_container<ResultSelector> _result_selector;
 
-    template<class IA = IterA>
-    enable_if<std::is_same<IterB, SB>::value && std::is_same<IA, SA>::value> find_next() {
-        _iter_a = std::find_if(std::move(_iter_a), _end_a, [this](const value_type_a& a) {
+    LZ_CONSTEXPR_CXX_20 void find_next() {
+        using detail::find_if;
+        using detail::lower_bound;
+        using std::find_if;
+        using std::lower_bound;
+
+        _iter_a = find_if(std::move(_iter_a), _end_a, [this](const value_type_a& a) {
             auto&& to_find = _selector_a(a);
-            _iter_b =
-                std::lower_bound(std::move(_iter_b), _end_b, to_find,
-                                 [this](const value_type_b& b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
-            if (_iter_b != _end_b && !(to_find < _selector_b(*_iter_b))) {
-                return true;
-            }
-            _iter_b = _begin_b;
-            return false;
-        });
-    }
-
-    template<class IA = IterA>
-    enable_if<!std::is_same<IterB, SB>::value && std::is_same<IA, SA>::value> find_next() {
-        _iter_a = std::find_if(std::move(_iter_a), _end_a, [this](const value_type_a& a) {
-            auto&& to_find = _selector_a(a);
-            _iter_b = detail::lower_bound(
-                std::move(_iter_b), _end_b, to_find,
-                [this](const value_type_b& b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
-            if (_iter_b != _end_b && !(to_find < _selector_b(*_iter_b))) {
-                return true;
-            }
-            _iter_b = _begin_b;
-            return false;
-        });
-    }
-
-    template<class IA = IterA>
-    enable_if<std::is_same<IterB, SB>::value && !std::is_same<IA, SA>::value> find_next() {
-        _iter_a = detail::find_if(std::move(_iter_a), _end_a, [this](const value_type_a& a) {
-            auto&& to_find = _selector_a(a);
-            _iter_b =
-                std::lower_bound(std::move(_iter_b), _end_b, to_find,
-                                 [this](const value_type_b& b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
-            if (_iter_b != _end_b && !(to_find < _selector_b(*_iter_b))) {
-                return true;
-            }
-            _iter_b = _begin_b;
-            return false;
-        });
-    }
-
-    template<class IA = IterA>
-    enable_if<!std::is_same<IterB, SB>::value && !std::is_same<IA, SA>::value> find_next() {
-        _iter_a = detail::find_if(std::move(_iter_a), _end_a, [this](const value_type_a& a) {
-            auto&& to_find = _selector_a(a);
-            _iter_b = detail::lower_bound(
-                std::move(_iter_b), _end_b, to_find,
-                [this](const value_type_b& b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
+            _iter_b = lower_bound(std::move(_iter_b), _end_b, to_find,
+                                  [this](const value_type_b& b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
             if (_iter_b != _end_b && !(to_find < _selector_b(*_iter_b))) {
                 return true;
             }
@@ -97,7 +55,7 @@ private:
 
 public:
     using reference = decltype(_result_selector(*_iter_a, *_iter_b));
-    using value_type = decay<reference>;
+    using value_type = decay_t<reference>;
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;

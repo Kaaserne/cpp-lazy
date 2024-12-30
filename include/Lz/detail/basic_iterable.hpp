@@ -3,13 +3,12 @@
 #ifndef LZ_BASIC_ITERATOR_VIEW_HPP
 #define LZ_BASIC_ITERATOR_VIEW_HPP
 
-#include "Lz/algorithm.hpp"
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/concepts.hpp"
-#include "Lz/detail/procs.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/string_view.hpp"
-
+#include <Lz/algorithm.hpp>
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/concepts.hpp>
+#include <Lz/detail/procs.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/string_view.hpp>
 #include <algorithm>
 #include <array>
 #include <map>
@@ -107,8 +106,8 @@ struct has_resize<T, decltype((void)std::declval<T&>().resize(1), 0)> : std::tru
 template<class It, class S = It>
 class basic_iterable {
 protected:
-    It _begin{};
-    S _end{};
+    It _begin;
+    S _end;
 
 public:
     using value_type = val_t<It>;
@@ -119,15 +118,15 @@ public:
 
 private:
     template<class PairFunc>
-    using key_type = decay<decltype(std::get<0>(std::declval<func_ret_type<PairFunc, reference>>()))>;
+    using key_type = decay_t<decltype(std::get<0>(std::declval<func_ret_type<PairFunc, reference>>()))>;
 
     template<class PairFunc>
-    using value_type_map = decay<decltype(std::get<1>(std::declval<func_ret_type<PairFunc, reference>>()))>;
+    using value_type_map = decay_t<decltype(std::get<1>(std::declval<func_ret_type<PairFunc, reference>>()))>;
 
 #ifdef __cpp_if_constexpr
     template<class T>
     auto inserter_for(T&& container) const {
-        using C = decay<T>;
+        using C = decay_t<T>;
 
         if constexpr (is_array<C>::value) {
             return std::begin(container);
@@ -139,12 +138,12 @@ private:
 #else
     template<class T>
     auto inserter_for(T&& container)
-        -> enable_if<!is_array<decay<T>>::value, decltype(std::inserter(container, container.begin()))> {
+        -> enable_if<!is_array<decay_t<T>>::value, decltype(std::inserter(container, container.begin()))> {
         return std::inserter(container, container.begin());
     }
 
     template<class T>
-    auto inserter_for(T&& container) -> enable_if<is_array<decay<T>>::value, decltype(std::begin(container))> {
+    auto inserter_for(T&& container) -> enable_if<is_array<decay_t<T>>::value, decltype(std::begin(container))> {
         return std::begin(container);
     }
 #endif // __cpp_if_constexpr

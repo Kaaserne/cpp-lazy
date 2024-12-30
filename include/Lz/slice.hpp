@@ -3,7 +3,7 @@
 #ifndef LZ_SLICE_HPP
 #define LZ_SLICE_HPP
 
-#include "Lz/take.hpp"
+#include <Lz/take.hpp>
 
 namespace lz {
 

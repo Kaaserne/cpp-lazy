@@ -3,10 +3,9 @@
 #ifndef LZ_RANGE_ITERATOR_HPP
 #define LZ_RANGE_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 #include <cmath>
 #include <iterator>
 
@@ -15,8 +14,8 @@ namespace detail {
 template<class Arithmetic>
 class range_iterator : public iter_base<range_iterator<Arithmetic>, Arithmetic, fake_ptr_proxy<Arithmetic>, std::ptrdiff_t,
                                         std::random_access_iterator_tag> {
-    Arithmetic _iterator{};
-    Arithmetic _step{};
+    Arithmetic _iterator;
+    Arithmetic _step;
 
 public:
     using iterator_category = std::random_access_iterator_tag;

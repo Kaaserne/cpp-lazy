@@ -1,8 +1,8 @@
 #ifndef LZ_FLATTEN_HPP
 #define LZ_FLATTEN_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/flatten.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/flatten.hpp>
 
 namespace lz {
 

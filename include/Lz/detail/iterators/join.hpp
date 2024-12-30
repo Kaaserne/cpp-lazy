@@ -3,10 +3,10 @@
 #ifndef LZ_JOIN_ITERATOR_HPP
 #define LZ_JOIN_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
 #if defined(LZ_STANDALONE)
 #ifdef LZ_HAS_FORMAT
@@ -33,12 +33,6 @@ enable_if<std::is_arithmetic<T>::value, std::string> to_string(const T value) {
     to_string_from_buff(value, buff);
     return buff;
 }
-
-inline std::string to_string(const bool value) {
-    char buff[safe_buffer_size<bool>::value]{};
-    to_string_from_buff(value, buff);
-    return buff;
-}
 #endif // defined(LZ_STANDALONE) && (!defined(LZ_HAS_FORMAT))
 
 template<class Iterator, class S>
@@ -61,12 +55,12 @@ public:
 
 private:
     // TODO: make join compatible with generic iterators?
-    mutable std::string _delimiter{};
+    mutable std::string _delimiter;
 #if defined(LZ_HAS_FORMAT) || !defined(LZ_STANDALONE)
-    std::string _fmt{};
+    std::string _fmt;
 #endif
-    Iterator _iterator{};
-    mutable bool _is_iterator_turn{ true };
+    Iterator _iterator;
+    mutable bool _is_iterator_turn;
 
 private:
     template<class T = ContainerType>

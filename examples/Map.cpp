@@ -5,7 +5,7 @@
 
 struct some_struct {
     std::string s;
-    int a{};
+    int a;
 };
 
 

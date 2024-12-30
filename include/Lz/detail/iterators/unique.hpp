@@ -3,24 +3,24 @@
 #ifndef LZ_UNIQUE_ITERATOR_HPP
 #define LZ_UNIQUE_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/func_container.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/iterator_base.hpp>
 #include <algorithm>
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class BinaryOp>
-class unique_iterator : public iter_base<unique_iterator<Iterator, S, BinaryOp>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                                         diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+template<class Iterator, class S, class BinaryPredicate>
+class unique_iterator
+    : public iter_base<unique_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _iterator{};
-    S _end{};
-    mutable func_container<BinaryOp> _predicate{};
+    Iterator _iterator;
+    S _end;
+    mutable func_container<BinaryPredicate> _predicate;
 
 public:
     using iterator_category = std::forward_iterator_tag;
@@ -29,10 +29,10 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr unique_iterator(Iterator begin, S end, BinaryOp compare) :
+    constexpr unique_iterator(Iterator begin, S end, BinaryPredicate binary_predicate) :
         _iterator(std::move(begin)),
         _end(std::move(end)),
-        _predicate(std::move(compare)) {
+        _predicate(std::move(binary_predicate)) {
     }
 
     constexpr unique_iterator() = default;
@@ -62,17 +62,17 @@ public:
     }
 };
 
-template<class Iterator, class BinaryOp>
-class unique_iterator<Iterator, Iterator, BinaryOp>
-    : public iter_base<unique_iterator<Iterator, Iterator, BinaryOp>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+template<class Iterator, class BinaryPredicate>
+class unique_iterator<Iterator, Iterator, BinaryPredicate>
+    : public iter_base<unique_iterator<Iterator, Iterator, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                        diff_type<Iterator>, std::bidirectional_iterator_tag> {
 
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _begin{};
-    Iterator _iterator{};
-    Iterator _end{};
-    mutable func_container<BinaryOp> _predicate{};
+    Iterator _begin;
+    Iterator _iterator;
+    Iterator _end;
+    mutable func_container<BinaryPredicate> _predicate;
 
 public:
     using iterator_category = std::forward_iterator_tag;
@@ -81,7 +81,7 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr unique_iterator(Iterator iterator, Iterator begin, Iterator end, BinaryOp compare) :
+    constexpr unique_iterator(Iterator iterator, Iterator begin, Iterator end, BinaryPredicate compare) :
         _begin(std::move(begin)),
         _iterator(std::move(iterator)),
         _end(std::move(end)),

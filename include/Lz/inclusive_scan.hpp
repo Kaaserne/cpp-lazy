@@ -3,8 +3,8 @@
 #ifndef LZ_INCLUSIVE_SCAN_HPP
 #define LZ_INCLUSIVE_SCAN_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/inclusive_scan.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/inclusive_scan.hpp>
 
 namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
@@ -52,8 +52,8 @@ public:
  * @param binary_op The fold function. Essentially, it is executed as (`init = binary_op(std::move(init), *iterator);`)
  * @return An inclusive scan view object.
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class T = value_iterable_t<Iterable>,
-         class BinaryOp = MAKE_BIN_PRED(std::plus, value_iterable_t<Iterable>)>
+template<LZ_CONCEPT_ITERABLE Iterable, class T = val_iterable_t<Iterable>,
+         class BinaryOp = MAKE_BIN_PRED(std::plus, val_iterable_t<Iterable>)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 inclusive_scan_iterable<iter_t<Iterable>, sentinel_t<Iterable>, T, BinaryOp>
 inclusive_scan(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) {
     LZ_ASSERT(std::begin(iterable) != std::end(iterable), "Iterable cannot be empty");

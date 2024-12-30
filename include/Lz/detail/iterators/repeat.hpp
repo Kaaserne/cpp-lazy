@@ -3,18 +3,16 @@
 #ifndef LZ_REPEAT_ITERATOR_HPP
 #define LZ_REPEAT_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/iterator_base.hpp>
 #include <limits>
-
 
 namespace lz {
 namespace detail {
 template<class T>
 class repeat_iterator : public iter_base<repeat_iterator<T>, T&, T*, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
-    mutable T _to_repeat{};
-    std::size_t _amount{};
+    mutable T _to_repeat;
+    std::size_t _amount;
 
 public:
     using iterator_category = std::forward_iterator_tag;

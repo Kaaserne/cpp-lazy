@@ -1,9 +1,14 @@
-#include "Lz/exclude.hpp"
-
+#include <Lz/exclude.hpp>
+#include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 
-// TODO: write Exclude tests for sentinel
+
+TEST_CASE("Exclude with sentinels") {
+    auto cstr = lz::c_string("a string to exclude");
+    auto excluded = lz::exclude(cstr, 3, 5);
+    CHECK(excluded.to_string() == "a sing to exclude");
+}
 
 TEST_CASE("Exclude changing and creating elements", "[Exclude][Basic functionality]") {
     std::array<int, 10> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

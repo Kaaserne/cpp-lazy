@@ -3,8 +3,8 @@
 #ifndef LZ_REPEAT_HPP
 #define LZ_REPEAT_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/repeat.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/repeat.hpp>
 
 namespace lz {
 
@@ -38,7 +38,7 @@ public:
  * @return A repeat object, containing the random access iterator.
  */
 template<class T>
-LZ_NODISCARD constexpr repeat_iterable<detail::decay<T>>
+LZ_NODISCARD constexpr repeat_iterable<detail::decay_t<T>>
 repeat(T&& to_repeat, const std::size_t amount = (std::numeric_limits<std::size_t>::max)()) {
     return { std::forward<T>(to_repeat), amount };
 }

@@ -3,13 +3,11 @@
 #ifndef LZ_SPLIT_ITERATOR_HPP
 #define LZ_SPLIT_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/iterable.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterable.hpp>
+#include <Lz/iterator_base.hpp>
 #include <cstring>
-
 
 namespace lz {
 namespace detail {
@@ -18,17 +16,24 @@ template<class Iterator, class S, class Iterator2, class S2>
 class split_iterator
     : public iter_base<split_iterator<Iterator, S, Iterator2, S2>, basic_iterable<Iterator>,
                        fake_ptr_proxy<basic_iterable<Iterator>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = basic_iterable<Iterator>;
+    using reference = value_type;
+    using difference_type = diff_type<Iterator>;
+    using pointer = fake_ptr_proxy<reference>;
 
-    std::pair<Iterator, Iterator> _sub_range_end{};
-    Iterator _sub_range_begin{};
-    Iterator2 _to_search{};
-    S _end{};
-    S2 _to_search_end{};
+private:
+    std::pair<Iterator, Iterator> _sub_range_end;
+    Iterator _sub_range_begin;
+    Iterator2 _to_search;
+    S _end;
+    S2 _to_search_end;
     bool _trailingEmpty{ true };
 
     std::pair<Iterator, Iterator> search() const {
-        return detail::search(_sub_range_end.second, _end, _to_search, _to_search_end,
-                              MAKE_BIN_PRED(std::equal_to, value_type){});
+        using std::search;
+        return search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(std::equal_to, val_t<Iterator>){});
     }
 
 public:
@@ -70,7 +75,7 @@ public:
         }
 
         if (!_trailingEmpty && _sub_range_end.second == _end) {
-            _sub_range_begin = _sub_range_end.first = _end;
+            _sub_range_begin = _sub_range_end.first = _sub_range_end.second;
             return;
         }
 

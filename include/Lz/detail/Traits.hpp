@@ -3,8 +3,7 @@
 #ifndef LZ_LZ_TOOLS_HPP
 #define LZ_LZ_TOOLS_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
 #include <array> // tuple_element
 #include <cstddef>
 #include <iterator>
@@ -23,10 +22,10 @@ struct always_false : std::false_type {};
 #define MAKE_OPERATOR(OP, VALUE_TYPE) OP<VALUE_TYPE>
 
 template<std::size_t...>
-struct index_sequence {};
+struct index_sequence;
 
 template<std::size_t N, std::size_t... Rest>
-struct index_sequence_helper : public index_sequence_helper<N - 1, N - 1, Rest...> {};
+struct index_sequence_helper : public index_sequence_helper<N - 1, N - 1, Rest...>;
 
 template<std::size_t... Next>
 struct index_sequence_helper<0, Next...> {
@@ -51,7 +50,7 @@ template<std::size_t N>
 using make_index_sequence = std::make_index_sequence<N>;
 
 template<class T>
-using decay = std::decay_t<T>;
+using decay_t = std::decay_t<T>;
 
 template<std::size_t I, class T>
 using tup_element = std::tuple_element_t<I, T>;
@@ -80,30 +79,81 @@ constexpr const T* end(const T (&array)[N]) noexcept;
 
 } // namespace detail
 
+/**
+ * @brief Can be used to get the iterator type of an iterable. Example: `lz::iter_t<std::vector<int>>` will return
+ * `std::vector<int>::iterator`.
+ *
+ * @tparam Iterable The iterable to get the iterator type from.
+ */
 template<class Iterable>
 using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
 
-template<class S>
-using sentinel_t = decltype(detail::end(std::forward<S>(std::declval<S>())));
+/**
+ * @brief Can be used to get the sentinel type of an iterable. Example: `lz::sentinel_t<std::vector<int>>` will return
+ * `std::vector<int>::iterator`.
+ * @tparam Iterable The iterable to get the sentinel type from.
+ */
+template<class Iterable>
+using sentinel_t = decltype(detail::end(std::forward<Iterable>(std::declval<Iterable>())));
 
+/**
+ * @brief Can be used to get the value type of an iterator. Example: `lz::val_t<std::vector<int>::iterator>` will return `int`.
+ *
+ * @tparam Iterator The iterator to get the value type from.
+ */
 template<class Iterator>
 using val_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::value_type;
 
+/**
+ * @brief Can be used to get the reference type of an iterator. Example: `lz::ref_t<std::vector<int>::iterator>` will return
+ * `int&`.
+ *
+ * @tparam Iterator The iterator to get the reference type from.
+ */
 template<class Iterator>
 using ref_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::reference;
 
+/**
+ * @brief Can be used to get the pointer type of an iterator. Example: `lz::ptr_t<std::vector<int>::iterator>` will return
+ * `int*`.
+ *
+ * @tparam Iterator The iterator to get the pointer type from.
+ */
 template<class Iterator>
 using ptr_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::pointer;
 
+/**
+ * @brief Can be used to get the difference type of an iterator. Example: `lz::diff_t<std::vector<int>::iterator>` will return
+ * `std::ptrdiff_t`.
+ *
+ * @tparam Iterator The iterator to get the difference type from.
+ */
 template<class Iterator>
 using diff_type = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::difference_type;
 
+/**
+ * @brief Can be used to get the iterator category of an iterator. Example: `lz::iter_cat_t<std::vector<int>::iterator>` will
+ * return `std::random_access_iterator_tag`.
+ *
+ * @tparam Iterator The iterator to get the iterator category from.
+ */
 template<class Iterator>
 using iter_cat_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::iterator_category;
 
+/**
+ * @brief Can be used to get the value type of an iterable. Example: `lz::val_iterable_t<std::vector<int>>` will return `int`.
+ *
+ * @tparam Iterable The iterable to get the value type from.
+ */
 template<class Iterable>
-using value_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::value_type;
+using val_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::value_type;
 
+/**
+ * @brief Can be used to get the difference type of an iterable. Example: `lz::diff_iterable_t<std::vector<int>>` will return
+ * `std::ptrdiff_t`.
+ *
+ * @tparam Iterable
+ */
 template<class Iterable>
 using diff_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::difference_type;
 
@@ -115,8 +165,52 @@ using func_ret_type = decltype(std::declval<Function>()(std::declval<Args>()...)
 template<class... Ts>
 using common_type = typename std::common_type<Ts...>::type;
 
+template<class>
+struct iter_tuple_diff_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_diff_type_helper<std::tuple<Iterators...>> {
+    using type = common_type<diff_type<Iterators>...>;
+};
+
+template<class>
+struct iter_tuple_iter_cat_helper;
+
+template<class... Iterators>
+struct iter_tuple_iter_cat_helper<std::tuple<Iterators...>> {
+    using type = common_type<iter_cat_t<Iterators>...>;
+};
+
+template<class>
+struct iter_tuple_value_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_value_type_helper<std::tuple<Iterators...>> {
+    using type = std::tuple<val_t<Iterators>...>;
+};
+
+template<class>
+struct iter_tuple_ref_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_ref_type_helper<std::tuple<Iterators...>> {
+    using type = std::tuple<ref_t<Iterators>...>;
+};
+
+template<class IterTuple>
+using iter_tuple_diff_type_t = typename iter_tuple_diff_type_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_iter_cat_t = typename iter_tuple_iter_cat_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
+
 template<bool B>
-struct enable_if_impl {};
+struct enable_if_impl;
 
 template<>
 struct enable_if_impl<true> {
@@ -152,23 +246,19 @@ template<class T, class U>
 struct is_all_same<T, U> : std::is_same<T, U> {};
 
 template<class IterTag>
-struct is_bidi_tag : std::is_convertible<IterTag, std::bidirectional_iterator_tag> {};
+using is_bidi_tag = std::is_convertible<IterTag, std::bidirectional_iterator_tag>;
 
 template<class Iterator>
-struct is_bidi : is_bidi_tag<iter_cat_t<Iterator>> {};
+using is_bidi = is_bidi_tag<iter_cat_t<Iterator>>;
 
 template<class Iterator>
-struct is_fwd : std::is_convertible<iter_cat_t<Iterator>, std::forward_iterator_tag> {};
+using is_fwd = std::is_convertible<iter_cat_t<Iterator>, std::forward_iterator_tag>;
 
 template<class IterTag>
-struct is_ra_tag : std::is_convertible<IterTag, std::random_access_iterator_tag> {};
+using is_ra_tag = std::is_convertible<IterTag, std::random_access_iterator_tag>;
 
 template<class Iterator>
-struct is_ra : is_ra_tag<iter_cat_t<Iterator>> {};
-
-template<class Iterable>
-struct actual_sentinel : std::bool_constant<!std::is_same<iter_t<Iterable>, sentinel_t<Iterable>>::value> {};
-
+using is_ra = is_ra_tag<iter_cat_t<Iterator>>;
 } // namespace detail
 
 /**

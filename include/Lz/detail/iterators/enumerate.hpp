@@ -3,9 +3,9 @@
 #ifndef LZ_ENUMERATE_ITERATOR_HPP
 #define LZ_ENUMERATE_ITERATOR_HPP
 
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -19,8 +19,8 @@ class enumerate_iterator final
                        fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, enumerate_tag<Iterator>,
                        sentinel_selector<enumerate_tag<Iterator>, enumerate_iterator<Iterator, S, Arithmetic>, S>> {
 
-    Iterator _iterator{};
-    Arithmetic _index{};
+    Iterator _iterator;
+    Arithmetic _index;
 
     using Traits = std::iterator_traits<Iterator>;
 
@@ -59,6 +59,10 @@ public:
         return _iterator == other._iterator;
     }
 
+    LZ_CONSTEXPR_CXX_20 bool eq(const S& s) const {
+        return _iterator == s;
+    }
+
     LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type n) {
         _index += static_cast<Arithmetic>(n);
         _iterator += n;
@@ -66,10 +70,6 @@ public:
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const enumerate_iterator& other) const {
         return _iterator - other._iterator;
-    }
-
-    LZ_CONSTEXPR_CXX_20 bool eq(const S& s) const {
-        return _iterator == s;
     }
 };
 } // namespace detail

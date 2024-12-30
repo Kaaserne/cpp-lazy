@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 #include <iterator>
 
 namespace lz {
@@ -22,8 +21,8 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator{};
-    difference_type _n{};
+    Iterator _iterator;
+    difference_type _n;
 
 public:
     constexpr take_iterator() = default;

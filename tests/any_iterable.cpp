@@ -1,10 +1,16 @@
-#include "Lz/Lz.hpp"
-
+#include <Lz/Lz.hpp>
+#include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <list>
 
-// TODO write any iterable tests for sentinels
+
+TEST_CASE("Any iterable with sentinels") {
+    auto cstr = lz::c_string("Hello, world!");
+    lz::any_iterable<char, const char&> iterable = cstr;
+    auto expected = "Hello, world!";
+    CHECK(lz::equal(iterable, lz::c_string(expected)));
+}
 
 TEST_CASE("Creating a basic any iterable from std::vector, random access iterator") {
     std::vector<int> vec = { 1, 2, 3, 4, 5 };

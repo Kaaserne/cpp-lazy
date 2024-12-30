@@ -17,7 +17,7 @@ TEST_CASE("Inclusive scan with sentinels") {
 }
 
 TEST_CASE("Inclusive scan changing and creating elements", "[InclusiveScan][Basic functionality]") {
-    int arr[32]{};
+    int arr[32];
     std::iota(std::begin(arr), std::end(arr), 0);
     auto scan = lz::inclusive_scan(arr);
     auto begin = scan.begin();

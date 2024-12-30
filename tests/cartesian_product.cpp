@@ -1,9 +1,9 @@
-#include "Lz/algorithm.hpp"
-#include "Lz/c_string.hpp"
-#include "Lz/cartesian_product.hpp"
-
+#include <Lz/algorithm.hpp>
+#include <Lz/c_string.hpp>
+#include <Lz/cartesian_product.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+
 
 TEST_CASE("Is sentinel") {
     const char* str = "Hello,";

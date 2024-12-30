@@ -3,9 +3,9 @@
 #ifndef LZ_RANDOM_ITERATOR_HPP
 #define LZ_RANDOM_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/fake_ptr_proxy.hpp"
-#include "Lz/iterator_base.hpp"
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -21,9 +21,9 @@ public:
     using result_type = value_type;
 
 private:
-    mutable Distribution _distribution{};
+    mutable Distribution _distribution;
     Generator* _generator{ nullptr };
-    std::ptrdiff_t _current{};
+    std::ptrdiff_t _current;
 
 public:
     random_iterator(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :

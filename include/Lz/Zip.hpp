@@ -3,13 +3,13 @@
 #ifndef LZ_ZIP_HPP
 #define LZ_ZIP_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/zip.hpp"
+#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/detail/iterators/zip.hpp>
 
 namespace lz {
 namespace detail {
-template<class Tuple, std::size_t... Is>
-Tuple create_end_smallest_iterator(const Tuple& begin, Tuple end, index_sequence<Is...>) {
+template<class Tuple, class SentinelTuple, std::size_t... Is>
+Tuple create_end_smallest_iterator(const Tuple& begin, const SentinelTuple& end, index_sequence<Is...>) {
     const std::ptrdiff_t lengths[] = { static_cast<std::ptrdiff_t>(size_hint(std::get<Is>(begin), std::get<Is>(end)))... };
     const auto smallest_length = *std::min_element(std::begin(lengths), std::end(lengths));
     // If we use begin + smallest_length, we get compile errors for non random access iterators. However, we know that we are
@@ -21,16 +21,26 @@ Tuple create_end_smallest_iterator(const Tuple& begin, Tuple end, index_sequence
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<LZ_CONCEPT_ITERATOR... Iterators>
-class zip_iterable final : public detail::basic_iterable<detail::zip_iterator<Iterators...>> {
+template<class IterTuple, class SentinelTuple>
+class zip_iterable final : public detail::basic_iterable<detail::zip_iterator<IterTuple, SentinelTuple>,
+                                                         typename detail::zip_iterator<IterTuple, SentinelTuple>::sentinel> {
+
+    LZ_CONSTEXPR_CXX_20 zip_iterable(IterTuple begin, IterTuple end, std::bidirectional_iterator_tag /* unused */) :
+        detail::basic_iterable<iterator, iterator>(iterator(std::move(begin)), iterator(std::move(end))) {
+    }
+
+    LZ_CONSTEXPR_CXX_20 zip_iterable(IterTuple begin, SentinelTuple end, std::forward_iterator_tag /* unused */) :
+        detail::basic_iterable<iterator, SentinelTuple>(iterator(std::move(begin)), std::move(end)) {
+    }
+
 public:
-    using iterator = detail::zip_iterator<Iterators...>;
+    using iterator = detail::zip_iterator<IterTuple, SentinelTuple>;
     using const_iterator = iterator;
 
     using value_type = typename iterator::value_type;
 
-    LZ_CONSTEXPR_CXX_20 zip_iterable(std::tuple<Iterators...> begin, std::tuple<Iterators...> end) :
-        detail::basic_iterable<iterator>(iterator(std::move(begin)), iterator(std::move(end))) {
+    LZ_CONSTEXPR_CXX_20 zip_iterable(IterTuple begin, SentinelTuple end) :
+        zip_iterable(std::move(begin), std::move(end), detail::iter_tuple_iter_cat_t<IterTuple>{}) {
     }
 
     constexpr zip_iterable() = default;
@@ -54,7 +64,8 @@ public:
  * `for (auto tuple :  lz::zip(...))`.
  */
 template<LZ_CONCEPT_ITERABLE... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 zip_iterable<iter_t<Iterables>...> zip(Iterables&&... iterables) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 zip_iterable<std::tuple<iter_t<Iterables>...>, std::tuple<sentinel_t<Iterables>...>>
+zip(Iterables&&... iterables) {
     static_assert(sizeof...(Iterables) > 0, "Cannot create zip object with 0 iterators");
     auto begin = std::make_tuple(detail::begin(std::forward<Iterables>(iterables))...);
     auto end = std::make_tuple(detail::end(std::forward<Iterables>(iterables))...);

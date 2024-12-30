@@ -3,39 +3,35 @@
 #ifndef LZ_CHUNKS_HPP
 #define LZ_CHUNKS_HPP
 
-#include "Lz/detail/iterators/chunks.hpp"
+#include <Lz/detail/iterators/chunks.hpp>
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// TODO: make better implementation here? I.e. using iterator_tags
-
 template<class Iterator, class S>
-class chunks_iterable final : public detail::basic_iterable<detail::chunks_iterator<Iterator, S>, default_sentinel> {
+class chunks_iterable final : public detail::basic_iterable<detail::chunks_iterator<Iterator, S>,
+                                                            typename detail::chunks_iterator<Iterator, S>::sentinel> {
 public:
     using iterator = detail::chunks_iterator<Iterator, S>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
     LZ_CONSTEXPR_CXX_20
-    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size) :
+    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), chunk_size)) {
     }
 
-    constexpr chunks_iterable() = default;
-};
-
-template<class Iterator>
-class chunks_iterable<Iterator, Iterator> final : public detail::basic_iterable<detail::chunks_iterator<Iterator, Iterator>> {
-public:
-    using iterator = detail::chunks_iterator<Iterator, Iterator>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
-
     LZ_CONSTEXPR_CXX_20
-    chunks_iterable(Iterator begin, Iterator end, const std::size_t chunk_size) :
+    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end, chunk_size), iterator(end, begin, end, chunk_size)) {
+    }
+
+public:
+    LZ_CONSTEXPR_CXX_20
+    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size) :
+        chunks_iterable(begin, end, chunk_size, iter_cat_t<Iterator>{}) {
     }
 
     constexpr chunks_iterable() = default;

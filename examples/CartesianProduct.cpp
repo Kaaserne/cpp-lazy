@@ -1,4 +1,4 @@
-#include "Lz/CartesianProduct.hpp"
+#include <Lz/CartesianProduct.hpp>
 
 int main() {
     std::vector<int> vec = {1, 2, 3};

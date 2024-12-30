@@ -3,9 +3,8 @@
 #ifndef LZ_ANY_VIEW_HELPERS_HPP
 #define LZ_ANY_VIEW_HELPERS_HPP
 
-#include "Lz/detail/iterators/anyview/iterator_base.hpp"
-#include "Lz/iterator_base.hpp"
-
+#include <Lz/detail/iterators/anyview/iterator_base.hpp>
+#include <Lz/iterator_base.hpp>
 #include <iterator>
 
 namespace lz {
@@ -16,7 +15,7 @@ class iterator_wrapper : public iter_base<iterator_wrapper<T, Reference, IterCat
                                           DiffType, IterCat> {
 
     using any_iter_base = iterator_base<Reference, IterCat, DiffType>;
-    std::shared_ptr<any_iter_base> _ptr{ nullptr };
+    std::shared_ptr<any_iter_base> _ptr;
 
 public:
     using value_type = T;
