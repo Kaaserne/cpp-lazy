@@ -25,6 +25,24 @@ TEST_CASE("Is sentinel") {
     }
 }
 
+TEST_CASE("Empty or one element cartesian product") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        auto cart = lz::cartesian_product(vec, vec);
+        CHECK(lz::empty(cart));
+        CHECK(!lz::has_one(cart));
+        CHECK(!lz::has_many(cart));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        auto cart = lz::cartesian_product(vec, vec);
+        CHECK(!lz::empty(cart));
+        CHECK(lz::has_one(cart));
+        CHECK(!lz::has_many(cart));
+    }
+}
+
 TEST_CASE("Cartesian product changing and creating elements", "[CartesianProduct][Basic functionality]") {
     std::vector<int> vec = { 1, 2, 3 };
     std::vector<char> chars = { 'a', 'b', 'c' };

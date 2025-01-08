@@ -31,6 +31,24 @@ TEST_CASE("Chunks with sentinels") {
           std::vector<std::string>{ "Hel", "lo,", " wo", "rld", "!" });
 }
 
+TEST_CASE("empty or one element chunks") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        auto chunked = lz::chunks(vec, 3);
+        CHECK(lz::empty(chunked));
+        CHECK(!lz::has_one(chunked));
+        CHECK(!lz::has_many(chunked));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        auto chunked = lz::chunks(vec, 3);
+        CHECK(!lz::empty(chunked));
+        CHECK(lz::has_one(chunked));
+        CHECK(!lz::has_many(chunked));
+    }
+}
+
 TEST_CASE("Chunks binary operations", "[Chunks][Binary ops]") {
     std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7, 8 };
     auto chunked = lz::chunks(v, 3);

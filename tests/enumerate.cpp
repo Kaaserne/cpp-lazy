@@ -45,6 +45,24 @@ TEST_CASE("Enumerate changing and creating elements", "[Enumerate][Basic functio
     }
 }
 
+TEST_CASE("Empty or one element enumerate") {
+    SECTION("Empty") {
+        std::string a;
+        auto enumerate = lz::enumerate(a);
+        CHECK(lz::empty(enumerate));
+        CHECK(!lz::has_one(enumerate));
+        CHECK(!lz::has_many(enumerate));
+    }
+
+    SECTION("One element") {
+        std::string a = "h";
+        auto enumerate = lz::enumerate(a);
+        CHECK(!lz::empty(enumerate));
+        CHECK(lz::has_one(enumerate));
+        CHECK(!lz::has_many(enumerate));
+    }
+}
+
 TEST_CASE("Enumerate binary operations", "[Enumerate][Binary ops]") {
     constexpr std::size_t size = 3;
     std::array<int, size> array = { 1, 2, 3 };

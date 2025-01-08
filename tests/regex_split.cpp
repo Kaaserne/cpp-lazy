@@ -44,6 +44,35 @@ TEST_CASE("regex_split_iterable changing and creating elements", "[regex_split_i
     }
 }
 
+TEST_CASE("Empty or one element regex split") {
+    SECTION("Empty") {
+        std::regex r1(R"(\s+)");
+        std::string s;
+        auto splitter = lz::regex_split(s, r1);
+        CHECK(lz::empty(splitter));
+        CHECK(!lz::has_one(splitter));
+        CHECK(!lz::has_many(splitter));
+    }
+
+    SECTION("One element with result") {
+        std::regex r1(R"(\s+)");
+        std::string s = "Hello ";
+        auto splitter = lz::regex_split(s, r1);
+        CHECK(!lz::empty(splitter));
+        CHECK(lz::has_one(splitter));
+        CHECK(!lz::has_many(splitter));
+    }
+
+    SECTION("One element without result") {
+        std::regex r1(R"(\s+)");
+        std::string s = "Hello";
+        auto splitter = lz::regex_split(s, r1);
+        CHECK(!lz::empty(splitter));
+        CHECK(lz::has_one(splitter));
+        CHECK(!lz::has_many(splitter));
+    }
+}
+
 TEST_CASE("regex_split_iterable binary operations", "[regex_split_iterable][Binary ops]") {
     std::regex r1(R"(\s+)");
     std::string s = "    Hello, world! How are you?    ";

@@ -198,6 +198,35 @@ TEST_CASE("zip_longest_iterable binary operations", "[zip_longest_iterable][Bina
     }
 }
 
+TEST_CASE("Empty and one element zip longest") {
+    SECTION("Empty") {
+        std::vector<int> a;
+        std::vector<float> b;
+        auto zipper = lz::zip_longest(a, b);
+        CHECK(lz::empty(zipper));
+        CHECK(!lz::has_one(zipper));
+        CHECK(!lz::has_many(zipper));
+    }
+
+    SECTION("One element 1") {
+        std::vector<int> a = { 1 };
+        std::vector<float> b;
+        auto zipper = lz::zip_longest(a, b);
+        CHECK(!lz::empty(zipper));
+        CHECK(lz::has_one(zipper));
+        CHECK(!lz::has_many(zipper));
+    }
+
+    SECTION("One element 2") {
+        std::vector<int> a;
+        std::vector<float> b = { 1.f };
+        auto zipper = lz::zip_longest(a, b);
+        CHECK(!lz::empty(zipper));
+        CHECK(lz::has_one(zipper));
+        CHECK(!lz::has_many(zipper));
+    }
+}
+
 template<class... T>
 using opt_actual_t = std::tuple<lz::optional<std::reference_wrapper<T>>...>;
 

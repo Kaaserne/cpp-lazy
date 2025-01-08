@@ -24,7 +24,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool empty(Iterable&& iterable) {
-    return iterable.begin() == iterable.end();
+    return std::begin(iterable) == std::end(iterable);
 }
 
 /**
@@ -35,7 +35,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool empty(Iterable&& iterable) {
 template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool has_one(Iterable&& iterable) {
     auto it = std::begin(iterable);
-    return !lz::empty(iterable) && ++it == iterable.end();
+    return !lz::empty(iterable) && ++it == std::end(iterable);
 }
 
 /**
@@ -45,7 +45,10 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool has_one(Iterable&& iterable) {
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool has_many(Iterable&& iterable) {
-    return !lz::empty(iterable) && !has_one(iterable);
+    if (lz::empty(iterable)) {
+        return false;
+    }
+    return !has_one(iterable);
 }
 
 /**
@@ -459,7 +462,7 @@ LZ_CONSTEXPR_CXX_20 void for_each(Iterable&& iterable, UnaryOp unary_op) {
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryOp>
 LZ_CONSTEXPR_CXX_20 void for_each_while(Iterable&& iterable, UnaryOp unary_op) {
-    static_assert(std::is_convertible<detail::decay_t<decltype(unary_op(*iterable.begin()))>, bool>::value,
+    static_assert(std::is_convertible<detail::decay_t<decltype(unary_op(*std::begin(iterable)))>, bool>::value,
                   "Predicate must return boolean like value");
     detail::for_each_while(std::begin(iterable), std::end(iterable), std::move(unary_op));
 }

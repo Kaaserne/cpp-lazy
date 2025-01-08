@@ -2,7 +2,7 @@
 #include <Lz/common.hpp>
 #include <catch2/catch.hpp>
 
-TEST_CASE("Basic CommonView test") {
+TEST_CASE("Basic common_iterable test") {
     const char* s = "hello, world!";
     auto cstr = lz::c_string(s);
     auto common = lz::common(cstr);
@@ -10,7 +10,7 @@ TEST_CASE("Basic CommonView test") {
     CHECK(std::equal(common.begin(), common.end(), cstr.begin()));
 }
 
-TEST_CASE("CommonView binary operations", "[CommonView][Binary ops]") {
+TEST_CASE("common_iterable binary operations", "[common_iterable][Binary ops]") {
     const char* a = "hello ";
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);
@@ -29,7 +29,25 @@ TEST_CASE("CommonView binary operations", "[CommonView][Binary ops]") {
     }
 }
 
-TEST_CASE("CommonView to containers", "[CommonView][To container]") {
+TEST_CASE("common_iterable empty or one element") {
+    SECTION("Empty") {
+        auto c_str = lz::c_string("");
+        auto common = lz::common(c_str);
+        CHECK(lz::empty(common));
+        CHECK(!lz::has_one(common));
+        CHECK(!lz::has_many(common));
+    }
+
+    SECTION("One element") {
+        auto c_str = lz::c_string("a");
+        auto common = lz::common(c_str);
+        CHECK(!lz::empty(common));
+        CHECK(lz::has_one(common));
+        CHECK(!lz::has_many(common));
+    }
+}
+
+TEST_CASE("common_iterable to containers", "[common_iterable][To container]") {
     const char* a = "hello ";
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);

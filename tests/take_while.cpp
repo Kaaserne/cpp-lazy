@@ -31,6 +31,32 @@ TEST_CASE("take_while_iterable takes elements and is by reference", "[take_while
     }
 }
 
+TEST_CASE("Empty or one element drop while") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        auto drop_while = lz::drop_while(vec, [](int i) { return i == 2; });
+        CHECK(lz::empty(drop_while));
+        CHECK(!lz::has_many(drop_while));
+        CHECK(!lz::has_one(drop_while));
+    }
+
+    SECTION("One element true") {
+        std::vector<int> vec = { 1 };
+        auto drop_while = lz::drop_while(vec, [](int i) { return i == 1; });
+        CHECK(lz::empty(drop_while));
+        CHECK(!lz::has_many(drop_while));
+        CHECK(!lz::has_one(drop_while));
+    }
+
+    SECTION("One element false") {
+        std::vector<int> vec = { 1 };
+        auto drop_while = lz::drop_while(vec, [](int i) { return i != 1; });
+        CHECK(!lz::empty(drop_while));
+        CHECK(!lz::has_many(drop_while));
+        CHECK(lz::has_one(drop_while));
+    }
+}
+
 TEST_CASE("Drop while takes elements and is by reference", "[take_while_iterable][Basic functionality]") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

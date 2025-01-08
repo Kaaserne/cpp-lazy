@@ -77,6 +77,24 @@ TEST_CASE("Take binary operations", "[Take][Binary ops]") {
     }
 }
 
+TEST_CASE("Empty or one element take") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        auto take = lz::take(vec, 0);
+        CHECK(lz::empty(take));
+        CHECK(!lz::has_one(take));
+        CHECK(!lz::has_many(take));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        auto take = lz::take(vec, 1);
+        CHECK(!lz::empty(take));
+        CHECK(lz::has_one(take));
+        CHECK(!lz::has_many(take));
+    }
+}
+
 TEST_CASE("Take to containers", "[Take][To container]") {
     constexpr std::size_t size = 8;
     std::array<int, size> array = { 1, 2, 3, 4, 5, 6, 7, 8 };

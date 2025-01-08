@@ -53,6 +53,48 @@ TEST_CASE("Left join changing and creating elements", "[join_where_iterable][Bas
     }
 }
 
+TEST_CASE("Empty or one element join where") {
+    SECTION("Empty join") {
+        std::vector<customer> customers;
+        std::vector<payment_bill> payment_bills;
+        auto joined = lz::join_where(
+            customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
+            [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
+        CHECK(lz::empty(joined));
+        CHECK(!lz::has_many(joined));
+        CHECK(!lz::has_one(joined));
+    }
+
+    SECTION("One element join 1") {
+        std::vector<customer> customers{ customer{ 25 } };
+        std::vector<payment_bill> payment_bills;
+        auto joined = lz::join_where(
+            customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
+            [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
+        CHECK(lz::empty(joined));
+    }
+
+    SECTION("One element join 2") {
+        std::vector<customer> customers;
+        std::vector<payment_bill> payment_bills{ payment_bill{ 25, 0 } };
+        auto joined = lz::join_where(
+            customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
+            [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
+        CHECK(lz::empty(joined));
+    }
+
+    SECTION("One element join 3") {
+        std::vector<customer> customers{ customer{ 25 } };
+        std::vector<payment_bill> payment_bills{ payment_bill{ 25, 0 } };
+        auto joined = lz::join_where(
+            customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
+            [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
+        CHECK(lz::has_one(joined));
+        CHECK(!lz::has_many(joined));
+        CHECK(!lz::empty(joined));
+    }
+}
+
 TEST_CASE("Left join binary operations", "[join_where_iterable][Binary ops]") {
     std::vector<customer> customers{
         customer{ 25 }, customer{ 1 }, customer{ 39 }, customer{ 103 }, customer{ 99 },

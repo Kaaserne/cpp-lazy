@@ -14,6 +14,53 @@ TEST_CASE("Except tests with sentinels") {
     CHECK(except.to<std::string>() == "Hll, Wrld!");
 }
 
+TEST_CASE("Empty or one element except") {
+    SECTION("Empty") {
+        std::string a;
+        std::string b;
+        auto except = lz::except(a, b);
+        CHECK(lz::empty(except));
+        CHECK(!lz::has_one(except));
+        CHECK(!lz::has_many(except));
+    }
+
+    SECTION("One element 1") {
+        std::string a = "h";
+        std::string b;
+        auto except = lz::except(a, b);
+        CHECK(!lz::empty(except));
+        CHECK(lz::has_one(except));
+        CHECK(!lz::has_many(except));
+    }
+
+    SECTION("One element 2") {
+        std::string a;
+        std::string b = "w";
+        auto except = lz::except(a, b);
+        CHECK(!lz::empty(except));
+        CHECK(lz::has_one(except));
+        CHECK(!lz::has_many(except));
+    }
+
+    SECTION("One element both") {
+        std::string a = "h";
+        std::string b = "w";
+        auto except = lz::except(a, b);
+        CHECK(!lz::empty(except));
+        CHECK(lz::has_one(except));
+        CHECK(!lz::has_many(except));
+    }
+
+    SECTION("One element both 2") {
+        std::string a = "h";
+        std::string b = "h";
+        auto except = lz::except(a, b);
+        CHECK(lz::empty(except));
+        CHECK(!lz::has_one(except));
+        CHECK(!lz::has_many(except));
+    }
+}
+
 TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functionality]") {
     std::vector<int> array{ 1, 2, 3, 4, 5 };
     std::vector<int> to_except{ 3, 5 };

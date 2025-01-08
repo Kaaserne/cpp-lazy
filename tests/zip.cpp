@@ -73,6 +73,44 @@ TEST_CASE("zip_iterable changing and creating elements", "[zip_iterable][Basic f
     }
 }
 
+TEST_CASE("Empty or one element zip") {
+    SECTION("Empty") {
+        std::vector<int> empty;
+        std::vector<int> empty2;
+        auto zipper = lz::zip(empty, empty2);
+        CHECK(lz::empty(zipper));
+        CHECK(!lz::has_many(zipper));
+        CHECK(!lz::has_one(zipper));
+    }
+
+    SECTION("One element 1") {
+        std::vector<int> one = { 1 };
+        std::vector<int> empty;
+        auto zipper = lz::zip(one, empty);
+        CHECK(lz::empty(zipper));
+        CHECK(!lz::has_many(zipper));
+        CHECK(!lz::has_one(zipper));
+    }
+
+    SECTION("One element 2") {
+        std::vector<int> empty;
+        std::vector<int> one = { 1 };
+        auto zipper = lz::zip(empty, one);
+        CHECK(lz::empty(zipper));
+        CHECK(!lz::has_many(zipper));
+        CHECK(!lz::has_one(zipper));
+    }
+
+    SECTION("One element 3") {
+        std::vector<int> one = { 1 };
+        std::vector<int> one2 = { 1 };
+        auto zipper = lz::zip(one, one2);
+        CHECK(!lz::empty(zipper));
+        CHECK(!lz::has_many(zipper));
+        CHECK(lz::has_one(zipper));
+    }
+}
+
 TEST_CASE("zip_iterable binary operations", "[zip_iterable][Binary ops]") {
     constexpr std::size_t size = 4;
     std::vector<int> a = { 1, 2, 3, 4 };

@@ -71,6 +71,24 @@ TEST_CASE("Unique binary operations", "[Unique][Binary ops]") {
     }
 }
 
+TEST_CASE("Empty or one element unique") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        auto unique = lz::unique(vec);
+        CHECK(lz::empty(unique));
+        CHECK(!lz::has_many(unique));
+        CHECK(!lz::has_one(unique));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        auto unique = lz::unique(vec);
+        CHECK(lz::has_one(unique));
+        CHECK(!lz::has_many(unique));
+        CHECK(!lz::empty(unique));
+    }
+}
+
 TEST_CASE("Unique to container", "[Unique][To container]") {
     std::array<int, 4> arr = { 3, 2, 3, 1 };
     std::sort(arr.begin(), arr.end());

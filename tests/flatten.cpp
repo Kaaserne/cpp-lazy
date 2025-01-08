@@ -21,6 +21,24 @@ TEST_CASE("Flatten with sentinels") {
     CHECK(flattened_array.to<std::string>() == "Hello, World!");
 }
 
+TEST_CASE("Empty or one element flatten") {
+    SECTION("Empty") {
+        std::vector<std::vector<int>> empty;
+        auto empty_flattened = lz::flatten(empty);
+        CHECK(lz::empty(empty_flattened));
+        CHECK(!lz::has_one(empty_flattened));
+        CHECK(!lz::has_many(empty_flattened));
+    }
+
+    SECTION("One element") {
+        std::vector<std::vector<int>> one_element = { { 1 } };
+        auto one_elm_flattened = lz::flatten(one_element);
+        CHECK(!lz::empty(one_elm_flattened));
+        CHECK(lz::has_one(one_elm_flattened));
+        CHECK(!lz::has_many(one_elm_flattened));
+    }
+}
+
 TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
     SECTION("Flatten 1D") {
         std::vector<int> vec = { 1, 2, 3, 4 };

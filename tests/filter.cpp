@@ -12,6 +12,25 @@ TEST_CASE("Filter with sentinels") {
     CHECK(filter.to_vector() == expected);
 }
 
+TEST_CASE("Empty or one element filter") {
+    SECTION("Empty") {
+        std::list<int> empty;
+        auto filter = lz::filter(empty, [](int i) { return i != 0; });
+        CHECK(lz::empty(filter));
+        CHECK(!lz::has_one(filter));
+        CHECK(!lz::has_many(filter));
+    }
+
+    SECTION("One element") {
+        std::list<int> one_element = { 1 };
+        auto filter = lz::filter(one_element, [](int i) { return i != 0; });
+        CHECK(!lz::empty(filter));
+        CHECK(lz::has_one(filter));
+        CHECK(!lz::has_many(filter));
+        CHECK(*filter.begin() == 1);
+    }
+}
+
 TEST_CASE("Filter filters and is by reference", "[Filter][Basic functionality]") {
     constexpr size_t size = 3;
     std::array<int, size> array{ 1, 2, 3 };

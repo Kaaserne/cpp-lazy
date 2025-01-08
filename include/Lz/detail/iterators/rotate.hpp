@@ -38,6 +38,9 @@ public:
         _begin(std::move(begin)),
         _end(std::move(end)),
         _full_rotation(full_rotation) {
+        if (start == end) {
+            _full_rotation = true;
+        }
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {

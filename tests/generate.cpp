@@ -49,6 +49,22 @@ TEST_CASE("Generate binary operations", "[Generate][Binary ops]") {
     }
 }
 
+TEST_CASE("Empty or one element generate") {
+    SECTION("Empty") {
+        auto generator = lz::generate([]() { return 0; }, 0);
+        CHECK(lz::empty(generator));
+        CHECK(!lz::has_one(generator));
+        CHECK(!lz::has_many(generator));
+    }
+
+    SECTION("One element") {
+        auto generator = lz::generate([]() { return 0; }, 1);
+        CHECK(!lz::empty(generator));
+        CHECK(lz::has_one(generator));
+        CHECK(!lz::has_many(generator));
+    }
+}
+
 TEST_CASE("Generate to containers", "[Generate][To container]") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;

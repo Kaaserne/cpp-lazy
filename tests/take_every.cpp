@@ -44,6 +44,24 @@ TEST_CASE("take_every_iterable changing and creating elements", "[take_every_ite
     }
 }
 
+TEST_CASE("Empty or one element take every") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        auto takeEvery = lz::take_every(vec, 2);
+        CHECK(lz::empty(takeEvery));
+        CHECK(!lz::has_many(takeEvery));
+        CHECK(!lz::has_one(takeEvery));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        auto takeEvery = lz::take_every(vec, 2);
+        CHECK(!lz::empty(takeEvery));
+        CHECK(!lz::has_many(takeEvery));
+        CHECK(lz::has_one(takeEvery));
+    }
+}
+
 TEST_CASE("take_every_iterable binary operations", "[take_every_iterable][Binary ops]") {
     constexpr std::size_t size = 4;
     std::array<int, size> array = { 1, 2, 3, 4 };

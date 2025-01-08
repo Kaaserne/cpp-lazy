@@ -56,7 +56,10 @@ template<LZ_CONCEPT_ITERABLE Iterable, class T = val_iterable_t<Iterable>,
          class BinaryOp = MAKE_BIN_PRED(std::plus, val_iterable_t<Iterable>)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 inclusive_scan_iterable<iter_t<Iterable>, sentinel_t<Iterable>, T, BinaryOp>
 inclusive_scan(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) {
-    LZ_ASSERT(std::begin(iterable) != std::end(iterable), "Iterable cannot be empty");
+    if (lz::empty(iterable)) {
+        return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), std::move(init),
+                 std::move(binary_op) };
+    }
     auto begin = detail::begin(std::forward<Iterable>(iterable));
     auto tmp = binary_op(std::move(init), *begin);
     return { std::move(begin), detail::end(std::forward<Iterable>(iterable)), std::move(tmp), std::move(binary_op) };

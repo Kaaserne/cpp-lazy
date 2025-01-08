@@ -102,6 +102,22 @@ TEST_CASE("Map binary operations", "[Map][Binary ops]") {
     }
 }
 
+TEST_CASE("Empty or one element map") {
+    SECTION("Empty map") {
+        std::vector<int> vec;
+        auto map = lz::map(vec, [](int i) { return i; });
+        CHECK(lz::empty(map));
+    }
+
+    SECTION("One element map") {
+        std::vector<int> vec = { 1 };
+        auto map = lz::map(vec, [](int i) { return i; });
+        CHECK(!lz::empty(map));
+        CHECK(lz::has_one(map));
+        CHECK(!lz::has_many(map));
+    }
+}
+
 TEST_CASE("Map to containers", "[Map][To container]") {
     constexpr std::size_t size = 3;
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };

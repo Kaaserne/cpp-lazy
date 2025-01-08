@@ -92,6 +92,32 @@ TEST_CASE("Splitter changing and creating elements", "[Splitter][Basic functiona
     }
 }
 
+TEST_CASE("Empty or one element string splitter") {
+    SECTION("Empty") {
+        std::string to_split;
+        auto splitter = lz::split(to_split, " ");
+        CHECK(lz::empty(splitter));
+        CHECK(!lz::has_many(splitter));
+        CHECK(!lz::has_one(splitter));
+    }
+
+    SECTION("One element") {
+        std::string to_split = "Hello";
+        auto splitter = lz::split(to_split, " ");
+        CHECK(!lz::empty(splitter));
+        CHECK(!lz::has_many(splitter));
+        CHECK(lz::has_one(splitter));
+    }
+
+    SECTION("One element with delimiter") {
+        std::string to_split = "Hello ";
+        auto splitter = lz::split(to_split, " ");
+        CHECK(!lz::empty(splitter));
+        CHECK(lz::has_many(splitter));
+        CHECK(!lz::has_one(splitter));
+    }
+}
+
 TEST_CASE("Splitter binary operations", "[Splitter][Binary ops]") {
     std::string to_split = " Hello world test 123 ";
     auto splitter = lz::split(to_split, " ");

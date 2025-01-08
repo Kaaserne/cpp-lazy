@@ -16,6 +16,22 @@ TEST_CASE("Inclusive scan with sentinels") {
     }
 }
 
+TEST_CASE("Empty or one element inclusive scan") {
+    SECTION("Empty") {
+        std::vector<int> empty;
+        auto scan = lz::inclusive_scan(empty);
+        CHECK(lz::empty(scan));
+    }
+
+    SECTION("One element") {
+        std::vector<int> one_element = { 1 };
+        auto scan = lz::inclusive_scan(one_element);
+        CHECK(!lz::empty(scan));
+        CHECK(lz::has_one(scan));
+        CHECK(!lz::has_many(scan));
+    }
+}
+
 TEST_CASE("Inclusive scan changing and creating elements", "[InclusiveScan][Basic functionality]") {
     int arr[32];
     std::iota(std::begin(arr), std::end(arr), 0);

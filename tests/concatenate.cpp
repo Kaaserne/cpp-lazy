@@ -45,6 +45,44 @@ TEST_CASE("Concat changing and creating elements", "[Concat][Basic functionality
     }
 }
 
+TEST_CASE("Empty or one element concatenate") {
+    SECTION("Empty") {
+        std::string a;
+        std::string b;
+        auto concat = lz::concat(a, b);
+        CHECK(lz::empty(concat));
+        CHECK(!lz::has_one(concat));
+        CHECK(!lz::has_many(concat));
+    }
+
+    SECTION("One element 1") {
+        std::string a = "h";
+        std::string b;
+        auto concat = lz::concat(a, b);
+        CHECK(!lz::empty(concat));
+        CHECK(lz::has_one(concat));
+        CHECK(!lz::has_many(concat));
+    }
+
+    SECTION("One element 2") {
+        std::string a;
+        std::string b = "w";
+        auto concat = lz::concat(a, b);
+        CHECK(!lz::empty(concat));
+        CHECK(lz::has_one(concat));
+        CHECK(!lz::has_many(concat));
+    }
+
+    SECTION("One element both") {
+        std::string a = "h";
+        std::string b = "w";
+        auto concat = lz::concat(a, b);
+        CHECK(!lz::empty(concat));
+        CHECK(!lz::has_one(concat));
+        CHECK(lz::has_many(concat));
+    }
+}
+
 TEST_CASE("Concat binary operations", "[Concat][Binary ops]") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);

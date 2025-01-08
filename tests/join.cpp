@@ -48,6 +48,24 @@ TEST_CASE("Join should convert to string", "[Join][Basic functionality]") {
     }
 }
 
+TEST_CASE("Empty or one element join") {
+    SECTION("Empty") {
+        std::vector<int> v;
+        auto join = lz::join(v, ", ");
+        CHECK(lz::empty(join));
+        CHECK(!lz::has_many(join));
+        CHECK(!lz::has_one(join));
+    }
+
+    SECTION("One element") {
+        std::vector<int> v = { 1 };
+        auto join = lz::join(v, ", ");
+        CHECK(!lz::empty(join));
+        CHECK(!lz::has_many(join));
+        CHECK(lz::has_one(join));
+    }
+}
+
 TEST_CASE("Join binary operations", "[Join][Binary ops]") {
     std::vector<int> v = { 1, 2, 3, 4, 5 };
     std::vector<std::string> s = { "h", "e", "l", "l", "o" };

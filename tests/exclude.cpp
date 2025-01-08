@@ -65,7 +65,7 @@ TEST_CASE("Exclude binary operations", "[Exclude][Binary ops]") {
         CHECK(exBeg3 != exEnd3);
     }
 
-    SECTION("Lz next") {
+    SECTION("next") {
         CHECK(*std::next(exBeg1, 0) == 1);
         CHECK(*std::next(exBeg1, 3) == 6);
         CHECK(*std::next(exBeg1, 2) == 3);
@@ -92,6 +92,20 @@ TEST_CASE("Exclude binary operations", "[Exclude][Binary ops]") {
 
         CHECK(lz::distance(exBeg3, exEnd3) == 7);
         CHECK(lz::distance(std::next(exBeg3, 7), exEnd3) == 0);
+    }
+}
+
+TEST_CASE("Empty or one element exclude") {
+    SECTION("Empty") {
+        std::array<int, 0> arr = {};
+        auto excluded = lz::exclude(arr, 0, 1);
+        CHECK(excluded.begin() == excluded.end());
+    }
+
+    SECTION("One element") {
+        std::array<int, 1> arr = { 1 };
+        auto excluded = lz::exclude(arr, 0, 1);
+        CHECK(excluded.begin() == excluded.end());
     }
 }
 

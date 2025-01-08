@@ -20,6 +20,13 @@ TEST_CASE("loop_iterable tests with sentinels") {
     }
 }
 
+TEST_CASE("Empty loop iterable") {
+    std::vector<int> vec;
+    auto looper = lz::loop(vec);
+    // Because looper operator!= always returns true, we can't check if it's empty. But should return true anyway.
+    CHECK(!lz::empty(looper));
+}
+
 TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
     std::vector<int> vec = { 1, 2, 3, 4 };
     auto looper = lz::loop(vec);

@@ -40,6 +40,22 @@ TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]"
     }
 }
 
+TEST_CASE("Empty or one element range") {
+    SECTION("Empty") {
+        auto range = lz::range(0);
+        CHECK(lz::empty(range));
+        CHECK(!lz::has_many(range));
+        CHECK(!lz::has_one(range));
+    }
+
+    SECTION("One element") {
+        auto range = lz::range(1);
+        CHECK(!lz::empty(range));
+        CHECK(!lz::has_many(range));
+        CHECK(lz::has_one(range));
+    }
+}
+
 TEST_CASE("Range binary operations", "[Range][Binary ops]") {
     constexpr int size = 10;
     auto range = lz::range(size);

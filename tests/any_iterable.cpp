@@ -12,6 +12,24 @@ TEST_CASE("Any iterable with sentinels") {
     CHECK(lz::equal(iterable, lz::c_string(expected)));
 }
 
+TEST_CASE("Empty or one element any iterable") {
+    SECTION("Empty") {
+        std::vector<int> vec;
+        lz::any_iterable<int, int&> iterable = vec;
+        CHECK(lz::empty(iterable));
+        CHECK(!lz::has_one(iterable));
+        CHECK(!lz::has_many(iterable));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        lz::any_iterable<int, int&> iterable = vec;
+        CHECK(!lz::empty(iterable));
+        CHECK(lz::has_one(iterable));
+        CHECK(!lz::has_many(iterable));
+    }
+}
+
 TEST_CASE("Creating a basic any iterable from std::vector, random access iterator") {
     std::vector<int> vec = { 1, 2, 3, 4, 5 };
     lz::any_iterable<int, int&, std::random_access_iterator_tag> view = vec;

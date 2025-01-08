@@ -19,7 +19,23 @@ TEST_CASE("Group by with sentinels") {
     CHECK(it == grouper.end());
 }
 
-TEST_CASE("GroupBy changing and creating elements", "[GroupBy][Basic functionality]") {
+TEST_CASE("Empty or one element group by") {
+    SECTION("Empty") {
+        auto generator = lz::group_by(lz::c_string(""), [](char a, char b) { return a == b; });
+        CHECK(lz::empty(generator));
+        CHECK(!lz::has_one(generator));
+        CHECK(!lz::has_many(generator));
+    }
+
+    SECTION("One element") {
+        auto generator = lz::group_by(lz::c_string("a"), [](char a, char b) { return a == b; });
+        CHECK(!lz::empty(generator));
+        CHECK(lz::has_one(generator));
+        CHECK(!lz::has_many(generator));
+    }
+}
+
+TEST_CASE("group_by changing and creating elements", "[group_by][Basic functionality]") {
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
 
     std::sort(vec.begin(), vec.end(), [](const std::string& a, const std::string& b) { return a.length() < b.length(); });
@@ -44,7 +60,7 @@ TEST_CASE("GroupBy changing and creating elements", "[GroupBy][Basic functionali
     }
 }
 
-TEST_CASE("GroupBy binary operations", "[GroupBy][Binary ops]") {
+TEST_CASE("group_by binary operations", "[group_by][Binary ops]") {
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
 
     std::sort(vec.begin(), vec.end(), [](const std::string& a, const std::string& b) { return a.length() < b.length(); });

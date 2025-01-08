@@ -92,6 +92,24 @@ TEST_CASE("rotate_iterable binary operations", "[rotate_iterable][Binary ops]") 
     }
 }
 
+TEST_CASE("Empty or one element rotate") {
+    SECTION("Empty") {
+        std::vector<int> vec{};
+        auto rotate = lz::rotate(vec, vec.begin());
+        CHECK(lz::empty(rotate));
+        CHECK(!lz::has_many(rotate));
+        CHECK(!lz::has_one(rotate));
+    }
+
+    SECTION("One element") {
+        std::vector<int> vec = { 1 };
+        auto rotate = lz::rotate(vec, vec.begin());
+        CHECK(!lz::empty(rotate));
+        CHECK(!lz::has_many(rotate));
+        CHECK(lz::has_one(rotate));
+    }
+}
+
 TEST_CASE("rotate_iterable to containers", "[rotate_iterable][To container]") {
     constexpr std::size_t size = 6;
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };

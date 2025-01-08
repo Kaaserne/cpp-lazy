@@ -12,7 +12,7 @@ TEST_CASE("Exclusive scan with sentinels") {
     CHECK(lz::equal(scan, expected));
 }
 
-TEST_CASE("ExclusiveScan basic functionality", "[ExclusiveScan][Basic functionality]") {
+TEST_CASE("exclusive_scan basic functionality", "[exclusive_scan][Basic functionality]") {
     int arr[] = { 3, 1, 4, 1, 5, 9, 2, 6 };
     auto scan = lz::exclusive_scan(arr);
     static_assert(!std::is_same<decltype(scan.begin()), decltype(scan.end())>::value, "Iterators should not be the same type");
@@ -23,7 +23,26 @@ TEST_CASE("ExclusiveScan basic functionality", "[ExclusiveScan][Basic functional
     CHECK(is_same);
 }
 
-TEST_CASE("Exclusive scan binary operations", "[ExclusiveScan][Binary ops]") {
+TEST_CASE("Empty or one element exclusive scan") {
+    SECTION("Empty") {
+        std::vector<int> empty;
+        auto scan = lz::exclusive_scan(empty);
+        CHECK(lz::empty(scan));
+        CHECK(!lz::has_one(scan));
+        CHECK(!lz::has_many(scan));
+    }
+
+    SECTION("One element") {
+        std::vector<int> one_element = { 1 };
+        auto scan = lz::exclusive_scan(one_element);
+        CHECK(!lz::empty(scan));
+        CHECK(lz::has_one(scan));
+        CHECK(!lz::has_many(scan));
+        CHECK(*scan.begin() == 0);
+    }
+}
+
+TEST_CASE("Exclusive scan binary operations", "[exclusive_scan][Binary ops]") {
     int arr[] = { 3, 1, 4, 1, 5, 9, 2 };
     auto scan = lz::exclusive_scan(arr, 0);
 
@@ -53,7 +72,7 @@ TEST_CASE("Exclusive scan binary operations", "[ExclusiveScan][Binary ops]") {
     }
 }
 
-TEST_CASE("Exclusive scan to container", "[ExclusiveScan][To container]") {
+TEST_CASE("Exclusive scan to container", "[exclusive_scan][To container]") {
     int to_scan[] = { 2, 5, 6, 4, 87, 8, 45, 7 };
     auto scanner = lz::exclusive_scan(to_scan, 0);
 

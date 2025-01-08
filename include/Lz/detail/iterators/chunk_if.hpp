@@ -8,7 +8,33 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/iterator_base.hpp>
+// TODO add benchmarks for maybe_no_unique_address
+/*
+// Wrapper to conditionally apply [[no_unique_address]]
+template <typename T, bool = std::is_empty_v<T>>
+struct maybe_no_unique_address;
 
+// Specialization when T is empty
+template <typename T>
+struct maybe_no_unique_address<T, true> : private T {
+    maybe_no_unique_address() = default;
+    maybe_no_unique_address(const T& t) : T(t) {}
+
+    T& get() { return *this; }
+    const T& get() const { return *this; }
+};
+
+// Specialization when T is not empty
+template <typename T>
+struct maybe_no_unique_address<T, false> {
+    [[no_unique_address]] T value;
+    maybe_no_unique_address() = default;
+    maybe_no_unique_address(const T& t) : value(t) {}
+
+    T& get() { return value; }
+    const T& get() const { return value; }
+};
+*/
 namespace lz {
 namespace detail {
 

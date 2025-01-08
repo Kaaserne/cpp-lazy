@@ -116,7 +116,7 @@ TEST_CASE("Filtermap") {
 }
 
 TEST_CASE("Trim variants") {
-    SECTION("Drop back without sentinels") {
+    SECTION("Drop back while") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<int> expected = { 1, 2, 3 };
         auto actual_trim_back = lz::drop_back_while(actual, [](int i) { return i > 3; });
@@ -134,8 +134,6 @@ TEST_CASE("Trim variants") {
         const std::string actual = "   hello world   ";
         const std::string expected = "hello world";
         auto actual_trim = lz::trim_string(actual);
-        auto actual_trim_vec = actual_trim.to_vector();
-        (void)actual_trim_vec;
         CHECK(lz::equal(actual_trim, expected));
     }
 }

@@ -19,6 +19,32 @@ TEST_CASE("Chunk if with sentinels") {
     CHECK(it == chunked.end());
 }
 
+TEST_CASE("Empty or one element chunk_if") {
+    SECTION("Empty") {
+        std::string s;
+        auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
+        CHECK(lz::empty(chunked));
+        CHECK(!lz::has_one(chunked));
+        CHECK(!lz::has_many(chunked));
+    }
+
+    SECTION("One element") {
+        std::string s = ";";
+        auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
+        CHECK(!lz::empty(chunked));
+        CHECK(lz::has_one(chunked));
+        CHECK(!lz::has_many(chunked));
+    }
+
+    SECTION("One element that does not satisfy predicate") {
+        std::string s = "h";
+        auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
+        CHECK(!lz::empty(chunked));
+        CHECK(lz::has_one(chunked));
+        CHECK(!lz::has_many(chunked));
+    }
+}
+
 TEST_CASE("chunk_if changing and creating elements", "[chunk_if][Basic functionality]") {
     std::string s = "hello world; this is a message;;";
     auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });

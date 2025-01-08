@@ -39,6 +39,20 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
     REQUIRE(current_rand != next_rand);
 }
 
+TEST_CASE("Empty or one element random") {
+    SECTION("Empty random") {
+        auto r = lz::random(0, 0, 0);
+        CHECK(lz::empty(r));
+    }
+
+    SECTION("One element random") {
+        auto r = lz::random(0, 0, 1);
+        CHECK(!lz::empty(r));
+        CHECK(lz::has_one(r));
+        CHECK(!lz::has_many(r));
+    }
+}
+
 TEST_CASE("random_iterable binary operations", "[random_iterable][Binary ops]") {
     constexpr std::ptrdiff_t size = 5;
     auto random = lz::random(0., 1., size);

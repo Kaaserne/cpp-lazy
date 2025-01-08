@@ -22,6 +22,22 @@ TEST_CASE("Basic test") {
     }
 }
 
+TEST_CASE("Empty or one element c_string") {
+    SECTION("Empty") {
+        auto cstr = lz::c_string("");
+        CHECK(lz::empty(cstr));
+        CHECK(!lz::has_one(cstr));
+        CHECK(!lz::has_many(cstr));
+    }
+
+    SECTION("One element") {
+        auto cstr = lz::c_string("a");
+        CHECK(!lz::empty(cstr));
+        CHECK(lz::has_one(cstr));
+        CHECK(!lz::has_many(cstr));
+    }
+}
+
 TEST_CASE("CString binary operations", "[CString][Binary ops]") {
     const char* string = "123 456 789";
     auto c_string = lz::c_string(string);

@@ -26,6 +26,27 @@ TEST_CASE("Generate while changing and creating elements", "[Generate while][Bas
     }
 }
 
+TEST_CASE("Empty or one element generate while") {
+    SECTION("Empty") {
+        auto generator = lz::generate_while([]() { return std::make_pair(false, 0); });
+        CHECK(lz::empty(generator));
+        CHECK(!lz::has_one(generator));
+        CHECK(!lz::has_many(generator));
+    }
+
+    SECTION("One element") {
+        bool b = true;
+        auto generator = lz::generate_while([&b]() {
+            auto p = std::make_pair(b, 0);
+            b = false;
+            return p;
+        });
+        CHECK(!lz::empty(generator));
+        CHECK(lz::has_one(generator));
+        CHECK(!lz::has_many(generator));
+    }
+}
+
 TEST_CASE("Generate while binary operations", "[Generate while][Binary ops]") {
     auto generator = lz::generate_while(
         [](int& i) {

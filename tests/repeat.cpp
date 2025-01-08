@@ -41,6 +41,22 @@ TEST_CASE("repeat_iterable binary operations", "[repeat_iterable][Binary ops]") 
     }
 }
 
+TEST_CASE("Empty or one element repeat") {
+    SECTION("Empty") {
+        auto repeater = lz::repeat(20, 0);
+        CHECK(lz::empty(repeater));
+        CHECK(!lz::has_one(repeater));
+        CHECK(!lz::has_many(repeater));
+    }
+
+    SECTION("One element with result") {
+        auto repeater = lz::repeat(20, 1);
+        CHECK(!lz::empty(repeater));
+        CHECK(lz::has_one(repeater));
+        CHECK(!lz::has_many(repeater));
+    }
+}
+
 TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
     constexpr auto times = 5;
     const int to_repeat = 20;
