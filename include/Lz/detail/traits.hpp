@@ -60,22 +60,22 @@ using tup_element = std::tuple_element_t<I, T>;
 #endif // LZ_HAS_CXX_11
 
 template<class Iterable>
-constexpr decltype(std::forward<Iterable>(std::declval<Iterable>()).begin()) begin(Iterable&& c) noexcept;
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).begin());
 
 template<class Iterable>
-constexpr decltype(std::forward<Iterable>(std::declval<Iterable>()).end()) end(Iterable&& c) noexcept;
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).end());
 
 template<class T, size_t N>
-constexpr T* begin(T (&array)[N]) noexcept;
+LZ_NODISCARD constexpr auto begin(T (&array)[N]) noexcept -> decltype(std::begin(array));
 
 template<class T, size_t N>
-constexpr T* end(T (&array)[N]) noexcept;
+LZ_NODISCARD constexpr auto end(T (&array)[N]) noexcept -> decltype(std::end(array));
 
 template<class T, size_t N>
-constexpr const T* begin(const T (&array)[N]) noexcept;
+LZ_NODISCARD constexpr auto begin(const T (&array)[N]) noexcept -> decltype(std::begin(array));
 
 template<class T, size_t N>
-constexpr const T* end(const T (&array)[N]) noexcept;
+LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::end(array));
 
 } // namespace detail
 
@@ -271,14 +271,8 @@ using has_sentinel = std::is_same<iter_t<Iterable>, sentinel_t<Iterable>>;
  * @tparam Iterator The iterator type to select if @p Tag is not a `std::forward_iterator_tag`.
  * @tparam S The sentinel type to select if @p Tag is a `std::forward_iterator_tag`.
  */
-#ifdef LZ_HAS_CXX_11
-template<class Tag, class Iterator, class S = default_sentinel>
-using sentinel_selector = Iterator;
-#else
 template<class Tag, class Iterator, class S = default_sentinel>
 using sentinel_selector = detail::conditional<std::is_same<Tag, std::forward_iterator_tag>::value, S, Iterator>;
-#endif
-
 
 /**
  * @brief Is @p TagFrom convertible to @p TagTo? If so, return @p TagFrom, otherwise return @p ToDecay.

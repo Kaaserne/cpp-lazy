@@ -5,9 +5,6 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 
-// cxx 11 doesn't support sentinels, therefore, variant (for common_iterator and equivalents) is useless
-#ifndef LZ_HAS_CXX_11
-
 #if defined(__cpp_lib_variant) && defined(LZ_HAS_CXX_17)
 
 #include <variant>
@@ -201,7 +198,5 @@ T* get_if(variant<U, V>* t) {
 } // namespace lz
 
 #endif // !defined(__cpp_lib_variant) && !defined(LZ_HAS_CXX_17)
-
-#endif // LZ_HAS_CXX_11
 
 #endif // LZ_DETAIL_VARIANT_HPP

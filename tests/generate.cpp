@@ -2,6 +2,10 @@
 #include <catch2/catch.hpp>
 #include <list>
 
+#ifdef LZ_HAS_CXX_11
+#include <Lz/common.hpp>
+#endif // LZ_HAS_CXX_11
+
 TEST_CASE("Generate changing and creating elements", "[Generate][Basic functionality]") {
     auto compile_test = lz::generate([]() { return 0; });
     static_assert(!std::is_same<decltype(compile_test.begin()), decltype(compile_test.end())>::value, "Should be sentinel");
@@ -9,18 +13,19 @@ TEST_CASE("Generate changing and creating elements", "[Generate][Basic functiona
 
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
-    auto generator = lz::generate(
-        [](std::size_t& c) {
-            auto tmp{ c++ };
+    auto generator = lz::generate<std::function<int()>>(
+        [&counter]() {
+            auto tmp{ counter++ };
             return tmp;
         },
-        amount, counter);
+        amount);
 
     SECTION("Should be 0, 1, 2, 3") {
         std::size_t expected = 0;
-        for (std::size_t i : generator) {
-            CHECK(i == expected++);
-        }
+        generator.for_each([&expected](std::size_t i) {
+            CHECK(i == expected);
+            ++expected;
+        });
     }
 }
 
@@ -28,11 +33,11 @@ TEST_CASE("Generate binary operations", "[Generate][Binary ops]") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
     auto generator = lz::generate(
-        [](std::size_t& c) {
-            auto tmp{ c++ };
+        [&counter]() {
+            auto tmp{ counter++ };
             return tmp;
         },
-        amount, counter);
+        amount);
     auto begin = generator.begin();
 
     SECTION("Operator++") {
@@ -70,11 +75,11 @@ TEST_CASE("Generate to containers", "[Generate][To container]") {
     std::size_t counter = 0;
 
     auto generator = lz::generate(
-        [](std::size_t& c) {
-            auto tmp{ c++ };
+        [&counter]() {
+            auto tmp{ counter++ };
             return tmp;
         },
-        amount, counter);
+        amount);
 
     SECTION("To array") {
         auto array = generator.to<std::array<std::size_t, amount>>();

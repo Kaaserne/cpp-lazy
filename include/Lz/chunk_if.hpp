@@ -4,6 +4,7 @@
 #define LZ_CHUNK_IF_HPP
 
 #include <Lz/detail/iterators/chunk_if.hpp>
+// TODO make second arg always typename iter::sentinel in inheritance
 
 namespace lz {
 
@@ -11,7 +12,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class Iterator, class S, class UnaryPredicate>
 class chunk_if_iterable final
-    : public detail::basic_iterable<detail::chunk_if_iterator<Iterator, S, UnaryPredicate>, default_sentinel> {
+    : public detail::basic_iterable<detail::chunk_if_iterator<Iterator, S, UnaryPredicate>,
+                                    typename detail::chunk_if_iterator<Iterator, S, UnaryPredicate>::sentinel> {
 public:
     using iterator = detail::chunk_if_iterator<Iterator, S, UnaryPredicate>;
     using const_iterator = iterator;
@@ -20,7 +22,7 @@ public:
     constexpr chunk_if_iterable() = default;
 
     chunk_if_iterable(Iterator begin, S end, UnaryPredicate predicate) :
-        detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(predicate))) {
+        detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(predicate), begin == end)) {
     }
 };
 

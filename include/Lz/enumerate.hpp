@@ -29,16 +29,10 @@ private:
         detail::basic_iterable<iterator, iterator>(iterator(start, begin), iterator(static_cast<IntType>(end - begin), end)) {
     }
 
-#ifdef LZ_HAS_CXX_11
-    enumerate_iterable(Iterator begin, Iterator end, std::forward_iterator_tag /* unused */, const IntType start = 0) :
-        detail::basic_iterable<iterator, iterator>(iterator(start, begin), iterator(start, end)) {
-    }
-#else
     LZ_CONSTEXPR_CXX_20
     enumerate_iterable(Iterator begin, S end, std::forward_iterator_tag /* unused */, const IntType start = 0) :
         detail::basic_iterable<iterator, S>(iterator(start, std::move(begin)), std::move(end)) {
     }
-#endif
 
 public:
     LZ_CONSTEXPR_CXX_20 enumerate_iterable(Iterator begin, S end, const IntType start = 0) :

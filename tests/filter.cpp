@@ -150,9 +150,11 @@ TEST_CASE("Filter to container", "[Filter][To container]") {
 
     SECTION("To reverse container") {
         auto filtered = lz::filter(array, [](int i) { return i != 3; });
+        using iter = decltype(filtered)::iterator;
+        using sentinel = decltype(filtered.end());
 
-        auto it_rev = std::make_reverse_iterator(filtered.end());
-        auto end_rev = std::make_reverse_iterator(filtered.begin());
+        auto it_rev = std::reverse_iterator<iter>(filtered.end());
+        auto end_rev = std::reverse_iterator<sentinel>(filtered.begin());
         std::vector<int> reversed(it_rev, end_rev);
         std::vector<int> expected = { 2, 1 };
         CHECK(reversed == expected);

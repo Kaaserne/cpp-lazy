@@ -1,6 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <catch2/catch.hpp>
+#include <list>
 
 TEST_CASE("Basic common_iterable test") {
     const char* s = "hello, world!";

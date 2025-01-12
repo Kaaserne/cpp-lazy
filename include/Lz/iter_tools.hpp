@@ -33,6 +33,8 @@ struct convert_fn {
 
 template<std::size_t I>
 struct get_fn {
+    // TODO add const variant
+
     template<class T>
     LZ_CONSTEXPR_CXX_20 auto operator()(T&& gettable) noexcept -> decltype(std::get<I>(std::forward<T>(gettable))) {
         return std::get<I>(std::forward<T>(gettable));
@@ -40,12 +42,24 @@ struct get_fn {
 };
 
 template<class Iterable, std::size_t... N>
-auto pairwise_n_construct(Iterable&& iterable, std::index_sequence<N...>) {
-    using IterTuples = decltype(std::make_tuple(std::next(std::begin(iterable), N)...));
-    using SentinelTuples = decltype(std::make_tuple((N, std::end(iterable))...));
+using pairwise_n_iterable =
+    zip_iterable<std::tuple<decay_t<decltype(N, std::forward<iter_t<Iterable>>(std::declval<iter_t<Iterable>>()))>...>,
+                 std::tuple<decay_t<decltype(N, std::forward<sentinel_t<Iterable>>(std::declval<sentinel_t<Iterable>>()))>...>>;
 
-    return lz::zip_iterable<IterTuples, SentinelTuples>(std::make_tuple(std::next(std::begin(iterable), N)...),
-                                                        std::make_tuple((static_cast<void>(N), std::end(iterable))...));
+template<std::size_t N, class Iterator>
+enable_if<N == 0, decay_t<Iterator>> cached_next(Iterator&& iterator) {
+    return std::forward<Iterator>(iterator);
+}
+
+template<std::size_t N, class Iterator>
+enable_if<(N != 0), decay_t<Iterator>> cached_next(Iterator&& iterator) {
+    return std::next(cached_next<N - 1>(iterator));
+}
+
+template<class Iterable, std::size_t... N>
+pairwise_n_iterable<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) {
+    auto cached_iter = std::begin(iterable);
+    return { std::make_tuple(cached_next<N>(cached_iter)...), std::make_tuple((static_cast<void>(N), std::end(iterable))...) };
 }
 } // namespace detail
 
@@ -118,7 +132,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 zip_with_iterable<Fn, Iterables...> zip_with(Fn
 }
 
 template<class Iterable, std::size_t N>
-using pairwise_iterable = decltype(detail::pairwise_n_construct(std::declval<Iterable>(), detail::make_index_sequence<N>()));
+using pairwise_iterable =
+    decltype(detail::pairwise_n_construct(std::forward<Iterable>(std::declval<Iterable>()), detail::make_index_sequence<N>()));
 
 /**
  * @brief Returns an iterable that accesses N adjacent elements of one container in a std::tuple<T, ...> like fashion.

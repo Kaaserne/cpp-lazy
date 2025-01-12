@@ -11,23 +11,19 @@
 
 namespace lz {
 namespace detail {
-template<class GeneratorFunc, class... Args>
-using generate_while_ref = tup_element<1, tuple_invoker_ret<GeneratorFunc, Args...>>;
 
-template<class GeneratorFunc, class... Args>
+template<class GeneratorFunc>
 class generate_while_iterator
-    : public iter_base<generate_while_iterator<GeneratorFunc, Args...>, generate_while_ref<GeneratorFunc, Args...>,
-                       fake_ptr_proxy<generate_while_ref<GeneratorFunc, Args...>>, std::ptrdiff_t, std::forward_iterator_tag,
+    : public iter_base<generate_while_iterator<GeneratorFunc>, tup_element<1, func_ret_type<GeneratorFunc>>,
+                       fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::forward_iterator_tag,
                        default_sentinel> {
 
-    std::tuple<Args...> _args;
+    using fn_return_type = func_ret_type<GeneratorFunc>;
 
-    using fn_return_type = tuple_invoker_ret<GeneratorFunc, Args...>;
-    tuple_invoker<GeneratorFunc, Args...> _tuple_invoker;
+    func_container<GeneratorFunc> _func;
     fn_return_type _last_returned;
 
 public:
-    using iterator_category = std::forward_iterator_tag;
     using reference = tup_element<1, fn_return_type>;
     using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;
@@ -35,10 +31,9 @@ public:
 
     constexpr generate_while_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 generate_while_iterator(GeneratorFunc generator_func, std::tuple<Args...> args) :
-        _args(std::move(args)),
-        _tuple_invoker(make_expand_fn(std::move(generator_func), make_index_sequence<sizeof...(Args)>())),
-        _last_returned(_tuple_invoker(_args)) {
+    LZ_CONSTEXPR_CXX_14 generate_while_iterator(GeneratorFunc generator_func) :
+        _func(std::move(generator_func)),
+        _last_returned(_func()) {
     }
 
     LZ_NODISCARD constexpr reference dereference() const {
@@ -50,7 +45,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        _last_returned = _tuple_invoker(_args);
+        _last_returned = _func();
     }
 
     LZ_NODISCARD constexpr bool eq(const generate_while_iterator&) const noexcept {

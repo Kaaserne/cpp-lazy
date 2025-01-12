@@ -10,16 +10,16 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<class GeneratorFunc, class... Args>
+template<class GeneratorFunc>
 class generate_while_iterable final
-    : public detail::basic_iterable<detail::generate_while_iterator<GeneratorFunc, Args...>, default_sentinel> {
+    : public detail::basic_iterable<detail::generate_while_iterator<GeneratorFunc>, default_sentinel> {
 public:
-    using iterator = detail::generate_while_iterator<GeneratorFunc, Args...>;
+    using iterator = detail::generate_while_iterator<GeneratorFunc>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr generate_while_iterable(GeneratorFunc func, std::tuple<Args...> tuple) :
-        detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(func), std::move(tuple))) {
+    constexpr generate_while_iterable(GeneratorFunc func) :
+        detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(func))) {
     }
 
     constexpr generate_while_iterable() = default;
@@ -38,25 +38,22 @@ public:
  * `false`/something that is convertible to `false`, it doesn't). The type that is returned by `object::second` can be any type.
  * Example:
  * ```cpp
- * auto vector = lz::generate_while([](int& i) { return std::make_pair(i == 4, i++); }, 0).to_vector();
+ * auto vector = lz::generate_while([i = 0]() mutable { return std::make_pair(i == 4, i++); }).to_vector();
  * // vector yields: { 0, 1, 2, 3 }
  * ```
  * @param generator_func The function to execute any amount of times as long as it returns a pair of `{true/boolean like value,
  * <some_value>}`.
- * @param args Args to pass (they are copied) to the function @p generator_func. Arguments of the @p generator_func can be
- * accessed by (const) reference as seen in the example above
  * @return A generator iterator view object.
  */
-template<class GeneratorFunc, class... Args>
-LZ_NODISCARD constexpr generate_while_iterable<detail::decay_t<GeneratorFunc>, detail::decay_t<Args>...>
-generate_while(GeneratorFunc&& generator_func, Args&&... args) {
-    using Pair = decltype(generator_func(args...));
-    using PairFirst = decltype(std::get<0>(std::declval<Pair>()));
+template<class GeneratorFunc>
+LZ_NODISCARD constexpr generate_while_iterable<detail::decay_t<GeneratorFunc>> generate_while(GeneratorFunc&& generator_func) {
+    using pair = decltype(generator_func());
+    using pair_first = decltype(std::get<0>(std::declval<pair>()));
 
-    static_assert(std::is_convertible<detail::decay_t<PairFirst>, bool>::value,
+    static_assert(std::is_convertible<detail::decay_t<pair_first>, bool>::value,
                   "Function must return a std::pair compatible object (i.e. object::first, object::second), where object::first "
                   "returns a bool like object.");
-    return { std::forward<GeneratorFunc>(generator_func), std::make_tuple(std::forward<Args>(args)...) };
+    return { std::forward<GeneratorFunc>(generator_func) };
 }
 
 // End of group

@@ -8,14 +8,6 @@ TEST_CASE("Basic test") {
     auto cstr = lz::c_string(s);
     auto cstr_hello = lz::c_string(s, s + 5);
 
-    SECTION("Correct size") {
-        auto size = cstr.size();
-        CHECK(size == std::strlen(s));
-
-        auto hello_size = cstr_hello.size();
-        CHECK(hello_size == std::strlen("hello"));
-    }
-
     SECTION("Correct string") {
         CHECK(lz::equal(cstr_hello, lz::c_string("hello")));
         CHECK(lz::equal(cstr, lz::c_string("hello, world!")));
@@ -101,15 +93,12 @@ TEST_CASE("CString binary operations", "[CString][Binary ops]") {
     }
 
     SECTION("Operator bool") {
-        CHECK(c_string);
         CHECK(c_string.begin());
-        CHECK(c_str_random_access);
         CHECK(c_str_random_access.begin());
 
         CHECK(c_str_random_access.end());
 
         auto tmp = lz::c_string("");
-        CHECK(!tmp);
         CHECK(!tmp.begin());
     }
 }

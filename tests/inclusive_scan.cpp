@@ -6,7 +6,8 @@
 #include <numeric>
 
 TEST_CASE("Inclusive scan with sentinels") {
-    auto generator = lz::generate([](int i) { return i; }, 10, 1);
+    int x = 1;
+    auto generator = lz::generate([x]() { return x; }, 10);
     auto scan = lz::inclusive_scan(generator);
     static_assert(!std::is_same<decltype(scan.begin()), decltype(scan.end())>::value, "Should be sentinel");
     auto begin = scan.begin();

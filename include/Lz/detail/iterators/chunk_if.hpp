@@ -66,7 +66,7 @@ private:
 public:
     constexpr chunk_if_iterator() = default;
 
-    chunk_if_iterator(Iterator iterator, S end, UnaryPredicate predicate) :
+    chunk_if_iterator(Iterator iterator, S end, UnaryPredicate predicate, bool is_empty) :
         _sub_range_begin(iterator),
         _sub_range_end(std::move(iterator)),
         _end(std::move(end)),
@@ -74,7 +74,7 @@ public:
         if (_sub_range_begin != _end) {
             find_next();
         }
-        else {
+        if (is_empty) {
             _trailing_empty = false;
         }
     }

@@ -54,7 +54,7 @@ struct deref {
 };
 
 template<class Tuple, class SentinelTuple, std::size_t I>
-struct deref<SentinelTuple, I, enable_if<I == std::tuple_size<Tuple>::value - 1>> {
+struct deref<Tuple, SentinelTuple, I, enable_if<I == std::tuple_size<Tuple>::value - 1>> {
     LZ_CONSTEXPR_CXX_20 auto operator()(const Tuple& iterators, const SentinelTuple&) const -> decltype(*std::get<I>(iterators)) {
         return *std::get<I>(iterators);
     }
@@ -289,7 +289,7 @@ public:
 
 private:
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>, const concatenate_iterator& other) const {
+    LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence_helper<I...>, const concatenate_iterator& other) const {
         const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
                                                                         std::get<I>(other._iterators))... };
         return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });

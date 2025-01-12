@@ -15,15 +15,9 @@ class concatenate_iterable final
     : public detail::basic_iterable<detail::concatenate_iterator<IterTuple, SentinelTuple>,
                                     typename detail::concatenate_iterator<IterTuple, SentinelTuple>::sentinel> {
 
-#ifdef LZ_HAS_CXX_11
-    concatenate_iterable(IterTuple begin, SentinelTuple end, std::forward_iterator_tag /* unused */) :
-        detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(end, begin, end)) {
-    }
-#else
     constexpr concatenate_iterable(IterTuple begin, SentinelTuple end, std::forward_iterator_tag /* unused */) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(begin, begin, end)) {
     }
-#endif
 
     constexpr concatenate_iterable(IterTuple begin, SentinelTuple end, std::bidirectional_iterator_tag /* unused */) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(end, begin, end)) {

@@ -1,5 +1,6 @@
-#include <Lz/group_by.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/common.hpp>
+#include <Lz/group_by.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 
@@ -44,13 +45,14 @@ TEST_CASE("group_by changing and creating elements", "[group_by][Basic functiona
     SECTION("Should be correct chunks") {
         std::size_t str_len = 3;
 
-        for (auto&& g : grouper) {
+        using value_type = lz::val_iterable_t<decltype(grouper)>;
+        grouper.for_each([&str_len](const value_type& g) {
             CHECK(g.first.length() == str_len);
-            for (auto& str : g.second) {
+            for (const auto& str : g.second) {
                 CHECK(str.length() == str_len);
             }
             ++str_len;
-        }
+        });
     }
 
     SECTION("Should be by ref") {

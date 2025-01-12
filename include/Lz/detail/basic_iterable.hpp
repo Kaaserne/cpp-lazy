@@ -44,6 +44,7 @@ void stringify(const Iterable& iterable, std::ostream& out, std::string delimite
         return;
     }
 
+    using value_type = val_iterable_t<Iterable>;
 #ifndef LZ_STANDALONE
 
 #if FMT_VERSION >= 90000
@@ -59,9 +60,9 @@ void stringify(const Iterable& iterable, std::ostream& out, std::string delimite
 
 #if FMT_VERSION >= 90000
     detail::for_each(std::move(it), std::move(end),
-                     [&out, &fmt](const auto& v) { fmt::format_to(out, fmt::runtime(fmt.c_str()), v); });
+                     [&out, &fmt](const value_type& v) { fmt::format_to(out, fmt::runtime(fmt.c_str()), v); });
 #else
-    detail::for_each(std::move(it), std::move(end), [&out, &fmt](const auto& v) { fmt::format_to(out, fmt.c_str(), v); });
+    detail::for_each(std::move(it), std::move(end), [&out, &fmt](const value_type& v) { fmt::format_to(out, fmt.c_str(), v); });
 #endif // FMT_VERSION >= 90000
 
 #elif defined(LZ_HAS_FORMAT) && defined(LZ_STANDALONE)
@@ -69,16 +70,16 @@ void stringify(const Iterable& iterable, std::ostream& out, std::string delimite
     ++it;
     delimiter.append(fmt.data(), fmt.size());
     fmt = std::move(delimiter);
-    detail::for_each(std::move(it), std::move(end), [&out, &fmt](const auto& v) { std::format_to(out, fmt.c_str(), v); });
+    detail::for_each(std::move(it), std::move(end), [&out, &fmt](const value_type& v) { std::format_to(out, fmt.c_str(), v); });
 #else
 // clang-format off
     out << *it;
     ++it;
-    detail::for_each(std::move(it), std::move(end), [&out, &delimiter](const auto& v) {
+    detail::for_each(std::move(it), std::move(end), [&out, &delimiter](const value_type& v) {
         out << delimiter;
         out << v;
     });
-// clang-format on
+    // clang-format on
 #endif
 }
 
@@ -137,13 +138,12 @@ private:
     }
 #else
     template<class T>
-    auto inserter_for(T&& container)
-        -> enable_if<!is_array<decay_t<T>>::value, decltype(std::inserter(container, container.begin()))> {
+    enable_if<!is_array<decay_t<T>>::value, std::insert_iterator<decay_t<T>>> inserter_for(T&& container) const {
         return std::inserter(container, container.begin());
     }
 
     template<class T>
-    auto inserter_for(T&& container) -> enable_if<is_array<decay_t<T>>::value, decltype(std::begin(container))> {
+    enable_if<is_array<decay_t<T>>::value, decltype(std::begin(std::declval<T>()))> inserter_for(T&& container) const {
         return std::begin(container);
     }
 #endif // __cpp_if_constexpr
@@ -337,6 +337,11 @@ public:
         stringify(it, o, ", ");
 #endif
         return o;
+    }
+
+    template<class UnaryOp>
+    void for_each(UnaryOp&& unary_op) const {
+        lz::for_each(*this, std::forward<UnaryOp>(unary_op));
     }
 
     /**

@@ -6,7 +6,8 @@
 #include <numeric>
 
 TEST_CASE("Exclusive scan with sentinels") {
-    auto generator = lz::generate([](int& i) { return i++; }, 5, 0);
+    int i = 0;
+    auto generator = lz::generate([&i]() { return i++; }, 5);
     auto scan = lz::exclusive_scan(generator, 0);
     auto expected = { 0, 0, 1, 3, 6 };
     CHECK(lz::equal(scan, expected));

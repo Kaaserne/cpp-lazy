@@ -10,19 +10,17 @@
 
 namespace lz {
 namespace detail {
-template<class GeneratorFunc, class... Args>
-class generate_iterator : public iter_base<generate_iterator<GeneratorFunc, Args...>, tuple_invoker_ret<GeneratorFunc, Args...>,
-                                           fake_ptr_proxy<tuple_invoker_ret<GeneratorFunc, Args...>>, std::ptrdiff_t,
+template<class GeneratorFunc>
+class generate_iterator : public iter_base<generate_iterator<GeneratorFunc>, func_container_ret_type<GeneratorFunc>,
+                                           fake_ptr_proxy<func_container_ret_type<GeneratorFunc>>, std::ptrdiff_t,
                                            std::forward_iterator_tag, default_sentinel> {
 
-    mutable std::tuple<Args...> _args;
+    mutable func_container<GeneratorFunc> _func;
     std::size_t _current;
-    mutable tuple_invoker<GeneratorFunc, Args...> _tupleInvoker;
     bool _is_inf_loop;
 
 public:
-    using iterator_category = std::forward_iterator_tag;
-    using reference = tuple_invoker_ret<GeneratorFunc, Args...>;
+    using reference = func_container_ret_type<GeneratorFunc>;
     using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
@@ -30,15 +28,14 @@ public:
     constexpr generate_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14
-    generate_iterator(const std::size_t amount, GeneratorFunc generator_func, const bool is_inf_loop, std::tuple<Args...> args) :
-        _args(std::move(args)),
+    generate_iterator(const std::size_t amount, GeneratorFunc generator_func, const bool is_inf_loop) :
+        _func(std::move(generator_func)),
         _current(amount),
-        _tupleInvoker(make_expand_fn(std::move(generator_func), make_index_sequence<sizeof...(Args)>())),
         _is_inf_loop(is_inf_loop) {
     }
 
     LZ_NODISCARD constexpr reference dereference() const {
-        return _tupleInvoker(_args);
+        return _func();
     }
 
     LZ_NODISCARD constexpr pointer arrow() const {

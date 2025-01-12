@@ -2,8 +2,8 @@
 #include <Lz/flatten.hpp>
 #include <Lz/iter_tools.hpp>
 #include <catch2/catch.hpp>
+#include <forward_list>
 #include <list>
-
 
 TEST_CASE("Flatten with sentinels") {
     using c_string = decltype(lz::c_string(""));

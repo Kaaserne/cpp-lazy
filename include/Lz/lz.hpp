@@ -70,21 +70,21 @@ LZ_CONSTEXPR_CXX_20 chain_iterable<iter_t<Iterable>, sentinel_t<Iterable>> chain
 
 template<class Iterator, class S = Iterator>
 class chain_iterable final : public detail::basic_iterable<Iterator, S> {
-    using Base = detail::basic_iterable<Iterator, S>;
-    using Traits = std::iterator_traits<Iterator>;
+    using base = detail::basic_iterable<Iterator, S>;
+    using traits = std::iterator_traits<Iterator>;
 
 public:
-    using detail::basic_iterable<Iterator, S>::begin;
-    using detail::basic_iterable<Iterator, S>::end;
+    using base::begin;
+    using base::end;
 
     using iterator = Iterator;
     using const_iterator = iterator;
-    using difference_type = typename Traits::difference_type;
+    using difference_type = typename traits::difference_type;
 
-    using value_type = typename Traits::value_type;
-    using reference = typename Traits::reference;
+    using value_type = typename traits::value_type;
+    using reference = typename traits::reference;
 
-    LZ_CONSTEXPR_CXX_20 chain_iterable(Iterator b, S e) : Base(std::move(b), std::move(e)) {
+    LZ_CONSTEXPR_CXX_20 chain_iterable(Iterator b, S e) : base(std::move(b), std::move(e)) {
     }
 
     LZ_CONSTEXPR_CXX_20 chain_iterable() = default;
@@ -188,12 +188,12 @@ public:
         return chain(lz::reverse(*this));
     }
 
-    using chain_iterator = detail::zip_iterator<std::tuple<Iterator, Iterator>, std::tuple<S, S>>;
+    // using chain_iterator = pairwise_iterable<chain_iterable<Iterator, S>, 2>;
 
-    //! See iter_tools.hpp `reverse` for documentation.
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<chain_iterator> pairwise() const {
-        return chain(lz::pairwise(*this));
-    }
+    // //! See iter_tools.hpp `pairwise` for documentation.
+    // LZ_NODISCARD LZ_CONSTEXPR_CXX_20 chain_iterable<chain_iterator> pairwise() const {
+    //     return chain(lz::pairwise(*this));
+    // }
 
     template<class... Iterables>
     using cartesian_product_iterator =
@@ -558,7 +558,7 @@ public:
     template<class BinaryPredicate = MAKE_BIN_PRED(std::less, value_type)>
     LZ_CONSTEXPR_CXX_20 chain_iterable<Iterator, S>& sort(BinaryPredicate binary_predicate = {}) {
         // Use std sort, it needs to be random access iterator anyway
-        std::sort(Base::begin(), Base::end(), std::move(binary_predicate));
+        std::sort(begin(), end(), std::move(binary_predicate));
         return *this;
     }
 

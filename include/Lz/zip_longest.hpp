@@ -17,6 +17,7 @@ class zip_longest_iterable final
 public:
     using iterator = detail::zip_longest_iterator<IsRa::value, IterTuple, SentinelTuple>;
     using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
 
 private:
     static_assert(std::tuple_size<IterTuple>::value > 0, "Cannot create zip longest object with 0 iterators");
@@ -31,11 +32,6 @@ private:
     }
 
 public:
-    using iterator = detail::zip_longest_iterator<IsRa::value, IterTuple, SentinelTuple>;
-    using const_iterator = iterator;
-
-    using value_type = typename iterator::value_type;
-
     LZ_CONSTEXPR_CXX_20
     zip_longest_iterable(IterTuple begin, SentinelTuple end) : zip_longest_iterable(std::move(begin), std::move(end), IsRa{}) {
     }

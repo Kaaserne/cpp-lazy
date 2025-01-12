@@ -14,12 +14,9 @@ template<class Iterator, class S>
 class loop_iterable final
     : public detail::basic_iterable<detail::loop_iterator<Iterator, S>, typename detail::loop_iterator<Iterator, S>::sentinel> {
 
-#ifdef LZ_HAS_CXX_11
-#else
     loop_iterable(Iterator begin, S end, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(begin), std::move(end))) {
     }
-#endif
 
     loop_iterable(Iterator begin, S end, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(end, begin, end)) {

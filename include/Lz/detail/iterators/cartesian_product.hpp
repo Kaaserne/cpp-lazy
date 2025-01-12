@@ -235,12 +235,12 @@ private:
 #endif // __cpp_if_constexpr
 
     template<std::size_t... Is>
-    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence<Is...>) const {
+    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence_helper<Is...>) const {
         return reference{ *std::get<Is>(_iterator)... };
     }
 
     template<std::size_t... Is>
-    LZ_CONSTEXPR_CXX_20 difference_type distance_impl(index_sequence<Is...>, const cartesian_product_iterator& c) const {
+    LZ_CONSTEXPR_CXX_20 difference_type distance_impl(index_sequence_helper<Is...>, const cartesian_product_iterator& c) const {
         const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(c._iterator) -
                                                                            std::get<Is>(_iterator))... };
         return std::accumulate(std::begin(distances), std::end(distances), difference_type{ 1 },

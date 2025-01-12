@@ -7,9 +7,6 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/iterators/common.hpp>
 
-// cxx 11 doesn't support sentinels, therefore, common_iterable is useless
-#ifndef LZ_HAS_CXX_11
-
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
@@ -53,7 +50,5 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 common_iterable<iter_t<Iterable>, sentinel_t<It
 
 LZ_MODULE_EXPORT_SCOPE_END
 } // namespace lz
-
-#endif // LZ_HAS_CXX_11
 
 #endif

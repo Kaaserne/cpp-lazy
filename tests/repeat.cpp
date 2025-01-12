@@ -3,16 +3,20 @@
 #include <catch2/catch.hpp>
 #include <list>
 
+#ifdef LZ_HAS_CXX_11
+#include <Lz/common.hpp>
+#endif // LZ_HAS_CXX_11
+
 TEST_CASE("repeat_iterable changing and creating elements", "[repeat_iterable][Basic functionality]") {
     int to_repeat = 20;
     auto repeater = lz::repeat(to_repeat, 5);
 
     SECTION("Should be 5 times 20") {
         std::size_t counter = 0;
-        for (int i : repeater) {
-            CHECK(i == 20);
+        repeater.for_each([&counter, to_repeat](int i) {
+            CHECK(i == to_repeat);
             ++counter;
-        }
+        });
         CHECK(counter == 5);
     }
 

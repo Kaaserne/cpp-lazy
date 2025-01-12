@@ -61,6 +61,12 @@ public:
         }
     }
 
+    LZ_CONSTEXPR_CXX_14 optional(const optional<T>& right) noexcept {
+        if (right) {
+            construct(right.value());
+        }
+    }
+
     ~optional() {
         if LZ_CONSTEXPR_IF (std::is_trivially_destructible<T>::value) {
             return;

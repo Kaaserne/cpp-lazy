@@ -1,14 +1,19 @@
 #include <Lz/iter_tools.hpp>
 #include <catch2/catch.hpp>
 
+#ifdef LZ_HAS_CXX_11
+#include <Lz/common.hpp>
+#endif
+
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
     auto actual = lz::lines(lz::c_string("hello world\nthis is a message\ntesting"));
     CHECK(actual.distance() == 3);
 
-    for (const auto& act_exp : lz::zip(actual, expected)) {
-        CHECK(lz::equal(std::get<0>(act_exp), std::get<1>(act_exp)));
-    }
+    auto iterable = lz::zip(actual, expected);
+    using value_type = lz::val_iterable_t<decltype(iterable)>;
+
+    iterable.for_each([](const value_type& act_exp) { CHECK(lz::equal(std::get<0>(act_exp), std::get<1>(act_exp))); });
 }
 
 TEST_CASE("Unlines") {

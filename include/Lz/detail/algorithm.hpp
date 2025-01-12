@@ -149,11 +149,11 @@ search(Iterator begin, S end, Iter2 begin2, S2 end2, BinaryPredicate binary_pred
             ++it2;
         }
         if (it2 == end2) {
-            return begin;
+            return { begin, it };
         }
         ++begin;
     }
-    return begin;
+    return { begin, begin };
 }
 
 template<class Iterator, class S, class Iter2, class S2, class BinaryPredicate>

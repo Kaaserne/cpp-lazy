@@ -503,7 +503,7 @@ LZ_CONSTEXPR_CXX_20 void transform(Iterable&& iterable, OutputIterator output, U
  * @return true if both are equal, false otherwise.
  */
 template<class IterableA, class IterableB, class BinaryPredicate = MAKE_BIN_PRED(std::equal_to, val_iterable_t<IterableA>)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool equal(const IterableA& a, const IterableB& b, BinaryPredicate binary_predicate = {}) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool equal(IterableA&& a, IterableB&& b, BinaryPredicate binary_predicate = {}) {
     using detail::equal;
     using std::equal;
     return equal(std::begin(a), std::end(a), std::begin(b), std::end(b), std::move(binary_predicate));

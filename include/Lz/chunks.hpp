@@ -18,15 +18,9 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-#ifdef LZ_HAS_CXX_11
-    constexpr chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::forward_iterator_tag) :
-        detail::basic_iterable<iterator>(iterator(begin, begin, end, chunk_size), iterator(end, begin, end, chunk_size)) {
-    }
-#else
     constexpr chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), chunk_size)) {
     }
-#endif
 
     constexpr chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end, chunk_size), iterator(end, begin, end, chunk_size)) {

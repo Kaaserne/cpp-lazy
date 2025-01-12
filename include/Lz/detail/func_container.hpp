@@ -125,12 +125,13 @@ public:
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) const -> decltype(_func(std::forward<Args>(args)...)) {
+    LZ_CONSTEXPR_CXX_14 decltype(std::declval<Func>()(std::forward<Args>(std::declval<Args>())...))
+    operator()(Args&&... args) const {
         return _func(std::forward<Args>(args)...);
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) -> decltype(_func(std::forward<Args>(args)...)) {
+    LZ_CONSTEXPR_CXX_14 decltype(std::declval<Func>()(std::forward<Args>(std::declval<Args>())...)) operator()(Args&&... args) {
         return _func(std::forward<Args>(args)...);
     }
 };

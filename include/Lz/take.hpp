@@ -20,25 +20,16 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-#ifdef LZ_HAS_CXX_11
-    LZ_CONSTEXPR_CXX_20
-    take_iterable(Iterator begin, typename iterator::difference_type n, std::forward_iterator_tag /*unused*/) :
-        detail::basic_iterable<iterator>(iterator(begin, n), iterator(begin, 0)) {
-    }
-#else
-    LZ_CONSTEXPR_CXX_20
-    take_iterable(Iterator begin, typename iterator::difference_type n, std::forward_iterator_tag /*unused*/) :
+    constexpr take_iterable(Iterator begin, typename iterator::difference_type n, std::forward_iterator_tag /*unused*/) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), n)) {
     }
-#endif
 
-    LZ_CONSTEXPR_CXX_20
-    take_iterable(Iterator begin, typename iterator::difference_type n, std::random_access_iterator_tag /*unused*/) :
+    constexpr take_iterable(Iterator begin, typename iterator::difference_type n, std::random_access_iterator_tag /*unused*/) :
         detail::basic_iterable<iterator>(iterator(begin, n), iterator(begin + n, 0)) {
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 take_iterable(Iterator begin, typename iterator::difference_type n) :
+    constexpr take_iterable(Iterator begin, typename iterator::difference_type n) :
         take_iterable(std::move(begin), n, iter_cat_t<Iterator>{}) {
     }
 
@@ -61,7 +52,7 @@ public:
  * @return A take_iterable object containing the first `n` elements.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 take_iterable<iter_t<Iterable>> take(Iterable&& iterable, const diff_iterable_t<Iterable> n) {
+LZ_NODISCARD constexpr take_iterable<iter_t<Iterable>> take(Iterable&& iterable, const diff_iterable_t<Iterable> n) {
     return take_iterable<iter_t<Iterable>>(detail::begin(std::forward<Iterable>(iterable)), n);
 }
 

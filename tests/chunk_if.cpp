@@ -32,8 +32,8 @@ TEST_CASE("Empty or one element chunk_if") {
         std::string s = ";";
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
         CHECK(!lz::empty(chunked));
-        CHECK(lz::has_one(chunked));
-        CHECK(!lz::has_many(chunked));
+        CHECK(!lz::has_one(chunked));
+        CHECK(lz::has_many(chunked));
     }
 
     SECTION("One element that does not satisfy predicate") {

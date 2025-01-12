@@ -6,10 +6,10 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/traits.hpp>
-#include <array> // std::get
 #include <cstddef>
 #include <iterator>
 #include <limits>
+#include <tuple>
 
 #ifndef NDEBUG
 #include <exception>
@@ -49,32 +49,32 @@ namespace detail {
 #define LZ_ASSERT(CONDITION, MSG) ((CONDITION) ? ((void)0) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG)))
 
 template<class Iterable>
-constexpr decltype(std::forward<Iterable>(std::declval<Iterable>()).begin()) begin(Iterable&& c) noexcept {
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).begin()) {
     return std::forward<Iterable>(c).begin();
 }
 
 template<class Iterable>
-constexpr decltype(std::forward<Iterable>(std::declval<Iterable>()).end()) end(Iterable&& c) noexcept {
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).end()) {
     return std::forward<Iterable>(c).end();
 }
 
 template<class T, size_t N>
-constexpr T* begin(T (&array)[N]) noexcept {
+LZ_NODISCARD constexpr auto begin(T (&array)[N]) noexcept -> decltype(std::begin(array)) {
     return std::begin(array);
 }
 
 template<class T, size_t N>
-constexpr T* end(T (&array)[N]) noexcept {
+LZ_NODISCARD constexpr auto end(T (&array)[N]) noexcept -> decltype(std::end(array)) {
     return std::end(array);
 }
 
 template<class T, size_t N>
-constexpr const T* begin(const T (&array)[N]) noexcept {
+LZ_NODISCARD constexpr auto begin(const T (&array)[N]) noexcept -> decltype(std::begin(array)) {
     return std::begin(array);
 }
 
 template<class T, size_t N>
-constexpr const T* end(const T (&array)[N]) noexcept {
+LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::end(array)) {
     return std::end(array);
 }
 
@@ -83,22 +83,19 @@ struct tuple_expand {
 private:
     func_container<Fn> _fn;
 
-    template<class Tuple>
-    using value_type = decltype(_fn(std::get<I>(std::forward<Tuple>(std::declval<Tuple>()))...));
-
 public:
     constexpr tuple_expand() = default;
 
     explicit constexpr tuple_expand(Fn fn) : _fn(std::move(fn)) {
     }
 
-    template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 value_type<Tuple> operator()(Tuple&& tuple) {
-        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
-    }
+    // template<class Tuple>
+    // constexpr auto operator()(Tuple&& tuple) -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
+    //     return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
+    // }
 
     template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 value_type<Tuple> operator()(Tuple&& tuple) const {
+    constexpr auto operator()(Tuple&& tuple) const -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
         return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
     }
 };

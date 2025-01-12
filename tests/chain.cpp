@@ -1,4 +1,4 @@
-#include <Lz/Lz.hpp>
+#include <Lz/lz.hpp>
 #include <algorithm>
 #include <catch2/catch.hpp>
 #include <cctype>

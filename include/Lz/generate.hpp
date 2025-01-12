@@ -10,23 +10,16 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<class GeneratorFunc, class... Args>
-class generate_iterable final
-    : public detail::basic_iterable<detail::generate_iterator<GeneratorFunc, Args...>, default_sentinel> {
+template<class GeneratorFunc>
+class generate_iterable final : public detail::basic_iterable<detail::generate_iterator<GeneratorFunc>, default_sentinel> {
 public:
-    using iterator = detail::generate_iterator<GeneratorFunc, Args...>;
+    using iterator = detail::generate_iterator<GeneratorFunc>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-#ifdef LZ_HAS_CXX_11
-    constexpr generate_iterable(GeneratorFunc func, const std::size_t amount, const bool is_inf_loop, std::tuple<Args...> tuple) :
-        detail::basic_iterable<iterator>(iterator(amount, func, is_inf_loop, tuple), iterator(0, func, is_inf_loop, tuple)) {
+    constexpr generate_iterable(GeneratorFunc func, const std::size_t amount, const bool is_inf_loop) :
+        detail::basic_iterable<iterator, default_sentinel>(iterator(amount, std::move(func), is_inf_loop)) {
     }
-#else
-    constexpr generate_iterable(GeneratorFunc func, const std::size_t amount, const bool is_inf_loop, std::tuple<Args...> tuple) :
-        detail::basic_iterable<iterator, default_sentinel>(iterator(amount, std::move(func), is_inf_loop, std::move(tuple))) {
-    }
-#endif
 
     constexpr generate_iterable() = default;
 };
@@ -52,11 +45,10 @@ public:
  * @param args Args to pass to the function @p generator_func
  * @return A generator iterator view object.
  */
-template<class GeneratorFunc, class... Args>
-LZ_NODISCARD constexpr generate_iterable<detail::decay_t<GeneratorFunc>, detail::decay_t<Args>...>
-generate(GeneratorFunc&& generator_func, const std::size_t amount = (std::numeric_limits<std::size_t>::max)(), Args&&... args) {
-    return { std::forward<GeneratorFunc>(generator_func), amount, amount == (std::numeric_limits<std::size_t>::max)(),
-             std::make_tuple(std::forward<Args>(args)...) };
+template<class GeneratorFunc>
+LZ_NODISCARD constexpr generate_iterable<detail::decay_t<GeneratorFunc>>
+generate(GeneratorFunc&& generator_func, const std::size_t amount = (std::numeric_limits<std::size_t>::max)()) {
+    return { std::forward<GeneratorFunc>(generator_func), amount, amount == (std::numeric_limits<std::size_t>::max)() };
 }
 
 // End of group

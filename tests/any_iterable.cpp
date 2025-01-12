@@ -1,4 +1,4 @@
-#include <Lz/Lz.hpp>
+#include <Lz/lz.hpp>
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>

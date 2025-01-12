@@ -1,8 +1,14 @@
+#include <Lz/c_string.hpp>
+#include <Lz/common.hpp>
 #include <Lz/except.hpp>
 #include <Lz/range.hpp>
-#include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+
+template<class Iterable>
+lz::iter_t<Iterable> cheese(Iterable&& it) {
+    return lz::detail::begin(it);
+}
 
 TEST_CASE("Except tests with sentinels") {
     const char* str = "Hello, World!";
@@ -37,8 +43,8 @@ TEST_CASE("Empty or one element except") {
         std::string a;
         std::string b = "w";
         auto except = lz::except(a, b);
-        CHECK(!lz::empty(except));
-        CHECK(lz::has_one(except));
+        CHECK(lz::empty(except));
+        CHECK(!lz::has_one(except));
         CHECK(!lz::has_many(except));
     }
 
@@ -77,9 +83,12 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
         std::array<int, es> to_large_except = lz::range(static_cast<int>(es)).to<std::array<int, es>>();
 
         auto ex = lz::except(large_arr, to_large_except);
-        for (int i : ex) {
-            static_cast<void>(i);
-        }
+        auto current = 16;
+        ex.for_each([&current](int i) {
+            CHECK(i == current);
+            ++current;
+        });
+        current = 0;
     }
 
     SECTION("Excepts elements") {

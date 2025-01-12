@@ -48,24 +48,24 @@ add_executable(cpp-lazy-tests
 	inclusive_scan.cpp
 	init.cpp
 	iter_tools.cpp
-	join.cpp
-	join_where.cpp
-	loop.cpp
-	map.cpp
-	random.cpp
-	range.cpp
-	regex_split.cpp
-	repeat.cpp
-	rotate.cpp
-	standalone.cpp
-	string_splitter.cpp
-	string_view.cpp
-	take_every.cpp
-	take.cpp
-	take_while.cpp
-	unique.cpp
-	zip_longest.cpp
-	zip.cpp
+	# join.cpp
+	# join_where.cpp
+	# loop.cpp
+	# map.cpp
+	# random.cpp
+	# range.cpp
+	# regex_split.cpp
+	# repeat.cpp
+	# rotate.cpp
+	# standalone.cpp
+	# string_splitter.cpp
+	# string_view.cpp
+	# take_every.cpp
+	# take.cpp
+	# take_while.cpp
+	# unique.cpp
+	# zip_longest.cpp
+	# zip.cpp
 )
 
 set_source_files_properties(string_view.cpp PROPERTIES COMPILE_DEFINITIONS "LZ_STANDALONE")

@@ -23,7 +23,7 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr c_string_iterable(C begin) noexcept : detail::basic_iterable<iterator, default_sentinel>(iterator(begin)) {
+    constexpr c_string_iterable(C begin) noexcept : detail::basic_iterable<iterator, s>(iterator(begin)) {
     }
 
     constexpr c_string_iterable(C begin, C end) noexcept :
@@ -31,23 +31,6 @@ public:
     }
 
     constexpr c_string_iterable() = default;
-
-    template<class S = s>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 detail::enable_if<!std::is_same<iterator, S>::value, std::size_t> size() const noexcept {
-        std::size_t s = 0;
-        for (auto i = this->begin(); i != this->end(); ++i, ++s) {
-        }
-        return s;
-    }
-
-    template<class S = s>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 detail::enable_if<std::is_same<iterator, S>::value, std::size_t> size() const noexcept {
-        return static_cast<std::size_t>(this->_end - this->_begin);
-    }
-
-    LZ_NODISCARD constexpr explicit operator bool() const noexcept {
-        return static_cast<bool>(this->begin());
-    }
 };
 
 /**

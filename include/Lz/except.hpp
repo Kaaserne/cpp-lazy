@@ -12,8 +12,9 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class Iterator, class S, class IteratorToExcept, class S2, class BinaryPredicate>
 class except_iterable final
-    : public detail::basic_iterable<detail::except_iterator<Iterator, S, IteratorToExcept, S2, BinaryPredicate>,
-                                    default_sentinel> {
+    : public detail::basic_iterable<
+          detail::except_iterator<Iterator, S, IteratorToExcept, S2, BinaryPredicate>,
+          typename detail::except_iterator<Iterator, S, IteratorToExcept, S2, BinaryPredicate>::sentinel> {
 
 public:
     using iterator = detail::except_iterator<Iterator, S, IteratorToExcept, S2, BinaryPredicate>;
@@ -21,19 +22,11 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-#ifdef LZ_HAS_CXX_11
-    constexpr except_iterable(Iterator begin, S end, IteratorToExcept to_except_begin, S2 to_except_end,
-                              BinaryPredicate binary_predicate) :
-        detail::basic_iterable<iterator>(iterator(begin, end, to_except_begin, to_except_end, binary_predicate),
-                                         iterator(end, end, to_except_end, to_except_end, binary_predicate)) {
-    }
-#else
     constexpr except_iterable(Iterator begin, S end, IteratorToExcept to_except_begin, S2 to_except_end,
                               BinaryPredicate binary_predicate) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(to_except_begin),
                                                                     std::move(to_except_end), std::move(binary_predicate))) {
     }
-#endif
 
     constexpr except_iterable() = default;
 };
@@ -53,7 +46,7 @@ public:
  * @return An except_iterable view object.
  */
 template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE IterableToExcept,
-         class BinaryPredicate = MAKE_BIN_PRED(std::less, val_iterable_t<iter_t<Iterable>>)>
+         class BinaryPredicate = MAKE_BIN_PRED(std::less, val_iterable_t<Iterable>)>
 LZ_NODISCARD constexpr except_iterable<iter_t<Iterable>, sentinel_t<Iterable>, iter_t<IterableToExcept>,
                                        sentinel_t<IterableToExcept>, BinaryPredicate>
 except(Iterable&& iterable, IterableToExcept&& to_except, BinaryPredicate binary_predicate = {}) {

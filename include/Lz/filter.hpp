@@ -20,17 +20,9 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    using Sentinel = typename detail::filter_iterator<Iterator, S, UnaryPredicate>::sentinel;
-
-#ifdef LZ_HAS_CXX_11
-    constexpr filter_iterable(Iterator begin, Iterator end, UnaryPredicate function, std::forward_iterator_tag /* unused */) :
-        detail::basic_iterable<iterator>(iterator(begin, begin, end, function), iterator(end, begin, end, function)) {
-    }
-#else
     constexpr filter_iterable(Iterator begin, S end, UnaryPredicate function, std::forward_iterator_tag /* unused */) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(begin, begin, end, function)) {
     }
-#endif
 
     constexpr filter_iterable(Iterator begin, Iterator end, UnaryPredicate function,
                               std::bidirectional_iterator_tag /* unused */) :

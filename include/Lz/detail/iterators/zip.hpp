@@ -31,47 +31,47 @@ private:
     IterTuple _iterators;
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence_helper<I...>) const {
         return reference{ *std::get<I>(_iterators)... };
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void increment(index_sequence<I...>) {
+    LZ_CONSTEXPR_CXX_20 void increment(index_sequence_helper<I...>) {
         decompose((++std::get<I>(_iterators), 0)...);
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void decrement(index_sequence<I...>) {
+    LZ_CONSTEXPR_CXX_20 void decrement(index_sequence_helper<I...>) {
         decompose((--std::get<I>(_iterators), 0)...);
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void plus_is(index_sequence<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_20 void plus_is(index_sequence_helper<I...>, const difference_type offset) {
         decompose(((std::get<I>(_iterators) += offset), 0)...);
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_iterator& other, index_sequence_helper<I...>) const {
         const difference_type expand[] = { ((std::get<I>(_iterators) - std::get<I>(other._iterators)))... };
         return *std::min_element(std::begin(expand), std::end(expand));
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other, index_sequence_helper<I...>) const {
         const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(other._iterators))... };
         const auto end = std::end(expander);
         return std::find(std::begin(expander), end, true) != end;
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other, index_sequence_helper<I...>) const {
         const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(other))... };
         const auto end = std::end(expander);
         return std::find(std::begin(expander), end, true) != end;
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 explicit zip_iterator(IterTuple iterators) : _iterators(std::move(iterators)) {
+    constexpr explicit zip_iterator(IterTuple iterators) : _iterators(std::move(iterators)) {
     }
 
     constexpr zip_iterator() = default;

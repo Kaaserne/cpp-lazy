@@ -37,12 +37,6 @@ private:
     }
 
 public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = basic_iterable<Iterator>;
-    using reference = value_type;
-    using difference_type = diff_type<Iterator>;
-    using pointer = fake_ptr_proxy<reference>;
-
     LZ_CONSTEXPR_CXX_20 split_iterator(Iterator begin, S end, Iterator2 begin2, S2 end2) :
         _sub_range_end({ begin, begin }),
         _sub_range_begin(std::move(begin)),
