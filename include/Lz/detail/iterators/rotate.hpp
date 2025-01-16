@@ -33,7 +33,7 @@ private:
 public:
     constexpr rotate_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_20 rotate_iterator(Iterator begin, S end, Iterator start, const bool full_rotation) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterator(Iterator begin, S end, Iterator start, const bool full_rotation) :
         _iterator(std::move(start)),
         _begin(std::move(begin)),
         _end(std::move(end)),
@@ -43,15 +43,15 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    constexpr pointer arrow() const {
         return _iterator.operator->();
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         if (_iterator == _end) {
             _iterator = _begin;
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         if (_iterator == _begin) {
             _iterator = _end;
             _full_rotation = true;
@@ -67,11 +67,11 @@ public:
         --_iterator;
     }
 
-    LZ_NODISCARD constexpr bool eq(const rotate_iterator& b) const {
+    constexpr bool eq(const rotate_iterator& b) const {
         return _iterator == b._iterator && (_full_rotation && b._full_rotation);
     }
 
-    LZ_NODISCARD constexpr bool eq(const Iterator& start) const {
+    constexpr bool eq(const Iterator& start) const {
         return _iterator == start && _full_rotation;
     }
 };

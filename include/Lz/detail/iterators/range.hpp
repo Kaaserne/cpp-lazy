@@ -29,11 +29,11 @@ public:
 
     constexpr range_iterator() = default;
 
-    LZ_NODISCARD constexpr value_type dereference() const noexcept {
+    constexpr value_type dereference() const noexcept {
         return _iterator;
     }
 
-    LZ_NODISCARD constexpr pointer arrow() const noexcept {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const noexcept {
         return fake_ptr_proxy<value_type>(**this);
     }
 
@@ -45,8 +45,7 @@ public:
         _iterator -= _step;
     }
 
-    LZ_NODISCARD std::ptrdiff_t LZ_CONSTEXPR_CXX_20 difference(const range_iterator& b) const {
-        LZ_ASSERT(_step == b._step, "incompatible iterator types: difference step size");
+    std::ptrdiff_t constexpr difference(const range_iterator& b) const {
         return static_cast<difference_type>((_iterator - b._iterator) / _step);
     }
 
@@ -54,8 +53,7 @@ public:
         _iterator += static_cast<Arithmetic>(value) * _step;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& b) const noexcept {
-        LZ_ASSERT(_step == b._step, "incompatible iterator types: difference step size");
+    constexpr bool eq(const range_iterator& b) const noexcept {
         return _step < 0 ? _iterator <= b._iterator : _iterator >= b._iterator;
     }
 };

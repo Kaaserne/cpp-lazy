@@ -28,8 +28,7 @@ public:
     difference_type _offset;
 
 public:
-    LZ_CONSTEXPR_CXX_20
-    take_every_iterator(Iterator iterator, S end, const difference_type offset) :
+    constexpr take_every_iterator(Iterator iterator, S end, const difference_type offset) :
         _iterator(std::move(iterator)),
         _end(std::move(end)),
         _offset(offset) {
@@ -37,25 +36,24 @@ public:
 
     constexpr take_every_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() noexcept {
+    LZ_CONSTEXPR_CXX_14 void increment() noexcept {
         for (difference_type count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const take_every_iterator& b) const noexcept {
-        LZ_ASSERT(_offset == b._offset, "incompatible iterator types: different offsets");
+    constexpr bool eq(const take_every_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _iterator == _end;
     }
 };
@@ -79,7 +77,7 @@ public:
     difference_type _offset;
 
 #ifdef __cpp_if_constexpr
-    LZ_CONSTEXPR_CXX_20 void advance() noexcept {
+    LZ_CONSTEXPR_CXX_14 void advance() noexcept {
         if constexpr (!is_ra<Iterator>::value) {
             for (difference_type count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
             }
@@ -95,7 +93,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 void previous() noexcept {
+    LZ_CONSTEXPR_CXX_14 void previous() noexcept {
         if constexpr (!is_ra<Iterator>::value) {
             for (difference_type count = _offset; _iterator != _begin && count >= 0; --_iterator, --count) {
             }
@@ -112,7 +110,7 @@ public:
     }
 #else
     template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<is_ra<I>::value, void> advance() {
+    LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, void> advance() {
         const auto distance = _end - _iterator;
         if (_offset >= distance) {
             _iterator = _end;
@@ -123,13 +121,13 @@ public:
     }
 
     template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<!is_ra<I>::value> advance() {
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<I>::value> advance() {
         for (difference_type count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
         }
     }
 
     template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<is_ra<I>::value> previous() {
+    LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value> previous() {
         const auto distance = _iterator - _begin;
         if (_offset >= distance) {
             _iterator = _begin;
@@ -140,15 +138,14 @@ public:
     }
 
     template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_20 enable_if<!is_ra<I>::value> previous() {
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<I>::value> previous() {
         for (difference_type count = _offset; _iterator != _begin && count >= 0; --_iterator, --count) {
         }
     }
 #endif
 
 public:
-    LZ_CONSTEXPR_CXX_20
-    take_every_iterator(Iterator iterator, Iterator begin, Iterator end, const difference_type offset) :
+    constexpr take_every_iterator(Iterator iterator, Iterator begin, Iterator end, const difference_type offset) :
         _begin(std::move(begin)),
         _iterator(std::move(iterator)),
         _end(std::move(end)),
@@ -157,19 +154,19 @@ public:
 
     constexpr take_every_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         advance();
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         if (_iterator == _end) {
             --_iterator;
         }
@@ -178,7 +175,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         difference_type extra = 0;
         if (_iterator == _end && offset < 0) {
             --_iterator;
@@ -199,8 +196,7 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const take_every_iterator& other) const {
-        LZ_ASSERT(_offset == other._offset, "incompatible iterator types: different offsets");
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {
         if (_offset == 0) {
             return _iterator - other._iterator;
         }
@@ -211,8 +207,7 @@ public:
         return (raw_diff + (_offset - 1)) / _offset;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const take_every_iterator& b) const noexcept {
-        LZ_ASSERT(_offset == b._offset, "incompatible iterator types: different offsets");
+    constexpr bool eq(const take_every_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 };

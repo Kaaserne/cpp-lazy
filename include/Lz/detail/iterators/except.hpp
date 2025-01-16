@@ -30,13 +30,13 @@ private:
     S _end;
     mutable func_container<BinaryPredicate> _predicate;
 
-    LZ_CONSTEXPR_CXX_20 void find_next() {
+    LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::binary_search;
         using detail::find_if;
         using std::binary_search;
         using std::find_if;
 
-        _iterator = find_if(std::move(_iterator), _end, [this](const value_type& value) {
+        _iterator = find_if(std::move(_iterator), _end, [this](ref_t<Iterator> value) {
             return !binary_search(_to_except_begin, _to_except_end, value, _predicate);
         });
     }
@@ -44,6 +44,7 @@ private:
 public:
     constexpr except_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14
     except_iterator(Iterator begin, S end, IteratorToExcept except_begin, S2 except_end, BinaryPredicate compare) :
         _iterator(std::move(begin)),
         _to_except_begin(std::move(except_begin)),
@@ -56,24 +57,24 @@ public:
         find_next();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         find_next();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const except_iterator& b) const {
+    constexpr bool eq(const except_iterator& b) const {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel) const {
         return _iterator == _end;
     }
 };

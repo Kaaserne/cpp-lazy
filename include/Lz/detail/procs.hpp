@@ -30,7 +30,7 @@
 namespace lz {
 
 template<class Iter, class S>
-diff_type<Iter> distance(Iter first, S last);
+constexpr diff_type<Iter> distance(Iter first, S last);
 
 namespace detail {
 
@@ -118,7 +118,7 @@ LZ_CONSTEXPR_CXX_14 bool is_even(const Arithmetic value) noexcept {
 }
 
 template<class... Ts>
-LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
+constexpr void decompose(const Ts&...) noexcept {
 }
 
 template<class Result, class Arithmetic>
@@ -137,7 +137,7 @@ LZ_CONSTEXPR_CXX_14 Result round_even(const Arithmetic a, const Arithmetic b) no
 }
 
 template<class Iter, class S>
-diff_type<Iter> size_hint(Iter begin, S end) {
+LZ_CONSTEXPR_CXX_14 diff_type<Iter> size_hint(Iter begin, S end) {
     if LZ_CONSTEXPR_IF (is_ra<Iter>::value) {
         return lz::distance(std::move(begin), std::move(end));
     }

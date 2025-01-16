@@ -21,8 +21,9 @@ public:
 
     constexpr chunk_if_iterable() = default;
 
-    chunk_if_iterable(Iterator begin, S end, UnaryPredicate predicate) :
-        detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(predicate), begin == end)) {
+    LZ_CONSTEXPR_CXX_14 chunk_if_iterable(Iterator begin, S end, UnaryPredicate predicate) :
+        detail::basic_iterable<iterator, default_sentinel>(
+            iterator(std::move(begin), std::move(end), std::move(predicate), begin == end)) {
     }
 };
 
@@ -38,7 +39,7 @@ public:
  * @return A chunk if iterator view object.
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-chunk_if_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 chunk_if_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
 chunk_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::move(unary_predicate) };

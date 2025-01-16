@@ -16,7 +16,7 @@ class group_by_iterable final
     using const_iterator = iterator;
 
 public:
-    group_by_iterable(Iterator begin, S end, BinaryPredicate binary_predicate) :
+    LZ_CONSTEXPR_CXX_14 group_by_iterable(Iterator begin, S end, BinaryPredicate binary_predicate) :
         detail::basic_iterable<iterator, default_sentinel>(
             iterator(std::move(begin), std::move(end), std::move(binary_predicate))) {
     }
@@ -37,8 +37,8 @@ public:
  * `[](string a, string b) { return a.length() == b.length() }` to make groups where sizes of the strings are equal.
  * @return A group_by_iterable iterator view object.
  */
-template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::equal_to, val_iterable_t<Iterable>)>
-group_by_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
+template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::equal_to, val_iterable_t<Iterable>)>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 group_by_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
 group_by(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::move(binary_predicate) };

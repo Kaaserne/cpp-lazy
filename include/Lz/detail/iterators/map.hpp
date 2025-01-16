@@ -27,42 +27,42 @@ public:
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
 
-    LZ_CONSTEXPR_CXX_20 map_iterator(Iterator iterator, Function function) :
+    constexpr map_iterator(Iterator iterator, Function function) :
         _iterator(std::move(iterator)),
         _function(std::move(function)) {
     }
 
     constexpr map_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return _function(*_iterator);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         --_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         _iterator += offset;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const map_iterator& b) const {
+    constexpr difference_type difference(const map_iterator& b) const {
         return _iterator - b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const map_iterator& b) const noexcept {
+    constexpr bool eq(const map_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const S& s) const noexcept {
+    constexpr bool eq(const S& s) const noexcept {
         return _iterator == s;
     }
 };

@@ -24,7 +24,7 @@ using detail::basic_iterable;
  * `for (auto... lz::take(...))`.
  */
 template<LZ_CONCEPT_ITERATOR Iterator, class S>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 basic_iterable<Iterator, S> to_iterable(Iterator begin, S end) {
+LZ_NODISCARD constexpr basic_iterable<Iterator, S> to_iterable(Iterator begin, S end) {
     return { begin, end };
 }
 

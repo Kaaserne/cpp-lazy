@@ -13,12 +13,13 @@ template<class Iterator, class S, class UnaryPredicate>
 class take_while_iterable : public detail::basic_iterable<detail::take_while_iterator<Iterator, S, UnaryPredicate>,
                                                           typename detail::take_while_iterator<Iterator, S, UnaryPredicate>::sentinel> {
 private:
-    constexpr take_while_iterable(Iterator begin, S end, UnaryPredicate predicate, std::forward_iterator_tag /* is_bidi */) :
+    LZ_CONSTEXPR_CXX_14
+    take_while_iterable(Iterator begin, S end, UnaryPredicate predicate, std::forward_iterator_tag /* is_bidi */) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), end, predicate)) {
     }
 
-    constexpr take_while_iterable(Iterator begin, Iterator end, UnaryPredicate predicate, 
-                                  std::bidirectional_iterator_tag /* is_bidi */) :
+    LZ_CONSTEXPR_CXX_14
+    take_while_iterable(Iterator begin, Iterator end, UnaryPredicate predicate, std::bidirectional_iterator_tag /* is_bidi */) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end, predicate), iterator(end, begin, end, predicate)) {
     }
 
@@ -27,9 +28,9 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr take_while_iterable() = default;
+    LZ_CONSTEXPR_CXX_14 take_while_iterable() = default;
 
-    constexpr take_while_iterable(Iterator begin, S end, UnaryPredicate predicate) :
+    LZ_CONSTEXPR_CXX_14 take_while_iterable(Iterator begin, S end, UnaryPredicate predicate) :
         take_while_iterable(std::move(begin), std::move(end), std::move(predicate), iter_cat_t<Iterator>{}) {
     }
 };
@@ -43,7 +44,7 @@ public:
  * `for (auto... lz::take_while(...))`.
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 take_while_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 take_while_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
 take_while(Iterable&& iterable, UnaryPredicate predicate) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::move(predicate) };

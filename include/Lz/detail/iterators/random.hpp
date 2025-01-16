@@ -26,47 +26,47 @@ private:
     std::ptrdiff_t _current;
 
 public:
-    random_iterator(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :
+    constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :
         _distribution(distribution),
         _generator(&generator),
         _current(current) {
     }
 
-    random_iterator() = default;
+    constexpr random_iterator() = default;
 
-    LZ_NODISCARD value_type dereference() const {
+    constexpr value_type dereference() const {
         return _distribution(*_generator);
     }
 
-    LZ_NODISCARD value_type operator()() const {
+    constexpr value_type operator()() const {
         return dereference();
     }
 
-    void increment() noexcept {
+    LZ_CONSTEXPR_CXX_14 void increment() noexcept {
         --_current;
     }
 
-    LZ_NODISCARD pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_NODISCARD result_type(min)() const noexcept {
+    constexpr result_type(min)() const noexcept {
         return (_distribution->min)();
     }
 
-    LZ_NODISCARD result_type(max)() const noexcept {
+    constexpr result_type(max)() const noexcept {
         return (_distribution->max)();
     }
 
-    LZ_NODISCARD difference_type difference(const random_iterator& b) const noexcept {
+    constexpr difference_type difference(const random_iterator& b) const noexcept {
         return _current - b._current;
     }
 
-    LZ_NODISCARD bool eq(const random_iterator& b) const noexcept {
+    constexpr bool eq(const random_iterator& b) const noexcept {
         return _current == b._current;
     }
 
-    LZ_NODISCARD bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _current == 0;
     }
 };

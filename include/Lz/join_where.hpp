@@ -21,7 +21,7 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    LZ_CONSTEXPR_CXX_20
+    LZ_CONSTEXPR_CXX_17
     join_where_iterable(IterA iter_a, SA end_a, IterB iter_b, SB end_b, SelectorA a, SelectorB b, ResultSelector result_selector) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(iter_a), std::move(end_a), std::move(iter_b),
                                                                     std::move(end_b), std::move(a), std::move(b),
@@ -52,8 +52,8 @@ public:
  * @return A join where iterator view object, which can be used to iterate over.
  */
 template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
-join_where_iterable<iter_t<IterableA>, sentinel_t<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>, SelectorA, SelectorB,
-                    ResultSelector>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 join_where_iterable<iter_t<IterableA>, sentinel_t<IterableA>, iter_t<IterableB>,
+                                                     sentinel_t<IterableB>, SelectorA, SelectorB, ResultSelector>
 join_where(IterableA&& iterable_a, IterableB&& iterable_b, SelectorA a, SelectorB b, ResultSelector result_selector) {
     return { detail::begin(std::forward<IterableA>(iterable_a)),
              detail::end(std::forward<IterableA>(iterable_a)),

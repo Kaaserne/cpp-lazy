@@ -128,11 +128,11 @@ public:
 
     join_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    LZ_CONSTEXPR_CXX_20 reference dereference() const {
         return deref();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -158,22 +158,20 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const join_iterator& b) const {
-        LZ_ASSERT(_delimiter == b._delimiter, "incompatible iterator types: found different delimiters");
+    constexpr difference_type difference(const join_iterator& b) const {
         // distance * 2 for delimiter, - 1 for removing last delimiter
         return (_iterator - b._iterator) * 2 - 1;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const join_iterator& b) const noexcept {
-        LZ_ASSERT(_delimiter == b._delimiter, "incompatible iterator types: found different delimiters");
+    constexpr bool eq(const join_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const S& other) const noexcept {
+    constexpr bool eq(const S& other) const noexcept {
         return _iterator == other;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference operator[](const difference_type offset) const {
+    LZ_CONSTEXPR_CXX_20 reference operator[](const difference_type offset) const {
         return index_operator(offset);
     }
 };

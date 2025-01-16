@@ -19,16 +19,16 @@ public:
     using const_iterator = iterator;
 
 private:
-    rotate_iterable(Iterator begin, S end, Iterator start, std::bidirectional_iterator_tag) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterable(Iterator begin, S end, Iterator start, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(begin, end, start, false), iterator(begin, end, start, true)) {
     }
 
-    rotate_iterable(Iterator begin, S end, Iterator start, std::forward_iterator_tag) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterable(Iterator begin, S end, Iterator start, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, Iterator>(iterator(std::move(begin), std::move(end), start, false), start) {
     }
 
 public:
-    rotate_iterable(Iterator begin, S end, Iterator start) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterable(Iterator begin, S end, Iterator start) :
         rotate_iterable(std::move(begin), std::move(end), std::move(start), iter_cat_t<Iterator>{}) {
     }
 
@@ -46,7 +46,7 @@ public:
  * @return rotate_iterable object, which is a range of [start, start)
  */
 template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERATOR Iterator>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 rotate_iterable<Iterator, sentinel_t<Iterable>> rotate(Iterable&& iterable, Iterator start) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 rotate_iterable<Iterator, sentinel_t<Iterable>> rotate(Iterable&& iterable, Iterator start) {
     static_assert(std::is_same<Iterator, decltype(std::begin(iterable))>::value, "Iterators must be the same type");
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), std::move(start) };
 }

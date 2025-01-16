@@ -22,18 +22,23 @@ public:
 private:
     static_assert(std::tuple_size<IterTuple>::value > 0, "Cannot create zip longest object with 0 iterators");
 
-    LZ_CONSTEXPR_CXX_20 zip_longest_iterable(IterTuple begin, IterTuple end, std::true_type /* is bidirectional access */) :
+    LZ_CONSTEXPR_CXX_14 zip_longest_iterable(IterTuple begin, IterTuple end, std::true_type /* is bidirectional access */) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(begin, end, end)) {
     }
 
-    LZ_CONSTEXPR_CXX_20
+    LZ_CONSTEXPR_CXX_14
     zip_longest_iterable(IterTuple begin, SentinelTuple end, std::false_type /* is not bidirectional access */) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end))) {
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20
-    zip_longest_iterable(IterTuple begin, SentinelTuple end) : zip_longest_iterable(std::move(begin), std::move(end), IsRa{}) {
+    using iterator = detail::zip_longest_iterator<IsRa::value, IterTuple, SentinelTuple>;
+    using const_iterator = iterator;
+
+    using value_type = typename iterator::value_type;
+
+    LZ_CONSTEXPR_CXX_14 zip_longest_iterable(IterTuple begin, SentinelTuple end) :
+        zip_longest_iterable(std::move(begin), std::move(end), IsRa{}) {
     }
 
     constexpr zip_longest_iterable() = default;
@@ -64,10 +69,9 @@ using zip_longest_iterable_t =
  * @return zip_longest_iterable object that contains the iterator.
  */
 template<LZ_CONCEPT_ITERABLE... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 zip_longest_iterable_t<Iterables...> zip_longest(Iterables&&... iterables) {
-    auto begin = std::make_tuple(detail::begin(std::forward<Iterables>(iterables))...);
-    auto end = std::make_tuple(detail::end(std::forward<Iterables>(iterables))...);
-    return { std::move(begin), std::move(end) };
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_longest_iterable_t<Iterables...> zip_longest(Iterables&&... iterables) {
+    return { std::make_tuple(detail::begin(std::forward<Iterables>(iterables))...),
+             std::make_tuple(detail::end(std::forward<Iterables>(iterables))...) };
 }
 
 // End of group

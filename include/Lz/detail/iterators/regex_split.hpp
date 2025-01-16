@@ -32,7 +32,7 @@ private:
 public:
     constexpr regex_split_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 regex_split_iterator(RegexTokenIter first, RegexTokenIter last) : _current(first) {
+    regex_split_iterator(RegexTokenIter first, RegexTokenIter last) : _current(first) {
         while (_current != last && _current->length() == 0) {
             ++_current;
         }
@@ -46,15 +46,15 @@ public:
         return value_type(&*_current->first, static_cast<std::size_t>(_current->length()));
     }
 
-    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const regex_split_iterator& other) const {
+    constexpr bool eq(const regex_split_iterator& other) const {
         return _current == other._current;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel) const {
         return _current == RegexTokenIter{};
     }
 };

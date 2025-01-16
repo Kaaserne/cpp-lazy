@@ -20,17 +20,19 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    constexpr filter_iterable(Iterator begin, S end, UnaryPredicate function, std::forward_iterator_tag /* unused */) :
-        detail::basic_iterable<iterator, default_sentinel>(iterator(begin, begin, end, function)) {
+    using s = typename detail::filter_iterator<Iterator, S, UnaryPredicate>::sentinel;
+
+    LZ_CONSTEXPR_CXX_14 filter_iterable(Iterator begin, S end, UnaryPredicate function, std::forward_iterator_tag /* unused */) :
+        detail::basic_iterable<iterator, s>(iterator(begin, begin, end, function)) {
     }
 
-    constexpr filter_iterable(Iterator begin, Iterator end, UnaryPredicate function,
-                              std::bidirectional_iterator_tag /* unused */) :
+    LZ_CONSTEXPR_CXX_14
+    filter_iterable(Iterator begin, Iterator end, UnaryPredicate function, std::bidirectional_iterator_tag /* unused */) :
         detail::basic_iterable<iterator, iterator>(iterator(begin, begin, end, function), iterator(end, begin, end, function)) {
     }
 
 public:
-    constexpr filter_iterable(Iterator begin, S end, UnaryPredicate function) :
+    LZ_CONSTEXPR_CXX_14 filter_iterable(Iterator begin, S end, UnaryPredicate function) :
         filter_iterable(std::move(begin), std::move(end), std::move(function), iter_cat_t<Iterator>{}) {
     }
 
@@ -43,16 +45,16 @@ public:
  */
 
 /**
- * @brief Returns a forward filter iterator. If the `predicate` returns false, the value it is excluded.
- * @details I.e. `lz::filter({1, 2, 3, 4, 5}, [](int i){ return i % 2 == 0; });` will eventually remove all
+ * Returns a forward filter iterator. If the `predicate` returns false, the value it is excluded.
+ * I.e. `lz::filter({1, 2, 3, 4, 5}, [](int i){ return i % 2 == 0; });` will eventually remove all
  * elements that are not even.
  * @param iterable An iterable, e.g. a container / object with `begin()` and `end()` methods.
  * @param predicate A function that must return a bool, and needs a value type of the container as parameter.
  * @return A filter iterator that can be converted to an arbitrary container or can be iterated
  * over using `for (auto... lz::filter(...))`.
  */
-template<class Iterable, class UnaryPredicate>
-LZ_NODISCARD constexpr filter_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
+template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 filter_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
 filter(Iterable&& iterable, UnaryPredicate predicate) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::move(predicate) };

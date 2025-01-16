@@ -29,7 +29,7 @@ private:
     difference_type _to;
 
 public:
-    LZ_CONSTEXPR_CXX_20
+    LZ_CONSTEXPR_CXX_17
     exclude_iterator(Iterator begin, S end, const difference_type from, const difference_type to) :
         _iterator(std::move(begin)),
         _index(0),
@@ -43,15 +43,15 @@ public:
 
     constexpr exclude_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         ++_index;
         if (_index == _from) {
@@ -59,12 +59,11 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const exclude_iterator& b) const noexcept {
-        LZ_ASSERT(_to == b._to && _from == b._from, "incompatible iterator types: from and to must be equal");
+    constexpr bool eq(const exclude_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const S& s) const noexcept {
+    constexpr bool eq(const S& s) const noexcept {
         return _iterator == s;
     }
 };

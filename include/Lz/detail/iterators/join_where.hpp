@@ -35,16 +35,16 @@ private:
     mutable func_container<SelectorB> _selector_b;
     mutable func_container<ResultSelector> _result_selector;
 
-    LZ_CONSTEXPR_CXX_20 void find_next() {
+    LZ_CONSTEXPR_CXX_17 void find_next() {
         using detail::find_if;
         using detail::lower_bound;
         using std::find_if;
         using std::lower_bound;
 
-        _iter_a = find_if(std::move(_iter_a), _end_a, [this](const value_type_a& a) {
+        _iter_a = find_if(std::move(_iter_a), _end_a, [this](ref_t<IterA> a) {
             auto&& to_find = _selector_a(a);
             _iter_b = lower_bound(std::move(_iter_b), _end_b, to_find,
-                                  [this](const value_type_b& b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
+                                  [this](ref_t<IterB> b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
             if (_iter_b != _end_b && !(to_find < _selector_b(*_iter_b))) {
                 return true;
             }
@@ -60,6 +60,7 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
+    LZ_CONSTEXPR_CXX_17
     join_where_iterator(IterA it_a, SA end_a, IterB it_b, SB end_b, SelectorA a, SelectorB b, ResultSelector result_selector) :
         _iter_a(std::move(it_a)),
         _iter_b(it_b),
@@ -74,24 +75,24 @@ public:
 
     constexpr join_where_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return _result_selector(*_iter_a, *_iter_b);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iter_b;
         find_next();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const join_where_iterator& b) const noexcept {
+    constexpr bool eq(const join_where_iterator& b) const noexcept {
         return _iter_a == b._iter_a;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _iter_a == _end_a;
     }
 };

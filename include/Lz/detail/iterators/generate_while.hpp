@@ -36,11 +36,11 @@ public:
         _last_returned(_func()) {
     }
 
-    LZ_NODISCARD constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return std::get<1>(_last_returned);
     }
 
-    LZ_NODISCARD constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -48,11 +48,11 @@ public:
         _last_returned = _func();
     }
 
-    LZ_NODISCARD constexpr bool eq(const generate_while_iterator&) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(const generate_while_iterator&) const noexcept {
         return !std::get<0>(_last_returned);
     }
 
-    LZ_NODISCARD constexpr bool eq(default_sentinel) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {
         return !std::get<0>(_last_returned);
     }
 };

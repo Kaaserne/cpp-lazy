@@ -17,13 +17,11 @@ class cartesian_product_iterable final
 
     using s = typename detail::cartesian_product_iterator<IterTuple, SentinelTuple>::sentinel;
 
-    LZ_CONSTEXPR_CXX_20
-    cartesian_product_iterable(IterTuple begin, SentinelTuple end, std::forward_iterator_tag /* unused */) :
+    constexpr cartesian_product_iterable(IterTuple begin, SentinelTuple end, std::forward_iterator_tag /* unused */) :
         detail::basic_iterable<iterator, s>(iterator(std::move(begin), std::move(begin), std::move(end))) {
     }
 
-    LZ_CONSTEXPR_CXX_20
-    cartesian_product_iterable(IterTuple begin, SentinelTuple end, std::bidirectional_iterator_tag /* unused */) :
+    constexpr cartesian_product_iterable(IterTuple begin, SentinelTuple end, std::bidirectional_iterator_tag /* unused */) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(end, begin, end)) {
     }
 
@@ -34,7 +32,7 @@ public:
 
     constexpr cartesian_product_iterable() = default;
 
-    LZ_CONSTEXPR_CXX_20 cartesian_product_iterable(IterTuple begin, SentinelTuple end) :
+    constexpr cartesian_product_iterable(IterTuple begin, SentinelTuple end) :
         cartesian_product_iterable(std::move(begin), std::move(end), iter_cat_t<iterator>{}) {
     }
 };
@@ -51,7 +49,7 @@ public:
  */
 // clang-format off
 template<LZ_CONCEPT_ITERABLE... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20
+LZ_NODISCARD constexpr
 cartesian_product_iterable<std::tuple<iter_t<Iterables>...>, std::tuple<sentinel_t<Iterables>...>>
 cartesian_product(Iterables&&... iterables) {
     return { std::make_tuple(detail::begin(std::forward<Iterables>(iterables))...),

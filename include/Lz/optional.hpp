@@ -52,12 +52,16 @@ public:
     }
 
     template<class U = T>
-    constexpr optional(U&& value) : _value(std::forward<U>(value)), _has_value(true) {
+    constexpr optional(U&& value) noexcept : _value(std::forward<U>(value)), _has_value(true) {
     }
 
     LZ_CONSTEXPR_CXX_14 optional(optional<T>&& right) noexcept {
         if (right) {
             construct(std::move(right.value()));
+        }
+        else {
+            _has_value = false;
+            right._has_value = false;
         }
     }
 
@@ -69,9 +73,11 @@ public:
 
     ~optional() {
         if LZ_CONSTEXPR_IF (std::is_trivially_destructible<T>::value) {
+            _has_value = false;
             return;
         }
         if (_has_value) {
+            _has_value = false;
             _value.~T();
         }
     }
@@ -87,6 +93,33 @@ public:
         return *this;
     }
 
+    LZ_CONSTEXPR_CXX_14 optional& operator=(const optional<T>& value) noexcept {
+        if (_has_value && value) {
+            _value = *value;
+        }
+        else if (!value) {
+            _has_value = false;
+        }
+        else {
+            construct(*value);
+        }
+        return *this;
+    }
+
+    LZ_CONSTEXPR_CXX_14 optional& operator=(optional<T>&& value) noexcept {
+        if (_has_value && value) {
+            _value = std::move(*value);
+        }
+        else if (value) {
+            construct(std::move(*value));
+        }
+        else {
+            _has_value = false;
+        }
+        value._has_value = false;
+        return *this;
+    }
+
     constexpr explicit operator bool() const noexcept {
         return _has_value;
     }
@@ -99,58 +132,55 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 T& value() {
-        if (_has_value) {
-            return _value;
-        }
-        throw std::runtime_error("Cannot get uninitialized optional");
+        return const_cast<T&>(static_cast<const optional<T>*>(this)->value());
     }
 
-    LZ_CONSTEXPR_CXX_14 T& operator*() noexcept {
-        return _value;
+    constexpr T& operator*() noexcept {
+        return const_cast<T&>(static_cast<const optional<T>*>(this)->operator*());
     }
 
-    LZ_CONSTEXPR_CXX_14 const T& operator*() const noexcept {
+    constexpr const T& operator*() const noexcept {
         return _value;
     }
 
     template<class U>
-    LZ_CONSTEXPR_CXX_14 T value_or(U&& v) const& {
+    constexpr T value_or(U&& v) const& {
         return bool(*this) ? this->value() : static_cast<T>(std::forward<U>(v));
     }
 
     template<class U>
-    LZ_CONSTEXPR_CXX_14 T value_or(U&& v) && {
+    constexpr T value_or(U&& v) && {
         return bool(*this) ? std::move(this->value()) : static_cast<T>(std::forward<U>(v));
     }
 };
 
 template<class T>
-LZ_CONSTEXPR_CXX_14 bool operator==(const optional<T>& lhs, const optional<T>& rhs) {
+constexpr bool operator==(const optional<T>& lhs, const optional<T>& rhs) {
     return bool(lhs) != bool(rhs) ? false : !bool(lhs) ? true : *lhs == *rhs;
 }
 
 template<class T>
-LZ_CONSTEXPR_CXX_14 bool operator!=(const optional<T>& lhs, const optional<T>& rhs) {
+constexpr bool operator!=(const optional<T>& lhs, const optional<T>& rhs) {
     return !(lhs == rhs);
 }
 
 template<class T>
-LZ_CONSTEXPR_CXX_14 bool operator<(const optional<T>& lhs, const optional<T>& rhs) {
+constexpr bool operator<(const optional<T>& lhs, const optional<T>& rhs) {
     return !rhs ? false : !lhs ? true : *lhs < *rhs;
 }
 
 template<class T>
-LZ_CONSTEXPR_CXX_14 bool operator>(const optional<T>& lhs, const optional<T>& rhs) {
+constexpr bool operator>(const optional<T>& lhs, const optional<T>& rhs) {
     return rhs < lhs;
 }
 
 template<class T>
-LZ_CONSTEXPR_CXX_14 bool operator<=(const optional<T>& lhs, const optional<T>& rhs) {
+constexpr bool operator<=(const optional<T>& lhs, const optional<T>& rhs) {
     return !(rhs < lhs);
 }
 
 template<class T>
-LZ_CONSTEXPR_CXX_14 bool operator>=(const optional<T>& lhs, const optional<T>& rhs) {
+constexpr bool operator>=(const optional<T>& lhs, const optional<T>& rhs) {
     return !(lhs < rhs);
 }
 #endif // __cpp_lib_optional

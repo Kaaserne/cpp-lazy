@@ -22,8 +22,8 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr except_iterable(Iterator begin, S end, IteratorToExcept to_except_begin, S2 to_except_end,
-                              BinaryPredicate binary_predicate) :
+    LZ_CONSTEXPR_CXX_14
+    except_iterable(Iterator begin, S end, IteratorToExcept to_except_begin, S2 to_except_end, BinaryPredicate binary_predicate) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(to_except_begin),
                                                                     std::move(to_except_end), std::move(binary_predicate))) {
     }
@@ -37,7 +37,7 @@ public:
  */
 
 /**
- * @brief Skips elements in @p iterable that is contained by @p to_except. @p to_except must be sorted manually before creating
+ * Skips elements in @p iterable that is contained by @p to_except. @p to_except must be sorted manually before creating
  * this view.
  * @attention @p to_except must be sorted manually before creating this view.
  * @param iterable Sequence to iterate over.
@@ -46,9 +46,9 @@ public:
  * @return An except_iterable view object.
  */
 template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE IterableToExcept,
-         class BinaryPredicate = MAKE_BIN_PRED(std::less, val_iterable_t<Iterable>)>
-LZ_NODISCARD constexpr except_iterable<iter_t<Iterable>, sentinel_t<Iterable>, iter_t<IterableToExcept>,
-                                       sentinel_t<IterableToExcept>, BinaryPredicate>
+         class BinaryPredicate = MAKE_BIN_PRED(std::less, value_type<iter_t<Iterable>>)>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 except_iterable<iter_t<Iterable>, sentinel_t<Iterable>, iter_t<IterableToExcept>,
+                                                 sentinel_t<IterableToExcept>, BinaryPredicate>
 except(Iterable&& iterable, IterableToExcept&& to_except, BinaryPredicate binary_predicate = {}) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              detail::begin(std::forward<IterableToExcept>(to_except)), detail::end(std::forward<IterableToExcept>(to_except)),

@@ -24,18 +24,17 @@ public:
     constexpr enumerate_iterable() = default;
 
 private:
-    LZ_CONSTEXPR_CXX_20
-    enumerate_iterable(Iterator begin, Iterator end, std::random_access_iterator_tag /* unused */, const IntType start = 0) :
+    constexpr enumerate_iterable(Iterator begin, Iterator end, std::random_access_iterator_tag /* unused */,
+                                 const IntType start = 0) :
         detail::basic_iterable<iterator, iterator>(iterator(start, begin), iterator(static_cast<IntType>(end - begin), end)) {
     }
 
-    LZ_CONSTEXPR_CXX_20
-    enumerate_iterable(Iterator begin, S end, std::forward_iterator_tag /* unused */, const IntType start = 0) :
+    constexpr enumerate_iterable(Iterator begin, S end, std::forward_iterator_tag /* unused */, const IntType start = 0) :
         detail::basic_iterable<iterator, S>(iterator(start, std::move(begin)), std::move(end)) {
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 enumerate_iterable(Iterator begin, S end, const IntType start = 0) :
+    constexpr enumerate_iterable(Iterator begin, S end, const IntType start = 0) :
         enumerate_iterable(std::move(begin), std::move(end), iter_cat_t<iterator>{}, start) {
     }
 };
@@ -46,9 +45,7 @@ public:
  */
 
 /**
- * @brief Creates an enumerate object from an iterable. This can be useful when an index and a value
- * type of an iterable is needed.
- * @details Creates an enumerate object. The enumerator consists of a `std::pair<IntType, value_type&>`. The
+ * Creates an enumerate object. The enumerator consists of a `std::pair<IntType, value_type&>`. The
  * elements of the enumerate iterator are by reference. The `std:::pair<IntType, value_type&>::first` is the
  * counter index. The `std:::pair<IntType, value_type&>::second` is the element of the iterator by reference.
  * Furthermore, the `operator*` of this iterator returns an std::pair by value.
@@ -58,7 +55,7 @@ public:
  * @return enumerate iterator object. One can iterate over this using `for (auto pair : lz::enumerate(..))`
  */
 template<LZ_CONCEPT_ARITHMETIC IntType = int, LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enumerate_iterable<iter_t<Iterable>, sentinel_t<Iterable>, IntType>
+LZ_NODISCARD constexpr enumerate_iterable<iter_t<Iterable>, sentinel_t<Iterable>, IntType>
 enumerate(Iterable&& iterable, const IntType start = 0) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), start };
 }

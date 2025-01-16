@@ -35,40 +35,40 @@ public:
 
     constexpr enumerate_iterator() = default;
 
-    enumerate_iterator& increment() {
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& increment() {
         ++_index;
         ++_iterator;
         return *this;
     }
 
-    enumerate_iterator& decrement() {
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& decrement() {
         --_index;
         --_iterator;
         return *this;
     }
 
-    reference dereference() const {
+    constexpr reference dereference() const {
         return { _index, *_iterator };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const enumerate_iterator& other) const {
+    constexpr bool eq(const enumerate_iterator& other) const {
         return _iterator == other._iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const S& s) const {
+    constexpr bool eq(const S& s) const {
         return _iterator == s;
     }
 
-    LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type n) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
         _index += static_cast<Arithmetic>(n);
         _iterator += n;
     }
 
-    LZ_CONSTEXPR_CXX_20 difference_type difference(const enumerate_iterator& other) const {
+    constexpr difference_type difference(const enumerate_iterator& other) const {
         return _iterator - other._iterator;
     }
 };

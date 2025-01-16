@@ -20,7 +20,7 @@ public:
 
     common_iterable() = default;
 
-    LZ_CONSTEXPR_CXX_20 common_iterable(Iterator begin, S end) :
+    constexpr common_iterable(Iterator begin, S end) :
         detail::basic_iterable<iterator>(iterator(std::move(begin)), iterator(std::move(end))) {
     }
 };
@@ -31,14 +31,14 @@ public:
  */
 
 /**
- * @brief Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
+ * Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
  * must return a different type than its end() function), otherwise a static assertion will fail.
  *
  * @param iterable The iterable to create a common view from.
  * @return A common view object. Can be used in <algorithm> functions.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 common_iterable<iter_t<Iterable>, sentinel_t<Iterable>> common(Iterable&& iterable) {
+LZ_NODISCARD constexpr common_iterable<iter_t<Iterable>, sentinel_t<Iterable>> common(Iterable&& iterable) {
     static_assert(!std::is_same<iter_t<Iterable>, sentinel_t<Iterable>>::value, "Iterator and Sentinel must be different types");
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) };
 }

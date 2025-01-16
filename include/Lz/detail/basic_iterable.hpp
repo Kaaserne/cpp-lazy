@@ -72,14 +72,14 @@ void stringify(const Iterable& iterable, std::ostream& out, std::string delimite
     fmt = std::move(delimiter);
     detail::for_each(std::move(it), std::move(end), [&out, &fmt](const value_type& v) { std::format_to(out, fmt.c_str(), v); });
 #else
-// clang-format off
+    // clang-format off
     out << *it;
     ++it;
     detail::for_each(std::move(it), std::move(end), [&out, &delimiter](const value_type& v) {
         out << delimiter;
         out << v;
     });
-    // clang-format on
+    // clang-format on 
 #endif
 }
 
@@ -138,12 +138,13 @@ private:
     }
 #else
     template<class T>
-    enable_if<!is_array<decay_t<T>>::value, std::insert_iterator<decay_t<T>>> inserter_for(T&& container) const {
+    auto inserter_for(T&& container) const
+        -> enable_if<!is_array<decay_t<T>>::value, decltype(std::inserter(container, container.begin()))> {
         return std::inserter(container, container.begin());
     }
 
     template<class T>
-    enable_if<is_array<decay_t<T>>::value, decltype(std::begin(std::declval<T>()))> inserter_for(T&& container) const {
+    auto inserter_for(T&& container) const -> enable_if<is_array<decay_t<T>>::value, decltype(std::begin(container))> {
         return std::begin(container);
     }
 #endif // __cpp_if_constexpr
@@ -340,8 +341,8 @@ public:
     }
 
     template<class UnaryOp>
-    void for_each(UnaryOp&& unary_op) const {
-        lz::for_each(*this, std::forward<UnaryOp>(unary_op));
+    LZ_CONSTEXPR_CXX_14 void for_each(UnaryOp&& func) const {
+        lz::for_each(*this, std::forward<UnaryOp>(func));
     }
 
     /**
@@ -349,7 +350,7 @@ public:
      * @note Please note that this traverses the whole sequence.
      * @return The length of the view.
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 diff_type<It> distance() const {
+    LZ_NODISCARD constexpr diff_type<It> distance() const {
         return lz::distance(_begin, _end);
     }
 
@@ -358,7 +359,7 @@ public:
      * @param n The offset.
      * @return The element referred to by `begin() + n`
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 It next(const diff_type<It> n = 1) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 It next(const diff_type<It> n = 1) const {
         return std::next(_begin, n);
     }
 
@@ -366,19 +367,19 @@ public:
      * Checks is the sequence is empty.
      * @return True if it is empty, false otherwise.
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool empty() const {
+    LZ_NODISCARD constexpr bool empty() const {
         return lz::empty(*this);
     }
 
     //! See `lz::front(Iterable)` for details
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference front() const {
+    LZ_NODISCARD constexpr reference front() const {
         return lz::front(*this);
     }
 
     /**
      * @brief See `lz::back` for details
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference back() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 reference back() const {
         return lz::back(*this);
     }
 };

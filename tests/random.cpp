@@ -6,10 +6,10 @@ TEST_CASE("random_iterable should be random", "[random_iterable][Basic functiona
     constexpr std::size_t size = 5;
 
     SECTION("random_iterable doubles") {
-        const auto random_array = lz::random<long double>(0., 1., size).to<std::array<double, size>>();
-        auto randomArray2 = lz::random<long double>(0., 1., size).to<std::array<double, size>>();
+        const auto random_array = lz::random<long double>(0., 1., size).to<std::array<long double, size>>();
+        auto randomArray2 = lz::random<long double>(0., 1., size).to<std::array<long double, size>>();
         while (random_array == randomArray2) {
-            randomArray2 = lz::random<long double>(0., 1., size).to<std::array<double, size>>();
+            randomArray2 = lz::random<long double>(0., 1., size).to<std::array<long double, size>>();
         }
         REQUIRE(random_array != randomArray2);
     }

@@ -21,12 +21,12 @@ namespace detail {
 template<class To>
 struct convert_fn {
     template<class From>
-    LZ_CONSTEXPR_CXX_20 To operator()(From&& f) const {
+    constexpr To operator()(From&& f) const {
         return static_cast<To>(f);
     }
 
     template<class From>
-    LZ_CONSTEXPR_CXX_20 To operator()(From&& f) {
+    constexpr To operator()(From&& f) {
         return static_cast<To>(f);
     }
 };
@@ -36,30 +36,34 @@ struct get_fn {
     // TODO add const variant
 
     template<class T>
-    LZ_CONSTEXPR_CXX_20 auto operator()(T&& gettable) noexcept -> decltype(std::get<I>(std::forward<T>(gettable))) {
+    LZ_CONSTEXPR_CXX_14 auto operator()(T&& gettable) noexcept -> decltype(std::get<I>(std::forward<T>(gettable))) {
         return std::get<I>(std::forward<T>(gettable));
     }
 };
 
+template<class Iterator, std::size_t... N>
+using iter_tuple = decltype(std::make_tuple(std::next(std::declval<Iterator>(), N)...));
+
+template<class Iterator, std::size_t... N>
+using sent_tuple = decltype(std::make_tuple((N, std::declval<Iterator>())...));
+
 template<class Iterable, std::size_t... N>
-using pairwise_n_iterable =
-    zip_iterable<std::tuple<decay_t<decltype(N, std::forward<iter_t<Iterable>>(std::declval<iter_t<Iterable>>()))>...>,
-                 std::tuple<decay_t<decltype(N, std::forward<sentinel_t<Iterable>>(std::declval<sentinel_t<Iterable>>()))>...>>;
+using pairwise_n_object = zip_iterable<decltype(std::make_tuple(std::next(std::begin(std::declval<Iterable>()), N)...)),
+                                       decltype(std::make_tuple(std::end((N, std::declval<Iterable>()))...))>;
 
 template<std::size_t N, class Iterator>
-enable_if<N == 0, decay_t<Iterator>> cached_next(Iterator&& iterator) {
+LZ_CONSTEXPR_CXX_14 enable_if<N == 0, decay_t<Iterator>> cached_next(Iterator&& iterator) {
     return std::forward<Iterator>(iterator);
 }
 
 template<std::size_t N, class Iterator>
-enable_if<(N != 0), decay_t<Iterator>> cached_next(Iterator&& iterator) {
-    return std::next(cached_next<N - 1>(iterator));
+LZ_CONSTEXPR_CXX_14 enable_if<N != 0, decay_t<Iterator>> cached_next(Iterator&& iterator) {
+    return std::next(cached_next<N - 1>(std::forward<Iterator>(iterator)), 1);
 }
 
 template<class Iterable, std::size_t... N>
-pairwise_n_iterable<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) {
-    auto cached_iter = std::begin(iterable);
-    return { std::make_tuple(cached_next<N>(cached_iter)...), std::make_tuple((static_cast<void>(N), std::end(iterable))...) };
+LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) {
+    return { std::make_tuple(cached_next<N>(std::begin(iterable))...), std::make_tuple(std::end((N, iterable))...) };
 }
 } // namespace detail
 
@@ -71,7 +75,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @return Returns a split_iterable iterator, that splits the string on `'\n'`.
  */
 template<class String>
-LZ_NODISCARD string_splitter<String, typename String::value_type> lines(const String& string) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_splitter<String, typename String::value_type> lines(const String& string) {
     return lz::split(string, "\n");
 }
 
@@ -92,7 +96,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 join_iterable<iter_t<Strings>, sentinel_t<Strin
  * @return An iterable object that contains the reverse order of [begin(iterable) end(iterable))
  */
 template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 detail::basic_iterable<std::reverse_iterator<iter_t<Iterable>>> reverse(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 detail::basic_iterable<std::reverse_iterator<iter_t<Iterable>>> reverse(Iterable&& iterable) {
     static_assert(detail::is_bidi<iter_t<Iterable>>::value, "Iterable must be at least a bidirectional iterable");
     using iterator = iter_t<Iterable>;
     std::reverse_iterator<iterator> rev_begin(detail::begin(std::forward<Iterable>(iterable)));
@@ -106,8 +110,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 detail::basic_iterable<std::reverse_iterator<it
  * @return A map iterator that converts the elements in the container to the type @p `T`.
  */
 template<class T, LZ_CONCEPT_ITERATOR Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::convert_fn<T>>
-as(Iterable&& iterable) {
+LZ_NODISCARD constexpr map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::convert_fn<T>> as(Iterable&& iterable) {
     return lz::map(std::forward<Iterable>(iterable), detail::convert_fn<T>());
 }
 
@@ -125,7 +128,7 @@ using zip_with_iterable = map_iterable<decltype(lz::zip(std::forward<Iterables>(
  * @return A map_iterable<zip_iterable> object that applies fn over each expanded tuple elements from [begin, end)
  */
 template<class Fn, class... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 zip_with_iterable<Fn, Iterables...> zip_with(Fn fn, Iterables&&... iterables) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, Iterables...> zip_with(Fn fn, Iterables&&... iterables) {
     auto zipper = lz::zip(std::forward<Iterables>(iterables)...);
     auto tuple_expander_func = detail::make_expand_fn(std::move(fn), detail::make_index_sequence<sizeof...(Iterables)>());
     return lz::map(std::move(zipper), std::move(tuple_expander_func));
@@ -143,7 +146,7 @@ using pairwise_iterable =
  * @return A zip iterator that accesses N adjacent elements of one container.
  */
 template<std::size_t N, LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pairwise_iterable<Iterable, N> pairwise_n(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<Iterable, N> pairwise_n(Iterable&& iterable) {
     return detail::pairwise_n_construct(std::forward<Iterable>(iterable), detail::make_index_sequence<N>());
 }
 
@@ -153,7 +156,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pairwise_iterable<Iterable, N> pairwise_n(Itera
  * @return A zip iterator that accesses two adjacent elements of one container.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pairwise_iterable<Iterable, 2> pairwise(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<Iterable, 2> pairwise(Iterable&& iterable) {
     LZ_ASSERT(lz::has_many(iterable), "length of the sequence must be greater than or equal to 2");
     return pairwise_n<2>(std::forward<Iterable>(iterable));
 }

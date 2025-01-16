@@ -28,7 +28,7 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    LZ_CONSTEXPR_CXX_20 Iterator find(Iterator first, S last) {
+    LZ_CONSTEXPR_CXX_14 Iterator find(Iterator first, S last) {
         using detail::find_if;
         using std::find_if;
 
@@ -42,7 +42,7 @@ private:
     mutable func_container<UnaryPredicate> _predicate;
 
 public:
-    LZ_CONSTEXPR_CXX_20 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :
+    LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :
         _begin(std::move(begin)),
         _iterator(std::move(iterator)),
         _end(std::move(end)),
@@ -54,30 +54,30 @@ public:
 
     constexpr filter_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         _iterator = find(std::move(_iterator), _end);
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         do {
             --_iterator;
         } while (!_predicate(*_iterator) && _iterator != _begin);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const filter_iterator& b) const noexcept {
+    constexpr bool eq(const filter_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _iterator == _end;
     }
 };

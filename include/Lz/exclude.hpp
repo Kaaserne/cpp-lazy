@@ -18,7 +18,7 @@ public:
 
     constexpr exclude_iterable() = default;
 
-    LZ_CONSTEXPR_CXX_20
+    LZ_CONSTEXPR_CXX_17
     exclude_iterable(Iterator begin, S end, const diff_type<Iterator> from, const diff_type<Iterator> to) :
         detail::basic_iterable<iterator, S>(iterator(begin, end, from, to), std::move(end)) {
     }
@@ -37,7 +37,7 @@ public:
  * @return An exclude_iterable iterator view object.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 exclude_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 exclude_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
 exclude(Iterable&& iterable, const diff_type<iter_t<Iterable>> from, const diff_type<iter_t<Iterable>> to) {
     LZ_ASSERT(from <= to, "from must be less than or equal to `to`");
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), from, to };

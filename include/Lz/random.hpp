@@ -128,7 +128,7 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    random_iterable(const Distribution& distribution, Generator& generator, const std::ptrdiff_t amount) :
+    constexpr random_iterable(const Distribution& distribution, Generator& generator, const std::ptrdiff_t amount) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(distribution, generator, amount)) {
     }
 
@@ -144,7 +144,7 @@ public:
      * ```
      * @return A new random `value_type` between [min, max].
      */
-    LZ_NODISCARD value_type next_random() const {
+    LZ_NODISCARD constexpr value_type next_random() const {
         return *this->begin();
     }
 
@@ -152,7 +152,7 @@ public:
      * Gets the minimum random value.
      * @return The min value
      */
-    LZ_NODISCARD value_type min_random() const {
+    LZ_NODISCARD constexpr value_type min_random() const {
         return (this->begin().min)();
     }
 
@@ -160,7 +160,7 @@ public:
      * Gets the maximum random value.
      * @return The max value
      */
-    LZ_NODISCARD value_type max_random() const {
+    LZ_NODISCARD constexpr value_type max_random() const {
         return (this->begin().max)();
     }
 };
@@ -178,7 +178,7 @@ public:
  * @return A random view object that generates a sequence of `Generator::result_type`
  */
 template<class Generator, class Distribution>
-LZ_NODISCARD random_iterable<typename Distribution::result_type, Distribution, Generator>
+LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator>
 random(const Distribution& distribution, Generator& generator,
        const std::size_t amount = (std::numeric_limits<std::size_t>::max)()) {
     return { distribution, generator, static_cast<std::ptrdiff_t>(amount) };

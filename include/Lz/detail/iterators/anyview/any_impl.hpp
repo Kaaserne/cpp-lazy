@@ -30,15 +30,15 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
-    any_iterator_impl() = default;
+    constexpr any_iterator_impl() = default;
 
-    any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
 
-    any_iterator_impl(S s) : _iter(std::move(s)) {
+    constexpr any_iterator_impl(S s) : _iter(std::move(s)) {
     }
 
-    any_iterator_impl(common_iterator<Iter, S> iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter(std::move(iter)) {
     }
 
     ~any_iterator_impl() override = default;
@@ -87,9 +87,9 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
-    any_iterator_impl() = default;
+    constexpr any_iterator_impl() = default;
 
-    any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
 
     ~any_iterator_impl() override = default;
@@ -136,9 +136,9 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::bidirectional_iterator_tag;
 
-    any_iterator_impl() = default;
+    constexpr any_iterator_impl() = default;
 
-    any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
 
     ~any_iterator_impl() override = default;
@@ -189,9 +189,9 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::random_access_iterator_tag;
 
-    any_iterator_impl() = default;
+    constexpr any_iterator_impl() = default;
 
-    any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
 
     ~any_iterator_impl() override = default;

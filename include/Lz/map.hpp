@@ -20,16 +20,16 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    LZ_CONSTEXPR_CXX_20 map_iterable(Iterator begin, S end, Function function, std::forward_iterator_tag) :
+    constexpr map_iterable(Iterator begin, S end, Function function, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, S>(iterator(std::move(begin), std::move(function)), std::move(end)) {
     }
 
-    LZ_CONSTEXPR_CXX_20 map_iterable(Iterator begin, S end, Function function, std::bidirectional_iterator_tag) :
+    constexpr map_iterable(Iterator begin, S end, Function function, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(std::move(begin), function), iterator(std::move(end), function)) {
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 map_iterable(Iterator begin, S end, Function function) :
+    constexpr map_iterable(Iterator begin, S end, Function function) :
         map_iterable(std::move(begin), std::move(end), std::move(function), iter_cat_t<Iterator>{}) {
     }
 
@@ -52,7 +52,7 @@ public:
  * `for (auto... lz::map(...))`.
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class Function>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay_t<Function>>
+LZ_NODISCARD constexpr map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay_t<Function>>
 map(Iterable&& iterable, Function&& function) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::forward<Function>(function) };

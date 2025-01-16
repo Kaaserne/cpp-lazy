@@ -79,7 +79,7 @@ private:
     }
 
     template<class I, class S>
-    LZ_CONSTEXPR_CXX_20 void increment_one(I& iterator, const S& end) const {
+    LZ_CONSTEXPR_CXX_14 void increment_one(I& iterator, const S& end) const {
         if (iterator == end) {
             return;
         }
@@ -87,7 +87,7 @@ private:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_20 void decrement_one(I& iterator, const I& begin) const {
+    LZ_CONSTEXPR_CXX_14 void decrement_one(I& iterator, const I& begin) const {
         if (iterator == begin) {
             return;
         }
@@ -100,7 +100,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void increment(index_sequence_helper<I...>) {
+    LZ_CONSTEXPR_CXX_14 void increment(index_sequence_helper<I...>) {
         decompose((increment_one(std::get<I>(_iterators), std::get<I>(_end)), 0)...);
     }
 
@@ -108,43 +108,41 @@ private:
     LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& other, index_sequence_helper<I...>) const {
         // Cannot use auto here. Compiler is unable to deduce the type
         const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(other._iterators))... };
-        const auto end = std::end(expander);
-        return std::find(std::begin(expander), end, false) == end;
+        return detail::all_of(std::begin(expander), std::end(expander), [](bool val) { return val; });
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(index_sequence_helper<I...>) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(index_sequence_helper<I...>) const {
         // Cannot use auto here. Compiler is unable to deduce the type
         const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(_end))... };
-        const auto end = std::end(expander);
-        return detail::find(std::begin(expander), end, false) == end;
+        return detail::all_of(std::begin(expander), std::end(expander), [](bool val) { return val; });
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 explicit zip_longest_iterator(IterTuple iterators, SentinelTuple end) :
+    LZ_CONSTEXPR_CXX_14 explicit zip_longest_iterator(IterTuple iterators, SentinelTuple end) :
         _iterators(std::move(iterators)),
         _end(std::move(end)) {
     }
 
     constexpr zip_longest_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    LZ_CONSTEXPR_CXX_20 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         increment(make_idx_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& b) const {
+    LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& b) const {
         return eq(b, make_idx_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
         return eq(make_idx_sequence_for_this());
     }
 };
@@ -174,7 +172,7 @@ private:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_20 void increment_one(I& iterator, const I& end) const {
+    LZ_CONSTEXPR_CXX_14 void increment_one(I& iterator, const I& end) const {
         if (iterator == end) {
             return;
         }
@@ -187,12 +185,12 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void increment(index_sequence_helper<I...>) {
+    LZ_CONSTEXPR_CXX_14 void increment(index_sequence_helper<I...>) {
         decompose((increment_one(std::get<I>(_iterators), std::get<I>(_end)), 0)...);
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_20 void decrement_one(I& iterator, const difference_type longest, const difference_type this_iter_length) {
+    LZ_CONSTEXPR_CXX_14 void decrement_one(I& iterator, const difference_type longest, const difference_type this_iter_length) {
         if (this_iter_length == longest) {
             --iterator;
         }
@@ -206,7 +204,7 @@ private:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_20 void plus_is_one(I& iterator, const I& end, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is_one(I& iterator, const I& end, const difference_type offset) {
         const auto difference = end - iterator;
         if (offset > difference) {
             iterator = end;
@@ -217,7 +215,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void plus_is(index_sequence_helper<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence_helper<I...>, const difference_type offset) {
         decompose((plus_is_one(std::get<I>(_iterators), std::get<I>(_end), offset), 0)...);
     }
 
@@ -229,7 +227,7 @@ private:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_20 void
+    LZ_CONSTEXPR_CXX_14 void
     min_is_one(I& iterator, const difference_type this_iter_length, const difference_type longest, const difference_type offset) {
         if (this_iter_length == longest) {
             iterator -= offset;
@@ -263,7 +261,7 @@ private:
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 explicit zip_longest_iterator(IterTuple begin, IterTuple iterators, IterTuple end) :
+    constexpr explicit zip_longest_iterator(IterTuple begin, IterTuple iterators, IterTuple end) :
         _begin(std::move(begin)),
         _iterators(std::move(iterators)),
         _end(std::move(end)) {
@@ -271,15 +269,15 @@ public:
 
     constexpr zip_longest_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    LZ_CONSTEXPR_CXX_20 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         increment(make_idx_sequence_for_this());
     }
 
@@ -287,7 +285,7 @@ public:
         decrement(make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         if (offset < 0) {
             min_is(make_idx_sequence_for_this(), -offset);
         }
@@ -296,15 +294,15 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const zip_longest_iterator& other) const {
+    LZ_CONSTEXPR_CXX_20 difference_type difference(const zip_longest_iterator& other) const {
         return minus(other, make_idx_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference operator[](const difference_type offset) const {
+    LZ_CONSTEXPR_CXX_14 reference operator[](const difference_type offset) const {
         return *(*this + offset);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& b) const {
         return eq(b, make_idx_sequence_for_this());
     }
 };

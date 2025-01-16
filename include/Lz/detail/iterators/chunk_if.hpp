@@ -57,7 +57,7 @@ private:
     S _end;
     mutable func_container<UnaryPredicate> _predicate;
 
-    LZ_CONSTEXPR_CXX_20 void find_next() {
+    LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;
         using std::find_if;
         _sub_range_end = find_if(_sub_range_end, _end, _predicate);
@@ -66,7 +66,7 @@ private:
 public:
     constexpr chunk_if_iterator() = default;
 
-    chunk_if_iterator(Iterator iterator, S end, UnaryPredicate predicate, bool is_empty) :
+    LZ_CONSTEXPR_CXX_14 chunk_if_iterator(Iterator iterator, S end, UnaryPredicate predicate, bool is_empty) :
         _sub_range_begin(iterator),
         _sub_range_end(std::move(iterator)),
         _end(std::move(end)),
@@ -79,15 +79,15 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return { _sub_range_begin, _sub_range_end };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         if (_trailing_empty && _sub_range_end == _end) {
             _sub_range_begin = _sub_range_end;
             _trailing_empty = false;
@@ -108,12 +108,12 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const chunk_if_iterator& rhs) const {
+    constexpr bool eq(const chunk_if_iterator& rhs) const {
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _trailing_empty == rhs._trailing_empty;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel) const {
         return _sub_range_begin == _end && !_trailing_empty;
     }
 };

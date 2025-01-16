@@ -31,13 +31,13 @@ private:
     S _end;
     difference_type _chunk_size;
 
-    LZ_CONSTEXPR_CXX_20 void next_chunk() {
+    LZ_CONSTEXPR_CXX_14 void next_chunk() {
         for (difference_type count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
         }
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, S end, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator iterator, S end, const std::size_t chunk_size) :
         _sub_range_begin(iterator),
         _sub_range_end(std::move(iterator)),
         _end(std::move(end)),
@@ -50,25 +50,24 @@ public:
 
     constexpr chunks_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return { _sub_range_begin, _sub_range_end };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const chunks_iterator& rhs) const noexcept {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "incompatible iterators: different chunk sizes");
+    constexpr bool eq(const chunks_iterator& rhs) const noexcept {
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _sub_range_begin == _end;
     }
 };

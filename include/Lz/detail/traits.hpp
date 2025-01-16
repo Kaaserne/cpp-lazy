@@ -157,6 +157,32 @@ using val_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::value_ty
 template<class Iterable>
 using diff_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::difference_type;
 
+/**
+ * @brief Can be used to get the reference type of an iterable. Example: `lz::ref_iterable_t<std::vector<int>>` will return
+ * `int&`.
+ *
+ * @tparam Iterable The iterable to get the reference type from.
+ */
+template<class Iterable>
+using ref_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::reference;
+
+/**
+ * @brief Can be used to get the pointer type of an iterable. Example: `lz::ptr_iterable_t<std::vector<int>>` will return `int*`.
+ *
+ * @tparam Iterable The iterable to get the pointer type from.
+ */
+template<class Iterable>
+using ptr_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::pointer;
+
+/**
+ * @brief Can be used to get the iterator category of an iterable. Example: `lz::iter_cat_iterable_t<std::vector<int>>` will
+ * return `std::random_access_iterator_tag`.
+ *
+ * @tparam Iterable The iterable to get the iterator category from.
+ */
+template<class Iterable>
+using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
+
 namespace detail {
 
 template<class Function, class... Args>

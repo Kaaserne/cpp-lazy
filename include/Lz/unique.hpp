@@ -20,16 +20,16 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    unique_iterable(Iterator begin, S end, BinaryPredicate compare, std::forward_iterator_tag) :
+    constexpr unique_iterable(Iterator begin, S end, BinaryPredicate compare, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(compare))) {
     }
 
-    unique_iterable(Iterator begin, Iterator end, BinaryPredicate compare, std::bidirectional_iterator_tag) :
+    constexpr unique_iterable(Iterator begin, Iterator end, BinaryPredicate compare, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end, compare), iterator(end, begin, end, compare)) {
     }
 
 public:
-    unique_iterable(Iterator begin, S end, BinaryPredicate compare) :
+    constexpr unique_iterable(Iterator begin, S end, BinaryPredicate compare) :
         unique_iterable(std::move(begin), std::move(end), std::move(compare), iter_cat_t<Iterator>{}) {
     }
 
@@ -51,8 +51,8 @@ public:
  * @return An unique_iterable iterator view object, which can be used to iterate over in a `(for ... : unqiue(...))`
  * fashion.
  */
-template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::less, val_iterable_t<Iterable>)>
-unique_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
+template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::less, ref_iterable_t<Iterable>)>
+LZ_NODISCARD constexpr unique_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
 unique(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
              std::move(binary_predicate) };

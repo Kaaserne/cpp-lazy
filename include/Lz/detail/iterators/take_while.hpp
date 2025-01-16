@@ -23,7 +23,7 @@ class take_while_iterator
 
     using traits = std::iterator_traits<Iterator>;
 
-    void incremented_check() {
+    LZ_CONSTEXPR_CXX_14 void incremented_check() {
         if (_iterator != _end && !_unary_predicate(*_iterator)) {
             _iterator = _end;
         }
@@ -45,24 +45,24 @@ public:
         incremented_check();
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         incremented_check();
     }
 
-    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const take_while_iterator& b) const noexcept {
+    constexpr bool eq(const take_while_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _iterator == _end;
     }
 };

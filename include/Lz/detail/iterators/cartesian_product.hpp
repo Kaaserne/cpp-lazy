@@ -41,11 +41,11 @@ private:
 
 #ifndef __cpp_if_constexpr
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, void> next() const noexcept {
+    constexpr enable_if<I == 0, void> next() const noexcept {
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, void> previous() const noexcept {
+    constexpr enable_if<I == 0, void> previous() const noexcept {
     }
 
 #ifdef LZ_MSVC
@@ -54,7 +54,7 @@ private:
 #endif // LZ_MSVC
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 enable_if<(I > 0), void> next() {
+    LZ_CONSTEXPR_CXX_17 enable_if<(I > 0), void> next() {
         auto& prev = std::get<I - 1>(_iterator);
         ++prev;
 
@@ -74,23 +74,23 @@ private:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 void do_prev() {
+    LZ_CONSTEXPR_CXX_14 void do_prev() {
         --std::get<I>(_iterator);
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 enable_if<I == 0> do_prev_all() {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> do_prev_all() {
         do_prev<0>();
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 enable_if<(I > 0)> do_prev_all() {
+    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> do_prev_all() {
         do_prev<I>();
         do_prev_all<I - 1>();
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 enable_if<(I > 0)> previous() {
+    LZ_CONSTEXPR_CXX_17 enable_if<(I > 0)> previous() {
         if (_iterator == _end) {
             do_prev_all<I - 1>();
         }
@@ -114,7 +114,7 @@ private:
 #endif // LZ_MSVC
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_17 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
         auto& iterator = std::get<0>(_iterator);
         iterator = std::next(std::move(iterator), offset);
     }
@@ -144,7 +144,7 @@ private:
 
 #else
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 void next() {
+    LZ_CONSTEXPR_CXX_17 void next() {
         if constexpr (I == 0) {
             return;
         }
@@ -197,12 +197,12 @@ private:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 void do_prev() {
+    LZ_CONSTEXPR_CXX_14 void do_prev() {
         --std::get<I>(_iterator);
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 void do_prev_all() {
+    LZ_CONSTEXPR_CXX_14 void do_prev_all() {
         do_prev<I>();
         if constexpr (I > 0) {
             do_prev_all<I - 1>();
@@ -210,7 +210,7 @@ private:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_20 void previous() {
+    LZ_CONSTEXPR_CXX_14 void previous() {
         if constexpr (I == 0) {
             return;
         }
@@ -235,7 +235,7 @@ private:
 #endif // __cpp_if_constexpr
 
     template<std::size_t... Is>
-    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence_helper<Is...>) const {
+    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence_helper<Is...>) const {
         return reference{ *std::get<Is>(_iterator)... };
     }
 
@@ -249,7 +249,7 @@ private:
 
     using index_sequence_for_this = make_index_sequence<tup_size>;
 
-    void check_end() {
+    LZ_CONSTEXPR_CXX_14 void check_end() {
         if (std::get<0>(_iterator) == std::get<0>(_end)) {
             _iterator = _end;
         }
@@ -258,26 +258,26 @@ private:
 public:
     constexpr cartesian_product_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_20
+    constexpr
     cartesian_product_iterator(IterTuple iterator, IterTuple begin, SentinelTuple end) :
         _begin(std::move(begin)),
         _iterator(std::move(iterator)),
         _end(std::move(end)) {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return dereference(index_sequence_for_this());
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         next<tup_size>();
     }
 
-    void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         previous<tup_size>();
     }
 
@@ -286,15 +286,15 @@ public:
         check_end();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const cartesian_product_iterator& other) const {
+     constexpr bool eq(const cartesian_product_iterator& other) const {
         return _iterator == other._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+     constexpr bool eq(default_sentinel) const {
         return _iterator == _end;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const cartesian_product_iterator& other) const {
+     LZ_CONSTEXPR_CXX_20 difference_type difference(const cartesian_product_iterator& other) const {
         return other.distance_impl(index_sequence_for_this(), *this);
     }
 };

@@ -105,7 +105,7 @@ join(Iterable&& iterable, std::string delimiter) {
  * @return A string where each item in `iterable` is appended to a string, separated by `delimiter`.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-std::string str_join(Iterable&& iterable, const char* delimiter = "") {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 std::string str_join(Iterable&& iterable, const char* delimiter = "") {
     // clang-format off
     return detail::basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>(
         detail::begin(std::forward<Iterable>(iterable)),detail::end(std::forward<Iterable>(iterable)))
@@ -139,7 +139,7 @@ join(Iterable&& iterable, std::string delimiter, std::string fmt = "{}") {
  * @return A string where each item in `iterable` is appended to a string, separated by `delimiter`.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-std::string str_join(Iterable&& iterable, std::string delimiter = "", std::string fmt = "{}") {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_20 std::string str_join(Iterable&& iterable, std::string delimiter = "", std::string fmt = "{}") {
     // clang-format off
     return detail::basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>(
         detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)))

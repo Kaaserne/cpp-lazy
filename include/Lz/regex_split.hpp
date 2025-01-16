@@ -19,7 +19,7 @@ public:
     using const_iterator = iterator;
     using value_type = typename RegexTokenIter::value_type;
 
-    constexpr regex_split_iterable(RegexTokenIter first, RegexTokenIter last) :
+    regex_split_iterable(RegexTokenIter first, RegexTokenIter last) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(first), last)) {
     }
 

@@ -28,35 +28,35 @@ public:
     using difference_type = typename traits::difference_type;
     using iterator_category = typename traits::iterator_category;
 
-    LZ_CONSTEXPR_CXX_20 loop_iterator(Iterator iterator, Iterator begin, S end) :
+    constexpr loop_iterator(Iterator iterator, Iterator begin, S end) :
         _begin(std::move(begin)),
         _iterator(std::move(iterator)),
         _end(std::move(end)) {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         if (_iterator == _end) {
             _iterator = _begin;
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         if (_iterator == _begin) {
             _iterator = _end;
         }
         --_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 void plus_is(difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(difference_type offset) {
         if (offset >= 0) {
             _iterator += offset % (_end - _begin);
             return;
@@ -67,18 +67,18 @@ public:
         _iterator -= offset == 0 ? dist : offset;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& it) const noexcept {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& it) const noexcept {
         if (it._iterator == _end) {
             return 0;
         }
         return (std::numeric_limits<difference_type>::max)();
     }
 
-    LZ_NODISCARD constexpr bool eq(const loop_iterator&) const noexcept {
+    constexpr bool eq(const loop_iterator&) const noexcept {
         return false;
     }
 
-    LZ_NODISCARD constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return false;
     }
 };

@@ -29,33 +29,33 @@ public:
 
     constexpr inclusive_scan_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator(Iterator iterator, S end, T init, BinaryOp bin_op) :
+    constexpr inclusive_scan_iterator(Iterator iterator, S end, T init, BinaryOp bin_op) :
         _reducer(std::move(init)),
         _iterator(std::move(iterator)),
         _end(std::move(end)),
         _binary_op(std::move(bin_op)) {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 reference dereference() const {
+    constexpr reference dereference() const {
         return _reducer;
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         if (_iterator != _end) {
             _reducer = _binary_op(std::move(_reducer), *_iterator);
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_NODISCARD constexpr bool eq(const inclusive_scan_iterator& b) const {
+    constexpr bool eq(const inclusive_scan_iterator& b) const {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel) const {
         return _iterator == _end;
     }
 };

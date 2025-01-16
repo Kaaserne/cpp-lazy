@@ -31,13 +31,19 @@ private:
     S2 _to_search_end;
     bool _trailingEmpty{ true };
 
-    std::pair<Iterator, Iterator> search() const {
+    LZ_CONSTEXPR_CXX_14 std::pair<Iterator, Iterator> search() const {
         using std::search;
-        return search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(std::equal_to, val_t<Iterator>){});
+        return search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(std::equal_to, ref_t<Iterator>){});
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 split_iterator(Iterator begin, S end, Iterator2 begin2, S2 end2) :
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = basic_iterable<Iterator>;
+    using reference = value_type;
+    using difference_type = diff_type<Iterator>;
+    using pointer = fake_ptr_proxy<reference>;
+
+    LZ_CONSTEXPR_CXX_14 split_iterator(Iterator begin, S end, Iterator2 begin2, S2 end2) :
         _sub_range_end({ begin, begin }),
         _sub_range_begin(std::move(begin)),
         _to_search(std::move(begin2)),
@@ -53,15 +59,15 @@ public:
 
     split_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_20 value_type dereference() const {
+    constexpr value_type dereference() const {
         return { _sub_range_begin, _sub_range_end.first };
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         if (_trailingEmpty && _sub_range_end.second == _end) {
             _sub_range_begin = _sub_range_end.first;
             _trailingEmpty = false;
@@ -80,12 +86,12 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const split_iterator& rhs) const noexcept {
+    constexpr bool eq(const split_iterator& rhs) const noexcept {
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end.first == rhs._sub_range_end.first &&
                _trailingEmpty == rhs._trailingEmpty;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel) const {
         return _sub_range_begin == _end && !_trailingEmpty;
     }
 };

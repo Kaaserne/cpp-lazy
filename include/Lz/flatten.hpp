@@ -25,27 +25,22 @@ public:
     using value_type = typename detail::flatten_iterator<Iterator, S, 0>::value_type;
 
 private:
-    using Base = detail::basic_iterable<iterator, typename iterator::sentinel>;
+    using base = detail::basic_iterable<iterator, typename iterator::sentinel>;
 
-    LZ_CONSTEXPR_CXX_20 flatten_iterable(Iterator begin, S end, std::forward_iterator_tag) : Base(iterator(begin, begin, end)) {
+    LZ_CONSTEXPR_CXX_14 flatten_iterable(Iterator begin, S end, std::forward_iterator_tag) : base(iterator(begin, begin, end)) {
     }
 
-    LZ_CONSTEXPR_CXX_20 flatten_iterable(Iterator begin, S end, std::bidirectional_iterator_tag) :
-        Base(iterator(begin, begin, end), iterator(end, begin, end)) {
+    LZ_CONSTEXPR_CXX_14 flatten_iterable(Iterator begin, S end, std::bidirectional_iterator_tag) :
+        base(iterator(begin, begin, end), iterator(end, begin, end)) {
     }
 
 public:
     constexpr flatten_iterable() = default;
 
-    LZ_CONSTEXPR_CXX_20 flatten_iterable(Iterator begin, S end) :
+    LZ_CONSTEXPR_CXX_14 flatten_iterable(Iterator begin, S end) :
         flatten_iterable(std::move(begin), std::move(end), iter_cat_t<iterator>{}) {
     }
 };
-
-/**
- * @addtogroup ItFns
- * @{
- */
 
 template<class, class = void>
 struct dimensions;
@@ -63,15 +58,21 @@ inline constexpr std::size_t dimensions_v = dimensions<Iterable>::value;
 #endif
 
 /**
+ * @addtogroup ItFns
+ * @{
+ */
+
+// clang-format off
+
+/**
  * This function returns a view object that flattens an n-dimensional array.
  * @param iterable The iterable to flatten.
  * @return A flatten view object, where its iterator is a forward iterator.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20
-    // clang-format off
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
 flatten_iterable<iter_t<Iterable>, sentinel_t<Iterable>, dimensions<Iterable>::value - !detail::is_c_array<Iterable>::value>
-    flatten(Iterable&& iterable) {
+flatten(Iterable&& iterable) {
     static constexpr auto dims = dimensions<Iterable>::value - !detail::is_c_array<Iterable>::value;
     static_assert(std::is_default_constructible<iter_t<Iterable>>::value,
                   "underlying iterator needs to be default constructible");

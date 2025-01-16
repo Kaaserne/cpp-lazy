@@ -48,12 +48,37 @@ public:
      *
      * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
      */
-    template<class Iterable>
+    template<LZ_CONCEPT_ITERABLE Iterable>
     any_iterable(Iterable&& iterable) :
         base(it(std::make_shared<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable)))),
              it(std::make_shared<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))))) {
     }
 };
+
+/**
+ * @addtogroup ItFns
+ * @{
+ */
+
+/**
+ * Creates an any_iterable object from an iterable. This is useful when you cannot use `auto` or when you want to store
+ * different types of views in a container.
+ *
+ * @param iterable The iterable to create an any_iterable from.
+ * @return The any_iterable object.
+ */
+template<LZ_CONCEPT_ITERABLE Iterable>
+any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>, diff_iterable_t<Iterable>>
+make_any_iterable(Iterable&& iterable) {
+    return any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>,
+                        diff_iterable_t<Iterable>>(std::forward<Iterable>(iterable));
+}
+
+// End of group
+/**
+ * @}
+ */
+
 } // namespace lz
 
 #endif // LZ_ANY_VIEW_HPP

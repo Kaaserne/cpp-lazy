@@ -24,61 +24,57 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    common_iterator() = default;
+    constexpr common_iterator() = default;
 
-    common_iterator(const Iterator& iter) : _data(iter) {
+    constexpr common_iterator(const Iterator& iter) : _data(iter) {
     }
 
-    common_iterator(const S& sent) : _data(sent) {
+    constexpr common_iterator(const S& sent) : _data(sent) {
     }
 
-    common_iterator& operator=(const Iterator& iter) {
+    LZ_CONSTEXPR_CXX_14 common_iterator& operator=(const Iterator& iter) {
         _data = iter;
         return *this;
     }
 
-    common_iterator& operator=(const S& sent) {
+    LZ_CONSTEXPR_CXX_14 common_iterator& operator=(const S& sent) {
         _data = sent;
         return *this;
     }
 
-    reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
 #ifdef __cpp_lib_variant
         using std::get_if;
 #endif
         auto&& iter = get_if<Iterator>(&_data);
-        LZ_ASSERT(iter != nullptr, "Cannot get pointer from a sentinel");
         return **iter;
     }
 
-    fake_ptr_proxy<reference> arrow() const {
+    LZ_CONSTEXPR_CXX_17 fake_ptr_proxy<reference> arrow() const {
 #ifdef __cpp_lib_variant
         using std::get_if;
 #endif
         auto&& iter = get_if<Iterator>(&_data);
-        LZ_ASSERT(iter != nullptr, "Cannot get pointer from a sentinel");
         return fake_ptr_proxy<decltype(**this)>(**iter);
     }
 
-    void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
 #ifdef __cpp_lib_variant
         using std::get_if;
 #endif
         auto&& iter = get_if<Iterator>(&_data);
-        LZ_ASSERT(iter != nullptr, "Cannot increment a sentinel");
         ++(*iter);
     }
 
-    void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
 #ifdef __cpp_lib_variant
         using std::get_if;
 #endif
         auto&& iter = get_if<Iterator>(&_data);
-        LZ_ASSERT(iter != nullptr, "Cannot decrement a sentinel");
         --*iter;
     }
 
-    bool eq(const common_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const common_iterator& rhs) const {
 #ifdef __cpp_lib_variant
         using std::get;
         using std::get_if;
@@ -99,16 +95,15 @@ public:
         return true;
     }
 
-    void plus_is(const difference_type n) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
 #ifdef __cpp_lib_variant
         using std::get_if;
 #endif
         auto&& iter = get_if<Iterator>(&_data);
-        LZ_ASSERT(iter != nullptr, "Cannot increment sentinel");
         *iter += n;
     }
 
-    difference_type difference(const common_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const common_iterator& rhs) const {
 #ifdef __cpp_lib_variant
         using std::get;
         using std::get_if;
@@ -116,7 +111,6 @@ public:
 
         auto&& lhs_iter = get_if<Iterator>(&_data);
         auto&& rhs_iter = get_if<Iterator>(&rhs._data);
-        LZ_ASSERT(lhs_iter && rhs_iter, "Cannot get difference between a sentinel and an iterator");
         return *lhs_iter - *rhs_iter;
     }
 };

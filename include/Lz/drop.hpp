@@ -10,7 +10,7 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
- * @brief Drops the first `n` elements from the iterable.
+ * Drops the first `n` elements from the iterable.
  * @param iterable The iterable to drop elements from.
  * @param n The amount of elements to drop.
  * @return A basic_iterable containing the iterable with the first `n` elements dropped.

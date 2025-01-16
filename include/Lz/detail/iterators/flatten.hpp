@@ -109,41 +109,41 @@ public:
 
     constexpr flatten_wrapper() = default;
 
-    LZ_CONSTEXPR_CXX_20 flatten_wrapper(Iterator current, Iterator begin, S end) :
+    constexpr flatten_wrapper(Iterator current, Iterator begin, S end) :
         _begin(std::move(begin)),
         _current(std::move(current)),
         _end(std::move(end)) {
     }
 
-    LZ_CONSTEXPR_CXX_20 bool has_some() const noexcept {
+    constexpr bool has_some() const noexcept {
         return _current != _end;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool has_prev() const noexcept {
+    constexpr bool has_prev() const noexcept {
         return _current != _begin;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const flatten_wrapper& b) const noexcept {
+    constexpr bool eq(const flatten_wrapper& b) const noexcept {
         return _current == b._current;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _current == _end;
     }
 
-    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_current;
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    constexpr void increment() {
         ++_current;
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    constexpr void decrement() {
         --_current;
     }
 };
@@ -170,7 +170,7 @@ public:
     using difference_type = typename this_inner::difference_type;
 
 private:
-    LZ_CONSTEXPR_CXX_20 void advance() {
+    LZ_CONSTEXPR_CXX_14 void advance() {
         if (_inner_iter.has_some()) {
             return;
         }
@@ -190,7 +190,7 @@ private:
 public:
     constexpr flatten_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_20 flatten_iterator(Iterator it, Iterator begin, S end) :
+    LZ_CONSTEXPR_CXX_14 flatten_iterator(Iterator it, Iterator begin, S end) :
         _outer_iter(std::move(it), std::move(begin), std::move(end)) {
         if (_outer_iter.has_some()) {
             const auto beg = std::begin(*_outer_iter);
@@ -199,36 +199,36 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 bool has_some() const {
+    constexpr bool has_some() const {
         return _outer_iter.has_some();
     }
 
-    LZ_CONSTEXPR_CXX_20 bool has_prev() const {
+    constexpr bool has_prev() const {
         return _inner_iter.has_prev() || _outer_iter.has_prev();
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const flatten_iterator& b) const noexcept {
+    constexpr bool eq(const flatten_iterator& b) const noexcept {
         return _outer_iter == b._outer_iter && _inner_iter == b._inner_iter;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return !has_some();
     }
 
-    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_inner_iter;
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_inner_iter;
         this->advance();
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         if (_inner_iter.has_prev()) {
             --_inner_iter;
             return;
@@ -267,27 +267,27 @@ public:
     constexpr flatten_iterator(Iterator it, Iterator begin, S end) : _range(std::move(it), std::move(begin), std::move(end)) {
     }
 
-    LZ_CONSTEXPR_CXX_20 bool has_prev() const noexcept {
+    constexpr bool has_prev() const noexcept {
         return _range.has_prev();
     }
 
-    LZ_CONSTEXPR_CXX_20 bool has_some() const noexcept {
+    constexpr bool has_some() const noexcept {
         return _range.has_some();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_range;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const flatten_iterator& b) const noexcept {
+    constexpr bool eq(const flatten_iterator& b) const noexcept {
         return _range == b._range;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _range.eq(default_sentinel{});
     }
 

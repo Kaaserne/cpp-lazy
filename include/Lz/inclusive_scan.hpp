@@ -18,7 +18,7 @@ public:
 
     constexpr inclusive_scan_iterable() = default;
 
-    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterable(Iterator begin, S end, T init, BinaryOp binary_op) :
+    constexpr inclusive_scan_iterable(Iterator begin, S end, T init, BinaryOp binary_op) :
         detail::basic_iterable<iterator, default_sentinel>(
             iterator(std::move(begin), std::move(end), std::move(init), std::move(binary_op))) {
     }
@@ -30,8 +30,7 @@ public:
  */
 
 /**
- * @brief Returns an inclusive scan iterator.
- * @details Returns an inclusive scan iterator. This iterator begins by returning `*std::begin(iterable)`. It then
+ * Returns an inclusive scan iterator. This iterator begins by returning `*std::begin(iterable)`. It then
  * proceeds to the next one, which is essentially the previously calculated value (calculated by `binary_op(std::move(current),
  * *it)`
  * + the current iterator element being handled. Example:

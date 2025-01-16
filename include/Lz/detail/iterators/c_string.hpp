@@ -28,11 +28,11 @@ public:
 
     constexpr c_string_iterator() = default;
 
-    LZ_NODISCARD constexpr reference dereference() const noexcept {
+    constexpr reference dereference() const noexcept {
         return *_it;
     }
 
-    LZ_NODISCARD constexpr pointer arrow() const noexcept {
+    constexpr pointer arrow() const noexcept {
         return _it;
     }
 
@@ -40,7 +40,7 @@ public:
         ++_it;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const c_string_iterator& b) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(const c_string_iterator& b) const noexcept {
         if (b._it == nullptr) {
             if (_it == nullptr) {
                 return true;
@@ -50,7 +50,7 @@ public:
         return _it == b._it;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _it != nullptr && *_it == '\0';
     }
 
@@ -62,12 +62,11 @@ public:
         _it += offset;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 difference_type difference(const c_string_iterator& b) const noexcept {
-        LZ_ASSERT(_it != nullptr && b._it != nullptr, "Incompatible iterator types");
+    constexpr difference_type difference(const c_string_iterator& b) const noexcept {
         return _it - b._it;
     }
 
-    LZ_NODISCARD constexpr explicit operator bool() const noexcept {
+    constexpr explicit operator bool() const noexcept {
         return _it != nullptr && *_it != '\0';
     }
 };

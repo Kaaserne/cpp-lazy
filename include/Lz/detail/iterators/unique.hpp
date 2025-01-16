@@ -37,15 +37,15 @@ public:
 
     constexpr unique_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         _iterator = detail::adjacent_find(std::move(_iterator), _end, _predicate);
 
         if (_iterator != _end) {
@@ -53,11 +53,11 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const unique_iterator& b) const noexcept {
+    constexpr bool eq(const unique_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _iterator == _end;
     }
 };
@@ -90,11 +90,11 @@ public:
 
     constexpr unique_iterator() = default;
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -106,7 +106,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         if (_iterator == _begin) {
             return;
         }
@@ -126,7 +126,7 @@ public:
         _iterator = std::move(next);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const unique_iterator& b) const noexcept {
+    constexpr bool eq(const unique_iterator& b) const noexcept {
         return _iterator == b._iterator;
     }
 };

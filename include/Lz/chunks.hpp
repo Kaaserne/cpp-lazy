@@ -18,16 +18,19 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    constexpr chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::forward_iterator_tag) :
+    LZ_CONSTEXPR_CXX_14
+    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::forward_iterator_tag) :
         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), chunk_size)) {
     }
 
-    constexpr chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::bidirectional_iterator_tag) :
+    LZ_CONSTEXPR_CXX_14
+    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::bidirectional_iterator_tag) :
         detail::basic_iterable<iterator>(iterator(begin, begin, end, chunk_size), iterator(end, begin, end, chunk_size)) {
     }
 
 public:
-    constexpr chunks_iterable(Iterator begin, S end, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14
+    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size) :
         chunks_iterable(begin, end, chunk_size, iter_cat_t<Iterator>{}) {
     }
 
@@ -47,7 +50,7 @@ public:
  * @return A Chunk iterator view object.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD constexpr chunks_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 chunks_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
 chunks(Iterable&& iterable, const std::size_t chunk_size) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), chunk_size };
 }

@@ -26,11 +26,11 @@ public:
 
     constexpr repeat_iterator() = default;
 
-    LZ_NODISCARD constexpr reference dereference() const noexcept {
+    constexpr reference dereference() const noexcept {
         return _to_repeat;
     }
 
-    LZ_NODISCARD constexpr pointer arrow() const noexcept {
+    constexpr pointer arrow() const noexcept {
         return &_to_repeat;
     }
 
@@ -40,11 +40,11 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const repeat_iterator& b) const noexcept {
+    constexpr bool eq(const repeat_iterator& b) const noexcept {
         return _amount == b._amount;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _amount == 0;
     }
 };

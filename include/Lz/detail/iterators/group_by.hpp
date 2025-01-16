@@ -24,17 +24,17 @@ class group_by_iterator
     S _end;
     mutable func_container<BinaryPredicate> _comparer;
 
-    using vt = val_t<Iterator>;
     using ref_type = ref_t<Iterator>;
 
-    LZ_CONSTEXPR_CXX_20 void find_next(ref_type next) {
+    LZ_CONSTEXPR_CXX_14 void find_next(ref_type next) {
         using detail::find_if;
         using std::find_if;
 
-        _sub_range_end = find_if(std::move(_sub_range_end), _end, [this, &next](const vt& v) { return !_comparer(v, next); });
+        using rt = ref_t<Iterator>;
+        _sub_range_end = find_if(std::move(_sub_range_end), _end, [this, &next](rt v) { return !_comparer(v, next); });
     }
 
-    LZ_CONSTEXPR_CXX_20 void advance() {
+    LZ_CONSTEXPR_CXX_14 void advance() {
         if (_sub_range_end == _end) {
             return;
         }
@@ -52,7 +52,7 @@ public:
 
     constexpr group_by_iterator() = default;
 
-    group_by_iterator(Iterator begin, S end, BinaryPredicate binary_predicate) :
+    LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator begin, S end, BinaryPredicate binary_predicate) :
         _sub_range_end(begin),
         _sub_range_begin(std::move(begin)),
         _end(std::move(end)),
@@ -63,24 +63,24 @@ public:
         advance();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         _sub_range_begin = _sub_range_end;
         advance();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const group_by_iterator& rhs) const noexcept {
+    constexpr bool eq(const group_by_iterator& rhs) const noexcept {
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _sub_range_begin == _end;
     }
 };

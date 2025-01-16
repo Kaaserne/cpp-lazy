@@ -34,11 +34,11 @@ public:
         _is_inf_loop(is_inf_loop) {
     }
 
-    LZ_NODISCARD constexpr reference dereference() const {
+    constexpr reference dereference() const {
         return _func();
     }
 
-    LZ_NODISCARD constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -48,12 +48,11 @@ public:
         }
     }
 
-    LZ_NODISCARD constexpr bool eq(const generate_iterator& b) const noexcept {
-        LZ_ASSERT(_is_inf_loop == b._is_inf_loop, "incompatible iterator types: both must be while true or not");
+    constexpr bool eq(const generate_iterator& b) const noexcept {
         return _current == b._current;
     }
 
-    LZ_NODISCARD constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _current == 0;
     }
 };

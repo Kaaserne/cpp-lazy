@@ -225,7 +225,7 @@ public:
 
     // clang-format off
     //! See inclusive_scan.hpp for documentation.
-    template<class T = value_type, class BinaryOp = MAKE_BIN_PRED(std::plus, val_t<iterator>)>
+    template<class T = value_type, class BinaryOp = MAKE_BIN_PRED(std::plus, ref_t<iterator>)>
     LZ_NODISCARD
     LZ_CONSTEXPR_CXX_20 chain_iterable<detail::inclusive_scan_iterator<Iterator, S, detail::decay_t<T>, detail::decay_t<BinaryOp>>>
     inclusive_scan(T&& init = {}, BinaryOp&& binary_op = {}) const {
@@ -233,7 +233,7 @@ public:
     }
 
     //! See exclusive_scan.hpp for documentation.
-    template<class T = value_type, class BinaryOp = MAKE_BIN_PRED(std::plus, val_t<iterator>)>
+    template<class T = value_type, class BinaryOp = MAKE_BIN_PRED(std::plus, ref_t<iterator>)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20
     chain_iterable<detail::exclusive_scan_iterator<Iterator, S, detail::decay_t<T>, detail::decay_t<BinaryOp>>>
     exclusive_scan(T&& init = {}, BinaryOp&& binary_op = {}) const {
