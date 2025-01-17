@@ -23,9 +23,7 @@
 #include <stacktrace>
 #endif
 
-#ifdef LZ_HAS_EXECUTION
-#include <execution>
-#endif
+#include <exception>
 
 namespace lz {
 
