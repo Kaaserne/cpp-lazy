@@ -73,7 +73,7 @@ template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
 flatten_iterable<iter_t<Iterable>, sentinel_t<Iterable>, dimensions<Iterable>::value - !detail::is_c_array<Iterable>::value>
 flatten(Iterable&& iterable) {
-    static constexpr auto dims = dimensions<Iterable>::value - !detail::is_c_array<Iterable>::value;
+    constexpr auto dims = dimensions<Iterable>::value - !detail::is_c_array<Iterable>::value;
     static_assert(std::is_default_constructible<iter_t<Iterable>>::value,
                   "underlying iterator needs to be default constructible");
     return flatten_iterable<iter_t<Iterable>, sentinel_t<Iterable>, dims>(detail::begin(std::forward<Iterable>(iterable)),
