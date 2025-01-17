@@ -9,6 +9,7 @@
 #include <Lz/cartesian_product.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/chunks.hpp>
+#include <Lz/common.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/drop_while.hpp>
@@ -23,6 +24,7 @@
 #include <Lz/group_by.hpp>
 #include <Lz/inclusive_scan.hpp>
 #include <Lz/iter_tools.hpp>
+#include <Lz/iterable.hpp>
 #include <Lz/join.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/loop.hpp>
@@ -39,6 +41,7 @@
 #include <Lz/unique.hpp>
 #include <Lz/zip.hpp>
 #include <Lz/zip_longest.hpp>
+
 
 namespace lz {
 
