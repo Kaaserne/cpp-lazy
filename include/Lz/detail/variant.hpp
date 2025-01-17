@@ -60,6 +60,8 @@ class variant {
         case state::t2:
             ::new (std::addressof(_variant._t2)) T2(std::forward<V2>(other_variant_type2));
             break;
+        default:
+            break;
         }
     }
 
@@ -165,8 +167,10 @@ public:
         case state::t2:
             _variant._t2.~T2();
             break;
+        default:
+            _state = state::none;
+            break;
         }
-        _state = state::none;
     }
 };
 
