@@ -13,7 +13,7 @@ TEST_CASE("Generate changing and creating elements", "[Generate][Basic functiona
 
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
-    auto generator = lz::generate<std::function<std::size_t()>>(
+    auto generator = lz::generate(
         [&counter]() {
             auto tmp{ counter++ };
             return tmp;
