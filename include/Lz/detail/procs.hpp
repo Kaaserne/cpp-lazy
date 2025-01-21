@@ -76,7 +76,53 @@ LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::e
     return std::end(array);
 }
 
-template<class Fn, std::size_t... I>
+template<class IterableTuple, std::size_t... I>
+LZ_CONSTEXPR_CXX_14 auto begin_tuple(IterableTuple&& iterable_tuple, std::index_sequence<I...>)
+    -> decltype(std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {
+    return std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
+}
+
+template<class IterableTuple, std::size_t... I>
+LZ_CONSTEXPR_CXX_14 auto end_tuple(IterableTuple&& iterable_tuple, std::index_sequence<I...>)
+    -> decltype(std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {
+    return std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
+}
+
+template<class TAdaptor, class... Ts>
+struct fn_args_holder {
+    std::tuple<Ts...> data;
+
+    using adaptor = fn_args_holder<TAdaptor, Ts...>;
+
+    template<class... Args>
+    LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) noexcept : data(std::forward<Args>(args)...) {
+    }
+
+    template<class Iterable, std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable, index_sequence_helper<I...>) const& {
+        return TAdaptor{}(std::forward<Iterable>(iterable), std::get<I>(data)...);
+    }
+
+    template<class Iterable, std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 auto
+    operator()(Iterable&& iterable, index_sequence_helper<I...>) && -> decltype(TAdaptor{}(std::forward<Iterable>(iterable),
+                                                                                           std::get<I>(std::move(data))...)) {
+        return TAdaptor{}(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
+    }
+
+    template<class Iterable>
+    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) const& -> decltype((*this)(std::forward<Iterable>(iterable),
+                                                                                        make_index_sequence<sizeof...(Ts)>{})) {
+        return (*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
+    }
+
+    template<class Iterable>
+    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) && -> decltype(std::move(*this)(std::forward<Iterable>(iterable))) {
+        return std::move(*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
+    }
+};
+
+template<class Fn>
 struct tuple_expand {
 private:
     func_container<Fn> _fn;
@@ -84,27 +130,42 @@ private:
 public:
     constexpr tuple_expand() = default;
 
-    explicit constexpr tuple_expand(Fn fn) : _fn(std::move(fn)) {
+    template<class F>
+    explicit constexpr tuple_expand(F&& fn) : _fn(std::forward<F>(fn)) {
     }
 
-    // template<class Tuple>
-    // constexpr auto operator()(Tuple&& tuple) -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
-    //     return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
-    // }
+    template<class Tuple, std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence_helper<I...>)
+        -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
+        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
+    }
+
+    template<class Tuple, std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence_helper<I...>) const
+        -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
+        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
+    }
 
     template<class Tuple>
-    constexpr auto operator()(Tuple&& tuple) const -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
+    LZ_CONSTEXPR_CXX_14 auto operator()(Tuple&& tuple)
+        -> decltype(call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{})) {
+        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{});
+    }
+
+    template<class Tuple>
+    LZ_CONSTEXPR_CXX_14 auto operator()(Tuple&& tuple) const
+        -> decltype(call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{})) {
+        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{});
     }
 };
 
-template<class Fn, std::size_t... I>
-constexpr tuple_expand<Fn, I...> make_expand_fn(Fn fn, index_sequence_helper<I...>) {
-    return tuple_expand<Fn, I...>(std::move(fn));
+template<class Fn>
+constexpr tuple_expand<decay_t<Fn>> make_expand_fn(Fn&& fn) {
+    return { std::forward<Fn>(fn) };
 }
 
 template<class GenFn, class... Args>
-using tuple_invoker = decltype(make_expand_fn(std::declval<GenFn>(), make_index_sequence<sizeof...(Args)>()));
+using tuple_invoker = decltype(make_expand_fn(std::declval<GenFn>()));
 
 template<class GenFn, class... Args>
 using tuple_invoker_ret = decltype(std::declval<tuple_invoker<GenFn, Args...>>()(
@@ -209,5 +270,11 @@ enable_if<std::is_floating_point<T>::value> to_string_from_buff(const T value, c
 #endif // if defined(LZ_STANDALONE) && (!defined(LZ_HAS_FORMAT))
 } // namespace detail
 } // namespace lz
+
+template<class Iterable, class Adaptor>
+LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
+    -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value, decltype(adaptor(std::forward<Iterable>(iterable)))> {
+    return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
+}
 
 #endif // LZ_DETAIL_PROCS_HPP

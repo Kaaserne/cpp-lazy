@@ -25,23 +25,29 @@ template<class C>
 using basic_string_view = std::basic_string_view<C>;
 
 using string_view = std::string_view;
-#elif defined(LZ_STANDALONE)
+#else
 template<class CharT>
 class basic_string_view {
 public:
     static constexpr std::size_t npos = static_cast<std::size_t>(-1);
 
-    basic_string_view() = default;
+    using iterator = const CharT*;
+    using const_iterator = const CharT*;
+    using value_type = CharT;
 
-    constexpr basic_string_view(const CharT* data, std::size_t size) noexcept : _data(data), _size(size) {
+    constexpr basic_string_view() = default;
+
+    constexpr basic_string_view(const CharT* data, std::size_t size) noexcept : _data{ data }, _size{ size } {
     }
 
-    LZ_CONSTEXPR_CXX_17 basic_string_view(const CharT* data) noexcept : _data(data), _size(std::char_traits<CharT>::length(data)) {
+    LZ_CONSTEXPR_CXX_17 basic_string_view(const CharT* data) noexcept :
+        _data{ data },
+        _size{ std::char_traits<CharT>::length(data) } {
     }
 
     constexpr basic_string_view(const CharT* begin, const CharT* end) noexcept :
-        _data(begin),
-        _size(static_cast<std::size_t>(end - begin)) {
+        _data{ begin },
+        _size{ static_cast<std::size_t>(end - begin) } {
     }
 
     constexpr const CharT* data() const noexcept {
@@ -291,21 +297,13 @@ LZ_CONSTEXPR_CXX_17 bool operator>=(const CharT* lhs, const basic_string_view<Ch
     return !(lhs < rhs);
 }
 
-template<class CharT>
-constexpr std::size_t basic_string_view<CharT>::npos;
-
 using string_view = basic_string_view<char>;
 
 template<typename CharT>
 std::ostream& operator<<(std::ostream& os, const lz::basic_string_view<CharT> view) {
     return os.write(view.data(), static_cast<std::streamsize>(view.size()));
 }
-#else
 
-template<class C>
-using basic_string_view = fmt::basic_string_view<C>;
-
-using string_view = fmt::string_view;
 #endif
 
 LZ_MODULE_EXPORT_SCOPE_END

@@ -17,7 +17,7 @@ TEST_CASE("Except tests with sentinels") {
     auto c_str_to_except = lz::c_string(to_except);
     auto except = lz::except(c_str, c_str_to_except);
     static_assert(!std::is_same<decltype(except.begin()), decltype(except.end())>::value, "Must be sentinel");
-    CHECK(except.to<std::string>() == "Hll, Wrld!");
+    REQUIRE(except.to<std::string>() == "Hll, Wrld!");
 }
 
 TEST_CASE("Empty or one element except") {
@@ -25,45 +25,45 @@ TEST_CASE("Empty or one element except") {
         std::string a;
         std::string b;
         auto except = lz::except(a, b);
-        CHECK(lz::empty(except));
-        CHECK(!lz::has_one(except));
-        CHECK(!lz::has_many(except));
+        REQUIRE(lz::empty(except));
+        REQUIRE(!lz::has_one(except));
+        REQUIRE(!lz::has_many(except));
     }
 
     SECTION("One element 1") {
         std::string a = "h";
         std::string b;
         auto except = lz::except(a, b);
-        CHECK(!lz::empty(except));
-        CHECK(lz::has_one(except));
-        CHECK(!lz::has_many(except));
+        REQUIRE(!lz::empty(except));
+        REQUIRE(lz::has_one(except));
+        REQUIRE(!lz::has_many(except));
     }
 
     SECTION("One element 2") {
         std::string a;
         std::string b = "w";
         auto except = lz::except(a, b);
-        CHECK(lz::empty(except));
-        CHECK(!lz::has_one(except));
-        CHECK(!lz::has_many(except));
+        REQUIRE(lz::empty(except));
+        REQUIRE(!lz::has_one(except));
+        REQUIRE(!lz::has_many(except));
     }
 
     SECTION("One element both") {
         std::string a = "h";
         std::string b = "w";
         auto except = lz::except(a, b);
-        CHECK(!lz::empty(except));
-        CHECK(lz::has_one(except));
-        CHECK(!lz::has_many(except));
+        REQUIRE(!lz::empty(except));
+        REQUIRE(lz::has_one(except));
+        REQUIRE(!lz::has_many(except));
     }
 
     SECTION("One element both 2") {
         std::string a = "h";
         std::string b = "h";
         auto except = lz::except(a, b);
-        CHECK(lz::empty(except));
-        CHECK(!lz::has_one(except));
-        CHECK(!lz::has_many(except));
+        REQUIRE(lz::empty(except));
+        REQUIRE(!lz::has_one(except));
+        REQUIRE(!lz::has_many(except));
     }
 }
 
@@ -73,7 +73,7 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
 
     auto except = lz::except(array, to_except);
     auto it = except.begin();
-    CHECK(*it == 1);
+    REQUIRE(*it == 1);
 
     SECTION("For-loop") {
         constexpr std::size_t s = 32;
@@ -85,25 +85,25 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
         auto ex = lz::except(large_arr, to_large_except);
         auto current = 16;
         ex.for_each([&current](int i) {
-            CHECK(i == current);
+            REQUIRE(i == current);
             ++current;
         });
         current = 0;
     }
 
     SECTION("Excepts elements") {
-        CHECK(except.to_vector() == std::vector<int>{ 1, 2, 4 });
+        REQUIRE(except.to_vector() == std::vector<int>{ 1, 2, 4 });
     }
 
     SECTION("Is by reference") {
         *it = 0;
-        CHECK(*it == array[0]);
+        REQUIRE(*it == array[0]);
     }
 
     SECTION("Excepted with >") {
         std::sort(to_except.begin(), to_except.end(), std::greater<int>());
         auto except_greater = lz::except(array, to_except, std::greater<int>());
-        CHECK(except_greater.to<std::array<int, 3>>() == std::array<int, 3>{ 1, 2, 4 });
+        REQUIRE(except_greater.to<std::array<int, 3>>() == std::array<int, 3>{ 1, 2, 4 });
     }
 }
 
@@ -113,19 +113,19 @@ TEST_CASE("Except binary operations", "[Except][Binary ops]") {
 
     auto except = lz::except(a, b);
     auto it = except.begin();
-    CHECK(*it == 1);
+    REQUIRE(*it == 1);
 
     SECTION("Operator++") {
         ++it;
-        CHECK(*it == 4);
+        REQUIRE(*it == 4);
     }
 
     SECTION("Operator== & operator!=") {
-        CHECK(it != except.end());
+        REQUIRE(it != except.end());
         while (it != except.end()) {
             ++it;
         }
-        CHECK(it == except.end());
+        REQUIRE(it == except.end());
     }
 }
 
@@ -136,17 +136,17 @@ TEST_CASE("Except to containers", "[Except][To container]") {
 
     SECTION("To array") {
         auto excepted = except.to<std::array<int, 2>>();
-        CHECK(excepted == std::array<int, 2>{ 2, 4 });
+        REQUIRE(excepted == std::array<int, 2>{ 2, 4 });
     }
 
     SECTION("To vector") {
         auto excepted = except.to_vector();
-        CHECK(excepted == std::vector<int>{ 2, 4 });
+        REQUIRE(excepted == std::vector<int>{ 2, 4 });
     }
 
     SECTION("To other container using to<>()") {
         auto excepted = except.to<std::list<int>>();
-        CHECK(excepted == std::list<int>{ 2, 4 });
+        REQUIRE(excepted == std::list<int>{ 2, 4 });
     }
 
     SECTION("To map") {
@@ -157,7 +157,7 @@ TEST_CASE("Except to containers", "[Except][To container]") {
             std::make_pair(4, 4),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
@@ -168,6 +168,6 @@ TEST_CASE("Except to containers", "[Except][To container]") {
             std::make_pair(4, 4),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 }

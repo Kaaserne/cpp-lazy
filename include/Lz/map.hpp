@@ -3,65 +3,62 @@
 #ifndef LZ_MAP_HPP
 #define LZ_MAP_HPP
 
-#include <Lz/detail/basic_iterable.hpp>
 #include <Lz/detail/iterators/map.hpp>
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<LZ_CONCEPT_ITERATOR Iterator, class S, class Function>
-class map_iterable final : public detail::basic_iterable<detail::map_iterator<Iterator, S, Function>,
-                                                         typename detail::map_iterator<Iterator, S, Function>::sentinel> {
+struct map_adaptor {
+#ifdef LZ_HAS_CXX_11
+    static map_adaptor map;
+#endif
 
-public:
-    using iterator = detail::map_iterator<Iterator, S, Function>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
+    using adaptor = map_adaptor;
 
-private:
-    constexpr map_iterable(Iterator begin, S end, Function function, std::forward_iterator_tag) :
-        detail::basic_iterable<iterator, S>(iterator(std::move(begin), std::move(function)), std::move(end)) {
+    template<class Iterable, class Function>
+    constexpr detail::map_iterable<Iterable, detail::decay_t<Function>>
+    operator()(Iterable&& iterable, Function&& function) const {
+        return { std::forward<Iterable>(iterable), std::forward<Function>(function) };
     }
 
-    constexpr map_iterable(Iterator begin, S end, Function function, std::bidirectional_iterator_tag) :
-        detail::basic_iterable<iterator>(iterator(std::move(begin), function), iterator(std::move(end), function)) {
+    template<class Function>
+    LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<map_adaptor, detail::decay_t<Function>> operator()(Function&& function) const {
+        return { std::forward<Function>(function) };
     }
-
-public:
-    constexpr map_iterable(Iterator begin, S end, Function function) :
-        map_iterable(std::move(begin), std::move(end), std::move(function), iter_cat_t<Iterator>{}) {
-    }
-
-    constexpr map_iterable() = default;
 };
 
-// Start of group
-/**
- * @addtogroup ItFns
- * @{
- */
+#ifdef LZ_HAS_CXX_11
 
 /**
- * @brief Returns a bidirectional map object.
- * @details E.g. `map({std::pair(1, 2), std::pair(3, 2)}, [](std::pair<int, int> pairs) { return pair.first; });`
- * will return all pairs first values in the sequence, that is, `1` and `3`.
- * @param iterable The iterable to do the mapping over.
- * @param function A function that takes a value type as parameter. It may return anything.
- * @return A map_iterable object that can be converted to an arbitrary container or can be iterated over using
- * `for (auto... lz::map(...))`.
+ * @brief This adaptor is used to apply a function to each element in an iterable. The iterator category is the same as the input
+ * iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. If its input
+ * iterable has a .size() method, then this iterable will also have a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto map = vec | lz::map([](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
+ * // or
+ * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
+ * ```
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class Function>
-LZ_NODISCARD constexpr map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::decay_t<Function>>
-map(Iterable&& iterable, Function&& function) {
-    return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-             std::forward<Function>(function) };
-}
+map_adaptor map_adaptor::map{};
 
-// End of group
+#else
+
 /**
- * @}
+ * @brief This adaptor is used to apply a function to each element in an iterable. The iterator category is the same as the input
+ * iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. If its input
+ * iterable has a .size() method, then this iterable will also have a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto map = vec | lz::map([](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
+ * // or
+ * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
+ * ```
  */
+LZ_INLINE_VAR constexpr map_adaptor map{};
+
+#endif
 
 LZ_MODULE_EXPORT_SCOPE_END
 

@@ -3,7 +3,7 @@
 #ifndef LZ_CHUNKS_ITERATOR_HPP
 #define LZ_CHUNKS_ITERATOR_HPP
 
-#include <Lz/detail/basic_iterable.hpp>
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
 #include <cmath>
@@ -38,10 +38,10 @@ private:
 
 public:
     LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator iterator, S end, const std::size_t chunk_size) :
-        _sub_range_begin(iterator),
-        _sub_range_end(std::move(iterator)),
-        _end(std::move(end)),
-        _chunk_size(static_cast<difference_type>(chunk_size)) {
+        _sub_range_begin{ iterator },
+        _sub_range_end{ std::move(iterator) },
+        _end{ std::move(end) },
+        _chunk_size{ static_cast<difference_type>(chunk_size) } {
         if (_sub_range_begin == _end) {
             return;
         }
@@ -184,11 +184,11 @@ private:
 
 public:
     LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, Iterator begin, Iterator end, const std::size_t chunk_size) :
-        _begin(std::move(begin)),
-        _sub_range_begin(iterator),
-        _sub_range_end(std::move(iterator)),
-        _end(std::move(end)),
-        _chunk_size(static_cast<difference_type>(chunk_size)) {
+        _begin{ std::move(begin) },
+        _sub_range_begin{ iterator },
+        _sub_range_end{ std::move(iterator) },
+        _end{ std::move(end) },
+        _chunk_size{ static_cast<difference_type>(chunk_size) } {
         if (_sub_range_begin == _end) {
             return;
         }
@@ -216,7 +216,6 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const chunks_iterator& rhs) const noexcept {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "incompatible iterators: different chunk sizes");
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -236,9 +235,53 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "incompatible iterators: different chunk sizes");
         const auto dist = _sub_range_begin - rhs._sub_range_begin;
         return dist == 0 ? 0 : round_even<difference_type>(dist, _chunk_size);
+    }
+};
+
+template<class Iterable>
+class chunks_iterable {
+    Iterable _iterable;
+    std::size_t _chunk_size;
+
+public:
+    using iterator = chunks_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+    using sentinel = typename iterator::sentinel;
+
+    constexpr chunks_iterable() = default;
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 chunks_iterable(I&& iterable, const std::size_t chunk_size) :
+        _iterable{ std::forward<I>(iterable) },
+        _chunk_size{ chunk_size } {
+    }
+
+    template<class I = Iterable>
+    LZ_NODISCARD enable_if<sized<I>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(std::ceil(static_cast<double>(_iterable.size()) / _chunk_size));
+    }
+
+    template<class I = iterator>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, I> begin() const {
+        return { std::begin(_iterable), std::end(_iterable), _chunk_size };
+    }
+
+    template<class I = iterator>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> begin() const {
+        return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+    }
+
+    template<class I = iterator>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const {
+        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+    }
+
+    template<class I = iterator>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, sentinel> end() const {
+        return {};
     }
 };
 } // namespace detail

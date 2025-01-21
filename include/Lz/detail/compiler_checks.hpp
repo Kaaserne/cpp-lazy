@@ -52,6 +52,12 @@
 #define LZ_CONSTEXPR_CXX_20 inline
 #endif // Has cxx 20
 
+#ifdef __cpp_inline_variables
+#define LZ_INLINE_VAR inline
+#else
+#define LZ_INLINE_VAR
+#endif // __cpp_inline_variables
+
 #if LZ_HAS_ATTRIBUTE(nodiscard) && defined(LZ_HAS_CXX_17)
 #define LZ_NODISCARD [[nodiscard]]
 #else

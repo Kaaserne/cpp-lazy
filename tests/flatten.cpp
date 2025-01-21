@@ -11,31 +11,31 @@ TEST_CASE("Flatten with sentinels") {
     std::forward_list<c_string> array = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
     auto flattened = lz::flatten(array);
     auto str = flattened.to<std::string>();
-    CHECK(str == "Hello, World!");
+    REQUIRE(str == "Hello, World!");
 
     auto flatten_one = lz::flatten(lz::c_string("hello, world"));
-    CHECK(flatten_one.to<std::string>() == "hello, world");
+    REQUIRE(flatten_one.to<std::string>() == "hello, world");
 
     c_string arr[] = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
     auto flattened_array = lz::flatten(arr);
-    CHECK(flattened_array.to<std::string>() == "Hello, World!");
+    REQUIRE(flattened_array.to<std::string>() == "Hello, World!");
 }
 
 TEST_CASE("Empty or one element flatten") {
     SECTION("Empty") {
         std::vector<std::vector<int>> empty;
         auto empty_flattened = lz::flatten(empty);
-        CHECK(lz::empty(empty_flattened));
-        CHECK(!lz::has_one(empty_flattened));
-        CHECK(!lz::has_many(empty_flattened));
+        REQUIRE(lz::empty(empty_flattened));
+        REQUIRE(!lz::has_one(empty_flattened));
+        REQUIRE(!lz::has_many(empty_flattened));
     }
 
     SECTION("One element") {
         std::vector<std::vector<int>> one_element = { { 1 } };
         auto one_elm_flattened = lz::flatten(one_element);
-        CHECK(!lz::empty(one_elm_flattened));
-        CHECK(lz::has_one(one_elm_flattened));
-        CHECK(!lz::has_many(one_elm_flattened));
+        REQUIRE(!lz::empty(one_elm_flattened));
+        REQUIRE(lz::has_one(one_elm_flattened));
+        REQUIRE(!lz::has_many(one_elm_flattened));
     }
 }
 
@@ -43,23 +43,23 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
     SECTION("Flatten 1D") {
         std::vector<int> vec = { 1, 2, 3, 4 };
         auto flattened = lz::flatten(vec);
-        CHECK(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 4 });
-        CHECK(lz::reverse(flattened).to_vector() == std::vector<int>{ 4, 3, 2, 1 });
+        REQUIRE(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 4 });
+        REQUIRE(lz::reverse(flattened).to_vector() == std::vector<int>{ 4, 3, 2, 1 });
     }
 
     SECTION("Flatten 2D") {
         std::vector<std::list<int>> nested = { { 1, 2, 3 }, {}, { 1 }, { 4, 5, 6 }, {} };
         auto flattened = lz::flatten(nested);
-        CHECK(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 1, 4, 5, 6 });
-        CHECK(lz::reverse(flattened).to_vector() == std::vector<int>{ 6, 5, 4, 1, 3, 2, 1 });
+        REQUIRE(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 1, 4, 5, 6 });
+        REQUIRE(lz::reverse(flattened).to_vector() == std::vector<int>{ 6, 5, 4, 1, 3, 2, 1 });
     }
 
     SECTION("Flatten 3D") {
         std::vector<std::vector<std::vector<int>>> vectors = { { { 1, 2, 3 }, {} }, { { 4, 5 }, { 6 } }, { { 7 }, {} } };
 
         auto flattened = lz::flatten(vectors);
-        CHECK(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
-        CHECK(lz::reverse(flattened).to_vector() == std::vector<int>{ 7, 6, 5, 4, 3, 2, 1 });
+        REQUIRE(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE(lz::reverse(flattened).to_vector() == std::vector<int>{ 7, 6, 5, 4, 3, 2, 1 });
     }
 
     SECTION("Should be by ref") {
@@ -68,7 +68,7 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
         };
         auto flattened = lz::flatten(vectors);
         *flattened.begin() = -382753;
-        CHECK(vectors[0][0][0] == -382753);
+        REQUIRE(vectors[0][0][0] == -382753);
     }
 }
 
@@ -78,37 +78,37 @@ TEST_CASE("Flatten binary operations", "[Flatten][Binary ops]") {
 
     SECTION("Operator++") {
         auto begin = flattened.begin();
-        CHECK(*begin == 1);
+        REQUIRE(*begin == 1);
         ++begin;
-        CHECK(*begin == 2);
+        REQUIRE(*begin == 2);
         ++begin, ++begin;
-        CHECK(*begin == 1);
+        REQUIRE(*begin == 1);
     }
 
     SECTION("Operator--") {
         auto begin = flattened.begin();
         ++begin;
-        CHECK(*begin == 2);
+        REQUIRE(*begin == 2);
         --begin;
-        CHECK(*begin == 1);
-        CHECK(begin == flattened.begin());
+        REQUIRE(*begin == 1);
+        REQUIRE(begin == flattened.begin());
         ++begin, ++begin, ++begin;
-        CHECK(*begin == 1);
+        REQUIRE(*begin == 1);
         --begin;
-        CHECK(*begin == 3);
+        REQUIRE(*begin == 3);
     }
 
     SECTION("Operator== & operator!=") {
         auto begin = flattened.begin();
-        CHECK(begin == flattened.begin());
-        CHECK(begin != flattened.end());
+        REQUIRE(begin == flattened.begin());
+        REQUIRE(begin != flattened.end());
         begin = flattened.end();
-        CHECK(begin == flattened.end());
-        CHECK(begin != flattened.begin());
+        REQUIRE(begin == flattened.end());
+        REQUIRE(begin != flattened.begin());
     }
 
     SECTION("Operator-(Iterator)") {
-        // CHECK(flattened.end() - flattened.begin() == 7);
+        // REQUIRE(flattened.end() - flattened.begin() == 7);
     }
 }
 
@@ -117,15 +117,15 @@ TEST_CASE("Flatten to container", "[Flatten][To container]") {
     auto flattened = lz::flatten(vecs);
 
     SECTION("To array") {
-        CHECK(flattened.to<std::array<int,7>>() == std::array<int, 7>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE(flattened.to<std::array<int, 7>>() == std::array<int, 7>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
     SECTION("To vector") {
-        CHECK(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE(flattened.to_vector() == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
     SECTION("To other container using to<>()") {
-        CHECK(flattened.to<std::list<int>>() == std::list<int>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE(flattened.to<std::list<int>>() == std::list<int>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
     SECTION("To map") {
@@ -136,7 +136,7 @@ TEST_CASE("Flatten to container", "[Flatten][To container]") {
             std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7),
         };
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To unordered map") {
@@ -147,6 +147,6 @@ TEST_CASE("Flatten to container", "[Flatten][To container]") {
             std::make_pair(5, 5), std::make_pair(6, 6), std::make_pair(7, 7),
         };
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 }

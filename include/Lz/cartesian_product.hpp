@@ -1,70 +1,73 @@
-#pragma once
+// #pragma once
 
-#ifndef LZ_CARTESIAN_PRODUCT_HPP
-#define LZ_CARTESIAN_PRODUCT_HPP
+// #ifndef LZ_CARTESIAN_PRODUCT_HPP
+// #define LZ_CARTESIAN_PRODUCT_HPP
 
-#include <Lz/detail/basic_iterable.hpp>
-#include <Lz/detail/iterators/cartesian_product.hpp>
+// #include <Lz/basic_iterable.hpp>
+// #include <Lz/detail/iterators/cartesian_product.hpp>
 
-namespace lz {
+// namespace lz {
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+// LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<class IterTuple, class SentinelTuple>
-class cartesian_product_iterable final
-    : public detail::basic_iterable<detail::cartesian_product_iterator<IterTuple, SentinelTuple>,
-                                    typename detail::cartesian_product_iterator<IterTuple, SentinelTuple>::sentinel> {
+// using detail::cartesian_product_iterable;
 
-    using s = typename detail::cartesian_product_iterator<IterTuple, SentinelTuple>::sentinel;
+// template<LZ_CONCEPT_ITERABLE... Iterables>
+// struct cartesian_product_adaptor {
+//     std::tuple<Iterables...> iterables;
 
-    constexpr cartesian_product_iterable(IterTuple begin, SentinelTuple end, std::forward_iterator_tag /* unused */) :
-        detail::basic_iterable<iterator, s>(iterator(std::move(begin), std::move(begin), std::move(end))) {
-    }
+//     constexpr cartesian_product_adaptor() = default;
 
-    constexpr cartesian_product_iterable(IterTuple begin, SentinelTuple end, std::bidirectional_iterator_tag /* unused */) :
-        detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(end, begin, end)) {
-    }
+//     LZ_CONSTEXPR_CXX_14 cartesian_product_adaptor(const Iterables&... iterables) : iterables(iterables...) {
+//     }
 
-public:
-    using iterator = detail::cartesian_product_iterator<IterTuple, SentinelTuple>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
+//     template<class Iterable, std::size_t... Is>
+//     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 cartesian_product_iterable<Iterable, Iterables...>
+//     construct(Iterable&& lhs, detail::index_sequence_helper<Is...>) const {
+//         return { std::forward<Iterable>(lhs), std::get<Is>(std::forward<Iterables>(iterables))... };
+//     }
 
-    constexpr cartesian_product_iterable() = default;
+//     template<class Iterable>
+//     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 cartesian_product_iterable<Iterable, Iterables...> operator()(Iterable&& lhs) const {
+//         return construct(std::forward<Iterable>(lhs), detail::make_index_sequence<sizeof...(Iterables)>());
+//     }
 
-    constexpr cartesian_product_iterable(IterTuple begin, SentinelTuple end) :
-        cartesian_product_iterable(std::move(begin), std::move(end), iter_cat_t<iterator>{}) {
-    }
-};
+//     auto begin() const {
+//         return (*this)(std::get<0>(iterables)).begin();
+//     }
 
-/**
- * @addtogroup ItFns
- * @{
- */
+//     auto end() const {
+//         return (*this)(std::get<0>(iterables)).end();
+//     };
+// };
 
-/**
- * Creates an iterator view object that, when iterated over, gets all possible combinations of all its values of the iterables.
- * @param iterables The iterables to make all of the possible combinations with.
- * @return A cartesian_product product view object.
- */
-// clang-format off
-template<LZ_CONCEPT_ITERABLE... Iterables>
-LZ_NODISCARD constexpr
-cartesian_product_iterable<std::tuple<iter_t<Iterables>...>, std::tuple<sentinel_t<Iterables>...>>
-cartesian_product(Iterables&&... iterables) {
-    return { std::make_tuple(detail::begin(std::forward<Iterables>(iterables))...),
-             std::make_tuple(detail::end(std::forward<Iterables>(iterables))...) };
-}
+// template<>
+// struct cartesian_product_adaptor<void> {
+//     template<LZ_CONCEPT_ITERABLE... Iterables>
+//     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 cartesian_product_adaptor<Iterables...> operator()(Iterables&&... iterables) const {
+//         return cartesian_product_adaptor<Iterables...>{ std::forward<Iterables>(iterables)... };
+//     }
+// };
 
-// clang-format on
+// /**
+//  * @addtogroup ItFns
+//  * @{
+//  */
 
-// End of group
-/**
- * @}
- */
+// /**
+//  * Creates an iterator view object that, when iterated over, gets all possible combinations of all its values of the iterables.
+//  * @param iterables The iterables to make all of the possible combinations with.
+//  * @return A cartesian_product product view object.
+//  */
+// LZ_INLINE_VAR constexpr cartesian_product_adaptor<void> cartesian_product{};
 
-LZ_MODULE_EXPORT_SCOPE_END
+// // End of group
+// /**
+//  * @}
+//  */
 
-} // namespace lz
+// LZ_MODULE_EXPORT_SCOPE_END
 
-#endif // LZ_CARTESIAN_PRODUCT_HPP
+// } // namespace lz
+
+// #endif // LZ_CARTESIAN_PRODUCT_HPP

@@ -23,8 +23,7 @@ TEST_CASE("Overall tests with LZ_STANDALONE defined") {
 
     std::array<double, 4> vec = { 1.1, 2.2, 3.3, 4.4 };
     auto doubles = lz::str_join(vec, ", ");
-    CHECK(doubles == "1.1, 2.2, 3.3, 4.4");
-
+    REQUIRE(doubles == "1.1, 2.2, 3.3, 4.4");
 
     char char_map[] = { 'a', 'b', 'c', 'd' };
     auto char_joined = lz::join(char_map, ", ").to_string();

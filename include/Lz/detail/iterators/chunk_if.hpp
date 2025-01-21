@@ -3,11 +3,12 @@
 #ifndef LZ_CHUNK_IF_ITERATOR_HPP
 #define LZ_CHUNK_IF_ITERATOR_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/algorithm.hpp>
-#include <Lz/detail/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/iterator_base.hpp>
+
 // TODO add benchmarks for maybe_no_unique_address
 /*
 // Wrapper to conditionally apply [[no_unique_address]]
@@ -37,15 +38,14 @@ struct maybe_no_unique_address<T, false> {
 */
 namespace lz {
 namespace detail {
-
-template<class Iterator, class S, class UnaryPredicate>
-class chunk_if_iterator : public iter_base<chunk_if_iterator<Iterator, S, UnaryPredicate>, basic_iterable<Iterator>,
-                                           fake_ptr_proxy<basic_iterable<Iterator>>, diff_type<Iterator>,
-                                           std::forward_iterator_tag, default_sentinel> {
+template<class ValueType, class Iterator, class S, class UnaryPredicate>
+class chunk_if_iterator
+    : public iter_base<chunk_if_iterator<ValueType, Iterator, S, UnaryPredicate>, ValueType, fake_ptr_proxy<ValueType>,
+                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
     using iter_traits = std::iterator_traits<Iterator>;
 
 public:
-    using value_type = basic_iterable<Iterator>;
+    using value_type = ValueType;
     using difference_type = typename iter_traits::difference_type;
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
@@ -66,11 +66,11 @@ private:
 public:
     constexpr chunk_if_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 chunk_if_iterator(Iterator iterator, S end, UnaryPredicate predicate, bool is_empty) :
-        _sub_range_begin(iterator),
-        _sub_range_end(std::move(iterator)),
-        _end(std::move(end)),
-        _predicate(std::move(predicate)) {
+    LZ_CONSTEXPR_CXX_14 chunk_if_iterator(Iterator begin, S end, UnaryPredicate predicate, bool is_empty) :
+        _sub_range_begin{ std::move(begin) },
+        _sub_range_end{ _sub_range_begin },
+        _end{ std::move(end) },
+        _predicate{ std::move(predicate) } {
         if (_sub_range_begin != _end) {
             find_next();
         }
@@ -79,8 +79,16 @@ public:
         }
     }
 
-    constexpr reference dereference() const {
+    template<class V = ValueType>
+    constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         return { _sub_range_begin, _sub_range_end };
+    }
+
+    // Overload for std::string, [std/lz]::string_view
+    template<class V = ValueType>
+    constexpr enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        static_assert(!is_ra_tag<Iterator>::value, "Iterator must be a random access range");
+        return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -117,6 +125,42 @@ public:
         return _sub_range_begin == _end && !_trailing_empty;
     }
 };
+
+template<class ValueType, class Iterable, class UnaryPredicate>
+class chunk_if_iterable {
+    Iterable _iterable;
+    UnaryPredicate _predicate;
+
+public:
+    using iterator = chunk_if_iterator<ValueType, iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+    template<class I, class Up>
+    constexpr chunk_if_iterable(I&& iterable, Up&& predicate) :
+        _iterable{ std::forward<I>(iterable) },
+        _predicate{ std::forward<Up>(predicate) } {
+    }
+
+    constexpr chunk_if_iterable() = default;
+
+    iterator begin() && {
+        auto begin = std::move(_iterable).begin();
+        auto end = std::move(_iterable).end();
+        const auto is_end = end == begin;
+        return { begin, end, is_end };
+    }
+
+    iterator begin() const& {
+        const auto is_end = std::end(_iterable) == std::begin(_iterable);
+        return { std::begin(_iterable), std::end(_iterable), _predicate, is_end };
+    }
+
+    constexpr default_sentinel end() const& {
+        return {};
+    }
+};
+
 } // namespace detail
 } // namespace lz
 

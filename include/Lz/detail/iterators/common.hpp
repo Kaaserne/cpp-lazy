@@ -26,10 +26,17 @@ public:
 
     constexpr common_iterator() = default;
 
-    constexpr common_iterator(const Iterator& iter) : _data(iter) {
+    // TODO change () to  {}
+    constexpr common_iterator(const Iterator& iter) : _data{ iter } {
     }
 
-    constexpr common_iterator(const S& sent) : _data(sent) {
+    constexpr common_iterator(Iterator&& iter) noexcept : _data{ std::move(iter) } {
+    }
+
+    constexpr common_iterator(const S& sent) : _data{ sent } {
+    }
+
+    constexpr common_iterator(S&& sent) noexcept : _data{ std::move(sent) } {
     }
 
     LZ_CONSTEXPR_CXX_14 common_iterator& operator=(const Iterator& iter) {
@@ -39,6 +46,16 @@ public:
 
     LZ_CONSTEXPR_CXX_14 common_iterator& operator=(const S& sent) {
         _data = sent;
+        return *this;
+    }
+
+    LZ_CONSTEXPR_CXX_14 common_iterator& operator=(Iterator&& iter) noexcept {
+        _data = std::move(iter);
+        return *this;
+    }
+
+    LZ_CONSTEXPR_CXX_14 common_iterator& operator=(S&& sent) noexcept {
+        _data = std::move(sent);
         return *this;
     }
 
@@ -81,17 +98,19 @@ public:
 #endif
 
         auto&& lhs_iter = get_if<Iterator>(&_data);
-        auto&& rhs_iter = get_if<Iterator>(&rhs._data);
+        auto&& rhs_iter = get_if<S>(&rhs._data);
 
         if (lhs_iter && rhs_iter) {
             return *lhs_iter == *rhs_iter;
         }
-        if (lhs_iter /* && !rhs_iter */) {
-            return *lhs_iter == get<S>(rhs._data);
+
+        auto&& lhs_iter_inverted = get_if<S>(&_data);
+        auto&& rhs_iter_inverted = get_if<Iterator>(&rhs._data);
+
+        if (lhs_iter_inverted && rhs_iter_inverted) {
+            return *lhs_iter == *rhs_iter;
         }
-        if (rhs_iter /* && !lhs_iter */) {
-            return get<S>(_data) == *rhs_iter;
-        }
+
         return true;
     }
 
@@ -112,6 +131,38 @@ public:
         auto&& lhs_iter = get_if<Iterator>(&_data);
         auto&& rhs_iter = get_if<Iterator>(&rhs._data);
         return *lhs_iter - *rhs_iter;
+    }
+};
+
+template<class Iterable>
+class common_iterable {
+    Iterable _iterable;
+
+public:
+    using iterator = common_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+    common_iterable() = default;
+
+    template<class I>
+    constexpr common_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 iterator begin() && {
+        return { std::move(_iterable).begin() };
+    }
+
+    LZ_CONSTEXPR_CXX_14 iterator end() && {
+        return { std::move(_iterable).end() };
+    }
+
+    LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+        return { std::begin(_iterable) };
+    }
+
+    LZ_CONSTEXPR_CXX_14 iterator end() const& {
+        return { std::end(_iterable) };
     }
 };
 } // namespace detail

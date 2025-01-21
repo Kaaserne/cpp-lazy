@@ -10,7 +10,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("Starting with two delimiters ending with none") {
@@ -18,7 +18,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("Ending with one delimiter starting with none") {
@@ -26,7 +26,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("Ending with two delimiters starting with none") {
@@ -34,7 +34,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "", "" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("Starting and ending with one delimiter") {
@@ -42,7 +42,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123", "" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("Starting and ending with two delimiters") {
@@ -50,7 +50,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123", "", "" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("No delimiters at all") {
@@ -58,7 +58,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "Hello", "world", "test", "123" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 
     SECTION("Multiple delimiters in the middle") {
@@ -66,7 +66,7 @@ TEST_CASE("Splitter permutations") {
         auto splitter =
             lz::split(to_split, " ").transform_as<std::vector<std::string>>([](const auto& v) { return v.to_string(); });
         std::vector<std::string> expected = { "Hello", "", "world", "", "test", "", "123" };
-        CHECK(splitter == expected);
+        REQUIRE(splitter == expected);
     }
 }
 
@@ -82,13 +82,13 @@ TEST_CASE("Splitter changing and creating elements", "[Splitter][Basic functiona
         REQUIRE(static_cast<std::size_t>(splitter.distance()) == expected.size());
         for (std::size_t i = 0; i < expected.size(); i++, ++it) {
             auto string = lz::to_string_view(*it);
-            CHECK(string == expected[i]);
+            REQUIRE(string == expected[i]);
         }
-        CHECK(it == splitter.end());
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Should be std::string") {
-        CHECK(std::is_same<decltype(*it), lz::basic_iterable<decltype(to_split.begin())>>::value);
+        REQUIRE(std::is_same<decltype(*it), lz::basic_iterable<decltype(to_split.begin())>>::value);
     }
 }
 
@@ -96,25 +96,25 @@ TEST_CASE("Empty or one element string splitter") {
     SECTION("Empty") {
         std::string to_split;
         auto splitter = lz::split(to_split, " ");
-        CHECK(lz::empty(splitter));
-        CHECK(!lz::has_many(splitter));
-        CHECK(!lz::has_one(splitter));
+        REQUIRE(lz::empty(splitter));
+        REQUIRE(!lz::has_many(splitter));
+        REQUIRE(!lz::has_one(splitter));
     }
 
     SECTION("One element") {
         std::string to_split = "Hello";
         auto splitter = lz::split(to_split, " ");
-        CHECK(!lz::empty(splitter));
-        CHECK(!lz::has_many(splitter));
-        CHECK(lz::has_one(splitter));
+        REQUIRE(!lz::empty(splitter));
+        REQUIRE(!lz::has_many(splitter));
+        REQUIRE(lz::has_one(splitter));
     }
 
     SECTION("One element with delimiter") {
         std::string to_split = "Hello ";
         auto splitter = lz::split(to_split, " ");
-        CHECK(!lz::empty(splitter));
-        CHECK(lz::has_many(splitter));
-        CHECK(!lz::has_one(splitter));
+        REQUIRE(!lz::empty(splitter));
+        REQUIRE(lz::has_many(splitter));
+        REQUIRE(!lz::has_one(splitter));
     }
 }
 
@@ -123,31 +123,31 @@ TEST_CASE("Splitter binary operations", "[Splitter][Binary ops]") {
     auto splitter = lz::split(to_split, " ");
     auto it = splitter.begin();
 
-    CHECK(it->empty());
+    REQUIRE(it->empty());
 
     SECTION("Operator++") {
-        CHECK(it->empty());
+        REQUIRE(it->empty());
         ++it;
-        CHECK(lz::to_string_view(*it) == "Hello");
+        REQUIRE(lz::to_string_view(*it) == "Hello");
         ++it;
-        CHECK(lz::to_string_view(*it) == "world");
+        REQUIRE(lz::to_string_view(*it) == "world");
         ++it;
-        CHECK(lz::to_string_view(*it) == "test");
+        REQUIRE(lz::to_string_view(*it) == "test");
         ++it;
-        CHECK(lz::to_string_view(*it) == "123");
+        REQUIRE(lz::to_string_view(*it) == "123");
         ++it;
-        CHECK(it->empty());
-        CHECK(it != splitter.end());
+        REQUIRE(it->empty());
+        REQUIRE(it != splitter.end());
         ++it;
-        CHECK(it == splitter.end());
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Operator== & Operator!=") {
-        CHECK(it != splitter.end());
+        REQUIRE(it != splitter.end());
         while (it != splitter.end()) {
             ++it;
         }
-        CHECK(it == splitter.end());
+        REQUIRE(it == splitter.end());
     }
 }
 
@@ -160,7 +160,7 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
         auto actual = splitter.transform_as<std::array<std::string, 5>>([](const View& v) { return v.to_string(); });
         std::array<std::string, actual.size()> expected = { "Hello", "world", "test", "123", "" };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To vector") {
@@ -168,7 +168,7 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
             splitter.transform_as<std::vector<std::string>>([](const View& v) { return v.to_string(); });
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To other container using to<>()") {
@@ -176,7 +176,7 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
             splitter.transform_as<std::list<std::string>>([](const View& v) { return v.to_string(); });
         std::list<std::string> expected = { "Hello", "world", "test", "123", "" };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To map") {
@@ -190,7 +190,7 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
             std::make_pair(std::string(""), std::string("")),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
@@ -202,6 +202,6 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
                                                                   std::make_pair(std::string("123"), std::string("123")),
                                                                   std::make_pair(std::string(""), std::string("")) };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 }

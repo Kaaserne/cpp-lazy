@@ -10,7 +10,7 @@ TEST_CASE("Take while with sentinels") {
     auto take_while = lz::take_while(cstr, [](char c) { return c != 'W'; });
     static_assert(!std::is_same<decltype(take_while.begin()), decltype(take_while.end())>::value, "Should be sentinel");
     auto c_str_expected = lz::c_string("Hello, ");
-    CHECK(lz::equal(take_while, c_str_expected));
+    REQUIRE(lz::equal(take_while, c_str_expected));
 }
 
 TEST_CASE("take_while_iterable takes elements and is by reference", "[take_while_iterable][Basic functionality]") {
@@ -20,14 +20,14 @@ TEST_CASE("take_while_iterable takes elements and is by reference", "[take_while
     SECTION("Should take elements") {
         auto take_while = lz::take_while(array, [](int element) { return element < 5; });
         auto it = take_while.begin();
-        CHECK(std::distance(it, take_while.end()) == 4);
+        REQUIRE(std::distance(it, take_while.end()) == 4);
     }
 
     SECTION("Should be by reference") {
         auto take_while = lz::take_while(array, [](int element) { return element < 5; });
         auto it = take_while.begin();
         *it = 50;
-        CHECK(array[0] == 50);
+        REQUIRE(array[0] == 50);
     }
 }
 
@@ -35,25 +35,25 @@ TEST_CASE("Empty or one element drop while") {
     SECTION("Empty") {
         std::vector<int> vec;
         auto drop_while = lz::drop_while(vec, [](int i) { return i == 2; });
-        CHECK(lz::empty(drop_while));
-        CHECK(!lz::has_many(drop_while));
-        CHECK(!lz::has_one(drop_while));
+        REQUIRE(lz::empty(drop_while));
+        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE(!lz::has_one(drop_while));
     }
 
     SECTION("One element true") {
         std::vector<int> vec = { 1 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i == 1; });
-        CHECK(lz::empty(drop_while));
-        CHECK(!lz::has_many(drop_while));
-        CHECK(!lz::has_one(drop_while));
+        REQUIRE(lz::empty(drop_while));
+        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE(!lz::has_one(drop_while));
     }
 
     SECTION("One element false") {
         std::vector<int> vec = { 1 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i != 1; });
-        CHECK(!lz::empty(drop_while));
-        CHECK(!lz::has_many(drop_while));
-        CHECK(lz::has_one(drop_while));
+        REQUIRE(!lz::empty(drop_while));
+        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE(lz::has_one(drop_while));
     }
 }
 
@@ -64,16 +64,16 @@ TEST_CASE("Drop while takes elements and is by reference", "[take_while_iterable
     SECTION("Should drop elements") {
         auto drop_while = lz::drop_while(array, [](int element) { return element < 5; });
         auto it = drop_while.begin();
-        CHECK(std::distance(it, drop_while.end()) == 6);
+        REQUIRE(std::distance(it, drop_while.end()) == 6);
     }
 
     SECTION("Should be by reference") {
         auto drop_while = lz::drop_while(array, [](int element) { return element < 5; });
         auto it = drop_while.begin();
         *it = 50;
-        CHECK(array[4] == 50);
-        CHECK(array[4] != 6);
-        CHECK(array[0] == 1);
+        REQUIRE(array[4] == 50);
+        REQUIRE(array[4] != 6);
+        REQUIRE(array[0] == 1);
     }
 }
 

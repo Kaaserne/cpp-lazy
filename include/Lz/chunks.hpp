@@ -9,56 +9,60 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<class Iterator, class S>
-class chunks_iterable final : public detail::basic_iterable<detail::chunks_iterator<Iterator, S>,
-                                                            typename detail::chunks_iterator<Iterator, S>::sentinel> {
-public:
-    using iterator = detail::chunks_iterator<Iterator, S>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
+struct chunks_adaptor {
+#ifdef LZ_HAS_CXX_11
+    static chunks_adaptor chunks;
+#endif
 
-private:
-    LZ_CONSTEXPR_CXX_14
-    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::forward_iterator_tag) :
-        detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), chunk_size)) {
+    using adaptor = chunks_adaptor;
+
+    template<class Iterable>
+    constexpr detail::chunks_iterable<Iterable> operator()(Iterable&& iterable, std::size_t chunk_size) const {
+        return { std::forward<Iterable>(iterable), chunk_size };
     }
 
-    LZ_CONSTEXPR_CXX_14
-    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size, std::bidirectional_iterator_tag) :
-        detail::basic_iterable<iterator>(iterator(begin, begin, end, chunk_size), iterator(end, begin, end, chunk_size)) {
+    constexpr detail::fn_args_holder<chunks_adaptor, std::size_t> operator()(std::size_t chunk_size) const {
+        return { chunk_size };
     }
-
-public:
-    LZ_CONSTEXPR_CXX_14
-    chunks_iterable(Iterator begin, S end, const std::size_t chunk_size) :
-        chunks_iterable(begin, end, chunk_size, iter_cat_t<Iterator>{}) {
-    }
-
-    constexpr chunks_iterable() = default;
 };
 
-/**
- * @addtogroup ItFns
- * @{
- */
+#ifdef LZ_HAS_CXX_11
 
 /**
- * Chops a sequence into chunks of `chunk_size`. The value type of the iterator is another iterator, so a double for loop is
- * necessary to iterate over.
- * @param iterable The sequence to be chopped into chunks.
- * @param chunk_size The size of the chunks to be.
- * @return A Chunk iterator view object.
+ * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
+ * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,
+ * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have a
+ * .size() method.
+ *
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto chunked = lz::chunks(vec, 3); // chunked = { {1, 2, 3}, {4, 5} }
+ * // or
+ * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
+ * ```
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 chunks_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
-chunks(Iterable&& iterable, const std::size_t chunk_size) {
-    return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), chunk_size };
-}
+chunks_adaptor chunks_adaptor::chunks;
 
-// End of group
+#else
+
 /**
- * @}
+ * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
+ * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,
+ * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have a
+ * .size() method.
+ *
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto chunked = lz::chunks(vec, 3); // chunked = { {1, 2, 3}, {4, 5} }
+ * // or
+ * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
+ * ```
  */
+LZ_INLINE_VAR constexpr chunks_adaptor chunks{};
+
+#endif // LZ_HAS_CXX_11
 
 LZ_MODULE_EXPORT_SCOPE_END
 

@@ -1,62 +1,62 @@
-#pragma once
+// #pragma once
 
-#ifndef LZ_GENERATE_WHILE_ITERATOR_HPP
-#define LZ_GENERATE_WHILE_ITERATOR_HPP
+// #ifndef LZ_GENERATE_WHILE_ITERATOR_HPP
+// #define LZ_GENERATE_WHILE_ITERATOR_HPP
 
-#include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/detail/func_container.hpp>
-#include <Lz/detail/procs.hpp>
-#include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
+// #include <Lz/detail/fake_ptr_proxy.hpp>
+// #include <Lz/detail/func_container.hpp>
+// #include <Lz/detail/procs.hpp>
+// #include <Lz/detail/traits.hpp>
+// #include <Lz/iterator_base.hpp>
 
-namespace lz {
-namespace detail {
+// namespace lz {
+// namespace detail {
 
-template<class GeneratorFunc>
-class generate_while_iterator
-    : public iter_base<generate_while_iterator<GeneratorFunc>, tup_element<1, func_ret_type<GeneratorFunc>>,
-                       fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::forward_iterator_tag,
-                       default_sentinel> {
+// template<class GeneratorFunc>
+// class generate_while_iterator
+//     : public iter_base<generate_while_iterator<GeneratorFunc>, tup_element<1, func_ret_type<GeneratorFunc>>,
+//                        fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::forward_iterator_tag,
+//                        default_sentinel> {
 
-    using fn_return_type = func_ret_type<GeneratorFunc>;
+//     using fn_return_type = func_ret_type<GeneratorFunc>;
 
-    func_container<GeneratorFunc> _func;
-    fn_return_type _last_returned;
+//     func_container<GeneratorFunc> _func;
+//     fn_return_type _last_returned;
 
-public:
-    using reference = tup_element<1, fn_return_type>;
-    using value_type = decay_t<reference>;
-    using difference_type = std::ptrdiff_t;
-    using pointer = fake_ptr_proxy<reference>;
+// public:
+//     using reference = tup_element<1, fn_return_type>;
+//     using value_type = decay_t<reference>;
+//     using difference_type = std::ptrdiff_t;
+//     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr generate_while_iterator() = default;
+//     constexpr generate_while_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 generate_while_iterator(GeneratorFunc generator_func) :
-        _func(std::move(generator_func)),
-        _last_returned(_func()) {
-    }
+//     LZ_CONSTEXPR_CXX_14 generate_while_iterator(GeneratorFunc generator_func) :
+//         _func(std::move(generator_func)),
+//         _last_returned(_func()) {
+//     }
 
-    LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        return std::get<1>(_last_returned);
-    }
+//     LZ_CONSTEXPR_CXX_14 reference dereference() const {
+//         return std::get<1>(_last_returned);
+//     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
-        return fake_ptr_proxy<decltype(**this)>(**this);
-    }
+//     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+//         return fake_ptr_proxy<decltype(**this)>(**this);
+//     }
 
-    LZ_CONSTEXPR_CXX_14 void increment() {
-        _last_returned = _func();
-    }
+//     LZ_CONSTEXPR_CXX_14 void increment() {
+//         _last_returned = _func();
+//     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const generate_while_iterator&) const noexcept {
-        return !std::get<0>(_last_returned);
-    }
+//     LZ_CONSTEXPR_CXX_14 bool eq(const generate_while_iterator&) const noexcept {
+//         return !std::get<0>(_last_returned);
+//     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {
-        return !std::get<0>(_last_returned);
-    }
-};
-} // namespace detail
-} // namespace lz
+//     LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {
+//         return !std::get<0>(_last_returned);
+//     }
+// };
+// } // namespace detail
+// } // namespace lz
 
-#endif
+// #endif

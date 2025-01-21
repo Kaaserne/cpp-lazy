@@ -3,80 +3,56 @@
 #ifndef LZ_C_STRING_HPP
 #define LZ_C_STRING_HPP
 
-#include "Lz/detail/basic_iterable.hpp"
-#include "Lz/detail/iterators/c_string.hpp"
-#include "Lz/detail/traits.hpp"
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/iterators/c_string.hpp>
+#include <Lz/detail/traits.hpp>
 
 namespace lz {
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+struct c_string_adaptor {
+#ifdef LZ_HAS_CXX_11
+    static c_string_adaptor c_string;
+#endif
 
-template<class C, class Tag>
-class c_string_iterable final
-    : public detail::basic_iterable<detail::c_string_iterator<C, Tag>, typename detail::c_string_iterator<C, Tag>::sentinel> {
-    using s = typename detail::c_string_iterator<C, Tag>::sentinel;
+    using adaptor = c_string_adaptor;
 
-    static_assert(std::is_pointer<C>::value, "C must be a pointer");
-
-public:
-    using iterator = detail::c_string_iterator<C, Tag>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
-
-    constexpr c_string_iterable(C begin) noexcept : detail::basic_iterable<iterator, s>(iterator(begin)) {
+    template<class C>
+    LZ_NODISCARD constexpr detail::c_string_iterable<detail::decay_t<C>> operator()(C&& str) const noexcept {
+        return { std::forward<C>(str) };
     }
-
-    constexpr c_string_iterable(C begin, C end) noexcept :
-        detail::basic_iterable<iterator, iterator>(iterator(begin), iterator(end)) {
-    }
-
-    constexpr c_string_iterable() = default;
 };
 
-/**
- * @addtogroup ItFns
- * @{
- */
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+#ifdef LZ_HAS_CXX_11
 
 /**
- * Creates a c-string iterator with knowing its length
- *
- * @param begin Beginning of the c string
- * @param end Ending of the c string
- * @return CString object containing a random access iterator
+ * @brief This adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a sentinel,
+ * rather than an actual iterator. Example:
+ * ```cpp
+ * const char* str = "Hello, World!";
+ * auto cstr = lz::c_string(str);
+ * // or:
+ * auto cstr = "Hello" | lz::c_string;
+ * ```
  */
-template<class C>
-LZ_NODISCARD constexpr c_string_iterable<const C*, std::random_access_iterator_tag>
-c_string(const C* begin, const C* end) noexcept {
-    return { begin, end };
-}
+c_string_adaptor c_string_adaptor::c_string{};
+
+#else
 
 /**
- * Creates a c-string iterator with knowing its length
- *
- * @param arr Beginning array of the c string
- * @return CString object containing a random access iterator
+ * @brief This adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a sentinel,
+ * rather than an actual iterator. Example:
+ * ```cpp
+ * const char* str = "Hello, World!";
+ * auto cstr = lz::c_string(str);
+ * // or:
+ * auto cstr = "Hello" | lz::c_string;
+ * ```
  */
-template<class C, std::size_t N, detail::enable_if<!std::is_const<C>::value, int> = 0>
-LZ_NODISCARD constexpr c_string_iterable<C*, std::random_access_iterator_tag> c_string(C (&arr)[N]) noexcept {
-    return { detail::begin(arr), detail::end(arr) };
-}
+LZ_INLINE_VAR constexpr c_string_adaptor c_string{};
 
-/**
- * Creates a c-string iterator without knowing its length
- *
- * @param s The c string
- * @return CString object containing a forward iterator
- */
-template<class C>
-LZ_NODISCARD constexpr c_string_iterable<const C*, std::forward_iterator_tag> c_string(const C* s) noexcept {
-    return { s };
-}
-
-// End of group
-/**
- * @}
- */
+#endif
 
 LZ_MODULE_EXPORT_SCOPE_END
 

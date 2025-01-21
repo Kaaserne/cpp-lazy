@@ -9,25 +9,25 @@ TEST_CASE("Filter with sentinels") {
     auto filter = lz::filter(c_str, [](char c) { return c != 'o'; });
     static_assert(!std::is_same<decltype(filter.begin()), decltype(filter.end())>::value, "Must be sentinel");
     std::vector<char> expected = { 'H', 'e', 'l', 'l', ',', ' ', 'W', 'r', 'l', 'd', '!' };
-    CHECK(filter.to_vector() == expected);
+    REQUIRE(filter.to_vector() == expected);
 }
 
 TEST_CASE("Empty or one element filter") {
     SECTION("Empty") {
         std::list<int> empty;
         auto filter = lz::filter(empty, [](int i) { return i != 0; });
-        CHECK(lz::empty(filter));
-        CHECK(!lz::has_one(filter));
-        CHECK(!lz::has_many(filter));
+        REQUIRE(lz::empty(filter));
+        REQUIRE(!lz::has_one(filter));
+        REQUIRE(!lz::has_many(filter));
     }
 
     SECTION("One element") {
         std::list<int> one_element = { 1 };
         auto filter = lz::filter(one_element, [](int i) { return i != 0; });
-        CHECK(!lz::empty(filter));
-        CHECK(lz::has_one(filter));
-        CHECK(!lz::has_many(filter));
-        CHECK(*filter.begin() == 1);
+        REQUIRE(!lz::empty(filter));
+        REQUIRE(lz::has_one(filter));
+        REQUIRE(!lz::has_many(filter));
+        REQUIRE(*filter.begin() == 1);
     }
 }
 
@@ -45,14 +45,14 @@ TEST_CASE("Filter filters and is by reference", "[Filter][Basic functionality]")
         auto it = filter.begin();
 
         int expected = array[0];
-        CHECK(*it == expected);
+        REQUIRE(*it == expected);
 
         ++it;
         expected = array[1];
-        CHECK(*it == expected);
+        REQUIRE(*it == expected);
 
         ++it;
-        CHECK(it == filter.end());
+        REQUIRE(it == filter.end());
     }
 
     SECTION("Should be by reference") {
@@ -60,7 +60,7 @@ TEST_CASE("Filter filters and is by reference", "[Filter][Basic functionality]")
         auto it = filter.begin();
 
         *it = 50;
-        CHECK(array[0] == 50);
+        REQUIRE(array[0] == 50);
     }
 }
 
@@ -74,30 +74,30 @@ TEST_CASE("Filter binary operations", "[Filter][Binary ops]") {
     auto it = filter.begin();
 
     SECTION("Operator++") {
-        CHECK(*it == array[0]);
+        REQUIRE(*it == array[0]);
         ++it;
-        CHECK(*it == array[1]);
+        REQUIRE(*it == array[1]);
     }
 
     SECTION("Operator== & operator!=") {
-        CHECK(it != filter.end());
+        REQUIRE(it != filter.end());
         it = filter.end();
-        CHECK(it == filter.end());
+        REQUIRE(it == filter.end());
     }
 
     SECTION("Operator--") {
         auto rev_it = filter.end();
-        CHECK(rev_it != filter.begin());
+        REQUIRE(rev_it != filter.begin());
         --rev_it;
-        CHECK(*rev_it == array[1]);
-        CHECK(rev_it != filter.begin());
+        REQUIRE(*rev_it == array[1]);
+        REQUIRE(rev_it != filter.begin());
         ++rev_it;
-        CHECK(rev_it == filter.end());
+        REQUIRE(rev_it == filter.end());
         --rev_it;
-        CHECK(*rev_it == array[1]);
+        REQUIRE(*rev_it == array[1]);
         --rev_it;
-        CHECK(*rev_it == array[0]);
-        CHECK(rev_it == filter.begin());
+        REQUIRE(*rev_it == array[0]);
+        REQUIRE(rev_it == filter.begin());
     }
 }
 
@@ -110,26 +110,26 @@ TEST_CASE("Filter to container", "[Filter][To container]") {
         constexpr std::size_t filter_size = 2;
         auto filtered = lz::filter(array, [](int i) { return i != 3; }).to<std::array<int, filter_size>>();
 
-        CHECK(filtered[0] == array[0]);
-        CHECK(filtered[1] == array[1]);
+        REQUIRE(filtered[0] == array[0]);
+        REQUIRE(filtered[1] == array[1]);
     }
 
     SECTION("To vector") {
         auto filtered_vec = lz::filter(array, [](int i) { return i != 3; }).to_vector();
 
-        CHECK(filtered_vec.size() == 2);
-        CHECK(filtered_vec[0] == array[0]);
-        CHECK(filtered_vec[1] == array[1]);
+        REQUIRE(filtered_vec.size() == 2);
+        REQUIRE(filtered_vec[0] == array[0]);
+        REQUIRE(filtered_vec[1] == array[1]);
     }
 
     SECTION("To other container using to<>()") {
         auto filtered_list = lz::filter(array, [](int i) { return i != 3; }).to<std::list<int>>();
 
-        CHECK(filtered_list.size() == 2);
+        REQUIRE(filtered_list.size() == 2);
         auto counter = array.begin();
 
         for (int element : filtered_list) {
-            CHECK(element == *counter);
+            REQUIRE(element == *counter);
             ++counter;
         }
     }
@@ -138,14 +138,14 @@ TEST_CASE("Filter to container", "[Filter][To container]") {
         auto filtered = lz::filter(array, [](const int i) { return i != 3; });
         std::map<int, int> actual = filtered.to_map([](const int i) { return std::make_pair(i, i); });
         std::map<int, int> expected = { std::make_pair(1, 1), std::make_pair(2, 2) };
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To unordered map") {
         auto filtered = lz::filter(array, [](const int i) { return i != 3; });
         std::unordered_map<int, int> actual = filtered.to_unordered_map([](const int i) { return std::make_pair(i, i); });
         std::unordered_map<int, int> expected = { std::make_pair(1, 1), std::make_pair(2, 2) };
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To reverse container") {
@@ -157,6 +157,6 @@ TEST_CASE("Filter to container", "[Filter][To container]") {
         auto end_rev = std::reverse_iterator<sentinel>(filtered.begin());
         std::vector<int> reversed(it_rev, end_rev);
         std::vector<int> expected = { 2, 1 };
-        CHECK(reversed == expected);
+        REQUIRE(reversed == expected);
     }
 }

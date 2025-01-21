@@ -9,70 +9,70 @@ TEST_CASE("Zip longest with sentinels") {
     auto cstr3 = lz::c_string("S");
     auto longest = lz::zip_longest(cstr, cstr2, cstr3);
     static_assert(!std::is_same<decltype(longest.begin()), decltype(longest.end())>::value, "should be sentine");
-    CHECK(longest.distance() == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
+    REQUIRE(longest.distance() == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
 
     auto begin = longest.begin();
     lz::optional<std::reference_wrapper<const char>> ref1(std::get<0>(*begin));
     lz::optional<std::reference_wrapper<const char>> ref2(std::get<1>(*begin));
     lz::optional<std::reference_wrapper<const char>> ref3(std::get<2>(*begin));
 
-    CHECK(ref1.value() == 'H');
-    CHECK(ref2.value() == 'H');
-    CHECK(ref3.value() == 'S');
+    REQUIRE(ref1.value() == 'H');
+    REQUIRE(ref2.value() == 'H');
+    REQUIRE(ref3.value() == 'S');
     ++begin;
 
     ref1 = std::get<0>(*begin);
     ref2 = std::get<1>(*begin);
     ref3 = std::get<2>(*begin);
 
-    CHECK(ref1.value() == 'e');
-    CHECK(ref2.value() == 'e');
-    CHECK(!ref3);
+    REQUIRE(ref1.value() == 'e');
+    REQUIRE(ref2.value() == 'e');
+    REQUIRE(!ref3);
 
     ++begin;
     ref1 = std::get<0>(*begin);
     ref2 = std::get<1>(*begin);
     ref3 = std::get<2>(*begin);
 
-    CHECK(ref1.value() == 'l');
-    CHECK(ref2.value() == 'l');
-    CHECK(!ref3);
+    REQUIRE(ref1.value() == 'l');
+    REQUIRE(ref2.value() == 'l');
+    REQUIRE(!ref3);
 
     ++begin;
     ref1 = std::get<0>(*begin);
     ref2 = std::get<1>(*begin);
     ref3 = std::get<2>(*begin);
 
-    CHECK(ref1.value() == 'l');
-    CHECK(ref2.value() == 'l');
-    CHECK(!ref3);
+    REQUIRE(ref1.value() == 'l');
+    REQUIRE(ref2.value() == 'l');
+    REQUIRE(!ref3);
 
     ++begin;
     ref1 = std::get<0>(*begin);
     ref2 = std::get<1>(*begin);
     ref3 = std::get<2>(*begin);
 
-    CHECK(ref1.value() == 'o');
-    CHECK(ref2.value() == 'o');
-    CHECK(!ref3);
+    REQUIRE(ref1.value() == 'o');
+    REQUIRE(ref2.value() == 'o');
+    REQUIRE(!ref3);
 
     ++begin;
     ref1 = std::get<0>(*begin);
     ref2 = std::get<1>(*begin);
     ref3 = std::get<2>(*begin);
 
-    CHECK(!ref1);
-    CHECK(ref2.value() == '1');
-    CHECK(!ref3);
+    REQUIRE(!ref1);
+    REQUIRE(ref2.value() == '1');
+    REQUIRE(!ref3);
 
     ++begin;
     ref1 = std::get<0>(*begin);
     ref2 = std::get<1>(*begin);
     ref3 = std::get<2>(*begin);
 
-    CHECK(!ref1);
-    CHECK(!ref2);
-    CHECK(!ref3);
+    REQUIRE(!ref1);
+    REQUIRE(!ref2);
+    REQUIRE(!ref3);
 }
 
 // TEST_CASE("zip_longest_iterable changing and creating elements", "[zip_longest_iterable][Basic functionality]") {
@@ -86,8 +86,8 @@ TEST_CASE("Zip longest with sentinels") {
 //     static_assert(lz::detail::is_ra<decltype(ra.begin())>::value, "");
 
 //     SECTION("Unequal lengths") {
-//         CHECK(lz::distance(fwd.begin(), fwd.end()) == 7);
-//         CHECK(std::distance(ra.begin(), ra.end()) == 7);
+//         REQUIRE(lz::distance(fwd.begin(), fwd.end()) == 7);
+//         REQUIRE(std::distance(ra.begin(), ra.end()) == 7);
 //     }
 
 //     SECTION("Should zip longest") {
@@ -97,21 +97,21 @@ TEST_CASE("Zip longest with sentinels") {
 //             auto&& b = std::get<1>(tup);
 //             auto&& c = std::get<2>(tup);
 
-//             CHECK(*a == v[counter]);
+//             REQUIRE(*a == v[counter]);
 
 //             if (counter > 2) {
-//                 CHECK(!b);
+//                 REQUIRE(!b);
 //             }
 //             else {
-//                 CHECK(b);
-//                 CHECK(*b == *std::next(v2.begin(), static_cast<std::ptrdiff_t>(counter)));
+//                 REQUIRE(b);
+//                 REQUIRE(*b == *std::next(v2.begin(), static_cast<std::ptrdiff_t>(counter)));
 //             }
 //             if (counter > 3) {
-//                 CHECK(!c);
+//                 REQUIRE(!c);
 //             }
 //             else {
-//                 CHECK(c);
-//                 CHECK(*c == v3[counter]);
+//                 REQUIRE(c);
+//                 REQUIRE(*c == v3[counter]);
 //             }
 //             counter++;
 //         }
@@ -121,13 +121,13 @@ TEST_CASE("Zip longest with sentinels") {
 //         for (auto&& tup : ra) {
 //             auto&& a = std::get<0>(tup);
 //             auto&& b = std::get<1>(tup);
-//             CHECK(*a == v[counter]);
+//             REQUIRE(*a == v[counter]);
 //             if (counter > 3) {
-//                 CHECK(!b);
+//                 REQUIRE(!b);
 //             }
 //             else {
-//                 CHECK(b);
-//                 CHECK(*b == v3[counter]);
+//                 REQUIRE(b);
+//                 REQUIRE(*b == v3[counter]);
 //             }
 //             counter++;
 //         }
@@ -137,7 +137,7 @@ TEST_CASE("Zip longest with sentinels") {
 //         auto begin = ra.begin();
 //         std::reference_wrapper<int> ref_wrapper = std::get<0>(*begin).value();
 //         ref_wrapper.get() = 2000;
-//         CHECK(v[0] == ref_wrapper.get());
+//         REQUIRE(v[0] == ref_wrapper.get());
 //     }
 // }
 
@@ -149,100 +149,100 @@ TEST_CASE("Zip longest with sentinels") {
 //     auto zipper = lz::zip_longest(a, b, c);
 //     auto begin = zipper.begin();
 
-//     CHECK(*std::get<0>(*begin) == 1);
-//     CHECK(*std::get<1>(*begin) == 1.f);
-//     CHECK(*std::get<2>(*begin) == 1);
+//     REQUIRE(*std::get<0>(*begin) == 1);
+//     REQUIRE(*std::get<1>(*begin) == 1.f);
+//     REQUIRE(*std::get<2>(*begin) == 1);
 
 //     SECTION("Operator++") {
 //         ++begin;
-//         CHECK(*std::get<0>(*begin) == 2);
-//         CHECK(*std::get<1>(*begin) == 2.f);
-//         CHECK(*std::get<2>(*begin) == 2);
+//         REQUIRE(*std::get<0>(*begin) == 2);
+//         REQUIRE(*std::get<1>(*begin) == 2.f);
+//         REQUIRE(*std::get<2>(*begin) == 2);
 //         ++begin;
-//         CHECK(*std::get<0>(*begin) == 3);
-//         CHECK(*std::get<1>(*begin) == 3.f);
-//         CHECK(!std::get<2>(*begin));
+//         REQUIRE(*std::get<0>(*begin) == 3);
+//         REQUIRE(*std::get<1>(*begin) == 3.f);
+//         REQUIRE(!std::get<2>(*begin));
 //     }
 
 //     SECTION("Operator--") {
 //         auto end = zipper.end();
 //         --end;
-//         CHECK(!std::get<0>(*end));
-//         CHECK(*std::get<1>(*end) == 5.f);
-//         CHECK(!std::get<2>(*end));
+//         REQUIRE(!std::get<0>(*end));
+//         REQUIRE(*std::get<1>(*end) == 5.f);
+//         REQUIRE(!std::get<2>(*end));
 //         --end;
-//         CHECK(*std::get<0>(*end) == 4);
-//         CHECK(*std::get<1>(*end) == 4.f);
-//         CHECK(!std::get<2>(*end));
+//         REQUIRE(*std::get<0>(*end) == 4);
+//         REQUIRE(*std::get<1>(*end) == 4.f);
+//         REQUIRE(!std::get<2>(*end));
 //         --end, --end;
-//         CHECK(*std::get<0>(*end) == 2);
-//         CHECK(*std::get<1>(*end) == 2.f);
-//         CHECK(*std::get<2>(*end) == 2);
+//         REQUIRE(*std::get<0>(*end) == 2);
+//         REQUIRE(*std::get<1>(*end) == 2.f);
+//         REQUIRE(*std::get<2>(*end) == 2);
 //     }
 
 //     SECTION("Operator== & Operator!=") {
-//         CHECK(begin != zipper.end());
+//         REQUIRE(begin != zipper.end());
 //         begin = zipper.end();
-//         CHECK(begin == zipper.end());
+//         REQUIRE(begin == zipper.end());
 //     }
 
 //     SECTION("Operator+(int) offset, tests += as well") {
-//         CHECK(*std::get<0>(*(begin + 1)) == 2);
-//         CHECK(*std::get<1>(*(begin + 1)) == 2.f);
-//         CHECK(*std::get<2>(*(begin + 1)) == 2);
+//         REQUIRE(*std::get<0>(*(begin + 1)) == 2);
+//         REQUIRE(*std::get<1>(*(begin + 1)) == 2.f);
+//         REQUIRE(*std::get<2>(*(begin + 1)) == 2);
 
-//         CHECK(*std::get<0>(*(begin + 2)) == 3);
-//         CHECK(*std::get<1>(*(begin + 2)) == 3.f);
-//         CHECK(!std::get<2>(*(begin + 2)));
+//         REQUIRE(*std::get<0>(*(begin + 2)) == 3);
+//         REQUIRE(*std::get<1>(*(begin + 2)) == 3.f);
+//         REQUIRE(!std::get<2>(*(begin + 2)));
 
-//         CHECK(*std::get<0>(*(begin + 3)) == 4);
-//         CHECK(*std::get<1>(*(begin + 3)) == 4.f);
-//         CHECK(!std::get<2>(*(begin + 3)));
+//         REQUIRE(*std::get<0>(*(begin + 3)) == 4);
+//         REQUIRE(*std::get<1>(*(begin + 3)) == 4.f);
+//         REQUIRE(!std::get<2>(*(begin + 3)));
 
-//         CHECK(!std::get<0>(*(begin + 4)));
-//         CHECK(*std::get<1>(*(begin + 4)) == 5.f);
-//         CHECK(!std::get<2>(*(begin + 4)));
+//         REQUIRE(!std::get<0>(*(begin + 4)));
+//         REQUIRE(*std::get<1>(*(begin + 4)) == 5.f);
+//         REQUIRE(!std::get<2>(*(begin + 4)));
 //     }
 
 //     SECTION("Operator-(int) offset, tests -= as well") {
 //         auto end = zipper.end();
-//         CHECK(!std::get<0>(*(end - 1)));
-//         CHECK(*std::get<1>(*(end - 1)) == 5.f);
-//         CHECK(!std::get<2>(*(end - 1)));
+//         REQUIRE(!std::get<0>(*(end - 1)));
+//         REQUIRE(*std::get<1>(*(end - 1)) == 5.f);
+//         REQUIRE(!std::get<2>(*(end - 1)));
 
-//         CHECK(*std::get<0>(*(end - 2)) == 4);
-//         CHECK(*std::get<1>(*(end - 2)) == 4.f);
-//         CHECK(!std::get<2>(*(end - 2)));
+//         REQUIRE(*std::get<0>(*(end - 2)) == 4);
+//         REQUIRE(*std::get<1>(*(end - 2)) == 4.f);
+//         REQUIRE(!std::get<2>(*(end - 2)));
 
-//         CHECK(*std::get<0>(*(end - 3)) == 3);
-//         CHECK(*std::get<1>(*(end - 3)) == 3.f);
-//         CHECK(!std::get<2>(*(end - 3)));
+//         REQUIRE(*std::get<0>(*(end - 3)) == 3);
+//         REQUIRE(*std::get<1>(*(end - 3)) == 3.f);
+//         REQUIRE(!std::get<2>(*(end - 3)));
 
-//         CHECK(*std::get<0>(*(end - 4)) == 2);
-//         CHECK(*std::get<1>(*(end - 4)) == 2.f);
-//         CHECK(*std::get<2>(*(end - 4)) == 2);
+//         REQUIRE(*std::get<0>(*(end - 4)) == 2);
+//         REQUIRE(*std::get<1>(*(end - 4)) == 2.f);
+//         REQUIRE(*std::get<2>(*(end - 4)) == 2);
 
-//         CHECK(*std::get<0>(*(end - 5)) == 1);
-//         CHECK(*std::get<1>(*(end - 5)) == 1.f);
-//         CHECK(*std::get<2>(*(end - 5)) == 1);
+//         REQUIRE(*std::get<0>(*(end - 5)) == 1);
+//         REQUIRE(*std::get<1>(*(end - 5)) == 1.f);
+//         REQUIRE(*std::get<2>(*(end - 5)) == 1);
 //     }
 
 //     SECTION("Operator-(Iterator)") {
-//         CHECK(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size()));
+//         REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size()));
 //         ++begin;
-//         CHECK(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 1));
+//         REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 1));
 //     }
 
 //     SECTION("Operator[]()") {
-//         CHECK(*std::get<1>(begin[4]) == 5.f);
+//         REQUIRE(*std::get<1>(begin[4]) == 5.f);
 //     }
 
 //     SECTION("Operator<, <, <=, >, >=") {
 //         auto end = zipper.end();
-//         CHECK(begin < end);
-//         CHECK(begin + 5 > end - 1);
-//         CHECK(begin + 5 >= end);
-//         CHECK(begin <= end - 5);
+//         REQUIRE(begin < end);
+//         REQUIRE(begin + 5 > end - 1);
+//         REQUIRE(begin + 5 >= end);
+//         REQUIRE(begin <= end - 5);
 //     }
 // }
 
@@ -251,27 +251,27 @@ TEST_CASE("Zip longest with sentinels") {
 //         std::vector<int> a;
 //         std::vector<float> b;
 //         auto zipper = lz::zip_longest(a, b);
-//         CHECK(lz::empty(zipper));
-//         CHECK(!lz::has_one(zipper));
-//         CHECK(!lz::has_many(zipper));
+//         REQUIRE(lz::empty(zipper));
+//         REQUIRE(!lz::has_one(zipper));
+//         REQUIRE(!lz::has_many(zipper));
 //     }
 
 //     SECTION("One element 1") {
 //         std::vector<int> a = { 1 };
 //         std::vector<float> b;
 //         auto zipper = lz::zip_longest(a, b);
-//         CHECK(!lz::empty(zipper));
-//         CHECK(lz::has_one(zipper));
-//         CHECK(!lz::has_many(zipper));
+//         REQUIRE(!lz::empty(zipper));
+//         REQUIRE(lz::has_one(zipper));
+//         REQUIRE(!lz::has_many(zipper));
 //     }
 
 //     SECTION("One element 2") {
 //         std::vector<int> a;
 //         std::vector<float> b = { 1.f };
 //         auto zipper = lz::zip_longest(a, b);
-//         CHECK(!lz::empty(zipper));
-//         CHECK(lz::has_one(zipper));
-//         CHECK(!lz::has_many(zipper));
+//         REQUIRE(!lz::empty(zipper));
+//         REQUIRE(lz::has_one(zipper));
+//         REQUIRE(!lz::has_many(zipper));
 //     }
 // }
 
@@ -303,7 +303,7 @@ TEST_CASE("Zip longest with sentinels") {
 //     std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
 //     std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
 // };
-// CHECK(std::equal(to_arr.begin(), to_arr.end(), expected.begin(), zip_longest_comparer{}));
+// REQUIRE(std::equal(to_arr.begin(), to_arr.end(), expected.begin(), zip_longest_comparer{}));
 // }
 
 // SECTION("To vector") {
@@ -313,7 +313,7 @@ TEST_CASE("Zip longest with sentinels") {
 //         std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
 //         std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
 //     };
-//     CHECK(std::equal(to_vec.begin(), to_vec.end(), expected.begin(), zip_longest_comparer{}));
+//     REQUIRE(std::equal(to_vec.begin(), to_vec.end(), expected.begin(), zip_longest_comparer{}));
 // }
 
 // SECTION("To other container using to<>()") {
@@ -322,19 +322,19 @@ TEST_CASE("Zip longest with sentinels") {
 //         std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
 //         std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
 //     };
-//     CHECK(std::equal(to_list.begin(), to_list.end(), expected.begin(), zip_longest_comparer{}));
+//     REQUIRE(std::equal(to_list.begin(), to_list.end(), expected.begin(), zip_longest_comparer{}));
 // }
 
 // SECTION("To map") {
 //     auto toMap = zipper.to_map([](const auto& tup) { return std::make_pair(std::get<0>(tup), std::get<1>(tup)); });
 //     std::map<int, lz::optional<float>> expected = { { 1, 1.f }, { 2, 2.f }, { 3, 3.f }, { 4, 4.f }, { 0, 5.f } };
-//     CHECK(toMap == expected);
+//     REQUIRE(toMap == expected);
 // }
 
 // SECTION("To unordered map") {
 //     auto toUnorderedMap =
 //         zipper.to_unordered_map([](const auto& tup) { return std::make_pair(std::get<0>(tup), std::get<1>(tup)); });
 //     std::unordered_map<int, lz::optional<float>> expected = { { 1, 1.f }, { 2, 2.f }, { 3, 3.f }, { 4, 4.f }, { 0, 5.f } };
-//     CHECK(toUnorderedMap == expected);
+//     REQUIRE(toUnorderedMap == expected);
 // }
 // }

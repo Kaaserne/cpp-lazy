@@ -82,20 +82,22 @@ class func_container {
 #endif
 
 public:
-    constexpr explicit func_container(const Func& func) : _func(func), _is_constructed(true) {
+    constexpr explicit func_container(const Func& func) : _func{ func }, _is_constructed{ true } {
     }
 
-    constexpr explicit func_container(Func&& func) noexcept : _func(std::move(func)), _is_constructed(true) {
+    constexpr explicit func_container(Func&& func) noexcept : _func{ std::move(func) }, _is_constructed(true) {
     }
 
     constexpr func_container() : func_container(std::is_default_constructible<Func>()) {
     }
 
-    LZ_CONSTEXPR_CXX_14 func_container(func_container&& other) noexcept : _func(std::move(other._func)), _is_constructed(true) {
+    LZ_CONSTEXPR_CXX_14 func_container(func_container&& other) noexcept :
+        _func{ std::move(other._func) },
+        _is_constructed{ true } {
         other._is_constructed = false;
     }
 
-    constexpr func_container(const func_container& other) : _func(other._func), _is_constructed(true) {
+    constexpr func_container(const func_container& other) : _func{ other._func }, _is_constructed{ true } {
     }
 
     LZ_CONSTEXPR_CXX_20 func_container& operator=(const func_container& other) {

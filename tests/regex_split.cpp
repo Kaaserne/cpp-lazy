@@ -49,27 +49,27 @@ TEST_CASE("Empty or one element regex split") {
         std::regex r1(R"(\s+)");
         std::string s;
         auto splitter = lz::regex_split(s, r1);
-        CHECK(lz::empty(splitter));
-        CHECK(!lz::has_one(splitter));
-        CHECK(!lz::has_many(splitter));
+        REQUIRE(lz::empty(splitter));
+        REQUIRE(!lz::has_one(splitter));
+        REQUIRE(!lz::has_many(splitter));
     }
 
     SECTION("One element with result") {
         std::regex r1(R"(\s+)");
         std::string s = "Hello ";
         auto splitter = lz::regex_split(s, r1);
-        CHECK(!lz::empty(splitter));
-        CHECK(lz::has_one(splitter));
-        CHECK(!lz::has_many(splitter));
+        REQUIRE(!lz::empty(splitter));
+        REQUIRE(lz::has_one(splitter));
+        REQUIRE(!lz::has_many(splitter));
     }
 
     SECTION("One element without result") {
         std::regex r1(R"(\s+)");
         std::string s = "Hello";
         auto splitter = lz::regex_split(s, r1);
-        CHECK(!lz::empty(splitter));
-        CHECK(lz::has_one(splitter));
-        CHECK(!lz::has_many(splitter));
+        REQUIRE(!lz::empty(splitter));
+        REQUIRE(lz::has_one(splitter));
+        REQUIRE(!lz::has_many(splitter));
     }
 }
 
@@ -81,15 +81,15 @@ TEST_CASE("regex_split_iterable binary operations", "[regex_split_iterable][Bina
 
     SECTION("Operator++") {
         ++begin;
-        CHECK(lz::distance(begin, splitter.end()) == 4);
+        REQUIRE(lz::distance(begin, splitter.end()) == 4);
     }
 
     SECTION("Operator== & Operator!=") {
-        CHECK(begin != splitter.end());
+        REQUIRE(begin != splitter.end());
         while (begin != splitter.end()) {
             ++begin;
         }
-        CHECK(begin == splitter.end());
+        REQUIRE(begin == splitter.end());
     }
 }
 
