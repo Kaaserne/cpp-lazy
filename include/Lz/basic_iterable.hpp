@@ -237,7 +237,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  */
 template<class Container, class... Args, class Iterable, class = detail::enable_if<detail::is_iterable<Iterable>::value>>
 LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
-    return to<Container>(std::forward<Args>(args)...)(std::forward<Iterable>(iterable));
+    constexpr to_adaptor<Container> to{};
+    return to(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+    // return to<Container>(std::forward<Args>(args)...)(std::forward<Iterable>(iterable));
 }
 
 /**

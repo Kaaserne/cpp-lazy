@@ -1,141 +1,192 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_TAKE_WHILE_ITERATOR_HPP
-// #define LZ_TAKE_WHILE_ITERATOR_HPP
+#ifndef LZ_TAKE_WHILE_ITERATOR_HPP
+#define LZ_TAKE_WHILE_ITERATOR_HPP
 
-// #include <Lz/detail/compiler_checks.hpp>
-// #include <Lz/detail/fake_ptr_proxy.hpp>
-// #include <Lz/detail/func_container.hpp>
-// #include <Lz/detail/iterators/common.hpp>
-// #include <Lz/detail/traits.hpp>
-// #include <Lz/iterator_base.hpp>
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/func_container.hpp>
+#include <Lz/detail/iterators/common.hpp>
+#include <Lz/detail/traits.hpp>
+#include <Lz/iterator_base.hpp>
 
-// namespace lz {
-// namespace detail {
-// template<class Iterator, class S, class UnaryPredicate>
-// class take_while_iterator
-//     : public iter_base<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-//                        diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+namespace lz {
+namespace detail {
+template<class Iterator, class S, class UnaryPredicate, class = void>
+class take_while_iterator;
 
-//     common_iterator<Iterator, S> _iterator;
-//     S _end;
-//     func_container<UnaryPredicate> _unary_predicate;
+template<class Iterator, class S, class UnaryPredicate>
+class take_while_iterator<Iterator, S, UnaryPredicate, std::enable_if_t<!is_bidi<Iterator>::value>>
+    : public iter_base<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
-//     using traits = std::iterator_traits<Iterator>;
+    common_iterator<Iterator, S> _iterator;
+    S _end;
+    func_container<UnaryPredicate> _unary_predicate;
 
-//     LZ_CONSTEXPR_CXX_14 void incremented_check() {
-//         if (_iterator != _end && !_unary_predicate(*_iterator)) {
-//             _iterator = _end;
-//         }
-//     }
+    using traits = std::iterator_traits<Iterator>;
 
-// public:
-//     using iterator_category = std::forward_iterator_tag;
-//     using value_type = typename traits::value_type;
-//     using difference_type = typename traits::difference_type;
-//     using reference = typename traits::reference;
-//     using pointer = fake_ptr_proxy<reference>;
+    LZ_CONSTEXPR_CXX_14 void incremented_check() {
+        if (_iterator != _end && !_unary_predicate(*_iterator)) {
+            _iterator = _end;
+        }
+    }
 
-//     constexpr take_while_iterator() = default;
+public:
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+    using reference = typename traits::reference;
+    using pointer = fake_ptr_proxy<reference>;
 
-//     LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator iterator, S end, UnaryPredicate unary_predicate) :
-//         _iterator(std::move(iterator)),
-//         _end(std::move(end)),
-//         _unary_predicate(std::move(unary_predicate)) {
-//         incremented_check();
-//     }
+    constexpr take_while_iterator() = default;
 
-//     LZ_CONSTEXPR_CXX_14 void increment() {
-//         ++_iterator;
-//         incremented_check();
-//     }
+    LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator iterator, S end, UnaryPredicate unary_predicate) :
+        _iterator{ std::move(iterator) },
+        _end{ std::move(end) },
+        _unary_predicate{ std::move(unary_predicate) } {
+        incremented_check();
+    }
 
-//     constexpr reference dereference() const {
-//         return *_iterator;
-//     }
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_iterator;
+        incremented_check();
+    }
 
-//     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
-//         return fake_ptr_proxy<decltype(**this)>(**this);
-//     }
+    constexpr reference dereference() const {
+        return *_iterator;
+    }
 
-//     constexpr bool eq(const take_while_iterator& b) const noexcept {
-//         return _iterator == b._iterator;
-//     }
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
 
-//     constexpr bool eq(default_sentinel) const noexcept {
-//         return _iterator == _end;
-//     }
-// };
+    constexpr bool eq(const take_while_iterator& b) const noexcept {
+        return _iterator == b._iterator;
+    }
 
-// template<class Iterator, class UnaryPredicate>
-// class take_while_iterator<Iterator, Iterator, UnaryPredicate>
-//     : public iter_base<take_while_iterator<Iterator, Iterator, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-//                        diff_type<Iterator>, std::bidirectional_iterator_tag> {
+    constexpr bool eq(default_sentinel) const noexcept {
+        return _iterator == _end;
+    }
+};
 
-//     Iterator _begin;
-//     Iterator _iterator;
-//     Iterator _end;
-//     func_container<UnaryPredicate> _unary_predicate;
+template<class Iterator, class S, class UnaryPredicate>
+class take_while_iterator<Iterator, S, UnaryPredicate, std::enable_if_t<is_bidi<Iterator>::value>>
+    : public iter_base<take_while_iterator<Iterator, Iterator, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                       diff_type<Iterator>, std::bidirectional_iterator_tag> {
 
-//     using traits = std::iterator_traits<Iterator>;
+    Iterator _begin;
+    Iterator _iterator;
+    Iterator _end;
+    func_container<UnaryPredicate> _unary_predicate;
 
-//     void incremented_check() {
-//         if (_iterator != _end && !_unary_predicate(*_iterator)) {
-//             _iterator = _end;
-//         }
-//     }
+    using traits = std::iterator_traits<Iterator>;
 
-// public:
-//     using iterator_category = std::forward_iterator_tag;
-//     using value_type = typename traits::value_type;
-//     using difference_type = typename traits::difference_type;
-//     using reference = typename traits::reference;
-//     using pointer = fake_ptr_proxy<reference>;
+    void incremented_check() {
+        if (_iterator != _end && !_unary_predicate(*_iterator)) {
+            _iterator = _end;
+        }
+    }
 
-//     constexpr take_while_iterator() = default;
+public:;
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+    using reference = typename traits::reference;
+    using pointer = fake_ptr_proxy<reference>;
 
-//     LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator iterator, Iterator begin, Iterator end, UnaryPredicate unary_predicate) :
-//         _begin(std::move(begin)),
-//         _iterator(std::move(iterator)),
-//         _end(std::move(end)),
-//         _unary_predicate(std::move(unary_predicate)) {
-//         if (iterator == begin) {
-//             incremented_check();
-//         }
-//     }
+    constexpr take_while_iterator() = default;
 
-//     LZ_CONSTEXPR_CXX_20 void increment() {
-//         ++_iterator;
-//         incremented_check();
-//     }
+    LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator iterator, Iterator begin, Iterator end, UnaryPredicate unary_predicate) :
+        _begin{ std::move(begin) },
+        _iterator{ std::move(iterator) },
+        _end{ std::move(end) },
+        _unary_predicate{ std::move(unary_predicate) } {
+        if (iterator == begin) {
+            incremented_check();
+        }
+    }
 
-//     LZ_CONSTEXPR_CXX_20 void decrement() {
-//         if (_iterator != _end) {
-//             --_iterator;
-//             return;
-//         }
-//         do {
-//             --_iterator;
-//         } while (_iterator != _begin && !_unary_predicate(*_iterator));
-//     }
+    LZ_CONSTEXPR_CXX_20 void increment() {
+        ++_iterator;
+        incremented_check();
+    }
 
-//     LZ_CONSTEXPR_CXX_20 reference dereference() const {
-//         return *_iterator;
-//     }
+    LZ_CONSTEXPR_CXX_20 void decrement() {
+        if (_iterator != _end) {
+            --_iterator;
+            return;
+        }
+        do {
+            --_iterator;
+        } while (_iterator != _begin && !_unary_predicate(*_iterator));
+    }
 
-//     LZ_CONSTEXPR_CXX_20 pointer arrow() const {
-//         return fake_ptr_proxy<decltype(**this)>(**this);
-//     }
+    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+        return *_iterator;
+    }
 
-//     LZ_CONSTEXPR_CXX_20 bool eq(const take_while_iterator& b) const noexcept {
-//         return _iterator == b._iterator;
-//     }
+    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
 
-//     LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
-//         return _iterator == _end;
-//     }
-// };
-// } // namespace detail
-// } // namespace lz
+    LZ_CONSTEXPR_CXX_20 bool eq(const take_while_iterator& b) const noexcept {
+        return _iterator == b._iterator;
+    }
 
-// #endif // LZ_TAKE_WHILE_ITERATOR_HPP
+    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+        return _iterator == _end;
+    }
+};
+
+
+template<class Iterable, class UnaryPredicate>
+class take_while_iterable {
+    Iterable _iterable;
+    UnaryPredicate _unary_predicate;
+
+    using inner_iter = iter_t<Iterable>;
+    using inner_sentinel = sentinel_t<Iterable>;
+
+public:
+    using iterator = take_while_iterator<inner_iter, inner_sentinel, UnaryPredicate>;
+    using sentinel = typename iterator::sentinel;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+    constexpr take_while_iterable() = default;
+
+    template<class I, class Up>
+    constexpr take_while_iterable(I&& iterable, Up&& unary_predicate) :
+        _iterable{ std::forward<I>(iterable) },
+        _unary_predicate{ std::forward<Up>(unary_predicate) } {
+    }
+
+    template<class I = inner_iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() const& {
+        return { std::begin(_iterable), std::end(_iterable), _unary_predicate };
+    }
+
+    template<class I = inner_iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
+        return { std::begin(_iterable), std::end(_iterable), std::move(_unary_predicate) };
+    }
+
+    template<class I = inner_iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() const& {
+        return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
+    }
+
+    template<class I = inner_iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const& {
+        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
+    }
+
+    template<class I = inner_iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, sentinel> end() const& {
+        return {};
+    }
+};
+
+} // namespace detail
+} // namespace lz
+
+#endif // LZ_TAKE_WHILE_ITERATOR_HPP

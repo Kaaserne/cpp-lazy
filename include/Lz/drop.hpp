@@ -21,7 +21,7 @@ struct drop_adaptor {
     }
 
     template<class DiffT>
-    LZ_NODISCARD constexpr detail::fn_args_holder<drop_adaptor, DiffT> operator()(const DiffT n) const {
+    LZ_NODISCARD constexpr detail::fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
         return { n };
     }
 };

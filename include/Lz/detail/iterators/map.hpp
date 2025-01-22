@@ -93,31 +93,31 @@ public:
     }
 
     template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() && {
         return { std::move(_iterable).begin(), _unary_op };
     }
 
     template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
         return { std::move(_iterable).begin(), std::move(_unary_op) };
     }
 
-    LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable), _unary_op };
     }
 
     template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() && {
         return { std::move(_iterable).end(), _unary_op };
     }
 
     template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const& {
         return { std::end(_iterable), _unary_op };
     }
 
     template<class I = iterator>
-    constexpr enable_if<!is_bidi<I>::value, sentinel> end() const& {
+    LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, sentinel> end() const& {
         return {};
     }
 };

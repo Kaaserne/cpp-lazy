@@ -90,19 +90,18 @@ public:
         return static_cast<std::size_t>(_n);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<I>::value, iterator> begin() && {
         return { std::move(_iterable).begin(), _n };
+    }
+
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iterator> begin() && {
+        return static_cast<const take_iterable&>(*this).begin();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable), _n };
-    }
-
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iterator> end() && {
-        auto beg = std::move(_iterable).begin();
-        beg += _n;
-        return { beg, 0 };
     }
 
     template<class I = iter_t<Iterable>>

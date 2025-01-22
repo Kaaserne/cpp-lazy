@@ -129,13 +129,15 @@ public:
         construct(std::move(other._variant._t), std::move(other._variant._t2));
         return *this;
     }
-
+    
     template<class U>
     const U* get_if() const {
-        if (_state == state::t && std::is_same<T, U>::value) {
+        constexpr auto is_t = std::is_same<T, U>::value;
+        if (_state == state::t && is_t) {
             return reinterpret_cast<const U*>(std::addressof(_variant._t));
         }
-        if (_state == state::t2 && std::is_same<T2, U>::value) {
+        constexpr auto is_t2 = std::is_same<T2, U>::value;
+        if (_state == state::t2 && is_t2) {
             return reinterpret_cast<const U*>(std::addressof(_variant._t2));
         }
         return nullptr;

@@ -1,30 +1,47 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_DROP_WHILE_HPP
-// #define LZ_DROP_WHILE_HPP
+#ifndef LZ_DROP_WHILE_HPP
+#define LZ_DROP_WHILE_HPP
 
-// #include <Lz/basic_iterable.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/iterators/drop_while.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// /**
-//  * This iterator view object can be used to skip values while `predicate` returns true. After the
-//  * `predicate` returns false, no more values are being skipped.
-//  * @param iterable The sequence with the values that can be iterated over.
-//  * @param predicate Function that must return `bool`, and take a `Iterator::value_type` as function parameter.
-//  * @return A Take iterator view object.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
-// drop_while(Iterable&& iterable, UnaryPredicate predicate) {
-//     auto begin = lz::find_if_not(iterable, std::move(predicate));
-//     return { std::move(begin), std::forward<Iterable>(iterable).end() };
-// }
+struct drop_while_adaptor {
+#ifdef LZ_HAS_CXX_11
+    static drop_while_adaptor drop_while;
+#endif
 
-// LZ_MODULE_EXPORT_SCOPE_END
+    using adaptor = drop_while_adaptor;
 
-// } // namespace lz
+    template<class Iterable, class UnaryPredicate>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::drop_while_iterable<Iterable, detail::decay_t<UnaryPredicate>>
+    operator()(Iterable&& iterable, UnaryPredicate&& unaryPredicate) const {
+        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unaryPredicate) };
+    }
 
-// #endif // LZ_DROP_WHILE_HPP
+    template<class UnaryPredicate>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, detail::decay_t<UnaryPredicate>>
+    operator()(UnaryPredicate&& unaryPredicate) const {
+        return { std::forward<UnaryPredicate>(unaryPredicate) };
+    }
+};
+
+#ifdef LZ_HAS_CXX_11
+
+drop_while_adaptor drop_while_adaptor::drop_while{};
+
+#else
+
+LZ_INLINE_VAR constexpr drop_while_adaptor drop_while{};
+
+#endif
+
+LZ_MODULE_EXPORT_SCOPE_END
+
+} // namespace lz
+
+#endif // LZ_DROP_WHILE_HPP

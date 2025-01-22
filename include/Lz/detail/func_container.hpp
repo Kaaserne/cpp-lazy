@@ -11,7 +11,7 @@ namespace lz {
 namespace detail {
 template<class Func>
 class func_container {
-    mutable Func _func;
+    Func _func;
     bool _is_constructed{ false };
 
     constexpr explicit func_container(std::false_type /* is_default_constructible */) {
@@ -19,7 +19,7 @@ class func_container {
                                                  "lambda's are not default constructible pre C++20");
     }
 
-    constexpr explicit func_container(std::true_type /* is_default_constructible */) : _func(), _is_constructed(true) {
+    constexpr explicit func_container(std::true_type /* is_default_constructible */) : _func{}, _is_constructed(true) {
     }
 
     template<class F>
@@ -85,7 +85,7 @@ public:
     constexpr explicit func_container(const Func& func) : _func{ func }, _is_constructed{ true } {
     }
 
-    constexpr explicit func_container(Func&& func) noexcept : _func{ std::move(func) }, _is_constructed(true) {
+    constexpr explicit func_container(Func&& func) noexcept : _func{ std::move(func) }, _is_constructed{ true } {
     }
 
     constexpr func_container() : func_container(std::is_default_constructible<Func>()) {

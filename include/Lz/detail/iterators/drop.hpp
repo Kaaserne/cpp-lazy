@@ -33,7 +33,7 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return std::next(std::begin(std::move(_iterable)), _n);
+        return std::next(std::move(_iterable).begin(), _n);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
@@ -52,7 +52,7 @@ public:
 
     template<class I = iterator>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel>::value, I> end() && {
-        return std::end(std::move(_iterable));
+        return std::move(_iterable).end();
     }
 };
 } // namespace detail

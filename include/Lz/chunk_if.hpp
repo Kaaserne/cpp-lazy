@@ -15,7 +15,7 @@ struct chunk_if_adaptor {
     static chunk_if_adaptor<ValueType> chunk_if;
 #endif
 
-    using adaptor = chunk_if_adaptor;
+    using adaptor = chunk_if_adaptor<ValueType>;
 
     template<class Iterable, class UnaryPredicate>
     constexpr detail::chunk_if_iterable<ValueType, Iterable, detail::decay_t<UnaryPredicate>>
@@ -24,7 +24,7 @@ struct chunk_if_adaptor {
     }
 
     template<class UnaryPredicate>
-    constexpr detail::fn_args_holder<chunk_if_adaptor<ValueType>, detail::decay_t<UnaryPredicate>>
+    constexpr detail::fn_args_holder<adaptor, detail::decay_t<UnaryPredicate>>
     operator()(UnaryPredicate&& predicate) const {
         return { std::forward<UnaryPredicate>(predicate) };
     }
@@ -45,7 +45,7 @@ struct chunk_if_adaptor<void> {
     }
 
     template<class UnaryPredicate>
-    constexpr detail::fn_args_holder<chunk_if_adaptor<void>, detail::decay_t<UnaryPredicate>>
+    constexpr detail::fn_args_holder<adaptor, detail::decay_t<UnaryPredicate>>
     operator()(UnaryPredicate&& predicate) const {
         return { std::forward<UnaryPredicate>(predicate) };
     }

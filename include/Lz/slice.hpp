@@ -21,7 +21,7 @@ struct slice_adaptor {
     }
 
     template<class DiffT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<slice_adaptor, DiffT, DiffT>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, DiffT, DiffT>
     operator()(const DiffT from, const DiffT to) const {
         return { from, to };
     }

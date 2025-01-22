@@ -23,7 +23,7 @@ struct map_adaptor {
     }
 
     template<class Function>
-    LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<map_adaptor, detail::decay_t<Function>> operator()(Function&& function) const {
+    LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, detail::decay_t<Function>> operator()(Function&& function) const {
         return { std::forward<Function>(function) };
     }
 };

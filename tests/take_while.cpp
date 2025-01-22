@@ -1,8 +1,11 @@
 #include <Lz/drop_while.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/map.hpp>
 #include <Lz/take_while.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 
 TEST_CASE("Take while with sentinels") {
@@ -113,9 +116,9 @@ TEST_CASE("take_while_iterable to containers", "[take_while_iterable][To contain
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });
-
+    (void)take_while;
     SECTION("To array") {
-        auto arr = take_while.to<std::array<int, 4>>();
+        auto arr = take_while | lz::to<std::array<int, 4>>();
         REQUIRE(arr.size() == 4);
         REQUIRE(arr[0] == 1);
         REQUIRE(arr[1] == 2);
@@ -124,24 +127,24 @@ TEST_CASE("take_while_iterable to containers", "[take_while_iterable][To contain
     }
 
     SECTION("To vector") {
-        auto vec = take_while.to_vector();
+        auto vec = take_while | lz::to<std::vector>();
         REQUIRE(std::equal(vec.begin(), vec.end(), take_while.begin()));
     }
 
     SECTION("To other container using to<>()") {
-        auto lst = take_while.to<std::list<int>>();
+        auto lst = take_while | lz::to<std::list>();
         REQUIRE(std::equal(lst.begin(), lst.end(), take_while.begin()));
     }
 
     SECTION("To map") {
-        auto map = take_while.to_map([](int i) { return std::make_pair(i, i); });
+        auto map = take_while | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         REQUIRE(map.size() == 4);
         std::map<int, int> expected = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 } };
         REQUIRE(map == expected);
     }
 
     SECTION("To unordered map") {
-        auto map = take_while.to_unordered_map([](int i) { return std::make_pair(i, i); });
+        auto map = take_while | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         REQUIRE(map.size() == 4);
         std::unordered_map<int, int> expected = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 } };
         REQUIRE(map == expected);

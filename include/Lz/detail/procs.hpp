@@ -100,14 +100,16 @@ struct fn_args_holder {
 
     template<class Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable, index_sequence_helper<I...>) const& {
-        return TAdaptor{}(std::forward<Iterable>(iterable), std::get<I>(data)...);
+        constexpr TAdaptor adaptor;
+        return adaptor(std::forward<Iterable>(iterable), std::get<I>(data)...);
     }
 
     template<class Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable, index_sequence_helper<I...>) && -> decltype(TAdaptor{}(std::forward<Iterable>(iterable),
                                                                                            std::get<I>(std::move(data))...)) {
-        return TAdaptor{}(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
+        constexpr TAdaptor adaptor;
+        return adaptor(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
     }
 
     template<class Iterable>

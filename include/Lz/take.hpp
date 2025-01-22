@@ -20,7 +20,7 @@ struct take_adaptor {
     }
 
     template<class DiffT>
-    constexpr detail::fn_args_holder<take_adaptor, DiffT> operator()(const DiffT n) const {
+    constexpr detail::fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
         return { n };
     }
 };

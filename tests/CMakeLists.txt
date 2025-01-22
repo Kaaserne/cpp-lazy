@@ -62,7 +62,7 @@ add_executable(cpp-lazy-tests
 	# string_view.cpp
 	# take_every.cpp
 	take.cpp
-	# take_while.cpp
+	take_while.cpp
 	# unique.cpp
 	# zip_longest.cpp
 	# zip.cpp

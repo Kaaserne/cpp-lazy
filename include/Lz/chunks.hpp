@@ -21,7 +21,7 @@ struct chunks_adaptor {
         return { std::forward<Iterable>(iterable), chunk_size };
     }
 
-    constexpr detail::fn_args_holder<chunks_adaptor, std::size_t> operator()(std::size_t chunk_size) const {
+    constexpr detail::fn_args_holder<adaptor, std::size_t> operator()(std::size_t chunk_size) const {
         return { chunk_size };
     }
 };
