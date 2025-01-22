@@ -1,8 +1,9 @@
-#include <Lz/map.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
-
+#include <map>
+#include <unordered_map>
 
 struct TestStruct {
     std::string test_field_str;
@@ -14,7 +15,7 @@ TEST_CASE("Map with sentinels") {
     auto map = lz::map(cstr, [](char c) { return std::toupper(c); });
     static_assert(!std::is_same<decltype(map.end()), decltype(map.begin())>::value, "Should be sentinels");
     auto c_str_expected = lz::c_string("HELLO, WORLD!");
-    CHECK(lz::equal(map, c_str_expected));
+    REQUIRE(lz::equal(map, c_str_expected));
 }
 
 TEST_CASE("Map changing and creating elements", "[Map][Basic functionality]") {
@@ -23,22 +24,23 @@ TEST_CASE("Map changing and creating elements", "[Map][Basic functionality]") {
 
     SECTION("Should map out element") {
         auto map = lz::map(array, [](const TestStruct& t) { return t.test_field_str; });
+        REQUIRE(map.size() == size);
         static_assert(std::is_same<decltype(map.end()), decltype(map.begin())>::value, "Should not be sentinels");
         static_assert(std::is_same<decltype(*map.begin()), std::string>::value, "Types to not match (decltype(*map.begin()) and std::string)");
 
         auto it = map.begin();
-        CHECK(*it == "FieldA");
-        CHECK(*(++it) == "FieldB");
-        CHECK(*(++it) == "FieldC");
+        REQUIRE(*it == "FieldA");
+        REQUIRE(*(++it) == "FieldB");
+        REQUIRE(*(++it) == "FieldC");
     }
 
     SECTION("Should be by reference") {
         std::size_t count = 0;
         std::function<std::string&(TestStruct&)> f = [&count, &array](TestStruct& t) -> std::string& {
-            CHECK(&t == &array[count++]);
+            REQUIRE(&t == &array[count++]);
             return t.test_field_str;
         };
-        auto map = lz::map(array, std::move(f));
+        auto map = array | lz::map(std::move(f));
 
         for (auto&& _ : map) {
             static_cast<void>(_);
@@ -58,36 +60,36 @@ TEST_CASE("Map binary operations", "[Map][Binary ops]") {
 
     SECTION("Operator++") {
         ++it;
-        CHECK(*it == array[1].test_field_str);
+        REQUIRE(*it == array[1].test_field_str);
     }
 
     SECTION("Operator--") {
         ++it;
         --it;
-        CHECK(*it == array[0].test_field_str);
+        REQUIRE(*it == array[0].test_field_str);
     }
 
     SECTION("Operator== & operator!=") {
-        CHECK(it != map.end());
+        REQUIRE(it != map.end());
         it = map.end();
-        CHECK(it == map.end());
+        REQUIRE(it == map.end());
     }
 
     SECTION("Operator+(int) offset, tests += as well") {
-        CHECK(*(it + 1) == array[1].test_field_str);
+        REQUIRE(*(it + 1) == array[1].test_field_str);
     }
 
     SECTION("Operator-(int) offset, tests -= as well") {
         ++it;
-        CHECK(*(it - 1) == array[0].test_field_str);
+        REQUIRE(*(it - 1) == array[0].test_field_str);
     }
 
     SECTION("Operator-(Iterator)") {
-        CHECK((map.end() - map.begin()) == 3);
+        REQUIRE((map.end() - map.begin()) == 3);
     }
 
     SECTION("Operator[]()") {
-        CHECK(it[1] == "FieldB");
+        REQUIRE(it[1] == "FieldB");
     }
 
     SECTION("Operator<, <, <=, >, >=") {
@@ -95,10 +97,10 @@ TEST_CASE("Map binary operations", "[Map][Binary ops]") {
         auto end = map.end();
         auto distance = std::distance(b, end);
 
-        CHECK(b < end);
-        CHECK(b + distance - 1 > end - distance);
-        CHECK(b + distance - 1 <= end);
-        CHECK(b + size - 1 >= end - 1);
+        REQUIRE(b < end);
+        REQUIRE(b + distance - 1 > end - distance);
+        REQUIRE(b + distance - 1 <= end);
+        REQUIRE(b + size - 1 >= end - 1);
     }
 }
 
@@ -106,15 +108,15 @@ TEST_CASE("Empty or one element map") {
     SECTION("Empty map") {
         std::vector<int> vec;
         auto map = lz::map(vec, [](int i) { return i; });
-        CHECK(lz::empty(map));
+        REQUIRE(lz::empty(map));
     }
 
     SECTION("One element map") {
         std::vector<int> vec = { 1 };
         auto map = lz::map(vec, [](int i) { return i; });
-        CHECK(!lz::empty(map));
-        CHECK(lz::has_one(map));
-        CHECK(!lz::has_many(map));
+        REQUIRE(!lz::empty(map));
+        REQUIRE(lz::has_one(map));
+        REQUIRE(!lz::has_many(map));
     }
 }
 
@@ -124,32 +126,33 @@ TEST_CASE("Map to containers", "[Map][To container]") {
     auto map = lz::map(array, [](const TestStruct& t) { return t.test_field_str; });
 
     SECTION("To array") {
-        auto str_array = map.to<std::array<std::string, size>>();
+        auto str_array = map | lz::to<std::array<std::string, size>>();
 
         for (std::size_t i = 0; i < array.size(); i++) {
-            CHECK(str_array[i] == array[i].test_field_str);
+            REQUIRE(str_array[i] == array[i].test_field_str);
         }
     }
 
     SECTION("To vector") {
-        auto str_vec = map.to_vector();
+        auto str_vec = map | lz::to<std::vector>();
 
         for (std::size_t i = 0; i < array.size(); i++) {
-            CHECK(str_vec[i] == array[i].test_field_str);
+            REQUIRE(str_vec[i] == array[i].test_field_str);
         }
     }
 
-    SECTION("To other container using to<>()") {
-        auto str_list = map.to<std::list<std::string>>();
+    SECTION("To other container using to()") {
+        auto str_list = map | lz::to<std::list<std::string>>();
         auto list_iter = str_list.begin();
 
         for (std::size_t i = 0; i < array.size(); i++, ++list_iter) {
-            CHECK(*list_iter == array[i].test_field_str);
+            REQUIRE(*list_iter == array[i].test_field_str);
         }
     }
 
     SECTION("To map") {
-        std::map<std::string, std::string> actual = map.to_map([](const std::string& s) { return std::make_pair(s, s); });
+        std::map<std::string, std::string> actual = map | lz::map([](const std::string& s) { return std::make_pair(s, s); }) |
+                                                    lz::to<std::map<std::string, std::string>>();
 
         std::map<std::string, std::string> expected = {
             std::make_pair("FieldA", "FieldA"),
@@ -157,12 +160,13 @@ TEST_CASE("Map to containers", "[Map][To container]") {
             std::make_pair("FieldC", "FieldC"),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<std::string, std::string> actual =
-            map.to_unordered_map([](const std::string& s) { return std::make_pair(s, s); });
+        std::unordered_map<std::string, std::string> actual = map |
+                                                              lz::map([](const std::string& s) { return std::make_pair(s, s); }) |
+                                                              lz::to<std::unordered_map<std::string, std::string>>();
 
         std::unordered_map<std::string, std::string> expected = {
             std::make_pair("FieldA", "FieldA"),
@@ -170,6 +174,6 @@ TEST_CASE("Map to containers", "[Map][To container]") {
             std::make_pair("FieldC", "FieldC"),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 }

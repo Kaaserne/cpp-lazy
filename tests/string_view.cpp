@@ -11,76 +11,76 @@ TEST_CASE("String view basic functionality", "[String view][Basic functionality]
     lz::string_view view(str.data(), str.size());
 
     SECTION("Should have correct size") {
-        CHECK(view.size() == str.size());
+        REQUIRE(view.size() == str.size());
     }
 
     SECTION("Should have correct data") {
-        CHECK(view.data() == str.data());
+        REQUIRE(view.data() == str.data());
     }
 
     SECTION("Should have correct length") {
-        CHECK(view.length() == str.size());
+        REQUIRE(view.length() == str.size());
     }
 
     SECTION("Should have correct begin") {
-        CHECK(view.begin() == str.data());
+        REQUIRE(view.begin() == str.data());
     }
 
     SECTION("Should have correct end") {
-        CHECK(view.end() == str.data() + str.size());
+        REQUIRE(view.end() == str.data() + str.size());
     }
 
     SECTION("Should convert to string") {
-        CHECK(view.to_std_string() == str);
+        REQUIRE(view.to_std_string() == str);
     }
 
     SECTION("Use static_cast") {
-        CHECK(static_cast<std::string>(view) == str);
+        REQUIRE(static_cast<std::string>(view) == str);
     }
 
     SECTION("Prefix and suffix removal") {
         view = lz::string_view("Hello world");
         view.remove_prefix(6);
-        CHECK(view == "world");
+        REQUIRE(view == "world");
         view = lz::string_view("Hello world");
         view.remove_suffix(5);
-        CHECK(view == "Hello ");
+        REQUIRE(view == "Hello ");
     }
 
     SECTION("Contains") {
-        CHECK(view.contains("Hello"));
+        REQUIRE(view.contains("Hello"));
     }
 
     SECTION("Find") {
-        CHECK(view.find("world") == 6);
-        CHECK(view.find("Hello") == 0);
-        CHECK(view.find("zzz") == lz::string_view::npos);
+        REQUIRE(view.find("world") == 6);
+        REQUIRE(view.find("Hello") == 0);
+        REQUIRE(view.find("zzz") == lz::string_view::npos);
     }
 
     SECTION("Operator==") {
-        CHECK(view == str);
+        REQUIRE(view == str);
     }
 
     SECTION("Operator!=") {
         view = lz::string_view("Hello");
-        CHECK(view != "Hello world!");
+        REQUIRE(view != "Hello world!");
     }
 
     SECTION("Should have correct end") {
-        CHECK(view.end() == str.data() + str.size());
+        REQUIRE(view.end() == str.data() + str.size());
     }
 
     SECTION("Should have correct operator[]") {
-        CHECK(view[0] == str[0]);
-        CHECK(view[1] == str[1]);
-        CHECK(view[2] == str[2]);
-        CHECK(view[3] == str[3]);
-        CHECK(view[4] == str[4]);
-        CHECK(view[5] == str[5]);
-        CHECK(view[6] == str[6]);
-        CHECK(view[7] == str[7]);
-        CHECK(view[8] == str[8]);
-        CHECK(view[9] == str[9]);
+        REQUIRE(view[0] == str[0]);
+        REQUIRE(view[1] == str[1]);
+        REQUIRE(view[2] == str[2]);
+        REQUIRE(view[3] == str[3]);
+        REQUIRE(view[4] == str[4]);
+        REQUIRE(view[5] == str[5]);
+        REQUIRE(view[6] == str[6]);
+        REQUIRE(view[7] == str[7]);
+        REQUIRE(view[8] == str[8]);
+        REQUIRE(view[9] == str[9]);
     }
 }	
 #endif

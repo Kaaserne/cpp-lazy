@@ -13,7 +13,7 @@ TEST_CASE("Generate changing and creating elements", "[Generate][Basic functiona
 
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
-    auto generator = lz::generate<std::function<int()>>(
+    auto generator = lz::generate(
         [&counter]() {
             auto tmp{ counter++ };
             return tmp;
@@ -23,7 +23,7 @@ TEST_CASE("Generate changing and creating elements", "[Generate][Basic functiona
     SECTION("Should be 0, 1, 2, 3") {
         std::size_t expected = 0;
         generator.for_each([&expected](std::size_t i) {
-            CHECK(i == expected);
+            REQUIRE(i == expected);
             ++expected;
         });
     }
@@ -42,31 +42,31 @@ TEST_CASE("Generate binary operations", "[Generate][Binary ops]") {
 
     SECTION("Operator++") {
         ++begin;
-        CHECK(lz::distance(begin, generator.end()) == amount - 1);
+        REQUIRE(lz::distance(begin, generator.end()) == amount - 1);
     }
 
     SECTION("Operator== & Operator!=") {
-        CHECK(begin != generator.end());
+        REQUIRE(begin != generator.end());
         while (begin != generator.end()) {
             ++begin;
         }
-        CHECK(begin == generator.end());
+        REQUIRE(begin == generator.end());
     }
 }
 
 TEST_CASE("Empty or one element generate") {
     SECTION("Empty") {
         auto generator = lz::generate([]() { return 0; }, 0);
-        CHECK(lz::empty(generator));
-        CHECK(!lz::has_one(generator));
-        CHECK(!lz::has_many(generator));
+        REQUIRE(lz::empty(generator));
+        REQUIRE(!lz::has_one(generator));
+        REQUIRE(!lz::has_many(generator));
     }
 
     SECTION("One element") {
         auto generator = lz::generate([]() { return 0; }, 1);
-        CHECK(!lz::empty(generator));
-        CHECK(lz::has_one(generator));
-        CHECK(!lz::has_many(generator));
+        REQUIRE(!lz::empty(generator));
+        REQUIRE(lz::has_one(generator));
+        REQUIRE(!lz::has_many(generator));
     }
 }
 
@@ -85,21 +85,21 @@ TEST_CASE("Generate to containers", "[Generate][To container]") {
         auto array = generator.to<std::array<std::size_t, amount>>();
         std::array<std::size_t, amount> expected = { 0, 1, 2, 3 };
 
-        CHECK(array == expected);
+        REQUIRE(array == expected);
     }
 
     SECTION("To vector") {
         std::vector<std::size_t> vector = generator.to_vector();
         std::vector<std::size_t> expected = { 0, 1, 2, 3 };
 
-        CHECK(vector == expected);
+        REQUIRE(vector == expected);
     }
 
     SECTION("To other container using to<>()") {
         std::list<std::size_t> vector = generator.to<std::list<std::size_t>>();
         std::list<std::size_t> expected = { 0, 1, 2, 3 };
 
-        CHECK(vector == expected);
+        REQUIRE(vector == expected);
     }
 
     SECTION("To map") {
@@ -108,7 +108,7 @@ TEST_CASE("Generate to containers", "[Generate][To container]") {
 
         std::map<std::size_t, std::size_t> expected = { { 0, 0 }, { 10, 1 }, { 20, 2 }, { 30, 3 } };
 
-        CHECK(map == expected);
+        REQUIRE(map == expected);
     }
 
     SECTION("To unordered map") {
@@ -117,6 +117,6 @@ TEST_CASE("Generate to containers", "[Generate][To container]") {
 
         std::unordered_map<std::size_t, std::size_t> expected = { { 0, 0 }, { 10, 1 }, { 20, 2 }, { 30, 3 } };
 
-        CHECK(map == expected);
+        REQUIRE(map == expected);
     }
 }

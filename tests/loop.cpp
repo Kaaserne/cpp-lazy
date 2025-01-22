@@ -7,7 +7,7 @@ TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");
     auto looper = lz::loop(cstr);
     static_assert(!std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should be sentinel");
-    CHECK(*looper.begin() == 'H');
+    REQUIRE(*looper.begin() == 'H');
     auto looper_it = looper.begin();
     auto c_str_it = cstr.begin();
     for (std::size_t i = 0; i < 100; ++i) {
@@ -24,7 +24,7 @@ TEST_CASE("Empty loop iterable") {
     std::vector<int> vec;
     auto looper = lz::loop(vec);
     // Because looper operator!= always returns true, we can't check if it's empty. But should return true anyway.
-    CHECK(!lz::empty(looper));
+    REQUIRE(!lz::empty(looper));
 }
 
 TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
@@ -33,31 +33,31 @@ TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
     static_assert(std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should not be sentinel");
 
     SECTION("Distance") {
-        CHECK(std::distance(looper.begin(), looper.end()) ==
-              (std::numeric_limits<decltype(vec)::iterator::difference_type>::max)());
+        REQUIRE(std::distance(looper.begin(), looper.end()) ==
+                (std::numeric_limits<decltype(vec)::iterator::difference_type>::max)());
     }
 
     SECTION("Going a circle") {
-        CHECK(*(looper.begin() + static_cast<std::ptrdiff_t>(vec.size())) == 1);
-        CHECK(*(looper.begin() + (static_cast<std::ptrdiff_t>(vec.size()) - 1)) == 4);
+        REQUIRE(*(looper.begin() + static_cast<std::ptrdiff_t>(vec.size())) == 1);
+        REQUIRE(*(looper.begin() + (static_cast<std::ptrdiff_t>(vec.size()) - 1)) == 4);
 
-        CHECK(*(looper.end() - static_cast<std::ptrdiff_t>(vec.size())) == 1);
-        CHECK(*(looper.end() - (static_cast<std::ptrdiff_t>(vec.size()) + 1)) == 4);
+        REQUIRE(*(looper.end() - static_cast<std::ptrdiff_t>(vec.size())) == 1);
+        REQUIRE(*(looper.end() - (static_cast<std::ptrdiff_t>(vec.size()) + 1)) == 4);
     }
 
     SECTION("Always true") {
-        CHECK(looper.begin() != looper.end());
-        CHECK(!(looper.begin() == looper.begin()));
-        CHECK(looper.begin() + static_cast<std::ptrdiff_t>(vec.size()) != looper.end());
+        REQUIRE(looper.begin() != looper.end());
+        REQUIRE(!(looper.begin() == looper.begin()));
+        REQUIRE(looper.begin() + static_cast<std::ptrdiff_t>(vec.size()) != looper.end());
 
-        CHECK(looper.begin() < looper.end());
-        CHECK(!(looper.begin() > looper.end()));
-        CHECK(!(looper.begin() >= looper.end()));
-        CHECK(looper.begin() <= looper.end());
+        REQUIRE(looper.begin() < looper.end());
+        REQUIRE(!(looper.begin() > looper.end()));
+        REQUIRE(!(looper.begin() >= looper.end()));
+        REQUIRE(looper.begin() <= looper.end());
 
-        CHECK(!(looper.end() < looper.begin()));
-        CHECK(looper.end() > looper.begin());
-        CHECK(looper.end() >= looper.begin());
-        CHECK(!(looper.end() <= looper.begin()));
+        REQUIRE(!(looper.end() < looper.begin()));
+        REQUIRE(looper.end() > looper.begin());
+        REQUIRE(looper.end() >= looper.begin());
+        REQUIRE(!(looper.end() <= looper.begin()));
     }
 }

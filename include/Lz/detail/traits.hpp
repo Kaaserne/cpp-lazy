@@ -157,7 +157,70 @@ using val_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::value_ty
 template<class Iterable>
 using diff_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::difference_type;
 
+/**
+ * @brief Can be used to get the reference type of an iterable. Example: `lz::ref_iterable_t<std::vector<int>>` will return
+ * `int&`.
+ *
+ * @tparam Iterable The iterable to get the reference type from.
+ */
+template<class Iterable>
+using ref_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::reference;
+
+/**
+ * @brief Can be used to get the pointer type of an iterable. Example: `lz::ptr_iterable_t<std::vector<int>>` will return `int*`.
+ *
+ * @tparam Iterable The iterable to get the pointer type from.
+ */
+template<class Iterable>
+using ptr_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::pointer;
+
+/**
+ * @brief Can be used to get the iterator category of an iterable. Example: `lz::iter_cat_iterable_t<std::vector<int>>` will
+ * return `std::random_access_iterator_tag`.
+ *
+ * @tparam Iterable The iterable to get the iterator category from.
+ */
+template<class Iterable>
+using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
+
 namespace detail {
+
+template<class... T>
+using void_t = void;
+
+template<class T, class = void>
+struct sized : std::false_type {};
+
+template<class T>
+struct sized<T, void_t<decltype(std::declval<T>().size())>> : std::true_type {};
+
+template<class, class = void>
+struct is_iterable : std::false_type {};
+
+template<class T>
+struct is_iterable<T, void_t<decltype(std::begin(std::declval<T>()), std::end(std::declval<T>()))>> : std::true_type {};
+
+template<class, class = void>
+struct is_adaptor : std::false_type {};
+
+template<class T>
+struct is_adaptor<T, void_t<typename decay_t<T>::adaptor>> : std::true_type {};
+
+template<class... Args>
+struct first_arg_helper {};
+
+template<class Arg, class... Rest>
+struct first_arg_helper<Arg, Rest...> {
+    using type = Arg;
+};
+
+template<>
+struct first_arg_helper<> {
+    using type = void;
+};
+
+template<class... Args>
+using first_arg = typename first_arg_helper<Args...>::type;
 
 template<class Function, class... Args>
 using func_ret_type = decltype(std::declval<Function>()(std::declval<Args>()...));
@@ -260,8 +323,11 @@ using is_ra_tag = std::is_convertible<IterTag, std::random_access_iterator_tag>;
 template<class Iterator>
 using is_ra = is_ra_tag<iter_cat_t<Iterator>>;
 
+template<class Iterator, class S>
+using is_sentinel = std::integral_constant<bool, !std::is_same<Iterator, S>::value>;
+
 template<class Iterable>
-using has_sentinel = std::is_same<iter_t<Iterable>, sentinel_t<Iterable>>;
+using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value>;
 } // namespace detail
 
 /**

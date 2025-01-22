@@ -9,9 +9,9 @@
 namespace lz {
 namespace detail {
 
-template<class C, class Tag>
-class c_string_iterator : public iter_base<c_string_iterator<C, Tag>, decltype(*std::declval<C>()), C, std::ptrdiff_t, Tag,
-                                           sentinel_selector<Tag, c_string_iterator<C, Tag>>> {
+template<class C>
+class c_string_iterator : public iter_base<c_string_iterator<C>, decltype(*std::declval<C>()), C, std::ptrdiff_t,
+                                           std::forward_iterator_tag, default_sentinel> {
 
     C _it;
 
@@ -23,16 +23,16 @@ public:
     using pointer = C;
     using reference = decltype(*std::declval<C>());
 
-    constexpr c_string_iterator(C it) noexcept : _it(it) {
+    constexpr c_string_iterator(C it) noexcept : _it{ it } {
     }
 
     constexpr c_string_iterator() = default;
 
-    LZ_NODISCARD constexpr reference dereference() const noexcept {
+    constexpr reference dereference() const noexcept {
         return *_it;
     }
 
-    LZ_NODISCARD constexpr pointer arrow() const noexcept {
+    constexpr pointer arrow() const noexcept {
         return _it;
     }
 
@@ -40,7 +40,7 @@ public:
         ++_it;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const c_string_iterator& b) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(const c_string_iterator& b) const noexcept {
         if (b._it == nullptr) {
             if (_it == nullptr) {
                 return true;
@@ -50,25 +50,39 @@ public:
         return _it == b._it;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _it != nullptr && *_it == '\0';
     }
 
-    LZ_CONSTEXPR_CXX_14 void decrement() noexcept {
-        --_it;
-    }
-
-    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) noexcept {
-        _it += offset;
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 difference_type difference(const c_string_iterator& b) const noexcept {
-        LZ_ASSERT(_it != nullptr && b._it != nullptr, "Incompatible iterator types");
-        return _it - b._it;
-    }
-
-    LZ_NODISCARD constexpr explicit operator bool() const noexcept {
+    constexpr explicit operator bool() const noexcept {
         return _it != nullptr && *_it != '\0';
+    }
+};
+
+template<class C>
+class c_string_iterable {
+
+    static_assert(std::is_pointer<C>::value, "C must be a pointer");
+
+    C _begin;
+
+public:
+    using iterator = c_string_iterator<C>;
+    using sentinel = typename c_string_iterator<C>::sentinel;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+    constexpr c_string_iterable(C begin) noexcept : _begin(begin) {
+    }
+
+    constexpr c_string_iterable() = default;
+
+    LZ_NODISCARD constexpr iterator begin() const noexcept {
+        return { _begin };
+    }
+
+    LZ_NODISCARD constexpr sentinel end() const noexcept {
+        return {};
     }
 };
 } // namespace detail

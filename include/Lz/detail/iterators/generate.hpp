@@ -1,63 +1,62 @@
-#pragma once
+// #pragma once
 
-#ifndef LZ_GENERATE_ITERATOR_HPP
-#define LZ_GENERATE_ITERATOR_HPP
+// #ifndef LZ_GENERATE_ITERATOR_HPP
+// #define LZ_GENERATE_ITERATOR_HPP
 
-#include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/detail/func_container.hpp>
-#include <Lz/detail/procs.hpp>
-#include <Lz/iterator_base.hpp>
+// #include <Lz/detail/fake_ptr_proxy.hpp>
+// #include <Lz/detail/func_container.hpp>
+// #include <Lz/detail/procs.hpp>
+// #include <Lz/iterator_base.hpp>
 
-namespace lz {
-namespace detail {
-template<class GeneratorFunc>
-class generate_iterator : public iter_base<generate_iterator<GeneratorFunc>, func_container_ret_type<GeneratorFunc>,
-                                           fake_ptr_proxy<func_container_ret_type<GeneratorFunc>>, std::ptrdiff_t,
-                                           std::forward_iterator_tag, default_sentinel> {
+// namespace lz {
+// namespace detail {
+// template<class GeneratorFunc>
+// class generate_iterator : public iter_base<generate_iterator<GeneratorFunc>, func_container_ret_type<GeneratorFunc>,
+//                                            fake_ptr_proxy<func_container_ret_type<GeneratorFunc>>, std::ptrdiff_t,
+//                                            std::forward_iterator_tag, default_sentinel> {
 
-    mutable func_container<GeneratorFunc> _func;
-    std::size_t _current;
-    bool _is_inf_loop;
+//     mutable func_container<GeneratorFunc> _func;
+//     std::size_t _current;
+//     bool _is_inf_loop;
 
-public:
-    using reference = func_container_ret_type<GeneratorFunc>;
-    using value_type = decay_t<reference>;
-    using difference_type = std::ptrdiff_t;
-    using pointer = fake_ptr_proxy<reference>;
+// public:
+//     using reference = func_container_ret_type<GeneratorFunc>;
+//     using value_type = decay_t<reference>;
+//     using difference_type = std::ptrdiff_t;
+//     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr generate_iterator() = default;
+//     constexpr generate_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14
-    generate_iterator(const std::size_t amount, GeneratorFunc generator_func, const bool is_inf_loop) :
-        _func(std::move(generator_func)),
-        _current(amount),
-        _is_inf_loop(is_inf_loop) {
-    }
+//     LZ_CONSTEXPR_CXX_14
+//     generate_iterator(const std::size_t amount, GeneratorFunc generator_func, const bool is_inf_loop) :
+//         _func(std::move(generator_func)),
+//         _current(amount),
+//         _is_inf_loop(is_inf_loop) {
+//     }
 
-    LZ_NODISCARD constexpr reference dereference() const {
-        return _func();
-    }
+//     constexpr reference dereference() const {
+//         return _func();
+//     }
 
-    LZ_NODISCARD constexpr pointer arrow() const {
-        return fake_ptr_proxy<decltype(**this)>(**this);
-    }
+//     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+//         return fake_ptr_proxy<decltype(**this)>(**this);
+//     }
 
-    LZ_CONSTEXPR_CXX_14 void increment() {
-        if (!_is_inf_loop) {
-            --_current;
-        }
-    }
+//     LZ_CONSTEXPR_CXX_14 void increment() {
+//         if (!_is_inf_loop) {
+//             --_current;
+//         }
+//     }
 
-    LZ_NODISCARD constexpr bool eq(const generate_iterator& b) const noexcept {
-        LZ_ASSERT(_is_inf_loop == b._is_inf_loop, "incompatible iterator types: both must be while true or not");
-        return _current == b._current;
-    }
+//     constexpr bool eq(const generate_iterator& b) const noexcept {
+//         return _current == b._current;
+//     }
 
-    LZ_NODISCARD constexpr bool eq(default_sentinel) const noexcept {
-        return _current == 0;
-    }
-};
-} // namespace detail
-} // namespace lz
+//     constexpr bool eq(default_sentinel) const noexcept {
+//         return _current == 0;
+//     }
+// };
+// } // namespace detail
+// } // namespace lz
 
-#endif
+// #endif

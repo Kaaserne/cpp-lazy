@@ -12,7 +12,7 @@ TEST_CASE("Enumerate with sentinels") {
                   "Begin and end should not be the same type");
     auto taken = lz::take(enumerated, 3);
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
-    CHECK(lz::equal(taken, expected));
+    REQUIRE(lz::equal(taken, expected));
 }
 
 TEST_CASE("Enumerate changing and creating elements", "[Enumerate][Basic functionality]") {
@@ -24,16 +24,16 @@ TEST_CASE("Enumerate changing and creating elements", "[Enumerate][Basic functio
         static_assert(std::is_same<decltype(enumerate.begin()), decltype(enumerate.end())>::value, "Should not be sentinel");
         auto element = *enumerate.begin();
 
-        CHECK(element.first == 0);  // Idx
-        CHECK(element.second == 1); // Element
+        REQUIRE(element.first == 0);  // Idx
+        REQUIRE(element.second == 1); // Element
     }
 
     SECTION("Enumerate should create pair with {idx, elm} with offset") {
         auto enumerate = lz::enumerate(array, 2);
         auto element = *enumerate.begin();
 
-        CHECK(element.first == 2);  // Idx
-        CHECK(element.second == 1); // Element
+        REQUIRE(element.first == 2);  // Idx
+        REQUIRE(element.second == 1); // Element
     }
 
     SECTION("Enumerate should be by reference") {
@@ -41,7 +41,7 @@ TEST_CASE("Enumerate changing and creating elements", "[Enumerate][Basic functio
         auto element = *enumerate.begin();
         element.second = 500;
 
-        CHECK(array[0] == 500);
+        REQUIRE(array[0] == 500);
     }
 }
 
@@ -49,17 +49,17 @@ TEST_CASE("Empty or one element enumerate") {
     SECTION("Empty") {
         std::string a;
         auto enumerate = lz::enumerate(a);
-        CHECK(lz::empty(enumerate));
-        CHECK(!lz::has_one(enumerate));
-        CHECK(!lz::has_many(enumerate));
+        REQUIRE(lz::empty(enumerate));
+        REQUIRE(!lz::has_one(enumerate));
+        REQUIRE(!lz::has_many(enumerate));
     }
 
     SECTION("One element") {
         std::string a = "h";
         auto enumerate = lz::enumerate(a);
-        CHECK(!lz::empty(enumerate));
-        CHECK(lz::has_one(enumerate));
-        CHECK(!lz::has_many(enumerate));
+        REQUIRE(!lz::empty(enumerate));
+        REQUIRE(lz::has_one(enumerate));
+        REQUIRE(!lz::has_many(enumerate));
     }
 }
 
@@ -71,40 +71,40 @@ TEST_CASE("Enumerate binary operations", "[Enumerate][Binary ops]") {
     ++begin; // Increment by one
 
     SECTION("Operator++") {
-        CHECK(begin->first == 1);  // Index
-        CHECK(begin->second == 2); // element
+        REQUIRE(begin->first == 1);  // Index
+        REQUIRE(begin->second == 2); // element
     }
 
     SECTION("Operator--") {
         --begin;
         // Decrement by one, back at begin()
-        CHECK(begin->first == 0);  // Index
-        CHECK(begin->second == 1); // element
+        REQUIRE(begin->first == 0);  // Index
+        REQUIRE(begin->second == 1); // element
     }
 
     SECTION("Operator== & operator!=") {
-        CHECK(begin != enumerate.end());
+        REQUIRE(begin != enumerate.end());
         begin = enumerate.end();
-        CHECK(begin == enumerate.end());
+        REQUIRE(begin == enumerate.end());
     }
 
     SECTION("Operator+(int), tests += as well") {
-        CHECK((begin + 1)->first == 2);  // Index
-        CHECK((begin + 1)->second == 3); // element
+        REQUIRE((begin + 1)->first == 2);  // Index
+        REQUIRE((begin + 1)->second == 3); // element
     }
 
     SECTION("Operator-(int), tests -= as well") {
-        CHECK((begin - 1)->first == 0);  // Index
-        CHECK((begin - 1)->second == 1); // element
+        REQUIRE((begin - 1)->first == 0);  // Index
+        REQUIRE((begin - 1)->second == 1); // element
     }
 
     SECTION("Operator-(Iterator)") {
-        CHECK(enumerate.end() - begin == 2);
+        REQUIRE(enumerate.end() - begin == 2);
     }
 
     SECTION("Operator[]()") {
-        CHECK(enumerate.begin()[1].first == 1);
-        CHECK(enumerate.begin()[1].second == 2);
+        REQUIRE(enumerate.begin()[1].first == 1);
+        REQUIRE(enumerate.begin()[1].second == 2);
     }
 
     SECTION("Operator<, '<, <=, >, >='") {
@@ -112,10 +112,10 @@ TEST_CASE("Enumerate binary operations", "[Enumerate][Binary ops]") {
         const auto end = enumerate.end();
         const auto distance = std::distance(b, end);
 
-        CHECK(b < end);
-        CHECK(b + distance - 1 > end - distance);
-        CHECK(b + distance - 1 <= end);
-        CHECK(b + size - 1 >= end - 1);
+        REQUIRE(b < end);
+        REQUIRE(b + distance - 1 > end - distance);
+        REQUIRE(b + distance - 1 <= end);
+        REQUIRE(b + size - 1 >= end - 1);
     }
 }
 
@@ -129,7 +129,7 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
         auto expceted_pair = std::make_pair(0, 1);
 
         for (auto actual_pair : actual_array) {
-            CHECK(actual_pair == expceted_pair);
+            REQUIRE(actual_pair == expceted_pair);
             expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
         }
     }
@@ -139,7 +139,7 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
         auto expceted_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_array) {
-            CHECK(actual_pair == expceted_pair);
+            REQUIRE(actual_pair == expceted_pair);
             expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
         }
     }
@@ -149,7 +149,7 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
         auto expceted_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_list) {
-            CHECK(actual_pair == expceted_pair);
+            REQUIRE(actual_pair == expceted_pair);
             expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
         }
     }
@@ -165,7 +165,7 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
             std::make_pair(3, std::make_pair(2, 3)),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
@@ -179,13 +179,13 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
             std::make_pair(3, std::make_pair(2, 3)),
         };
 
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("Bidirectional to container") {
         std::list<int> to_enumerate = { 1, 2, 3 };
         auto enumerated = lz::enumerate(to_enumerate);
         std::array<std::pair<int, int>, 3> expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
-        CHECK(lz::equal(enumerated, expected));
+        REQUIRE(lz::equal(enumerated, expected));
     }
 }

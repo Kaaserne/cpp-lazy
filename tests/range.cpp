@@ -7,7 +7,7 @@ TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]"
         int expected_counter = 0;
 
         for (int i : lz::range(5)) {
-            CHECK(expected_counter == i);
+            REQUIRE(expected_counter == i);
             expected_counter++;
         }
     }
@@ -16,7 +16,7 @@ TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]"
         int expected_counter = 5;
 
         for (int i : lz::range(5, 0, -1)) {
-            CHECK(expected_counter == i);
+            REQUIRE(expected_counter == i);
             expected_counter--;
         }
     }
@@ -25,7 +25,7 @@ TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]"
         int expected_counter = 0;
 
         for (int i : lz::range(0, 5, 2)) {
-            CHECK(expected_counter == i);
+            REQUIRE(expected_counter == i);
             expected_counter += 2;
         }
     }
@@ -34,7 +34,7 @@ TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]"
         int expected_counter = 5;
 
         for (int i : lz::range(5, 0, -2)) {
-            CHECK(expected_counter == i);
+            REQUIRE(expected_counter == i);
             expected_counter -= 2;
         }
     }
@@ -43,16 +43,16 @@ TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]"
 TEST_CASE("Empty or one element range") {
     SECTION("Empty") {
         auto range = lz::range(0);
-        CHECK(lz::empty(range));
-        CHECK(!lz::has_many(range));
-        CHECK(!lz::has_one(range));
+        REQUIRE(lz::empty(range));
+        REQUIRE(!lz::has_many(range));
+        REQUIRE(!lz::has_one(range));
     }
 
     SECTION("One element") {
         auto range = lz::range(1);
-        CHECK(!lz::empty(range));
-        CHECK(!lz::has_many(range));
-        CHECK(lz::has_one(range));
+        REQUIRE(!lz::empty(range));
+        REQUIRE(!lz::has_many(range));
+        REQUIRE(lz::has_one(range));
     }
 }
 
@@ -63,56 +63,56 @@ TEST_CASE("Range binary operations", "[Range][Binary ops]") {
     auto it = range.begin();
     auto f_it = f_range.begin();
 
-    CHECK(*it == 0);
-    CHECK(*f_it == 0.);
+    REQUIRE(*it == 0);
+    REQUIRE(*f_it == 0.);
 
     SECTION("Operator++") {
         ++it;
-        CHECK(*it == 1);
+        REQUIRE(*it == 1);
         ++f_it;
-        CHECK(*f_it == 0.5);
+        REQUIRE(*f_it == 0.5);
     }
 
     SECTION("Operator--") {
         ++it, --it;
-        CHECK(*it == 0);
+        REQUIRE(*it == 0);
         ++f_it, --f_it;
-        CHECK(*f_it == 0);
+        REQUIRE(*f_it == 0);
     }
 
     SECTION("Operator== & Operator!=") {
-        CHECK(it != range.end());
+        REQUIRE(it != range.end());
         it = range.end();
-        CHECK(it == range.end());
+        REQUIRE(it == range.end());
     }
 
     SECTION("Operator+(int) offset, tests += as well") {
-        CHECK(*(it + 2) == 2);
-        CHECK(*(it + 4) == 4);
-        CHECK(*(f_it + 2) == 1.);
-        CHECK(*(f_it + 3) == 1.5);
-        CHECK(*(f_it + 5) == 2.5);
+        REQUIRE(*(it + 2) == 2);
+        REQUIRE(*(it + 4) == 4);
+        REQUIRE(*(f_it + 2) == 1.);
+        REQUIRE(*(f_it + 3) == 1.5);
+        REQUIRE(*(f_it + 5) == 2.5);
     }
 
     SECTION("Operator-(int) offset, tests -= as well") {
-        CHECK(*((it + 2) - 1) == 1);
-        CHECK(*((it + 4) - 2) == 2);
-        CHECK(*((f_it + 2) - 1) == .5);
-        CHECK(*((f_it + 3) - 2) == .5);
-        CHECK(*((f_it + 5) - 2) == 1.5);
+        REQUIRE(*((it + 2) - 1) == 1);
+        REQUIRE(*((it + 4) - 2) == 2);
+        REQUIRE(*((f_it + 2) - 1) == .5);
+        REQUIRE(*((f_it + 3) - 2) == .5);
+        REQUIRE(*((f_it + 5) - 2) == 1.5);
     }
 
     SECTION("Operator-(Iterator)") {
-        CHECK(range.end() - it == 10);
-        CHECK(f_range.end() - f_it == 21);
+        REQUIRE(range.end() - it == 10);
+        REQUIRE(f_range.end() - f_it == 21);
 
-        CHECK(range.end() - (it + 1) == 9);
-        CHECK(f_range.end() - (f_it + 1) == 20);
+        REQUIRE(range.end() - (it + 1) == 9);
+        REQUIRE(f_range.end() - (f_it + 1) == 20);
     }
 
     SECTION("Operator[]()") {
-        CHECK(f_it[1] == .5);
-        CHECK(it[1] == 1);
+        REQUIRE(f_it[1] == .5);
+        REQUIRE(it[1] == 1);
     }
 
     SECTION("Operator<, <, <=, >, >=") {
@@ -120,18 +120,18 @@ TEST_CASE("Range binary operations", "[Range][Binary ops]") {
         auto end = range.end();
         auto distance = std::distance(b, end);
 
-        CHECK(b < end);
-        CHECK(b + distance - 1 > end - distance);
-        CHECK(b + distance - 1 <= end);
-        CHECK(b + size - 1 >= end - 1);
+        REQUIRE(b < end);
+        REQUIRE(b + distance - 1 > end - distance);
+        REQUIRE(b + distance - 1 <= end);
+        REQUIRE(b + size - 1 >= end - 1);
 
         auto f_b = range.begin();
         auto f_end = range.end();
 
-        CHECK(f_b < end);
-        CHECK(f_b + distance - 1 > f_end - distance);
-        CHECK(f_b + distance - 1 <= f_end);
-        CHECK(f_b + 20 >= f_end - 1);
+        REQUIRE(f_b < end);
+        REQUIRE(f_b + distance - 1 > f_end - distance);
+        REQUIRE(f_b + distance - 1 <= f_end);
+        REQUIRE(f_b + 20 >= f_end - 1);
     }
 }
 
@@ -143,21 +143,21 @@ TEST_CASE("Range to containers", "[Range][To container]") {
         std::array<int, static_cast<std::size_t>(size)> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         auto actual = range.to<std::array<int, static_cast<std::size_t>(size)>>();
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To vector") {
         std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         auto actual = range.to_vector();
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To other container using to<>()") {
         std::list<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         auto actual = range.to<std::list<int>>();
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To map") {
@@ -168,7 +168,7 @@ TEST_CASE("Range to containers", "[Range][To container]") {
             actual.insert(std::make_pair(i, i));
         }
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To unordered map") {
@@ -179,6 +179,6 @@ TEST_CASE("Range to containers", "[Range][To container]") {
             actual.insert(std::make_pair(i, i));
         }
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 }

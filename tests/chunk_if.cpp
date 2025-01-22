@@ -1,7 +1,7 @@
+#include <Lz/basic_iterable.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/iter_tools.hpp>
-#include <Lz/iterable.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <list>
@@ -12,137 +12,139 @@ TEST_CASE("Chunk if with sentinels") {
     auto it = chunked.begin();
     auto expected = { "hello world", " this is a message", "", "" };
     for (const auto& str : expected) {
-        CHECK(lz::equal(*it, lz::c_string(str)));
+        REQUIRE(lz::equal(*it, lz::c_string(str)));
         ++it;
     }
-    CHECK(lz::distance(chunked.begin(), chunked.end()) == 4);
-    CHECK(it == chunked.end());
+    REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
+    REQUIRE(it == chunked.end());
+}
+
+TEST_CASE("Non string literal test") {
+    std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+    auto chunked = lz::chunk_if(arr, [](int i) { return i % 2 == 0; });
+    auto expected = { std::vector<int>{ 1 }, std::vector<int>{ 3 }, std::vector<int>{ 5 } };
+    REQUIRE(lz::equal(chunked, expected));
 }
 
 TEST_CASE("Empty or one element chunk_if") {
     SECTION("Empty") {
         std::string s;
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
-        CHECK(lz::empty(chunked));
-        CHECK(!lz::has_one(chunked));
-        CHECK(!lz::has_many(chunked));
+        REQUIRE(lz::empty(chunked));
+        REQUIRE(!lz::has_one(chunked));
+        REQUIRE(!lz::has_many(chunked));
     }
 
     SECTION("One element") {
         std::string s = ";";
-        auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
-        CHECK(!lz::empty(chunked));
-        CHECK(!lz::has_one(chunked));
-        CHECK(lz::has_many(chunked));
+        auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
+        REQUIRE(!lz::empty(chunked));
+        REQUIRE(!lz::has_one(chunked));
+        REQUIRE(lz::has_many(chunked));
     }
 
     SECTION("One element that does not satisfy predicate") {
         std::string s = "h";
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
-        CHECK(!lz::empty(chunked));
-        CHECK(lz::has_one(chunked));
-        CHECK(!lz::has_many(chunked));
+        REQUIRE(!lz::empty(chunked));
+        REQUIRE(lz::has_one(chunked));
+        REQUIRE(!lz::has_many(chunked));
     }
 }
 
 TEST_CASE("chunk_if changing and creating elements", "[chunk_if][Basic functionality]") {
     std::string s = "hello world; this is a message;;";
-    auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
+    auto chunked = s | lz::sv_chunk_if([](const char c) { return c == ';'; });
     static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
 
     SECTION("Length should be correct") {
-        CHECK(lz::distance(chunked.begin(), chunked.end()) == 4);
+        REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
     }
 
     SECTION("Should be by reference") {
         auto it = chunked.begin();
-        *it->begin() = 'w';
-        CHECK(s[0] == 'w');
+        REQUIRE(&*it->begin() == &s[0]);
     }
 
     SECTION("Should chunk correct length") {
         auto it = chunked.begin();
-        CHECK(it->to_string() == "hello world");
+        REQUIRE(*it == "hello world");
         ++it;
-        CHECK(it->to_string() == " this is a message");
+        REQUIRE(*it == " this is a message");
     }
 }
 
 TEST_CASE("chunk_if variations") {
     SECTION("Ending and starting with delimiter") {
         std::string s = ";hello world;; this is a message;;; testing;;";
-        auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
-        using Range = typename decltype(chunked.begin())::value_type;
-        auto vec = chunked.transform_as<std::vector<std::string>>([](const Range range) { return range.to_string(); });
-        std::vector<std::string> expected = { "", "hello world", "", " this is a message", "", "", " testing", "", "" };
-        CHECK(vec == expected);
+        auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
+        auto vec = chunked | lz::to<std::vector<lz::string_view>>();
+        std::vector<lz::string_view> expected = { "", "hello world", "", " this is a message", "", "", " testing", "", "" };
+        REQUIRE(vec == expected);
     }
 
     SECTION("Ending with delimiters") {
         std::string s = "hello world; this is a message;;";
-        auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
-        using Range = typename decltype(chunked.begin())::value_type;
-        auto vec = chunked.transform_as<std::vector<std::string>>([](const Range range) { return range.to_string(); });
+        auto chunked = s | lz::s_chunk_if([](const char c) { return c == ';'; });
+        auto vec = chunked | lz::to<std::vector>();
         std::vector<std::string> expected = { "hello world", " this is a message", "", "" };
-        CHECK(vec == expected);
+        REQUIRE(vec == expected);
     }
 
     SECTION("Ending with two one delimiter") {
         std::string s = "hello world; this is a message;";
-        auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
-        using Range = typename decltype(chunked.begin())::value_type;
-        auto vec = chunked.transform_as<std::vector<std::string>>([](const Range range) { return range.to_string(); });
+        auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
+        auto vec = chunked | lz::to<std::vector>();
         std::vector<std::string> expected = { "hello world", " this is a message", "" };
-        CHECK(vec == expected);
+        REQUIRE(lz::equal(vec, expected));
     }
 
     SECTION("No delimiters") {
-        std::string s = "hello world; this is a message";
-        auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
-        using Range = typename decltype(chunked.begin())::value_type;
-        auto vec = chunked.transform_as<std::vector<std::string>>([](const Range range) { return range.to_string(); });
-        std::vector<std::string> expected = { "hello world", " this is a message" };
-        CHECK(vec == expected);
+        std::string s = "hello world this is a message";
+        auto chunked = lz::s_chunk_if(s, [](const char c) { return c == ';'; });
+        auto vec = chunked | lz::to<std::vector>();
+        std::vector<std::string> expected = { "hello world this is a message" };
+        REQUIRE(lz::equal(vec, expected));
     }
 }
 
 TEST_CASE("chunk_if binary operations", "[chunk_if][Binary ops]") {
     std::string s = ";hello world;; this is a message;;; testing;;";
-    auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
+    auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
     static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
-    CHECK(chunked.begin()->to_string().empty());
+    REQUIRE(chunked.begin()->empty());
 
     SECTION("Operator++") {
-        CHECK(lz::distance(chunked.begin(), chunked.end()) == 9);
+        REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 9);
         auto begin = chunked.begin();
-        CHECK(begin->to_string().empty());
+        REQUIRE(begin->empty());
         ++begin;
-        CHECK(begin->to_string() == "hello world");
+        REQUIRE(*begin == "hello world");
         ++begin;
-        CHECK(begin->to_string().empty());
+        REQUIRE(begin->empty());
         ++begin;
-        CHECK(begin->to_string() == " this is a message");
+        REQUIRE(*begin == " this is a message");
         ++begin;
-        CHECK(begin->to_string().empty());
+        REQUIRE(begin->empty());
         ++begin;
-        CHECK(begin->to_string().empty());
+        REQUIRE(begin->empty());
         ++begin;
-        CHECK(begin->to_string() == " testing");
+        REQUIRE(*begin == " testing");
         ++begin;
-        CHECK(begin->to_string().empty());
+        REQUIRE(begin->empty());
         ++begin;
-        CHECK(begin->to_string().empty());
+        REQUIRE(begin->empty());
         ++begin;
-        CHECK(begin == chunked.end());
+        REQUIRE(begin == chunked.end());
     }
 
     SECTION("Operator== & operator!=") {
         auto begin = chunked.begin();
-        CHECK(begin != chunked.end());
+        REQUIRE(begin != chunked.end());
         while (begin != chunked.end()) {
             ++begin;
         }
-        CHECK(begin == chunked.end());
+        REQUIRE(begin == chunked.end());
     }
 
     SECTION("Operator--") {
@@ -151,28 +153,26 @@ TEST_CASE("chunk_if binary operations", "[chunk_if][Binary ops]") {
 
 TEST_CASE("chunk_if to containers", "[chunk_if][To container]") {
     std::string s = "hello world; this is a message;;";
-    auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
+    auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
     using Iterator = decltype(*chunked.begin());
 
     SECTION("To array") {
         REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
-        std::array<std::string, 4> arr;
-        lz::transform(chunked, arr.begin(), [](const Iterator& it) { return it.to_string(); });
-        CHECK(arr ==
-              decltype(arr){ std::string{ "hello world" }, std::string{ " this is a message" }, std::string{}, std::string{} });
+        auto arr = chunked | lz::to<std::array<lz::string_view, 4>>();
+        lz::transform(chunked, arr.begin(), [](const Iterator& it) { return lz::string_view{ it.begin(), it.end() }; });
+        REQUIRE(arr == decltype(arr){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
+                                      lz::string_view{}, lz::string_view{} });
     }
 
     SECTION("To vector") {
-        std::vector<std::string> vec;
-        lz::transform(chunked, std::back_inserter(vec), [](const Iterator& it) { return it.to_string(); });
-        CHECK(vec ==
-              decltype(vec){ std::string{ "hello world" }, std::string{ " this is a message" }, std::string{}, std::string{} });
+        auto vec = chunked | lz::to<std::vector>();
+        REQUIRE(vec == decltype(vec){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
+                                      lz::string_view{}, lz::string_view{} });
     }
 
-    SECTION("To other container using to<>()") {
-        std::list<std::string> list;
-        lz::transform(chunked, std::inserter(list, list.begin()), [](const Iterator& it) { return it.to_string(); });
-        CHECK(list ==
-              decltype(list){ std::string{ "hello world" }, std::string{ " this is a message" }, std::string{}, std::string{} });
+    SECTION("To other container") {
+        auto list = chunked | lz::to<std::list>();
+        REQUIRE(list == decltype(list){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
+                                        lz::string_view{}, lz::string_view{} });
     }
 }

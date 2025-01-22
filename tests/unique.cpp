@@ -8,7 +8,7 @@ TEST_CASE("Unique using sentinels") {
     auto unique = lz::unique(str);
     static_assert(!std::is_same<decltype(unique.begin()), decltype(unique.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("abcdefghj");
-    CHECK(lz::equal(unique, expected));
+    REQUIRE(lz::equal(unique, expected));
 }
 
 TEST_CASE("Unique changing and creating elements", "[Unique][Basic functionality]") {
@@ -23,14 +23,14 @@ TEST_CASE("Unique changing and creating elements", "[Unique][Basic functionality
 
     SECTION("Should be unique") {
         std::array<int, size> expected = { 1, 2, 3 };
-        CHECK(expected == unique.to<std::array<int, size>>());
+        REQUIRE(expected == unique.to<std::array<int, size>>());
     }
 
     SECTION("Should be unique too, using >") {
         std::array<int, size> expected = { 3, 2, 1 };
         auto unique_greater = lz::unique(expected, std::greater<int>());
-        CHECK(expected == unique_greater.to<std::array<int, size>>());
-        CHECK(std::is_sorted(expected.begin(), expected.end(), std::greater<int>()));
+        REQUIRE(expected == unique_greater.to<std::array<int, size>>());
+        REQUIRE(std::is_sorted(expected.begin(), expected.end(), std::greater<int>()));
     }
 }
 
@@ -41,7 +41,7 @@ TEST_CASE("Unique binary operations", "[Unique][Binary ops]") {
         auto unique = lz::unique(arr);
         auto beg = unique.begin();
         ++beg;
-        CHECK(*beg == 2);
+        REQUIRE(*beg == 2);
     }
 
     SECTION("Operator==, operator!=") {
@@ -49,9 +49,9 @@ TEST_CASE("Unique binary operations", "[Unique][Binary ops]") {
         std::sort(arr.begin(), arr.end());
         auto unique = lz::unique(arr);
         auto beg = unique.begin();
-        CHECK(beg != unique.end());
+        REQUIRE(beg != unique.end());
         beg = unique.end();
-        CHECK(beg == unique.end());
+        REQUIRE(beg == unique.end());
     }
 
     SECTION("Operator--") {
@@ -61,13 +61,13 @@ TEST_CASE("Unique binary operations", "[Unique][Binary ops]") {
         auto unique = lz::unique(arr);
         auto iter = unique.end();
         --iter;
-        CHECK(*iter == 1);
+        REQUIRE(*iter == 1);
         --iter;
-        CHECK(*iter == 2);
-        CHECK(&*iter == &arr[3]);
+        REQUIRE(*iter == 2);
+        REQUIRE(&*iter == &arr[3]);
         --iter;
-        CHECK(*iter == 3);
-        CHECK(iter == unique.begin());
+        REQUIRE(*iter == 3);
+        REQUIRE(iter == unique.begin());
     }
 }
 
@@ -75,17 +75,17 @@ TEST_CASE("Empty or one element unique") {
     SECTION("Empty") {
         std::vector<int> vec;
         auto unique = lz::unique(vec);
-        CHECK(lz::empty(unique));
-        CHECK(!lz::has_many(unique));
-        CHECK(!lz::has_one(unique));
+        REQUIRE(lz::empty(unique));
+        REQUIRE(!lz::has_many(unique));
+        REQUIRE(!lz::has_one(unique));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto unique = lz::unique(vec);
-        CHECK(lz::has_one(unique));
-        CHECK(!lz::has_many(unique));
-        CHECK(!lz::empty(unique));
+        REQUIRE(lz::has_one(unique));
+        REQUIRE(!lz::has_many(unique));
+        REQUIRE(!lz::empty(unique));
     }
 }
 
@@ -98,19 +98,19 @@ TEST_CASE("Unique to container", "[Unique][To container]") {
     SECTION("To array") {
         auto unique_array = unique.to<std::array<int, size>>();
         std::array<int, size> expected = { 1, 2, 3 };
-        CHECK(unique_array == expected);
+        REQUIRE(unique_array == expected);
     }
 
     SECTION("To vector") {
         auto unique_vec = unique.to_vector();
         std::vector<int> expected = { 1, 2, 3 };
-        CHECK(unique_vec == expected);
+        REQUIRE(unique_vec == expected);
     }
 
     SECTION("To other container using to<>()") {
         auto unique_list = unique.to<std::list<int>>();
         std::list<int> expected = { 1, 2, 3 };
-        CHECK(unique_list == expected);
+        REQUIRE(unique_list == expected);
     }
 
     SECTION("To map") {
@@ -122,7 +122,7 @@ TEST_CASE("Unique to container", "[Unique][To container]") {
             std::make_pair(3, 3),
         };
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To unordered map") {
@@ -134,6 +134,6 @@ TEST_CASE("Unique to container", "[Unique][To container]") {
             std::make_pair(3, 3),
         };
 
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 }

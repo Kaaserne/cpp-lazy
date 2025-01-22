@@ -24,7 +24,7 @@ TEST_CASE("Generate while changing and creating elements", "[Generate while][Bas
         });
         std::array<int, 4> expected = { 0, 1, 2, 3 };
         auto actual = generator.to<std::array<int, expected.size()>>();
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
         i = 0;
     }
 }
@@ -32,9 +32,9 @@ TEST_CASE("Generate while changing and creating elements", "[Generate while][Bas
 TEST_CASE("Empty or one element generate while") {
     SECTION("Empty") {
         auto generator = lz::generate_while([]() { return std::make_pair(false, 0); });
-        CHECK(lz::empty(generator));
-        CHECK(!lz::has_one(generator));
-        CHECK(!lz::has_many(generator));
+        REQUIRE(lz::empty(generator));
+        REQUIRE(!lz::has_one(generator));
+        REQUIRE(!lz::has_many(generator));
     }
 
     SECTION("One element") {
@@ -44,9 +44,9 @@ TEST_CASE("Empty or one element generate while") {
             b = false;
             return p;
         });
-        CHECK(!lz::empty(generator));
-        CHECK(lz::has_one(generator));
-        CHECK(!lz::has_many(generator));
+        REQUIRE(!lz::empty(generator));
+        REQUIRE(lz::has_one(generator));
+        REQUIRE(!lz::has_many(generator));
     }
 }
 
@@ -61,9 +61,9 @@ TEST_CASE("Generate while binary operations", "[Generate while][Binary ops]") {
             return std::make_pair(copy != 4, copy);
         });
         auto begin = generator.begin();
-        CHECK(*begin == 0);
+        REQUIRE(*begin == 0);
         ++begin;
-        CHECK(*begin == 1);
+        REQUIRE(*begin == 1);
     }
 
     SECTION("Operator== & Operator!=") {
@@ -74,16 +74,16 @@ TEST_CASE("Generate while binary operations", "[Generate while][Binary ops]") {
         });
         auto begin = generator.begin();
         ++begin;
-        CHECK(begin != generator.begin());
+        REQUIRE(begin != generator.begin());
         ++begin, ++begin, ++begin;
-        CHECK(begin == generator.end());
+        REQUIRE(begin == generator.end());
         begin = generator.begin();
         i = 0;
-        CHECK(*begin == 0);
+        REQUIRE(*begin == 0);
         while (begin != generator.end()) {
             ++begin;
         }
-        CHECK(begin == generator.end());
+        REQUIRE(begin == generator.end());
     }
 }
 
@@ -96,7 +96,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
         });
         std::array<int, 4> expected = { 0, 1, 2, 3 };
         auto actual = generator.to<std::array<int, 4>>();
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To vector") {
@@ -107,7 +107,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
         });
         std::vector<int> expected = { 0, 1, 2, 3 };
         auto actual = generator.to_vector();
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To other container using to<>()") {
@@ -118,7 +118,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
         });
         std::list<int> expected = { 0, 1, 2, 3 };
         auto actual = generator.to<std::list<int>>();
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To map") {
@@ -129,7 +129,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
         });
         std::map<int, int> expected = { { 0, 0 }, { 1, 1 }, { 2, 2}, { 3, 3 }};
         auto actual = generator.to_map([](int x) { return std::make_pair(x, x); });
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
@@ -140,6 +140,6 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
         });
         std::unordered_map<int, int> expected = { { 0, 0 }, { 1, 1 }, { 2, 2}, { 3, 3 }};
         auto actual = generator.to_unordered_map([](int x) { return std::make_pair(x, x); });
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 }

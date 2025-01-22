@@ -27,31 +27,31 @@ include(CTest)
 
 # ---- Tests ----
 add_executable(cpp-lazy-tests
-	algorithm.cpp
-	any_iterable.cpp
-	cartesian_product.cpp
-	chain.cpp
+	# algorithm.cpp
+	# any_iterable.cpp
+	# cartesian_product.cpp
+	# chain.cpp
 	chunk_if.cpp
 	chunks.cpp
 	common.cpp
-	concatenate.cpp
+	# concatenate.cpp
 	cstring.cpp
-	enumerate.cpp
-	except.cpp
-	exclude.cpp
-	exclusive_scan.cpp
-	filter.cpp
-	flatten.cpp
-	generate.cpp
-	generate_while.cpp
-	group_by.cpp
-	inclusive_scan.cpp
+	# enumerate.cpp
+	# except.cpp
+	# exclude.cpp
+	# exclusive_scan.cpp
+	# filter.cpp
+	# flatten.cpp
+	# generate.cpp
+	# generate_while.cpp
+	# group_by.cpp
+	# inclusive_scan.cpp
 	init.cpp
-	iter_tools.cpp
+	# iter_tools.cpp
 	# join.cpp
 	# join_where.cpp
 	# loop.cpp
-	# map.cpp
+	map.cpp
 	# random.cpp
 	# range.cpp
 	# regex_split.cpp
@@ -61,7 +61,7 @@ add_executable(cpp-lazy-tests
 	# string_splitter.cpp
 	# string_view.cpp
 	# take_every.cpp
-	# take.cpp
+	take.cpp
 	# take_while.cpp
 	# unique.cpp
 	# zip_longest.cpp

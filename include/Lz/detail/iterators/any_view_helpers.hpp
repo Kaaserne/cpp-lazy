@@ -24,7 +24,7 @@ public:
     using difference_type = DiffType;
     using iterator_category = IterCat;
 
-    iterator_wrapper() = default;
+    constexpr iterator_wrapper() = default;
 
     iterator_wrapper(const std::shared_ptr<any_iter_base>& ptr) : _ptr(ptr->clone()) {
     }

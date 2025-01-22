@@ -10,7 +10,7 @@ TEST_CASE("Exclusive scan with sentinels") {
     auto generator = lz::generate([&i]() { return i++; }, 5);
     auto scan = lz::exclusive_scan(generator, 0);
     auto expected = { 0, 0, 1, 3, 6 };
-    CHECK(lz::equal(scan, expected));
+    REQUIRE(lz::equal(scan, expected));
 }
 
 TEST_CASE("exclusive_scan basic functionality", "[exclusive_scan][Basic functionality]") {
@@ -18,28 +18,28 @@ TEST_CASE("exclusive_scan basic functionality", "[exclusive_scan][Basic function
     auto scan = lz::exclusive_scan(arr);
     static_assert(!std::is_same<decltype(scan.begin()), decltype(scan.end())>::value, "Iterators should not be the same type");
 
-    CHECK(*scan.begin() == 0);
-    CHECK(lz::distance(std::begin(scan), std::end(scan)) == std::distance(std::begin(arr), std::end(arr)));
+    REQUIRE(*scan.begin() == 0);
+    REQUIRE(lz::distance(std::begin(scan), std::end(scan)) == std::distance(std::begin(arr), std::end(arr)));
     constexpr auto is_same = std::is_same<int&, decltype(*scan.begin())>::value;
-    CHECK(is_same);
+    REQUIRE(is_same);
 }
 
 TEST_CASE("Empty or one element exclusive scan") {
     SECTION("Empty") {
         std::vector<int> empty;
         auto scan = lz::exclusive_scan(empty);
-        CHECK(lz::empty(scan));
-        CHECK(!lz::has_one(scan));
-        CHECK(!lz::has_many(scan));
+        REQUIRE(lz::empty(scan));
+        REQUIRE(!lz::has_one(scan));
+        REQUIRE(!lz::has_many(scan));
     }
 
     SECTION("One element") {
         std::vector<int> one_element = { 1 };
         auto scan = lz::exclusive_scan(one_element);
-        CHECK(!lz::empty(scan));
-        CHECK(lz::has_one(scan));
-        CHECK(!lz::has_many(scan));
-        CHECK(*scan.begin() == 0);
+        REQUIRE(!lz::empty(scan));
+        REQUIRE(lz::has_one(scan));
+        REQUIRE(!lz::has_many(scan));
+        REQUIRE(*scan.begin() == 0);
     }
 }
 
@@ -52,24 +52,24 @@ TEST_CASE("Exclusive scan binary operations", "[exclusive_scan][Binary ops]") {
     SECTION("Operator++") {
         auto begin = scan.begin();
         ++begin;
-        CHECK(*begin == 0 + 3);
+        REQUIRE(*begin == 0 + 3);
         ++begin;
-        CHECK(*begin == 0 + 3 + 1);
+        REQUIRE(*begin == 0 + 3 + 1);
         ++begin;
-        CHECK(*begin == 0 + 3 + 1 + 4);
+        REQUIRE(*begin == 0 + 3 + 1 + 4);
     }
 
     SECTION("Operator== & operator!=") {
-        CHECK(scan.begin() != scan.end());
+        REQUIRE(scan.begin() != scan.end());
         auto begin = scan.begin();
         while (begin != scan.end()) {
             ++begin;
         }
-        CHECK(begin == scan.end());
+        REQUIRE(begin == scan.end());
         begin = scan.begin();
         ++begin;
-        CHECK(begin != scan.begin());
-        CHECK(begin != scan.end());
+        REQUIRE(begin != scan.begin());
+        REQUIRE(begin != scan.end());
     }
 }
 
@@ -80,32 +80,32 @@ TEST_CASE("Exclusive scan to container", "[exclusive_scan][To container]") {
     SECTION("To array") {
         std::array<int, 8> expected = { 0, 2, 7, 13, 17, 104, 112, 157 };
         auto actual = scanner.to<std::array<int, expected.size()>>();
-        CHECK(actual == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To vector") {
         std::vector<int> expected = { 0, 2, 7, 13, 17, 104, 112, 157 };
         auto actual = scanner.to_vector();
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To other container using to<>()") {
         std::list<int> expected = { 0, 2, 7, 13, 17, 104, 112, 157 };
         auto actual = scanner.to<std::list<int>>();
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To map") {
         std::map<int, int> expected = { { 0, 0 },   { 4, 2 },     { 14, 7 },    { 26, 13 },
                                         { 34, 17 }, { 208, 104 }, { 224, 112 }, { 314, 157 } };
         auto actual = scanner.to_map([](int i) { return std::make_pair(i + i, i); });
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 
     SECTION("To unordered map") {
         std::unordered_map<int, int> expected = { { 0, 0 },   { 4, 2 },     { 14, 7 },    { 26, 13 },
                                                   { 34, 17 }, { 208, 104 }, { 224, 112 }, { 314, 157 } };
         auto actual = scanner.to_unordered_map([](int i) { return std::make_pair(i + i, i); });
-        CHECK(expected == actual);
+        REQUIRE(expected == actual);
     }
 }

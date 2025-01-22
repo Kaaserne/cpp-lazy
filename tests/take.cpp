@@ -1,23 +1,28 @@
+#include <Lz/c_string.hpp>
 #include <Lz/drop.hpp>
+#include <Lz/map.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
-#include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <list>
-
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Take with sentinels") {
     const char* str = "Hello, world!";
     auto c_string = lz::c_string(str);
-    auto take = lz::take(c_string, 5);
+    auto take = c_string | lz::take(5);
     static_assert(!std::is_same<decltype(take.begin()), decltype(take.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("Hello");
     REQUIRE(lz::equal(take, expected));
+    auto vec = take | lz::to<std::vector<char>>();
+    REQUIRE(lz::equal(vec, expected));
 }
 
 TEST_CASE("Take changing and creating elements", "[Take][Basic functionality]") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take = lz::take(array, 4);
+    REQUIRE(take.size() == 4);
     REQUIRE(*take.begin() == 1);
     REQUIRE(*std::next(take.begin()) == 2);
     REQUIRE(*std::prev(take.end()) == 4);
@@ -28,6 +33,7 @@ TEST_CASE("Take changing and creating elements", "[Take][Basic functionality]") 
 TEST_CASE("Take binary operations", "[Take][Binary ops]") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take = lz::take(array, 4);
+    REQUIRE(take.size() == 4);
 
     SECTION("Operator++") {
         auto begin = take.begin();
@@ -81,17 +87,19 @@ TEST_CASE("Empty or one element take") {
     SECTION("Empty") {
         std::vector<int> vec;
         auto take = lz::take(vec, 0);
-        CHECK(lz::empty(take));
-        CHECK(!lz::has_one(take));
-        CHECK(!lz::has_many(take));
+        REQUIRE(take.size() == 0);
+        REQUIRE(lz::empty(take));
+        REQUIRE(!lz::has_one(take));
+        REQUIRE(!lz::has_many(take));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto take = lz::take(vec, 1);
-        CHECK(!lz::empty(take));
-        CHECK(lz::has_one(take));
-        CHECK(!lz::has_many(take));
+        REQUIRE(take.size() == 1);
+        REQUIRE(!lz::empty(take));
+        REQUIRE(lz::has_one(take));
+        REQUIRE(!lz::has_many(take));
     }
 }
 
@@ -99,9 +107,10 @@ TEST_CASE("Take to containers", "[Take][To container]") {
     constexpr std::size_t size = 8;
     std::array<int, size> array = { 1, 2, 3, 4, 5, 6, 7, 8 };
     auto take = lz::take(array, 4);
+    REQUIRE(take.size() == 4);
 
     SECTION("To array") {
-        auto arr = take.to<std::array<int, 4>>();
+        auto arr = take | lz::to<std::array<int, 4>>();
         REQUIRE(arr.size() == 4);
         REQUIRE(arr[0] == 1);
         REQUIRE(arr[1] == 2);
@@ -110,24 +119,25 @@ TEST_CASE("Take to containers", "[Take][To container]") {
     }
 
     SECTION("To vector") {
-        auto vec = take.to_vector();
+        auto vec = take | lz::to<std::vector>(std::allocator<int>());
         REQUIRE(std::equal(vec.begin(), vec.end(), take.begin()));
     }
 
     SECTION("To other container using to<>()") {
-        auto lst = take.to<std::list<int>>();
+        auto lst = take | lz::to<std::list<int>>(std::allocator<int>());
         REQUIRE(std::equal(lst.begin(), lst.end(), take.begin()));
     }
 
     SECTION("To map") {
-        auto map = take.to_map([](int i) { return std::make_pair(i, i); });
+        auto map_obj = take | lz::map([](int i) { return std::make_pair(i, i); });
+        auto map = lz::to<std::map<int, int>>(map_obj);
         REQUIRE(map.size() == 4);
         std::map<int, int> expected = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 } };
         REQUIRE(map == expected);
     }
 
     SECTION("To unordered map") {
-        auto map = take.to_unordered_map([](int i) { return std::make_pair(i, i); });
+        auto map = take | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         REQUIRE(map.size() == 4);
         std::unordered_map<int, int> expected = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 } };
         REQUIRE(map == expected);
@@ -135,31 +145,21 @@ TEST_CASE("Take to containers", "[Take][To container]") {
 }
 
 TEST_CASE("Drop & slice") {
-    SECTION("Drop iterable") {
-        std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        auto drop = lz::drop(vec, 4);
-        std::vector<int> expected = { 5, 6, 7, 8 };
-        REQUIRE(std::equal(drop.begin(), drop.end(), expected.begin()));
-    }
-
     SECTION("Drop iterator") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        auto drop = lz::drop(vec, 4);
+        auto drop = vec | lz::drop(4);
+        REQUIRE(drop.size() == 4);
         std::vector<int> expected = { 5, 6, 7, 8 };
-        REQUIRE(std::equal(drop.begin(), drop.end(), expected.begin()));
+        auto result = lz::to<std::vector<int>>(drop, std::allocator<int>());
+        REQUIRE(std::equal(result.begin(), result.end(), expected.begin()));
     }
 
     SECTION("Slice iterable") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        auto slice = lz::slice(vec, 2, 6);
+        auto slice = vec | lz::slice(2, 6);
+        REQUIRE(slice.size() == 4);
         std::vector<int> expected = { 3, 4, 5, 6 };
-        REQUIRE(std::equal(slice.begin(), slice.end(), expected.begin()));
-    }
-
-    SECTION("Slice iterator") {
-        std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
-        auto slice = lz::slice(vec, 2, 6);
-        std::vector<int> expected = { 3, 4, 5, 6 };
+        auto result = lz::to<std::vector>(slice, std::allocator<int>());
         REQUIRE(std::equal(slice.begin(), slice.end(), expected.begin()));
     }
 }

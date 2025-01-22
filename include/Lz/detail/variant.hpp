@@ -48,7 +48,7 @@ class variant {
     void reconstruct(state s, U&& this_variant, V&& other_variant_type) {
         this->~variant();
         _state = s;
-        ::new (std::addressof(this_variant)) V(std::forward<V>(other_variant_type));
+        ::new (std::addressof(this_variant)) decay_t<U>(std::forward<V>(other_variant_type));
     }
 
     template<class V, class V2>
@@ -60,15 +60,15 @@ class variant {
         case state::t2:
             ::new (std::addressof(_variant._t2)) T2(std::forward<V2>(other_variant_type2));
             break;
-        case state::none:
+        default:
             break;
         }
     }
 
 public:
-    static constexpr std::size_t npos = -1;
+    static constexpr auto npos = static_cast<std::size_t>(-1);
 
-    variant() : _state(state::none) {
+    variant() noexcept : _state(state::none) {
     }
 
     variant(const T& t) : _state(state::t) {
@@ -79,11 +79,11 @@ public:
         ::new (std::addressof(_variant._t2)) T2(t2);
     }
 
-    variant(T&& t) : _state(state::t) {
+    variant(T&& t) noexcept : _state(state::t) {
         ::new (std::addressof(_variant._t)) T(std::move(t));
     }
 
-    variant(T2&& t2) : _state(state::t2) {
+    variant(T2&& t2) noexcept : _state(state::t2) {
         ::new (std::addressof(_variant._t2)) T2(std::move(t2));
     }
 
@@ -91,7 +91,7 @@ public:
         construct(other._variant._t, other._variant._t2);
     }
 
-    variant(variant&& other) : _state(other._state) {
+    variant(variant&& other) noexcept : _state(other._state) {
         other._state = state::none;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
     }
@@ -106,12 +106,12 @@ public:
         return *this;
     }
 
-    variant& operator=(T&& t) {
+    variant& operator=(T&& t) noexcept {
         reconstruct(state::t, _variant._t, std::move(t));
         return *this;
     }
 
-    variant& operator=(T2&& t2) {
+    variant& operator=(T2&& t2) noexcept {
         reconstruct(state::t2, _variant._t2, std::move(t2));
         return *this;
     }
@@ -123,7 +123,7 @@ public:
         return *this;
     }
 
-    variant& operator=(variant&& other) {
+    variant& operator=(variant&& other) noexcept {
         this->~variant();
         _state = other._state;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
@@ -167,10 +167,10 @@ public:
         case state::t2:
             _variant._t2.~T2();
             break;
-        case state::none:
+        default:
+            _state = state::none;
             break;
         }
-        _state = state::none;
     }
 };
 

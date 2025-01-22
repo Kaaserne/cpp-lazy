@@ -9,30 +9,30 @@ TEST_CASE("Group by with sentinels") {
     auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
     auto it = grouper.begin();
 
-    CHECK(lz::equal(it->second, lz::c_string("aaa")));
+    REQUIRE(lz::equal(it->second, lz::c_string("aaa")));
     ++it;
-    CHECK(lz::equal(it->second, lz::c_string("bb")));
+    REQUIRE(lz::equal(it->second, lz::c_string("bb")));
     ++it;
-    CHECK(lz::equal(it->second, lz::c_string("cccc")));
+    REQUIRE(lz::equal(it->second, lz::c_string("cccc")));
     ++it;
-    CHECK(lz::equal(it->second, lz::c_string("d")));
+    REQUIRE(lz::equal(it->second, lz::c_string("d")));
     ++it;
-    CHECK(it == grouper.end());
+    REQUIRE(it == grouper.end());
 }
 
 TEST_CASE("Empty or one element group by") {
     SECTION("Empty") {
         auto generator = lz::group_by(lz::c_string(""), [](char a, char b) { return a == b; });
-        CHECK(lz::empty(generator));
-        CHECK(!lz::has_one(generator));
-        CHECK(!lz::has_many(generator));
+        REQUIRE(lz::empty(generator));
+        REQUIRE(!lz::has_one(generator));
+        REQUIRE(!lz::has_many(generator));
     }
 
     SECTION("One element") {
         auto generator = lz::group_by(lz::c_string("a"), [](char a, char b) { return a == b; });
-        CHECK(!lz::empty(generator));
-        CHECK(lz::has_one(generator));
-        CHECK(!lz::has_many(generator));
+        REQUIRE(!lz::empty(generator));
+        REQUIRE(lz::has_one(generator));
+        REQUIRE(!lz::has_many(generator));
     }
 }
 
@@ -47,9 +47,9 @@ TEST_CASE("group_by changing and creating elements", "[group_by][Basic functiona
 
         using value_type = lz::val_iterable_t<decltype(grouper)>;
         grouper.for_each([&str_len](const value_type& g) {
-            CHECK(g.first.length() == str_len);
+            REQUIRE(g.first.length() == str_len);
             for (const auto& str : g.second) {
-                CHECK(str.length() == str_len);
+                REQUIRE(str.length() == str_len);
             }
             ++str_len;
         });
@@ -58,7 +58,7 @@ TEST_CASE("group_by changing and creating elements", "[group_by][Basic functiona
     SECTION("Should be by ref") {
         auto begin = grouper.begin();
         *(begin->second.begin()) = "imm";
-        CHECK(vec[0] == "imm");
+        REQUIRE(vec[0] == "imm");
     }
 }
 
@@ -70,21 +70,21 @@ TEST_CASE("group_by binary operations", "[group_by][Binary ops]") {
 
     SECTION("Operator++") {
         auto it = grouper.begin();
-        CHECK(it->first.length() == 3);
-        CHECK(*it->second.begin() == "i'm");
+        REQUIRE(it->first.length() == 3);
+        REQUIRE(*it->second.begin() == "i'm");
         ++it;
 
-        CHECK(it->first.length() == 4);
-        CHECK(*it->second.begin() == "done");
+        REQUIRE(it->first.length() == 4);
+        REQUIRE(*it->second.begin() == "done");
     }
 
     SECTION("Operator== & operator!=") {
         auto it = grouper.begin();
-        CHECK(it != grouper.end());
+        REQUIRE(it != grouper.end());
         while (it != grouper.end()) {
             ++it;
         }
 
-        CHECK(it == grouper.end());
+        REQUIRE(it == grouper.end());
     }
 }
