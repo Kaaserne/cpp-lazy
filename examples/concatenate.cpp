@@ -1,4 +1,4 @@
-#include <Lz/Concatenate.hpp>
+#include <Lz/concatenate.hpp>
 #include <iostream>
 
 
