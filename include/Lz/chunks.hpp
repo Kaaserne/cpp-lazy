@@ -3,28 +3,11 @@
 #ifndef LZ_CHUNKS_HPP
 #define LZ_CHUNKS_HPP
 
-#include <Lz/detail/iterators/chunks.hpp>
+#include <Lz/detail/adaptors/chunks.hpp>
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-struct chunks_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static chunks_adaptor chunks;
-#endif
-
-    using adaptor = chunks_adaptor;
-
-    template<class Iterable>
-    constexpr detail::chunks_iterable<Iterable> operator()(Iterable&& iterable, std::size_t chunk_size) const {
-        return { std::forward<Iterable>(iterable), chunk_size };
-    }
-
-    constexpr detail::fn_args_holder<adaptor, std::size_t> operator()(std::size_t chunk_size) const {
-        return { chunk_size };
-    }
-};
 
 #ifdef LZ_HAS_CXX_11
 
@@ -42,7 +25,7 @@ struct chunks_adaptor {
  * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
  * ```
  */
-chunks_adaptor chunks_adaptor::chunks;
+detail::chunks_adaptor detail::chunks_adaptor::chunks;
 
 #else
 
@@ -60,7 +43,7 @@ chunks_adaptor chunks_adaptor::chunks;
  * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
  * ```
  */
-LZ_INLINE_VAR constexpr chunks_adaptor chunks{};
+LZ_INLINE_VAR constexpr detail::chunks_adaptor chunks{};
 
 #endif // LZ_HAS_CXX_11
 

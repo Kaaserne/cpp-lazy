@@ -3,39 +3,11 @@
 #ifndef LZ_CHUNK_IF_ITERATOR_HPP
 #define LZ_CHUNK_IF_ITERATOR_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/iterator_base.hpp>
 
-// TODO add benchmarks for maybe_no_unique_address
-/*
-// Wrapper to conditionally apply [[no_unique_address]]
-template <typename T, bool = std::is_empty_v<T>>
-struct maybe_no_unique_address;
-
-// Specialization when T is empty
-template <typename T>
-struct maybe_no_unique_address<T, true> : private T {
-    maybe_no_unique_address() = default;
-    maybe_no_unique_address(const T& t) : T(t) {}
-
-    T& get() { return *this; }
-    const T& get() const { return *this; }
-};
-
-// Specialization when T is not empty
-template <typename T>
-struct maybe_no_unique_address<T, false> {
-    [[no_unique_address]] T value;
-    maybe_no_unique_address() = default;
-    maybe_no_unique_address(const T& t) : value(t) {}
-
-    T& get() { return value; }
-    const T& get() const { return value; }
-};
-*/
 namespace lz {
 namespace detail {
 template<class ValueType, class Iterator, class S, class UnaryPredicate>
@@ -125,42 +97,6 @@ public:
         return _sub_range_begin == _end && !_trailing_empty;
     }
 };
-
-template<class ValueType, class Iterable, class UnaryPredicate>
-class chunk_if_iterable {
-    Iterable _iterable;
-    UnaryPredicate _predicate;
-
-public:
-    using iterator = chunk_if_iterator<ValueType, iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
-
-    template<class I, class Up>
-    constexpr chunk_if_iterable(I&& iterable, Up&& predicate) :
-        _iterable{ std::forward<I>(iterable) },
-        _predicate{ std::forward<Up>(predicate) } {
-    }
-
-    constexpr chunk_if_iterable() = default;
-
-    iterator begin() && {
-        auto begin = std::move(_iterable).begin();
-        auto end = std::move(_iterable).end();
-        const auto is_end = end == begin;
-        return { begin, end, is_end };
-    }
-
-    iterator begin() const& {
-        const auto is_end = std::end(_iterable) == std::begin(_iterable);
-        return { std::begin(_iterable), std::end(_iterable), _predicate, is_end };
-    }
-
-    constexpr default_sentinel end() const& {
-        return {};
-    }
-};
-
 } // namespace detail
 } // namespace lz
 

@@ -39,12 +39,12 @@ public:
     }
 
     template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel>::value, sentinel> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel>::value, sentinel> end() const {
         return std::end(_iterable);
     }
 
     template<class I = iterator>
-    LZ_NODISCARD constexpr enable_if<is_sentinel<I, sentinel>::value, sentinel> end() const& {
+    LZ_NODISCARD constexpr enable_if<is_sentinel<I, sentinel>::value, sentinel> end() const {
         return {};
     }
 };
@@ -55,7 +55,6 @@ class drop_while_iterable<Iterable, UnaryPredicate, enable_if<is_ra<iter_t<Itera
     sentinel_t<Iterable> _end;
 
 public:
-    // TODO remove iter_t<Iterable> for drop_while_iterator
     using iterator = iter_t<Iterable>;
     using sentinel = sentinel_t<Iterable>;
     using const_iterator = iterator;
@@ -73,9 +72,12 @@ public:
         return static_cast<std::size_t>(_end - _begin);
     }
 
-
     LZ_NODISCARD constexpr iterator begin() && {
         return std::move(_begin);
+    }
+
+    LZ_NODISCARD constexpr sentinel end() && {
+        return std::move(_end);
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
@@ -84,10 +86,6 @@ public:
 
     LZ_NODISCARD constexpr sentinel end() const& {
         return _end;
-    }
-
-    LZ_NODISCARD constexpr sentinel end() && {
-        return std::move(_end);
     }
 };
 } // namespace detail

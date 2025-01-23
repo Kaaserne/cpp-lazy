@@ -3,24 +3,9 @@
 #ifndef LZ_C_STRING_HPP
 #define LZ_C_STRING_HPP
 
-#include <Lz/basic_iterable.hpp>
-#include <Lz/detail/iterators/c_string.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/adaptors/c_string.hpp>
 
 namespace lz {
-
-struct c_string_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static c_string_adaptor c_string;
-#endif
-
-    using adaptor = c_string_adaptor;
-
-    template<class C>
-    LZ_NODISCARD constexpr detail::c_string_iterable<detail::decay_t<C>> operator()(C&& str) const noexcept {
-        return { std::forward<C>(str) };
-    }
-};
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
@@ -28,7 +13,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
  * @brief This adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a sentinel,
- * rather than an actual iterator. Example:
+ * rather than an actual iterator. This iterable does not contain a .size() method. Example:
  * ```cpp
  * const char* str = "Hello, World!";
  * auto cstr = lz::c_string(str);
@@ -36,13 +21,13 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto cstr = "Hello" | lz::c_string;
  * ```
  */
-c_string_adaptor c_string_adaptor::c_string{};
+detail::c_string_adaptor detail::c_string_adaptor::c_string{};
 
 #else
 
 /**
  * @brief This adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a sentinel,
- * rather than an actual iterator. Example:
+ * rather than an actual iterator. This iterable does not contain a .size() method. Example:
  * ```cpp
  * const char* str = "Hello, World!";
  * auto cstr = lz::c_string(str);
@@ -50,7 +35,7 @@ c_string_adaptor c_string_adaptor::c_string{};
  * auto cstr = "Hello" | lz::c_string;
  * ```
  */
-LZ_INLINE_VAR constexpr c_string_adaptor c_string{};
+LZ_INLINE_VAR constexpr detail::c_string_adaptor c_string{};
 
 #endif
 

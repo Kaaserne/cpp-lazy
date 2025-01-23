@@ -3,60 +3,19 @@
 #ifndef LZ_CHUNK_IF_HPP
 #define LZ_CHUNK_IF_HPP
 
-#include <Lz/detail/iterators/chunk_if.hpp>
+#include <Lz/detail/adaptors/chunk_if.hpp>
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<class ValueType>
-struct chunk_if_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static chunk_if_adaptor<ValueType> chunk_if;
-#endif
-
-    using adaptor = chunk_if_adaptor<ValueType>;
-
-    template<class Iterable, class UnaryPredicate>
-    constexpr detail::chunk_if_iterable<ValueType, Iterable, detail::decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& predicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(predicate) };
-    }
-
-    template<class UnaryPredicate>
-    constexpr detail::fn_args_holder<adaptor, detail::decay_t<UnaryPredicate>>
-    operator()(UnaryPredicate&& predicate) const {
-        return { std::forward<UnaryPredicate>(predicate) };
-    }
-};
-
-template<>
-struct chunk_if_adaptor<void> {
-#ifdef LZ_HAS_CXX_11
-    static chunk_if_adaptor<void> chunk_if;
-#endif
-
-    using adaptor = chunk_if_adaptor<void>;
-
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    constexpr detail::chunk_if_iterable<basic_iterable<iter_t<Iterable>>, Iterable, detail::decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& predicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(predicate) };
-    }
-
-    template<class UnaryPredicate>
-    constexpr detail::fn_args_holder<adaptor, detail::decay_t<UnaryPredicate>>
-    operator()(UnaryPredicate&& predicate) const {
-        return { std::forward<UnaryPredicate>(predicate) };
-    }
-};
-
 #ifdef LZ_HAS_CXX_11
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward. It returns an iterable of iterables. If `std::string` or `[lz|std]::string_view` is preffed as its
- * `value_type`, please see `s_chunk_if` or `sv_chunk_if` respectively.
+ * category is forward, and returns a sentinel. It returns an iterable of iterables. If `std::string` or `[lz|std]::string_view`
+ * is preffed as its `value_type`, please see `s_chunk_if` or `sv_chunk_if` respectively. This iterable does not contain a .size()
+ * method.
  *
  * Example:
  * ```cpp
@@ -67,11 +26,12 @@ struct chunk_if_adaptor<void> {
  * }
  * ```
  */
-chunk_if_adaptor<void> chunk_if_adaptor<void>::chunk_if{};
+detail::chunk_if_adaptor<void> detail::chunk_if_adaptor<void>::chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward. It returns an iterable of `[std|lz]::string_view`. The input iterable must therefore be random_access.
+ * category is forward, and returns a sentinel. It returns an iterable of `[std|lz]::string_view`. The input iterable must
+ * therefore be random_access. This iterable does not contain a .size() method.
  *
  * Example:
  * ```cpp
@@ -79,34 +39,36 @@ chunk_if_adaptor<void> chunk_if_adaptor<void>::chunk_if{};
  * auto chunked = lz::sv_chunk_if(s, [](char c) { return c == ';'; });
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * // or
- * auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
+ * auto chunked = s | lz::sv_chunk_if([](char c) { return c == ';'; });
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * ```
  */
-chunk_if_adaptor<lz::string_view> chunk_if_adaptor<lz::string_view>::sv_chunk_if{};
+detail::chunk_if_adaptor<lz::string_view> detail::chunk_if_adaptor<lz::string_view>::sv_chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward. It returns an iterable of `std::string`. The input iterable must therefore be random_access.
+ * category is forward, and returns a sentinel. It returns an iterable of `std::string`. The input iterable must therefore be
+ * random_access. This iterable does not contain a .size() method.
  *
  * Example:
  * ```cpp
  * std::string s = "hello;world;;";
- * auto chunked = lz::sv_chunk_if(s, [](char c) { return c == ';'; });
+ * auto chunked = lz::s_chunk_if(s, [](char c) { return c == ';'; });
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * // or
- * auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
+ * auto chunked = s | lz::s_chunk_if([](char c) { return c == ';'; });
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * ```
  */
-chunk_if_adaptor<std::string> chunk_if_adaptor<std::string>::s_chunk_if{};
+detail::chunk_if_adaptor<std::string> detail::chunk_if_adaptor<std::string>::s_chunk_if{};
 
 #else
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward. It returns an iterable of iterables. If `std::string` or `[lz|std]::string_view` is preffed as its
- * `value_type`, please see `s_chunk_if` or `sv_chunk_if` respectively.
+ * category is forward, and returns a sentinel. It returns an iterable of iterables. If `std::string` or `[lz|std]::string_view`
+ * is preffed as its `value_type`, please see `s_chunk_if` or `sv_chunk_if` respectively. This iterable does not contain a .size()
+ * method.
  *
  * Example:
  * ```cpp
@@ -117,11 +79,12 @@ chunk_if_adaptor<std::string> chunk_if_adaptor<std::string>::s_chunk_if{};
  * }
  * ```
  */
-LZ_INLINE_VAR constexpr chunk_if_adaptor<void> chunk_if{};
+LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<void> chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward. It returns an iterable of `[std|lz]::string_view`. The input iterable must therefore be random_access.
+ * category is forward, and returns a sentinel. It returns an iterable of `[std|lz]::string_view`. The input iterable must
+ * therefore be random_access. This iterable does not contain a .size() method.
  *
  * Example:
  * ```cpp
@@ -129,27 +92,28 @@ LZ_INLINE_VAR constexpr chunk_if_adaptor<void> chunk_if{};
  * auto chunked = lz::sv_chunk_if(s, [](char c) { return c == ';'; });
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * // or
- * auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
+ * auto chunked = s | lz::sv_chunk_if([](char c) { return c == ';'; });
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * ```
  */
-LZ_INLINE_VAR constexpr chunk_if_adaptor<lz::string_view> sv_chunk_if{};
+LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward. It returns an iterable of `std::string`. The input iterable must therefore be random_access.
+ * category is forward, and returns a sentinel. It returns an iterable of `std::string`. The input iterable must therefore be
+ * random_access. This iterable does not contain a .size() method.
  *
  * Example:
  * ```cpp
  * std::string s = "hello;world;;";
- * auto chunked = lz::sv_chunk_if(s, [](char c) { return c == ';'; });
+ * auto chunked = lz::s_chunk_if(s, [](char c) { return c == ';'; });
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * // or
- * auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
+ * auto chunked = s | lz::s_chunk_if([](char c) { return c == ';'; });
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * ```
  */
-LZ_INLINE_VAR constexpr chunk_if_adaptor<std::string> s_chunk_if{};
+LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 #endif
 

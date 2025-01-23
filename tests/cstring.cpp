@@ -1,3 +1,4 @@
+#include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <catch2/catch.hpp>
@@ -12,6 +13,7 @@ TEST_CASE("Empty or one element c_string") {
     }
 
     SECTION("One element") {
+        int arr[] = { 1 };
         auto cstr = lz::c_string("a");
         REQUIRE(!lz::empty(cstr));
         REQUIRE(lz::has_one(cstr));

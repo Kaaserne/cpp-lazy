@@ -20,6 +20,8 @@ using variant = std::variant<T, T2>;
 
 #else
 
+#include <stdexcept>
+
 namespace lz {
 namespace detail {
 

@@ -239,7 +239,6 @@ template<class Container, class... Args, class Iterable, class = detail::enable_
 LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
     constexpr to_adaptor<Container> to{};
     return to(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
-    // return to<Container>(std::forward<Args>(args)...)(std::forward<Iterable>(iterable));
 }
 
 /**
