@@ -1,72 +1,26 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_ENUMERATE_HPP
-// #define LZ_ENUMERATE_HPP
+#ifndef LZ_ENUMERATE_HPP
+#define LZ_ENUMERATE_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/enumerate.hpp>
+#include <Lz/detail/adaptors/enumerate.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<LZ_CONCEPT_ITERATOR Iterator, class S, LZ_CONCEPT_INTEGRAL IntType>
-// class enumerate_iterable final
-//     : public detail::basic_iterable<detail::enumerate_iterator<Iterator, S, IntType>,
-//                                     typename detail::enumerate_iterator<Iterator, S, IntType>::sentinel> {
+#ifdef LZ_HAS_CXX_11
 
-// public:
-//     using iterator = detail::enumerate_iterator<Iterator, S, IntType>;
-//     using const_iterator = iterator;
+detail::enumerate_adaptor enumerate{};
 
-//     using value_type = typename iterator::value_type;
+#else
 
-//     constexpr enumerate_iterable() = default;
+LZ_INLINE_VAR constexpr detail::enumerate_adaptor enumerate{};
 
-// private:
-//     constexpr enumerate_iterable(Iterator begin, Iterator end, std::random_access_iterator_tag /* unused */,
-//                                  const IntType start = 0) :
-//         detail::basic_iterable<iterator, iterator>(iterator(start, begin), iterator(static_cast<IntType>(end - begin), end)) {
-//     }
+#endif
 
-//     constexpr enumerate_iterable(Iterator begin, S end, std::forward_iterator_tag /* unused */, const IntType start = 0) :
-//         detail::basic_iterable<iterator, S>(iterator(start, std::move(begin)), std::move(end)) {
-//     }
+LZ_MODULE_EXPORT_SCOPE_END
 
-// public:
-//     constexpr enumerate_iterable(Iterator begin, S end, const IntType start = 0) :
-//         enumerate_iterable(std::move(begin), std::move(end), iter_cat_t<iterator>{}, start) {
-//     }
-// };
+} // namespace lz
 
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
-
-// /**
-//  * Creates an enumerate object. The enumerator consists of a `std::pair<IntType, value_type&>`. The
-//  * elements of the enumerate iterator are by reference. The `std:::pair<IntType, value_type&>::first` is the
-//  * counter index. The `std:::pair<IntType, value_type&>::second` is the element of the iterator by reference.
-//  * Furthermore, the `operator*` of this iterator returns an std::pair by value.
-//  * @tparam IntType The type of the iterator integer. By default, `int` is assumed. Can be any arithmetic type.
-//  * @param iterable An iterable, e.g. a container / object with `begin()` and `end()` methods.
-//  * @param start The start of the counting index. 0 is assumed by default.
-//  * @return enumerate iterator object. One can iterate over this using `for (auto pair : lz::enumerate(..))`
-//  */
-// template<LZ_CONCEPT_ARITHMETIC IntType = int, LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD constexpr enumerate_iterable<iter_t<Iterable>, sentinel_t<Iterable>, IntType>
-// enumerate(Iterable&& iterable, const IntType start = 0) {
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(), start };
-// }
-
-// // End of group
-// /**
-//  * @}
-//  */
-
-// LZ_MODULE_EXPORT_SCOPE_END
-
-// } // namespace lz
-
-// #endif
+#endif

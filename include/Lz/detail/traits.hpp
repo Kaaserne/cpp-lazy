@@ -19,7 +19,7 @@ struct always_false : std::false_type {};
 
 #ifdef LZ_HAS_CXX_11
 
-#define MAKE_OPERATOR(OP, VALUE_TYPE) OP<VALUE_TYPE>
+#define MAKE_OPERATOR(OP, VALUE_TYPE) (OP<(VALUE_TYPE)>)
 
 template<std::size_t, std::size_t...>
 struct index_sequence_helper;
@@ -86,7 +86,7 @@ LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::e
  * @tparam Iterable The iterable to get the iterator type from.
  */
 template<class Iterable>
-using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
+using iter_t = decltype(std::begin(std::declval<Iterable>()));
 
 /**
  * @brief Can be used to get the sentinel type of an iterable. Example: `lz::sentinel_t<std::vector<int>>` will return
@@ -94,7 +94,7 @@ using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterab
  * @tparam Iterable The iterable to get the sentinel type from.
  */
 template<class Iterable>
-using sentinel_t = decltype(detail::end(std::forward<Iterable>(std::declval<Iterable>())));
+using sentinel_t = decltype(std::end(std::declval<Iterable>()));
 
 /**
  * @brief Can be used to get the value type of an iterator. Example: `lz::val_t<std::vector<int>::iterator>` will return `int`.
@@ -184,6 +184,9 @@ template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
 
 namespace detail {
+
+template<class Iterable>
+using iterable_ref = std::reference_wrapper<decay_t<Iterable>>;
 
 template<class... T>
 using void_t = void;

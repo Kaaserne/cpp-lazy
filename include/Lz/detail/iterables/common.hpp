@@ -10,7 +10,7 @@ namespace detail {
 
 template<class Iterable>
 class common_iterable {
-    Iterable _iterable;
+    iterable_ref<Iterable> _iterable;
 
 public:
     using iterator = common_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
@@ -20,23 +20,23 @@ public:
     common_iterable() = default;
 
     template<class I>
-    constexpr common_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    constexpr common_iterable(I&& iterable) : _iterable{ iterable } {
     }
 
     LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_iterable).begin() };
+        return { std::move(_iterable.get()).begin() };
     }
 
     LZ_CONSTEXPR_CXX_14 iterator end() && {
-        return { std::move(_iterable).end() };
+        return { std::move(_iterable.get()).end() };
     }
 
     LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable) };
+        return { std::begin(_iterable.get()) };
     }
 
     LZ_CONSTEXPR_CXX_14 iterator end() const& {
-        return { std::end(_iterable) };
+        return { std::end(_iterable.get()) };
     }
 };
 } // namespace detail

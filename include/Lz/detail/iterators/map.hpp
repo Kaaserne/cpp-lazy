@@ -67,60 +67,6 @@ public:
         return _iterator == s;
     }
 };
-
-template<class Iterable, class UnaryOp>
-class map_iterable {
-    Iterable _iterable;
-    UnaryOp _unary_op;
-
-public:
-    using iterator = map_iterator<iter_t<Iterable>, sentinel_t<Iterable>, UnaryOp>;
-    using sentinel = typename iterator::sentinel;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
-
-    template<class I, class Uo>
-    constexpr map_iterable(I&& iterable, Uo&& unary_op) :
-        _iterable{ std::forward<I>(iterable) },
-        _unary_op{ std::forward<Uo>(unary_op) } {
-    }
-
-    constexpr map_iterable() = default;
-
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept {
-        return static_cast<std::size_t>(_iterable.size());
-    }
-
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() && {
-        return { std::move(_iterable).begin(), _unary_op };
-    }
-
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
-        return { std::move(_iterable).begin(), std::move(_unary_op) };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), _unary_op };
-    }
-
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() && {
-        return { std::move(_iterable).end(), _unary_op };
-    }
-
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const& {
-        return { std::end(_iterable), _unary_op };
-    }
-
-    template<class I = iterator>
-    LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, sentinel> end() const& {
-        return {};
-    }
-};
 } // namespace detail
 } // namespace lz
 

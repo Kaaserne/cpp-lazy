@@ -88,42 +88,6 @@ LZ_CONSTEXPR_CXX_14 auto end_tuple(IterableTuple&& iterable_tuple, std::index_se
     return std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
 }
 
-template<class TAdaptor, class... Ts>
-struct fn_args_holder {
-    std::tuple<Ts...> data;
-
-    using adaptor = fn_args_holder<TAdaptor, Ts...>;
-
-    template<class... Args>
-    LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) noexcept : data(std::forward<Args>(args)...) {
-    }
-
-    template<class Iterable, std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable, index_sequence_helper<I...>) const& {
-        constexpr TAdaptor adaptor;
-        return adaptor(std::forward<Iterable>(iterable), std::get<I>(data)...);
-    }
-
-    template<class Iterable, std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto
-    operator()(Iterable&& iterable, index_sequence_helper<I...>) && -> decltype(TAdaptor{}(std::forward<Iterable>(iterable),
-                                                                                           std::get<I>(std::move(data))...)) {
-        constexpr TAdaptor adaptor;
-        return adaptor(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
-    }
-
-    template<class Iterable>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) const& -> decltype((*this)(std::forward<Iterable>(iterable),
-                                                                                        make_index_sequence<sizeof...(Ts)>{})) {
-        return (*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
-    }
-
-    template<class Iterable>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) && -> decltype(std::move(*this)(std::forward<Iterable>(iterable))) {
-        return std::move(*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
-    }
-};
-
 template<class Fn>
 struct tuple_expand {
 private:

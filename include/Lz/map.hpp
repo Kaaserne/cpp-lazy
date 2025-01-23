@@ -3,30 +3,11 @@
 #ifndef LZ_MAP_HPP
 #define LZ_MAP_HPP
 
-#include <Lz/detail/iterators/map.hpp>
+#include <Lz/detail/adaptors/map.hpp>
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-struct map_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static map_adaptor map;
-#endif
-
-    using adaptor = map_adaptor;
-
-    template<class Iterable, class Function>
-    constexpr detail::map_iterable<Iterable, detail::decay_t<Function>>
-    operator()(Iterable&& iterable, Function&& function) const {
-        return { std::forward<Iterable>(iterable), std::forward<Function>(function) };
-    }
-
-    template<class Function>
-    LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, detail::decay_t<Function>> operator()(Function&& function) const {
-        return { std::forward<Function>(function) };
-    }
-};
 
 #ifdef LZ_HAS_CXX_11
 
@@ -41,7 +22,7 @@ struct map_adaptor {
  * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
  * ```
  */
-map_adaptor map_adaptor::map{};
+detail::map_adaptor detail::map_adaptor::map{};
 
 #else
 
@@ -56,7 +37,7 @@ map_adaptor map_adaptor::map{};
  * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
  * ```
  */
-LZ_INLINE_VAR constexpr map_adaptor map{};
+LZ_INLINE_VAR constexpr detail::map_adaptor map{};
 
 #endif
 

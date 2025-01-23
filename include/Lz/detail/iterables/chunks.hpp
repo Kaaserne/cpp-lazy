@@ -9,7 +9,7 @@ namespace lz {
 namespace detail {
 template<class Iterable>
 class chunks_iterable {
-    Iterable _iterable;
+    iterable_ref<Iterable> _iterable;
     std::size_t _chunk_size;
 
 public:
@@ -22,28 +22,28 @@ public:
 
     template<class I>
     LZ_CONSTEXPR_CXX_14 chunks_iterable(I&& iterable, const std::size_t chunk_size) :
-        _iterable{ std::forward<I>(iterable) },
+        _iterable{ iterable },
         _chunk_size{ chunk_size } {
     }
 
     template<class I = Iterable>
     LZ_NODISCARD enable_if<sized<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(std::ceil(static_cast<double>(_iterable.size()) / _chunk_size));
+        return static_cast<std::size_t>(std::ceil(static_cast<double>(_iterable.get().size()) / _chunk_size));
     }
 
     template<class I = iterator>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, I> begin() const {
-        return { std::begin(_iterable), std::end(_iterable), _chunk_size };
+        return { std::begin(_iterable.get()), std::end(_iterable.get()), _chunk_size };
     }
 
     template<class I = iterator>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> begin() const {
-        return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+        return { std::begin(_iterable.get()), std::begin(_iterable.get()), std::end(_iterable.get()), _chunk_size };
     }
 
     template<class I = iterator>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const {
-        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+        return { std::end(_iterable.get()), std::begin(_iterable.get()), std::end(_iterable.get()), _chunk_size };
     }
 
     template<class I = iterator>

@@ -36,8 +36,8 @@ add_executable(cpp-lazy-tests
 	common.cpp
 	# concatenate.cpp
 	cstring.cpp
-	# enumerate.cpp
-	# except.cpp
+	enumerate.cpp
+	except.cpp
 	# exclude.cpp
 	# exclusive_scan.cpp
 	# filter.cpp
@@ -53,7 +53,7 @@ add_executable(cpp-lazy-tests
 	# loop.cpp
 	map.cpp
 	# random.cpp
-	# range.cpp
+	range.cpp
 	# regex_split.cpp
 	# repeat.cpp
 	# rotate.cpp

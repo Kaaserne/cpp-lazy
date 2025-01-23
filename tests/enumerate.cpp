@@ -1,8 +1,11 @@
 #include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/take.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Enumerate with sentinels") {
     const char* str = "Hello";
@@ -13,6 +16,20 @@ TEST_CASE("Enumerate with sentinels") {
     auto taken = lz::take(enumerated, 3);
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
     REQUIRE(lz::equal(taken, expected));
+}
+
+TEST_CASE("Enumerate correct size()") {
+    std::list<int> list = { 1, 2, 3, 4, 5 };
+    auto enumerated = lz::enumerate(list);
+    REQUIRE(enumerated.size() == 5);
+    enumerated = lz::enumerate(list, 2);
+    REQUIRE(enumerated.size() == 5);
+    auto end = enumerated.end();
+    --end;
+    REQUIRE(end->first == 6);
+    --end, --end, --end, --end;
+    REQUIRE(end->first == 2);
+    REQUIRE(end->second == 1);
 }
 
 TEST_CASE("Enumerate changing and creating elements", "[Enumerate][Basic functionality]") {
@@ -125,7 +142,7 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
     std::vector<int> vec = { 1, 2, 3 };
 
     SECTION("To array") {
-        auto actual_array = lz::enumerate(array).to<std::array<std::pair<int, int>, size>>();
+        auto actual_array = lz::enumerate(array) | lz::to<std::array<std::pair<int, int>, size>>();
         auto expceted_pair = std::make_pair(0, 1);
 
         for (auto actual_pair : actual_array) {
@@ -135,17 +152,17 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
     }
 
     SECTION("To vector") {
-        std::vector<std::pair<int, int>> actual_array = lz::enumerate(vec).to_vector();
+        auto actual_vec = lz::enumerate(vec) | lz::to<std::vector>();
         auto expceted_pair = std::make_pair(0, 1);
 
-        for (const auto& actual_pair : actual_array) {
+        for (const auto& actual_pair : actual_vec) {
             REQUIRE(actual_pair == expceted_pair);
             expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
         }
     }
 
     SECTION("To other container using to<>()") {
-        auto actual_list = lz::enumerate(vec).to<std::list<std::pair<int, int>>>();
+        auto actual_list = lz::enumerate(vec) | lz::to<std::list>();
         auto expceted_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_list) {
@@ -156,8 +173,9 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
 
     SECTION("To map") {
         auto enumerator = lz::enumerate(array);
-        std::map<int, std::pair<int, int>> actual =
-            enumerator.to_map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); });
+        auto actual =
+            enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
+            lz::to<std::map<int, std::pair<int, int>>>();
 
         std::map<int, std::pair<int, int>> expected = {
             std::make_pair(1, std::make_pair(0, 1)),
@@ -170,8 +188,9 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
 
     SECTION("To unordered map") {
         auto enumerator = lz::enumerate(array);
-        std::unordered_map<int, std::pair<int, int>> actual =
-            enumerator.to_unordered_map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); });
+        auto actual =
+            enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
+            lz::to<std::unordered_map<int, std::pair<int, int>>>();
 
         std::unordered_map<int, std::pair<int, int>> expected = {
             std::make_pair(1, std::make_pair(0, 1)),

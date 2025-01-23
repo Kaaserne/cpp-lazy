@@ -1,14 +1,10 @@
 #include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/except.hpp>
+#include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <catch2/catch.hpp>
 #include <list>
-
-template<class Iterable>
-lz::iter_t<Iterable> cheese(Iterable&& it) {
-    return lz::detail::begin(it);
-}
 
 TEST_CASE("Except tests with sentinels") {
     const char* str = "Hello, World!";
@@ -17,7 +13,7 @@ TEST_CASE("Except tests with sentinels") {
     auto c_str_to_except = lz::c_string(to_except);
     auto except = lz::except(c_str, c_str_to_except);
     static_assert(!std::is_same<decltype(except.begin()), decltype(except.end())>::value, "Must be sentinel");
-    REQUIRE(except.to<std::string>() == "Hll, Wrld!");
+    REQUIRE((except | lz::to<std::string>()) == "Hll, Wrld!");
 }
 
 TEST_CASE("Empty or one element except") {
@@ -79,12 +75,12 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
         constexpr std::size_t s = 32;
         constexpr std::size_t es = 16;
 
-        std::array<int, s> large_arr = lz::range(static_cast<int>(s)).to<std::array<int, s>>();
-        std::array<int, es> to_large_except = lz::range(static_cast<int>(es)).to<std::array<int, es>>();
+        std::array<int, s> large_arr = lz::range(static_cast<int>(s)) | lz::to<std::array<int, s>>();
+        std::array<int, es> to_large_except = lz::range(static_cast<int>(es)) | lz::to<std::array<int, es>>();
 
         auto ex = lz::except(large_arr, to_large_except);
         auto current = 16;
-        ex.for_each([&current](int i) {
+        lz::for_each(ex, [&current](int i) {
             REQUIRE(i == current);
             ++current;
         });
@@ -103,7 +99,7 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
     SECTION("Excepted with >") {
         std::sort(to_except.begin(), to_except.end(), std::greater<int>());
         auto except_greater = lz::except(array, to_except, std::greater<int>());
-        REQUIRE(except_greater.to<std::array<int, 3>>() == std::array<int, 3>{ 1, 2, 4 });
+        REQUIRE((except_greater | lz::to<std::array<int, 3>>()) == std::array<int, 3>{ 1, 2, 4 });
     }
 }
 
@@ -135,22 +131,23 @@ TEST_CASE("Except to containers", "[Except][To container]") {
     auto except = lz::except(a, b);
 
     SECTION("To array") {
-        auto excepted = except.to<std::array<int, 2>>();
+        auto excepted = except | lz::to<std::array<int, 2>>();
         REQUIRE(excepted == std::array<int, 2>{ 2, 4 });
     }
 
     SECTION("To vector") {
-        auto excepted = except.to_vector();
+        auto excepted = except | lz::to<std::vector>();
         REQUIRE(excepted == std::vector<int>{ 2, 4 });
     }
 
     SECTION("To other container using to<>()") {
-        auto excepted = except.to<std::list<int>>();
+        auto excepted = except | lz::to<std::list>();
         REQUIRE(excepted == std::list<int>{ 2, 4 });
     }
 
     SECTION("To map") {
-        std::map<int, int> actual = except.to_map([](const int i) { return std::make_pair(i, i); });
+        auto actual = except | lz::map([](const int i) { return std::make_pair(i, i); }) |
+                      lz::to<std::map<int, int>>();
 
         std::map<int, int> expected = {
             std::make_pair(2, 2),
@@ -161,7 +158,8 @@ TEST_CASE("Except to containers", "[Except][To container]") {
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<int, int> actual = except.to_unordered_map([](const int i) { return std::make_pair(i, i); });
+        auto actual = except | lz::map([](const int i) { return std::make_pair(i, i); }) |
+                      lz::to<std::unordered_map<int, int>>();
 
         std::unordered_map<int, int> expected = {
             std::make_pair(2, 2),

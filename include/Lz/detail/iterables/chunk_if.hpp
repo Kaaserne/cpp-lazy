@@ -10,7 +10,7 @@ namespace detail {
 
 template<class ValueType, class Iterable, class UnaryPredicate>
 class chunk_if_iterable {
-    Iterable _iterable;
+    iterable_ref<Iterable> _iterable;
     UnaryPredicate _predicate;
 
 public:
@@ -18,27 +18,27 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    template<class I, class Up>
-    constexpr chunk_if_iterable(I&& iterable, Up&& predicate) :
-        _iterable{ std::forward<I>(iterable) },
-        _predicate{ std::forward<Up>(predicate) } {
+    template<class I>
+    constexpr chunk_if_iterable(I&& iterable, UnaryPredicate predicate) :
+        _iterable{ iterable },
+        _predicate{ std::move(predicate) } {
     }
 
     constexpr chunk_if_iterable() = default;
 
     iterator begin() && {
-        auto begin = std::move(_iterable).begin();
-        auto end = std::move(_iterable).end();
+        auto begin = std::move(_iterable.get()).begin();
+        auto end = std::move(_iterable.get()).end();
         const auto is_end = end == begin;
         return { begin, end, is_end };
     }
 
     iterator begin() const& {
-        const auto is_end = std::end(_iterable) == std::begin(_iterable);
-        return { std::begin(_iterable), std::end(_iterable), _predicate, is_end };
+        const auto is_end = std::end(_iterable.get()) == std::begin(_iterable.get());
+        return { std::begin(_iterable.get()), std::end(_iterable.get()), _predicate, is_end };
     }
 
-    constexpr default_sentinel end() const& {
+    constexpr default_sentinel end() const {
         return {};
     }
 };

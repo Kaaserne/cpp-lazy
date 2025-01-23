@@ -3,33 +3,12 @@
 #ifndef LZ_DROP_WHILE_HPP
 #define LZ_DROP_WHILE_HPP
 
-#include <Lz/basic_iterable.hpp>
-#include <Lz/detail/iterators/drop_while.hpp>
+#include <Lz/detail/adaptors/drop_while.hpp>
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-struct drop_while_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static drop_while_adaptor drop_while;
-#endif
-
-    using adaptor = drop_while_adaptor;
-
-    template<class Iterable, class UnaryPredicate>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::drop_while_iterable<Iterable, detail::decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& unaryPredicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unaryPredicate) };
-    }
-
-    template<class UnaryPredicate>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, detail::decay_t<UnaryPredicate>>
-    operator()(UnaryPredicate&& unaryPredicate) const {
-        return { std::forward<UnaryPredicate>(unaryPredicate) };
-    }
-};
-
 #ifdef LZ_HAS_CXX_11
 
 /**
@@ -44,13 +23,13 @@ struct drop_while_adaptor {
  * auto dropped = vec | lz::drop_while([](int i) { return i < 3; }); // dropped = { 3, 4, 5 }
  * ```
  */
-drop_while_adaptor drop_while_adaptor::drop_while{};
+detail::drop_while_adaptor detail::drop_while_adaptor::drop_while{};
 
 #else
 
 /**
  * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
- * true. Once it has returned false, it will no longer do such thing. The iterator category is the same as its input iterable. Its
+ * `true`. Once it has returned `false`, it will no longer do such thing. The iterator category is the same as its input iterable. Its
  * end() function will return the same type as its begin() function, regardless of the iterator category. If its input iterable is
  * random access, then this iterable will have a .size() method. Example:
  * ```cpp
@@ -60,7 +39,7 @@ drop_while_adaptor drop_while_adaptor::drop_while{};
  * auto dropped = vec | lz::drop_while([](int i) { return i < 3; }); // dropped = { 3, 4, 5 }
  * ```
  */
-LZ_INLINE_VAR constexpr drop_while_adaptor drop_while{};
+LZ_INLINE_VAR constexpr detail::drop_while_adaptor drop_while{};
 
 #endif
 

@@ -15,7 +15,7 @@ struct c_string_adaptor {
     using adaptor = c_string_adaptor;
 
     template<class C>
-    LZ_NODISCARD constexpr c_string_iterable<detail::decay_t<C>> operator()(C&& str) const noexcept {
+    LZ_NODISCARD constexpr c_string_iterable<decay_t<C>> operator()(C&& str) const noexcept {
         return { std::forward<C>(str) };
     }
 };
