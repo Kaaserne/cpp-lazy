@@ -22,7 +22,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto res = vec | lz::drop(2); // res = {3, 4, 5}
  * ```
  */
-detail::drop_adaptor detail::drop_adaptor::drop{};
+detail::drop_adaptor drop{};
 
 #else
 

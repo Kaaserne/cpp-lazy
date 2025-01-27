@@ -26,7 +26,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * }
  * ```
  */
-detail::chunk_if_adaptor<void> detail::chunk_if_adaptor<void>::chunk_if{};
+detail::chunk_if_adaptor<void> chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator

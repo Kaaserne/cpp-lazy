@@ -10,10 +10,6 @@
 namespace lz {
 namespace detail {
 struct except_adaptor {
-#ifndef LZ_HAS_CXX_11
-    static except_adaptor except;
-#endif
-
     using adaptor = except_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable1, LZ_CONCEPT_ITERABLE Iterable2, 

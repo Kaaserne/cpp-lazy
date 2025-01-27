@@ -9,10 +9,6 @@
 namespace lz {
 namespace detail {
 struct common_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static common_adaptor common;
-#endif
-
     using adaptor = common_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable>

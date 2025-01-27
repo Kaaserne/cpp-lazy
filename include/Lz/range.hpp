@@ -11,7 +11,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
 
-detail::range_adaptor detail::range_adaptor::range{};
+detail::range_adaptor range{};
 
 #else
 

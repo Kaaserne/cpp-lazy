@@ -12,10 +12,6 @@ namespace lz {
 namespace detail {
 template<class ValueType>
 struct chunk_if_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static chunk_if_adaptor<ValueType> chunk_if;
-#endif
-
     using adaptor = chunk_if_adaptor<ValueType>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
@@ -32,10 +28,6 @@ struct chunk_if_adaptor {
 
 template<>
 struct chunk_if_adaptor<void> {
-#ifdef LZ_HAS_CXX_11
-    static chunk_if_adaptor<void> chunk_if;
-#endif
-
     using adaptor = chunk_if_adaptor<void>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>

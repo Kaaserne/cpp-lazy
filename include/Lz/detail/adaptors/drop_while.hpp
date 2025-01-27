@@ -9,10 +9,6 @@
 namespace lz {
 namespace detail {
 struct drop_while_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static drop_while_adaptor drop_while;
-#endif
-
     using adaptor = drop_while_adaptor;
 
     template<class Iterable, class UnaryPredicate>

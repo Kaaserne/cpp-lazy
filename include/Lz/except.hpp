@@ -12,7 +12,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
 
-detail::except_adaptor  detail::except_adaptor::except{};
+detail::except_adaptor except{};
 
 #else
 

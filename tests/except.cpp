@@ -5,6 +5,9 @@
 #include <Lz/range.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <array>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Except tests with sentinels") {
     const char* str = "Hello, World!";
@@ -88,7 +91,7 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
     }
 
     SECTION("Excepts elements") {
-        REQUIRE(except.to_vector() == std::vector<int>{ 1, 2, 4 });
+        REQUIRE((except | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 4 });
     }
 
     SECTION("Is by reference") {

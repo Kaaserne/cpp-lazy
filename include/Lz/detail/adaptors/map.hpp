@@ -8,11 +8,7 @@
 
 namespace lz {
 namespace detail {
-    struct map_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static map_adaptor map;
-#endif
-
+struct map_adaptor {
     using adaptor = map_adaptor;
 
     template<class Iterable, class Function>

@@ -22,7 +22,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
  * ```
  */
-detail::map_adaptor detail::map_adaptor::map{};
+detail::map_adaptor map{};
 
 #else
 

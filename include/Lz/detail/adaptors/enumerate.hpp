@@ -9,10 +9,6 @@
 namespace lz {
 namespace detail {
 struct enumerate_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static enumerate_adaptor enumerate;
-#endif
-
     using adaptor = enumerate_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class IntType = int>

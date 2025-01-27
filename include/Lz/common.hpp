@@ -32,7 +32,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @param iterable The iterable to create a common view from.
  * @return A common view object. Can be used in <algorithm> functions.
  */
-detail::common_adaptor detail::common_adaptor::common{};
+detail::common_adaptor common{};
 
 #else
 

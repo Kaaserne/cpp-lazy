@@ -3,27 +3,9 @@
 #ifndef LZ_TAKE_HPP
 #define LZ_TAKE_HPP
 
-#include <Lz/basic_iterable.hpp>
-#include <Lz/detail/iterators/take.hpp>
+#include <Lz/detail/adaptors/take.hpp>
 
 namespace lz {
-struct take_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static take_adaptor take;
-#endif
-
-    using adaptor = take_adaptor;
-
-    template<class Iterable>
-    constexpr detail::take_iterable<Iterable> operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
-        return { std::forward<Iterable>(iterable), n };
-    }
-
-    template<class DiffT>
-    constexpr detail::fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
-        return { n };
-    }
-};
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
@@ -39,7 +21,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto res = vec | lz::take(2); // res = {1, 2}
  * ```
  */
-take_adaptor take_adaptor::take{};
+detail::take_adaptor take{};
 
 #else
 
@@ -54,7 +36,7 @@ take_adaptor take_adaptor::take{};
  * auto res = vec | lz::take(2); // res = {1, 2}
  * ```
  */
-LZ_INLINE_VAR constexpr take_adaptor take{};
+LZ_INLINE_VAR constexpr detail::take_adaptor take{};
 
 #endif
 

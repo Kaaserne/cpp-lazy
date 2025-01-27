@@ -23,7 +23,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto dropped = vec | lz::drop_while([](int i) { return i < 3; }); // dropped = { 3, 4, 5 }
  * ```
  */
-detail::drop_while_adaptor detail::drop_while_adaptor::drop_while{};
+detail::drop_while_adaptor drop_while{};
 
 #else
 

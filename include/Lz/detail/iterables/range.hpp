@@ -6,6 +6,8 @@
 #include <Lz/detail/iterators/range.hpp>
 #include <Lz/detail/concepts.hpp>
 
+namespace lz {
+namespace detail {
 template<LZ_CONCEPT_ARITHMETIC Arithmetic>
 class range_iterable {
     Arithmetic _start;
@@ -34,5 +36,6 @@ public:
 
     constexpr range_iterable() = default;
 };
-
+} // namespace detail
+} // namespace lz
 #endif // LZ_RANGE_ITERABLE_HPP

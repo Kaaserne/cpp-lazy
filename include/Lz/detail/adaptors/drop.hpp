@@ -10,10 +10,6 @@
 namespace lz {
 namespace detail {
 struct drop_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static drop_adaptor drop;
-#endif
-
     using adaptor = drop_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable>

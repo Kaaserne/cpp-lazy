@@ -10,10 +10,6 @@ namespace lz {
 namespace detail {
 
 struct chunks_adaptor {
-#ifdef LZ_HAS_CXX_11
-    static chunks_adaptor chunks;
-#endif
-
     using adaptor = chunks_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable>
