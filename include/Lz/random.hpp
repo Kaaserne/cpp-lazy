@@ -8,7 +8,6 @@
 #include <random>
 
 namespace lz {
-namespace detail {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
@@ -16,16 +15,15 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 detail::random_adaptor<false> random;
 
-detail::random_adaptor<true> random_with_sentinel;
+detail::random_adaptor<true> common_random;
 
 #else
 
-LZ_INLINE_VAR constexpr detail::random_adaptor<false> random{};
+LZ_INLINE_VAR constexpr detail::random_adaptor<true> random{};
 
-LZ_INLINE_VAR constexpr detail::random_adaptor<true> random_with_sentinel{};
+LZ_INLINE_VAR constexpr detail::random_adaptor<false> common_random{};
 
 #endif
-} // namespace detail
 } // namespace lz
 
 LZ_MODULE_EXPORT_SCOPE_END

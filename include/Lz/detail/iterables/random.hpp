@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef LZ_RANDOM_HPP
-#define LZ_RANDOM_HPP
+#ifndef LZ_RANDOM_ITERABLE_HPP
+#define LZ_RANDOM_ITERABLE_HPP
 
 #include <Lz/detail/iterators/random.hpp>
 
@@ -14,7 +14,7 @@ class random_iterable {
     std::ptrdiff_t _current;
 
 public:
-    using iterator = random_iterator<Arithmetic, Distribution, Generator>;
+    using iterator = random_iterator<Arithmetic, Distribution, Generator, UseSentinel>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -48,4 +48,4 @@ public:
 } // namespace lz
 
 
-#endif
+#endif // LZ_RANDOM_ITERABLE_HPP

@@ -1,24 +1,30 @@
 #include <Lz/random.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("random_iterable should be random", "[random_iterable][Basic functionality]") {
     constexpr std::size_t size = 5;
 
     SECTION("random_iterable doubles") {
-        const auto random_array = lz::random<long double>(0., 1., size).to<std::array<long double, size>>();
-        auto randomArray2 = lz::random<long double>(0., 1., size).to<std::array<long double, size>>();
+        constexpr long double start = 0;
+        constexpr long double end = 1;
+        const auto random_array = lz::random(start, end, size) | lz::to<std::array<long double, size>>();
+        REQUIRE(random_array.size() == size);
+        auto randomArray2 = lz::random(start, end, size) | lz::to<std::array<long double, size>>();
         while (random_array == randomArray2) {
-            randomArray2 = lz::random<long double>(0., 1., size).to<std::array<long double, size>>();
+            randomArray2 = lz::random(start, end, size) | lz::to<std::array<long double, size>>();
         }
         REQUIRE(random_array != randomArray2);
     }
 
     SECTION("random_iterable ints") {
         const auto random_array =
-            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size).to<std::array<int, size>>();
+            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
         const auto randomArray2 =
-            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size).to<std::array<int, size>>();
+            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
         REQUIRE(random_array != randomArray2);
     }
 }
@@ -31,10 +37,10 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
     static_assert(!std::is_same<decltype(r.begin()), decltype(r.end())>::value, "Should not be the same");
     REQUIRE(lz::distance(r.begin(), r.end()) == 3);
 
-    const auto current_rand = r.next_random();
-    auto next_rand = r.next_random();
+    const auto current_rand = *r.begin();
+    auto next_rand = *r.begin();
     while (current_rand == next_rand) {
-        next_rand = r.next_random();
+        next_rand = *r.begin();
     }
     REQUIRE(current_rand != next_rand);
 }
@@ -55,20 +61,71 @@ TEST_CASE("Empty or one element random") {
 
 TEST_CASE("random_iterable binary operations", "[random_iterable][Binary ops]") {
     constexpr std::ptrdiff_t size = 5;
-    auto random = lz::random(0., 1., size);
-    auto it = random.begin();
+    auto random = lz::common_random(0., 1., size);
+    static_assert(std::is_same<decltype(random.begin()), decltype(random.end())>::value, "Should be the same");
 
     SECTION("Operator++") {
+        auto it = random.begin();
         ++it;
         REQUIRE(lz::distance(it, random.end()) == 4);
     }
 
     SECTION("Operator== & Operator!=") {
+        auto it = random.begin();
         REQUIRE(it != random.end());
         while (it != random.end()) {
             ++it;
         }
         REQUIRE(it == random.end());
+    }
+
+    SECTION("Operator*") {
+        auto it = random.begin();
+        REQUIRE(*it >= 0.);
+        REQUIRE(*it <= 1.);
+    }
+
+    SECTION("Operator[]") {
+        auto it = random.begin();
+        REQUIRE(it[0] <= 1.);
+        REQUIRE(it[0] >= 0.);
+    }
+
+    SECTION("Operator+(int)") {
+        auto it = random.begin();
+        REQUIRE(*(it + 1) >= 0.);
+        REQUIRE(*(it + 1) <= 1.);
+    }
+
+    SECTION("Operator-(int)") {
+        auto it = random.begin();
+        it += 3;
+        REQUIRE((random.end() - 2) == it);
+    }
+
+    SECTION("Operator-(Iterator)") {
+        auto it = random.begin();
+        REQUIRE(it - random.begin() == 0);
+        REQUIRE(random.end() - it == 5);
+    }
+
+    SECTION("Operator+=(int)") {
+        auto it = random.begin();
+        it += 1;
+        REQUIRE(it == random.begin() + 1);
+    }
+
+    SECTION("Operator-=(int)") {
+        auto it = random.begin() + 1;
+        it -= 1;
+        REQUIRE(it == random.begin());
+    }
+
+    SECTION("Operator<, <, >=, <=") {
+        REQUIRE(random.begin() < random.end());
+        REQUIRE(random.begin() <= random.end());
+        REQUIRE(random.end() > random.begin());
+        REQUIRE(random.end() >= random.begin());
     }
 }
 
@@ -77,25 +134,25 @@ TEST_CASE("random_iterable to containers", "[random_iterable][To container]") {
     auto range = lz::random(0., 1., size);
 
     SECTION("To array") {
-        REQUIRE(range.to<std::array<double, size>>().size() == size);
+        REQUIRE((range | lz::to<std::array<double, size>>()).size() == size);
         REQUIRE(lz::all_of(range, [](double val) { return val >= 0. && val <= 1.; }));
     }
 
     SECTION("To vector") {
-        REQUIRE(range.to_vector().size() == size);
+        REQUIRE((range | lz::to<std::vector>()).size() == size);
     }
 
     SECTION("To other container using to<>()") {
-        REQUIRE(range.to<std::list<double>>().size() == size);
+        REQUIRE((range | lz::to<std::list>()).size() == size);
     }
 
     SECTION("To map") {
-        std::map<double, double> actual = range.to_map([](const double i) { return std::make_pair(i, i); });
+        auto actual = range | lz::map([](const double i) { return std::make_pair(i, i); }) | lz::to<std::map<double, double>>();
         REQUIRE(actual.size() == size);
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<double, double> actual = range.to_unordered_map([](const double i) { return std::make_pair(i, i); });
+        auto actual = range | lz::map([](const double i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<double, double>>();
         REQUIRE(actual.size() == size);
     }
 }

@@ -9,10 +9,11 @@
 
 namespace lz {
 namespace detail {
-template<class Arithmetic, class Distribution, class Generator>
+template<class Arithmetic, class Distribution, class Generator, bool UseSentinel>
 class random_iterator
-    : public iter_base<random_iterator<Arithmetic, Distribution, Generator>, Arithmetic, fake_ptr_proxy<Arithmetic>,
-                       std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+    : public iter_base<random_iterator<Arithmetic, Distribution, Generator, UseSentinel>, Arithmetic, fake_ptr_proxy<Arithmetic>,
+                       std::ptrdiff_t, conditional<UseSentinel, std::forward_iterator_tag, std::random_access_iterator_tag>,
+                       conditional<UseSentinel, default_sentinel, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
 public:
     using value_type = Arithmetic;
     using difference_type = std::ptrdiff_t;
@@ -63,7 +64,7 @@ public:
     }
 
     constexpr difference_type difference(const random_iterator& b) const noexcept {
-        return _current - b._current;
+        return b._current - _current;
     }
 
     constexpr bool eq(const random_iterator& b) const noexcept {

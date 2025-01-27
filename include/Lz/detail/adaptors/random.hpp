@@ -113,15 +113,15 @@ public:
 
 inline std::mt19937 create_mt_engine() {
     std::random_device rd;
-    seed_sequence<8> seed_seq{rd};
-    return std::mt19937{seed_seq};
+    seed_sequence<8> seed_seq(rd);
+    return std::mt19937(seed_seq);
 }
 
 template<bool UseSentinel>
 struct random_adaptor {
     using adaptor = random_adaptor<UseSentinel>;
 
-    template<class Generator, class Distribution>
+    template<class Distribution, class Generator>
     LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator, UseSentinel>
     operator()(const Distribution& distribution, Generator& generator, const std::size_t amount) const {
         return { distribution, generator, static_cast<std::ptrdiff_t>(amount) };
@@ -139,7 +139,7 @@ struct random_adaptor {
     template<class Floating>
     LZ_NODISCARD
     enable_if<std::is_floating_point<Floating>::value, random_iterable<Floating, std::uniform_real_distribution<Floating>, std::mt19937, UseSentinel>>
-    random(const Floating min, const Floating max, const std::size_t amount = (std::numeric_limits<std::size_t>::max)()) {
+    operator()(const Floating min, const Floating max, const std::size_t amount) const {
         static std::mt19937 gen = create_mt_engine();
         std::uniform_real_distribution<Floating> dist(min, max);
         return (*this)(dist, gen, amount);
