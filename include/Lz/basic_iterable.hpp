@@ -4,11 +4,11 @@
 #define LZ_BASIC_ITERATOR_VIEW_HPP
 
 #include <Lz/algorithm.hpp>
+#include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/string_view.hpp>
 #include <array>
 
 #if defined(LZ_STANDALONE)

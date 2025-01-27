@@ -4,6 +4,7 @@
 #define LZ_CHUNK_IF_HPP
 
 #include <Lz/detail/adaptors/chunk_if.hpp>
+#include <Lz/string_view.hpp>
 
 namespace lz {
 
