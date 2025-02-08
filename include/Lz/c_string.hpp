@@ -3,6 +3,7 @@
 #ifndef LZ_C_STRING_HPP
 #define LZ_C_STRING_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/c_string.hpp>
 
 namespace lz {
@@ -21,7 +22,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto cstr = "Hello" | lz::c_string;
  * ```
  */
-detail::c_string_adaptor c_string{};
+static const detail::c_string_adaptor c_string{};
 
 #else
 

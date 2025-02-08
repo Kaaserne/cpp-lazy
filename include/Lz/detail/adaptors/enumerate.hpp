@@ -18,7 +18,7 @@ struct enumerate_adaptor {
     }
 
     template<class IntType = int>
-    LZ_NODISCARD constexpr enable_if<std::is_arithmetic<IntType>::value, fn_args_holder<adaptor, IntType>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_arithmetic<IntType>::value, fn_args_holder<adaptor, IntType>>
     operator()(const IntType start = 0) const {
         return { start };
     }

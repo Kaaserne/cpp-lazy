@@ -16,6 +16,9 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
+template<class Iterator, class S>
+LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance(Iterator begin, S end);
+
 /**
  * This value is returned when index_of(_if) does not find the value specified.
  */
@@ -363,6 +366,7 @@ LZ_CONSTEXPR_CXX_17 Iterator lower_bound(Iterator begin, S end, const T& value, 
 
 template<class Iterator, class S, class T, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_17 Iterator upper_bound(Iterator begin, S end, const T& value, BinaryPredicate binary_predicate) {
+    using std::lower_bound;
     return lower_bound(std::move(begin), std::move(end), value,
                        [&binary_predicate](ref_t<Iterator> v1, const T& v2) { return !binary_predicate(v2, v1); });
 }

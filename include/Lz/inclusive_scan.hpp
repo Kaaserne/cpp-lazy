@@ -1,76 +1,73 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_INCLUSIVE_SCAN_HPP
-// #define LZ_INCLUSIVE_SCAN_HPP
+#ifndef LZ_INCLUSIVE_SCAN_HPP
+#define LZ_INCLUSIVE_SCAN_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/inclusive_scan.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/inclusive_scan.hpp>
 
-// namespace lz {
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+namespace lz {
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<class Iterator, class S, class T, class BinaryOp>
-// class inclusive_scan_iterable final
-//     : public detail::basic_iterable<detail::inclusive_scan_iterator<Iterator, S, T, BinaryOp>, default_sentinel> {
-// public:
-//     using iterator = detail::inclusive_scan_iterator<Iterator, S, T, BinaryOp>;
-//     using const_iterator = iterator;
+#ifdef LZ_HAS_CXX_11
 
-//     constexpr inclusive_scan_iterable() = default;
+/**
+ * @brief Performs an inclusive scan on a container. The first element will be the result of the binary operation with init value
+ * and the first element of the input iterable. The second element will be the previous result + the next value of the input
+ * iterable, the third element will be previous result + the next value of the input iterable, etc. It contains a .size() method
+ * if the input iterable also has a .size() method. Its end() function returns a sentinel rather than an iterator. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * // std::plus is used as the default binary operation
+ * auto scan = lz::inclusive_scan(vec, 0); // scan = { 1, 3, 6, 10, 15 }
+ * // so 0 + 1 (= 1), 1 + 2 (= 3), 3 + 3 (= 6), 6 + 4 (= 10), 10 + 5 (= 15)
+ *
+ * // or
+ * auto scan = vec | lz::inclusive_scan(0); // scan = { 1, 3, 6, 10, 15 }
+ * // you can also add a custom operator:
+ * auto scan = vec | lz::inclusive_scan(0, std::plus<int>{}); // scan = { 1, 3, 6, 10, 15 }
+ * // When working with pipe expressions, you always need to specify the init value. When working with 'regular' functions, you
+ * // can omit the init value, in which case it will be a default constructed object of the type of the container.
+ * // Example
+ * auto scan = lz::inclusive_scan(vec); // OK
+ * auto scan = lz::inclusive_scan(vec, 0); // OK
+ * // auto scan = vec | lz::inclusive_scan; // Error, unable to determine the type of the init value
+ * auto scan = vec | lz::inclusive_scan(0); // OK
+ * ```
+ */
+static const detail::inclusive_scan_adaptor inclusive_scan{};
 
-//     constexpr inclusive_scan_iterable(Iterator begin, S end, T init, BinaryOp binary_op) :
-//         detail::basic_iterable<iterator, default_sentinel>(
-//             iterator(std::move(begin), std::move(end), std::move(init), std::move(binary_op))) {
-//     }
-// };
+#else
 
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
+/**
+ * @brief Performs an inclusive scan on a container. The first element will be the result of the binary operation with init value
+ * and the first element of the input iterable. The second element will be the previous result + the next value of the input
+ * iterable, the third element will be previous result + the next value of the input iterable, etc. It contains a .size() method
+ * if the input iterable also has a .size() method. Its end() function returns a sentinel rather than an iterator. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * // std::plus is used as the default binary operation
+ * auto scan = lz::inclusive_scan(vec, 0); // scan = { 1, 3, 6, 10, 15 }
+ * // so 0 + 1 (= 1), 1 + 2 (= 3), 3 + 3 (= 6), 6 + 4 (= 10), 10 + 5 (= 15)
+ *
+ * // or
+ * auto scan = vec | lz::inclusive_scan(0); // scan = { 1, 3, 6, 10, 15 }
+ * // you can also add a custom operator:
+ * auto scan = vec | lz::inclusive_scan(0, std::plus<int>{}); // scan = { 1, 3, 6, 10, 15 }
+ * // When working with pipe expressions, you always need to specify the init value. When working with 'regular' functions, you
+ * // can omit the init value, in which case it will be a default constructed object of the type of the container.
+ * // Example
+ * auto scan = lz::inclusive_scan(vec); // OK
+ * auto scan = lz::inclusive_scan(vec, 0); // OK
+ * // auto scan = vec | lz::inclusive_scan; // Error, unable to determine the type of the init value
+ * auto scan = vec | lz::inclusive_scan(0); // OK
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::inclusive_scan_adaptor inclusive_scan{};
 
-// /**
-//  * Returns an inclusive scan iterator. This iterator begins by returning `*std::begin(iterable)`. It then
-//  * proceeds to the next one, which is essentially the previously calculated value (calculated by `binary_op(std::move(current),
-//  * *it)`
-//  * + the current iterator element being handled. Example:
-//  * @example
-//  * ```cpp
-//  * int array[] = {3, 5, 2, 3, 4, 2, 3};
-//  * // start the scan from 3
-//  * auto scan = lz::inclusive_scan(array);
-//  *
-//  * for (const int& i : scan) {
-//  *     fmt::print("{} ", i);
-//  * }
-//  * // prints 3 8 10 13 17 19 22
-//  * ```
-//  *
-//  * @param iterable The iterable to perform the inclusive scan over
-//  * @param init The value to start with
-//  * @param binary_op The fold function. Essentially, it is executed as (`init = binary_op(std::move(init), *iterator);`)
-//  * @return An inclusive scan view object.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable, class T = val_iterable_t<Iterable>,
-//          class BinaryOp = MAKE_BIN_PRED(std::plus, val_iterable_t<Iterable>)>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 inclusive_scan_iterable<iter_t<Iterable>, sentinel_t<Iterable>, T, BinaryOp>
-// inclusive_scan(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) {
-//     if (lz::empty(iterable)) {
-//         return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(),
-//         std::move(init),
-//                  std::move(binary_op) };
-//     }
-//     auto begin = std::forward<Iterable>(iterable).begin());
-//     auto tmp = binary_op(std::move(init), *begin);
-//     return { std::move(begin), std::forward<Iterable>(iterable).end(), std::move(tmp), std::move(binary_op) };
-// }
+#endif
 
-// // End of group
-// /**
-//  * @}
-//  */
+LZ_MODULE_EXPORT_SCOPE_END
+} // namespace lz
 
-// LZ_MODULE_EXPORT_SCOPE_END
-// } // namespace lz
-
-// #endif
+#endif

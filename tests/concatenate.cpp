@@ -1,7 +1,10 @@
 #include <Lz/c_string.hpp>
 #include <Lz/concatenate.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Concatenate with sentinels") {
     const char* str = "hello, world!";
@@ -11,14 +14,18 @@ TEST_CASE("Concatenate with sentinels") {
     static_assert(std::is_same<lz::default_sentinel, decltype(concat.end())>::value, "Sentinel type should be default_sentinel");
     std::vector<char> expected = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!',
                                    'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
-    REQUIRE(lz::equal(concat, expected));
+    auto actual = concat | lz::to<std::vector<char>>();
+    auto tmp = concat | lz::map([](const char c) { return std::string{ c }; });
+    (void)tmp;
+    REQUIRE(lz::equal(actual, expected));
 }
 
 TEST_CASE("Concat changing and creating elements", "[Concat][Basic functionality]") {
     std::string a = "hello ";
     std::string b = "world";
 
-    auto concat = lz::concat(a, b);
+    auto concat = a | lz::concat(b);
+    CHECK(concat.size() == a.size() + b.size());
     static_assert(std::is_same<decltype(concat.begin()), decltype(concat.end())>::value, "Should not be sentinel");
 
     SECTION("Should be by reference") {
@@ -28,7 +35,7 @@ TEST_CASE("Concat changing and creating elements", "[Concat][Basic functionality
 
     SECTION("Should concat") {
         constexpr const char* expected = "hello world";
-        REQUIRE(concat.to<std::string>() == expected);
+        REQUIRE((concat | lz::to<std::string>()) == expected);
     }
 
     SECTION("Length should be correct") {
@@ -50,6 +57,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a;
         std::string b;
         auto concat = lz::concat(a, b);
+        CHECK(concat.size() == 0);
         REQUIRE(lz::empty(concat));
         REQUIRE(!lz::has_one(concat));
         REQUIRE(!lz::has_many(concat));
@@ -59,6 +67,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a = "h";
         std::string b;
         auto concat = lz::concat(a, b);
+        CHECK(concat.size() == 1);
         REQUIRE(!lz::empty(concat));
         REQUIRE(lz::has_one(concat));
         REQUIRE(!lz::has_many(concat));
@@ -68,6 +77,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a;
         std::string b = "w";
         auto concat = lz::concat(a, b);
+        CHECK(concat.size() == 1);
         REQUIRE(!lz::empty(concat));
         REQUIRE(lz::has_one(concat));
         REQUIRE(!lz::has_many(concat));
@@ -77,6 +87,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a = "h";
         std::string b = "w";
         auto concat = lz::concat(a, b);
+        CHECK(concat.size() == 2);
         REQUIRE(!lz::empty(concat));
         REQUIRE(!lz::has_one(concat));
         REQUIRE(lz::has_many(concat));
@@ -86,6 +97,7 @@ TEST_CASE("Empty or one element concatenate") {
 TEST_CASE("Concat binary operations", "[Concat][Binary ops]") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);
+    CHECK(concat.size() == a.size() + b.size());
     auto begin = concat.begin();
 
     REQUIRE(*begin == 'h');
@@ -151,26 +163,26 @@ TEST_CASE("Concatenate to containers", "[Concatenate][To container]") {
 
     SECTION("To array") {
         constexpr std::size_t size = 3 + 3;
-        REQUIRE(concat.to<std::array<int, size>>() == std::array<int, size>{ 1, 2, 3, 4, 5, 6 });
+        REQUIRE((concat | lz::to<std::array<int, size>>()) == std::array<int, size>{ 1, 2, 3, 4, 5, 6 });
     }
 
     SECTION("To vector") {
-        REQUIRE(concat.to_vector() == std::vector<int>{ 1, 2, 3, 4, 5, 6 });
+        REQUIRE((concat | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4, 5, 6 });
     }
 
     SECTION("To other container using to<>()") {
-        REQUIRE(concat.to<std::list<int>>() == std::list<int>{ 1, 2, 3, 4, 5, 6 });
+        REQUIRE((concat | lz::to<std::list<int>>()) == std::list<int>{ 1, 2, 3, 4, 5, 6 });
     }
 
     SECTION("To map") {
-        std::map<int, int> map = concat.to_map([](const int i) { return std::make_pair(i, i); });
+        auto map = concat | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         std::map<int, int> expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3),
                                         std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6) };
         REQUIRE(map == expected);
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<int, int> map = concat.to_unordered_map([](const int i) { return std::make_pair(i, i); });
+        auto map = concat | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         std::unordered_map<int, int> expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3),
                                                   std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6) };
         REQUIRE(map == expected);

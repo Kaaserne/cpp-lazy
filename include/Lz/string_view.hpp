@@ -12,10 +12,6 @@
 #include <ostream>
 #endif
 
-#if !defined(LZ_HAS_STRING_VIEW) && !defined(LZ_STANDALONE)
-#include <fmt/core.h>
-#endif
-
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN

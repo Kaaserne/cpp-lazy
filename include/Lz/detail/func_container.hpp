@@ -3,15 +3,17 @@
 #ifndef LZ_FUNCTION_CONTAINER_HPP
 #define LZ_FUNCTION_CONTAINER_HPP
 
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/Traits.hpp>
 #include <type_traits>
-
 
 namespace lz {
 namespace detail {
+template<class>
+struct always_false : std::false_type {};
+
 template<class Func>
 class func_container {
-    Func _func;
+    mutable Func _func;
     bool _is_constructed{ false };
 
     constexpr explicit func_container(std::false_type /* is_default_constructible */) {
@@ -19,7 +21,7 @@ class func_container {
                                                  "lambda's are not default constructible pre C++20");
     }
 
-    constexpr explicit func_container(std::true_type /* is_default_constructible */) : _func{}, _is_constructed(true) {
+    constexpr explicit func_container(std::true_type /* is_default_constructible */) : _func{}, _is_constructed{ true } {
     }
 
     template<class F>
@@ -57,7 +59,9 @@ class func_container {
             construct(std::move(f));
         }
     }
+
 #else
+
     template<class F = Func>
     LZ_CONSTEXPR_CXX_20 enable_if<std::is_copy_assignable<F>::value> copy(const Func& f) {
         _func = f;
@@ -79,6 +83,7 @@ class func_container {
         reset();
         construct(std::move(f));
     }
+
 #endif
 
 public:
@@ -88,7 +93,7 @@ public:
     constexpr explicit func_container(Func&& func) noexcept : _func{ std::move(func) }, _is_constructed{ true } {
     }
 
-    constexpr func_container() : func_container(std::is_default_constructible<Func>()) {
+    constexpr func_container() : func_container(std::is_default_constructible<Func>{}) {
     }
 
     LZ_CONSTEXPR_CXX_14 func_container(func_container&& other) noexcept :
@@ -127,20 +132,16 @@ public:
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 decltype(std::declval<Func>()(std::forward<Args>(std::declval<Args>())...))
-    operator()(Args&&... args) const {
+    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) const -> decltype(_func(std::forward<Args>(args)...)) {
         return _func(std::forward<Args>(args)...);
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 decltype(std::declval<Func>()(std::forward<Args>(std::declval<Args>())...)) operator()(Args&&... args) {
+    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) -> decltype(_func(std::forward<Args>(args)...)) {
         return _func(std::forward<Args>(args)...);
     }
 };
-
-template<class Func, class... Iterators>
-using func_container_ret_type = func_ret_type<func_container<Func>, decltype(*std::declval<Iterators>())...>;
-
 } // namespace detail
 } // namespace lz
+
 #endif // LZ_FUNCTION_CONTAINER_HPP

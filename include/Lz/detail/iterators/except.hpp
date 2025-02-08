@@ -3,10 +3,9 @@
 #ifndef LZ_EXCEPT_ITERATOR_HPP
 #define LZ_EXCEPT_ITERATOR_HPP
 
-#include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/detail/func_container.hpp>
-#include <Lz/iterator_base.hpp>
 #include <Lz/algorithm.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -24,11 +23,11 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator;
-    IteratorToExcept _to_except_begin;
-    S2 _to_except_end;
-    S _end;
-    mutable func_container<BinaryPredicate> _predicate;
+    Iterator _iterator{};
+    IteratorToExcept _to_except_begin{};
+    S2 _to_except_end{};
+    S _end{};
+    mutable BinaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::binary_search;

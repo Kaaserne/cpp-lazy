@@ -1,6 +1,9 @@
 #include <Lz/generate_while.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Generate while changing and creating elements", "[Generate while][Basic functionality]") {
     const auto compile_test1 = lz::generate_while([]() { return std::make_pair(false, false); });
@@ -23,7 +26,7 @@ TEST_CASE("Generate while changing and creating elements", "[Generate while][Bas
             return std::make_pair(copy != 4, copy);
         });
         std::array<int, 4> expected = { 0, 1, 2, 3 };
-        auto actual = generator.to<std::array<int, expected.size()>>();
+        auto actual = generator | lz::to<std::array<int, expected.size()>>();
         REQUIRE(expected == actual);
         i = 0;
     }
@@ -95,7 +98,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
             return std::make_pair(copy != 4, copy);
         });
         std::array<int, 4> expected = { 0, 1, 2, 3 };
-        auto actual = generator.to<std::array<int, 4>>();
+        auto actual = generator | lz::to<std::array<int, 4>>();
         REQUIRE(expected == actual);
     }
 
@@ -106,7 +109,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
             return std::make_pair(copy != 4, copy);
         });
         std::vector<int> expected = { 0, 1, 2, 3 };
-        auto actual = generator.to_vector();
+        auto actual = generator | lz::to<std::vector>();
         REQUIRE(expected == actual);
     }
 
@@ -117,7 +120,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
             return std::make_pair(copy != 4, copy);
         });
         std::list<int> expected = { 0, 1, 2, 3 };
-        auto actual = generator.to<std::list<int>>();
+        auto actual = generator | lz::to<std::list<int>>();
         REQUIRE(expected == actual);
     }
 
@@ -128,7 +131,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
             return std::make_pair(copy != 4, copy);
         });
         std::map<int, int> expected = { { 0, 0 }, { 1, 1 }, { 2, 2}, { 3, 3 }};
-        auto actual = generator.to_map([](int x) { return std::make_pair(x, x); });
+        auto actual = generator | lz::map([](int x) { return std::make_pair(x, x); }) | lz::to<std::map<int, int>>();
         REQUIRE(actual == expected);
     }
 
@@ -139,7 +142,7 @@ TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
             return std::make_pair(copy != 4, copy);
         });
         std::unordered_map<int, int> expected = { { 0, 0 }, { 1, 1 }, { 2, 2}, { 3, 3 }};
-        auto actual = generator.to_unordered_map([](int x) { return std::make_pair(x, x); });
+        auto actual = generator | lz::map([](int x) { return std::make_pair(x, x); }) | lz::to<std::unordered_map<int, int>>();
         REQUIRE(actual == expected);
     }
 }

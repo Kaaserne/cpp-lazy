@@ -1,6 +1,5 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
-#include <Lz/iterable.hpp>
 #include <catch2/catch.hpp>
 
 TEST_CASE("Empty") {

@@ -1,11 +1,12 @@
+#include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/except.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
+#include <array>
 #include <catch2/catch.hpp>
 #include <list>
-#include <array>
 #include <map>
 #include <unordered_map>
 
@@ -70,7 +71,7 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
     std::vector<int> array{ 1, 2, 3, 4, 5 };
     std::vector<int> to_except{ 3, 5 };
 
-    auto except = lz::except(array, to_except);
+    auto except = array | lz::except(to_except);
     auto it = except.begin();
     REQUIRE(*it == 1);
 
@@ -78,8 +79,8 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
         constexpr std::size_t s = 32;
         constexpr std::size_t es = 16;
 
-        std::array<int, s> large_arr = lz::range(static_cast<int>(s)) | lz::to<std::array<int, s>>();
-        std::array<int, es> to_large_except = lz::range(static_cast<int>(es)) | lz::to<std::array<int, es>>();
+        auto large_arr = lz::range(static_cast<int>(s)) | lz::to<std::array<int, s>>();
+        auto to_large_except = lz::range(static_cast<int>(es)) | lz::to<std::array<int, es>>();
 
         auto ex = lz::except(large_arr, to_large_except);
         auto current = 16;

@@ -16,13 +16,13 @@ template<class Iterator, class S, class UnaryPredicate, class = void>
 class take_while_iterator;
 
 template<class Iterator, class S, class UnaryPredicate>
-class take_while_iterator<Iterator, S, UnaryPredicate, std::enable_if_t<!is_bidi<Iterator>::value>>
+class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<is_sentinel<Iterator, S>::value>>
     : public iter_base<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                        diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
-    common_iterator<Iterator, S> _iterator;
-    S _end;
-    func_container<UnaryPredicate> _unary_predicate;
+    common_iterator<Iterator, S> _iterator{};
+    S _end{};
+    UnaryPredicate _unary_predicate{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -70,14 +70,14 @@ public:
 };
 
 template<class Iterator, class S, class UnaryPredicate>
-class take_while_iterator<Iterator, S, UnaryPredicate, std::enable_if_t<is_bidi<Iterator>::value>>
+class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<!is_sentinel<Iterator, S>::value>>
     : public iter_base<take_while_iterator<Iterator, Iterator, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                        diff_type<Iterator>, std::bidirectional_iterator_tag> {
 
-    Iterator _begin;
-    Iterator _iterator;
-    Iterator _end;
-    func_container<UnaryPredicate> _unary_predicate;
+    Iterator _begin{};
+    Iterator _iterator{};
+    Iterator _end{};
+    UnaryPredicate _unary_predicate{};
 
     using traits = std::iterator_traits<Iterator>;
 

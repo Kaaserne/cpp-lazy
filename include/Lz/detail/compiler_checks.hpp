@@ -89,8 +89,10 @@
 #define LZ_CONSTEXPR_IF
 #endif // __cpp_if_constexpr
 
-#if defined(LZ_STANDALONE) && defined(__cpp_lib_to_chars) && LZ_HAS_INCLUDE(<charconv>)
-#define LZ_USE_CHARCONV
+#if defined(__cpp_lib_to_chars) && LZ_HAS_INCLUDE(<charconv>) && (defined(LZ_HAS_CXX_17))
+#define LZ_HAS_CHARCONV (true)
+#else
+#define LZ_HAS_CHARCONV (false)
 #endif
 
 #ifndef LZ_MODULE_EXPORT

@@ -12,7 +12,7 @@ struct common_adaptor {
     using adaptor = common_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 common_iterable<Iterable> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr common_iterable<Iterable> operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
         return { std::forward<Iterable>(iterable) };
     }

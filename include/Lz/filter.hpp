@@ -1,74 +1,49 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_FILTER_HPP
-// #define LZ_FILTER_HPP
+#ifndef LZ_FILTER_HPP
+#define LZ_FILTER_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/filter.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/filter.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<LZ_CONCEPT_ITERATOR Iterator, class S, class UnaryPredicate>
-// class filter_iterable final
-//     : public detail::basic_iterable<detail::filter_iterator<Iterator, S, UnaryPredicate>,
-//                                     typename detail::filter_iterator<Iterator, S, UnaryPredicate>::sentinel> {
-// public:
-//     using iterator = detail::filter_iterator<Iterator, S, UnaryPredicate>;
-//     using const_iterator = iterator;
-//     using value_type = typename iterator::value_type;
+#ifdef LZ_HAS_CXX_11
 
-// private:
-//     using s = typename detail::filter_iterator<Iterator, S, UnaryPredicate>::sentinel;
+/**
+ * @brief Drops elements based on a condition predicate. If it returns `false`, the element in question is dropped. If it returns
+ * `true` then this item is will be yielded. If the input iterable is forward an end() sentinel is returned, otherwise the end()
+ * iterator is the same as the begin() iterator. It does not contain a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto filtered = lz::filter(vec, [](int i) { return i % 2 == 0; }); // { 2, 4 }
+ * // or
+ * auto filtered = vec | lz::filter([](int i) { return i % 2 == 0; }); // { 2, 4 }
+ * ```
+ */
+static const detail::filter_adaptor filter{};
 
-//     LZ_CONSTEXPR_CXX_14 filter_iterable(Iterator begin, S end, UnaryPredicate function, std::forward_iterator_tag /* unused */)
-//     :
-//         detail::basic_iterable<iterator, s>(iterator(begin, begin, end, function)) {
-//     }
+#else
 
-//     LZ_CONSTEXPR_CXX_14
-//     filter_iterable(Iterator begin, Iterator end, UnaryPredicate function, std::bidirectional_iterator_tag /* unused */) :
-//         detail::basic_iterable<iterator, iterator>(iterator(begin, begin, end, function), iterator(end, begin, end, function))
-//         {
-//     }
+/**
+ * @brief Drops elements based on a condition predicate. If it returns `false`, the element in question is dropped. If it returns
+ * `true` then this item is will be yielded. If the input iterable is forward an end() sentinel is returned, otherwise the end()
+ * iterator is the same as the begin() iterator. It does not contain a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto filtered = lz::filter(vec, [](int i) { return i % 2 == 0; }); // { 2, 4 }
+ * // or
+ * auto filtered = vec | lz::filter([](int i) { return i % 2 == 0; }); // { 2, 4 }
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::filter_adaptor filter{};
 
-// public:
-//     LZ_CONSTEXPR_CXX_14 filter_iterable(Iterator begin, S end, UnaryPredicate function) :
-//         filter_iterable(std::move(begin), std::move(end), std::move(function), iter_cat_t<Iterator>{}) {
-//     }
+#endif
 
-//     constexpr filter_iterable() = default;
-// };
+LZ_MODULE_EXPORT_SCOPE_END
 
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
+} // namespace lz
 
-// /**
-//  * Returns a forward filter iterator. If the `predicate` returns false, the value it is excluded.
-//  * I.e. `lz::filter({1, 2, 3, 4, 5}, [](int i){ return i % 2 == 0; });` will eventually remove all
-//  * elements that are not even.
-//  * @param iterable An iterable, e.g. a container / object with `begin()` and `end()` methods.
-//  * @param predicate A function that must return a bool, and needs a value type of the container as parameter.
-//  * @return A filter iterator that can be converted to an arbitrary container or can be iterated
-//  * over using `for (auto... lz::filter(...))`.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 filter_iterable<iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>
-// filter(Iterable&& iterable, UnaryPredicate predicate) {
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(),
-//              std::move(predicate) };
-// }
-
-// // End of group
-// /**
-//  * @}
-//  */
-
-// LZ_MODULE_EXPORT_SCOPE_END
-
-// } // namespace lz
-
-// #endif // end LZ_FILTER_HPP
+#endif // end LZ_FILTER_HPP

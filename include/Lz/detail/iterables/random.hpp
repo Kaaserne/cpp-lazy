@@ -8,7 +8,7 @@
 namespace lz {
 namespace detail {
 template<class Arithmetic, class Distribution, class Generator, bool UseSentinel>
-class random_iterable {
+class random_iterable : public lazy_view {
     Distribution _distribution;
     Generator* _generator{ nullptr };
     std::ptrdiff_t _current;

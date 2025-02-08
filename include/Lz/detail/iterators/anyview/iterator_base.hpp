@@ -28,7 +28,7 @@ struct iterator_base<Reference, std::forward_iterator_tag, DiffType> {
 
     virtual bool eq(const iterator_base& other) const = 0;
 
-    virtual std::shared_ptr<iterator_base> clone() const = 0;
+    virtual std::unique_ptr<iterator_base> clone() const = 0;
 };
 
 template<class Reference, class DiffType>
@@ -47,7 +47,7 @@ struct iterator_base<Reference, std::bidirectional_iterator_tag, DiffType> {
 
     virtual bool eq(const iterator_base& other) const = 0;
 
-    virtual std::shared_ptr<iterator_base> clone() const = 0;
+    virtual std::unique_ptr<iterator_base> clone() const = 0;
 };
 
 template<class Reference, class DiffType>
@@ -72,7 +72,7 @@ struct iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
     virtual bool lt(const iterator_base& other) const = 0;
 
-    virtual std::shared_ptr<iterator_base> clone() const = 0;
+    virtual std::unique_ptr<iterator_base> clone() const = 0;
 };
 } // namespace detail
 } // namespace lz

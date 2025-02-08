@@ -1,7 +1,10 @@
 #include <Lz/c_string.hpp>
 #include <Lz/join_where.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 struct customer {
     int id;
@@ -25,7 +28,7 @@ TEST_CASE("Join where with sentinels") {
         std::make_tuple('o', 'o'),
         std::make_tuple('o', 'o'),
     };
-    auto vec = joined.to_vector();
+    auto vec = joined | lz::to<std::vector>();
     REQUIRE(vec == expected);
 }
 
@@ -104,9 +107,10 @@ TEST_CASE("Left join binary operations", "[join_where_iterable][Binary ops]") {
         payment_bill{ 99, 1 }, payment_bill{ 2523, 52 }, payment_bill{ 2523, 53 },
     };
 
-    auto joined = lz::join_where(
-        customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
-        [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
+    auto joined = customers |
+                  lz::join_where(
+                      payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
+                      [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
     auto it = joined.begin();
 
     SECTION("Operator++") {
@@ -147,7 +151,7 @@ TEST_CASE("join_where_iterable to containers", "[join_where_iterable][To contain
                                                                        std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
                                                                        std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
 
-        auto array = joined.to<std::array<std::tuple<customer, payment_bill>, 4>>();
+        auto array = joined | lz::to<std::array<std::tuple<customer, payment_bill>, 4>>();
         REQUIRE(std::equal(array.begin(), array.end(), expected.begin(),
                            [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
                                auto& a_fst = std::get<0>(a);
@@ -164,7 +168,7 @@ TEST_CASE("join_where_iterable to containers", "[join_where_iterable][To contain
                                                                      std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
                                                                      std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
 
-        auto vec = joined.to_vector();
+        auto vec = joined | lz::to<std::vector>();
         REQUIRE(std::equal(vec.begin(), vec.end(), expected.begin(),
                            [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
                                auto& a_fst = std::get<0>(a);
@@ -181,7 +185,7 @@ TEST_CASE("join_where_iterable to containers", "[join_where_iterable][To contain
                                                                    std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
                                                                    std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
 
-        auto list = joined.to<std::list<std::tuple<customer, payment_bill>>>();
+        auto list = joined | lz::to<std::list>();
         REQUIRE(std::equal(list.begin(), list.end(), expected.begin(),
                            [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
                                auto& a_fst = std::get<0>(a);
@@ -202,8 +206,10 @@ TEST_CASE("join_where_iterable to containers", "[join_where_iterable][To contain
             { 1, std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) }
         };
 
-        decltype(expected) actual =
-            joined.to_map([](const std::tuple<customer, payment_bill>& val) { return std::make_pair(std::get<1>(val).id, val); });
+        auto actual = joined | lz::map([](const std::tuple<customer, payment_bill>& val) {
+                          return std::make_pair(std::get<1>(val).id, val);
+                      }) |
+                      lz::to<std::map<int, std::tuple<customer, payment_bill>>>();
 
         REQUIRE(std::equal(expected.begin(), expected.end(), actual.begin(), [](const pair& a, const pair& b) {
             return a.first == b.first && std::get<1>(a.second).id == std::get<1>(b.second).id &&
@@ -221,8 +227,10 @@ TEST_CASE("join_where_iterable to containers", "[join_where_iterable][To contain
             { 1, std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) }
         };
 
-        decltype(expected) actual = joined.to_unordered_map(
-            [](const std::tuple<customer, payment_bill>& val) { return std::make_pair(std::get<1>(val).id, val); });
+        auto actual = joined | lz::map([](const std::tuple<customer, payment_bill>& val) {
+                          return std::make_pair(std::get<1>(val).id, val);
+                      }) |
+                      lz::to<std::unordered_map<int, std::tuple<customer, payment_bill>>>();
 
         REQUIRE(std::equal(expected.begin(), expected.end(), actual.begin(), [](const pair& a, const pair& b) {
             return a.first == b.first && std::get<1>(a.second).id == std::get<1>(b.second).id &&

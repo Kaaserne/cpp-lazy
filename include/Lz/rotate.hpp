@@ -1,59 +1,77 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_ROTATE_HPP
-// #define LZ_ROTATE_HPP
+#ifndef LZ_ROTATE_HPP
+#define LZ_ROTATE_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/rotate.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/rotate.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<class Iterator, class S>
-// class rotate_iterable final : public detail::basic_iterable<detail::rotate_iterator<Iterator, S>,
-//                                                             typename detail::rotate_iterator<Iterator, S>::sentinel> {
+#ifdef LZ_HAS_CXX_11
 
-// public:
-//     using iterator = detail::rotate_iterator<Iterator, S>;
-//     using const_iterator = iterator;
+/**
+ * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
+ * Its iterator category is the same as the input iterable if it has a .size() method. If the input iterable does not have a
+ * .size() method, it will return the end type of its input iterable, rather than a rotate_iterator. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto rotated = lz::rotate(vec, 2); // rotated = { 3, 4, 5, 1, 2 }
+ *
+ * // or
+ * auto rotated = vec | lz::rotate(2); // rotated = { 3, 4, 5, 1, 2 }
+ * // or, in case input iterable does not have .size() method:
+ *
+ * auto str = lz::c_string("Hello, World!");
+ * auto rotated = lz::rotate(str, 7); // rotated = "World!Hello, "
+ * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str does not have a .size() method
+ *
+ * // Invalid: filter decays into a forward iterator because it doesn't have a .size() method
+ * // auto rotated =
+ *         vec | lz::filter([](int i) { return i % 2 == 0; }) | lz::rotate(2) | lz::reverse; // Error, rotated is forward
+ *
+ * // Instead, do (first rotate, then filter, instead of filter then rotate):
+ * auto rotated = vec | lz::rotate(2) | lz::filter([](int i) { return i % 2 == 0; }) | lz::reverse | lz::to<std::vector>();
+ * // rotated = { 2, 4 }
+ * ```
+ */
+static const detail::rotate_adaptor rotate{};
 
-// private:
-//     LZ_CONSTEXPR_CXX_14 rotate_iterable(Iterator begin, S end, Iterator start, std::bidirectional_iterator_tag) :
-//         detail::basic_iterable<iterator>(iterator(begin, end, start, false), iterator(begin, end, start, true)) {
-//     }
+#else
 
-//     LZ_CONSTEXPR_CXX_14 rotate_iterable(Iterator begin, S end, Iterator start, std::forward_iterator_tag) :
-//         detail::basic_iterable<iterator, Iterator>(iterator(std::move(begin), std::move(end), start, false), start) {
-//     }
+/**
+ * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
+ * Its iterator category is the same as the input iterable if it has a .size() method. If the input iterable does not have a
+ * .size() method, it will return the end type of its input iterable, rather than a rotate_iterator. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto rotated = lz::rotate(vec, 2); // rotated = { 3, 4, 5, 1, 2 }
+ *
+ * // or
+ * auto rotated = vec | lz::rotate(2); // rotated = { 3, 4, 5, 1, 2 }
+ * // or, in case input iterable does not have .size() method:
+ *
+ * auto str = lz::c_string("Hello, World!");
+ * auto rotated = lz::rotate(str, 7); // rotated = "World!Hello, "
+ * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str does not have a .size() method
+ *
+ * // Invalid: filter decays into a forward iterator because it doesn't have a .size() method
+ * // auto rotated =
+ *         vec | lz::filter([](int i) { return i % 2 == 0; }) | lz::rotate(2) | lz::reverse; // Error, rotated is forward
+ *
+ * // Instead, do (first rotate, then filter, instead of filter then rotate):
+ * auto rotated = vec | lz::rotate(2) | lz::filter([](int i) { return i % 2 == 0; }) | lz::reverse | lz::to<std::vector>();
+ * // rotated = { 2, 4 }
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::rotate_adaptor rotate{};
 
-// public:
-//     LZ_CONSTEXPR_CXX_14 rotate_iterable(Iterator begin, S end, Iterator start) :
-//         rotate_iterable(std::move(begin), std::move(end), std::move(start), iter_cat_t<Iterator>{}) {
-//     }
+#endif
 
-//     constexpr rotate_iterable() = default;
-// };
+LZ_MODULE_EXPORT_SCOPE_END
 
-// /**
-//  * @brief Rotates a range. Starts at `start`, `begin` must denote the begin of the sequence, `end` the end of the sequence.
-//  * @details It ratates a range, meaning:
-//  * auto range = {1, 2, 3, 4, 5};
-//  * auto rotated = lz::rotate(range.begin() + 2, range.begin(), range.end()); // -> {3, 4, 5, 1, 2}
-//  * @param start The start of the range to start the rotation (essentialy begin + some value)
-//  * @param begin The beginning of the range (container.begin())
-//  * @param end The ending of the range (container.end())
-//  * @return rotate_iterable object, which is a range of [start, start)
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERATOR Iterator>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 rotate_iterable<Iterator, sentinel_t<Iterable>> rotate(Iterable&& iterable, Iterator start) {
-//     static_assert(std::is_same<Iterator, decltype(std::begin(iterable))>::value, "Iterators must be the same type");
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(), std::move(start)
-//     };
-// }
+} // namespace lz
 
-// LZ_MODULE_EXPORT_SCOPE_END
-
-// } // namespace lz
-
-// #endif // LZ_ROTATE_HPP
+#endif // LZ_ROTATE_HPP

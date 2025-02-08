@@ -3,6 +3,7 @@
 #ifndef LZ_CHUNKS_HPP
 #define LZ_CHUNKS_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/chunks.hpp>
 
 namespace lz {
@@ -25,7 +26,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
  * ```
  */
-detail::chunks_adaptor chunks;
+static const detail::chunks_adaptor chunks;
 
 #else
 

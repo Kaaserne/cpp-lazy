@@ -34,7 +34,7 @@ namespace lz {
  * @tparam DiffType The difference_type. It is used for the return type of iterator - iterator
  */
 template<class T, class Reference = T&, class IterCat = std::forward_iterator_tag, class DiffType = std::ptrdiff_t>
-class any_iterable {
+class any_iterable : public lazy_view {
 private:
     using it = detail::iterator_wrapper<T, Reference, IterCat, DiffType>;
 
@@ -43,6 +43,7 @@ private:
 
     it _begin;
     it _end;
+    // TODO: add .size() methods
 
 public:
     any_iterable() = default;
@@ -54,8 +55,24 @@ public:
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     any_iterable(Iterable&& iterable) :
-        _begin(std::make_shared<any_iter_impl<Iterable>>(std::forward<Iterable>(iterable).begin()))),
-        _end(std::make_shared<any_iter_impl<Iterable>>(std::forward<Iterable>(iterable).end())) {
+        _begin{ std::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
+        _end{ std::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    }
+
+    LZ_NODISCARD it begin() const& {
+        return _begin;
+    }
+
+    LZ_NODISCARD it end() const& {
+        return _end;
+    }
+
+    LZ_NODISCARD it begin() && {
+        return std::move(_begin);
+    }
+
+    LZ_NODISCARD it end() && {
+        return std::move(_end);
     }
 };
 

@@ -1,65 +1,63 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_INCLUSIVE_SCAN_ITERATOR_HPP
-// #define LZ_INCLUSIVE_SCAN_ITERATOR_HPP
+#ifndef LZ_INCLUSIVE_SCAN_ITERATOR_HPP
+#define LZ_INCLUSIVE_SCAN_ITERATOR_HPP
 
-// #include <Lz/detail/fake_ptr_proxy.hpp>
-// #include <Lz/detail/func_container.hpp>
-// #include <Lz/iterator_base.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
 
-// namespace lz {
-// namespace detail {
-// template<class Iterator, class S, class T, class BinaryOp>
-// class inclusive_scan_iterator : public iter_base<inclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
-//                                                  diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+namespace lz {
+namespace detail {
+template<class Iterator, class S, class T, class BinaryOp>
+class inclusive_scan_iterator : public iter_base<inclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
+                                                 diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+    Iterator _iterator{};
+    mutable T _reducer{};
+    S _end{};
+    BinaryOp _binary_op{};
 
-//     mutable T _reducer;
-//     Iterator _iterator;
-//     S _end;
-//     func_container<BinaryOp> _binary_op;
+    using traits = std::iterator_traits<Iterator>;
 
-//     using traits = std::iterator_traits<Iterator>;
+public:
+    using reference = T&;
+    using value_type = T;
+    using pointer = fake_ptr_proxy<reference>;
+    using difference_type = typename traits::difference_type;
+    using iterator_category = std::forward_iterator_tag;
 
-// public:
-//     using reference = T&;
-//     using value_type = T;
-//     using pointer = fake_ptr_proxy<reference>;
-//     using difference_type = typename traits::difference_type;
-//     using iterator_category = std::forward_iterator_tag;
+    constexpr inclusive_scan_iterator() = default;
 
-//     constexpr inclusive_scan_iterator() = default;
+    constexpr inclusive_scan_iterator(Iterator iterator, S end, T init, BinaryOp bin_op) :
+        _iterator{ std::move(iterator) },
+        _reducer{ std::move(init) },
+        _end{ std::move(end) },
+        _binary_op{ std::move(bin_op) } {
+    }
 
-//     constexpr inclusive_scan_iterator(Iterator iterator, S end, T init, BinaryOp bin_op) :
-//         _reducer(std::move(init)),
-//         _iterator(std::move(iterator)),
-//         _end(std::move(end)),
-//         _binary_op(std::move(bin_op)) {
-//     }
+    constexpr reference dereference() const {
+        return _reducer;
+    }
 
-//     constexpr reference dereference() const {
-//         return _reducer;
-//     }
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_iterator;
+        if (_iterator != _end) {
+            _reducer = _binary_op(std::move(_reducer), *_iterator);
+        }
+    }
 
-//     LZ_CONSTEXPR_CXX_14 void increment() {
-//         ++_iterator;
-//         if (_iterator != _end) {
-//             _reducer = _binary_op(std::move(_reducer), *_iterator);
-//         }
-//     }
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
 
-//     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
-//         return fake_ptr_proxy<decltype(**this)>(**this);
-//     }
+    constexpr bool eq(const inclusive_scan_iterator& b) const {
+        return _iterator == b._iterator;
+    }
 
-//     constexpr bool eq(const inclusive_scan_iterator& b) const {
-//         return _iterator == b._iterator;
-//     }
+    constexpr bool eq(default_sentinel) const {
+        return _iterator == _end;
+    }
+};
+} // namespace detail
+} // namespace lz
 
-//     constexpr bool eq(default_sentinel) const {
-//         return _iterator == _end;
-//     }
-// };
-// } // namespace detail
-// } // namespace lz
-
-// #endif
+#endif

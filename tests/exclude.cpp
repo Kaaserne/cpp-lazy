@@ -1,13 +1,15 @@
-#include <Lz/exclude.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/exclude.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
-
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");
     auto excluded = lz::exclude(cstr, 3, 5);
-    REQUIRE(excluded.to_string() == "a sing to exclude");
+    REQUIRE((excluded | lz::to<std::string>()) == "a sing to exclude");
 }
 
 TEST_CASE("Exclude changing and creating elements", "[Exclude][Basic functionality]") {
@@ -33,7 +35,7 @@ TEST_CASE("Exclude changing and creating elements", "[Exclude][Basic functionali
 TEST_CASE("Exclude binary operations", "[Exclude][Binary ops]") {
     std::array<int, 10> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-    auto excluded1 = lz::exclude(arr, 3, 5);
+    auto excluded1 = arr | lz::exclude(3, 5);
     auto exBeg1 = excluded1.begin();
     auto exEnd1 = excluded1.end();
 
@@ -117,38 +119,45 @@ TEST_CASE("Exclude to containers", "[Exclude][To container]") {
     auto excluded3 = lz::exclude(arr, 7, 10);
 
     SECTION("To array") {
-        REQUIRE(excluded1.to<std::array<int, 8>>() == std::array<int, 8>{ 1, 2, 3, 6, 7, 8, 9, 10 });
-        REQUIRE(excluded2.to<std::array<int, 8>>() == std::array<int, 8>{ 3, 4, 5, 6, 7, 8, 9, 10 });
-        REQUIRE(excluded3.to<std::array<int, 7>>() == std::array<int, 7>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE((excluded1 | lz::to<std::array<int, 8>>()) == std::array<int, 8>{ 1, 2, 3, 6, 7, 8, 9, 10 });
+        REQUIRE((excluded2 | lz::to<std::array<int, 8>>()) == std::array<int, 8>{ 3, 4, 5, 6, 7, 8, 9, 10 });
+        REQUIRE((excluded3 | lz::to<std::array<int, 7>>()) == std::array<int, 7>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
     SECTION("To vector") {
-        REQUIRE(excluded1.to_vector() == std::vector<int>{ 1, 2, 3, 6, 7, 8, 9, 10 });
-        REQUIRE(excluded2.to_vector() == std::vector<int>{ 3, 4, 5, 6, 7, 8, 9, 10 });
-        REQUIRE(excluded3.to_vector() == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE((excluded1 | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 6, 7, 8, 9, 10 });
+        REQUIRE((excluded2 | lz::to<std::vector>()) == std::vector<int>{ 3, 4, 5, 6, 7, 8, 9, 10 });
+        REQUIRE((excluded3 | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
     SECTION("To other container using to<>()") {
-        REQUIRE(excluded1.to<std::list<int>>() == std::list<int>{ 1, 2, 3, 6, 7, 8, 9, 10 });
-        REQUIRE(excluded2.to<std::list<int>>() == std::list<int>{ 3, 4, 5, 6, 7, 8, 9, 10 });
-        REQUIRE(excluded3.to<std::list<int>>() == std::list<int>{ 1, 2, 3, 4, 5, 6, 7 });
+        REQUIRE((excluded1 | lz::to<std::list>()) == std::list<int>{ 1, 2, 3, 6, 7, 8, 9, 10 });
+        REQUIRE((excluded2 | lz::to<std::list>()) == std::list<int>{ 3, 4, 5, 6, 7, 8, 9, 10 });
+        REQUIRE((excluded3 | lz::to<std::list>()) == std::list<int>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
     SECTION("To map") {
-        REQUIRE(excluded1.to_map([](int i) { return std::make_pair(i, i); }) ==
+        REQUIRE((excluded1 | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>()) ==
                 std::map<int, int>{ { 1, 1 }, { 2, 2 }, { 3, 3 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } });
-        REQUIRE(excluded2.to_map([](int i) { return std::make_pair(i, i); }) ==
+
+        REQUIRE((excluded2 | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>()) ==
                 std::map<int, int>{ { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } });
-        REQUIRE(excluded3.to_map([](int i) { return std::make_pair(i, i); }) ==
+
+        REQUIRE((excluded3 | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>()) ==
                 std::map<int, int>{ { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 } });
     }
 
     SECTION("To unordered map") {
-        REQUIRE(excluded1.to_unordered_map([](int i) { return std::make_pair(i, i); }) ==
+        REQUIRE((excluded1 | lz::map([](int i) {
+            return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>()) ==
                 std::unordered_map<int, int>{ { 1, 1 }, { 2, 2 }, { 3, 3 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } });
-        REQUIRE(excluded2.to_unordered_map([](int i) { return std::make_pair(i, i); }) ==
+
+        REQUIRE((excluded2 | lz::map([](int i) {
+            return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>()) ==
                 std::unordered_map<int, int>{ { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 } });
-        REQUIRE(excluded3.to_unordered_map([](int i) { return std::make_pair(i, i); }) ==
+
+        REQUIRE((excluded3 | lz::map([](int i) {
+            return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>()) ==
                 std::unordered_map<int, int>{ { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 7, 7 } });
     }
 }

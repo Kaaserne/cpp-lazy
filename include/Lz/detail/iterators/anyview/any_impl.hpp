@@ -15,7 +15,7 @@ template<class Iter, class S, class T, class Reference, class DiffType>
 class any_iterator_impl<Iter, S, T, Reference, std::forward_iterator_tag, DiffType> final
     : public iterator_base<Reference, std::forward_iterator_tag, DiffType> {
 
-    common_iterator<Iter, S> _iter;
+    common_iterator<Iter, S> _iter{};
 
     static_assert(std::is_same<Reference, decltype(*_iter)>::value,
                   "The iterator operator* returns a different type than template parameter `Reference`. Try adding/removing "
@@ -32,13 +32,13 @@ public:
 
     constexpr any_iterator_impl() = default;
 
-    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
-    constexpr any_iterator_impl(S s) : _iter(std::move(s)) {
+    constexpr any_iterator_impl(S s) : _iter{ std::move(s) } {
     }
 
-    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 
     ~any_iterator_impl() override = default;
@@ -63,8 +63,8 @@ public:
         return _iter == static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::shared_ptr<any_iter_base> clone() const override {
-        return std::make_shared<any_iterator_impl>(_iter);
+    std::unique_ptr<any_iter_base> clone() const override {
+        return std::make_unique<any_iterator_impl>(_iter);
     }
 };
 
@@ -114,8 +114,8 @@ public:
         return _iter == static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::shared_ptr<any_iter_base> clone() const override {
-        return std::make_shared<any_iterator_impl>(_iter);
+    std::unique_ptr<any_iter_base> clone() const override {
+        return std::make_unique<any_iterator_impl>(_iter);
     }
 };
 
@@ -167,8 +167,8 @@ public:
         return _iter == static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::shared_ptr<any_iter_base> clone() const override {
-        return std::make_shared<any_iterator_impl>(_iter);
+    std::unique_ptr<any_iter_base> clone() const override {
+        return std::make_unique<any_iterator_impl>(_iter);
     }
 };
 
@@ -191,7 +191,7 @@ public:
 
     constexpr any_iterator_impl() = default;
 
-    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
     ~any_iterator_impl() override = default;
@@ -224,7 +224,7 @@ public:
         _iter += n;
     }
 
-    virtual DiffType minus(const any_iter_base& other) const override {
+    DiffType minus(const any_iter_base& other) const override {
         return _iter - static_cast<const any_iterator_impl&>(other)._iter;
     }
 
@@ -232,8 +232,8 @@ public:
         return _iter < static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::shared_ptr<any_iter_base> clone() const override {
-        return std::make_shared<any_iterator_impl>(_iter);
+    std::unique_ptr<any_iter_base> clone() const override {
+        return std::make_unique<any_iterator_impl>(_iter);
     }
 };
 } // namespace detail

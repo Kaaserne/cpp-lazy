@@ -4,7 +4,6 @@
 #define LZ_DETAIL_PROCS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/func_container.hpp>
 #include <Lz/detail/traits.hpp>
 #include <cstddef>
 #include <iterator>
@@ -15,10 +14,6 @@
 #include <exception>
 #endif // NDEBUG
 
-#if defined(LZ_STANDALONE) && (!defined(LZ_HAS_FORMAT)) && defined(__cpp_lib_to_chars)
-#include <charconv>
-#endif
-
 #if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
 #include <stacktrace>
 #endif
@@ -26,10 +21,6 @@
 #include <exception>
 
 namespace lz {
-
-template<class Iter, class S>
-constexpr diff_type<Iter> distance(Iter first, S last);
-
 namespace detail {
 
 [[noreturn]] inline void assertion_fail(const char* file, const int line, const char* func, const char* message) {
@@ -47,33 +38,27 @@ namespace detail {
 #define LZ_ASSERT(CONDITION, MSG) ((CONDITION) ? ((void)0) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG)))
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).begin()) {
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
     return std::forward<Iterable>(c).begin();
 }
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).end()) {
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
     return std::forward<Iterable>(c).end();
 }
 
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto begin(T (&array)[N]) noexcept -> decltype(std::begin(array)) {
-    return std::begin(array);
+template<class Iterable>
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(c))> {
+    return std::begin(c);
 }
 
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto end(T (&array)[N]) noexcept -> decltype(std::end(array)) {
-    return std::end(array);
-}
-
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto begin(const T (&array)[N]) noexcept -> decltype(std::begin(array)) {
-    return std::begin(array);
-}
-
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::end(array)) {
-    return std::end(array);
+template<class Iterable>
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(c))> {
+    return std::end(c);
 }
 
 template<class IterableTuple, std::size_t... I>
@@ -91,7 +76,7 @@ LZ_CONSTEXPR_CXX_14 auto end_tuple(IterableTuple&& iterable_tuple, std::index_se
 template<class Fn>
 struct tuple_expand {
 private:
-    func_container<Fn> _fn;
+    Fn _fn;
 
 public:
     constexpr tuple_expand() = default;
@@ -160,87 +145,29 @@ LZ_CONSTEXPR_CXX_14 Result round_even(const Arithmetic a, const Arithmetic b) no
     }
     return static_cast<Result>(a / b) + 1;
 }
-
-template<class Iter, class S>
-LZ_CONSTEXPR_CXX_14 diff_type<Iter> size_hint(Iter begin, S end) {
-    if LZ_CONSTEXPR_IF (is_ra<Iter>::value) {
-        return lz::distance(std::move(begin), std::move(end));
-    }
-    else {
-        return 0;
-    }
-}
-
-#if defined(LZ_STANDALONE) && (!defined(LZ_HAS_FORMAT))
-template<class T>
-struct safe_buffer_size : std::integral_constant<std::size_t, std::numeric_limits<T>::digits10 + 3> {};
-
-template<>
-struct safe_buffer_size<bool> : std::integral_constant<std::size_t, sizeof("false") + 1> {};
-
-inline void to_string_from_buff(const char value, char buff[safe_buffer_size<char>::value]) {
-    buff[0] = value;
-    std::fill(buff + 1, buff + safe_buffer_size<char>::value, '\0');
-}
-
-inline void to_string_from_buff(const bool value, char buff[safe_buffer_size<bool>::value]) {
-    std::snprintf(buff, safe_buffer_size<bool>::value, "%s", value ? "true" : "false");
-}
-
-#if !defined(__cpp_lib_to_chars)
-template<class TCast, class T>
-void to_string_from_buff(const T value, char buff[safe_buffer_size<T>::value], const char* fmt) {
-    std::snprintf(buff, safe_buffer_size<T>::value, fmt, static_cast<TCast>(value));
-}
-#endif // !defined(__cpp_lib_to_chars)
-
-#ifdef __cpp_lib_to_chars
-template<class T>
-void to_string_from_buff(const T value, char buff[safe_buffer_size<T>::value]) {
-    std::to_chars(buff, buff + safe_buffer_size<T>::value, value);
-}
-#elif defined(__cpp_if_constexpr)
-template<class T>
-void to_string_from_buff(const T value, char buff[safe_buffer_size<T>::value]) {
-    if constexpr (std::is_integral<T>::value) {
-        if constexpr (std::is_signed<T>::value) {
-            to_string_from_buff<long long>(value, buff, "%lld");
-        }
-        else {
-            to_string_from_buff<unsigned long long>(value, buff, "%llu");
-        }
-        return;
-    }
-    else if constexpr (std::is_floating_point<T>::value) {
-        to_string_from_buff<long double>(value, buff, "%Lf");
-    }
-}
-#else
-template<class T>
-enable_if<std::is_integral<T>::value && std::is_signed<T>::value>
-to_string_from_buff(const T value, char buff[safe_buffer_size<T>::value]) {
-    to_string_from_buff<long long>(value, buff, "%lld");
-}
-
-template<class T>
-enable_if<std::is_integral<T>::value && !std::is_signed<T>::value>
-to_string_from_buff(const T value, char buff[safe_buffer_size<T>::value]) {
-    to_string_from_buff<unsigned long long>(value, buff, "%llu");
-}
-
-template<class T>
-enable_if<std::is_floating_point<T>::value> to_string_from_buff(const T value, char buff[safe_buffer_size<T>::value]) {
-    to_string_from_buff<long double>(value, buff, "%Lf");
-}
-#endif
-#endif // if defined(LZ_STANDALONE) && (!defined(LZ_HAS_FORMAT))
 } // namespace detail
-} // namespace lz
 
-template<class Iterable, class Adaptor>
-LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
-    -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value, decltype(adaptor(std::forward<Iterable>(iterable)))> {
-    return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
+#ifdef LZ_HAS_CXX_17
+
+template<class Iterable>
+LZ_NODISCARD constexpr auto size(Iterable&& c) noexcept(noexcept(std::size(c))) {
+    static_assert(detail::sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+    return std::size(c);
 }
 
+#else
+
+template<class Iterable>
+LZ_NODISCARD constexpr auto size(const Iterable& c) noexcept(noexcept(c.size())) -> decltype(c.size()) {
+    static_assert(detail::sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+    return c.size();
+}
+
+template<class T, size_t N>
+LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
+    return N;
+}
+
+#endif
+} // namespace lz
 #endif // LZ_DETAIL_PROCS_HPP

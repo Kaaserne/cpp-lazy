@@ -9,22 +9,22 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class Arithmetic>
+template<class Iterator, class S, class Arithmetic, bool IsSized>
 class enumerate_iterator final
-    : public iter_base<enumerate_iterator<Iterator, S, Arithmetic>, std::pair<Arithmetic, ref_t<Iterator>>,
-                       fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>,
-                       sentinel_selector<iter_cat_t<Iterator>, enumerate_iterator<Iterator, S, Arithmetic>, S>> {
+    : public iter_base<enumerate_iterator<Iterator, S, Arithmetic, IsSized>, std::pair<Arithmetic, ref_t<Iterator>>,
+                       fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>,
+                       conditional<IsSized, iter_cat_t<Iterator>, std::forward_iterator_tag>, conditional<IsSized, Iterator, S>> {
 
-    Iterator _iterator;
-    Arithmetic _index;
+    Iterator _iterator{};
+    Arithmetic _index{};
 
-    using Traits = std::iterator_traits<Iterator>;
+    using traits = std::iterator_traits<Iterator>;
 
 public:
-    using value_type = std::pair<Arithmetic, typename Traits::value_type>;
-    using reference = std::pair<Arithmetic, typename Traits::reference>;
+    using value_type = std::pair<Arithmetic, typename traits::value_type>;
+    using reference = std::pair<Arithmetic, typename traits::reference>;
     using pointer = fake_ptr_proxy<reference>;
-    using difference_type = typename Traits::difference_type;
+    using difference_type = typename traits::difference_type;
 
     constexpr enumerate_iterator(Iterator iterator, const Arithmetic start) : 
         _iterator{ std::move(iterator) },

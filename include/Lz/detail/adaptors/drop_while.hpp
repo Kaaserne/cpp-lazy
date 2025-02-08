@@ -12,15 +12,14 @@ struct drop_while_adaptor {
     using adaptor = drop_while_adaptor;
 
     template<class Iterable, class UnaryPredicate>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 drop_while_iterable<Iterable, decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& unaryPredicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unaryPredicate) };
+    LZ_NODISCARD constexpr drop_while_iterable<Iterable, UnaryPredicate>
+    operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
+        return { std::forward<Iterable>(iterable), std::move(unary_predicate) };
     }
 
     template<class UnaryPredicate>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, decay_t<UnaryPredicate>>
-    operator()(UnaryPredicate&& unaryPredicate) const {
-        return { std::forward<UnaryPredicate>(unaryPredicate) };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate unary_predicate) const {
+        return { std::move(unary_predicate) };
     }
 };
 } // namespace detail

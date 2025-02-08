@@ -1,70 +1,56 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_UNIQUE_HPP
-// #define LZ_UNIQUE_HPP
+#ifndef LZ_UNIQUE_HPP
+#define LZ_UNIQUE_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/unique.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/unique.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<LZ_CONCEPT_ITERATOR Iterator, class S, class BinaryPredicate>
-// class unique_iterable final
-//     : public detail::basic_iterable<detail::unique_iterator<Iterator, S, BinaryPredicate>,
-//                                     typename detail::unique_iterator<Iterator, S, BinaryPredicate>::sentinel> {
-// public:
-//     using iterator = detail::unique_iterator<Iterator, S, BinaryPredicate>;
-//     using const_iterator = iterator;
-//     using value_type = typename iterator::value_type;
+#ifdef LZ_HAS_CXX_11
 
-// private:
-//     constexpr unique_iterable(Iterator begin, S end, BinaryPredicate compare, std::forward_iterator_tag) :
-//         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(end), std::move(compare))) {
-//     }
+/**
+ * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted beforehand.
+ * This iterator will 'decay' into a bidirectional one if the input iterator is bidirectional or higher. If the input iterable is
+ * not bidirectional or higher, then the output iterator will be forward, and will also return a sentinel, rather than an
+ * iterator. This method does not contain a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
+ * std::sort(vec.begin(), vec.end());
+ * auto unique = lz::unique(vec /* custom comparer can be passed as second argument *\/);
+ * // or
+ * auto unique = vec | lz::unique; // custom comparer can be passed as argument as well:
+ * auto unique = vec | lz::unique(std::less<>{});
+ * ```
+ */
+static const detail::unique_adaptor unique{};
 
-//     constexpr unique_iterable(Iterator begin, Iterator end, BinaryPredicate compare, std::bidirectional_iterator_tag) :
-//         detail::basic_iterable<iterator>(iterator(begin, begin, end, compare), iterator(end, begin, end, compare)) {
-//     }
+#else
 
-// public:
-//     constexpr unique_iterable(Iterator begin, S end, BinaryPredicate compare) :
-//         unique_iterable(std::move(begin), std::move(end), std::move(compare), iter_cat_t<Iterator>{}) {
-//     }
+/**
+ * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted beforehand.
+ * This iterator will 'decay' into a bidirectional one if the input iterator is higher than bidirectional. If the input iterable is
+ * not bidirectional or higher, then the output iterator will be forward, and will also return a sentinel, rather than an
+ * iterator. This method does not contain a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
+ * std::sort(vec.begin(), vec.end());
+ * auto unique = lz::unique(vec /* custom comparer can be passed as second argument *\/);
+ * // or
+ * auto unique = vec | lz::unique;
+ * // custom comparer can be passed as argument as well:
+ * auto unique = vec | lz::unique(std::less<>{});
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::unique_adaptor unique{};
 
-//     constexpr unique_iterable() = default;
-// };
+#endif
 
-// // Start of group
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
+LZ_MODULE_EXPORT_SCOPE_END
 
-// /**
-//  * @brief Returns an unique_iterable iterator view object.
-//  * @attention `iterable` must be sorted in order to work correctly.
-//  * @details Use this iterator view to eventually get an iterator of unique_iterable values.
-//  * @param iterable The iterable sequence.
-//  * @param binary_predicate The comparer. operator< is assumed by default.
-//  * @return An unique_iterable iterator view object, which can be used to iterate over in a `(for ... : unqiue(...))`
-//  * fashion.
-//  */
-// template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::less, ref_iterable_t<Iterable>)>
-// LZ_NODISCARD constexpr unique_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
-// unique(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(),
-//              std::move(binary_predicate) };
-// }
+} // end namespace lz
 
-// // End of group
-// /**
-//  * @}
-//  */
-
-// LZ_MODULE_EXPORT_SCOPE_END
-
-// } // end namespace lz
-
-// #endif // end LZ_UNIQUE_HPP
+#endif // end LZ_UNIQUE_HPP

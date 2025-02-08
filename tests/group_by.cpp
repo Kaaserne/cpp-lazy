@@ -40,13 +40,13 @@ TEST_CASE("group_by changing and creating elements", "[group_by][Basic functiona
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
 
     std::sort(vec.begin(), vec.end(), [](const std::string& a, const std::string& b) { return a.length() < b.length(); });
-    auto grouper = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
+    auto grouper = vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); });
 
     SECTION("Should be correct chunks") {
         std::size_t str_len = 3;
 
         using value_type = lz::val_iterable_t<decltype(grouper)>;
-        grouper.for_each([&str_len](const value_type& g) {
+        lz::for_each(grouper, [&str_len](const value_type& g) {
             REQUIRE(g.first.length() == str_len);
             for (const auto& str : g.second) {
                 REQUIRE(str.length() == str_len);

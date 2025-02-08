@@ -32,7 +32,7 @@ set(examples
     Range
     regex_split
     Repeat
-    StringSplitter
+    string_splitter
     Take
     TakeEvery
     take_while

@@ -142,7 +142,7 @@ TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
     std::vector<int> vec = { 1, 2, 3 };
 
     SECTION("To array") {
-        auto actual_array = lz::enumerate(array) | lz::to<std::array<std::pair<int, int>, size>>();
+        auto actual_array = array | lz::enumerate | lz::to<std::array<std::pair<int, int>, size>>();
         auto expceted_pair = std::make_pair(0, 1);
 
         for (auto actual_pair : actual_array) {

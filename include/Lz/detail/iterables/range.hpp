@@ -8,8 +8,8 @@
 
 namespace lz {
 namespace detail {
-template<LZ_CONCEPT_ARITHMETIC Arithmetic>
-class range_iterable {
+template<class Arithmetic>
+class range_iterable : public lazy_view {
     Arithmetic _start;
     Arithmetic _end;
     Arithmetic _step;
@@ -20,10 +20,19 @@ public:
     using reverse_iterator = std::reverse_iterator<iterator>;
     using value_type = typename iterator::value_type;
 
+    constexpr range_iterable() = default;
+
     constexpr range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
         _start{ start },
         _end{ end },
         _step{ step } {
+    }
+
+    LZ_NODISCARD std::size_t size() const noexcept {
+        if (_step == 0) {
+            return 0;
+        }
+        return static_cast<std::size_t>(std::ceil((_end - _start) / _step));
     }
 
     LZ_NODISCARD constexpr iterator begin() const noexcept {
@@ -33,8 +42,6 @@ public:
     LZ_NODISCARD constexpr iterator end() const noexcept {
         return { _end, _step };
     }
-
-    constexpr range_iterable() = default;
 };
 } // namespace detail
 } // namespace lz

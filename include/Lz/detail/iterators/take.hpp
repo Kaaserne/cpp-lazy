@@ -21,8 +21,8 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator;
-    difference_type _n;
+    Iterator _iterator{};
+    difference_type _n{};
 
 public:
     constexpr take_iterator() = default;

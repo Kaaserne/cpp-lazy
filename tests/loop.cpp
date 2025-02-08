@@ -23,41 +23,81 @@ TEST_CASE("loop_iterable tests with sentinels") {
 TEST_CASE("Empty loop iterable") {
     std::vector<int> vec;
     auto looper = lz::loop(vec);
-    // Because looper operator!= always returns true, we can't check if it's empty. But should return true anyway.
-    REQUIRE(!lz::empty(looper));
+    REQUIRE(lz::empty(looper));
 }
 
 TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
     std::vector<int> vec = { 1, 2, 3, 4 };
     auto looper = lz::loop(vec);
-    static_assert(std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should not be sentinel");
-
-    SECTION("Distance") {
-        REQUIRE(std::distance(looper.begin(), looper.end()) ==
-                (std::numeric_limits<decltype(vec)::iterator::difference_type>::max)());
-    }
-
-    SECTION("Going a circle") {
-        REQUIRE(*(looper.begin() + static_cast<std::ptrdiff_t>(vec.size())) == 1);
-        REQUIRE(*(looper.begin() + (static_cast<std::ptrdiff_t>(vec.size()) - 1)) == 4);
-
-        REQUIRE(*(looper.end() - static_cast<std::ptrdiff_t>(vec.size())) == 1);
-        REQUIRE(*(looper.end() - (static_cast<std::ptrdiff_t>(vec.size()) + 1)) == 4);
-    }
+    static_assert(!std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should be sentinel");
 
     SECTION("Always true") {
         REQUIRE(looper.begin() != looper.end());
-        REQUIRE(!(looper.begin() == looper.begin()));
-        REQUIRE(looper.begin() + static_cast<std::ptrdiff_t>(vec.size()) != looper.end());
+        REQUIRE(looper.begin() != looper.begin());
+    }
+}
 
-        REQUIRE(looper.begin() < looper.end());
-        REQUIRE(!(looper.begin() > looper.end()));
-        REQUIRE(!(looper.begin() >= looper.end()));
-        REQUIRE(looper.begin() <= looper.end());
+TEST_CASE("Loop with non while true argument") {
+    std::array<int, 4> arr = { 1, 2, 3, 4 }; // {1, 2, 3, 4}
 
-        REQUIRE(!(looper.end() < looper.begin()));
-        REQUIRE(looper.end() > looper.begin());
-        REQUIRE(looper.end() >= looper.begin());
-        REQUIRE(!(looper.end() <= looper.begin()));
+    SECTION("Empty") {
+        auto looper = lz::loop(arr, 0);
+        static_assert(std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should not be sentinel");
+        REQUIRE(looper.size() == 0);
+        REQUIRE(lz::empty(looper));
+
+        std::vector<int> vec;
+        auto looper2 = lz::loop(vec, 0);
+        REQUIRE(looper2.size() == 0);
+        REQUIRE(lz::empty(looper2));
+    }
+
+    SECTION("Distance positive") {
+        auto looper = lz::loop(arr, 2);
+        auto begin = looper.begin();
+
+        for (std::size_t i = 0, start = 8; i < looper.size(); ++i, --start, ++begin) {
+            CHECK(looper.end() - begin == static_cast<std::ptrdiff_t>(start));
+        }
+
+        begin = looper.begin();
+        auto end = looper.end();
+
+        for (std::size_t i = 0, start = 8; i < looper.size(); ++i, --start, --end) {
+            CHECK(end - begin == static_cast<std::ptrdiff_t>(start));
+        }
+    }
+
+    SECTION("Distance negative") {
+        auto looper = lz::loop(arr, 3);
+        auto begin = looper.begin();
+        for (std::ptrdiff_t i = -static_cast<std::ptrdiff_t>(looper.size()); i < 1; ++i, ++begin) {
+            CHECK(std::distance(looper.end(), begin) == i);
+        }
+    }
+
+    // TODO Create more tests for these operators in all tests
+    SECTION("Operator+") {
+        auto looper = lz::loop(arr, 2);
+        auto begin = looper.begin();
+        CHECK(*(begin + 1) == 2);
+        CHECK(*(begin + 2) == 3);
+        CHECK(*(begin + 3) == 4);
+        CHECK(*(begin + 4) == 1);
+        CHECK(*(begin + 5) == 2);
+        CHECK(*(begin + 6) == 3);
+        CHECK(*(begin + 7) == 4);
+        CHECK(begin + 8 == looper.end());
+
+        auto end = looper.end();
+        CHECK(*(end - 1) == 4);
+        CHECK(*(end - 2) == 3);
+        CHECK(*(end - 3) == 2);
+        CHECK(*(end - 4) == 1);
+        CHECK(*(end - 5) == 4);
+        CHECK(*(end - 6) == 3);
+        CHECK(*(end - 7) == 2);
+        CHECK(*(end - 8) == 1);
+        CHECK(looper.begin() == end - 8);
     }
 }

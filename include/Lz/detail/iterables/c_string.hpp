@@ -8,11 +8,11 @@
 namespace lz {
 namespace detail {
 template<class C>
-class c_string_iterable {
+class c_string_iterable : public lazy_view {
 
     static_assert(std::is_pointer<C>::value, "C must be a pointer");
 
-    C _begin;
+    C _begin{};
 
 public:
     using iterator = c_string_iterator<C>;
@@ -29,7 +29,7 @@ public:
         return { _begin };
     }
 
-    LZ_NODISCARD constexpr sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
         return {};
     }
 };

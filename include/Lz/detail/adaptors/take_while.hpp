@@ -16,14 +16,14 @@ struct take_while_adaptor {
     // TODO add LZ_CONCEPT_ITERABLE to all adaptors
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr take_while_iterable<Iterable, decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& unary_predicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate) };
+    operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
+        return { std::forward<Iterable>(iterable), std::move(unary_predicate) };
     }
 
     template<class UnaryPredicate>
-    LZ_NODISCARD constexpr fn_args_holder<adaptor, decay_t<UnaryPredicate>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, decay_t<UnaryPredicate>>
     operator()(UnaryPredicate&& unary_predicate) const {
-        return { *this, std::forward<UnaryPredicate>(unary_predicate) };
+        return { std::move(unary_predicate) };
     }
 };
 

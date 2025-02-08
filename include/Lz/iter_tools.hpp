@@ -1,8 +1,9 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_FUNCTION_TOOLS_HPP
-// #define LZ_FUNCTION_TOOLS_HPP
+#ifndef LZ_ITER_TOOLS_HPP
+#define LZ_ITER_TOOLS_HPP
 
+#include <Lz/basic_iterable.hpp>
 // #include <Lz/concatenate.hpp>
 // #include <Lz/drop_while.hpp>
 // #include <Lz/filter.hpp>
@@ -16,7 +17,7 @@
 // #include <cctype>
 // #include <numeric>
 
-// namespace lz {
+namespace lz {
 // namespace detail {
 // template<class To>
 // struct convert_fn {
@@ -67,7 +68,7 @@
 // }
 // } // namespace detail
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 // /**
 //  * @brief Returns a split_iterable, that splits the string on `'\n'`.
@@ -90,19 +91,19 @@
 //     return lz::join(strings, "\n");
 // }
 
-// /**
-//  * @brief Returns a view object of which its iterators are reversed.
-//  * @param iterable The iterable. The iterable must have at least std::bidirectional_iterator_tag.
-//  * @return An iterable object that contains the reverse order of [begin(iterable) end(iterable))
-//  */
-// template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_17 detail::basic_iterable<std::reverse_iterator<iter_t<Iterable>>> reverse(Iterable&& iterable) {
-//     static_assert(detail::is_bidi<iter_t<Iterable>>::value, "Iterable must be at least a bidirectional iterable");
-//     using iterator = iter_t<Iterable>;
-//     std::reverse_iterator<iterator> rev_begin(std::forward<Iterable>(iterable).begin()));
-//     std::reverse_iterator<iterator> rev_end(std::forward<Iterable>(iterable).end());
-//     return { std::move(rev_end), std::move(rev_begin) };
-// }
+/**
+ * @brief Returns an iterable object of which its iterators are reversed.
+ * @param iterable The iterable. The iterable must have at least std::bidirectional_iterator_tag.
+ * @return An iterable object that contains the reverse order of [begin(iterable) end(iterable))
+ */
+template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 basic_iterable<std::reverse_iterator<iter_t<Iterable>>> reverse(Iterable&& iterable) {
+    static_assert(detail::is_bidi<iter_t<Iterable>>::value, "Iterable must be at least a bidirectional iterable");
+    using iterator = iter_t<Iterable>;
+    std::reverse_iterator<iterator> rev_begin(detail::begin(std::forward<Iterable>(iterable)));
+    std::reverse_iterator<iterator> rev_end(detail::end(std::forward<Iterable>(iterable)));
+    return { std::move(rev_end), std::move(rev_begin) };
+}
 
 // /**
 //  * @brief Returns an iterable that converts the elements in the given container to the type @p `T`.
@@ -277,8 +278,8 @@
 //     };
 //     return lz::trim(std::forward<String>(s), is_space_fn, is_space_fn);
 // }
-// } // End namespace lz
+} // End namespace lz
 
-// LZ_MODULE_EXPORT_SCOPE_END
+LZ_MODULE_EXPORT_SCOPE_END
 
-// #endif // End LZ_FUNCTION_TOOLS_HPP
+#endif // LZ_ITER_TOOLS_HPP

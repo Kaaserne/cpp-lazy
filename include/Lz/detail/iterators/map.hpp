@@ -13,11 +13,11 @@ namespace lz {
 namespace detail {
 template<class Iterator, class S, class UnaryOp>
 class map_iterator
-    : public iter_base<map_iterator<Iterator, S, UnaryOp>, func_container_ret_type<UnaryOp, Iterator>,
-                       fake_ptr_proxy<func_container_ret_type<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>,
+    : public iter_base<map_iterator<Iterator, S, UnaryOp>, func_ret_type_iter<UnaryOp, Iterator>,
+                       fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>,
                        sentinel_selector<iter_cat_t<Iterator>, map_iterator<Iterator, S, UnaryOp>, S>> {
-    Iterator _iterator;
-    func_container<UnaryOp> _unary_op;
+    Iterator _iterator{};
+    UnaryOp _unary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -28,7 +28,7 @@ public:
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr map_iterator(Iterator iterator, UnaryOp unary_op) noexcept :
+    constexpr map_iterator(Iterator iterator, UnaryOp unary_op) :
         _iterator{ std::move(iterator) },
         _unary_op{ std::move(unary_op) } {
     }

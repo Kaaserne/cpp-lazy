@@ -3,18 +3,20 @@
 #ifndef LZ_CHUNK_IF_ITERABLE_HPP
 #define LZ_CHUNK_IF_ITERABLE_HPP
 
+#include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/chunk_if.hpp>
+#include <Lz/detail/ref_or_view.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class ValueType, class Iterable, class UnaryPredicate>
-class chunk_if_iterable {
-    iterable_ref<Iterable> _iterable;
-    UnaryPredicate _predicate;
+class chunk_if_iterable : public lazy_view {
+    ref_or_view<Iterable> _iterable;
+    func_container<UnaryPredicate> _predicate;
 
 public:
-    using iterator = chunk_if_iterator<ValueType, iter_t<Iterable>, sentinel_t<Iterable>, UnaryPredicate>;
+    using iterator = chunk_if_iterator<ValueType, iter_t<Iterable>, sentinel_t<Iterable>, func_container<UnaryPredicate>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -26,19 +28,19 @@ public:
 
     constexpr chunk_if_iterable() = default;
 
-    iterator begin() && {
-        auto begin = std::move(_iterable.get()).begin();
-        auto end = std::move(_iterable.get()).end();
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
+        auto begin = detail::begin(std::move(_iterable));
+        auto end = detail::end(std::move(_iterable));
         const auto is_end = end == begin;
         return { begin, end, is_end };
     }
 
-    iterator begin() const& {
-        const auto is_end = std::end(_iterable.get()) == std::begin(_iterable.get());
-        return { std::begin(_iterable.get()), std::end(_iterable.get()), _predicate, is_end };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+        const auto is_end = std::end(_iterable) == std::begin(_iterable);
+        return { std::begin(_iterable), std::end(_iterable), _predicate, is_end };
     }
 
-    constexpr default_sentinel end() const {
+    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
         return {};
     }
 };

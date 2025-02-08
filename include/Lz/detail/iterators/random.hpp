@@ -22,9 +22,9 @@ public:
     using result_type = value_type;
 
 private:
-    mutable Distribution _distribution;
+    mutable Distribution _distribution{};
     Generator* _generator{ nullptr };
-    std::ptrdiff_t _current;
+    std::ptrdiff_t _current{};
 
 public:
     constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :

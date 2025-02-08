@@ -3,6 +3,7 @@
 #ifndef LZ_COMMON_HPP
 #define LZ_COMMON_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/common.hpp>
 
 namespace lz {
@@ -32,7 +33,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @param iterable The iterable to create a common view from.
  * @return A common view object. Can be used in <algorithm> functions.
  */
-detail::common_adaptor common{};
+static const detail::common_adaptor common{};
 
 #else
 

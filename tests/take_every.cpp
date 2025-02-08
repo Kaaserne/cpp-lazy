@@ -1,9 +1,11 @@
-#include <Lz/take_every.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/map.hpp>
+#include <Lz/take_every.hpp>
 #include <array>
 #include <catch2/catch.hpp>
 #include <list>
-
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("take_every_iterable with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -16,7 +18,7 @@ TEST_CASE("take_every_iterable with sentinels") {
 TEST_CASE("take_every_iterable changing and creating elements", "[take_every_iterable][Basic functionality]") {
     constexpr std::size_t size = 4;
     std::array<int, size> array = { 1, 2, 3, 4 };
-    auto take_every = lz::take_every(array, 2);
+    auto take_every = array | lz::take_every(2);
     auto iterator = take_every.begin();
 
     SECTION("take_every_iterable should be by reference") {
@@ -28,17 +30,6 @@ TEST_CASE("take_every_iterable changing and creating elements", "[take_every_ite
         REQUIRE(*iterator == 1);
         ++iterator;
         REQUIRE(*iterator == 3);
-        ++iterator;
-        REQUIRE(iterator == take_every.end());
-    }
-
-    SECTION("take_every_iterable should select every amount-th with skip first") {
-        take_every = lz::take_every(array, 2, array.begin() + 1);
-        iterator = take_every.begin();
-
-        REQUIRE(*iterator == 2);
-        ++iterator;
-        REQUIRE(*iterator == 4);
         ++iterator;
         REQUIRE(iterator == take_every.end());
     }
@@ -167,28 +158,29 @@ TEST_CASE("take_every_iterable to containers", "[take_every_iterable][To contain
     auto take_every = lz::take_every(array, offset);
 
     SECTION("To array") {
-        std::array<int, static_cast<std::size_t>(size / offset)> actual = take_every.to<std::array<int, offset>>();
+        std::array<int, static_cast<std::size_t>(size / offset)> actual = std::move(take_every) | lz::to<std::array<int, offset>>();
         REQUIRE(actual == std::array<int, offset>{ 1, 3 });
     }
 
     SECTION("To vector") {
-        std::vector<int> actual = take_every.to_vector();
+        std::vector<int> actual = take_every | lz::to<std::vector>();
         REQUIRE(actual == std::vector<int>{ 1, 3 });
     }
 
     SECTION("To other container using to<>()") {
-        std::list<int> actual = take_every.to<std::list<int>>();
+        std::list<int> actual = take_every | lz::to<std::list>();
         REQUIRE(actual == std::list<int>{ 1, 3 });
     }
 
     SECTION("To map") {
-        std::map<int, int> actual = take_every.to_map([](const int i) { return std::make_pair(i, i); });
+        auto actual = take_every | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         std::map<int, int> expected = { std::make_pair(1, 1), std::make_pair(3, 3) };
         REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<int, int> actual = take_every.to_unordered_map([](const int i) { return std::make_pair(i, i); });
+        auto actual =
+            take_every | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         std::unordered_map<int, int> expected = { std::make_pair(1, 1), std::make_pair(3, 3) };
         REQUIRE(actual == expected);
     }

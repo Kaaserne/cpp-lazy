@@ -13,13 +13,13 @@ struct drop_adaptor {
     using adaptor = drop_adaptor;
 
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 drop_iterable<Iterable>
+    LZ_NODISCARD constexpr drop_iterable<Iterable>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
-        return { std::forward<Iterable>(iterable), n };
+        return { iterable, n };
     }
 
     template<class DiffT>
-    LZ_NODISCARD constexpr fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
         return { n };
     }
 };

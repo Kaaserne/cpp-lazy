@@ -3,6 +3,7 @@
 #ifndef LZ_CHUNK_IF_HPP
 #define LZ_CHUNK_IF_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/chunk_if.hpp>
 #include <Lz/string_view.hpp>
 
@@ -27,7 +28,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * }
  * ```
  */
-detail::chunk_if_adaptor<void> chunk_if{};
+static const detail::chunk_if_adaptor<void> chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
@@ -44,7 +45,7 @@ detail::chunk_if_adaptor<void> chunk_if{};
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * ```
  */
-detail::chunk_if_adaptor<lz::string_view> detail::chunk_if_adaptor<lz::string_view>::sv_chunk_if{};
+static const detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
@@ -61,7 +62,7 @@ detail::chunk_if_adaptor<lz::string_view> detail::chunk_if_adaptor<lz::string_vi
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * ```
  */
-detail::chunk_if_adaptor<std::string> detail::chunk_if_adaptor<std::string>::s_chunk_if{};
+static const detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 #else
 

@@ -1,20 +1,24 @@
-#include <Lz/iter_tools.hpp>
-#include <Lz/rotate.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/filter.hpp>
+#include <Lz/iter_tools.hpp>
+#include <Lz/map.hpp>
+#include <Lz/rotate.hpp>
 #include <catch2/catch.hpp>
 #include <list>
-
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");
-    auto rotated = lz::rotate(c_str, std::next(c_str.begin(), 7));
+    auto rotated = lz::rotate(c_str, 7);
     static_assert(!std::is_same<decltype(rotated.begin()), decltype(rotated.end())>::value, "Should be sentinel");
-    REQUIRE(rotated.to_string() == "World!Hello, ");
+    REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
 }
 
 TEST_CASE("rotate_iterable basic functionality", "[rotate_iterable][Basic functionality]") {
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
-    auto rotate = lz::rotate(arr, arr.begin() + 2);
+    auto rotate = lz::rotate(arr, 2);
+    REQUIRE(rotate.size() == arr.size());
 
     SECTION("Should be correct length") {
         auto beg = rotate.begin();
@@ -27,14 +31,15 @@ TEST_CASE("rotate_iterable basic functionality", "[rotate_iterable][Basic functi
 
     SECTION("With bidirectional iterator") {
         std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
-        auto rotator = lz::rotate(lst, std::next(lst.begin(), 2));
+        auto rotator = lz::rotate(lst, 2);
         REQUIRE(std::distance(rotator.begin(), rotator.end()) == static_cast<std::ptrdiff_t>(lst.size()));
+        REQUIRE(rotator.size() == lst.size());
     }
 }
 
 TEST_CASE("rotate_iterable binary operations", "[rotate_iterable][Binary ops]") {
     std::array<int, 4> arr = { 1, 2, 3, 4 };
-    auto rotate = lz::rotate(arr, arr.begin() + 3);
+    auto rotate = lz::rotate(arr, 3);
 
     auto begin = rotate.begin();
     auto end = rotate.end();
@@ -50,12 +55,19 @@ TEST_CASE("rotate_iterable binary operations", "[rotate_iterable][Binary ops]") 
     }
 
     SECTION("Operator--") {
-        --begin;
-        REQUIRE(*begin == 3);
+        REQUIRE(begin != end);
         --end;
         REQUIRE(*end == 3);
+        --end;
+        REQUIRE(*end == 2);
+        --end;
+        REQUIRE(*end == 1);
+        --end;
+        REQUIRE(*end == 4);
+        REQUIRE(begin == end);
     }
 
+    // TODO add begin = end tests for every iterator
     SECTION("Operator== & Operator!=") {
         REQUIRE(begin != end);
         begin = end;
@@ -64,7 +76,7 @@ TEST_CASE("rotate_iterable binary operations", "[rotate_iterable][Binary ops]") 
 
     SECTION("Various ++ and -- operators with begin and end") {
         std::array<int, 5> container = { 1, 2, 3, 4, 5 };
-        auto rotator = lz::rotate(container, container.begin() + 3);
+        auto rotator = lz::rotate(container, 3);
 
         auto uneven_begin = rotator.begin();
         auto uneven_end = rotator.end();
@@ -90,12 +102,57 @@ TEST_CASE("rotate_iterable binary operations", "[rotate_iterable][Binary ops]") 
         --uneven_end;
         REQUIRE(*uneven_end == 5);
     }
+
+    SECTION("Operator+= and Operator-=") {
+        begin += 0;
+        REQUIRE(*begin == 4);
+        begin -= 0;
+        REQUIRE(*begin == 4);
+        begin += 2;
+        REQUIRE(*begin == 2);
+        begin += 1;
+        REQUIRE(*begin == 3);
+        begin -= 1;
+        REQUIRE(*begin == 2);
+        begin -= 2;
+        REQUIRE(*begin == 4);
+        begin += 4;
+        REQUIRE(begin == end);
+
+        end -= 1;
+        REQUIRE(*end == 3);
+        end -= 0;
+        REQUIRE(*end == 3);
+        end += 0;
+        REQUIRE(*end == 3);
+        end -= 3;
+        REQUIRE(*end == 4);
+        end += 4;
+        REQUIRE(begin == end);
+    }
+
+    SECTION("Operator-") {
+        REQUIRE(end - begin == 4);
+        REQUIRE(begin - end == -4);
+        ++begin;
+        REQUIRE(end - begin == 3);
+        REQUIRE(begin - end == -3);
+        ++begin;
+        REQUIRE(end - begin == 2);
+        REQUIRE(begin - end == -2);
+        ++begin;
+        REQUIRE(end - begin == 1);
+        REQUIRE(begin - end == -1);
+        ++begin;
+        REQUIRE(end - begin == 0);
+        REQUIRE(begin - end == 0);
+    }
 }
 
 TEST_CASE("Empty or one element rotate") {
     SECTION("Empty") {
         std::vector<int> vec{};
-        auto rotate = lz::rotate(vec, vec.begin());
+        auto rotate = lz::rotate(vec, 0);
         REQUIRE(lz::empty(rotate));
         REQUIRE(!lz::has_many(rotate));
         REQUIRE(!lz::has_one(rotate));
@@ -103,7 +160,24 @@ TEST_CASE("Empty or one element rotate") {
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
-        auto rotate = lz::rotate(vec, vec.begin());
+        auto rotate = lz::rotate(vec, 0);
+        REQUIRE(!lz::empty(rotate));
+        REQUIRE(!lz::has_many(rotate));
+        REQUIRE(lz::has_one(rotate));
+    }
+
+    // TODO add more tests with sentinels empty and one element
+    SECTION("Empty with sentinel") {
+        auto cstr = lz::c_string("");
+        auto rotate = lz::rotate(cstr, 0);
+        REQUIRE(lz::empty(rotate));
+        REQUIRE(!lz::has_many(rotate));
+        REQUIRE(!lz::has_one(rotate));
+    }
+
+    SECTION("One element with sentinel") {
+        auto cstr = lz::c_string("a");
+        auto rotate = lz::rotate(cstr, 0);
         REQUIRE(!lz::empty(rotate));
         REQUIRE(!lz::has_many(rotate));
         REQUIRE(lz::has_one(rotate));
@@ -113,27 +187,32 @@ TEST_CASE("Empty or one element rotate") {
 TEST_CASE("rotate_iterable to containers", "[rotate_iterable][To container]") {
     constexpr std::size_t size = 6;
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
-    auto rotator = lz::rotate(vec, vec.begin() + 2);
+    auto rotator = lz::rotate(vec, 2);
+
+    SECTION("Reverse to container") {
+        auto reversed = lz::reverse(rotator);
+        REQUIRE((reversed | lz::to<std::array<int, size>>()) == std::array<int, size>{ 2, 1, 6, 5, 4, 3 });
+    }
 
     SECTION("To array") {
-        REQUIRE(rotator.to<std::array<int, size>>() == std::array<int, size>{ 3, 4, 5, 6, 1, 2 });
+        REQUIRE((rotator | lz::to<std::array<int, size>>()) == std::array<int, size>{ 3, 4, 5, 6, 1, 2 });
     }
 
     SECTION("To vector") {
-        REQUIRE(rotator.to_vector() == std::vector<int>{ 3, 4, 5, 6, 1, 2 });
+        REQUIRE((rotator | lz::to<std::vector>()) == std::vector<int>{ 3, 4, 5, 6, 1, 2 });
     }
 
     SECTION("To other container using to<>()") {
-        REQUIRE(rotator.to<std::list<int>>() == std::list<int>{ 3, 4, 5, 6, 1, 2 });
+        REQUIRE((rotator | lz::to<std::list<int>>()) == std::list<int>{ 3, 4, 5, 6, 1, 2 });
     }
 
     SECTION("To map") {
-        auto map = rotator.to_map([](int i) { return std::make_pair(i, i); });
+        auto map = rotator | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         REQUIRE(map == std::map<int, int>{ { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 1, 1 }, { 2, 2 } });
     }
 
     SECTION("To unordered map") {
-        auto map = rotator.to_unordered_map([](int i) { return std::make_pair(i, i); });
+        auto map = rotator | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         REQUIRE(map == std::unordered_map<int, int>{ { 3, 3 }, { 4, 4 }, { 5, 5 }, { 6, 6 }, { 1, 1 }, { 2, 2 } });
     }
 }

@@ -11,33 +11,24 @@
 #include <Lz/detail/traits.hpp>
 #include <array>
 
-#if defined(LZ_STANDALONE)
-#ifdef LZ_HAS_FORMAT
-#include <format>
-#else
-#include <sstream>
-#endif // LZ_HAS_FORMAT
-#else
-#include <fmt/ostream.h>
-#endif
-
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class I, class S = I>
-class basic_iterable {
+class basic_iterable : public lazy_view {
     I _begin;
     S _end;
 
 public:
     using iterator = I;
+    using const_iterator = I;
+    using value_type = val_t<I>;
     using sentinel = S;
 
     constexpr basic_iterable() = default;
 
-    template<class It, class Se>
-    constexpr basic_iterable(It&& begin, Se&& end) : _begin{ std::forward<It>(begin) }, _end{ std::forward<Se>(end) } {
+    constexpr basic_iterable(I begin, S end) : _begin{ std::move(begin) }, _end{ std::move(end) } {
     }
 
     template<class It = I>
@@ -46,12 +37,14 @@ public:
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend bool operator==(const basic_iterable& lhs, Rhs&& rhs) {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend detail::enable_if<detail::is_iterable<detail::decay_t<Rhs>>::value, bool>
+    operator==(const basic_iterable& lhs, Rhs&& rhs) {
         return lz::equal(lhs, std::forward<Rhs>(rhs));
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend bool operator!=(const basic_iterable& lhs, Rhs&& rhs) {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend detail::enable_if<detail::is_iterable<detail::decay_t<Rhs>>::value, bool>
+    operator!=(const basic_iterable& lhs, Rhs&& rhs) {
         return !(lhs == std::forward<Rhs>(rhs));
     }
 
@@ -84,9 +77,10 @@ public:
  * @return An iterable object that can be converted to an arbitrary container. Can be used in pipe expressions, converted to a
  * container with `to<Container>()`, used in algorithms, for-each loops, etc...
  */
-template<class Iterator, class Sentinel>
-LZ_NODISCARD constexpr basic_iterable<Iterator, Sentinel> to_iterable(Iterator&& begin, Sentinel&& end) noexcept {
-    return { std::forward<Iterator>(begin), std::forward<Sentinel>(end) };
+template<class Iterator, class S>
+LZ_NODISCARD constexpr basic_iterable<detail::decay_t<Iterator>, detail::decay_t<S>>
+to_iterable(Iterator&& begin, S&& end) noexcept {
+    return { std::forward<Iterator>(begin), std::forward<S>(end) };
 }
 
 LZ_MODULE_EXPORT_SCOPE_END
@@ -100,23 +94,25 @@ struct prealloc_container {
 
 template<class Iterable, class Container>
 struct prealloc_container<Iterable, Container,
-                          void_t<decltype(std::declval<Iterable>().size(), std::declval<Container>().reserve(0))>> {
+                          void_t<decltype(lz::size(std::declval<Iterable>()), std::declval<Container>().reserve(0))>> {
     LZ_CONSTEXPR_CXX_20 void reserve(const Iterable& iterable, Container& container) const {
-        container.reserve(iterable.size());
+        container.reserve(lz::size(iterable));
     }
 };
 
 template<class Container>
 struct container_constructor {
+    template<class Container, class Iterable, class... Args>
+    using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
+
     template<class Iterable, class... Args>
-    LZ_NODISCARD constexpr enable_if<is_ra<iter_t<Iterable>>::value, Container>
+    LZ_NODISCARD constexpr enable_if<can_construct<Container, Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
-        return Container(std::forward<Iterable>(iterable).begin(), std::forward<Iterable>(iterable).end(),
-                         std::forward<Args>(args)...);
+        return Container(std::begin(iterable), std::end(iterable), std::forward<Args>(args)...);
     }
 
     template<class Iterable, class... Args>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!is_ra<iter_t<Iterable>>::value, Container>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!can_construct<Container, Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
         Container container(std::forward<Args>(args)...);
         constexpr prealloc_container<Iterable, Container> reserver{};
@@ -294,6 +290,14 @@ LZ_MODULE_EXPORT_SCOPE_END
 //     Iterable, lz::detail::enable_if<std::is_base_of<lz::detail::basic_iterable<lz::iter_t<Iterable>>, Iterable>::value, char>>
 //     : fmt::ostream_formatter {};
 // #endif
+
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+template<class Iterable, class Adaptor>
+LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
+    -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value, decltype(adaptor(std::forward<Iterable>(iterable)))> {
+    return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
+}
 
 LZ_MODULE_EXPORT_SCOPE_END
 

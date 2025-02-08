@@ -84,7 +84,7 @@ struct iter_base<Derived, Reference, Pointer, DifferenceType, std::bidirectional
 
     LZ_CONSTEXPR_CXX_14 Derived operator--(int) {
         Derived copy = *static_cast<Derived*>(this);
-        static_cast<Derived&>(*this)->decrement();
+        static_cast<Derived&>(*this).decrement();
         return copy;
     }
 };

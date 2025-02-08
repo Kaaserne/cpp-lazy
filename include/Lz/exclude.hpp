@@ -1,55 +1,49 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_EXCLUDE_HPP
-// #define LZ_EXCLUDE_HPP
+#ifndef LZ_EXCLUDE_HPP
+#define LZ_EXCLUDE_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/exclude.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/exclude.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<class Iterator, class S>
-// class exclude_iterable final : public detail::basic_iterable<detail::exclude_iterator<Iterator, S>, S> {
-// public:
-//     using iterator = detail::exclude_iterator<Iterator, S>;
-//     using const_iterator = iterator;
+#ifdef LZ_HAS_CXX_11
 
-//     constexpr exclude_iterable() = default;
+/**
+ * @brief Excludes elements from a container, using two indexes. The first index is means the start index, the second index means
+ * the end index. Contains a .size() method, it's a forward iterator and returns a sentinel. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+ * // Exclude index [3, 6)
+ * auto excluded = lz::exclude(vec, 3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
+ * // or
+ * auto excluded = vec | lz::exclude(3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
+ * ```
+ */
+static const detail::exclude_adaptor exclude{};
 
-//     LZ_CONSTEXPR_CXX_17
-//     exclude_iterable(Iterator begin, S end, const diff_type<Iterator> from, const diff_type<Iterator> to) :
-//         detail::basic_iterable<iterator, S>(iterator(begin, end, from, to), std::move(end)) {
-//     }
-// };
+#else
 
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
+/**
+ * @brief Excludes elements from a container, using two indexes. The first index is means the start index, the second index means
+ * the end index. Contains a .size() method, it's a forward iterator and returns a sentinel. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+ * // Exclude index [3, 6)
+ * auto excluded = lz::exclude(vec, 3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
+ * // or
+ * auto excluded = vec | lz::exclude(3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::exclude_adaptor exclude{};
 
-// /**
-//  * Excludes a range within @p iterable where index is [from, to).
-//  * @param iterable The iterable sequence.
-//  * @param from Index to start excluding elements from.
-//  * @param to Index to stop at, note that its underlying element at this index is included.
-//  * @return An exclude_iterable iterator view object.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_17 exclude_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
-// exclude(Iterable&& iterable, const diff_type<iter_t<Iterable>> from, const diff_type<iter_t<Iterable>> to) {
-//     LZ_ASSERT(from <= to, "from must be less than or equal to `to`");
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(), from, to };
-// }
+#endif
 
-// // End of group
-// /**
-//  * @}
-//  */
+LZ_MODULE_EXPORT_SCOPE_END
 
-// LZ_MODULE_EXPORT_SCOPE_END
+} // namespace lz
 
-// } // namespace lz
-
-// #endif // LZ_SKIP_HPP
+#endif // LZ_SKIP_HPP

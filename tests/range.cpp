@@ -1,6 +1,10 @@
+#include <Lz/algorithm.hpp>
+#include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]") {
     SECTION("Looping upwards") {
@@ -141,27 +145,27 @@ TEST_CASE("Range to containers", "[Range][To container]") {
 
     SECTION("To array") {
         std::array<int, static_cast<std::size_t>(size)> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        auto actual = range.to<std::array<int, static_cast<std::size_t>(size)>>();
+        auto actual = range | lz::to<std::array<int, static_cast<std::size_t>(size)>>();
 
         REQUIRE(expected == actual);
     }
 
     SECTION("To vector") {
         std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        auto actual = range.to_vector();
+        auto actual = range | lz::to<std::vector>();
 
         REQUIRE(expected == actual);
     }
 
     SECTION("To other container using to<>()") {
         std::list<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        auto actual = range.to<std::list<int>>();
+        auto actual = range | lz::to<std::list>();
 
         REQUIRE(expected == actual);
     }
 
     SECTION("To map") {
-        std::map<int, int> expected = range.to_map([](const int i) { return std::make_pair(i, i); });
+        auto expected = range | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         std::map<int, int> actual;
 
         for (int i : lz::range(size)) {
@@ -172,7 +176,7 @@ TEST_CASE("Range to containers", "[Range][To container]") {
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<int, int> expected = range.to_unordered_map([](const int i) { return std::make_pair(i, i); });
+        auto expected = range | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         std::unordered_map<int, int> actual;
 
         for (int i : lz::range(size)) {

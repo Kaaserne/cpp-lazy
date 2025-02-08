@@ -11,7 +11,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
 
-detail::take_while_adaptor take_while{};
+static const detail::take_while_adaptor take_while{};
 
 #else
 

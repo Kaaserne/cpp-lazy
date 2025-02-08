@@ -1,56 +1,57 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_GROUP_BY_HPP
-// #define LZ_GROUP_BY_HPP
+#ifndef LZ_GROUP_BY_HPP
+#define LZ_GROUP_BY_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/group_by.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/group_by.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
-// template<class Iterator, class S, class BinaryPredicate>
-// class group_by_iterable final
-//     : public detail::basic_iterable<detail::group_by_iterator<Iterator, S, BinaryPredicate>, default_sentinel> {
-//     using iterator = detail::group_by_iterator<Iterator, S, BinaryPredicate>;
-//     using const_iterator = iterator;
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// public:
-//     LZ_CONSTEXPR_CXX_14 group_by_iterable(Iterator begin, S end, BinaryPredicate binary_predicate) :
-//         detail::basic_iterable<iterator, default_sentinel>(
-//             iterator(std::move(begin), std::move(end), std::move(binary_predicate))) {
-//     }
+#ifdef LZ_HAS_CXX_11
 
-//     constexpr group_by_iterable() = default;
-// };
+/**
+ * @brief Creates chunks of elements of which the predicate returns true. Input iterable must be sorted first before using this
+ * function. Its end iterator is a sentinel one. Therefore, its begin() and end() types are not the same. The iterable does not
+ * contain a .size() method. Its iterator category is forward. Example:
+ * ```cpp
+ * char str[] = "aaabbccccd";
+ * // normally, use std::sort(std::begin(str), std::end(str)) before using this function, if it isn't sorted already
+ * auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
+ * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
+ * // or
+ * auto grouper = cstr | lz::group_by([](char a, char b) { return a == b; });
+ * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
+ *
+ * ```
+ */
+static const detail::group_by_adaptor group_by{};
 
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
+#else
 
-// /**
-//  * Chops a sequence into chunks, where every chunk is grouped based on a grouping predicate.
-//  * @attention `iterable` must be sorted in order to work properly.
-//  * @param iterable The iterable to group into chunks.
-//  * @param comparer The comparer to make groups with. For e.g. if value_type is string, one can use
-//  * `[](string a, string b) { return a.length() == b.length() }` to make groups where sizes of the strings are equal.
-//  * @return A group_by_iterable iterator view object.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate = MAKE_BIN_PRED(std::equal_to, val_iterable_t<Iterable>)>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 group_by_iterable<iter_t<Iterable>, sentinel_t<Iterable>, BinaryPredicate>
-// group_by(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end(),
-//              std::move(binary_predicate) };
-// }
+/**
+ * @brief Creates chunks of elements of which the predicate returns true. Input iterable must be sorted first before using this
+ * function. Its end iterator is a sentinel one. Therefore, its begin() and end() types are not the same. The iterable does not
+ * contain a .size() method. Its iterator category is forward. Example:
+ * ```cpp
+ * char str[] = "aaabbccccd";
+ * // normally, use std::sort(std::begin(str), std::end(str)) before using this function, if it isn't sorted already
+ * auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
+ * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
+ * // or
+ * auto grouper = cstr | lz::group_by([](char a, char b) { return a == b; });
+ * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
+ *
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::group_by_adaptor group_by{};
 
-// // End of group
-// /**
-//  * @}
-//  */
+#endif // LZ_HAS_CXX_11
 
-// LZ_MODULE_EXPORT_SCOPE_END
+LZ_MODULE_EXPORT_SCOPE_END
 
-// } // namespace lz
+} // namespace lz
 
-// #endif // LZ_GROUP_BY_HPP
+#endif // LZ_GROUP_BY_HPP

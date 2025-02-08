@@ -1,10 +1,9 @@
 #include <Lz/generate.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
-
-#ifdef LZ_HAS_CXX_11
-#include <Lz/common.hpp>
-#endif // LZ_HAS_CXX_11
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Generate changing and creating elements", "[Generate][Basic functionality]") {
     auto compile_test = lz::generate([]() { return 0; });
@@ -22,7 +21,7 @@ TEST_CASE("Generate changing and creating elements", "[Generate][Basic functiona
 
     SECTION("Should be 0, 1, 2, 3") {
         std::size_t expected = 0;
-        generator.for_each([&expected](std::size_t i) {
+        lz::for_each(generator, [&expected](std::size_t i) {
             REQUIRE(i == expected);
             ++expected;
         });
@@ -82,29 +81,29 @@ TEST_CASE("Generate to containers", "[Generate][To container]") {
         amount);
 
     SECTION("To array") {
-        auto array = generator.to<std::array<std::size_t, amount>>();
+        auto array = generator | lz::to<std::array<std::size_t, amount>>();
         std::array<std::size_t, amount> expected = { 0, 1, 2, 3 };
 
         REQUIRE(array == expected);
     }
 
     SECTION("To vector") {
-        std::vector<std::size_t> vector = generator.to_vector();
+        auto vector = generator | lz::to<std::vector>();
         std::vector<std::size_t> expected = { 0, 1, 2, 3 };
 
         REQUIRE(vector == expected);
     }
 
     SECTION("To other container using to<>()") {
-        std::list<std::size_t> vector = generator.to<std::list<std::size_t>>();
+        auto vector = generator | lz::to<std::list>();
         std::list<std::size_t> expected = { 0, 1, 2, 3 };
 
         REQUIRE(vector == expected);
     }
 
     SECTION("To map") {
-        std::map<std::size_t, std::size_t> map =
-            generator.to_map([](const std::size_t elm) { return std::make_pair(elm * 10, elm); });
+        auto map = generator | lz::map([](const std::size_t elm) { return std::make_pair(elm * 10, elm); }) |
+                   lz::to<std::map<std::size_t, std::size_t>>();
 
         std::map<std::size_t, std::size_t> expected = { { 0, 0 }, { 10, 1 }, { 20, 2 }, { 30, 3 } };
 
@@ -112,8 +111,8 @@ TEST_CASE("Generate to containers", "[Generate][To container]") {
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<std::size_t, std::size_t> map =
-            generator.to_unordered_map([](const std::size_t elm) { return std::make_pair(elm * 10, elm); });
+        auto map = generator | lz::map([](const std::size_t elm) { return std::make_pair(elm * 10, elm); }) |
+                   lz::to<std::unordered_map<std::size_t, std::size_t>>();
 
         std::unordered_map<std::size_t, std::size_t> expected = { { 0, 0 }, { 10, 1 }, { 20, 2 }, { 30, 3 } };
 

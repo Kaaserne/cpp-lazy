@@ -1,65 +1,66 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_REGEX_SPLIT_ITERATOR_HPP
-// #define LZ_REGEX_SPLIT_ITERATOR_HPP
+#ifndef LZ_REGEX_SPLIT_ITERATOR_HPP
+#define LZ_REGEX_SPLIT_ITERATOR_HPP
 
-// #include <Lz/detail/compiler_checks.hpp>
-// #include <Lz/detail/fake_ptr_proxy.hpp>
-// #include <Lz/iterator_base.hpp>
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/iterator_base.hpp>
+#include <Lz/string_view.hpp>
 
-// namespace lz {
-// namespace detail {
-// template<class RegexTokenIter>
-// using regex_split_value_type = basic_string_view<typename RegexTokenIter::regex_type::value_type>;
+namespace lz {
+namespace detail {
+template<class RegexTokenIter>
+using regex_split_value_type = basic_string_view<typename RegexTokenIter::regex_type::value_type>;
 
-// template<class RegexTokenIter>
-// using regex_split_val = typename val_t<RegexTokenIter>::string_type::value_type;
+template<class RegexTokenIter>
+using regex_split_val = typename val_t<RegexTokenIter>::string_type::value_type;
 
-// template<class RegexTokenIter>
-// class regex_split_iterator
-//     : public iter_base<regex_split_iterator<RegexTokenIter>, basic_string_view<regex_split_val<RegexTokenIter>>,
-//                        fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>, diff_type<RegexTokenIter>,
-//                        std::forward_iterator_tag, default_sentinel> {
-// public:
-//     using value_type = basic_string_view<regex_split_val<RegexTokenIter>>;
-//     using difference_type = typename RegexTokenIter::difference_type;
-//     using pointer = fake_ptr_proxy<value_type>;
-//     using reference = value_type;
+template<class RegexTokenIter, class RegexTokenSentinel>
+class regex_split_iterator : public iter_base<regex_split_iterator<RegexTokenIter, RegexTokenSentinel>,
+                                              basic_string_view<regex_split_val<RegexTokenIter>>,
+                                              fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>,
+                                              diff_type<RegexTokenIter>, std::forward_iterator_tag, RegexTokenSentinel> {
+public:
+    using value_type = basic_string_view<regex_split_val<RegexTokenIter>>;
+    using difference_type = typename RegexTokenIter::difference_type;
+    using pointer = fake_ptr_proxy<value_type>;
+    using reference = value_type;
 
-// private:
-//     RegexTokenIter _current;
+private:
+    RegexTokenIter _current{};
 
-// public:
-//     constexpr regex_split_iterator() = default;
+public:
+    constexpr regex_split_iterator() = default;
 
-//     regex_split_iterator(RegexTokenIter first, RegexTokenIter last) : _current(first) {
-//         while (_current != last && _current->length() == 0) {
-//             ++_current;
-//         }
-//     }
+    regex_split_iterator(RegexTokenIter first, RegexTokenSentinel last) : _current{ std::move(first) } {
+        while (_current != last && _current->length() == 0) {
+            ++_current;
+        }
+    }
 
-//     LZ_CONSTEXPR_CXX_14 void increment() {
-//         ++_current;
-//     }
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_current;
+    }
 
-//     LZ_CONSTEXPR_CXX_14 value_type dereference() const {
-//         return value_type(&*_current->first, static_cast<std::size_t>(_current->length()));
-//     }
+    LZ_CONSTEXPR_CXX_14 value_type dereference() const {
+        return value_type(&*_current->first, static_cast<std::size_t>(_current->length()));
+    }
 
-//     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
-//         return fake_ptr_proxy<decltype(**this)>(**this);
-//     }
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
 
-//     constexpr bool eq(const regex_split_iterator& other) const {
-//         return _current == other._current;
-//     }
+    constexpr bool eq(const regex_split_iterator& other) const {
+        return _current == other._current;
+    }
 
-//     constexpr bool eq(default_sentinel) const {
-//         return _current == RegexTokenIter{};
-//     }
-// };
+    constexpr bool eq(RegexTokenSentinel end) const {
+        return _current == end;
+    }
+};
 
-// } // namespace detail
-// } // namespace lz
+} // namespace detail
+} // namespace lz
 
-// #endif
+#endif

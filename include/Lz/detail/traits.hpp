@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef LZ_LZ_TOOLS_HPP
-#define LZ_LZ_TOOLS_HPP
+#ifndef LZ_TRAITS_HPP
+#define LZ_TRAITS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <array> // tuple_element
@@ -12,14 +12,69 @@
 namespace lz {
 struct default_sentinel;
 
-namespace detail {
+struct lazy_view {};
 
-template<class>
-struct always_false : std::false_type {};
+namespace detail {
+template<bool B>
+struct enable_if_impl;
+
+template<>
+struct enable_if_impl<true> {
+    template<class T>
+    using type = T;
+};
+
+template<bool B, class T = void>
+using enable_if = typename enable_if_impl<B>::template type<T>;
+
+template<bool B>
+struct conditional_impl;
+
+template<>
+struct conditional_impl<true> {
+    template<class IfTrue, class /* IfFalse */>
+    using type = IfTrue;
+};
+
+template<>
+struct conditional_impl<false> {
+    template<class /* IfTrue */, class IfFalse>
+    using type = IfFalse;
+};
+
+template<bool B, class IfTrue, class IfFalse>
+using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
 #ifdef LZ_HAS_CXX_11
 
-#define MAKE_OPERATOR(OP, VALUE_TYPE) (OP<(VALUE_TYPE)>)
+struct less {
+    template<class T, class U>
+    LZ_NODISCARD constexpr operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&> < static_cast<U&&>(rhs)))
+        ->decltype(static_cast<T&&> < static_cast<U&&>(rhs)) {
+        return static_cast<T&&> < static_cast<U&&>(rhs);
+    }
+};
+
+struct equal_to {
+    template<class T, class U>
+    LZ_NODISCARD constexpr operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&> == static_cast<U&&>(rhs)))
+        ->decltype(static_cast<T&&> == static_cast<U&&>(rhs)) {
+        return static_cast<T&&> == static_cast<U&&>(rhs);
+    }
+};
+
+struct plus {
+    template<class T, class U>
+    LZ_NODISCARD constexpr operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&> + static_cast<U&&>(rhs)))
+        ->decltype(static_cast<T&&> + static_cast<U&&>(rhs)) {
+        return static_cast<T&&> + static_cast<U&&>(rhs);
+    }
+};
+
+#define MAKE_BIN_PRED(OP) lz::detail::OP
+
+template<class T>
+using remove_reference_t = typename std::remove_reference<T>::type;
 
 template<std::size_t, std::size_t...>
 struct index_sequence_helper;
@@ -41,8 +96,11 @@ using decay_t = typename std::decay<T>::type;
 template<std::size_t I, class T>
 using tup_element = typename std::tuple_element<I, T>::type;
 
-#define MAKE_BIN_PRED(OP, VALUE_TYPE) OP<VALUE_TYPE>
 #else // ^^^ has cxx 11 vvv cxx > 11
+
+template<class T>
+using remove_reference_t = std::remove_reference_t<T>;
+
 template<std::size_t... N>
 using index_sequence_helper = std::index_sequence<N...>;
 
@@ -55,29 +113,97 @@ using decay_t = std::decay_t<T>;
 template<std::size_t I, class T>
 using tup_element = std::tuple_element_t<I, T>;
 
-#define MAKE_BIN_PRED(OP, VALUE_TYPE) OP<>
+#define MAKE_BIN_PRED(OP) std::OP<>
 
 #endif // LZ_HAS_CXX_11
 
-template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).begin());
+#ifdef __cpp_lib_is_invocable
+
+template<class Function, class... Args>
+using is_invocable = std::is_invocable<Function, Args...>;
+
+#else
+
+template<class Function, class = void>
+struct is_invocable_impl_no_args : std::false_type {};
+
+template<class Function>
+struct is_invocable_impl_no_args<Function, std::void_t<decltype(std::declval<Function>()())>> : std::true_type {};
+
+template<class, class Function, class...>
+struct is_invocable_impl_n_args : std::false_type {};
+
+template<class Function, class... Args>
+struct is_invocable_impl_n_args<std::void_t<decltype(std::declval<Function>()(std::declval<Args>()...))>, Function, Args...>
+    : std::true_type {};
+
+template<class F, class... Args>
+using is_invocable = typename std::conditional<sizeof...(Args) == 0, is_invocable_impl_no_args<F>,
+                                               is_invocable_impl_n_args<void, F, Args...>>::type;
+
+#endif
+
+#ifdef LZ_HAS_CXX_20
+
+template<class T>
+using remove_cvref = std::remove_cvref_t<T>;
+
+#else // ^^^ has cxx 20 vvv cxx < 20
+
+template<class T>
+using remove_cvref = typename std::remove_cv<remove_reference_t<T>>::type;
+
+#endif // LZ_HAS_CXX_20
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept -> decltype(std::forward<Iterable>(c).end());
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())>;
 
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto begin(T (&array)[N]) noexcept -> decltype(std::begin(array));
+template<class Iterable>
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
 
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto end(T (&array)[N]) noexcept -> decltype(std::end(array));
+template<class Iterable>
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(std::forward<Iterable>(c)))>;
 
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto begin(const T (&array)[N]) noexcept -> decltype(std::begin(array));
-
-template<class T, size_t N>
-LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::end(array));
-
+template<class Iterable>
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(std::forward<Iterable>(c)))>;
 } // namespace detail
+
+#ifdef LZ_HAS_CXX_17
+
+/**
+ * @brief Returns the size of a container.
+ *
+ * @param c The container to get the size from.
+ * @return The size of the container.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr auto size(Iterable&& c) noexcept -> decltype(std::size(c));
+
+#else
+
+/**
+ * @brief Returns the size of a container.
+ *
+ * @param c The container to get the size from.
+ * @return The size of the container.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr auto size(const Iterable& c) noexcept(noexcept(c.size())) -> decltype(c.size());
+
+/**
+ * @brief Returns the size of a container.
+ *
+ * @param c The container to get the size from.
+ * @return The size of the container.
+ */
+template<class T, size_t N>
+LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept;
+
+#endif
 
 /**
  * @brief Can be used to get the iterator type of an iterable. Example: `lz::iter_t<std::vector<int>>` will return
@@ -86,7 +212,7 @@ LZ_NODISCARD constexpr auto end(const T (&array)[N]) noexcept -> decltype(std::e
  * @tparam Iterable The iterable to get the iterator type from.
  */
 template<class Iterable>
-using iter_t = decltype(std::begin(std::declval<Iterable>()));
+using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
 
 /**
  * @brief Can be used to get the sentinel type of an iterable. Example: `lz::sentinel_t<std::vector<int>>` will return
@@ -94,7 +220,7 @@ using iter_t = decltype(std::begin(std::declval<Iterable>()));
  * @tparam Iterable The iterable to get the sentinel type from.
  */
 template<class Iterable>
-using sentinel_t = decltype(std::end(std::declval<Iterable>()));
+using sentinel_t = decltype(detail::end(std::forward<Iterable>(std::declval<Iterable>())));
 
 /**
  * @brief Can be used to get the value type of an iterator. Example: `lz::val_t<std::vector<int>::iterator>` will return `int`.
@@ -102,7 +228,7 @@ using sentinel_t = decltype(std::end(std::declval<Iterable>()));
  * @tparam Iterator The iterator to get the value type from.
  */
 template<class Iterator>
-using val_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::value_type;
+using val_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::value_type;
 
 /**
  * @brief Can be used to get the reference type of an iterator. Example: `lz::ref_t<std::vector<int>::iterator>` will return
@@ -111,7 +237,7 @@ using val_t = typename std::iterator_traits<typename std::remove_reference<Itera
  * @tparam Iterator The iterator to get the reference type from.
  */
 template<class Iterator>
-using ref_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::reference;
+using ref_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::reference;
 
 /**
  * @brief Can be used to get the pointer type of an iterator. Example: `lz::ptr_t<std::vector<int>::iterator>` will return
@@ -120,7 +246,7 @@ using ref_t = typename std::iterator_traits<typename std::remove_reference<Itera
  * @tparam Iterator The iterator to get the pointer type from.
  */
 template<class Iterator>
-using ptr_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::pointer;
+using ptr_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::pointer;
 
 /**
  * @brief Can be used to get the difference type of an iterator. Example: `lz::diff_t<std::vector<int>::iterator>` will return
@@ -129,7 +255,7 @@ using ptr_t = typename std::iterator_traits<typename std::remove_reference<Itera
  * @tparam Iterator The iterator to get the difference type from.
  */
 template<class Iterator>
-using diff_type = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::difference_type;
+using diff_type = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::difference_type;
 
 /**
  * @brief Can be used to get the iterator category of an iterator. Example: `lz::iter_cat_t<std::vector<int>::iterator>` will
@@ -138,7 +264,7 @@ using diff_type = typename std::iterator_traits<typename std::remove_reference<I
  * @tparam Iterator The iterator to get the iterator category from.
  */
 template<class Iterator>
-using iter_cat_t = typename std::iterator_traits<typename std::remove_reference<Iterator>::type>::iterator_category;
+using iter_cat_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::iterator_category;
 
 /**
  * @brief Can be used to get the value type of an iterable. Example: `lz::val_iterable_t<std::vector<int>>` will return `int`.
@@ -184,10 +310,6 @@ template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
 
 namespace detail {
-
-template<class Iterable>
-using iterable_ref = std::reference_wrapper<decay_t<Iterable>>;
-
 template<class... T>
 using void_t = void;
 
@@ -195,7 +317,7 @@ template<class T, class = void>
 struct sized : std::false_type {};
 
 template<class T>
-struct sized<T, void_t<decltype(std::declval<T>().size())>> : std::true_type {};
+struct sized<T, void_t<decltype(lz::size(std::declval<T>()))>> : std::true_type {};
 
 template<class, class = void>
 struct is_iterable : std::false_type {};
@@ -227,6 +349,12 @@ using first_arg = typename first_arg_helper<Args...>::type;
 
 template<class Function, class... Args>
 using func_ret_type = decltype(std::declval<Function>()(std::declval<Args>()...));
+
+template<class Function, class Iterator>
+using func_ret_type_iter = decltype(std::declval<Function>()(*std::declval<Iterator>()));
+
+template<class Function, class... Iterator>
+using func_ret_type_iters = decltype(std::declval<Function>()(*(std::declval<Iterator>())...));
 
 template<class... Ts>
 using common_type = typename std::common_type<Ts...>::type;
@@ -275,41 +403,20 @@ using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>
 template<class IterTuple>
 using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
 
-template<bool B>
-struct enable_if_impl;
-
-template<>
-struct enable_if_impl<true> {
-    template<class T>
-    using type = T;
-};
-
-template<bool B, class T = void>
-using enable_if = typename enable_if_impl<B>::template type<T>;
-
-template<bool B>
-struct conditional_impl;
-
-template<>
-struct conditional_impl<true> {
-    template<class IfTrue, class /* IfFalse */>
-    using type = IfTrue;
-};
-
-template<>
-struct conditional_impl<false> {
-    template<class /* IfTrue */, class IfFalse>
-    using type = IfFalse;
-};
-
-template<bool B, class IfTrue, class IfFalse>
-using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
+template<class...>
+struct is_all_same : std::false_type {};
 
 template<class T, class U, class... Vs>
-struct is_all_same : std::integral_constant<bool, std::is_same<T, U>::value && is_all_same<U, Vs...>::value> {};
+struct is_all_same<T, U, Vs...> : std::integral_constant<bool, std::is_same<T, U>::value && is_all_same<U, Vs...>::value> {};
 
 template<class T, class U>
 struct is_all_same<T, U> : std::is_same<T, U> {};
+
+template<>
+struct is_all_same<std::true_type> : std::true_type {};
+
+template<>
+struct is_all_same<std::false_type> : std::false_type {};
 
 template<class IterTag>
 using is_bidi_tag = std::is_convertible<IterTag, std::bidirectional_iterator_tag>;
@@ -334,14 +441,14 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
 } // namespace detail
 
 /**
- * @brief Selects @p S if @p Tag is a `std::forward_iterator_tag`, otherwise selects @p Iterator.
+ * @brief Selects @p S if @p Tag is not at least bidirectional, otherwise selects @p Iterator.
  *
- * @tparam Tag The iterator tag to check.
- * @tparam Iterator The iterator type to select if @p Tag is not a `std::forward_iterator_tag`.
- * @tparam S The sentinel type to select if @p Tag is a `std::forward_iterator_tag`.
+ * @tparam Tag The iterator category tag to check.
+ * @tparam Iterator The iterator type to select if @p Tag is at least bidirectional.
+ * @tparam S The sentinel type to select if @p Tag is not at least bidirectional.
  */
 template<class Tag, class Iterator, class S = default_sentinel>
-using sentinel_selector = detail::conditional<std::is_same<Tag, std::forward_iterator_tag>::value, S, Iterator>;
+using sentinel_selector = detail::conditional<!detail::is_bidi_tag<Tag>::value, S, Iterator>;
 
 /**
  * @brief Is @p TagFrom convertible to @p TagTo? If so, return @p TagFrom, otherwise return @p ToDecay.
@@ -354,4 +461,4 @@ template<class TagFrom, class TagTo, class ToDecay>
 using iter_cat_decay = detail::conditional<std::is_convertible<TagFrom, TagTo>::value, TagFrom, ToDecay>;
 } // namespace lz
 
-#endif // LZ_LZ_TOOLS_HPP
+#endif // LZ_TRAITS_HPP

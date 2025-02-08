@@ -15,14 +15,14 @@ struct chunk_if_adaptor {
     using adaptor = chunk_if_adaptor<ValueType>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    constexpr chunk_if_iterable<ValueType, Iterable, decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& predicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(predicate) };
+    constexpr chunk_if_iterable<ValueType, Iterable, UnaryPredicate>
+    operator()(Iterable&& iterable, UnaryPredicate predicate) const {
+        return { std::forward<Iterable>(iterable), std::move(predicate) };
     }
 
     template<class UnaryPredicate>
-    constexpr fn_args_holder<adaptor, decay_t<UnaryPredicate>> operator()(UnaryPredicate&& predicate) const {
-        return { std::forward<UnaryPredicate>(predicate) };
+    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate predicate) const {
+        return { std::move(predicate) };
     }
 };
 
@@ -31,14 +31,14 @@ struct chunk_if_adaptor<void> {
     using adaptor = chunk_if_adaptor<void>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>>, Iterable, decay_t<UnaryPredicate>>
-    operator()(Iterable&& iterable, UnaryPredicate&& predicate) const {
-        return { std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(predicate) };
+    constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>>, Iterable, UnaryPredicate>
+    operator()(Iterable&& iterable, UnaryPredicate predicate) const {
+        return { std::move(iterable), std::move(predicate) };
     }
 
     template<class UnaryPredicate>
-    constexpr fn_args_holder<adaptor, decay_t<UnaryPredicate>> operator()(UnaryPredicate&& predicate) const {
-        return { std::forward<UnaryPredicate>(predicate) };
+    constexpr fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate&& predicate) const {
+        return { std::move(predicate) };
     }
 };
 } // namespace detail

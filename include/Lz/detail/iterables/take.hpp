@@ -8,8 +8,8 @@
 namespace lz {
 namespace detail {
 template<class Iterable>
-class take_iterable {
-    Iterable _iterable;
+class take_iterable : public lazy_view {
+    ref_or_view<Iterable> _iterable;
     diff_iterable_t<Iterable> _n;
 
 public:
@@ -25,26 +25,27 @@ public:
 
     constexpr take_iterable() = default;
 
-    LZ_NODISCARD constexpr std::size_t size() const noexcept {
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
         return static_cast<std::size_t>(_n);
     }
 
     template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<I>::value, iterator> begin() && {
-        return { std::move(_iterable).begin(), _n };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!is_ra<I>::value, iterator> begin() && {
+        return { detail::begin(std::move(_iterable)), _n };
     }
 
     template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<is_ra<I>::value, iterator> begin() && {
         return static_cast<const take_iterable&>(*this).begin();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 iterator begin() const& {
         return { std::begin(_iterable), _n };
     }
 
     template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iterator> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<is_ra<I>::value, iterator> end() const& {
         return { std::begin(_iterable) + _n, 0 };
     }
 

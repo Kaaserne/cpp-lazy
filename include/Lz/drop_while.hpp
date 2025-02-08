@@ -3,6 +3,7 @@
 #ifndef LZ_DROP_WHILE_HPP
 #define LZ_DROP_WHILE_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/drop_while.hpp>
 
 namespace lz {
@@ -23,7 +24,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto dropped = vec | lz::drop_while([](int i) { return i < 3; }); // dropped = { 3, 4, 5 }
  * ```
  */
-detail::drop_while_adaptor drop_while{};
+static const detail::drop_while_adaptor drop_while{};
 
 #else
 

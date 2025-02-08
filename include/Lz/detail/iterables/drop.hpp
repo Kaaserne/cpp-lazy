@@ -4,13 +4,14 @@
 #define LZ_DROP_ITERABLE_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/ref_or_view.hpp>
 #include <Lz/detail/traits.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable>
-class drop_iterable {
-    Iterable _iterable;
+class drop_iterable : public lazy_view {
+    ref_or_view<Iterable> _iterable;
     diff_iterable_t<Iterable> _n;
 
 public:
@@ -22,37 +23,28 @@ public:
     constexpr drop_iterable() = default;
 
     template<class I>
-    constexpr drop_iterable(I&& iterable, diff_iterable_t<Iterable> n) noexcept :
-        _iterable{ iterable },
-        _n{ n } {
+    constexpr drop_iterable(I&& iterable, diff_iterable_t<Iterable> n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept {
-        return _iterable.size() - static_cast<std::size_t>(_n);
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, std::size_t> size() const noexcept {
+        return lz::size(_iterable) - static_cast<std::size_t>(_n);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return std::next(std::move(_iterable).begin(), _n);
+        return std::next(detail::begin(std::move(_iterable)), _n);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return std::next(std::begin(_iterable), _n);
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD constexpr enable_if<is_sentinel<I, sentinel>::value, sentinel> end() const& noexcept {
-        return {};
-    }
-
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel>::value, I> end() const& {
+    LZ_NODISCARD constexpr sentinel end() const& {
         return std::end(_iterable);
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel>::value, I> end() && {
-        return std::move(_iterable).end();
+    LZ_NODISCARD constexpr sentinel end() && {
+        return detail::end(std::move(_iterable));
     }
 };
 } // namespace detail

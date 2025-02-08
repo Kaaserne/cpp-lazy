@@ -1,9 +1,11 @@
 #include <Lz/generate.hpp>
 #include <Lz/inclusive_scan.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
-#include <iostream>
 #include <list>
+#include <map>
 #include <numeric>
+#include <unordered_map>
 
 TEST_CASE("Inclusive scan with sentinels") {
     int x = 1;
@@ -36,7 +38,8 @@ TEST_CASE("Empty or one element inclusive scan") {
 TEST_CASE("Inclusive scan changing and creating elements", "[InclusiveScan][Basic functionality]") {
     int arr[32];
     std::iota(std::begin(arr), std::end(arr), 0);
-    auto scan = lz::inclusive_scan(arr);
+    auto scan = arr | lz::inclusive_scan(0);
+    REQUIRE(scan.size() == lz::size(arr));
     auto begin = scan.begin();
 
     std::ptrdiff_t sum = 0;
@@ -86,33 +89,33 @@ TEST_CASE("Inclusive scan splitter to containers", "[InclusiveScan][To container
 
     SECTION("To array") {
         std::array<int, 8> expected = { 2, 7, 13, 17, 104, 112, 157, 164 };
-        auto actual = scanner.to<std::array<int, expected.size()>>();
+        auto actual = scanner | lz::to<std::array<int, expected.size()>>();
         REQUIRE(actual == expected);
     }
 
     SECTION("To vector") {
         std::vector<int> expected = { 2, 7, 13, 17, 104, 112, 157, 164 };
-        auto actual = scanner.to_vector();
+        auto actual = scanner | lz::to<std::vector>();
         REQUIRE(expected == actual);
     }
 
     SECTION("To other container using to<>()") {
         std::list<int> expected = { 2, 7, 13, 17, 104, 112, 157, 164 };
-        auto actual = scanner.to<std::list<int>>();
+        auto actual = scanner | lz::to<std::list<int>>();
         REQUIRE(expected == actual);
     }
 
     SECTION("To map") {
         std::map<int, int> expected = { { 4, 2 },     { 14, 7 },    { 26, 13 },   { 34, 17 },
                                         { 208, 104 }, { 224, 112 }, { 314, 157 }, { 328, 164 } };
-        auto actual = scanner.to_map([](int i) { return std::make_pair(i + i, i); });
+        auto actual = scanner | lz::map([](int i) { return std::make_pair(i + i, i); }) | lz::to<std::map<int, int>>();
         REQUIRE(expected == actual);
     }
 
     SECTION("To unordered map") {
         std::unordered_map<int, int> expected = { { 4, 2 },     { 14, 7 },    { 26, 13 },   { 34, 17 },
                                                   { 208, 104 }, { 224, 112 }, { 314, 157 }, { 328, 164 } };
-        auto actual = scanner.to_unordered_map([](int i) { return std::make_pair(i + i, i); });
+        auto actual = scanner | lz::map([](int i) { return std::make_pair(i + i, i); }) | lz::to<std::unordered_map<int, int>>();
         REQUIRE(expected == actual);
     }
 }

@@ -12,12 +12,12 @@ struct take_adaptor {
     using adaptor = take_adaptor;
 
     template<class Iterable>
-    constexpr take_iterable<Iterable> operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
+    LZ_NODISCARD constexpr take_iterable<Iterable> operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
         return { std::forward<Iterable>(iterable), n };
     }
 
     template<class DiffT>
-    constexpr fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
         return { n };
     }
 };

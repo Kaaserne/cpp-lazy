@@ -26,10 +26,10 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
-    S _end;
-    difference_type _chunk_size;
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
+    S _end{};
+    difference_type _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
         for (difference_type count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
@@ -87,11 +87,11 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _begin;
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
-    Iterator _end;
-    difference_type _chunk_size;
+    Iterator _begin{};
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
+    Iterator _end{};
+    difference_type _chunk_size{};
 
 #ifdef __cpp_if_constexpr
     LZ_CONSTEXPR_CXX_20 void next_chunk() {

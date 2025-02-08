@@ -1,62 +1,69 @@
-// #pragma once
+#pragma once
 
-// #ifndef LZ_LOOP_HPP
-// #define LZ_LOOP_HPP
+#ifndef LZ_LOOP_HPP
+#define LZ_LOOP_HPP
 
-// #include <Lz/basic_iterable.hpp>
-// #include <Lz/detail/iterators/loop.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/loop.hpp>
 
-// namespace lz {
+namespace lz {
 
-// LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// template<class Iterator, class S>
-// class loop_iterable final
-//     : public detail::basic_iterable<detail::loop_iterator<Iterator, S>, typename detail::loop_iterator<Iterator, S>::sentinel>
-//     {
+#ifdef LZ_HAS_CXX_11
 
-//     constexpr loop_iterable(Iterator begin, S end, std::forward_iterator_tag) :
-//         detail::basic_iterable<iterator, default_sentinel>(iterator(std::move(begin), std::move(begin), std::move(end))) {
-//     }
+/**
+ * @brief Loops over an iterable. Can be finite or infinite.
+ * If finite:
+ *     Contains a .size() method if the input iterable has a .size() method. Will return an actual iterator if the input
+ *     iterable is at least bidirectional. Otherwise it will return a default_sentinel. Its input iterator category will
+ *     be the same as the input iterator category. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * auto looper = lz::loop(vec, 2); // {1, 2, 3, 4, 1, 2, 3, 4}
+ * // or
+ * auto looper = vec | lz::loop(2); // {1, 2, 3, 4, 1, 2, 3, 4}
+ * ```
+ * If infinite:
+ *     Does not contain a .size() method. Loop infinitely over the input iterable. Its input iterator category will
+ *     always be forward. It also returns a default_sentinel. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * auto looper = lz::loop(vec); // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+ * // or
+ * auto looper = vec | lz::loop; // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+ */
+static const detail::loop_adaptor loop{};
 
-//     constexpr loop_iterable(Iterator begin, S end, std::bidirectional_iterator_tag) :
-//         detail::basic_iterable<iterator>(iterator(begin, begin, end), iterator(end, begin, end)) {
-//     }
+#else
 
-// public:
-//     using iterator = detail::loop_iterator<Iterator, S>;
-//     using const_iterator = iterator;
-//     using value_type = typename iterator::value_type;
+/**
+ * @brief Loops over an iterable. Can be finite or infinite.
+ * If finite:
+ *     Contains a .size() method if the input iterable has a .size() method. Will return an actual iterator if the input
+ *     iterable is at least bidirectional. Otherwise it will return a default_sentinel. Its input iterator category will
+ *     be the same as the input iterator category. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * auto looper = lz::loop(vec, 2); // {1, 2, 3, 4, 1, 2, 3, 4}
+ * // or
+ * auto looper = vec | lz::loop(2); // {1, 2, 3, 4, 1, 2, 3, 4}
+ * ```
+ * If infinite:
+ *     Does not contain a .size() method. Loop infinitely over the input iterable. Its input iterator category will
+ *     always be forward. It also returns a default_sentinel. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * auto looper = lz::loop(vec); // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+ * // or
+ * auto looper = vec | lz::loop; // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+ */
+LZ_INLINE_VAR constexpr detail::loop_n_adaptor loop{};
 
-//     constexpr loop_iterable(Iterator begin, S end) : loop_iterable(std::move(begin), std::move(end), iter_cat_t<Iterator>{}) {
-//     }
+#endif
 
-//     loop_iterable() = default;
-// };
+LZ_MODULE_EXPORT_SCOPE_END
 
-// /**
-//  * @addtogroup ItFns
-//  * @{
-//  */
+} // namespace lz
 
-// /**
-//  * Loops over iterable indefinitely
-//  *
-//  * @param iterable The sequence to loop over.
-//  * @return A loop iterator object.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD constexpr loop_iterable<iter_t<Iterable>, sentinel_t<Iterable>> loop(Iterable&& iterable) {
-//     return { std::forward<Iterable>(iterable).begin()), std::forward<Iterable>(iterable).end() };
-// }
-
-// // End of group
-// /**
-//  * @}
-//  */
-
-// LZ_MODULE_EXPORT_SCOPE_END
-
-// } // namespace lz
-
-// #endif // LZ_LOOP_HPP
+#endif // LZ_LOOP_HPP

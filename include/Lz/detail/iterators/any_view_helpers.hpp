@@ -15,7 +15,7 @@ class iterator_wrapper : public iter_base<iterator_wrapper<T, Reference, IterCat
                                           DiffType, IterCat> {
 
     using any_iter_base = iterator_base<Reference, IterCat, DiffType>;
-    std::shared_ptr<any_iter_base> _ptr;
+    std::unique_ptr<any_iter_base> _implementation{};
 
 public:
     using value_type = T;
@@ -26,55 +26,48 @@ public:
 
     constexpr iterator_wrapper() = default;
 
-    iterator_wrapper(const std::shared_ptr<any_iter_base>& ptr) : _ptr(ptr->clone()) {
+    iterator_wrapper(const std::unique_ptr<any_iter_base>& ptr) : _implementation{ ptr->clone() } {
     }
 
-    iterator_wrapper(std::shared_ptr<any_iter_base>&& ptr) : _ptr(std::move(ptr)) {
+    iterator_wrapper(std::unique_ptr<any_iter_base>&& ptr) noexcept : _implementation{ std::move(ptr) } {
     }
 
-    iterator_wrapper(const iterator_wrapper& other) : _ptr(other._ptr->clone()) {
+    iterator_wrapper(const iterator_wrapper& other) : _implementation{ other._implementation->clone() } {
     }
 
     iterator_wrapper& operator=(const iterator_wrapper& other) {
         if (this != &other) {
-            _ptr = other._ptr->clone();
-        }
-        return *this;
-    }
-
-    iterator_wrapper& operator=(std::shared_ptr<any_iter_base>&& ptr) {
-        if (_ptr != ptr) {
-            _ptr = std::move(ptr);
+            _implementation = other._implementation->clone();
         }
         return *this;
     }
 
     reference dereference() const {
-        return _ptr->dereference();
+        return _implementation->dereference();
     }
 
     pointer arrow() const {
-        return _ptr->arrow();
+        return _implementation->arrow();
     }
 
     void increment() {
-        _ptr->increment();
+        _implementation->increment();
     }
 
     void decrement() {
-        _ptr->decrement();
+        _implementation->decrement();
     }
 
     bool eq(const iterator_wrapper& other) const {
-        return _ptr->eq(*other._ptr);
+        return _implementation->eq(*other._implementation);
     }
 
     void plus_is(const DiffType n) {
-        _ptr->plus_is(n);
+        _implementation->plus_is(n);
     }
 
     DiffType difference(const iterator_wrapper& other) const {
-        return _ptr->minus(*other._ptr);
+        return _implementation->minus(*other._implementation);
     }
 };
 

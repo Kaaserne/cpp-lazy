@@ -5,7 +5,6 @@
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/detail/func_container.hpp>
 #include <Lz/iterator_base.hpp>
 
 namespace lz {
@@ -23,11 +22,11 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
     bool _trailing_empty{ true };
-    S _end;
-    mutable func_container<UnaryPredicate> _predicate;
+    S _end{};
+    UnaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;
@@ -58,8 +57,8 @@ public:
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    constexpr enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
-        static_assert(!is_ra_tag<Iterator>::value, "Iterator must be a random access range");
+    LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        static_assert(is_ra<Iterator>::value, "Iterator must be a random access range");
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
     }
 

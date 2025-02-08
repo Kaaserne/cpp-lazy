@@ -1,7 +1,10 @@
 #include <Lz/c_string.hpp>
+#include <Lz/map.hpp>
 #include <Lz/unique.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Unique using sentinels") {
     auto str = lz::c_string("aabbcccddefgghhj");
@@ -14,7 +17,7 @@ TEST_CASE("Unique using sentinels") {
 TEST_CASE("Unique changing and creating elements", "[Unique][Basic functionality]") {
     std::array<int, 4> arr = { 3, 2, 3, 1 };
     std::sort(arr.begin(), arr.end());
-    auto unique = lz::unique(arr);
+    auto unique = arr | lz::unique;
     auto beg = unique.begin();
     constexpr std::size_t size = 3;
 
@@ -23,13 +26,13 @@ TEST_CASE("Unique changing and creating elements", "[Unique][Basic functionality
 
     SECTION("Should be unique") {
         std::array<int, size> expected = { 1, 2, 3 };
-        REQUIRE(expected == unique.to<std::array<int, size>>());
+        REQUIRE(expected == (unique | lz::to<std::array<int, size>>()));
     }
 
     SECTION("Should be unique too, using >") {
         std::array<int, size> expected = { 3, 2, 1 };
-        auto unique_greater = lz::unique(expected, std::greater<int>());
-        REQUIRE(expected == unique_greater.to<std::array<int, size>>());
+        auto unique_greater = expected | lz::unique(std::greater<int>());
+        REQUIRE(expected == (unique_greater | lz::to<std::array<int, size>>()));
         REQUIRE(std::is_sorted(expected.begin(), expected.end(), std::greater<int>()));
     }
 }
@@ -96,25 +99,25 @@ TEST_CASE("Unique to container", "[Unique][To container]") {
     auto unique = lz::unique(arr);
 
     SECTION("To array") {
-        auto unique_array = unique.to<std::array<int, size>>();
+        auto unique_array = unique | lz::to<std::array<int, size>>();
         std::array<int, size> expected = { 1, 2, 3 };
         REQUIRE(unique_array == expected);
     }
 
     SECTION("To vector") {
-        auto unique_vec = unique.to_vector();
+        auto unique_vec = unique | lz::to<std::vector>();
         std::vector<int> expected = { 1, 2, 3 };
         REQUIRE(unique_vec == expected);
     }
 
     SECTION("To other container using to<>()") {
-        auto unique_list = unique.to<std::list<int>>();
+        auto unique_list = unique | lz::to<std::list<int>>();
         std::list<int> expected = { 1, 2, 3 };
         REQUIRE(unique_list == expected);
     }
 
     SECTION("To map") {
-        std::map<int, int> actual = unique.to_map([](const int i) { return std::make_pair(i, i); });
+        auto actual = unique | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
 
         std::map<int, int> expected = {
             std::make_pair(1, 1),
@@ -126,7 +129,7 @@ TEST_CASE("Unique to container", "[Unique][To container]") {
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<int, int> actual = unique.to_unordered_map([](const int i) { return std::make_pair(i, i); });
+        auto actual = unique | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
 
         std::unordered_map<int, int> expected = {
             std::make_pair(1, 1),

@@ -1,11 +1,10 @@
+#include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <array>
 #include <catch2/catch.hpp>
 #include <list>
-
-#ifdef LZ_HAS_CXX_11
-#include <Lz/common.hpp>
-#endif // LZ_HAS_CXX_11
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("repeat_iterable changing and creating elements", "[repeat_iterable][Basic functionality]") {
     int to_repeat = 20;
@@ -13,7 +12,7 @@ TEST_CASE("repeat_iterable changing and creating elements", "[repeat_iterable][B
 
     SECTION("Should be 5 times 20") {
         std::size_t counter = 0;
-        repeater.for_each([&counter, to_repeat](int i) {
+        lz::for_each(repeater, [&counter, to_repeat](int i) {
             REQUIRE(i == to_repeat);
             ++counter;
         });
@@ -64,17 +63,17 @@ TEST_CASE("Empty or one element repeat") {
 TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
     constexpr auto times = 5;
     const int to_repeat = 20;
-    auto repeater = lz::repeat(to_repeat, times);
+    auto repeater = to_repeat | lz::repeat(times);
 
     SECTION("To array") {
-        std::array<int, times> array = repeater.to<std::array<int, times>>();
+        std::array<int, times> array = repeater | lz::to<std::array<int, times>>();
         for (int i : array) {
             REQUIRE(i == to_repeat);
         }
     }
 
     SECTION("To vector") {
-        std::vector<int> vec = repeater.to_vector();
+        std::vector<int> vec = repeater | lz::to<std::vector>();
         for (int i : vec) {
             REQUIRE(i == to_repeat);
         }
@@ -82,7 +81,7 @@ TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
     }
 
     SECTION("To other container using to<>()") {
-        std::list<int> lst = repeater.to<std::list<int>>();
+        std::list<int> lst = repeater | lz::to<std::list>();
         for (int i : lst) {
             REQUIRE(i == to_repeat);
         }
@@ -90,7 +89,7 @@ TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
     }
 
     SECTION("To map") {
-        std::map<int, int> actual = repeater.to_map([](const int i) { return std::make_pair(i, i); });
+        auto actual = repeater | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         std::map<int, int> expected;
 
         for (int i = 0; i < times; i++) {
@@ -101,7 +100,8 @@ TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
     }
 
     SECTION("To unordered map") {
-        std::unordered_map<int, int> actual = repeater.to_unordered_map([](const int i) { return std::make_pair(i, i); });
+        auto actual =
+            repeater | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         std::unordered_map<int, int> expected;
 
         for (int i = 0; i < times; i++) {
