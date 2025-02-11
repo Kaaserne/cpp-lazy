@@ -7,7 +7,7 @@
 #include <map>
 #include <unordered_map>
 
-TEST_CASE("Reference and copmile test with operator|") {
+TEST_CASE("Reference and compile test with operator|") {
     std::vector<int> vec1 = { 1 };
     std::vector<int> vec2 = { 1 };
     const std::vector<int> vec3 = { 1 };

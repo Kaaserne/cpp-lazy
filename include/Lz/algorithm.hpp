@@ -96,18 +96,6 @@ LZ_NODISCARD constexpr val_iterable_t<Iterable> back_or(Iterable&& iterable, T&&
 }
 
 /**
- * @brief Gets the distance between two iterators. This function is O(n) for forward iterators, O(1) for random access iterators.
- *
- * @param begin The beginning of the range
- * @param end The ending of the range
- * @return The distance between the two iterators
- */
-template<class Iterator, class S>
-LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
-    return detail::distance(std::move(begin), std::move(end));
-}
-
-/**
  * @brief Accumulates the values in the range [begin, end) using the binary operator @p binary_op
  *
  * @param iterable The iterable to accumulate
@@ -504,7 +492,7 @@ template<class Iterable, class OutputIterator>
 LZ_CONSTEXPR_CXX_14 void copy(Iterable&& iterable, OutputIterator output) {
     using detail::copy;
     using std::copy;
-    copy(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), std::move(output));
+    copy(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), output);
 }
 
 /**
@@ -549,10 +537,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool equal(IterableA&& a, IterableB&& b, Binary
 template<class Iterable, class T, class BinaryPredicate = MAKE_BIN_PRED(less)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable>
 lower_bound(Iterable&& iterable, const T& value, BinaryPredicate&& binary_predicate = {}) {
-    using detail::lower_bound;
-    using std::lower_bound;
-    return lower_bound(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), value,
-                       std::forward<BinaryPredicate>(binary_predicate));
+    return detail::lower_bound(std::forward<Iterable>(iterable), value, std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**
@@ -567,10 +552,7 @@ lower_bound(Iterable&& iterable, const T& value, BinaryPredicate&& binary_predic
 template<class Iterable, class T, class BinaryPredicate = MAKE_BIN_PRED(less)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable>
 upper_bound(Iterable&& iterable, const T& value, BinaryPredicate&& binary_predicate = {}) {
-    using detail::upper_bound;
-    using std::upper_bound;
-    return upper_bound(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), value,
-                       std::forward<BinaryPredicate>(binary_predicate));
+    return detail::upper_bound(std::forward<Iterable>(iterable), value, std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**
@@ -584,10 +566,7 @@ upper_bound(Iterable&& iterable, const T& value, BinaryPredicate&& binary_predic
 template<class Iterable, class T, class BinaryPredicate = MAKE_BIN_PRED(less)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17 bool
 binary_search(Iterable&& iterable, const T& value, BinaryPredicate&& binary_predicate = {}) {
-    using detail::binary_search;
-    using std::binary_search;
-    return binary_search(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), value,
-                         std::forward<BinaryPredicate>(binary_predicate));
+    return detail::binary_search(std::forward<Iterable>(iterable), value, std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**

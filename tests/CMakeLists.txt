@@ -64,8 +64,8 @@ add_executable(cpp-lazy-tests
 	take.cpp
 	take_while.cpp
 	unique.cpp
-	# zip_longest.cpp
-	# zip.cpp
+	zip_longest.cpp
+	zip.cpp
 )
 
 set_source_files_properties(string_view.cpp PROPERTIES COMPILE_DEFINITIONS "LZ_STANDALONE")

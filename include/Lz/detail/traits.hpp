@@ -45,6 +45,30 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
+// #ifdef LZ_HAS_CXX_17
+
+// template<class... Ts>
+// using conjuction = std::conjunction<Ts...>;
+
+// #else
+
+template<bool Value, class T, class... Rest>
+struct conjunction_impl {
+    using type = T;
+};
+
+template<class T, class Next, class... Rest>
+struct conjunction_impl<true, T, Next, Rest...> {
+    using type = typename conjunction_impl<static_cast<bool>(Next::value), Next, Rest...>::type;
+};
+
+template<class... Ts>
+struct conjunction : std::false_type {};
+
+template<class T,  class... Rest>
+struct conjunction<T, Rest...> : conjunction_impl<static_cast<bool>(T::value), T, Rest...>::type {};
+// #endif
+
 #ifdef LZ_HAS_CXX_11
 
 struct less {
@@ -156,11 +180,11 @@ using remove_cvref = typename std::remove_cv<remove_reference_t<T>>::type;
 #endif // LZ_HAS_CXX_20
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
     -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())>;
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
     -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
 
 template<class Iterable>
@@ -403,21 +427,6 @@ using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>
 template<class IterTuple>
 using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
 
-template<class...>
-struct is_all_same : std::false_type {};
-
-template<class T, class U, class... Vs>
-struct is_all_same<T, U, Vs...> : std::integral_constant<bool, std::is_same<T, U>::value && is_all_same<U, Vs...>::value> {};
-
-template<class T, class U>
-struct is_all_same<T, U> : std::is_same<T, U> {};
-
-template<>
-struct is_all_same<std::true_type> : std::true_type {};
-
-template<>
-struct is_all_same<std::false_type> : std::false_type {};
-
 template<class IterTag>
 using is_bidi_tag = std::is_convertible<IterTag, std::bidirectional_iterator_tag>;
 
@@ -439,6 +448,18 @@ using is_sentinel = std::integral_constant<bool, !std::is_same<Iterator, S>::val
 template<class Iterable>
 using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value>;
 } // namespace detail
+
+/**
+ * @brief Helper to check whether a type is sized i.e. contains a .size() method. Example:
+ * ```cpp
+ * std::vector<int> v;
+ * static_assert(lz::sized<decltype(v)>::value, "Vector is sized");
+ * 
+ * auto not_sized = lz::cstring("Hello");
+ * static_assert(!lz::sized<decltype(not_sized)>::value, "C string is not sized"); // C strings are not sized
+ * ```
+ */
+using detail::sized;
 
 /**
  * @brief Selects @p S if @p Tag is not at least bidirectional, otherwise selects @p Iterator.

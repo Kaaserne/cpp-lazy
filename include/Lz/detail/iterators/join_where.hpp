@@ -3,13 +3,13 @@
 #ifndef LZ_JOIN_WHERE_ITERATOR_HPP
 #define LZ_JOIN_WHERE_ITERATOR_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
-// TODO: possible to make this bidirectional?
 template<class IterA, class SA, class IterB, class SB, class SelectorA, class SelectorB, class ResultSelector>
 class join_where_iterator : public iter_base<join_where_iterator<IterA, SA, IterB, SB, SelectorA, SelectorB, ResultSelector>,
                                              func_ret_type_iters<ResultSelector, IterA, IterB>,
@@ -24,11 +24,10 @@ private:
 
     using selector_a_ret_val = decay_t<func_ret_type<SelectorA, ref_type_a>>;
 
+    basic_iterable<IterB, SB> _iterable{};
     IterA _iter_a{};
-    IterB _iter_b{};
     IterB _begin_b{};
     SA _end_a{};
-    SB _end_b{};
 
     SelectorA _selector_a{};
     SelectorB _selector_b{};
@@ -36,24 +35,25 @@ private:
 
     LZ_CONSTEXPR_CXX_17 void find_next() {
         using detail::find_if;
-        using detail::lower_bound;
         using std::find_if;
-        using std::lower_bound;
 
         _iter_a = find_if(std::move(_iter_a), _end_a, [this](ref_t<IterA> a) {
             auto&& to_find = _selector_a(a);
-            _iter_b = lower_bound(std::move(_iter_b), _end_b, to_find,
-                                  [this](ref_t<IterB> b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
-            if (_iter_b != _end_b && !(to_find < _selector_b(*_iter_b))) {
+
+            auto pos = lz::lower_bound(_iterable, to_find,
+                                       [this](ref_t<IterB> b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
+
+            if (pos != _iterable.end() && !(to_find < _selector_b(*pos))) {
+                _iterable = lz::to_iterable(pos, _iterable.end());
                 return true;
             }
-            _iter_b = _begin_b;
+            _iterable = lz::to_iterable(_begin_b, _iterable.end());
             return false;
         });
     }
 
 public:
-    using reference = decltype(_result_selector(*_iter_a, *_iter_b));
+    using reference = decltype(_result_selector(*_iter_a, *_iterable.begin()));
     using value_type = decay_t<reference>;
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
@@ -61,11 +61,10 @@ public:
 
     LZ_CONSTEXPR_CXX_17
     join_where_iterator(IterA it_a, SA end_a, IterB it_b, SB end_b, SelectorA a, SelectorB b, ResultSelector result_selector) :
+        _iterable{ std::move(it_b), std::move(end_b) },
         _iter_a{ std::move(it_a) },
-        _iter_b{ it_b },
-        _begin_b{ std::move(it_b) },
+        _begin_b{ _iterable.begin() },
         _end_a{ std::move(end_a) },
-        _end_b{ std::move(end_b) },
         _selector_a{ std::move(a) },
         _selector_b{ std::move(b) },
         _result_selector{ std::move(result_selector) } {
@@ -75,7 +74,7 @@ public:
     constexpr join_where_iterator() = default;
 
     constexpr reference dereference() const {
-        return _result_selector(*_iter_a, *_iter_b);
+        return _result_selector(*_iter_a, *_iterable.begin());
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -83,7 +82,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        ++_iter_b;
+        _iterable = lz::to_iterable(std::next(_iterable.begin()), _iterable.end());
         find_next();
     }
 

@@ -38,89 +38,28 @@ namespace detail {
 #define LZ_ASSERT(CONDITION, MSG) ((CONDITION) ? ((void)0) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG)))
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
     -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
     return std::forward<Iterable>(c).begin();
 }
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
     -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
     return std::forward<Iterable>(c).end();
 }
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
     -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(c))> {
     return std::begin(c);
 }
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
     -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(c))> {
     return std::end(c);
 }
-
-template<class IterableTuple, std::size_t... I>
-LZ_CONSTEXPR_CXX_14 auto begin_tuple(IterableTuple&& iterable_tuple, std::index_sequence<I...>)
-    -> decltype(std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {
-    return std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
-}
-
-template<class IterableTuple, std::size_t... I>
-LZ_CONSTEXPR_CXX_14 auto end_tuple(IterableTuple&& iterable_tuple, std::index_sequence<I...>)
-    -> decltype(std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {
-    return std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
-}
-
-template<class Fn>
-struct tuple_expand {
-private:
-    Fn _fn;
-
-public:
-    constexpr tuple_expand() = default;
-
-    template<class F>
-    explicit constexpr tuple_expand(F&& fn) : _fn(std::forward<F>(fn)) {
-    }
-
-    template<class Tuple, std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence_helper<I...>)
-        -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
-    }
-
-    template<class Tuple, std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence_helper<I...>) const
-        -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
-    }
-
-    template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Tuple&& tuple)
-        -> decltype(call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{});
-    }
-
-    template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Tuple&& tuple) const
-        -> decltype(call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{});
-    }
-};
-
-template<class Fn>
-constexpr tuple_expand<decay_t<Fn>> make_expand_fn(Fn&& fn) {
-    return { std::forward<Fn>(fn) };
-}
-
-template<class GenFn, class... Args>
-using tuple_invoker = decltype(make_expand_fn(std::declval<GenFn>()));
-
-template<class GenFn, class... Args>
-using tuple_invoker_ret = decltype(std::declval<tuple_invoker<GenFn, Args...>>()(
-    std::declval<typename std::add_lvalue_reference<std::tuple<Args...>>::type>()));
 
 template<class Arithmetic>
 LZ_CONSTEXPR_CXX_14 bool is_even(const Arithmetic value) noexcept {
@@ -145,29 +84,132 @@ LZ_CONSTEXPR_CXX_14 Result round_even(const Arithmetic a, const Arithmetic b) no
     }
     return static_cast<Result>(a / b) + 1;
 }
+
+template<class Iterator, class S>
+LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance_impl(Iterator begin, S end, std::forward_iterator_tag) {
+    diff_type<Iterator> dist = 0;
+    for (; begin != end; ++begin, ++dist) {
+    }
+    return dist;
+}
+
+template<class Iterator, class S>
+constexpr diff_type<Iterator> distance_impl(Iterator begin, S end, std::random_access_iterator_tag) {
+    return end - begin;
+}
 } // namespace detail
+
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+/**
+ * @brief Gets the distance of an iterable. If iterable is not random access, the operation will be O(n), otherwise O(1).
+ *
+ * @param begin The beginning of the iterable
+ * @param end The end of the iterable
+ * @return The length of the iterable
+ */
+template<class Iterator, class S>
+constexpr diff_type<Iterator> distance(Iterator begin, S end) {
+    return detail::distance_impl(std::move(begin), std::move(end), iter_cat_t<Iterator>{});
+}
 
 #ifdef LZ_HAS_CXX_17
 
+/**
+ * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::size(vec) << '\n'; // prints 5
+ * ```
+ *
+ * @param i The container to get the size from.
+ * @return The size of the container.
+ */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(Iterable&& c) noexcept(noexcept(std::size(c))) {
-    static_assert(detail::sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) {
+    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
     return std::size(c);
 }
 
 #else
 
+/**
+ * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::size(vec) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The container to get the size from.
+ * @return The size of the container.
+ */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(const Iterable& c) noexcept(noexcept(c.size())) -> decltype(c.size()) {
-    static_assert(detail::sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(c.size())) -> decltype(i.size()) {
+    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
     return c.size();
 }
 
+/**
+ * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * ```cpp
+ * int arr[] = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::size(arr) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The container to get the size from.
+ * @return The size of the container.
+ */
 template<class T, size_t N>
 LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
     return N;
 }
 
 #endif
+
+/**
+ * @brief Gets the size of an iterable. If the iterable is not sized, it will calculate the size by iterating over the iterable,
+ * which is O(n). Example:
+ * ```cpp
+ * // Sized, making it O(1)
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::eager_size(vec) << '\n'; // prints 5
+ *
+ * // Not sized, making it O(n)
+ * auto not_sized = lz::c_string("Hello");
+ * std::cout << lz::eager_size(not_sized) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The iterable to get the size of.
+ * @return The size of the iterable.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr auto eager_size(Iterable&& c) -> detail::enable_if<detail::sized<Iterable>::value, decltype(lz::size(c))> {
+    return lz::size(c);
+}
+
+/**
+ * @brief Gets the size of an iterable. If the iterable is not sized, it will calculate the size by iterating over the iterable,
+ * which is O(n). Example:
+ * ```cpp
+ * // Sized, making it O(1)
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::eager_size(vec) << '\n'; // prints 5
+ *
+ * // Not sized, making it O(n)
+ * auto not_sized = lz::c_string("Hello");
+ * std::cout << lz::eager_size(not_sized) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The iterable to get the size of.
+ * @return The size of the iterable.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, diff_iterable_t<Iterable>> eager_size(Iterable&& c) {
+    using std::distance;
+    return distance(std::begin(c), std::end(c));
+}
+
+LZ_MODULE_EXPORT_SCOPE_END
+
 } // namespace lz
 #endif // LZ_DETAIL_PROCS_HPP

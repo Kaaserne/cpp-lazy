@@ -5,14 +5,13 @@
 
 #include <Lz/detail/iterators/cartesian_product.hpp>
 #include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
 namespace detail {
 template<class... Iterables>
 class cartesian_product_iterable : public lazy_view {
     std::tuple<ref_or_view<Iterables>...> _iterables;
-
-    using is = make_index_sequence<sizeof...(Iterables)>;
 
 public:
     using iterator = cartesian_product_iterator<std::tuple<iter_t<Iterables>...>, std::tuple<sentinel_t<Iterables>...>>;
@@ -29,12 +28,12 @@ public:
     // TODO add size, also add test for that
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        return { begin_tuple(_iterables, is{}), begin_tuple(_iterables, is{}), end_tuple(_iterables, is{}) };
+        return { begin_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
     }
 
     template<class I = iterator>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
-        return { end_tuple(_iterables, is{}), begin_tuple(_iterables, is{}), end_tuple(_iterables, is{}) };
+        return { end_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
     }
 
     template<class I = iterator>
@@ -43,20 +42,14 @@ public:
     }
 
     template<class Iterable>
-    friend cartesian_product_iterable<Iterable, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<Iterable, Iterables...>
     operator|(Iterable&& iterable, cartesian_product_iterable<Iterables...>&& cartesian) {
         return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))),
                                 std::move(cartesian._iterables)) };
     }
 
     template<class Iterable>
-    friend cartesian_product_iterable<Iterable, Iterables...>
-    operator|(Iterable&& iterable, cartesian_product_iterable<Iterables...>& cartesian) {
-        return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))), cartesian._iterables) };
-    }
-
-    template<class Iterable>
-    friend cartesian_product_iterable<Iterable, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<Iterable, Iterables...>
     operator|(Iterable&& iterable, const cartesian_product_iterable<Iterables...>& cartesian) {
         return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))), cartesian._iterables) };
     }

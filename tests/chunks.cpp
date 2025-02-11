@@ -16,7 +16,7 @@ TEST_CASE("Chunks changing and creating elements", "[Chunks][Basic functionality
 
     SECTION("Should be correct length") {
         REQUIRE(std::distance(chunked.begin(), chunked.end()) == 3);
-        static_assert(lz::detail::sized<decltype(v)>::value);
+        static_assert(lz::sized<decltype(v)>::value);
         CHECK(chunked.size() == static_cast<std::size_t>(std::distance(chunked.begin(), chunked.end())));
     }
 }

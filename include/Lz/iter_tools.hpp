@@ -91,6 +91,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 //     return lz::join(strings, "\n");
 // }
 
+// TODO make sized reverse iterator view thingy
 /**
  * @brief Returns an iterable object of which its iterators are reversed.
  * @param iterable The iterable. The iterable must have at least std::bidirectional_iterator_tag.

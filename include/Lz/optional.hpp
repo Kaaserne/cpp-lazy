@@ -8,6 +8,8 @@
 
 #ifdef __cpp_lib_optional
 #include <optional>
+#else // ^^ __cpp_lib_optional vv !__cpp_lib_optional
+#include <stdexcept>
 #endif // __cpp_lib_optional
 
 namespace lz {
@@ -36,38 +38,55 @@ class optional {
         typename std::remove_const<T>::type _value;
         std::uint8_t _dummy;
     };
-    bool _has_value;
+    bool _has_value{false};
 
     template<class U>
-    void construct(U&& obj) noexcept(noexcept(::new(static_cast<void*>(std::addressof(_value))) T(std::forward<U>(obj)))) {
+    void construct(U&& obj) noexcept(std::is_nothrow_constructible<T, U>::value) {
         ::new (static_cast<void*>(std::addressof(_value))) T(std::forward<U>(obj));
         _has_value = true;
     }
 
-public:
-    constexpr optional() noexcept : optional(nullopt) {
+public: // Declare the move constructor as a friend
+    template<class U>
+    friend class optional;
+
+    constexpr optional() noexcept : optional{ nullopt } {
     }
 
-    constexpr optional(nullopt_t) noexcept : _has_value(false) {
+    constexpr optional(nullopt_t) noexcept  {
     }
 
-    template<class U = T>
-    constexpr optional(U&& value) noexcept : _value(std::forward<U>(value)), _has_value(true) {
+    constexpr optional(const T& value) : _value{ value }, _has_value{ true } {
     }
 
-    LZ_CONSTEXPR_CXX_14 optional(optional<T>&& right) noexcept {
-        if (right) {
-            construct(std::move(right.value()));
+    constexpr optional(T&& value) noexcept : _value{ std::move(value) }, _has_value{ true } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 optional(optional<T>&& that) noexcept(std::is_nothrow_move_constructible<T>::value) {
+        if (that) {
+            construct(std::move(*that));
+            that._has_value = false;
         }
-        else {
-            _has_value = false;
-            right._has_value = false;
+    }
+
+    LZ_CONSTEXPR_CXX_14 optional(const optional<T>& that) {
+        if (that) {
+            construct(*that);
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 optional(const optional<T>& right) noexcept {
-        if (right) {
-            construct(right.value());
+    template<class U>
+    LZ_CONSTEXPR_CXX_14 optional(optional<U>&& that) noexcept(std::is_nothrow_constructible<T, U>::value) {
+        if (that) {
+            construct(std::move(*that));
+            that._has_value = false;
+        }
+    }
+
+    template<class U>
+    LZ_CONSTEXPR_CXX_14 optional(const optional<U>& that) {
+        if (that) {
+            construct(*that);
         }
     }
 
@@ -82,105 +101,118 @@ public:
         }
     }
 
-    template<class U = T>
-    LZ_CONSTEXPR_CXX_14 optional& operator=(U&& value) noexcept {
+    LZ_CONSTEXPR_CXX_14 optional& operator=(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value) {
         if (_has_value) {
-            _value = std::forward<U>(value);
+            _value = std::move(value);
         }
         else {
-            construct(std::forward<U>(value));
+            construct(std::move(value));
         }
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 optional& operator=(const optional<T>& value) noexcept {
-        if (_has_value && value) {
-            _value = *value;
+    LZ_CONSTEXPR_CXX_14 optional& operator=(const T& value) {
+        if (_has_value) {
+            _value = value;
         }
-        else if (!value) {
+        else {
+            construct(value);
+        }
+        return *this;
+    }
+
+    LZ_CONSTEXPR_CXX_14 optional& operator=(const optional<T>& that) {
+        if (*this && that) {
+            _value = *that;
+        }
+        else if (!that) {
             _has_value = false;
         }
         else {
-            construct(*value);
+            construct(*that);
         }
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 optional& operator=(optional<T>&& value) noexcept {
-        if (_has_value && value) {
-            _value = std::move(*value);
+    LZ_CONSTEXPR_CXX_14 optional& operator=(optional<T>&& that) noexcept(std::is_nothrow_move_assignable<T>::value) {
+        if (*this && that) {
+            _value = std::move(*that);
         }
-        else if (value) {
-            construct(std::move(*value));
+        else if (that) {
+            construct(std::move(*that));
         }
         else {
             _has_value = false;
         }
-        value._has_value = false;
+        that._has_value = false;
         return *this;
     }
 
-    constexpr explicit operator bool() const noexcept {
+    LZ_NODISCARD constexpr bool has_value() const noexcept {
         return _has_value;
     }
 
-    LZ_CONSTEXPR_CXX_14 const T& value() const {
+    LZ_NODISCARD constexpr explicit operator bool() const noexcept {
+        return _has_value;
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 const T& value() const {
         if (_has_value) {
             return _value;
         }
         throw std::runtime_error("Cannot get uninitialized optional");
     }
 
-    LZ_CONSTEXPR_CXX_14 T& value() {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T& value() {
         return const_cast<T&>(static_cast<const optional<T>*>(this)->value());
     }
 
-    constexpr T& operator*() noexcept {
+    LZ_NODISCARD constexpr T& operator*() noexcept {
         return const_cast<T&>(static_cast<const optional<T>*>(this)->operator*());
     }
 
-    constexpr const T& operator*() const noexcept {
+    LZ_NODISCARD constexpr const T& operator*() const noexcept {
         return _value;
     }
 
     template<class U>
-    constexpr T value_or(U&& v) const& {
+    LZ_NODISCARD constexpr T value_or(U&& v) const& {
         return bool(*this) ? this->value() : static_cast<T>(std::forward<U>(v));
     }
 
     template<class U>
-    constexpr T value_or(U&& v) && {
+    LZ_NODISCARD constexpr T value_or(U&& v) && {
         return bool(*this) ? std::move(this->value()) : static_cast<T>(std::forward<U>(v));
     }
 };
 
-template<class T>
-constexpr bool operator==(const optional<T>& lhs, const optional<T>& rhs) {
+template<class T, class U>
+constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs) {
     return bool(lhs) != bool(rhs) ? false : !bool(lhs) ? true : *lhs == *rhs;
 }
 
-template<class T>
-constexpr bool operator!=(const optional<T>& lhs, const optional<T>& rhs) {
+template<class T, class U>
+constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs) {
     return !(lhs == rhs);
 }
 
-template<class T>
-constexpr bool operator<(const optional<T>& lhs, const optional<T>& rhs) {
+template<class T, class U>
+constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs) {
     return !rhs ? false : !lhs ? true : *lhs < *rhs;
 }
 
-template<class T>
-constexpr bool operator>(const optional<T>& lhs, const optional<T>& rhs) {
+template<class T, class U>
+constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs) {
     return rhs < lhs;
 }
 
-template<class T>
-constexpr bool operator<=(const optional<T>& lhs, const optional<T>& rhs) {
+template<class T, class U>
+constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs) {
     return !(rhs < lhs);
 }
 
-template<class T>
-constexpr bool operator>=(const optional<T>& lhs, const optional<T>& rhs) {
+template<class T, class U>
+constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs) {
     return !(lhs < rhs);
 }
 #endif // __cpp_lib_optional

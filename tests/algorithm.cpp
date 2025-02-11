@@ -75,12 +75,16 @@ TEST_CASE("Front") {
         REQUIRE(lz::front(iterable) == 'H');
     }
 }
-// TODO add back
+
 TEST_CASE("Back") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3 };
+        REQUIRE(lz::back(vec) == 3);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        REQUIRE(lz::back(vec) == 1);
     }
 }
 
@@ -104,15 +108,20 @@ TEST_CASE("Front or") {
     }
 }
 
-// TODO add back_or
 TEST_CASE("Back or") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3 };
+        REQUIRE(lz::back_or(vec, 0) == 3);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        REQUIRE(lz::back_or(vec, 0) == 1);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty") {
+        std::vector<int> vec = {};
+        REQUIRE(lz::back_or(vec, 0) == 0);
     }
 }
 
@@ -298,18 +307,33 @@ TEST_CASE("Find last") {
     }
 }
 
-// TODO add find_last_if
 TEST_CASE("Find last random access") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 5 };
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 5; });
+        REQUIRE(*pos == 5);
+        REQUIRE(lz::distance(vec.begin(), pos) == 5);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 1; });
+        REQUIRE(*pos == 1);
+        REQUIRE(lz::distance(vec.begin(), pos) == 0);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty ") {
+        std::vector<int> vec;
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 1; });
+        REQUIRE(pos == vec.end());
+        REQUIRE(lz::distance(vec.begin(), pos) == 0);
     }
 
-    SECTION("Not found c-string") {
+    SECTION("Not found") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 6; });
+        REQUIRE(pos == vec.end());
+        REQUIRE(lz::distance(vec.begin(), pos) == 5);
     }
 }
 
@@ -347,18 +371,33 @@ TEST_CASE("Find last if") {
     }
 }
 
-// TODO add search
 TEST_CASE("Find last if random access") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty ") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 5 };
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 5; });
+        REQUIRE(*pos == 5);
+        REQUIRE(lz::distance(vec.begin(), pos) == 5);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 1; });
+        REQUIRE(*pos == 1);
+        REQUIRE(lz::distance(vec.begin(), pos) == 0);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty") {
+        std::vector<int> vec;
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 1; });
+        REQUIRE(pos == vec.end());
+        REQUIRE(lz::distance(vec.begin(), pos) == 0);
     }
 
-    SECTION("Not found c-string") {
+    SECTION("Not found") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto pos = lz::find_last_if(vec, [](int i) { return i == 6; });
+        REQUIRE(pos == vec.end());
+        REQUIRE(lz::distance(vec.begin(), pos) == 5);
     }
 }
 
@@ -409,6 +448,69 @@ TEST_CASE("Search") {
         REQUIRE(it.second == iterable.end());
         REQUIRE(lz::distance(iterable.begin(), it.first) == 5);
         REQUIRE(lz::distance(iterable.begin(), it.second) == 5);
+    }
+}
+
+TEST_CASE("Search random access") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        std::vector<int> search = { 5, 6 };
+        auto it = lz::search(vec, search);
+        REQUIRE(*it.first == 5);
+        REQUIRE(*it.second == 7);
+        REQUIRE(lz::distance(vec.begin(), it.first) == 4);
+        REQUIRE(lz::distance(vec.begin(), it.second) == 6);
+        REQUIRE(std::distance(it.first, it.second) == 2);
+    }
+
+    SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        std::vector<int> search = { 1 };
+        auto it = lz::search(vec, search);
+        REQUIRE(*it.first == 1);
+        REQUIRE(it.second == vec.end());
+        REQUIRE(lz::distance(vec.begin(), it.first) == 0);
+        REQUIRE(lz::distance(vec.begin(), it.second) == 1);
+    }
+
+    SECTION("With empty 1") {
+        std::vector<int> vec = {};
+        std::vector<int> search = { 1, 2, 3, 4, 5 };
+        auto it = lz::search(vec, search);
+        REQUIRE(it.first == vec.end());
+        REQUIRE(it.second == vec.end());
+        REQUIRE(lz::distance(vec.begin(), it.first) == 0);
+        REQUIRE(lz::distance(vec.begin(), it.second) == 0);
+    }
+
+    SECTION("With empty 2") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        std::vector<int> search = {};
+        auto it = lz::search(vec, search);
+        REQUIRE(it.first == vec.begin());
+        REQUIRE(it.second == vec.begin());
+        REQUIRE(lz::distance(vec.begin(), it.first) == 0);
+        REQUIRE(lz::distance(vec.begin(), it.second) == 0);
+    }
+
+    SECTION("With empty 3") {
+        std::vector<int> vec = {};
+        std::vector<int> search = {};
+        auto it = lz::search(vec, search);
+        REQUIRE(it.first == vec.end());
+        REQUIRE(it.second == vec.end());
+        REQUIRE(lz::distance(vec.begin(), it.first) == 0);
+        REQUIRE(lz::distance(vec.begin(), it.second) == 0);
+    }
+
+    SECTION("Not found") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        std::vector<int> search = { 5, 6 };
+        auto it = lz::search(vec, search);
+        REQUIRE(it.first == vec.end());
+        REQUIRE(it.second == vec.end());
+        REQUIRE(lz::distance(vec.begin(), it.first) == 5);
+        REQUIRE(lz::distance(vec.begin(), it.second) == 5);
     }
 }
 
@@ -480,18 +582,33 @@ TEST_CASE("Find last if not") {
     }
 }
 
-// TODO add find_or_default
 TEST_CASE("Find last if not random access") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        auto pos = lz::find_last_if_not(vec, [](int i) { return i == 5; });
+        REQUIRE(*pos == 8);
+        REQUIRE(lz::distance(vec.begin(), pos) == 7);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        auto pos = lz::find_last_if_not(vec, [](int i) { return i != 1; });
+        REQUIRE(*pos == *vec.begin());
+        REQUIRE(lz::distance(vec.begin(), pos) == 0);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty") {
+        std::vector<int> vec = {};
+        auto pos = lz::find_last_if_not(vec, [](int i) { return i == 1; });
+        REQUIRE(pos == vec.end());
+        REQUIRE(lz::distance(vec.begin(), pos) == 0);
     }
 
-    SECTION("Not found c-string") {
+    SECTION("Not found") {
+        std::vector<int> vec = { 5, 5, 5 };
+        auto pos = lz::find_last_if_not(vec, [](int i) { return i == 5; });
+        REQUIRE(pos == vec.end());
+        REQUIRE(lz::distance(vec.begin(), pos) == 3);
     }
 }
 
@@ -573,18 +690,25 @@ TEST_CASE("Find last or default") {
     }
 }
 
-// TODO add find_last_or_default_if
 TEST_CASE("Find last or default random access") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::find_last_or_default(vec, 5, 0) == 5);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        REQUIRE(lz::find_last_or_default(vec, 1, 0) == 1);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty") {
+        std::vector<int> vec = {};
+        REQUIRE(lz::find_last_or_default(vec, 1, 0) == 0);
     }
 
-    SECTION("Not found c-string") {
+    SECTION("Not found") {
+        std::vector<int> vec = { 1, 2, 3, 4 };
+        REQUIRE(lz::find_last_or_default(vec, 5, 0) == 0);
     }
 }
 
@@ -614,18 +738,25 @@ TEST_CASE("Find last or default if") {
     }
 }
 
-// TODO add find_last_or_default_not
 TEST_CASE("Find last or default if random access") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 5; }, 0) == 5);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }, 0) == 1);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty") {
+        std::vector<int> vec = {};
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }, 0) == 0);
     }
 
-    SECTION("Not found c-string") {
+    SECTION("Not found") {
+        std::vector<int> vec = { 5, 5, 5 };
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 6; }, 0) == 0);
     }
 }
 
@@ -655,18 +786,25 @@ TEST_CASE("Find last or default not") {
     }
 }
 
-// TODO add find_last_or_default_not_if
 TEST_CASE("Find last or default not random access") {
-    SECTION("With non-empty c-string") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::find_last_or_default_not(vec, 5, 0) == 6);
     }
 
     SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        REQUIRE(lz::find_last_or_default_not(vec, 1, 0) == 0);
     }
 
-    SECTION("With empty c-string") {
+    SECTION("With empty") {
+        std::vector<int> vec = {};
+        REQUIRE(lz::find_last_or_default_not(vec, 1, 0) == 0);
     }
 
-    SECTION("Not found c-string") {
+    SECTION("Not found") {
+        std::vector<int> vec = { 5, 5, 5 };
+        REQUIRE(lz::find_last_or_default_not(vec, 5, 0) == 0);
     }
 }
 
@@ -783,7 +921,6 @@ TEST_CASE("Starts with") {
 }
 
 TEST_CASE("Partition") {
-    // Use lz::detail explicitly here so to prevent ADL
     SECTION("With non-empty c-string") {
         char str[] = "6789012345";
         auto iterable = lz::c_string(str);
@@ -811,7 +948,7 @@ TEST_CASE("Partition") {
     SECTION("With empty c-string") {
         char str[] = "";
         auto iterable = lz::c_string(str);
-        auto partitioned = lz::detail::partition(iterable.begin(), iterable.end(), [](char c) { return c % 2 == 0; });
+        auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
         auto part1 = lz::to_iterable(iterable.begin(), partitioned);
         auto part2 = lz::to_iterable(partitioned, iterable.end());
@@ -823,7 +960,7 @@ TEST_CASE("Partition") {
     SECTION("With all even c-string") {
         char str[] = "2468";
         auto iterable = lz::c_string(str);
-        auto partitioned = lz::detail::partition(iterable.begin(), iterable.end(), [](char c) { return c % 2 == 0; });
+        auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
         auto part1 = lz::to_iterable(iterable.begin(), partitioned);
         auto part2 = lz::to_iterable(partitioned, iterable.end());
@@ -835,7 +972,7 @@ TEST_CASE("Partition") {
     SECTION("With all odd c-string") {
         char str[] = "13579";
         auto iterable = lz::c_string(str);
-        auto partitioned = lz::detail::partition(iterable.begin(), iterable.end(), [](char c) { return c % 2 == 0; });
+        auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
         auto part1 = lz::to_iterable(iterable.begin(), partitioned);
         auto part2 = lz::to_iterable(partitioned, iterable.end());

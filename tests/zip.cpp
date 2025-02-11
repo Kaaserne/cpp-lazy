@@ -1,7 +1,11 @@
 #include <Lz/c_string.hpp>
+#include <Lz/iter_tools.hpp>
+#include <Lz/map.hpp>
 #include <Lz/zip.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Zip with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -22,12 +26,20 @@ TEST_CASE("zip_iterable changing and creating elements", "[zip_iterable][Basic f
     SECTION("Unequal lengths") {
         std::vector<int> ints = { 1, 2, 3, 4, 5 };
         std::vector<double> floats = { 1.2, 3.3 };
-        auto zipper = lz::zip(ints, floats);
+
+        auto zipper = ints | lz::zip(floats);
         auto end = zipper.end();
-        REQUIRE(*--end == std::make_tuple(2, 3.3));
-        REQUIRE(*--end == std::make_tuple(1, 1.2));
+
+        REQUIRE(*--end == std::make_tuple(5, 3.3));
+        REQUIRE(*--end == std::make_tuple(4, 1.2));
         REQUIRE(end == zipper.begin());
         REQUIRE(std::distance(zipper.begin(), zipper.end()) == 2);
+        REQUIRE(floats.size() == zipper.size());
+
+        std::array<std::tuple<int, Approx>, 2> expected = { std::make_tuple(5, Approx{ 3.3f }),
+                                                            std::make_tuple(4, Approx{ 1.2f }) };
+        auto reversed = lz::reverse(zipper);
+        REQUIRE(lz::equal(reversed, expected));
     }
 
     SECTION("Should compile") {
@@ -121,14 +133,17 @@ TEST_CASE("zip_iterable binary operations", "[zip_iterable][Binary ops]") {
     auto begin = zipper.begin();
 
     SECTION("Operator++") {
+        REQUIRE(begin == zipper.begin());
         ++begin;
-        REQUIRE(*begin == std::make_tuple(a[1], Approx(b[1]), c[1]));
+        REQUIRE(*begin == std::make_tuple(*std::next(a.begin()), Approx{ *std::next(b.begin()) }, *std::next(c.begin())));
+        REQUIRE(begin == std::next(zipper.begin()));
     }
 
     SECTION("Operator--") {
         ++begin;
         --begin;
-        REQUIRE(*begin == std::make_tuple(a[0], Approx(b[0]), c[0]));
+        REQUIRE(*begin == std::make_tuple(*a.begin(), Approx(*b.begin()), *c.begin()));
+        REQUIRE(begin == zipper.begin());
     }
 
     SECTION("Operator== & Operator!=") {
@@ -137,33 +152,55 @@ TEST_CASE("zip_iterable binary operations", "[zip_iterable][Binary ops]") {
         REQUIRE(begin == zipper.end());
     }
 
-    SECTION("Operator+(int) offset, tests += as well") {
-        REQUIRE(*(begin + 2) == std::make_tuple(a[2], Approx(b[2]), c[2]));
-    }
+    SECTION("Operator+(int)") {
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
+            REQUIRE(*(begin + i) ==
+                    std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
+        }
 
-    SECTION("Operator-(int) offset, tests -= as well") {
-        ++begin;
-        REQUIRE(*(begin - 1) == std::make_tuple(a[0], Approx(b[0]), c[0]));
+        auto end = zipper.end();
+        for (std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
+            REQUIRE(*(end - i) == std::make_tuple(*std::prev(a.end(), i), *std::prev(b.end(), i), *std::prev(c.end(), i)));
+        }
+
+        while (begin != end) {
+            ++begin;
+        }
+        for (std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
+            REQUIRE(*(begin - i) == std::make_tuple(*std::prev(a.end(), i), *std::prev(b.end(), i), *std::prev(c.end(), i)));
+        }
+
+        begin = zipper.begin();
+        while (end != begin) {
+            --end;
+        }
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
+            REQUIRE(*(end + i) ==
+                    std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
+        }
     }
 
     SECTION("Operator-(Iterator)") {
         REQUIRE((zipper.end() - zipper.begin()) == 4);
+        REQUIRE(zipper.begin() - zipper.end() == -4);
 
         std::array<short, 3> shortest = { 1, 2, 3 };
         auto zip = lz::zip(c, shortest);
-        REQUIRE(std::distance(zip.begin(), zip.end()) == 3);
-    }
+        auto beg = zip.begin();
+        auto e = zip.end();
 
-    SECTION("Operator[]()") {
-        std::size_t idx = 0;
-        REQUIRE(zipper.begin()[static_cast<std::ptrdiff_t>(idx)] == std::make_tuple(a[idx], Approx(b[idx]), c[idx]));
-    }
+        for (std::ptrdiff_t i = zip.size(); i > 0; i--) {
+            REQUIRE((e - beg) == i);
+            REQUIRE((beg - e) == -i);
+            --e;
+        }
 
-    SECTION("Operator<, <, <=, >, >=") {
-        REQUIRE(zipper.begin() < zipper.end());
-        REQUIRE(zipper.begin() + 1 > zipper.begin());
-        REQUIRE(zipper.begin() + size <= zipper.end());
-        REQUIRE(zipper.begin() + size >= zipper.end());
+        e = zip.end();
+        for (std::ptrdiff_t i = zip.size(); i > 0; i--) {
+            REQUIRE((beg - e) == -i);
+            REQUIRE((e - beg) == i);
+            ++beg;
+        }
     }
 }
 
@@ -174,7 +211,7 @@ TEST_CASE("zip_iterable to containers", "[zip_iterable][To container]") {
     std::array<short, size> c = { 1, 2, 3, 4 };
 
     SECTION("To array") {
-        auto array = lz::zip(a, b, c).to<std::array<std::tuple<int, float, short>, size>>();
+        auto array = lz::zip(a, b, c) | lz::to<std::array<std::tuple<int, float, short>, size>>();
 
         for (std::size_t i = 0; i < array.size(); i++) {
             auto& a_element = std::get<0>(array[i]);
@@ -188,7 +225,7 @@ TEST_CASE("zip_iterable to containers", "[zip_iterable][To container]") {
     }
 
     SECTION("To vector") {
-        auto vector = lz::zip(a, b, c).to_vector();
+        auto vector = lz::zip(a, b, c) | lz::to<std::vector>();
 
         for (std::size_t i = 0; i < vector.size(); i++) {
             auto& a_element = std::get<0>(vector[i]);
@@ -202,7 +239,7 @@ TEST_CASE("zip_iterable to containers", "[zip_iterable][To container]") {
     }
 
     SECTION("To other container using to<>()") {
-        auto list = lz::zip(a, b, c).to<std::list<std::tuple<int, float, short>>>();
+        auto list = lz::zip(a, b, c) | lz::to<std::list<std::tuple<int, float, short>>>();
         auto list_iter = list.begin();
 
         for (std::size_t i = 0; i < list.size(); i++) {
@@ -220,8 +257,8 @@ TEST_CASE("zip_iterable to containers", "[zip_iterable][To container]") {
 
     SECTION("To map") {
         using Tuple = std::tuple<int, float, short>;
-        std::map<int, Tuple> actual =
-            lz::zip(a, b, c).to_map([](const Tuple& tup) { return std::make_pair(std::get<0>(tup), tup); });
+        auto actual = lz::zip(a, b, c) | lz::map([](const Tuple& tup) { return std::make_pair(std::get<0>(tup), tup); }) |
+                      lz::to<std::map<int, Tuple>>();
         std::map<int, std::tuple<int, float, short>> expected = {
             std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
             std::make_pair(2, std::make_tuple(2, 2.f, static_cast<short>(2))),
@@ -234,8 +271,8 @@ TEST_CASE("zip_iterable to containers", "[zip_iterable][To container]") {
 
     SECTION("To map") {
         using Tuple = std::tuple<int, float, short>;
-        std::unordered_map<int, Tuple> actual =
-            lz::zip(a, b, c).to_unordered_map([](const Tuple& tup) { return std::make_pair(std::get<0>(tup), tup); });
+        auto actual = lz::zip(a, b, c) | lz::map([](const Tuple& tup) { return std::make_pair(std::get<0>(tup), tup); }) |
+                      lz::to<std::unordered_map<int, Tuple>>();
 
         std::unordered_map<int, std::tuple<int, float, short>> expected = {
             std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
