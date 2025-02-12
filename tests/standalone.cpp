@@ -30,3 +30,7 @@ TEST_CASE("Overall tests with LZ_STANDALONE defined") {
     REQUIRE(char_joined == "a, b, c, d");
     REQUIRE(lz::map(char_map, [](char c) { return static_cast<char>(c + 1); }).to_string(" ") == "b c d e");
 }
+
+TEST_CASE("Formatting") {
+    // TODO, std::print and std::ostream
+}

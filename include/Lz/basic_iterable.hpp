@@ -114,7 +114,8 @@ struct container_constructor {
     template<class Iterable, class... Args>
     LZ_NODISCARD constexpr enable_if<can_construct<Container, Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
-        return Container(std::begin(iterable), std::end(iterable), std::forward<Args>(args)...);
+        return Container(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
+                         std::forward<Args>(args)...);
     }
 
     template<class Iterable, class... Args>
@@ -141,21 +142,28 @@ struct container_constructor<std::array<ValueType, N>> {
 struct iterable_formatter {
     using adaptor = iterable_formatter;
 
-#if !defined(LZ_STANDALONE)
+#if !defined(LZ_STANDALONE) || defined(LZ_HAS_CXX_20)
 
-    template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20
-        enable_if<!std::is_same<Iterable, lz::string_view>::value && !std::is_array<Iterable>::value, std::string>
-        operator()(const Iterable& iterable, lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
-        return fmt::format(formatter, fmt::join(iterable, delimiter));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 fn_args_holder<adaptor, lz::string_view, lz::string_view>
-    operator()(lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*, const char*>
+    operator()(const char* formatter = "{}", const char* delimiter = ", ") const {
         return { formatter, delimiter };
     }
 
-#elif
+#endif
+
+#if !defined(LZ_STANDALONE)
+
+    template<class Iterable>
+    LZ_NODISCARD std::string
+    operator()(const Iterable& iterable, const char* formatter = "{}", const char* delimiter = ", ") const {
+        return fmt::format(formatter, fmt::join(iterable, delimiter));
+    }
+
+#elif defined(LZ_HAS_CXX_20)
+
+    // TODO
+
+#else
 
     // TODO
 
@@ -165,20 +173,27 @@ struct iterable_formatter {
 struct iterable_printer {
     using adaptor = iterable_printer;
 
-#if !defined(LZ_STANDALONE)
+#if !defined(LZ_STANDALONE) || defined(LZ_HAS_CXX_20)
 
-    template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!std::is_same<Iterable, lz::string_view>::value>
-    operator()(const Iterable& iterable, lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
-        fmt::print(formatter, fmt::join(iterable, delimiter));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 fn_args_holder<adaptor, lz::string_view, lz::string_view>
-    operator()(lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*, const char*>
+    operator()(const char* formatter = "{}", const char* delimiter = ", ") const {
         return { formatter, delimiter };
     }
 
-#elif
+#endif
+
+#if !defined(LZ_STANDALONE)
+
+    template<class Iterable>
+    LZ_NODISCARD void operator()(const Iterable& iterable, const char* formatter = "{}", const char* delimiter = ", ") const {
+        fmt::print(formatter, fmt::join(iterable, delimiter));
+    }
+
+#elif defined(LZ_HAS_CXX_20)
+
+    // TODO
+
+#else
 
     // TODO
 
@@ -348,14 +363,10 @@ operator<<(std::ostream& stream, const Iterable& iterable) {
         return stream;
     }
 
-    stream << *begin;
-    ++begin;
-
-    while (begin != end) {
-        stream << ", " << *begin;
-        ++begin;
-    }
-
+    stream << *begin++;
+    lz::for_each(lz::to_iterable(std::move(begin), std::move(end)), [&stream](const auto& value) { 
+        stream << ", " << value;
+    });
     return stream;
 }
 

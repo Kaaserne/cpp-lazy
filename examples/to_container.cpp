@@ -4,10 +4,6 @@
 #include <set>
 #include <vector>
 
-#ifdef LZ_HAS_EXECUTION
-#    include <execution>
-#endif
-
 int main() {
     auto generator = lz::generate(
         [](char& c) {

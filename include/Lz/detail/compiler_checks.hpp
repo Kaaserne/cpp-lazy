@@ -40,7 +40,7 @@
 #define LZ_CONSTEXPR_CXX_17 inline
 #endif // Has cxx 17
 
-#if (__cplusplus > 201703L) || ((defined(LZ_MSVC) && (LZ_MSVC > 201703L)))
+#if (__cplusplus >= 202002L) || ((defined(LZ_MSVC) && (LZ_MSVC >= 202002L)))
 #define LZ_HAS_CXX_20
 #if defined(__cpp_constexpr_dynamic_alloc) && defined(__cpp_lib_constexpr_dynamic_alloc) &&                                      \
     defined(__cpp_lib_constexpr_string) && defined(__cpp_lib_constexpr_vector) && defined(__cpp_lib_constexpr_algorithms)
@@ -70,10 +70,6 @@
 #else
 #define LZ_CONST_REF_QUALIFIER
 #endif // __cpp_ref_qualifiers
-
-#if LZ_HAS_INCLUDE(<execution>) && (defined(LZ_HAS_CXX_17) && (defined(__cpp_lib_execution)))
-#define LZ_HAS_EXECUTION
-#endif // has execution
 
 #if LZ_HAS_INCLUDE(<string_view>) && (defined(LZ_HAS_CXX_17) && (defined(__cpp_lib_string_view)))
 #define LZ_HAS_STRING_VIEW

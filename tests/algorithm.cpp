@@ -2,54 +2,84 @@
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 
+#include <sstream>
 
-TEST_CASE("Format") {
+TEST_CASE("Formatting") {
     SECTION("Non-empty fmt") {
         std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(arr.begin(), arr.end());
-        auto str = iterable | lz::format;
+
+        auto str = arr | lz::format;
         REQUIRE(str == "1, 2, 3, 4, 5");
 
-        str = iterable | lz::format("{}");
+        str = arr | lz::format("{}");
         REQUIRE(str == "1, 2, 3, 4, 5");
 
-        str = iterable | lz::format("{:02}");
+        str = arr | lz::format("{:02}");
         REQUIRE(str == "01, 02, 03, 04, 05");
 
-        str = iterable | lz::format("{:02}", ",");
+        str = arr | lz::format("{:02}", ",");
+        REQUIRE(str == "01,02,03,04,05");
+
+        str = lz::format(arr);
+        REQUIRE(str == "1, 2, 3, 4, 5");
+
+        str = lz::format(arr, "{}");
+        REQUIRE(str == "1, 2, 3, 4, 5");
+
+        str = lz::format(arr, "{:02}");
+        REQUIRE(str == "01, 02, 03, 04, 05");
+
+        str = lz::format(arr, "{:02}", ",");
         REQUIRE(str == "01,02,03,04,05");
     }
 
     SECTION("Empty fmt") {
         std::array<int, 0> arr = {};
-        auto iterable = lz::to_iterable(arr.begin(), arr.end());
-        auto str = iterable | lz::format;
+
+        auto str = arr | lz::format;
         REQUIRE(str == "");
 
-        str = iterable | lz::format("{}");
+        str = arr | lz::format("{}");
         REQUIRE(str == "");
 
-        str = iterable | lz::format("{:02}");
+        str = arr | lz::format("{:02}");
         REQUIRE(str == "");
 
-        str = iterable | lz::format("{:02}", ",");
+        str = arr | lz::format("{:02}", ",");
+        REQUIRE(str == "");
+
+        str = lz::format(arr);
+        REQUIRE(str == "");
+
+        str = lz::format(arr, "{}");
+        REQUIRE(str == "");
+
+        str = lz::format(arr, "{:02}");
+        REQUIRE(str == "");
+
+        str = lz::format(arr, "{:02}", ",");
         REQUIRE(str == "");
     }
 
     SECTION("One element fmt") {
         std::array<int, 1> arr = { 1 };
-        auto iterable = lz::to_iterable(arr.begin(), arr.end());
 
-        auto str = iterable | lz::format("{}");
+        auto str = arr | lz::format("{}");
         REQUIRE(str == "1");
 
-        str = iterable | lz::format("{:02}");
+        str = arr | lz::format("{:02}");
         REQUIRE(str == "01");
 
-        str = iterable | lz::format("{:02}", ",");
+        str = arr | lz::format("{:02}", ",");
         REQUIRE(str == "01");
 
-        str = iterable | lz::format("{:02}", ",");
+        str = lz::format(arr, "{}");
+        REQUIRE(str == "1");
+
+        str = lz::format(arr, "{:02}");
+        REQUIRE(str == "01");
+
+        str = lz::format(arr, "{:02}", ",");
         REQUIRE(str == "01");
     }
 
@@ -57,6 +87,11 @@ TEST_CASE("Format") {
         std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
         auto iterable = lz::to_iterable(arr.begin(), arr.end());
         std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "1, 2, 3, 4, 5");
+
+        oss.str("");
+        
         oss << iterable;
         REQUIRE(oss.str() == "1, 2, 3, 4, 5");
     }
