@@ -126,9 +126,9 @@ constexpr diff_type<Iterator> distance(Iterator begin, S end) {
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) {
+LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i)) {
     static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
-    return std::size(c);
+    return std::size(i);
 }
 
 #else
@@ -144,9 +144,9 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(c.size())) -> decltype(i.size()) {
+LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size())) -> decltype(i.size()) {
     static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
-    return c.size();
+    return i.size();
 }
 
 /**

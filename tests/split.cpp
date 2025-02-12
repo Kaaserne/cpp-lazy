@@ -122,10 +122,10 @@ TEST_CASE("Splitter binary operations", "[Splitter][Binary ops]") {
     auto splitter = to_split | lz::sv_split(" ");
     auto it = splitter.begin();
 
-    REQUIRE(it->empty());
+    REQUIRE(*it == "");
 
     SECTION("Operator++") {
-        REQUIRE(it->empty());
+        REQUIRE(*it == "");
         ++it;
         REQUIRE(*it == "Hello");
         ++it;
@@ -135,7 +135,7 @@ TEST_CASE("Splitter binary operations", "[Splitter][Binary ops]") {
         ++it;
         REQUIRE(*it == "123");
         ++it;
-        REQUIRE(it->empty());
+        REQUIRE(*it == "");
         REQUIRE(it != splitter.end());
         ++it;
         REQUIRE(it == splitter.end());
@@ -171,8 +171,9 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
     }
 
     SECTION("To map") {
-        auto actual = splitter |
-                      lz::map([](const lz::string_view v) { return std::make_pair(v.to_std_string(), v.to_std_string()); }) |
+        auto actual = splitter | lz::map([](const lz::string_view v) {
+                          return std::make_pair(std::string{ v.data(), v.size() }, std::string{ v.data(), v.size() });
+                      }) |
                       lz::to<std::map<std::string, std::string>>();
 
         std::map<std::string, std::string> expected = {
@@ -187,8 +188,9 @@ TEST_CASE("Splitter to containers", "[Splitter][To container]") {
     }
 
     SECTION("To unordered map") {
-        auto actual = splitter |
-                      lz::map([](const lz::string_view v) { return std::make_pair(v.to_std_string(), v.to_std_string()); }) |
+        auto actual = splitter | lz::map([](const lz::string_view v) {
+                          return std::make_pair(std::string{ v.data(), v.size() }, std::string{ v.data(), v.size() });
+                      }) |
                       lz::to<std::unordered_map<std::string, std::string>>();
         std::unordered_map<std::string, std::string> expected = { std::make_pair(std::string("Hello"), std::string("Hello")),
                                                                   std::make_pair(std::string("world"), std::string("world")),

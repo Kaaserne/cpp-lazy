@@ -11,9 +11,12 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
+
+static const detail::join_adaptor join{};
+
 #else
 
-LZ_INLINE_VAR constexpr detail::join_adaptor<detail::basic_formatter> join{};
+LZ_INLINE_VAR constexpr detail::join_adaptor join{};
 
 #endif
 

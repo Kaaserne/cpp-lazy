@@ -9,7 +9,13 @@
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
+#include <Lz/string_view.hpp>
 #include <array>
+#include <ostream>
+
+#if !defined(LZ_STANDALONE)
+#include <fmt/format.h>
+#endif
 
 namespace lz {
 
@@ -131,6 +137,53 @@ struct container_constructor<std::array<ValueType, N>> {
         return arr;
     }
 };
+
+struct iterable_formatter {
+    using adaptor = iterable_formatter;
+
+#if !defined(LZ_STANDALONE)
+
+    template<class Iterable>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20
+        enable_if<!std::is_same<Iterable, lz::string_view>::value && !std::is_array<Iterable>::value, std::string>
+        operator()(const Iterable& iterable, lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
+        return fmt::format(formatter, fmt::join(iterable, delimiter));
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 fn_args_holder<adaptor, lz::string_view, lz::string_view>
+    operator()(lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
+        return { formatter, delimiter };
+    }
+
+#elif
+
+    // TODO
+
+#endif
+};
+
+struct iterable_printer {
+    using adaptor = iterable_printer;
+
+#if !defined(LZ_STANDALONE)
+
+    template<class Iterable>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!std::is_same<Iterable, lz::string_view>::value>
+    operator()(const Iterable& iterable, lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
+        fmt::print(formatter, fmt::join(iterable, delimiter));
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 fn_args_holder<adaptor, lz::string_view, lz::string_view>
+    operator()(lz::string_view formatter = "{}", lz::string_view delimiter = ", ") const {
+        return { formatter, delimiter };
+    }
+
+#elif
+
+    // TODO
+
+#endif
+};
 } // namespace detail
 
 template<class Container>
@@ -156,6 +209,20 @@ struct template_combiner {
 };
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+#ifdef LZ_HAS_CXX_11
+
+static const detail::iterable_printer print{};
+
+static const detail::iterable_formatter format{};
+
+#else
+
+LZ_INLINE_VAR constexpr detail::iterable_printer print{};
+
+LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
+
+#endif
 
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be used in a pipe expression.
@@ -269,29 +336,28 @@ LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 
-// TODO add formatters
-
-// #if defined(LZ_HAS_FORMAT) && defined(LZ_STANDALONE)
-// template<class Iterable>
-// struct std::formatter<Iterable,
-//                       lz::detail::enable_if< // Enable if Iterable is base of BasicIterable
-//                           std::is_base_of<lz::detail::BasicIterable<lz::iter_t<Iterable>>, Iterable>::value, char>>
-//     : std::formatter<std::string> {
-//     using InnerIter = lz::detail::BasicIterable<lz::iter_t<Iterable>>;
-
-//     template<class FormatCtx>
-//     auto format(const InnerIter& it, FormatCtx& ctx) const -> decltype(ctx.out()) {
-//         return std::formatter<std::string>::format(it.to_string(), ctx);
-//     }
-// };
-// #elif !defined(LZ_STANDALONE) && !defined(LZ_HAS_FORMAT)
-// template<class Iterable>
-// struct fmt::formatter<
-//     Iterable, lz::detail::enable_if<std::is_base_of<lz::detail::basic_iterable<lz::iter_t<Iterable>>, Iterable>::value, char>>
-//     : fmt::ostream_formatter {};
-// #endif
-
 LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+template<class Iterable>
+lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
+operator<<(std::ostream& stream, const Iterable& iterable) {
+    auto begin = iterable.begin();
+    auto end = iterable.end();
+
+    if (begin == end) {
+        return stream;
+    }
+
+    stream << *begin;
+    ++begin;
+
+    while (begin != end) {
+        stream << ", " << *begin;
+        ++begin;
+    }
+
+    return stream;
+}
 
 template<class Iterable, class Adaptor>
 LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)

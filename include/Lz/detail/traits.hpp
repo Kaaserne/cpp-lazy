@@ -205,7 +205,7 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(Iterable&& c) noexcept -> decltype(std::size(c));
+LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i));
 
 #else
 
@@ -216,7 +216,7 @@ LZ_NODISCARD constexpr auto size(Iterable&& c) noexcept -> decltype(std::size(c)
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(const Iterable& c) noexcept(noexcept(c.size())) -> decltype(c.size());
+LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size())) -> decltype(i.size());
 
 /**
  * @brief Returns the size of a container.
@@ -229,14 +229,14 @@ LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept;
 
 #endif
 
-/**
- * @brief Can be used to get the iterator type of an iterable. Example: `lz::iter_t<std::vector<int>>` will return
- * `std::vector<int>::iterator`.
- *
- * @tparam Iterable The iterable to get the iterator type from.
- */
-template<class Iterable>
-using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
+    /**
+     * @brief Can be used to get the iterator type of an iterable. Example: `lz::iter_t<std::vector<int>>` will return
+     * `std::vector<int>::iterator`.
+     *
+     * @tparam Iterable The iterable to get the iterator type from.
+     */
+    template<class Iterable>
+    using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
 
 /**
  * @brief Can be used to get the sentinel type of an iterable. Example: `lz::sentinel_t<std::vector<int>>` will return

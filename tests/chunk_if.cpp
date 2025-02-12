@@ -112,28 +112,28 @@ TEST_CASE("chunk_if binary operations", "[chunk_if][Binary ops]") {
     std::string s = ";hello world;; this is a message;;; testing;;";
     auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
     static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
-    REQUIRE(chunked.begin()->empty());
+    REQUIRE(*chunked.begin() == "");
 
     SECTION("Operator++") {
         REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 9);
         auto begin = chunked.begin();
-        REQUIRE(begin->empty());
+        REQUIRE(*begin == "");
         ++begin;
         REQUIRE(*begin == "hello world");
         ++begin;
-        REQUIRE(begin->empty());
+        REQUIRE(*begin == "");
         ++begin;
         REQUIRE(*begin == " this is a message");
         ++begin;
-        REQUIRE(begin->empty());
+        REQUIRE(*begin == "");
         ++begin;
-        REQUIRE(begin->empty());
+        REQUIRE(*begin == "");
         ++begin;
         REQUIRE(*begin == " testing");
         ++begin;
-        REQUIRE(begin->empty());
+        REQUIRE(*begin == "");
         ++begin;
-        REQUIRE(begin->empty());
+        REQUIRE(*begin == "");
         ++begin;
         REQUIRE(begin == chunked.end());
     }
@@ -159,7 +159,8 @@ TEST_CASE("chunk_if to containers", "[chunk_if][To container]") {
     SECTION("To array") {
         REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
         auto arr = chunked | lz::to<std::array<lz::string_view, 4>>();
-        lz::transform(chunked, arr.begin(), [](const Iterator& it) { return lz::string_view{ it.begin(), it.end() }; });
+        lz::transform(chunked, arr.begin(),
+                      [](const Iterator& it) { return lz::string_view{ it.begin(), it.size() }; });
         REQUIRE(arr == decltype(arr){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
                                       lz::string_view{}, lz::string_view{} });
     }

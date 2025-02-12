@@ -6,10 +6,18 @@
 #include <Lz/detail/compiler_checks.hpp>
 
 #ifdef LZ_HAS_STRING_VIEW
+
 #include <string_view>
+
+#elif !defined(LZ_STANDALONE)
+
+#include <fmt/core.h>
+
 #else
+
 #include <cstddef>
 #include <ostream>
+
 #endif
 
 namespace lz {
@@ -17,11 +25,21 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #if defined(LZ_HAS_STRING_VIEW)
+
 template<class C>
 using basic_string_view = std::basic_string_view<C>;
 
 using string_view = std::string_view;
+
+#elif !defined(LZ_STANDALONE)
+
+template<class C>
+using basic_string_view = fmt::basic_string_view<C>;
+
+using string_view = fmt::string_view;
+
 #else
+
 template<class CharT>
 class basic_string_view {
 public:
@@ -303,5 +321,7 @@ std::ostream& operator<<(std::ostream& os, const lz::basic_string_view<CharT> vi
 #endif
 
 LZ_MODULE_EXPORT_SCOPE_END
+
 } // namespace lz
+
 #endif

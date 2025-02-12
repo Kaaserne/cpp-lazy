@@ -2,6 +2,82 @@
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 
+
+TEST_CASE("Format") {
+    SECTION("Non-empty fmt") {
+        std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        auto str = iterable | lz::format;
+        REQUIRE(str == "1, 2, 3, 4, 5");
+
+        str = iterable | lz::format("{}");
+        REQUIRE(str == "1, 2, 3, 4, 5");
+
+        str = iterable | lz::format("{:02}");
+        REQUIRE(str == "01, 02, 03, 04, 05");
+
+        str = iterable | lz::format("{:02}", ",");
+        REQUIRE(str == "01,02,03,04,05");
+    }
+
+    SECTION("Empty fmt") {
+        std::array<int, 0> arr = {};
+        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        auto str = iterable | lz::format;
+        REQUIRE(str == "");
+
+        str = iterable | lz::format("{}");
+        REQUIRE(str == "");
+
+        str = iterable | lz::format("{:02}");
+        REQUIRE(str == "");
+
+        str = iterable | lz::format("{:02}", ",");
+        REQUIRE(str == "");
+    }
+
+    SECTION("One element fmt") {
+        std::array<int, 1> arr = { 1 };
+        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+
+        auto str = iterable | lz::format("{}");
+        REQUIRE(str == "1");
+
+        str = iterable | lz::format("{:02}");
+        REQUIRE(str == "01");
+
+        str = iterable | lz::format("{:02}", ",");
+        REQUIRE(str == "01");
+
+        str = iterable | lz::format("{:02}", ",");
+        REQUIRE(str == "01");
+    }
+
+    SECTION("Non empty ostream") {
+        std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "1, 2, 3, 4, 5");
+    }
+
+    SECTION("Empty ostream") {
+        std::array<int, 0> arr = {};
+        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "");
+    }
+
+    SECTION("One element ostream") {
+        std::array<int, 1> arr = { 1 };
+        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "1");
+    }
+}
+
 TEST_CASE("Empty") {
     SECTION("With empty c-string") {
         const char* str = "";

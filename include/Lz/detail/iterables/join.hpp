@@ -8,7 +8,7 @@
 namespace lz {
 namespace detail {
 
-template<class Iterable, class UnaryFormatFn>
+template<class Iterable>
 class join_iterable : public lazy_view {
     std::string _separator;
     ref_or_view<Iterable> _iterable;
@@ -29,5 +29,22 @@ public:
 
 } // namespace detail
 } // namespace lz
+
+#if !defined(LZ_STANDALONE)
+
+template<class Iterable>
+struct fmt::formatter<lz::detail::join_iterable<Iterable>, char> : fmt::formatter<std::string> {
+    format_context::iterator format(const Iterable& iterable, format_context& ctx) const {
+        auto out = ctx.out();
+        *out++ = '[';
+        lz::copy(iterable, out);
+        *out++ = ']';
+        return out;
+    };
+};
+
+#elif
+// TODO make string implementation
+#endif
 
 #endif // LZ_JOIN_ITERABLE_HPP
