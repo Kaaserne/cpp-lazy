@@ -14,8 +14,8 @@ namespace detail {
 template<class Iterator, class S>
 /* Forward iterator */
 class chunks_iterator
-    : public iter_base<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+    : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
+                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -74,8 +74,8 @@ public:
 
 template<class Iterator>
 class chunks_iterator<Iterator, Iterator /* Bidirectional or higher */>
-    : public iter_base<chunks_iterator<Iterator, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                       diff_type<Iterator>, iter_cat_t<Iterator>> {
+    : public iterator<chunks_iterator<Iterator, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
+                      diff_type<Iterator>, iter_cat_t<Iterator>> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 

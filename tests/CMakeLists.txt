@@ -47,8 +47,8 @@ add_executable(cpp-lazy-tests
 	group_by.cpp
 	inclusive_scan.cpp
 	init.cpp
+	intersection.cpp
 	# iter_tools.cpp
-	# join.cpp
 	join_where.cpp
 	loop.cpp
 	map.cpp
@@ -58,7 +58,7 @@ add_executable(cpp-lazy-tests
 	repeat.cpp
 	rotate.cpp
 	split.cpp
-	# standalone.cpp
+	standalone.cpp
 	string_view.cpp
 	take_every.cpp
 	take.cpp
@@ -68,14 +68,10 @@ add_executable(cpp-lazy-tests
 	zip.cpp
 )
 
-set_source_files_properties(string_view.cpp PROPERTIES COMPILE_DEFINITIONS "LZ_STANDALONE")
-
-set_source_files_properties(standalone.cpp PROPERTIES COMPILE_DEFINITIONS "LZ_STANDALONE")
-
 target_compile_options(cpp-lazy-tests
 	PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
-	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -pedantic-errors>
+	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion>
 )
 target_link_libraries(cpp-lazy-tests
 	PRIVATE

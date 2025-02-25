@@ -15,8 +15,8 @@ class take_every_iterator;
 
 template<class Iterator, class S>
 class take_every_iterator<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
-    : public iter_base<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                       std::forward_iterator_tag, default_sentinel> {
+    : public iterator<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      std::forward_iterator_tag, default_sentinel> {
     using traits = std::iterator_traits<Iterator>;
 
 public:
@@ -63,8 +63,8 @@ public:
 
 template<class Iterator, class S>
 class take_every_iterator<Iterator, S, enable_if<is_bidi<Iterator>::value>>
-    : public iter_base<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                       iter_cat_t<Iterator>> {
+    : public iterator<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>> {
     using traits = std::iterator_traits<Iterator>;
 
 public:

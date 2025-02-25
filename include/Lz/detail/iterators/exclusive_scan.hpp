@@ -9,8 +9,8 @@
 namespace lz {
 namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
-class exclusive_scan_iterator : public iter_base<exclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
-                                                 diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
+                                                diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
     Iterator _iterator{};
     mutable T _reducer{};
     S _end{};

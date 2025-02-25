@@ -11,8 +11,8 @@ namespace lz {
 namespace detail {
 
 template<class Iterator, class S>
-class common_iterator : public iter_base<common_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                                         diff_type<Iterator>, iter_cat_t<Iterator>> {
+class common_iterator : public iterator<common_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                                        diff_type<Iterator>, iter_cat_t<Iterator>> {
     variant<Iterator, S> _data{};
 
     using traits = std::iterator_traits<Iterator>;

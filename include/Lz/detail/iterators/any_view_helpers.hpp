@@ -11,8 +11,8 @@ namespace lz {
 namespace detail {
 
 template<class T, class Reference, class IterCat, class DiffType>
-class iterator_wrapper : public iter_base<iterator_wrapper<T, Reference, IterCat, DiffType>, Reference, fake_ptr_proxy<Reference>,
-                                          DiffType, IterCat> {
+class iterator_wrapper : public iterator<iterator_wrapper<T, Reference, IterCat, DiffType>, Reference, fake_ptr_proxy<Reference>,
+                                         DiffType, IterCat> {
 
     using any_iter_base = iterator_base<Reference, IterCat, DiffType>;
     std::unique_ptr<any_iter_base> _implementation{};

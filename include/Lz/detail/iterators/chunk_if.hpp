@@ -11,8 +11,8 @@ namespace lz {
 namespace detail {
 template<class ValueType, class Iterator, class S, class UnaryPredicate>
 class chunk_if_iterator
-    : public iter_base<chunk_if_iterator<ValueType, Iterator, S, UnaryPredicate>, ValueType, fake_ptr_proxy<ValueType>,
-                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+    : public iterator<chunk_if_iterator<ValueType, Iterator, S, UnaryPredicate>, ValueType, fake_ptr_proxy<ValueType>,
+                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
     using iter_traits = std::iterator_traits<Iterator>;
 
 public:

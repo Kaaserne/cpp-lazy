@@ -3,6 +3,12 @@
 #ifndef LZ_COMPILER_CHECK_HPP
 #define LZ_COMPILER_CHECK_HPP
 
+#define LZ_VERSION 90000
+#define LZ_VERSION_MAJOR 9
+#define LZ_VERSION_MINOR 0
+#define LZ_VERSION_PATCH 0
+
+
 #if defined(__has_include)
 #define LZ_HAS_INCLUDE(FILE) __has_include(FILE)
 #else

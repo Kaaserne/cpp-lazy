@@ -15,8 +15,8 @@ class loop_iterator;
 
 template<class Iterator, class S>
 class loop_iterator<Iterator, S, false>
-    : public iter_base<loop_iterator<Iterator, S, false>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                       iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, loop_iterator<Iterator, S, false>>> {
+    : public iterator<loop_iterator<Iterator, S, false>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, loop_iterator<Iterator, S, false>>> {
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -51,16 +51,21 @@ public:
         ++_iterator;
         if (_iterator == _end) {
             --_amount;
-            _iterator = _begin;
+            if (_amount == 0) {
+                return;
+            }
+            else {
+                _iterator = _begin;
+            }
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        --_iterator;
         if (_iterator == _begin) {
             _iterator = _end;
             ++_amount;
         }
-        --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type offset) {
@@ -78,12 +83,12 @@ public:
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& other) const {
         const auto iterable_length = _end - _begin;
-        if (_iterator >= other._iterator) {
+        if (_iterator > other._iterator) {
             const auto total_diff = iterable_length * (other._amount - _amount - 1);
             return total_diff + (_iterator - other._iterator);
         }
         const auto total_diff = iterable_length * (other._amount - _amount);
-        return (total_diff + (_iterator - other._iterator)) + iterable_length;
+        return total_diff + ((_iterator - other._iterator) + iterable_length);
     }
 
     constexpr bool eq(const loop_iterator& other) const {
@@ -97,8 +102,8 @@ public:
 
 template<class Iterator, class S>
 class loop_iterator<Iterator, S, true>
-    : public iter_base<loop_iterator<Iterator, S, true>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                       iter_cat_t<Iterator>, default_sentinel> {
+    : public iterator<loop_iterator<Iterator, S, true>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, default_sentinel> {
 
     using traits = std::iterator_traits<Iterator>;
 

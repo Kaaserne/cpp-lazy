@@ -3,6 +3,7 @@
 #ifndef LZ_TAKE_HPP
 #define LZ_TAKE_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/take.hpp>
 
 namespace lz {

@@ -17,10 +17,10 @@ template<class RegexTokenIter>
 using regex_split_val = typename val_t<RegexTokenIter>::string_type::value_type;
 
 template<class RegexTokenIter, class RegexTokenSentinel>
-class regex_split_iterator : public iter_base<regex_split_iterator<RegexTokenIter, RegexTokenSentinel>,
-                                              basic_string_view<regex_split_val<RegexTokenIter>>,
-                                              fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>,
-                                              diff_type<RegexTokenIter>, std::forward_iterator_tag, RegexTokenSentinel> {
+class regex_split_iterator : public iterator<regex_split_iterator<RegexTokenIter, RegexTokenSentinel>,
+                                             basic_string_view<regex_split_val<RegexTokenIter>>,
+                                             fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>,
+                                             diff_type<RegexTokenIter>, std::forward_iterator_tag, RegexTokenSentinel> {
 public:
     using value_type = basic_string_view<regex_split_val<RegexTokenIter>>;
     using difference_type = typename RegexTokenIter::difference_type;

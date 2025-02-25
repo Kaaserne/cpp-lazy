@@ -17,8 +17,8 @@ class take_while_iterator;
 
 template<class Iterator, class S, class UnaryPredicate>
 class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<is_sentinel<Iterator, S>::value>>
-    : public iter_base<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+    : public iterator<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
     common_iterator<Iterator, S> _iterator{};
     S _end{};
@@ -71,8 +71,8 @@ public:
 
 template<class Iterator, class S, class UnaryPredicate>
 class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<!is_sentinel<Iterator, S>::value>>
-    : public iter_base<take_while_iterator<Iterator, Iterator, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, std::bidirectional_iterator_tag> {
+    : public iterator<take_while_iterator<Iterator, Iterator, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, std::bidirectional_iterator_tag> {
 
     Iterator _begin{};
     Iterator _iterator{};

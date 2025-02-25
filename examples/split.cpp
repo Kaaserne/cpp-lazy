@@ -1,23 +1,59 @@
 #include <Lz/split.hpp>
 #include <iostream>
 
-// For fmt string_view
-std::ostream& operator<<(std::ostream& s, fmt::string_view v) {
-	for (const char c : v) {
-		s << c;
-	}
-	return s;
-}
-
 int main() {
     std::string to_split = "Hello world ";
     std::string delim = " ";
-    // Alternative: lz::split(to_split, ' ') (using a char is faster, so use it whenever possible)
-    const auto splitter = lz::split(to_split, std::move(delim));
-    std::cout << splitter << '\n';
-    // Output: Hello world
+    // sv_split returns a string_view splitter
+    const auto splitter = lz::sv_split(to_split, std::move(delim));
+
+    std::cout << "Using string_views:\n";
+
     for (lz::string_view substring : splitter) {
-        std::cout << substring << '\n';
+        std::cout.write(substring.data(), substring.size());
+        std::cout << ' ';
+        // Or use fmt::print("{} ", substring);
     }
-    
+    // Output: Hello world
+
+    std::cout << '\n';
+
+    for (lz::string_view substring : to_split | lz::sv_split(" ")) {
+        std::cout.write(substring.data(), substring.size());
+        std::cout << ' ';
+        // Or use fmt::print("{} ", substring);
+    }
+    // Output: Hello world
+
+    std::cout << "\n\nUsing strings:\n";
+    const auto splitter2 = lz::s_split(to_split, " ");
+    for (std::string substring : splitter2) {
+        std::cout << substring << ' ';
+        // Or use fmt::print("{} ", substring);
+    }
+    // Output: Hello world
+    std::cout << '\n';
+
+    for (std::string substring : to_split | lz::s_split(" ")) {
+        std::cout << substring << ' ';
+        // Or use fmt::print("{} ", substring);
+    }
+    // Output: Hello world
+
+    std::cout << "\n\nUsing other container types:\n";
+    std::vector<int> to_split2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    auto to_split_on = { 5 };
+    // to_split_on must be by reference!
+    const auto splitter3 = lz::split(to_split2, to_split_on);
+    // Returns an iterable of iterables
+    for (auto splitted : splitter3) {
+        for (auto& i : splitted) {
+            std::cout << i << ' ';
+            // Or use fmt::print("{} ", i);
+        }
+        std::cout << '\n';
+    }
+    // Output:
+    // 1 2 3 4
+    // 6 7 8 9
 }

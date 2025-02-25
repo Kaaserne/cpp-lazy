@@ -166,7 +166,6 @@ TEST_CASE("Empty or one element rotate") {
         REQUIRE(lz::has_one(rotate));
     }
 
-    // TODO add more tests with sentinels empty and one element
     SECTION("Empty with sentinel") {
         auto cstr = lz::c_string("");
         auto rotate = lz::rotate(cstr, 0);

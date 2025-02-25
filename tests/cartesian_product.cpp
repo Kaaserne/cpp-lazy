@@ -1,6 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/cartesian_product.hpp>
+#include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
@@ -13,6 +14,7 @@ TEST_CASE("Reference and compile test with operator|") {
     const std::vector<int> vec3 = { 1 };
     std::vector<int> vec4 = { 1 };
     auto cartesian = lz::cartesian_product(vec1, vec2, vec3, vec4);
+    REQUIRE(cartesian.size() == 1);
     REQUIRE(!vec1.empty());
     REQUIRE(!vec2.empty());
     REQUIRE(!vec3.empty());
@@ -82,9 +84,25 @@ TEST_CASE("Cartesian product changing and creating elements", "[CartesianProduct
     std::vector<int> vec = { 1, 2, 3 };
     std::vector<char> chars = { 'a', 'b', 'c' };
     auto cartesian = lz::cartesian_product(vec, chars);
+    REQUIRE(cartesian.size() == vec.size() * chars.size());
+    REQUIRE(cartesian.size() == static_cast<std::size_t>(cartesian.end() - cartesian.begin()));
 
     SECTION("Should not be sentinel") {
         static_assert(std::is_same<decltype(cartesian.begin()), decltype(cartesian.end())>::value, "Should be the same");
+    }
+
+    SECTION("Distances") {
+        auto iter = cartesian.begin();
+        REQUIRE(std::distance(iter, iter) == 0);
+        REQUIRE(std::distance(iter, iter + 1) == 1);
+        REQUIRE(std::distance(iter, iter + 2) == 2);
+        REQUIRE(std::distance(iter, iter + 3) == 3);
+        REQUIRE(std::distance(iter, iter + 4) == 4);
+        REQUIRE(std::distance(iter, iter + 5) == 5);
+        REQUIRE(std::distance(iter, iter + 6) == 6);
+        REQUIRE(std::distance(iter, iter + 7) == 7);
+        REQUIRE(std::distance(iter, iter + 8) == 8);
+        REQUIRE(std::distance(iter, iter + 9) == 9);
     }
 
     SECTION("Should be by reference") {
@@ -103,159 +121,200 @@ TEST_CASE("Cartesian product changing and creating elements", "[CartesianProduct
     SECTION("Should be correct length") {
         REQUIRE(std::distance(cartesian.begin(), cartesian.end()) == static_cast<std::ptrdiff_t>(vec.size() * chars.size()));
     }
+
+    SECTION("Different sizes") {
+        std::vector<int> vec2 = { 1, 2 };
+        std::vector<int> vec3 = { 1, 2, 3, 4 };
+        auto cart = lz::cartesian_product(vec, vec2, vec3);
+        REQUIRE(cart.size() == vec.size() * vec2.size() * vec3.size());
+        REQUIRE(std::distance(cart.begin(), cart.end()) == static_cast<std::ptrdiff_t>(cart.size()));
+        auto actual = cart | lz::to<std::vector>();
+        std::vector<std::tuple<int, int, int>> expected = {
+            std::make_tuple(1, 1, 1), std::make_tuple(1, 1, 2), std::make_tuple(1, 1, 3), std::make_tuple(1, 1, 4),
+            std::make_tuple(1, 2, 1), std::make_tuple(1, 2, 2), std::make_tuple(1, 2, 3), std::make_tuple(1, 2, 4),
+            std::make_tuple(2, 1, 1), std::make_tuple(2, 1, 2), std::make_tuple(2, 1, 3), std::make_tuple(2, 1, 4),
+            std::make_tuple(2, 2, 1), std::make_tuple(2, 2, 2), std::make_tuple(2, 2, 3), std::make_tuple(2, 2, 4),
+            std::make_tuple(3, 1, 1), std::make_tuple(3, 1, 2), std::make_tuple(3, 1, 3), std::make_tuple(3, 1, 4),
+            std::make_tuple(3, 2, 1), std::make_tuple(3, 2, 2), std::make_tuple(3, 2, 3), std::make_tuple(3, 2, 4),
+        };
+
+        REQUIRE(actual == expected);
+    }
 }
 
 TEST_CASE("Cartesian product binary operations", "[CartesianProduct][Binary ops]") {
-    std::vector<int> vec = { 1, 2, 3 };
+    std::vector<int> vec = { 1, 2 };
     std::vector<char> chars = { 'a', 'b', 'c' };
-    auto cartesian = lz::cartesian_product(vec, chars);
+    std::vector<char> chars2 = { 'a', 'b' };
+    auto cartesian = lz::cartesian_product(vec, chars, chars2);
 
     SECTION("Operator++") {
-        auto begin = cartesian.begin();
-        ++begin;
-        REQUIRE(*begin == std::make_tuple(1, 'b'));
-        ++begin, ++begin;
-        REQUIRE(*begin == std::make_tuple(2, 'a'));
+        auto iter = cartesian.begin();
+        REQUIRE(*iter == std::make_tuple(1, 'a', 'a'));
+        REQUIRE(*(++iter) == std::make_tuple(1, 'a', 'b'));
+        REQUIRE(*(++iter) == std::make_tuple(1, 'b', 'a'));
+        REQUIRE(*(++iter) == std::make_tuple(1, 'b', 'b'));
+        REQUIRE(*(++iter) == std::make_tuple(1, 'c', 'a'));
+        REQUIRE(*(++iter) == std::make_tuple(1, 'c', 'b'));
+        REQUIRE(*(++iter) == std::make_tuple(2, 'a', 'a'));
+        REQUIRE(*(++iter) == std::make_tuple(2, 'a', 'b'));
+        REQUIRE(*(++iter) == std::make_tuple(2, 'b', 'a'));
+        REQUIRE(*(++iter) == std::make_tuple(2, 'b', 'b'));
+        REQUIRE(*(++iter) == std::make_tuple(2, 'c', 'a'));
+        REQUIRE(*(++iter) == std::make_tuple(2, 'c', 'b'));
+        REQUIRE(++iter == cartesian.end());
     }
 
     SECTION("Operator--") {
-        std::vector<int> tmp_vec = { 1, 2, 3 };
-        std::vector<char> tmp_chars = { 'a', 'b', 'c' };
-        auto cart = lz::cartesian_product(tmp_vec, tmp_chars);
-        auto end = cart.end();
-
-        --end;
-        REQUIRE(*end == std::make_tuple(3, 'c'));
-
-        --end;
-        REQUIRE(*end == std::make_tuple(3, 'b'));
-
-        --end;
-        REQUIRE(*end == std::make_tuple(3, 'a'));
-
-        --end;
-        REQUIRE(*end == std::make_tuple(2, 'c'));
-
-        --end /*2, 'b'*/, --end /*2, 'a'*/, --end /*1, 'c'*/, --end, /*1, 'b'*/ --end /*1, 'a'*/;
-        REQUIRE(end == cart.begin());
-
-        auto beg = cart.begin();
-        ++beg;
-        --beg;
-        REQUIRE(*beg == std::make_tuple(1, 'a'));
-    }
-
-    SECTION("Operator== & operator!=") {
-        auto it = cartesian.begin();
-        REQUIRE(it != cartesian.end());
-        it = cartesian.end();
-        REQUIRE(it == cartesian.end());
+        auto iter = cartesian.end();
+        REQUIRE(*(--iter) == std::make_tuple(2, 'c', 'b'));
+        REQUIRE(*(--iter) == std::make_tuple(2, 'c', 'a'));
+        REQUIRE(*(--iter) == std::make_tuple(2, 'b', 'b'));
+        REQUIRE(*(--iter) == std::make_tuple(2, 'b', 'a'));
+        REQUIRE(*(--iter) == std::make_tuple(2, 'a', 'b'));
+        REQUIRE(*(--iter) == std::make_tuple(2, 'a', 'a'));
+        REQUIRE(*(--iter) == std::make_tuple(1, 'c', 'b'));
+        REQUIRE(*(--iter) == std::make_tuple(1, 'c', 'a'));
+        REQUIRE(*(--iter) == std::make_tuple(1, 'b', 'b'));
+        REQUIRE(*(--iter) == std::make_tuple(1, 'b', 'a'));
+        REQUIRE(*(--iter) == std::make_tuple(1, 'a', 'b'));
+        REQUIRE(*(--iter) == std::make_tuple(1, 'a', 'a'));
+        REQUIRE(iter == cartesian.begin());
     }
 
     SECTION("Operator+(int), tests += as well") {
         auto iter = cartesian.begin();
-        REQUIRE(*(iter + 1) == std::make_tuple(1, 'b'));
-        REQUIRE(*(iter + 2) == std::make_tuple(1, 'c'));
-        REQUIRE(*(iter + 3) == std::make_tuple(2, 'a'));
-        REQUIRE(*(iter + 6) == std::make_tuple(3, 'a'));
-        REQUIRE(*(iter + 8) == std::make_tuple(3, 'c'));
-        REQUIRE(iter + 9 == cartesian.end());
+        REQUIRE(*iter == std::make_tuple(1, 'a', 'a'));
+        REQUIRE(*(iter + 1) == std::make_tuple(1, 'a', 'b'));
+        REQUIRE(*(iter + 2) == std::make_tuple(1, 'b', 'a'));
+        REQUIRE(*(iter + 3) == std::make_tuple(1, 'b', 'b'));
+        REQUIRE(*(iter + 4) == std::make_tuple(1, 'c', 'a'));
+        REQUIRE(*(iter + 5) == std::make_tuple(1, 'c', 'b'));
+        REQUIRE(*(iter + 6) == std::make_tuple(2, 'a', 'a'));
+        REQUIRE(*(iter + 7) == std::make_tuple(2, 'a', 'b'));
+        REQUIRE(*(iter + 8) == std::make_tuple(2, 'b', 'a'));
+        REQUIRE(*(iter + 9) == std::make_tuple(2, 'b', 'b'));
+        REQUIRE(*(iter + 10) == std::make_tuple(2, 'c', 'a'));
+        REQUIRE(*(iter + 11) == std::make_tuple(2, 'c', 'b'));
+        REQUIRE((iter + 12) == cartesian.end());
+
+        iter = cartesian.end();
+        REQUIRE(*(iter - 1) == std::make_tuple(2, 'c', 'b'));
+        REQUIRE(*(iter - 2) == std::make_tuple(2, 'c', 'a'));
+        REQUIRE(*(iter - 3) == std::make_tuple(2, 'b', 'b'));
+        REQUIRE(*(iter - 4) == std::make_tuple(2, 'b', 'a'));
+        REQUIRE(*(iter - 5) == std::make_tuple(2, 'a', 'b'));
+        REQUIRE(*(iter - 6) == std::make_tuple(2, 'a', 'a'));
+        REQUIRE(*(iter - 7) == std::make_tuple(1, 'c', 'b'));
+        REQUIRE(*(iter - 8) == std::make_tuple(1, 'c', 'a'));
+        REQUIRE(*(iter - 9) == std::make_tuple(1, 'b', 'b'));
+        REQUIRE(*(iter - 10) == std::make_tuple(1, 'b', 'a'));
+        REQUIRE(*(iter - 11) == std::make_tuple(1, 'a', 'b'));
+        REQUIRE(*(iter - 12) == std::make_tuple(1, 'a', 'a'));
+        REQUIRE((iter - 12) == cartesian.begin());
     }
 
-    SECTION("Operator-(int), tests -= as well") {
+    SECTION("Distances") {
         auto iter = cartesian.begin();
-        iter += 8;
-        REQUIRE(*(iter - 3) == std::make_tuple(2, 'c'));
-        REQUIRE(*(iter - 2) == std::make_tuple(3, 'a'));
-        REQUIRE(*(iter - 1) == std::make_tuple(3, 'b'));
-        REQUIRE(*(iter - 8) == std::make_tuple(1, 'a'));
-        REQUIRE(iter - 8 == cartesian.begin());
-    }
+        REQUIRE(std::distance(iter, iter) == 0);
+        REQUIRE(std::distance(iter, iter + 1) == 1);
+        REQUIRE(std::distance(iter, iter + 2) == 2);
+        REQUIRE(std::distance(iter, iter + 3) == 3);
+        REQUIRE(std::distance(iter, iter + 4) == 4);
+        REQUIRE(std::distance(iter, iter + 5) == 5);
+        REQUIRE(std::distance(iter, iter + 6) == 6);
+        REQUIRE(std::distance(iter, iter + 7) == 7);
+        REQUIRE(std::distance(iter, iter + 8) == 8);
+        REQUIRE(std::distance(iter, iter + 9) == 9);
+        REQUIRE(std::distance(iter, iter + 10) == 10);
+        REQUIRE(std::distance(iter, iter + 11) == 11);
+        REQUIRE(std::distance(iter, iter + 12) == 12);
 
-    SECTION("Operator<, <, <=, >, >=") {
-        auto b = cartesian.begin();
-        auto end = cartesian.end();
-        auto distance = std::distance(b, end);
-
-        REQUIRE(b < end);
-        REQUIRE(b + distance - 1 > end - distance);
-        REQUIRE(b + distance - 1 <= end);
-        REQUIRE(b + 9 - 1 >= end - 1);
+        REQUIRE(std::distance(iter + 1, iter) == -1);
+        REQUIRE(std::distance(iter + 2, iter) == -2);
+        REQUIRE(std::distance(iter + 3, iter) == -3);
+        REQUIRE(std::distance(iter + 4, iter) == -4);
+        REQUIRE(std::distance(iter + 5, iter) == -5);
+        REQUIRE(std::distance(iter + 6, iter) == -6);
+        REQUIRE(std::distance(iter + 7, iter) == -7);
+        REQUIRE(std::distance(iter + 8, iter) == -8);
+        REQUIRE(std::distance(iter + 9, iter) == -9);
+        REQUIRE(std::distance(iter + 10, iter) == -10);
+        REQUIRE(std::distance(iter + 11, iter) == -11);
+        REQUIRE(std::distance(iter + 12, iter) == -12);
     }
 }
 
 TEST_CASE("CartesianProduct to containers", "[CartesianProduct][To container]") {
     std::vector<int> vec = { 1, 2, 3 };
     std::vector<char> chars = { 'a', 'b', 'c' };
-    auto cartesian = lz::cartesian_product(vec, chars);
+    std::vector<char> chars2 = { 'a', 'b' };
+    auto cartesian = lz::cartesian_product(vec, chars, chars2);
 
     SECTION("To array") {
-        constexpr std::size_t size = 9;
-        auto result = cartesian | lz::to<std::array<std::tuple<int, char>, size>>();
-
-        std::array<std::tuple<int, char>, size> expected = {
-            std::make_tuple(1, 'a'), std::make_tuple(1, 'b'), std::make_tuple(1, 'c'),
-
-            std::make_tuple(2, 'a'), std::make_tuple(2, 'b'), std::make_tuple(2, 'c'),
-
-            std::make_tuple(3, 'a'), std::make_tuple(3, 'b'), std::make_tuple(3, 'c'),
+        auto actual = cartesian | lz::to<std::array<std::tuple<int, char, char>, 18>>();
+        std::array<std::tuple<int, char, char>, 18> expected = {
+            std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'),
+            std::make_tuple(1, 'b', 'b'), std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'c', 'b'),
+            std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'), std::make_tuple(2, 'b', 'a'),
+            std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b'),
+            std::make_tuple(3, 'a', 'a'), std::make_tuple(3, 'a', 'b'), std::make_tuple(3, 'b', 'a'),
+            std::make_tuple(3, 'b', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'c', 'b'),
         };
-        REQUIRE(result == expected);
+        REQUIRE(actual == expected);
+    }
+
+    SECTION("To list") {
+        auto actual = cartesian | lz::to<std::list>();
+        std::list<std::tuple<int, char, char>> expected = {
+            std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'),
+            std::make_tuple(1, 'b', 'b'), std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'c', 'b'),
+            std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'), std::make_tuple(2, 'b', 'a'),
+            std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b'),
+            std::make_tuple(3, 'a', 'a'), std::make_tuple(3, 'a', 'b'), std::make_tuple(3, 'b', 'a'),
+            std::make_tuple(3, 'b', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'c', 'b'),
+        };
+        REQUIRE(actual == expected);
     }
 
     SECTION("To vector") {
-        std::vector<std::tuple<int, char>> result = cartesian | lz::to<std::vector>();
-        std::vector<std::tuple<int, char>> expected = {
-            std::make_tuple(1, 'a'), std::make_tuple(1, 'b'), std::make_tuple(1, 'c'),
-
-            std::make_tuple(2, 'a'), std::make_tuple(2, 'b'), std::make_tuple(2, 'c'),
-
-            std::make_tuple(3, 'a'), std::make_tuple(3, 'b'), std::make_tuple(3, 'c'),
+        auto actual = cartesian | lz::to<std::vector>();
+        std::vector<std::tuple<int, char, char>> expected = {
+            std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'),
+            std::make_tuple(1, 'b', 'b'), std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'c', 'b'),
+            std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'), std::make_tuple(2, 'b', 'a'),
+            std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b'),
+            std::make_tuple(3, 'a', 'a'), std::make_tuple(3, 'a', 'b'), std::make_tuple(3, 'b', 'a'),
+            std::make_tuple(3, 'b', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'c', 'b'),
         };
-        REQUIRE(result == expected);
+        REQUIRE(actual == expected);
     }
-
-    SECTION("To other container using to<>()") {
-        auto result = cartesian | lz::to<std::list<std::tuple<int, char>>>();
-        std::list<std::tuple<int, char>> expected = {
-            std::make_tuple(1, 'a'), std::make_tuple(1, 'b'), std::make_tuple(1, 'c'),
-
-            std::make_tuple(2, 'a'), std::make_tuple(2, 'b'), std::make_tuple(2, 'c'),
-
-            std::make_tuple(3, 'a'), std::make_tuple(3, 'b'), std::make_tuple(3, 'c'),
-        };
-        REQUIRE(result == expected);
-    }
-
-    // TODO add to map
 
     SECTION("To map") {
-        auto result = cartesian | lz::map([](lz::ref_iterable_t<decltype(cartesian)> v) {
-                          return std::make_pair(std::get<0>(v) + std::get<1>(v), v);
+        auto actual = cartesian | lz::map([](const auto& elm) {
+                          return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));
                       }) |
-                      lz::to<std::map<int, std::tuple<int, char>>>();
-        decltype(result) expected = {
-            { 1 + 'a', std::make_tuple(1, 'a') }, { 1 + 'b', std::make_tuple(1, 'b') }, { 1 + 'c', std::make_tuple(1, 'c') },
-
-            { 2 + 'a', std::make_tuple(2, 'a') }, { 2 + 'b', std::make_tuple(2, 'b') }, { 2 + 'c', std::make_tuple(2, 'c') },
-
-            { 3 + 'a', std::make_tuple(3, 'a') }, { 3 + 'b', std::make_tuple(3, 'b') }, { 3 + 'c', std::make_tuple(3, 'c') }
+                      lz::to<std::map<int, std::pair<char, char>>>();
+        std::map<int, std::pair<char, char>> expected = {
+            { 1, { 'a', 'a' } }, { 1, { 'a', 'b' } }, { 1, { 'b', 'a' } }, { 1, { 'b', 'b' } }, { 1, { 'c', 'a' } },
+            { 1, { 'c', 'b' } }, { 2, { 'a', 'a' } }, { 2, { 'a', 'b' } }, { 2, { 'b', 'a' } }, { 2, { 'b', 'b' } },
+            { 2, { 'c', 'a' } }, { 2, { 'c', 'b' } }, { 3, { 'a', 'a' } }, { 3, { 'a', 'b' } }, { 3, { 'b', 'a' } },
+            { 3, { 'b', 'b' } }, { 3, { 'c', 'a' } }, { 3, { 'c', 'b' } }
         };
-        REQUIRE(result == expected);
+        REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
-        auto result = cartesian | lz::map([](const typename decltype(cartesian)::iterator::value_type& v) {
-                          return std::make_pair(std::get<0>(v) + std::get<1>(v), v);
+        auto actual = cartesian | lz::map([](const auto& elm) {
+                          return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));
                       }) |
-                      lz::to<std::unordered_map<int, std::tuple<int, char>>>();
-        decltype(result) expected = {
-            { 1 + 'a', std::make_tuple(1, 'a') }, { 1 + 'b', std::make_tuple(1, 'b') }, { 1 + 'c', std::make_tuple(1, 'c') },
-
-            { 2 + 'a', std::make_tuple(2, 'a') }, { 2 + 'b', std::make_tuple(2, 'b') }, { 2 + 'c', std::make_tuple(2, 'c') },
-
-            { 3 + 'a', std::make_tuple(3, 'a') }, { 3 + 'b', std::make_tuple(3, 'b') }, { 3 + 'c', std::make_tuple(3, 'c') }
+                      lz::to<std::unordered_map<int, std::pair<char, char>>>();
+        std::unordered_map<int, std::pair<char, char>> expected = {
+            { 1, { 'a', 'a' } }, { 1, { 'a', 'b' } }, { 1, { 'b', 'a' } }, { 1, { 'b', 'b' } }, { 1, { 'c', 'a' } },
+            { 1, { 'c', 'b' } }, { 2, { 'a', 'a' } }, { 2, { 'a', 'b' } }, { 2, { 'b', 'a' } }, { 2, { 'b', 'b' } },
+            { 2, { 'c', 'a' } }, { 2, { 'c', 'b' } }, { 3, { 'a', 'a' } }, { 3, { 'a', 'b' } }, { 3, { 'b', 'a' } },
+            { 3, { 'b', 'b' } }, { 3, { 'c', 'a' } }, { 3, { 'c', 'b' } }
         };
-        REQUIRE(result == expected);
+        REQUIRE(actual == expected);
     }
 }

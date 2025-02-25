@@ -6,9 +6,8 @@
 
 
 TEST_CASE("Any iterable with sentinels") {
-    auto cstr = lz::c_string("Hello, world!");
-    lz::any_iterable<char, const char&> iterable = cstr;
-    auto expected = "Hello, world!";
+    lz::any_iterable<char, const char&> iterable = "Hello, World!" | lz::c_string;
+    auto expected = "Hello, World!";
     REQUIRE(lz::equal(iterable, lz::c_string(expected)));
 }
 

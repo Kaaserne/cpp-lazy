@@ -33,9 +33,16 @@ public:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(ref_or_view_helper<I, false>& other) noexcept :
-        ref_or_view_helper{ *other._iterable_ref_ptr } {
+    ref_or_view_helper& operator=(const ref_or_view_helper<I, false>& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        _iterable_ref_ptr = other._iterable_ref_ptr;
+        return *this;
     }
+
+    template<class I>
+    ref_or_view_helper& operator=(ref_or_view_helper<I, false>&& other) = delete; // cannot get address of rvalue
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
@@ -82,7 +89,21 @@ public:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(ref_or_view_helper<I, true>& other) : ref_or_view_helper{ other._iterable_value } {
+    ref_or_view_helper& operator=(const ref_or_view_helper<I, true>& other) {
+        if (this == &other) {
+            return *this;
+        }
+        _iterable_value = other._iterable_value;
+        return *this;
+    }
+
+    template<class I>
+    ref_or_view_helper& operator=(ref_or_view_helper<I, true>&& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        _iterable_value = std::move(other._iterable_value);
+        return *this;
     }
 
     template<class I = Iterable>
@@ -114,6 +135,14 @@ template<class Iterable>
 using ref_or_view =
     ref_or_view_helper<Iterable, std::is_base_of<lazy_view, remove_cvref<Iterable>>::value || is_c_array<Iterable>::value>;
 } // namespace detail
+
+/**
+ * @brief Class that contains a reference or a copy of an iterable. If the iterable is an 'actual' container, it will contain a
+ * reference to it. If it is a view/iterable, it will contain a copy of it, while maintaining the underlying reference to the
+ * container.
+ */
+using detail::ref_or_view;
+
 } // namespace lz
 
 #endif // LZ_REF_OR_VIEW_HPP

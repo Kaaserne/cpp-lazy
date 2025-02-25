@@ -13,7 +13,7 @@ namespace detail {
 
 template<class IterTuple, class SentinelTuple>
 class zip_iterator
-    : public iter_base<
+    : public iterator<
           zip_iterator<IterTuple, SentinelTuple>, iter_tuple_ref_type_t<IterTuple>,
           fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
           sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, zip_iterator<IterTuple, SentinelTuple>, SentinelTuple>> {

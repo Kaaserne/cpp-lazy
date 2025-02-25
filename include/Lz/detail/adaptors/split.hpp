@@ -12,8 +12,6 @@ template<class ValueType>
 struct split_adaptor {
     using adaptor = split_adaptor<ValueType>;
 
-    // TODO make for chunk_if same Container.. Args construction
-
     template<LZ_CONCEPT_ITERABLE Iterable, class CharT>
     constexpr split_iterable<ValueType, Iterable, c_string_iterable<const CharT*>>
     operator()(Iterable&& iterable, const CharT* delimiter) const {

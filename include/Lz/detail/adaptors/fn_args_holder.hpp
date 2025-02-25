@@ -43,7 +43,9 @@ struct fn_args_holder {
     }
 
     template<class Iterable>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) && -> decltype(std::move(*this)(std::forward<Iterable>(iterable))) {
+    LZ_CONSTEXPR_CXX_14 auto
+    operator()(Iterable&& iterable) && -> decltype(std::move(*this)(std::forward<Iterable>(iterable),
+                                                                    make_index_sequence<sizeof...(Ts)>{})) {
         return std::move(*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
     }
 };

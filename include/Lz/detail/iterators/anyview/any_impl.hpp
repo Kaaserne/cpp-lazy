@@ -17,10 +17,6 @@ class any_iterator_impl<Iter, S, T, Reference, std::forward_iterator_tag, DiffTy
 
     common_iterator<Iter, S> _iter{};
 
-    static_assert(std::is_same<Reference, decltype(*_iter)>::value,
-                  "The iterator operator* returns a different type than template parameter `Reference`. Try adding/removing "
-                  "(const) `&` to `Reference`");
-
     using any_iter_base = iterator_base<Reference, std::forward_iterator_tag, DiffType>;
 
 public:
@@ -44,10 +40,6 @@ public:
     ~any_iterator_impl() override = default;
 
     reference dereference() override {
-        return *_iter;
-    }
-
-    reference dereference() const override {
         return *_iter;
     }
 
@@ -98,10 +90,6 @@ public:
         return *_iter;
     }
 
-    reference dereference() const override {
-        return *_iter;
-    }
-
     pointer arrow() override {
         return pointer{ dereference() };
     }
@@ -144,10 +132,6 @@ public:
     ~any_iterator_impl() override = default;
 
     reference dereference() override {
-        return *_iter;
-    }
-
-    reference dereference() const override {
         return *_iter;
     }
 
@@ -197,10 +181,6 @@ public:
     ~any_iterator_impl() override = default;
 
     reference dereference() override {
-        return *_iter;
-    }
-
-    reference dereference() const override {
         return *_iter;
     }
 

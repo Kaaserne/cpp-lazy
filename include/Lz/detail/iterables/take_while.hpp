@@ -5,6 +5,7 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/take_while.hpp>
+#include <Lz/detail/ref_or_view.hpp>
 
 namespace lz {
 namespace detail {

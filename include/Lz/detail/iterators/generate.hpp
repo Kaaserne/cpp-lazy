@@ -10,9 +10,9 @@
 namespace lz {
 namespace detail {
 template<class GeneratorFunc>
-class generate_iterator : public iter_base<generate_iterator<GeneratorFunc>, func_ret_type<GeneratorFunc>,
-                                           fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t,
-                                           std::forward_iterator_tag, default_sentinel> {
+class generate_iterator
+    : public iterator<generate_iterator<GeneratorFunc>, func_ret_type<GeneratorFunc>,
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
 
     mutable GeneratorFunc _func{};
     std::size_t _current{};

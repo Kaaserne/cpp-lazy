@@ -12,7 +12,7 @@ struct range_adaptor {
 
     template<class Arithmetic>
     LZ_NODISCARD constexpr range_iterable<Arithmetic>
-    operator()(const Arithmetic start, const Arithmetic end, const Arithmetic step) const noexcept {
+    operator()(const Arithmetic start, const Arithmetic end, const Arithmetic step = 1) const noexcept {
         return { start, end, step };
     }
 

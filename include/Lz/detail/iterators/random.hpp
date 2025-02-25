@@ -11,9 +11,10 @@ namespace lz {
 namespace detail {
 template<class Arithmetic, class Distribution, class Generator, bool UseSentinel>
 class random_iterator
-    : public iter_base<random_iterator<Arithmetic, Distribution, Generator, UseSentinel>, Arithmetic, fake_ptr_proxy<Arithmetic>,
-                       std::ptrdiff_t, conditional<UseSentinel, std::forward_iterator_tag, std::random_access_iterator_tag>,
-                       conditional<UseSentinel, default_sentinel, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
+    : public iterator<
+          random_iterator<Arithmetic, Distribution, Generator, UseSentinel>, Arithmetic, fake_ptr_proxy<Arithmetic>,
+          std::ptrdiff_t, conditional<UseSentinel, std::forward_iterator_tag, std::random_access_iterator_tag>,
+          conditional<UseSentinel, default_sentinel, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
 public:
     using value_type = Arithmetic;
     using difference_type = std::ptrdiff_t;

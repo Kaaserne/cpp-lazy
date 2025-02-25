@@ -9,8 +9,8 @@
 namespace lz {
 namespace detail {
 template<class C>
-class c_string_iterator : public iter_base<c_string_iterator<C>, decltype(*std::declval<C>()), C, std::ptrdiff_t,
-                                           std::forward_iterator_tag, default_sentinel> {
+class c_string_iterator : public iterator<c_string_iterator<C>, decltype(*std::declval<C>()), C, std::ptrdiff_t,
+                                          std::forward_iterator_tag, default_sentinel> {
 
     C _it{};
 

@@ -15,9 +15,9 @@ class filter_iterator;
 
 template<class Iterator, class S, class UnaryPredicate>
 class filter_iterator
-    : public iter_base<filter_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
-                       sentinel_selector<iter_cat_t<Iterator>, filter_iterator<Iterator, S, UnaryPredicate>>> {
+    : public iterator<filter_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
+                      sentinel_selector<iter_cat_t<Iterator>, filter_iterator<Iterator, S, UnaryPredicate>>> {
 
     using traits = std::iterator_traits<Iterator>;
 

@@ -3,6 +3,17 @@
 
 int main() {
 	std::vector<int> vec = {1, 2, 3, 4, 5};
-    fmt::print("{}\n", lz::exclude(vec, 2, 4)); // Exclude idx 2 to idx 4 [2, 4). Index [2, 3] is excluded
-                                                // output: 1, 2, 5
+    auto excluded = lz::exclude(vec, 2, 4);
+    for (int& i : excluded) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    }
+    // Output: 1 2 5
+
+    std::cout << '\n';
+    for (int& i : vec | lz::exclude(2, 4)) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    }
+    // Output: 1 2 5
 }

@@ -11,10 +11,10 @@
 namespace lz {
 namespace detail {
 template<class IterA, class SA, class IterB, class SB, class SelectorA, class SelectorB, class ResultSelector>
-class join_where_iterator : public iter_base<join_where_iterator<IterA, SA, IterB, SB, SelectorA, SelectorB, ResultSelector>,
-                                             func_ret_type_iters<ResultSelector, IterA, IterB>,
-                                             fake_ptr_proxy<func_ret_type_iters<ResultSelector, IterA, IterB>>, std::ptrdiff_t,
-                                             std::forward_iterator_tag, default_sentinel> {
+class join_where_iterator : public iterator<join_where_iterator<IterA, SA, IterB, SB, SelectorA, SelectorB, ResultSelector>,
+                                            func_ret_type_iters<ResultSelector, IterA, IterB>,
+                                            fake_ptr_proxy<func_ret_type_iters<ResultSelector, IterA, IterB>>, std::ptrdiff_t,
+                                            std::forward_iterator_tag, default_sentinel> {
 private:
     using traits_a = std::iterator_traits<IterA>;
     using traits_b = std::iterator_traits<IterB>;

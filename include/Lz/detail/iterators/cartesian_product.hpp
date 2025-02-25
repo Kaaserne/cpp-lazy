@@ -20,11 +20,12 @@ using default_sentinel_selector = sentinel_selector<iter_tuple_iter_cat_t<IterTu
 
 template<class IterTuple, class SentinelTuple>
 class cartesian_product_iterator
-    : public iter_base<cartesian_product_iterator<IterTuple, SentinelTuple>, iter_tuple_ref_type_t<IterTuple>,
-                       fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                       iter_tuple_iter_cat_t<IterTuple>, default_sentinel_selector<IterTuple, SentinelTuple>> {
+    : public iterator<cartesian_product_iterator<IterTuple, SentinelTuple>, iter_tuple_ref_type_t<IterTuple>,
+                      fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+                      iter_tuple_iter_cat_t<IterTuple>, default_sentinel_selector<IterTuple, SentinelTuple>> {
 
     static constexpr std::size_t tup_size = std::tuple_size<IterTuple>::value;
+    static_assert(tup_size >= 1, "Amount of cartesian product iterables must be at least 1");
 
 public:
     using value_type = iter_tuple_value_type_t<IterTuple>;
@@ -40,6 +41,11 @@ private:
 #ifndef __cpp_if_constexpr
     template<std::size_t I>
     constexpr enable_if<I == 0, void> next() const noexcept {
+        auto& first = std::get<0>(_iterator);
+        if (first == std::get<0>(_end)) {
+            return;
+        }
+        ++first;
     }
 
     template<std::size_t I>
@@ -53,21 +59,16 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_17 enable_if<(I > 0), void> next() {
-        auto& prev = std::get<I - 1>(_iterator);
+        auto& prev = std::get<I>(_iterator);
         ++prev;
+        if (prev == std::get<I>(_end)) {
+            next<I - 1>();
 
-        auto& first = std::get<0>(_iterator);
-        auto peek_first = std::next(first);
-        if (std::get<tup_size - 1>(_iterator) == std::get<tup_size - 1>(_end) && peek_first == std::get<0>(_end)) {
-            first = std::move(peek_first);
-            return;
-        }
-
-        if (prev == std::get<I - 1>(_end)) {
-            if (I != 1) {
-                prev = std::get<I - 1>(_begin);
-                next<I - 1>();
+            if (std::get<0>(_iterator) == std::get<0>(_end)) {
+                return;
             }
+
+            prev = std::get<I>(_begin);
         }
     }
 
@@ -113,84 +114,94 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_17 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
-        auto& iterator = std::get<0>(_iterator);
-        iterator = std::next(std::move(iterator), offset);
+        if (_iterator == _end && offset < 0) {
+            do_prev_all<I>();
+            ++offset;
+        }
+
+        auto& it = std::get<0>(_iterator);
+        const auto& begin = std::get<0>(_begin);
+        auto end = std::get<0>(_end);
+        const auto distance = std::distance(begin, end);
+
+        if (offset == distance) {
+            it = std::move(end);
+            return;
+        }
+        it += to_add;
     }
 
     template<std::size_t I>
     enable_if<(I > 0)> operator_plus_impl(const difference_type offset) {
-        auto& iterator = std::get<I>(_iterator);
+        if (_iterator == _end && offset < 0) {
+            do_prev_all<I>();
+            ++offset;
+        }
+
+        auto& it = std::get<I>(_iterator);
         const auto& begin = std::get<I>(_begin);
-        const auto& end = std::get<I>(_end);
-        difference_type dist;
-        if (offset < 0) {
-            if (iterator == begin) {
-                iterator = end;
-                dist = iterator - begin;
-            }
-            else {
-                dist = iterator - begin + 1;
-            }
+        auto end = std::get<I>(_end);
+        const auto distance = std::distance(begin, end);
+
+        if (_iterator == _end && offset < 0) {
+            do_prev_all<I>();
+            ++offset;
         }
-        else {
-            dist = end - iterator;
-        }
-        const auto offsets = std::lldiv(offset, dist);
-        iterator += static_cast<difference_type>(offsets.rem);
-        operator_plus_impl<I - 1>(static_cast<difference_type>(offsets.quot));
+
+        const auto to_add = offset % distance;
+        it += to_add;
+        operator_plus_impl<I - 1>(offset / distance);
     }
 
 #else
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_17 void next() {
         if constexpr (I == 0) {
-            return;
-        }
-        else {
-            auto& prev = std::get<I - 1>(_iterator);
-            ++prev;
-
             auto& first = std::get<0>(_iterator);
-            auto peek_first = std::next(first);
-            if (std::get<tup_size - 1>(_iterator) == std::get<tup_size - 1>(_end) && peek_first == std::get<0>(_end)) {
-                first = std::move(peek_first);
+            if (first == std::get<0>(_end)) {
                 return;
             }
+            ++first;
+        }
+        else {
+            auto& prev = std::get<I>(_iterator);
+            ++prev;
+            if (prev == std::get<I>(_end)) {
+                next<I - 1>();
 
-            if (prev == std::get<I - 1>(_end)) {
-                if constexpr (I != 1) {
-                    prev = std::get<I - 1>(_begin);
-                    next<I - 1>();
+                if (std::get<0>(_iterator) == std::get<0>(_end)) {
+                    return;
                 }
+
+                prev = std::get<I>(_begin);
             }
         }
     }
 
     template<std::size_t I>
-    void operator_plus_impl(const difference_type offset) {
-        auto& iterator = std::get<I>(_iterator);
+    void operator_plus_impl(difference_type offset) {
+        auto& it = std::get<I>(_iterator);
+        const auto& begin = std::get<I>(_begin);
+        auto end = std::get<I>(_end);
+        const auto distance = std::distance(begin, end);
+
+        if (_iterator == _end && offset < 0) {
+            do_prev_all<I>();
+            ++offset;
+        }
+
+        const auto to_add = offset % distance;
+
         if constexpr (I == 0) {
-            iterator = iterator + offset;
+            if (offset == distance) {
+                it = std::move(end);
+                return;
+            }
+            it += to_add;
         }
         else {
-            const auto& begin = std::get<I>(_begin);
-            const auto& end = std::get<I>(_end);
-            difference_type dist;
-            if (offset < 0) {
-                if (iterator == begin) {
-                    iterator = end;
-                    dist = iterator - begin;
-                }
-                else {
-                    dist = iterator - begin + 1;
-                }
-            }
-            else {
-                dist = end - iterator;
-            }
-            const auto [quot, rem] = std::lldiv(offset, dist);
-            iterator += static_cast<difference_type>(rem);
-            operator_plus_impl<I - 1>(static_cast<difference_type>(quot));
+            it += to_add;
+            operator_plus_impl<I - 1>(offset / distance);
         }
     }
 
@@ -239,10 +250,15 @@ private:
 
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_20 difference_type distance_impl(index_sequence_helper<Is...>, const cartesian_product_iterator& c) const {
-        const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(c._iterator) -
-                                                                           std::get<Is>(_iterator))... };
-        return std::accumulate(std::begin(distances), std::end(distances), difference_type{ 1 },
-                               std::multiplies<difference_type>{});
+        difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterator) - std::get<Is>(c._iterator))... };
+        difference_type sizes[] = { std::distance(std::get<Is>(_begin), std::get<Is>(_end))... };
+
+        difference_type sum = distances[0];
+        for (std::size_t i = 1; i < tup_size; i++) {
+            const auto same_sizes = sizes[i] == (distances[i] < 0 ? -distances[i] : distances[i]);
+            sum = sum * sizes[i] + (same_sizes ? 0 : distances[i]);
+        }
+        return sum;
     }
 
     using index_sequence_for_this = make_index_sequence<tup_size>;
@@ -272,7 +288,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        next<tup_size>();
+        next<tup_size - 1>();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
@@ -293,7 +309,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const cartesian_product_iterator& other) const {
-        return other.distance_impl(index_sequence_for_this(), *this);
+        return distance_impl(index_sequence_for_this{}, other);
     }
 };
 } // namespace detail

@@ -13,7 +13,7 @@ struct always_false : std::false_type {};
 
 template<class Func>
 class func_container {
-    mutable Func _func;
+    Func _func;
     bool _is_constructed{ false };
 
     constexpr explicit func_container(std::false_type /* is_default_constructible */) {

@@ -9,8 +9,8 @@ namespace lz {
 namespace detail {
 template<class Iterator>
 class take_iterator
-    : public iter_base<take_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                       iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, take_iterator<Iterator>>> {
+    : public iterator<take_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, take_iterator<Iterator>>> {
 
     using traits = std::iterator_traits<Iterator>;
 

@@ -270,10 +270,10 @@ using first_it = tup_element<0, Tuple>;
 
 template<class IterTuple, class SentinelTuple>
 class concatenate_iterator
-    : public iter_base<concatenate_iterator<IterTuple, SentinelTuple>, ref_t<first_it<IterTuple>>,
-                       fake_ptr_proxy<ref_t<first_it<IterTuple>>>, iter_tuple_diff_type_t<IterTuple>,
-                       iter_tuple_iter_cat_t<IterTuple>,
-                       sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
+    : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, ref_t<first_it<IterTuple>>,
+                      fake_ptr_proxy<ref_t<first_it<IterTuple>>>, iter_tuple_diff_type_t<IterTuple>,
+                      iter_tuple_iter_cat_t<IterTuple>,
+                      sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
 
     IterTuple _iterators{};
     IterTuple _begin{};

@@ -11,8 +11,8 @@ namespace lz {
 namespace detail {
 // TODO can we make bidirectional?
 template<class Iterator, class S>
-class exclude_iterator : public iter_base<exclude_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                                          diff_type<Iterator>, std::forward_iterator_tag, S> {
+class exclude_iterator : public iterator<exclude_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                                         diff_type<Iterator>, std::forward_iterator_tag, S> {
 
     using traits = std::iterator_traits<Iterator>;
 

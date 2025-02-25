@@ -1,3 +1,5 @@
+#define LZ_STANDALONE
+
 #include <Lz/detail/compiler_checks.hpp>
 
 #if !defined(LZ_HAS_STRING_VIEW)

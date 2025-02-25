@@ -12,7 +12,8 @@ struct loop_n_adaptor {
     using adaptor = loop_n_adaptor;
 
     template<class Iterable>
-    LZ_NODISCARD constexpr loop_iterable<Iterable, true> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr detail::enable_if<!std::is_integral<Iterable>::value, loop_iterable<Iterable, true>>
+    operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
     template<class Iterable>

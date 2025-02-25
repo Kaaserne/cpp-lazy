@@ -11,9 +11,9 @@ namespace lz {
 namespace detail {
 template<class Iterator, class S, bool IsSized>
 class rotate_iterator
-    : public iter_base<rotate_iterator<Iterator, S, IsSized>, ref_t<Iterator>, ptr_t<Iterator>, diff_type<Iterator>,
-                       conditional<IsSized, iter_cat_t<Iterator>, std::forward_iterator_tag>,
-                       conditional<IsSized, rotate_iterator<Iterator, S, IsSized>, Iterator>> {
+    : public iterator<rotate_iterator<Iterator, S, IsSized>, ref_t<Iterator>, ptr_t<Iterator>, diff_type<Iterator>,
+                      conditional<IsSized, iter_cat_t<Iterator>, std::forward_iterator_tag>,
+                      conditional<IsSized, rotate_iterator<Iterator, S, IsSized>, Iterator>> {
 
     using traits = std::iterator_traits<Iterator>;
 

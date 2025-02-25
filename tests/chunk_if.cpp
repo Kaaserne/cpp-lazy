@@ -20,10 +20,39 @@ TEST_CASE("Chunk if with sentinels") {
 }
 
 TEST_CASE("Non string literal test") {
+    std::function<bool(int)> is_even = [](int i) {
+        return i % 2 == 0;
+    };
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
-    auto chunked = lz::chunk_if(arr, [](int i) { return i % 2 == 0; });
-    auto expected = { std::vector<int>{ 1 }, std::vector<int>{ 3 }, std::vector<int>{ 5 } };
-    REQUIRE(lz::equal(chunked, expected));
+    auto chunked = lz::chunk_if(arr, is_even);
+
+    auto expected = { 1 };
+    auto it = chunked.begin();
+    REQUIRE(lz::equal(*it, expected));
+    ++it;
+    expected = { 3 };
+    REQUIRE(lz::equal(*it, expected));
+    ++it;
+    expected = { 5 };
+    REQUIRE(lz::equal(*it, expected));
+    ++it;
+    REQUIRE(it == chunked.end());
+
+    arr = { 0, 1, 2, 3, 4 };
+    chunked = lz::chunk_if(arr, is_even);
+    it = chunked.begin();
+    expected = {};
+    REQUIRE(lz::equal(*it, expected));
+    ++it;
+    expected = { 1 };
+    REQUIRE(lz::equal(*it, expected));
+    ++it;
+    expected = { 3 };
+    REQUIRE(lz::equal(*it, expected));
+    ++it;
+    expected = {};
+    ++it;
+    REQUIRE(it == chunked.end());
 }
 
 TEST_CASE("Empty or one element chunk_if") {

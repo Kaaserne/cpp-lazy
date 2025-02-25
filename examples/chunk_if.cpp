@@ -5,12 +5,26 @@ int main() {
 	auto chunked = lz::chunk_if(s, [](const char c) { return c == ';'; });
 
 	for (auto&& chunk : chunked) {
-		for (const char c : chunk) {
-			fmt::print("{}", c);
-		}
-		fmt::print("\n");
-	}
-	// Output
-	// hello world
-	//  this is a message
+        for (char& c : chunk) {
+            std::cout << c;
+            // or use fmt::print("{}", c);
+        }
+        // or use fmt::print("\n");
+        std::cout << '\n';
+    }
+    // Output:
+    // hello world
+    //  this is a message
+
+    for (auto&& chunk : s | lz::chunk_if([](const char c) { return c == ';'; })) {
+        for (char& c : chunk) {
+            std::cout << c;
+            // or use fmt::print("{}", c);
+        }
+        // or use fmt::print("\n");
+        std::cout << '\n';
+    }
+    // Output:
+    // hello world
+    //  this is a message
 }

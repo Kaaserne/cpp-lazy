@@ -10,10 +10,10 @@ namespace lz {
 struct default_sentinel {};
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
-struct iter_base;
+struct iterator;
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
-struct iter_base<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
+struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
 public:
     using iterator_category = std::forward_iterator_tag;
     using sentinel = S;
@@ -33,8 +33,14 @@ public:
         return static_cast<const Derived&>(*this).dereference();
     }
 
-    LZ_NODISCARD constexpr Reference operator*() {
-        return static_cast<Derived&>(*this).dereference();
+    template<class T = Reference>
+    LZ_NODISCARD constexpr detail::enable_if<std::is_lvalue_reference<T>::value, detail::decay_t<T>&> operator*() {
+        return const_cast<detail::decay_t<T>&>(static_cast<const iterator&>(*this).operator*());
+    }
+
+    template<class T = Reference>
+    LZ_NODISCARD constexpr detail::enable_if<!std::is_lvalue_reference<T>::value, T> operator*() {
+        return static_cast<const iterator&>(*this).operator*();
     }
 
     LZ_NODISCARD constexpr Pointer operator->() const {
@@ -62,19 +68,19 @@ public:
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S>
 LZ_NODISCARD constexpr detail::enable_if<!std::is_same<S, Derived>::value, bool>
-operator==(const S& a, const iter_base<Derived, Reference, Pointer, DifferenceType, IterCat, S>& b) {
+operator==(const S& a, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, S>& b) {
     return b == a;
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S>
 LZ_NODISCARD constexpr detail::enable_if<!std::is_same<S, Derived>::value, bool>
-operator!=(const S& a, const iter_base<Derived, Reference, Pointer, DifferenceType, IterCat, S>& b) {
+operator!=(const S& a, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, S>& b) {
     return !(a == b);
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
-struct iter_base<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S>
-    : public iter_base<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
+struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S>
+    : public iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::bidirectional_iterator_tag;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator--() {
@@ -90,8 +96,8 @@ struct iter_base<Derived, Reference, Pointer, DifferenceType, std::bidirectional
 };
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
-struct iter_base<Derived, Reference, Pointer, DifferenceType, std::random_access_iterator_tag, S>
-    : public iter_base<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S> {
+struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_iterator_tag, S>
+    : public iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S> {
     using iterator_category = std::random_access_iterator_tag;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator+=(const DifferenceType n) {

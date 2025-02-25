@@ -14,8 +14,8 @@ class except_iterator;
 
 template<class Iterator, class S, class Iterable, class BinaryPredicate>
 class except_iterator<Iterator, S, Iterable, BinaryPredicate, enable_if<sized<Iterable>::value>>
-    : public iter_base<except_iterator<Iterator, S, Iterable, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+    : public iterator<except_iterator<Iterator, S, Iterable, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -80,8 +80,8 @@ public:
 
 template<class Iterator, class S, class Iterable, class BinaryPredicate>
 class except_iterator<Iterator, S, Iterable, BinaryPredicate, enable_if<!sized<Iterable>::value>>
-    : public iter_base<except_iterator<Iterator, S, Iterable, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+    : public iterator<except_iterator<Iterator, S, Iterable, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 

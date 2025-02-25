@@ -12,9 +12,9 @@ namespace detail {
 
 template<class GeneratorFunc>
 class generate_while_iterator
-    : public iter_base<generate_while_iterator<GeneratorFunc>, tup_element<1, func_ret_type<GeneratorFunc>>,
-                       fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::forward_iterator_tag,
-                       default_sentinel> {
+    : public iterator<generate_while_iterator<GeneratorFunc>, tup_element<1, func_ret_type<GeneratorFunc>>,
+                      fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::forward_iterator_tag,
+                      default_sentinel> {
 
     GeneratorFunc _func{};
     using fn_return_type = decltype(_func());

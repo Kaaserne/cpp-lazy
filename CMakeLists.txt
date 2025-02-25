@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(cpp-lazy
-        VERSION 7.0.2
+        VERSION 9.0.0
         DESCRIPTION
         "A fast C++11/14/17/20 header only library for lazy evaluation and function tools"
         HOMEPAGE_URL "https://github.com/MarcDirven/cpp-lazy"
@@ -17,7 +17,7 @@ endif()
 include(GNUInstallDirs)
 set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installation directory of the include files")
 
-option(CPP-LAZY_USE_MODULES "Enable C++20's modules" NO)
+option(CPP-LAZY_USE_MODULES "Enable C++20's modules (experimental)" NO)
 
 if (CPP-LAZY_USE_MODULES)
 	set(CPP-LAZY_SOURCE_FILES "src/lz.cppm")

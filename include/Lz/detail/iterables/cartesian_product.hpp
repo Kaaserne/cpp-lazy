@@ -13,6 +13,12 @@ template<class... Iterables>
 class cartesian_product_iterable : public lazy_view {
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
+    template<std::size_t... Is>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence_helper<Is...>) const {
+        const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(std::get<Is>(_iterables)))... };
+        return std::accumulate(std::begin(sizes), std::end(sizes), std::size_t{ 1 }, std::multiplies<std::size_t>{});
+    }
+
 public:
     using iterator = cartesian_product_iterator<std::tuple<iter_t<Iterables>...>, std::tuple<sentinel_t<Iterables>...>>;
     using sentinel = typename iterator::sentinel;
@@ -26,6 +32,10 @@ public:
     }
 
     // TODO add size, also add test for that
+    template<class T = conjunction<sized<Iterables>...>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
+        return size(make_index_sequence<sizeof...(Iterables)>{});
+    }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { begin_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };

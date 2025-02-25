@@ -8,43 +8,35 @@
 
 namespace lz {
 namespace detail {
-template<class, class U>
-struct alias_wrapper_helper {
-    using type = U;
-};
-
-template<class T, class U = void>
-using alias_wrapper = typename alias_wrapper_helper<T, U>::type;
-
 template<class, class = void>
 struct has_value_type : std::false_type {};
 
 template<class T>
-struct has_value_type<T, alias_wrapper<typename T::value_type>> : std::true_type {};
+struct has_value_type<T, void_t<typename T::value_type>> : std::true_type {};
 
 template<class, class = void>
 struct has_diff_type : std::false_type {};
 
 template<class T>
-struct has_diff_type<T, alias_wrapper<typename T::difference_type>> : std::true_type {};
+struct has_diff_type<T, void_t<typename T::difference_type>> : std::true_type {};
 
 template<class, class = void>
 struct has_ptr : std::false_type {};
 
 template<class T>
-struct has_ptr<T, alias_wrapper<typename T::pointer>> : std::true_type {};
+struct has_ptr<T, void_t<typename T::pointer>> : std::true_type {};
 
 template<class, class = void>
 struct has_iter_cat : std::false_type {};
 
 template<class T>
-struct has_iter_cat<T, alias_wrapper<typename T::iterator_category>> : std::true_type {};
+struct has_iter_cat<T, void_t<typename T::iterator_category>> : std::true_type {};
 
 template<class, class = void>
 struct has_ref : std::false_type {};
 
 template<class T>
-struct has_ref<T, alias_wrapper<typename T::reference>> : std::true_type {};
+struct has_ref<T, void_t<typename T::reference>> : std::true_type {};
 
 template<class T>
 struct is_iterator {
@@ -58,7 +50,7 @@ struct traits_or_underlying_type_helper {
 };
 
 template<class T>
-struct traits_or_underlying_type_helper<T, alias_wrapper<typename T::iterator>> {
+struct traits_or_underlying_type_helper<T, void_t<typename T::iterator>> {
     using type = std::iterator_traits<typename T::iterator>;
 };
 
@@ -90,7 +82,7 @@ using count_dims = typename count_dims_helper<is_iterator<T>::value>::template t
 // Improvement of https://stackoverflow.com/a/21076724/8729023
 template<class Iterator, class S>
 class flatten_wrapper
-    : public iter_base<
+    : public iterator<
           flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
           common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
           sentinel_selector<common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>, flatten_wrapper<Iterator, S>>> {
@@ -156,10 +148,10 @@ using inner = flatten_iterator<decltype(std::begin(*std::declval<Iterator>())), 
                                N - 1>;
 
 template<class Iterator, class S, int N>
-class flatten_iterator : public iter_base<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>,
-                                          fake_ptr_proxy<ref_t<inner<Iterator, N>>>, diff_type<inner<Iterator, N>>,
-                                          common_type<std::bidirectional_iterator_tag, iter_cat_t<inner<Iterator, N>>>,
-                                          sentinel_selector<iter_cat_t<inner<Iterator, N>>, flatten_iterator<Iterator, S, N>>> {
+class flatten_iterator
+    : public iterator<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>, fake_ptr_proxy<ref_t<inner<Iterator, N>>>,
+                      diff_type<inner<Iterator, N>>, common_type<std::bidirectional_iterator_tag, iter_cat_t<inner<Iterator, N>>>,
+                      sentinel_selector<iter_cat_t<inner<Iterator, N>>, flatten_iterator<Iterator, S, N>>> {
 
     using this_inner = inner<Iterator, N>;
 
@@ -247,11 +239,11 @@ public:
 
 template<class Iterator, class S>
 class flatten_iterator<Iterator, S, 0>
-    : public iter_base<flatten_iterator<Iterator, S, 0>, ref_t<flatten_wrapper<Iterator, S>>,
-                       fake_ptr_proxy<ref_t<flatten_wrapper<Iterator, S>>>, diff_type<flatten_wrapper<Iterator, S>>,
-                       common_type<std::bidirectional_iterator_tag, iter_cat_t<flatten_wrapper<Iterator, S>>>,
-                       sentinel_selector<common_type<iter_cat_t<flatten_wrapper<Iterator, S>>, std::bidirectional_iterator_tag>,
-                                         flatten_iterator<Iterator, S, 0>>> {
+    : public iterator<flatten_iterator<Iterator, S, 0>, ref_t<flatten_wrapper<Iterator, S>>,
+                      fake_ptr_proxy<ref_t<flatten_wrapper<Iterator, S>>>, diff_type<flatten_wrapper<Iterator, S>>,
+                      common_type<std::bidirectional_iterator_tag, iter_cat_t<flatten_wrapper<Iterator, S>>>,
+                      sentinel_selector<common_type<iter_cat_t<flatten_wrapper<Iterator, S>>, std::bidirectional_iterator_tag>,
+                                        flatten_iterator<Iterator, S, 0>>> {
 
     flatten_wrapper<Iterator, S> _range;
     using traits = std::iterator_traits<Iterator>;

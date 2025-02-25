@@ -1,36 +1,137 @@
-#include <Lz/join.hpp>
-#include <Lz/map.hpp>
+#define LZ_STANDALONE
+
 #include <Lz/split.hpp>
 #include <catch2/catch.hpp>
 
-TEST_CASE("Overall tests with LZ_STANDALONE defined") {
-    std::array<unsigned, 4> array = { 1, 2, 3, 4 };
-    auto combined = lz::join(array, ", ").to_string();
+TEST_CASE("Formatting and compile tests") {
+    SECTION("Compile test") {
+        std::string to_split = "Hello, World!";
+        auto split = lz::sv_split(to_split, ", ");
+        static_assert(std::is_same<decltype(*split.begin()), lz::string_view>::value, "Should be string_view");
+    }
 
-    REQUIRE(combined == "1, 2, 3, 4");
-    REQUIRE(lz::map(array, [](unsigned i) { return i + 1; }).to_string(" ") == "2 3 4 5");
+    SECTION("Format test non empty") {
+        std::vector<int> vec = { 1, 2, 3, 4 };
+        REQUIRE((vec | lz::format) == "1, 2, 3, 4");
+        REQUIRE(lz::format(vec) == "1, 2, 3, 4");
 
-    std::array<bool, 4> bools = { true, false, true, false };
-    auto bool_map = lz::join(bools, ", ").to_string();
+        REQUIRE((vec | lz::format(",")) == "1,2,3,4");
+        REQUIRE(lz::format(vec, ",") == "1,2,3,4");
 
-    REQUIRE(bool_map == "true, false, true, false");
+        std::streambuf* old_cout = std::cout.rdbuf();
+        std::ostringstream oss;
+        std::cout.rdbuf(oss.rdbuf());
 
-    std::string to_split = "hello, world";
-    auto splitter = lz::split(to_split, ", ");
-    REQUIRE(lz::distance(splitter.begin(), splitter.end()) == 2);
-    static_assert(std::is_same<decltype(*splitter.begin()), lz::basic_iterable<decltype(to_split.begin())>>::value,
-                  "Should be lz::View");
+        lz::format(std::cout, vec);
+        REQUIRE(oss.str() == "1, 2, 3, 4");
+        oss.str("");
 
-    std::array<double, 4> vec = { 1.1, 2.2, 3.3, 4.4 };
-    auto doubles = lz::str_join(vec, ", ");
-    REQUIRE(doubles == "1.1, 2.2, 3.3, 4.4");
+        lz::format(std::cout, vec, ",");
+        REQUIRE(oss.str() == "1,2,3,4");
 
-    char char_map[] = { 'a', 'b', 'c', 'd' };
-    auto char_joined = lz::join(char_map, ", ").to_string();
-    REQUIRE(char_joined == "a, b, c, d");
-    REQUIRE(lz::map(char_map, [](char c) { return static_cast<char>(c + 1); }).to_string(" ") == "b c d e");
-}
+        std::cout.rdbuf(old_cout);
 
-TEST_CASE("Formatting") {
-    // TODO, std::print and std::ostream
+#if defined(LZ_HAS_FORMAT)
+
+        REQUIRE((vec | lz::format(", ", "{}")) == "1, 2, 3, 4");
+        REQUIRE(lz::format(vec, ", ", "{}") == "1, 2, 3, 4");
+
+#endif
+    }
+
+    SECTION("Format empty") {
+        std::vector<int> vec = {};
+        REQUIRE((vec | lz::format) == "");
+        REQUIRE(lz::format(vec) == "");
+
+        REQUIRE((vec | lz::format(",")) == "");
+        REQUIRE(lz::format(vec, ",") == "");
+
+#if defined(LZ_HAS_FORMAT)
+
+        REQUIRE((vec | lz::format(", ", "{}")) == "");
+        REQUIRE(lz::format(vec, ", ", "{}") == "");
+
+#endif
+    }
+
+    SECTION("Format one") {
+        std::vector<int> vec = { 1 };
+        REQUIRE((vec | lz::format) == "1");
+        REQUIRE(lz::format(vec) == "1");
+
+        REQUIRE((vec | lz::format(",")) == "1");
+        REQUIRE(lz::format(vec, ",") == "1");
+
+#if defined(LZ_HAS_FORMAT)
+
+        REQUIRE((vec | lz::format(", ", "{}")) == "1");
+        REQUIRE(lz::format(vec, ", ", "{}") == "1");
+
+#endif
+    }
+
+    SECTION("Ostream test non empty") {
+        std::array<int, 4> arr = { 1, 2, 3, 4 };
+        auto iterable = lz::to_iterable(arr);
+        std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "1, 2, 3, 4");
+    }
+
+    SECTION("Ostream test empty") {
+        std::array<int, 0> arr = {};
+        auto iterable = lz::to_iterable(arr);
+        std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "");
+    }
+
+    SECTION("Ostream test one element") {
+        std::array<int, 1> arr = { 1 };
+        auto iterable = lz::to_iterable(arr);
+        std::ostringstream oss;
+        oss << iterable;
+        REQUIRE(oss.str() == "1");
+    }
+
+    SECTION("std::cout test non empty") {
+        std::streambuf* old_cout = std::cout.rdbuf();
+        std::ostringstream oss;
+        std::cout.rdbuf(oss.rdbuf());
+
+        std::array<int, 4> arr = { 1, 2, 3, 4 };
+        auto iterable = lz::to_iterable(arr);
+        std::cout << iterable;
+        REQUIRE(oss.str() == "1, 2, 3, 4");
+
+        std::cout.rdbuf(old_cout);
+    }
+
+    SECTION("std::cout test empty") {
+        std::streambuf* old_cout = std::cout.rdbuf();
+        std::ostringstream oss;
+        std::cout.rdbuf(oss.rdbuf());
+
+        std::array<int, 0> arr = {};
+        auto iterable = lz::to_iterable(arr);
+        std::cout << iterable;
+        REQUIRE(oss.str() == "");
+
+        std::cout.rdbuf(old_cout);
+    }
+
+    SECTION("std::cout test one element") {
+        std::cout.flush();
+        std::streambuf* old_cout = std::cout.rdbuf();
+        std::ostringstream oss;
+        std::cout.rdbuf(oss.rdbuf());
+
+        std::array<int, 1> arr = { 1 };
+        auto iterable = lz::to_iterable(arr);
+        std::cout << iterable;
+        REQUIRE(oss.str() == "1");
+
+        std::cout.rdbuf(old_cout);
+    }
 }

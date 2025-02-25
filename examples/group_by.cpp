@@ -9,39 +9,41 @@ int main() {
 	auto grouper = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
 
 	for (auto&& pair : grouper) {
-		fmt::print("String length group: {}\n", pair.first.length());
-		for (const auto& str : pair.second) {
-			fmt::print("value: {}\n", str);
-		}
-	}
+        std::cout << "String length group: " << pair.first.length() << '\n';
+        // Or use fmt::print("String length group: {}\n", pair.first.length());
+        for (auto& str : pair.second) {
+            std::cout << "value: " << str << '\n';
+            // Or use fmt::print("value: {}\n", str);
+        }
+    }
 
-	/* Output:
-	String length group: 3
-	value: i'm
-	String length group: 4
-	value: done
-	String length group: 5
-	value: hello
-	value: hellp
-	 * */
+    /* Output:
+    String length group: 3
+    value: i'm
+    String length group: 4
+    value: done
+    String length group: 5
+    value: hello
+    value: hellp
+    */
 
-	fmt::print("\n");
+    std::cout << '\n';
 
-	std::sort(vec.begin(), vec.end(), [](const std::string& a, const std::string& b) { return a.length() > b.length(); });
-	auto grouper_desc = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
-	for (auto&& pair : grouper_desc) {
-		fmt::print("String length group: {}\n", pair.first.length());
-		for (const auto& str : pair.second) {
-			fmt::print("value: {}\n", str);
-		}
-	}
-	/* Output:
-	String length group: 5
-	value: hello
-	value: hellp
-	String length group: 4
-	value: done
-	String length group: 3
-	value: i'm
-	 * */
+    for (auto&& pair : vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); })) {
+        std::cout << "String length group: " << pair.first.length() << '\n';
+        // Or use fmt::print("String length group: {}\n", pair.first.length());
+        for (auto& str : pair.second) {
+            std::cout << "value: " << str << '\n';
+            // Or use fmt::print("value: {}\n", str);
+        }
+    }
+    /* Output:
+    String length group: 3
+    value: i'm
+    String length group: 4
+    value: done
+    String length group: 5
+    value: hello
+    value: hellp
+    */
 }

@@ -10,15 +10,18 @@ int main() {
     for (std::tuple<int&, int&> tup : lz::zip(a, b)) {
         std::cout << std::get<0>(tup) << ' ' << std::get<1>(tup) << '\n';
     }
-    // Yields (by reference if '& is used):
+    // Yields:
     // 1 1
     // 2 2
     // 3 3
 
-	// Or, C++17:
-#ifdef LZ_HAS_CXX_17
-	for (auto [a, b] : lz::zip(a, b)) {
-		// process a and b...
-	}
-#endif
+    std::cout << '\n';
+
+    for (std::tuple<int&, int&> tup : a | lz::zip(b)) {
+        std::cout << std::get<0>(tup) << ' ' << std::get<1>(tup) << '\n';
+    }
+    // Yields:
+    // 1 1
+    // 2 2
+    // 3 3
 }

@@ -4,6 +4,7 @@
 #define LZ_TAKE_ITERABLE_HPP
 
 #include <Lz/detail/iterators/take.hpp>
+#include <Lz/detail/ref_or_view.hpp>
 
 namespace lz {
 namespace detail {

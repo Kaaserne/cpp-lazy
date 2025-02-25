@@ -16,8 +16,8 @@ class unique_iterator;
 // TODO add iter_cat_t if std::forward_iterator_tag is hardcoded
 template<class Iterator, class S, class BinaryPredicate>
 class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>::value>>
-    : public iter_base<unique_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+    : public iterator<unique_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -67,8 +67,8 @@ public:
 
 template<class Iterator, class S, class BinaryPredicate>
 class unique_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator>::value>>
-    : public iter_base<unique_iterator<Iterator, Iterator, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                       diff_type<Iterator>, std::bidirectional_iterator_tag> {
+    : public iterator<unique_iterator<Iterator, Iterator, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, std::bidirectional_iterator_tag> {
 
     using traits = std::iterator_traits<Iterator>;
 

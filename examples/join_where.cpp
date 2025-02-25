@@ -1,4 +1,4 @@
-#include <Lz/JoinWhere.hpp>
+#include <Lz/join_where.hpp>
 
 struct customer {
     int id;
@@ -26,10 +26,13 @@ int main() {
             [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
 
         for (std::tuple<customer, payment_bill> join : joined) {
-            fmt::print("{} and {} are the same. The corresponding payment bill id is {}\n", std::get<0>(join).id,
-                       std::get<1>(join).customer_id, std::get<1>(join).id);
+            std::cout << std::get<0>(join).id << " and " << std::get<1>(join).customer_id
+                      << " are the same. The corresponding payment bill id is " << std::get<1>(join).id << '\n';
+            /* Or use fmt::print("{} and {} are the same. The corresponding payment bill id is {}\n", std::get<0>(join).id,
+                                 std::get<1>(join).customer_id, std::get<1>(join).id); */
         }
-        /* // Output:
+        /*
+        Output:
          25 and 25 are the same. The corresponding payment bill id is 0
          25 and 25 are the same. The corresponding payment bill id is 2
          25 and 25 are the same. The corresponding payment bill id is 3
@@ -44,14 +47,36 @@ int main() {
             [](const payment_bill& p, const customer& c) { return std::make_tuple(p, c); });
 
         for (std::tuple<payment_bill, customer> join : joined) {
-            fmt::print("{} and {} are the same. The corresponding payment bill id is {}\n",
-					   std::get<1>(join).id, std::get<0>(join).customer_id, std::get<0>(join).id);
+            std::cout << std::get<0>(join).customer_id << " and " << std::get<1>(join).id
+                      << " are the same. The corresponding payment bill id is " << std::get<0>(join).id << '\n';
+            /* Or use fmt::print("{} and {} are the same. The corresponding payment bill id is {}\n",
+                                 std::get<1>(join).id, std::get<0>(join).customer_id, std::get<0>(join).id); */
         }
-        /* // Output:
-		 25 and 25 are the same. The corresponding payment bill id is 0
-		 25 and 25 are the same. The corresponding payment bill id is 2
-		 25 and 25 are the same. The corresponding payment bill id is 3
-		 99 and 99 are the same. The corresponding payment bill id is 1
-		 */
-	}
+        /*
+         Output:
+         25 and 25 are the same. The corresponding payment bill id is 0
+         25 and 25 are the same. The corresponding payment bill id is 2
+         25 and 25 are the same. The corresponding payment bill id is 3
+         99 and 99 are the same. The corresponding payment bill id is 1
+         */
+    }
+
+    std::cout << '\n';
+
+    // Of course, also the pipe syntax is supported
+    auto joined = payment_bills |
+                  lz::join_where(
+                      customers, [](const payment_bill& p) { return p.customer_id; }, [](const customer& c) { return c.id; },
+                      [](const payment_bill& p, const customer& c) { return std::make_tuple(p, c); });
+    for (std::tuple<payment_bill, customer> join : joined) {
+        std::cout << std::get<0>(join).customer_id << " and " << std::get<1>(join).id
+                  << " are the same. The corresponding payment bill id is " << std::get<0>(join).id << '\n';
+    }
+    /*
+    Output:
+     25 and 25 are the same. The corresponding payment bill id is 0
+     25 and 25 are the same. The corresponding payment bill id is 2
+     25 and 25 are the same. The corresponding payment bill id is 3
+     99 and 99 are the same. The corresponding payment bill id is 1
+    */
 }

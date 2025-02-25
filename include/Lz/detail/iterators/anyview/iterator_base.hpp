@@ -20,8 +20,6 @@ struct iterator_base<Reference, std::forward_iterator_tag, DiffType> {
 
     virtual Reference dereference() = 0;
 
-    virtual Reference dereference() const = 0;
-
     virtual fake_ptr_proxy<Reference> arrow() = 0;
 
     virtual void increment() = 0;
@@ -36,8 +34,6 @@ struct iterator_base<Reference, std::bidirectional_iterator_tag, DiffType> {
     virtual ~iterator_base() = default;
 
     virtual Reference dereference() = 0;
-
-    virtual Reference dereference() const = 0;
 
     virtual fake_ptr_proxy<Reference> arrow() = 0;
 
@@ -55,8 +51,6 @@ struct iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
     virtual ~iterator_base() = default;
 
     virtual Reference dereference() = 0;
-
-    virtual Reference dereference() const = 0;
 
     virtual fake_ptr_proxy<Reference> arrow() = 0;
 

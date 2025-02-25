@@ -14,9 +14,9 @@ namespace detail {
 
 template<class Iterator, class S, class BinaryPredicate>
 class group_by_iterator
-    : public iter_base<group_by_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, basic_iterable<Iterator>>,
-                       fake_ptr_proxy<std::pair<ref_t<Iterator>, basic_iterable<Iterator>>>, std::ptrdiff_t,
-                       std::forward_iterator_tag, default_sentinel> {
+    : public iterator<group_by_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, basic_iterable<Iterator>>,
+                      fake_ptr_proxy<std::pair<ref_t<Iterator>, basic_iterable<Iterator>>>, std::ptrdiff_t,
+                      std::forward_iterator_tag, default_sentinel> {
 
     Iterator _sub_range_end{};
     Iterator _sub_range_begin{};

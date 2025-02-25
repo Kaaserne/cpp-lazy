@@ -10,27 +10,37 @@ TEST_CASE("Formatting") {
 
         auto str = arr | lz::format;
         REQUIRE(str == "1, 2, 3, 4, 5");
+        REQUIRE(lz::format(arr) == "1, 2, 3, 4, 5");
 
-        str = arr | lz::format("{}");
+        str = arr | lz::format(", ", "{}");
         REQUIRE(str == "1, 2, 3, 4, 5");
+        REQUIRE(lz::format(arr, ", ", "{}") == "1, 2, 3, 4, 5");
 
-        str = arr | lz::format("{:02}");
+        str = arr | lz::format(", ", "{:02}");
         REQUIRE(str == "01, 02, 03, 04, 05");
+        REQUIRE(lz::format(arr, ", ", "{:02}") == "01, 02, 03, 04, 05");
 
-        str = arr | lz::format("{:02}", ",");
+        str = arr | lz::format(",", "{:02}");
         REQUIRE(str == "01,02,03,04,05");
+        REQUIRE(lz::format(arr, ",", "{:02}") == "01,02,03,04,05");
 
-        str = lz::format(arr);
-        REQUIRE(str == "1, 2, 3, 4, 5");
+        std::streambuf* old_cout = std::cout.rdbuf();
+        std::ostringstream oss;
+        std::cout.rdbuf(oss.rdbuf());
 
-        str = lz::format(arr, "{}");
-        REQUIRE(str == "1, 2, 3, 4, 5");
+        lz::format(std::cout, arr);
+        REQUIRE(oss.str() == "1, 2, 3, 4, 5");
+        oss.str("");
 
-        str = lz::format(arr, "{:02}");
-        REQUIRE(str == "01, 02, 03, 04, 05");
+        lz::format(std::cout, arr, ",");
+        REQUIRE(oss.str() == "1,2,3,4,5");
+        oss.str("");
 
-        str = lz::format(arr, "{:02}", ",");
-        REQUIRE(str == "01,02,03,04,05");
+        lz::format(std::cout, arr, ", ", "{:02}");
+        REQUIRE(oss.str() == "01, 02, 03, 04, 05");
+        oss.str("");
+
+        std::cout.rdbuf(old_cout);
     }
 
     SECTION("Empty fmt") {
@@ -38,54 +48,36 @@ TEST_CASE("Formatting") {
 
         auto str = arr | lz::format;
         REQUIRE(str == "");
+        REQUIRE(lz::format(arr) == "");
 
-        str = arr | lz::format("{}");
+        str = arr | lz::format(",", "{}");
         REQUIRE(str == "");
+        REQUIRE(lz::format(arr, ",", "{}") == "");
 
-        str = arr | lz::format("{:02}");
+        str = arr | lz::format(",", "{:02}");
         REQUIRE(str == "");
+        REQUIRE(lz::format(arr, ",", "{:02}") == "");
 
-        str = arr | lz::format("{:02}", ",");
+        str = arr | lz::format(",", "{:02}");
         REQUIRE(str == "");
-
-        str = lz::format(arr);
-        REQUIRE(str == "");
-
-        str = lz::format(arr, "{}");
-        REQUIRE(str == "");
-
-        str = lz::format(arr, "{:02}");
-        REQUIRE(str == "");
-
-        str = lz::format(arr, "{:02}", ",");
-        REQUIRE(str == "");
+        REQUIRE(lz::format(arr, ",", "{:02}") == "");
     }
 
     SECTION("One element fmt") {
         std::array<int, 1> arr = { 1 };
 
-        auto str = arr | lz::format("{}");
+        auto str = arr | lz::format(", ", "{}");
         REQUIRE(str == "1");
+        REQUIRE(lz::format(arr, ", ", "{}") == "1");
 
-        str = arr | lz::format("{:02}");
+        str = arr | lz::format(", ", "{:02}");
         REQUIRE(str == "01");
-
-        str = arr | lz::format("{:02}", ",");
-        REQUIRE(str == "01");
-
-        str = lz::format(arr, "{}");
-        REQUIRE(str == "1");
-
-        str = lz::format(arr, "{:02}");
-        REQUIRE(str == "01");
-
-        str = lz::format(arr, "{:02}", ",");
-        REQUIRE(str == "01");
+        REQUIRE(lz::format(arr, ", ", "{:02}") == "01");
     }
 
     SECTION("Non empty ostream") {
         std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        auto iterable = lz::to_iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1, 2, 3, 4, 5");
@@ -98,7 +90,7 @@ TEST_CASE("Formatting") {
 
     SECTION("Empty ostream") {
         std::array<int, 0> arr = {};
-        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        auto iterable = lz::to_iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "");
@@ -106,7 +98,7 @@ TEST_CASE("Formatting") {
 
     SECTION("One element ostream") {
         std::array<int, 1> arr = { 1 };
-        auto iterable = lz::to_iterable(arr.begin(), arr.end());
+        auto iterable = lz::to_iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1");

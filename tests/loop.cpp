@@ -35,10 +35,15 @@ TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
         REQUIRE(looper.begin() != looper.end());
         REQUIRE(looper.begin() != looper.begin());
     }
+
+    SECTION("Always false") {
+        REQUIRE(looper.begin() == looper.end());
+        REQUIRE(looper.begin() == looper.begin());
+    }
 }
 
 TEST_CASE("Loop with non while true argument") {
-    std::array<int, 4> arr = { 1, 2, 3, 4 }; // {1, 2, 3, 4}
+    std::array<int, 4> arr = { 1, 2, 3, 4 };
 
     SECTION("Empty") {
         auto looper = lz::loop(arr, 0);
@@ -50,6 +55,18 @@ TEST_CASE("Loop with non while true argument") {
         auto looper2 = lz::loop(vec, 0);
         REQUIRE(looper2.size() == 0);
         REQUIRE(lz::empty(looper2));
+    }
+
+    SECTION("Size") {
+        auto looper = lz::loop(arr, 2);
+        REQUIRE(looper.size() == 8);
+        REQUIRE(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
+    }
+
+    SECTION("To vector") {
+        auto looper = lz::loop(arr, 2);
+        std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
+        REQUIRE((looper | lz::to<std::vector>()) == expected);
     }
 
     SECTION("Distance positive") {
@@ -71,7 +88,7 @@ TEST_CASE("Loop with non while true argument") {
     SECTION("Distance negative") {
         auto looper = lz::loop(arr, 3);
         auto begin = looper.begin();
-        for (std::ptrdiff_t i = -static_cast<std::ptrdiff_t>(looper.size()); i < 1; ++i, ++begin) {
+        for (std::ptrdiff_t i = -static_cast<std::ptrdiff_t>(looper.size()); i < 0; ++i, ++begin) {
             CHECK(std::distance(looper.end(), begin) == i);
         }
     }

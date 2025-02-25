@@ -57,9 +57,9 @@ class zip_longest_iterator;
 
 template<class IterTuple, class SentinelTuple>
 class zip_longest_iterator<false /*is bidirectional access*/, IterTuple, SentinelTuple>
-    : public iter_base<zip_longest_iterator<false, IterTuple, SentinelTuple>, optional_iter_tuple_ref_type<IterTuple>,
-                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                       iter_tuple_iter_cat_t<IterTuple>, default_sentinel> {
+    : public iterator<zip_longest_iterator<false, IterTuple, SentinelTuple>, optional_iter_tuple_ref_type<IterTuple>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+                      iter_tuple_iter_cat_t<IterTuple>, default_sentinel> {
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
     using value_type = optional_value_type_iter_tuple_t<IterTuple>;
@@ -156,9 +156,9 @@ LZ_CONSTEXPR_CXX_14 std::tuple<decltype(I, bool{})...> create_bool_tuple(std::in
 
 template<class IterTuple, class SentinelTuple>
 class zip_longest_iterator<true /*is bidirectional access*/, IterTuple, SentinelTuple>
-    : public iter_base<zip_longest_iterator<true, IterTuple, IterTuple>, optional_iter_tuple_ref_type<IterTuple>,
-                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                       iter_tuple_iter_cat_t<IterTuple>> {
+    : public iterator<zip_longest_iterator<true, IterTuple, IterTuple>, optional_iter_tuple_ref_type<IterTuple>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+                      iter_tuple_iter_cat_t<IterTuple>> {
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
     using value_type = optional_value_type_iter_tuple_t<IterTuple>;

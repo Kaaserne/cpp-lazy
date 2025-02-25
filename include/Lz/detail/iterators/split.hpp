@@ -11,8 +11,8 @@ namespace lz {
 namespace detail {
 
 template<class ValueType, class Iterator, class S, class Iterator2, class S2>
-class split_iterator : public iter_base<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType,
-                                        fake_ptr_proxy<ValueType>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+class split_iterator : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType,
+                                       fake_ptr_proxy<ValueType>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
     std::pair<Iterator, Iterator> _sub_range_end;
     Iterator _sub_range_begin;
     Iterator2 _to_search;
@@ -21,8 +21,7 @@ class split_iterator : public iter_base<split_iterator<ValueType, Iterator, S, I
     bool _trailingEmpty{ true };
 
     LZ_CONSTEXPR_CXX_14 std::pair<Iterator, Iterator> search() const {
-        using std::search;
-        return search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
+        return detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
     }
 
 public:
