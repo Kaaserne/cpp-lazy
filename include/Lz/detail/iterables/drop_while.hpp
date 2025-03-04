@@ -28,7 +28,7 @@ public:
     constexpr drop_while_iterable() = default;
 
     template<class I>
-    constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) noexcept :
+    constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _iterable{ iterable },
         _unary_predicate{ std::move(unary_predicate) } {
     }
@@ -66,7 +66,7 @@ public:
     constexpr drop_while_iterable() = default;
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) noexcept :
+    LZ_CONSTEXPR_CXX_14 drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _begin{ lz::find_if_not(iterable, std::move(unary_predicate)) },
         _end{ std::forward<I>(iterable).end() } {
     }

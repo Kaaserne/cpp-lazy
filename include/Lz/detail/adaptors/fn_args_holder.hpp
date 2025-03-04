@@ -3,6 +3,7 @@
 #ifndef LZ_FN_ARGS_HOLDER_ADAPTOR_HPP
 #define LZ_FN_ARGS_HOLDER_ADAPTOR_HPP
 
+#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/traits.hpp>
 #include <tuple>
 
@@ -19,7 +20,7 @@ struct fn_args_holder {
     LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) noexcept : data(std::forward<Args>(args)...) {
     }
 
-    template<class Iterable, std::size_t... I>
+    template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
                index_sequence_helper<I...>) const& -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
@@ -28,21 +29,22 @@ struct fn_args_holder {
         return adaptor(std::forward<Iterable>(iterable), std::get<I>(data)...);
     }
 
-    template<class Iterable, std::size_t... I>
+    template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
-    operator()(Iterable&& iterable, index_sequence_helper<I...>) &&
-            -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...)) {
+    operator()(Iterable&& iterable,
+               index_sequence_helper<I...>) && -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
+                                                                                   std::get<I>(std::move(data))...)) {
         constexpr Adaptor adaptor;
         return adaptor(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
     }
 
-    template<class Iterable>
+    template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) const& -> decltype((*this)(std::forward<Iterable>(iterable),
                                                                                         make_index_sequence<sizeof...(Ts)>{})) {
         return (*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
     }
 
-    template<class Iterable>
+    template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable) && -> decltype(std::move(*this)(std::forward<Iterable>(iterable),
                                                                     make_index_sequence<sizeof...(Ts)>{})) {

@@ -26,10 +26,10 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterable _to_except{};
-    Iterator _iterator{};
-    S _end{};
-    mutable BinaryPredicate _predicate{};
+    Iterable _to_except;
+    Iterator _iterator;
+    S _end;
+    BinaryPredicate _predicate;
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;

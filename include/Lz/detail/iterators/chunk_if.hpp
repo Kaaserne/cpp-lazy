@@ -22,11 +22,11 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _sub_range_begin{};
-    Iterator _sub_range_end{};
+    Iterator _sub_range_begin;
+    Iterator _sub_range_end;
     bool _trailing_empty{ true };
-    S _end{};
-    UnaryPredicate _predicate{};
+    S _end;
+    UnaryPredicate _predicate;
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;

@@ -12,10 +12,28 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
 
-static const detail::generate_adaptor generate{};
+/**
+ * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
+ * returns a sentinel. Example:
+ * ```cpp
+ * lz::generate([]() { return 10; }, 5); // Generates 5 times the number 10
+ * // or
+ * lz::generate([]() { return 10; }); // Generates infinite times the number 10
+ * ```
+ */
+static constexpr detail::generate_adaptor detail::generate_adaptor::generate{};
 
 #else
 
+/**
+ * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
+ * returns a sentinel. Example:
+ * ```cpp
+ * lz::generate([]() { return 10; }, 5); // Generates 5 times the number 10
+ * // or
+ * lz::generate([]() { return 10; }); // Generates infinite times the number 10
+ * ```
+ */
 LZ_INLINE_VAR constexpr detail::generate_adaptor generate{};
 
 #endif

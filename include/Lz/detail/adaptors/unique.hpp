@@ -4,6 +4,7 @@
 #define LZ_UNIQUE_ADPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
+#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/unique.hpp>
 
 namespace lz {
@@ -11,13 +12,46 @@ namespace detail {
 struct unique_adaptor {
     using adaptor = unique_adaptor;
 
-    template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
+#ifdef LZ_HAS_CXX_11
+
+    static constexpr adaptor unique{};
+
+#endif
+
+    /**
+     * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted
+     * beforehand. This iterator will 'decay' into a bidirectional one if the input iterator is bidirectional or higher. If the
+     * input iterable is not bidirectional or higher, then the output iterator will be forward, and will also return a sentinel,
+     * rather than an iterator. This method does not contain a .size() method. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
+     * std::sort(vec.begin(), vec.end());
+     * auto unique = lz::unique(vec);
+     * auto unique = lz::unique(vec, std::less<>{});
+     * ```
+     * @param iterable The iterable to make unique. Must be sorted beforehand.
+     * @param predicate The predicate to compare the elements with. The default is std::less<>{}
+     */
+    template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, unique_iterable<Iterable, BinaryPredicate>>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
     }
 
-    // TODO add docs for all adaptors
+    /**
+     * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted
+     * beforehand. This iterator will 'decay' into a bidirectional one if the input iterator is bidirectional or higher. If the
+     * input iterable is not bidirectional or higher, then the output iterator will be forward, and will also return a sentinel,
+     * rather than an iterator. This method does not contain a .size() method. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
+     * std::sort(vec.begin(), vec.end());
+     * auto unique = vec | lz::unique;
+     * // custom comparer can be passed as argument as well:
+     * auto unique = vec | lz::unique(std::less<>{});
+     * ```
+     * @param predicate The predicate to compare the elements with. The default is std::less<>{}
+     */
     template<class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>
     operator()(BinaryPredicate predicate = {}) const {

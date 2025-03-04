@@ -10,10 +10,32 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
 
-static const detail::flatten_adaptor flatten{};
+/**
+ * @brief Flattens a nested iterable. For instance a vector of vectors will be flattened to a single iterable. Returns a
+ * bidirectional iterable if the input is bidirectional, otherwise the same as the input iterable. If its input iterable is
+ * forward or less, the end iterator will be a sentinel. Contains a .size() method if all the input iterables are sized. Example:
+ * ```cpp
+ * std::vector<std::vector<int>> vectors = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+ * auto flattened = lz::flatten(vectors); // { 1, 2, 3, 4, 5, 6, 7 }
+ * // or
+ * auto flattened = vectors | lz::flatten; // { 1, 2, 3, 4, 5, 6, 7 }
+ * ```
+ */
+static constexpr detail::flatten_adaptor detail::flatten_adaptor::flatten{};
 
 #else
 
+/**
+ * @brief Flattens a nested iterable. For instance a vector of vectors will be flattened to a single iterable. Returns a
+ * bidirectional iterable if the input is bidirectional, otherwise the same as the input iterable. If its input iterable is
+ * forward or less, the end iterator will be a sentinel. Contains a .size() method if all the input iterables are sized. Example:
+ * ```cpp
+ * std::vector<std::vector<int>> vectors = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+ * auto flattened = lz::flatten(vectors); // { 1, 2, 3, 4, 5, 6, 7 }
+ * // or
+ * auto flattened = vectors | lz::flatten; // { 1, 2, 3, 4, 5, 6, 7 }
+ * ```
+ */
 LZ_INLINE_VAR constexpr detail::flatten_adaptor flatten{};
 
 #endif

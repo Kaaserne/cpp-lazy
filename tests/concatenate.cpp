@@ -24,7 +24,7 @@ TEST_CASE("Concat changing and creating elements", "[Concat][Basic functionality
     std::string b = "world";
 
     auto concat = a | lz::concat(b);
-    CHECK(concat.size() == a.size() + b.size());
+    REQUIRE(concat.size() == a.size() + b.size());
     static_assert(std::is_same<decltype(concat.begin()), decltype(concat.end())>::value, "Should not be sentinel");
 
     SECTION("Should be by reference") {
@@ -56,7 +56,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a;
         std::string b;
         auto concat = lz::concat(a, b);
-        CHECK(concat.size() == 0);
+        REQUIRE(concat.size() == 0);
         REQUIRE(lz::empty(concat));
         REQUIRE(!lz::has_one(concat));
         REQUIRE(!lz::has_many(concat));
@@ -66,7 +66,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a = "h";
         std::string b;
         auto concat = lz::concat(a, b);
-        CHECK(concat.size() == 1);
+        REQUIRE(concat.size() == 1);
         REQUIRE(!lz::empty(concat));
         REQUIRE(lz::has_one(concat));
         REQUIRE(!lz::has_many(concat));
@@ -76,7 +76,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a;
         std::string b = "w";
         auto concat = lz::concat(a, b);
-        CHECK(concat.size() == 1);
+        REQUIRE(concat.size() == 1);
         REQUIRE(!lz::empty(concat));
         REQUIRE(lz::has_one(concat));
         REQUIRE(!lz::has_many(concat));
@@ -86,7 +86,7 @@ TEST_CASE("Empty or one element concatenate") {
         std::string a = "h";
         std::string b = "w";
         auto concat = lz::concat(a, b);
-        CHECK(concat.size() == 2);
+        REQUIRE(concat.size() == 2);
         REQUIRE(!lz::empty(concat));
         REQUIRE(!lz::has_one(concat));
         REQUIRE(lz::has_many(concat));
@@ -96,7 +96,7 @@ TEST_CASE("Empty or one element concatenate") {
 TEST_CASE("Concat binary operations", "[Concat][Binary ops]") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);
-    CHECK(concat.size() == a.size() + b.size());
+    REQUIRE(concat.size() == a.size() + b.size());
     auto begin = concat.begin();
 
     REQUIRE(*begin == 'h');

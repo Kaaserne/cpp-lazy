@@ -5,11 +5,23 @@
 #include <map>
 #include <unordered_map>
 
-TEST_CASE("Generate changing and creating elements", "[Generate][Basic functionality]") {
-    auto compile_test = lz::generate([]() { return 0; });
-    static_assert(!std::is_same<decltype(compile_test.begin()), decltype(compile_test.end())>::value, "Should be sentinel");
-    static_cast<void>(compile_test);
+TEST_CASE("Generate infinite") {
+    auto generator = lz::generate([]() { return 0; });
+    static_assert(!std::is_same<decltype(generator.begin()), decltype(generator.end())>::value, "Should be sentinel");
+    REQUIRE(generator.begin() != generator.end());
+    REQUIRE(generator.begin() != generator.begin());
 
+    auto begin = generator.begin();
+    REQUIRE(*begin == 0);
+    REQUIRE(begin != generator.end());
+    REQUIRE(begin != generator.begin());
+    ++begin;
+    REQUIRE(*begin == 0);
+    REQUIRE(begin != generator.end());
+    REQUIRE(begin != generator.begin());
+}
+
+TEST_CASE("Generate changing and creating elements", "[Generate][Basic functionality]") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
     auto generator = lz::generate(

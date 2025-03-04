@@ -153,9 +153,9 @@ TEST_CASE("Intersection binary operations") {
         auto intersect = lz::intersection(a, b);
         auto it = intersect.begin();
         auto it2 = intersect.end();
-        CHECK(it != it2);
+        REQUIRE(it != it2);
         it2 = it;
-        CHECK(it == it2);
+        REQUIRE(it == it2);
     }
 }
 

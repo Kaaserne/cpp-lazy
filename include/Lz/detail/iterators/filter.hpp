@@ -10,14 +10,13 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class UnaryPredicate>
+template<class Iterator, class S, class UnaryPredicate, class = void>
 class filter_iterator;
 
 template<class Iterator, class S, class UnaryPredicate>
-class filter_iterator
+class filter_iterator<Iterator, S, UnaryPredicate, enable_if<!is_bidi<Iterator>::value>>
     : public iterator<filter_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                      diff_type<Iterator>, common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
-                      sentinel_selector<iter_cat_t<Iterator>, filter_iterator<Iterator, S, UnaryPredicate>>> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -34,10 +33,68 @@ public:
     }
 
 private:
-    Iterator _begin{};
-    Iterator _iterator{};
-    S _end{};
-    mutable UnaryPredicate _predicate{};
+    Iterator _iterator;
+    S _end;
+    UnaryPredicate _predicate;
+
+public:
+    LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :
+        _iterator{ std::move(iterator) },
+        _end{ std::move(end) },
+        _predicate{ std::move(up) } {
+        if (_iterator == begin) {
+            _iterator = find(std::move(_iterator), _end);
+        }
+    }
+
+    constexpr filter_iterator() = default;
+
+    constexpr reference dereference() const {
+        return *_iterator;
+    }
+
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
+
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_iterator;
+        _iterator = find(std::move(_iterator), _end);
+    }
+
+    constexpr bool eq(const filter_iterator& b) const {
+        return _iterator == b._iterator;
+    }
+
+    constexpr bool eq(default_sentinel) const {
+        return _iterator == _end;
+    }
+};
+
+template<class Iterator, class S, class UnaryPredicate>
+class filter_iterator<Iterator, S, UnaryPredicate, enable_if<is_bidi<Iterator>::value>>
+    : public iterator<filter_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                      diff_type<Iterator>, std::bidirectional_iterator_tag, filter_iterator<Iterator, S, UnaryPredicate>> {
+
+    using traits = std::iterator_traits<Iterator>;
+
+public:
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+    using reference = typename traits::reference;
+    using pointer = fake_ptr_proxy<reference>;
+
+    LZ_CONSTEXPR_CXX_14 Iterator find(Iterator first, S last) {
+        using detail::find_if;
+        using std::find_if;
+        return find_if(std::move(first), std::move(last), _predicate);
+    }
+
+private:
+    Iterator _begin;
+    Iterator _iterator;
+    S _end;
+    UnaryPredicate _predicate;
 
 public:
     LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :

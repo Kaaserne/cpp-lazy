@@ -31,7 +31,7 @@ public:
     }
 
     template<class T = conjunction<sized<Iterables>...>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 std::size_t size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<T::value, std::size_t> size() const {
         return size(make_index_sequence<sizeof...(Iterables)>{});
     }
 

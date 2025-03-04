@@ -26,7 +26,6 @@ public:
 
     constexpr common_iterator() = default;
 
-    // TODO change () to  {}
     constexpr common_iterator(const Iterator& iter) : _data{ iter } {
     }
 

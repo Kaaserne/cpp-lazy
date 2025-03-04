@@ -31,7 +31,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * }); // { 0, 1, 2, 3 }
  * ```
  */
-static const detail::generate_while_adaptor generate_while{};
+static constexpr detail::generate_while_adaptor detail::generate_while_adaptor::generate_while{};
 
 #else
 

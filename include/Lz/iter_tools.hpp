@@ -4,11 +4,12 @@
 #define LZ_ITER_TOOLS_HPP
 
 #include <Lz/basic_iterable.hpp>
+#include <Lz/detail/adaptors/iter_tools.hpp>
 // #include <Lz/concatenate.hpp>
 // #include <Lz/drop_while.hpp>
 // #include <Lz/filter.hpp>
 // #include <Lz/join.hpp>
-// #include <Lz/map.hpp>
+#include <Lz/map.hpp>
 // #include <Lz/split.hpp>
 // #include <Lz/take.hpp>
 // #include <Lz/take_while.hpp>
@@ -18,20 +19,7 @@
 // #include <numeric>
 
 namespace lz {
-// namespace detail {
-// template<class To>
-// struct convert_fn {
-//     template<class From>
-//     constexpr To operator()(From&& f) const {
-//         return static_cast<To>(f);
-//     }
-
-//     template<class From>
-//     constexpr To operator()(From&& f) {
-//         return static_cast<To>(f);
-//     }
-// };
-
+namespace detail {
 // template<std::size_t I>
 // struct get_fn {
 //     // TODO add const variant
@@ -66,7 +54,7 @@ namespace lz {
 // LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) {
 //     return { std::make_tuple(cached_next<N>(std::begin(iterable))...), std::make_tuple(std::end((N, iterable))...) };
 // }
-// } // namespace detail
+} // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
@@ -106,15 +94,27 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17 basic_iterable<std::reverse_iterator<iter_t<Ite
     return { std::move(rev_end), std::move(rev_begin) };
 }
 
-// /**
-//  * @brief Returns an iterable that converts the elements in the given container to the type @p `T`.
-//  * @tparam T The type to convert the elements to.
-//  * @return A map iterator that converts the elements in the container to the type @p `T`.
-//  */
-// template<class T, LZ_CONCEPT_ITERATOR Iterable>
-// LZ_NODISCARD constexpr map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::convert_fn<T>> as(Iterable&& iterable) {
-//     return lz::map(std::forward<Iterable>(iterable), detail::convert_fn<T>());
-// }
+
+#ifdef LZ_HAS_CXX_11
+
+template<class T>
+static const detail::as_adaptor<T> detail::as_adaptor<T>::as{};
+
+#else
+
+/**
+ * @brief Returns an iterable that converts the elements in the given container to the type @p `T`.
+ * @tparam T The type to convert the elements to.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto floats = vec | lz::as<float>(); // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * ```
+ */
+template<class T>
+LZ_INLINE_VAR constexpr detail::as_adaptor<T> as{};
+
+#endif
 
 // template<class Fn, class... Iterables>
 // using zip_with_iterable = map_iterable<decltype(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...).begin()),

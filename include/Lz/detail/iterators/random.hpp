@@ -23,7 +23,7 @@ public:
     using result_type = value_type;
 
 private:
-    mutable Distribution _distribution{};
+    mutable Distribution _distribution;
     Generator* _generator{ nullptr };
     std::ptrdiff_t _current{};
 

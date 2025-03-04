@@ -24,10 +24,9 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // or
  * auto grouper = cstr | lz::group_by([](char a, char b) { return a == b; });
  * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
- *
  * ```
  */
-static const detail::group_by_adaptor group_by{};
+static constexpr detail::group_by_adaptor detail::group_by_adaptor::group_by{};
 
 #else
 
@@ -43,7 +42,6 @@ static const detail::group_by_adaptor group_by{};
  * // or
  * auto grouper = cstr | lz::group_by([](char a, char b) { return a == b; });
  * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
- *
  * ```
  */
 LZ_INLINE_VAR constexpr detail::group_by_adaptor group_by{};

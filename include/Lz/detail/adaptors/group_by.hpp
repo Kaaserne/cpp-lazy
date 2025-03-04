@@ -4,6 +4,7 @@
 #define LZ_GROUP_BY_ADAPTORS_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
+#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/group_by.hpp>
 
 namespace lz {
@@ -11,12 +12,43 @@ namespace detail {
 struct group_by_adaptor {
     using adaptor = group_by_adaptor;
 
-    template<class Iterable, class BinaryPredicate>
+#ifdef LZ_HAS_CXX_11
+
+    static constexpr adaptor group_by{};
+
+#endif
+
+    /**
+     * @brief Creates chunks of elements of which the predicate returns true. Input iterable must be sorted first before using
+     * this function. Its end iterator is a sentinel one. Therefore, its begin() and end() types are not the same. The iterable
+     * does not contain a .size() method. Its iterator category is forward. Example:
+     * ```cpp
+     * char str[] = "aaabbccccd";
+     * // normally, use std::sort(std::begin(str), std::end(str)) before using this function, if it isn't sorted already
+     * auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
+     * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
+     * ```
+     * @param iterable The iterable to group by
+     * @param binary_predicate The predicate to group by
+     */
+    template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate>
     LZ_NODISCARD constexpr group_by_iterable<Iterable, decay_t<BinaryPredicate>>
     operator()(Iterable&& iterable, BinaryPredicate binary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(binary_predicate) };
     }
 
+    /**
+     * @brief Creates chunks of elements of which the predicate returns true. Input iterable must be sorted first before using
+     * this function. Its end iterator is a sentinel one. Therefore, its begin() and end() types are not the same. The iterable
+     * does not contain a .size() method. Its iterator category is forward. Example:
+     * ```cpp
+     * char str[] = "aaabbccccd";
+     * // normally, use std::sort(std::begin(str), std::end(str)) before using this function, if it isn't sorted already
+     * auto grouper = cstr | lz::group_by([](char a, char b) { return a == b; });
+     * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
+     * ```
+     * @param binary_predicate The predicate to group by
+     */
     template<class BinaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, decay_t<BinaryPredicate>>
     operator()(BinaryPredicate binary_predicate) const {

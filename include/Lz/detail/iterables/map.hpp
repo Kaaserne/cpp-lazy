@@ -55,8 +55,6 @@ public:
         return { std::end(_iterable), _unary_op };
     }
 
-    // TODO make end() return actual iterator instead of {} in some cases when sentinel == actual iterator but not equal to
-    // this->iterator
     template<class I = iterator>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, sentinel> end() const& {
         return std::end(_iterable);

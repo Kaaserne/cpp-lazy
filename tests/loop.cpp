@@ -37,8 +37,8 @@ TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
     }
 
     SECTION("Always false") {
-        REQUIRE(looper.begin() == looper.end());
-        REQUIRE(looper.begin() == looper.begin());
+        REQUIRE(!(looper.begin() == looper.end()));
+        REQUIRE(!(looper.begin() == looper.begin()));
     }
 }
 
@@ -74,14 +74,14 @@ TEST_CASE("Loop with non while true argument") {
         auto begin = looper.begin();
 
         for (std::size_t i = 0, start = 8; i < looper.size(); ++i, --start, ++begin) {
-            CHECK(looper.end() - begin == static_cast<std::ptrdiff_t>(start));
+            REQUIRE(looper.end() - begin == static_cast<std::ptrdiff_t>(start));
         }
 
         begin = looper.begin();
         auto end = looper.end();
 
         for (std::size_t i = 0, start = 8; i < looper.size(); ++i, --start, --end) {
-            CHECK(end - begin == static_cast<std::ptrdiff_t>(start));
+            REQUIRE(end - begin == static_cast<std::ptrdiff_t>(start));
         }
     }
 
@@ -89,7 +89,7 @@ TEST_CASE("Loop with non while true argument") {
         auto looper = lz::loop(arr, 3);
         auto begin = looper.begin();
         for (std::ptrdiff_t i = -static_cast<std::ptrdiff_t>(looper.size()); i < 0; ++i, ++begin) {
-            CHECK(std::distance(looper.end(), begin) == i);
+            REQUIRE(std::distance(looper.end(), begin) == i);
         }
     }
 
@@ -97,24 +97,24 @@ TEST_CASE("Loop with non while true argument") {
     SECTION("Operator+") {
         auto looper = lz::loop(arr, 2);
         auto begin = looper.begin();
-        CHECK(*(begin + 1) == 2);
-        CHECK(*(begin + 2) == 3);
-        CHECK(*(begin + 3) == 4);
-        CHECK(*(begin + 4) == 1);
-        CHECK(*(begin + 5) == 2);
-        CHECK(*(begin + 6) == 3);
-        CHECK(*(begin + 7) == 4);
-        CHECK(begin + 8 == looper.end());
+        REQUIRE(*(begin + 1) == 2);
+        REQUIRE(*(begin + 2) == 3);
+        REQUIRE(*(begin + 3) == 4);
+        REQUIRE(*(begin + 4) == 1);
+        REQUIRE(*(begin + 5) == 2);
+        REQUIRE(*(begin + 6) == 3);
+        REQUIRE(*(begin + 7) == 4);
+        REQUIRE(begin + 8 == looper.end());
 
         auto end = looper.end();
-        CHECK(*(end - 1) == 4);
-        CHECK(*(end - 2) == 3);
-        CHECK(*(end - 3) == 2);
-        CHECK(*(end - 4) == 1);
-        CHECK(*(end - 5) == 4);
-        CHECK(*(end - 6) == 3);
-        CHECK(*(end - 7) == 2);
-        CHECK(*(end - 8) == 1);
-        CHECK(looper.begin() == end - 8);
+        REQUIRE(*(end - 1) == 4);
+        REQUIRE(*(end - 2) == 3);
+        REQUIRE(*(end - 3) == 2);
+        REQUIRE(*(end - 4) == 1);
+        REQUIRE(*(end - 5) == 4);
+        REQUIRE(*(end - 6) == 3);
+        REQUIRE(*(end - 7) == 2);
+        REQUIRE(*(end - 8) == 1);
+        REQUIRE(looper.begin() == end - 8);
     }
 }

@@ -27,10 +27,16 @@ int main() {
     output = v | lz::format(" "); // 1 2 3 4 5
     std::cout << output << '\n';
 
-    lz::format(std::cout, v); // 1, 2, 3, 4, 5
+    lz::format(v, std::cout); // 1, 2, 3, 4, 5
     std::cout << '\n';
 
-    lz::format(std::cout, v, " "); // 1 2 3 4 5
+    lz::format(v, std::cout, " "); // 1 2 3 4 5
+    std::cout << '\n';
+
+    v | lz::format(std::cout); // 1, 2, 3, 4, 5
+    std::cout << '\n';
+
+    v | lz::format(std::cout, " "); // 1 2 3 4 5
     std::cout << '\n';
 
     // If you're using fmt or have std::format
@@ -47,7 +53,10 @@ int main() {
     output = v | lz::format(", ", "{:02d}"); // 01, 02, 03, 04, 05
     std::cout << output << '\n';
 
-    lz::format(std::cout, v, ", ", "{:02d}"); // 01, 02, 03, 04, 05
+    lz::format(v, std::cout, ", ", "{:02d}"); // 01, 02, 03, 04, 05
+    std::cout << '\n';
+
+    v | lz::format(std::cout, ", ", "{:02d}"); // 01, 02, 03, 04, 05
     std::cout << '\n';
 #endif
 

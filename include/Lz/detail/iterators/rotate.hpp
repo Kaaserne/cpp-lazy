@@ -24,9 +24,9 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    Iterator _iterator{};
-    Iterator _begin{};
-    S _end{};
+    Iterator _iterator;
+    Iterator _begin;
+    S _end;
     std::size_t _offset{};
 
 public:

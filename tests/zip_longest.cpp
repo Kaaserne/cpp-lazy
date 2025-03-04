@@ -88,8 +88,8 @@ TEST_CASE("zip_longest_iterable changing and creating elements", "[zip_longest_i
     auto ra = lz::zip_longest(v, v3);
     static_assert(lz::detail::is_fwd<decltype(fwd.begin())>::value, "");
     static_assert(lz::detail::is_ra<decltype(ra.begin())>::value, "");
-    CHECK(ra.size() == v.size());
-    CHECK(fwd.size() == v.size());
+    REQUIRE(ra.size() == v.size());
+    REQUIRE(fwd.size() == v.size());
 
     SECTION("Unequal lengths") {
         REQUIRE(lz::distance(fwd.begin(), fwd.end()) == 7);
@@ -338,7 +338,7 @@ TEST_CASE("Zip longest iterable to container", "[zip_longest_iterable][To contai
                       lz::map([](const tuple_ref& tup) { return std::make_pair(std::get<2>(tup).value(), std::get<1>(tup)); }) |
                       lz::to<map_type>();
         map_type expected = { { 'a', 1.f }, { 'b', 2.f }, { 'c', 3.f }, { 'd', 4.f }, { 'f', 5.f }, { 'g', lz::nullopt } };
-        CHECK(to_map == expected);
+        REQUIRE(to_map == expected);
     }
 
     SECTION("To unordered map") {
@@ -349,6 +349,6 @@ TEST_CASE("Zip longest iterable to container", "[zip_longest_iterable][To contai
             zipper | lz::map([](const tuple_ref& tup) { return std::make_pair(std::get<2>(tup).value(), std::get<1>(tup)); }) |
             lz::to<map_type>();
         map_type expected = { { 'a', 1.f }, { 'b', 2.f }, { 'c', 3.f }, { 'd', 4.f }, { 'f', 5.f }, { 'g', lz::nullopt } };
-        CHECK(to_unordered == expected);
+        REQUIRE(to_unordered == expected);
     }
 }

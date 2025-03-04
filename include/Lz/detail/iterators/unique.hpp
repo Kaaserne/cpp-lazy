@@ -21,9 +21,9 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>
 
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _iterator{};
-    S _end{};
-    BinaryPredicate _predicate{};
+    Iterator _iterator;
+    S _end;
+    BinaryPredicate _predicate;
 
 public:
     using iterator_category = std::forward_iterator_tag;

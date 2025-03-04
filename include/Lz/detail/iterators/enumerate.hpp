@@ -15,7 +15,7 @@ class enumerate_iterator final
                       fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>,
                       conditional<IsSized, iter_cat_t<Iterator>, std::forward_iterator_tag>, conditional<IsSized, Iterator, S>> {
 
-    Iterator _iterator{};
+    Iterator _iterator;
     Arithmetic _index{};
 
     using traits = std::iterator_traits<Iterator>;

@@ -22,12 +22,21 @@ TEST_CASE("Formatting and compile tests") {
         std::ostringstream oss;
         std::cout.rdbuf(oss.rdbuf());
 
-        lz::format(std::cout, vec);
+        lz::format(vec, std::cout);
         REQUIRE(oss.str() == "1, 2, 3, 4");
         oss.str("");
 
-        lz::format(std::cout, vec, ",");
+        lz::format(vec, std::cout, ",");
         REQUIRE(oss.str() == "1,2,3,4");
+        oss.str("");
+
+        vec | lz::format(std::cout);
+        REQUIRE(oss.str() == "1, 2, 3, 4");
+        oss.str("");
+
+        vec | lz::format(std::cout, ",");
+        REQUIRE(oss.str() == "1,2,3,4");
+        oss.str("");
 
         std::cout.rdbuf(old_cout);
 
@@ -35,6 +44,10 @@ TEST_CASE("Formatting and compile tests") {
 
         REQUIRE((vec | lz::format(", ", "{}")) == "1, 2, 3, 4");
         REQUIRE(lz::format(vec, ", ", "{}") == "1, 2, 3, 4");
+
+        vec | lz::format(std::cout, ", ", "{:02d}");
+        REQUIRE(oss.str() == "01, 02, 03, 04");
+        oss.str("");
 
 #endif
     }

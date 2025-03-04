@@ -56,4 +56,16 @@ int main() {
     // Output:
     // 1 2 3 4
     // 6 7 8 9
+
+    // With custom types
+    std::string to_split3 = "Hello world ";
+    std::string delim2 = " ";
+    auto splitter4 = to_split3 | lz::t_split<std::vector<char>>(delim2);
+    for (std::vector<char> substring : splitter4) {
+        std::cout.write(substring.data(), substring.size());
+        std::cout << ' ';
+        // Or use fmt::print("{} ", substring);
+    }
+    // Output: Hello world
+    std::cout << '\n';
 }

@@ -275,9 +275,9 @@ class concatenate_iterator
                       iter_tuple_iter_cat_t<IterTuple>,
                       sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
 
-    IterTuple _iterators{};
-    IterTuple _begin{};
-    SentinelTuple _end{};
+    IterTuple _iterators;
+    IterTuple _begin;
+    SentinelTuple _end;
 
     using first_tuple_iterator = std::iterator_traits<first_it<IterTuple>>;
 

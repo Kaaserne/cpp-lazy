@@ -32,7 +32,7 @@ TEST_CASE("Join where with sentinels") {
     REQUIRE(vec == expected);
 }
 
-TEST_CASE("Left join changing and creating elements", "[join_where_iterable][Basic functionality]") {
+TEST_CASE("Join changing and creating elements", "[join_where_iterable][Basic functionality]") {
     std::vector<customer> customers{
         customer{ 25 }, customer{ 1 }, customer{ 39 }, customer{ 103 }, customer{ 99 },
     };

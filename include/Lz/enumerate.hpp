@@ -17,7 +17,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ValueType>, where std::pair::first_type is an integer (corresponding to the current index) and std::pair::second_type is the
  * value of the input iterable (by reference). The index starts at 0 by default, but can be changed by passing a start value to
  * the function. Its end() and begin() function will return the same type if its input iterable is sized, otherwise it will return
- * the same type as the input iterable. Example:
+ * the same type as the input iterable. The iterator category is the same as its input iterable. Example:
  * ```cpp
  * std::forward_list<int> list = {1, 2, 3, 4, 5};
  * auto enumerated = lz::enumerate(list); // enumerated = { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }
@@ -33,7 +33,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // does not contain a .size() method. Its end() and begin() function return a different iterator type
  * ```
  */
-static const detail::enumerate_adaptor enumerate{};
+static constexpr detail::enumerate_adaptor detail::enumerate_adaptor::enumerate{};
 
 #else
 
@@ -42,7 +42,7 @@ static const detail::enumerate_adaptor enumerate{};
  * ValueType>, where std::pair::first_type is an integer (corresponding to the current index) and std::pair::second_type is the
  * value of the input iterable (by reference). The index starts at 0 by default, but can be changed by passing a start value to
  * the function. Its end() and begin() function will return the same type if its input iterable is sized, otherwise it will return
- * the same type as the input iterable. Example:
+ * the same type as the input iterable. The iterator category is the same as its input iterable. Example:
  * ```cpp
  * std::forward_list<int> list = {1, 2, 3, 4, 5};
  * auto enumerated = lz::enumerate(list); // enumerated = { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }

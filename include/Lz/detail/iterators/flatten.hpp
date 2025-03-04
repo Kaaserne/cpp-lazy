@@ -87,9 +87,9 @@ class flatten_wrapper
           common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
           sentinel_selector<common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>, flatten_wrapper<Iterator, S>>> {
 
-    Iterator _begin{};
-    Iterator _current{};
-    S _end{};
+    Iterator _begin;
+    Iterator _current;
+    S _end;
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -140,14 +140,14 @@ public:
     }
 };
 
-template<class, class, int>
+template<class, class, std::size_t>
 class flatten_iterator;
 
-template<class Iterator, int N>
-using inner = flatten_iterator<decltype(std::begin(*std::declval<Iterator>())), decltype(std::end(*std::declval<Iterator>())),
-                               N - 1>;
+template<class Iterator, std::size_t N>
+using inner =
+    flatten_iterator<decltype(std::begin(*std::declval<Iterator>())), decltype(std::end(*std::declval<Iterator>())), N - 1>;
 
-template<class Iterator, class S, int N>
+template<class Iterator, class S, std::size_t N>
 class flatten_iterator
     : public iterator<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>, fake_ptr_proxy<ref_t<inner<Iterator, N>>>,
                       diff_type<inner<Iterator, N>>, common_type<std::bidirectional_iterator_tag, iter_cat_t<inner<Iterator, N>>>,
@@ -176,8 +176,8 @@ private:
         _inner_iter = {};
     }
 
-    flatten_wrapper<Iterator, S> _outer_iter{};
-    this_inner _inner_iter{};
+    flatten_wrapper<Iterator, S> _outer_iter;
+    this_inner _inner_iter;
 
 public:
     constexpr flatten_iterator() = default;

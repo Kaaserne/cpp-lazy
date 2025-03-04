@@ -10,7 +10,7 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, bool IsInfiniteLoop>
+template<class Iterator, class S, bool /* is inf */>
 class loop_iterator;
 
 template<class Iterator, class S>
@@ -137,17 +137,11 @@ public:
     }
 
     constexpr bool eq(const loop_iterator&) const {
-        if (_begin == _end) {
-            return true;
-        }
-        return false;
+        return eq(default_sentinel{});
     }
 
     constexpr bool eq(default_sentinel) const {
-        if (_begin == _end) {
-            return true;
-        }
-        return false;
+        return _begin == _end;
     }
 };
 } // namespace detail

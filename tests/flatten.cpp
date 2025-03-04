@@ -1,4 +1,5 @@
 #include <Lz/c_string.hpp>
+#include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
@@ -7,6 +8,41 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+
+TEST_CASE("Dimensions & sized") {
+    int arr[3];
+    static_assert(lz::dimensions<decltype(arr)>::value == 1, "Dimensions of array should be 1");
+    int arr2[3][3];
+    static_assert(lz::dimensions<decltype(arr2)>::value == 2, "Dimensions of array should be 2");
+    int arr3[3][3][3];
+    static_assert(lz::dimensions<decltype(arr3)>::value == 3, "Dimensions of array should be 3");
+
+    std::vector<int> vec;
+    static_assert(lz::dimensions<decltype(vec)>::value == 1, "Dimensions of vector should be 1");
+    std::vector<std::vector<int>> vec2;
+    static_assert(lz::dimensions<decltype(vec2)>::value == 2, "Dimensions of vector should be 2");
+    std::vector<std::vector<std::vector<int>>> vec3;
+    static_assert(lz::dimensions<decltype(vec3)>::value == 3, "Dimensions of vector should be 3");
+
+    std::array<int, 3> arr4;
+    static_assert(lz::dimensions<decltype(arr4)>::value == 1, "Dimensions of array should be 1");
+    std::array<std::array<int, 3>, 3> arr5;
+    static_assert(lz::dimensions<decltype(arr5)>::value == 2, "Dimensions of array should be 2");
+    std::array<std::array<std::array<int, 3>, 3>, 3> arr6;
+    static_assert(lz::dimensions<decltype(arr6)>::value == 3, "Dimensions of array should be 3");
+
+    auto str = lz::c_string("Hello, World!");
+    static_assert(!lz::detail::all_sized<decltype(str)>::value, "c_string should not be sized");
+    std::array<decltype(lz::c_string("")), 2> arr_of_cstr = { lz::c_string(""), lz::c_string("") };
+    static_assert(!lz::detail::all_sized<decltype(arr_of_cstr)>::value, "Array of c_string should not all be sized");
+
+    std::vector<int> v;
+    auto filter = lz::filter(v, [](int) { return true; });
+    static_assert(!lz::detail::all_sized<decltype(filter)>::value, "Filter should not be sized");
+
+    std::array<std::array<decltype(lz::c_string("")), 1>, 1> arr_of_arr_of_cstr = { { lz::c_string("") } };
+    static_assert(!lz::detail::all_sized<decltype(arr_of_arr_of_cstr)>::value, "Array of array of c_string should be sized");
+}
 
 TEST_CASE("Flatten with sentinels") {
     using c_string = decltype(lz::c_string(""));
@@ -31,6 +67,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(lz::empty(empty_flattened));
         REQUIRE(!lz::has_one(empty_flattened));
         REQUIRE(!lz::has_many(empty_flattened));
+        REQUIRE(empty_flattened.size() == 0);
     }
 
     SECTION("One element") {
@@ -39,6 +76,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(!lz::empty(one_elm_flattened));
         REQUIRE(lz::has_one(one_elm_flattened));
         REQUIRE(!lz::has_many(one_elm_flattened));
+        REQUIRE(one_elm_flattened.size() == 1);
     }
 }
 
@@ -48,11 +86,13 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
         auto flattened = lz::flatten(vec);
         REQUIRE((flattened | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4 });
         REQUIRE((lz::reverse(flattened) | lz::to<std::vector>()) == std::vector<int>{ 4, 3, 2, 1 });
+        REQUIRE(flattened.size() == 4);
     }
 
     SECTION("Flatten 2D") {
         std::vector<std::list<int>> nested = { { 1, 2, 3 }, {}, { 1 }, { 4, 5, 6 }, {} };
         auto flattened = lz::flatten(nested);
+        REQUIRE(flattened.size() == 7);
         REQUIRE((flattened | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 1, 4, 5, 6 });
         REQUIRE((lz::reverse(flattened) | lz::to<std::vector>()) == std::vector<int>{ 6, 5, 4, 1, 3, 2, 1 });
     }
@@ -61,8 +101,21 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
         std::vector<std::vector<std::vector<int>>> vectors = { { { 1, 2, 3 }, {} }, { { 4, 5 }, { 6 } }, { { 7 }, {} } };
 
         auto flattened = lz::flatten(vectors);
+        REQUIRE(flattened.size() == 7);
         REQUIRE((flattened | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
         REQUIRE((lz::reverse(flattened) | lz::to<std::vector>()) == std::vector<int>{ 7, 6, 5, 4, 3, 2, 1 });
+    }
+
+    SECTION("Flatten 4D") {
+        std::vector<std::vector<std::vector<std::vector<int>>>> vectors = {
+            { { { 1, 2, 3 }, {} }, { { 4, 5 }, { 6 } }, { { 7 }, {} } },
+            { { { 8, 9 }, { 10 } }, { { 11 }, {} } },
+        };
+
+        auto flattened = lz::flatten(vectors);
+        REQUIRE(flattened.size() == 11);
+        REQUIRE((flattened | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
+        REQUIRE((lz::reverse(flattened) | lz::to<std::vector>()) == std::vector<int>{ 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 });
     }
 
     SECTION("Should be by ref") {
@@ -70,6 +123,7 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
             { { 0 }, { 1, 2, 3 }, {}, { 4 } }, { {} }, { { 5, 6 }, { 7 }, {} }, { {} }, { {} }
         };
         auto flattened = lz::flatten(vectors);
+        REQUIRE(flattened.size() == 8);
         *flattened.begin() = -382753;
         REQUIRE(vectors[0][0][0] == -382753);
     }
@@ -78,6 +132,7 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
 TEST_CASE("Flatten binary operations", "[Flatten][Binary ops]") {
     std::vector<std::list<int>> nested = { { 1, 2, 3 }, {}, { 1 }, { 4, 5, 6 }, {} };
     auto flattened = nested | lz::flatten;
+    REQUIRE(flattened.size() == 7);
 
     SECTION("Operator++") {
         auto begin = flattened.begin();
@@ -119,6 +174,7 @@ TEST_CASE("Flatten binary operations", "[Flatten][Binary ops]") {
 TEST_CASE("Flatten to container", "[Flatten][To container]") {
     std::vector<std::vector<int>> vecs = { { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } };
     auto flattened = lz::flatten(vecs);
+    REQUIRE(flattened.size() == 7);
 
     SECTION("To array") {
         REQUIRE((flattened | lz::to<std::array<int, 7>>()) == std::array<int, 7>{ 1, 2, 3, 4, 5, 6, 7 });

@@ -26,9 +26,9 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _sub_range_begin{};
-    Iterator _sub_range_end{};
-    S _end{};
+    Iterator _sub_range_begin;
+    Iterator _sub_range_end;
+    S _end;
     difference_type _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {

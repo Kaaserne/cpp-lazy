@@ -15,25 +15,43 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward, and returns a sentinel. It returns an iterable of iterables. If `std::string` or `[lz|std]::string_view`
- * is preffed as its `value_type`, please see `s_chunk_if` or `sv_chunk_if` respectively. This iterable does not contain a .size()
- * method.
+ * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
+ * the template parameter passed. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * `s_chunk_if` or `sv_chunk_if` respectively. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto chunked = lz::chunk_if(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} }
+ * // Both return an iterable of std::vector<int>
+ * auto chunked = lz::t_chunk_if<std::vector<int>>(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
  * // or
- * auto chunked = vec | lz::chunk_if([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} }
- * }
+ * auto chunked = vec | lz::t_chunk_if<std::vector<int>>([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
+ * ```
+ * @tparam ValueType The value type of the chunked iterable.
+ */
+template<class ValueType>
+static constexpr detail::chunk_if_adaptor<ValueType> detail::chunk_if_adaptor<ValueType>::t_chunk_if;
+
+/**
+ * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
+ * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
+ * `lz::basic_iterable`. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see `s_chunk_if` or
+ * `sv_chunk_if` respectively. This iterable does not contain a .size() method. Iterable is forward only.
+ *
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto chunked = lz::chunk_if(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
+ * // or
+ * auto chunked = vec | lz::chunk_if([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
  * ```
  */
-static const detail::chunk_if_adaptor<void> chunk_if{};
+static constexpr detail::chunk_if_adaptor<void> detail::chunk_if_adaptor<void>::chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of `[std|lz]::string_view`. The input iterable must
- * therefore be random_access. This iterable does not contain a .size() method.
+ * therefore be random_access. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
  * ```cpp
@@ -45,12 +63,12 @@ static const detail::chunk_if_adaptor<void> chunk_if{};
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * ```
  */
-static const detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
+static constexpr detail::chunk_if_adaptor<lz::string_view> detail::chunk_if_adaptor<lz::string_view>::sv_chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of `std::string`. The input iterable must therefore be
- * random_access. This iterable does not contain a .size() method.
+ * random_access. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
  * ```cpp
@@ -62,15 +80,34 @@ static const detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * ```
  */
-static const detail::chunk_if_adaptor<std::string> s_chunk_if{};
+static constexpr detail::chunk_if_adaptor<std::string> detail::chunk_if_adaptor<std::string>::s_chunk_if{};
 
 #else
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
- * category is forward, and returns a sentinel. It returns an iterable of iterables. If `std::string` or `[lz|std]::string_view`
- * is preffed as its `value_type`, please see `s_chunk_if` or `sv_chunk_if` respectively. This iterable does not contain a .size()
- * method.
+ * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
+ * the template parameter passed. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * `s_chunk_if` or `sv_chunk_if` respectively. This iterable does not contain a .size() method. Iterable is forward only.
+ *
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * // Both return an iterable of std::vector<int>
+ * auto chunked = lz::t_chunk_if<std::vector<int>>(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
+ * // or
+ * auto chunked = vec | lz::t_chunk_if<std::vector<int>>([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
+ * ```
+ * @tparam ValueType The value type of the chunked iterable.
+ */
+template<class ValueType>
+LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<ValueType> t_chunk_if;
+
+/**
+ * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
+ * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
+ * `lz::basic_iterable`. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see `s_chunk_if` or
+ * `sv_chunk_if` respectively. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
  * ```cpp
@@ -78,7 +115,6 @@ static const detail::chunk_if_adaptor<std::string> s_chunk_if{};
  * auto chunked = lz::chunk_if(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} }
  * // or
  * auto chunked = vec | lz::chunk_if([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} }
- * }
  * ```
  */
 LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<void> chunk_if{};
@@ -86,7 +122,7 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<void> chunk_if{};
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of `[std|lz]::string_view`. The input iterable must
- * therefore be random_access. This iterable does not contain a .size() method.
+ * therefore be random_access. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
  * ```cpp
@@ -103,7 +139,7 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of `std::string`. The input iterable must therefore be
- * random_access. This iterable does not contain a .size() method.
+ * random_access. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
  * ```cpp
@@ -118,6 +154,8 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
 LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 #endif
+
+using detail::chunk_if_adaptor;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

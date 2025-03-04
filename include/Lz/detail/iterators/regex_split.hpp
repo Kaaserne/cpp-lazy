@@ -28,7 +28,7 @@ public:
     using reference = value_type;
 
 private:
-    RegexTokenIter _current{};
+    RegexTokenIter _current;
 
 public:
     constexpr regex_split_iterator() = default;

@@ -111,6 +111,8 @@ public:
     }
 };
 
+template class seed_sequence<8>;
+
 inline std::mt19937 create_mt_engine() {
     std::random_device rd;
     seed_sequence<8> seed_seq(rd);
@@ -121,12 +123,50 @@ template<bool UseSentinel>
 struct random_adaptor {
     using adaptor = random_adaptor<UseSentinel>;
 
+#ifdef LZ_HAS_CXX_11
+
+    static constexpr adaptor<false> common_random{};
+
+    static constexpr adaptor<true> random{};
+
+#endif
+
+    /**
+     * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
+     * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
+     * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
+     * ```cpp
+     * std::mt19937 gen;
+     * std::uniform_real_distribution<double> dist(0., 1.);
+     * auto random = lz::random(dist, gen, 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } (random * numbers)
+     * ```
+     * @param distribution The random distribution to use, for instance std::uniform_real_distribution<double>.
+     * @param generator The random engine to use, for instance std::mt19937.
+     * @param amount The amount of random numbers to generate.
+     */
     template<class Distribution, class Generator>
     LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator, UseSentinel>
     operator()(const Distribution& distribution, Generator& generator, const std::size_t amount) const {
         return { distribution, generator, static_cast<std::ptrdiff_t>(amount) };
     }
 
+    /**
+     * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
+     * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
+     * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
+     * ```cpp
+     * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a mt19937 engine.
+     * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
+     * // (inclusive)
+     * // with integers. Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a mt19937 engine.
+     * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
+     * ```
+     * @param min The minimum value of the random numbers (inclusive).
+     * @param max The maximum value of the random numbers (inclusive).
+     * @param amount The amount of random numbers to generate.
+     */
     template<class Integral>
     LZ_NODISCARD
     enable_if<std::is_integral<Integral>::value, random_iterable<Integral, std::uniform_int_distribution<Integral>, std::mt19937, UseSentinel>>
@@ -136,6 +176,23 @@ struct random_adaptor {
         return (*this)(dist, gen, amount);
     }
 
+    /**
+     * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
+     * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
+     * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
+     * ```cpp
+     * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a mt19937 engine.
+     * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
+     * // (inclusive)
+     * // with integers. Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a mt19937 engine.
+     * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
+     * ```
+     * @param min The minimum value of the random numbers (inclusive).
+     * @param max The maximum value of the random numbers (inclusive).
+     * @param amount The amount of random numbers to generate.
+     */
     template<class Floating>
     LZ_NODISCARD
     enable_if<std::is_floating_point<Floating>::value, random_iterable<Floating, std::uniform_real_distribution<Floating>, std::mt19937, UseSentinel>>
@@ -145,6 +202,9 @@ struct random_adaptor {
         return (*this)(dist, gen, amount);
     }
 };
+
+template struct random_adaptor<true>;
+template struct random_adaptor<false>;
 } // namespace detail
 } // namespace lz
 

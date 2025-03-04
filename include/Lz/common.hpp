@@ -30,10 +30,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```
  * Will not result in an iterable where its end() and begin() functions return the same type. This is because
  * the common view is created first and then the take view is created. The take view will return another sentinel.
- * @param iterable The iterable to create a common view from.
- * @return A common view object. Can be used in <algorithm> functions.
  */
-static const detail::common_adaptor common{};
+static constexpr detail::common_adaptor detail::common_adaptor::common{};
 
 #else
 
@@ -55,8 +53,6 @@ static const detail::common_adaptor common{};
  * ```
  * Will not result in an iterable where its end() and begin() functions return the same type. This is because
  * the common view is created first and then the take view is created. The take view will return another sentinel.
- * @param iterable The iterable to create a common view from.
- * @return A common view object. Can be used in <algorithm> functions.
  */
 LZ_INLINE_VAR constexpr detail::common_adaptor common{};
 

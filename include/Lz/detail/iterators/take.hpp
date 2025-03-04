@@ -21,7 +21,7 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator{};
+    Iterator _iterator;
     difference_type _n{};
 
 public:

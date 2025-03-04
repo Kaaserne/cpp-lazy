@@ -46,7 +46,7 @@ class optional {
         _has_value = true;
     }
 
-public: // Declare the move constructor as a friend
+public:
     template<class U>
     friend class optional;
 

@@ -16,7 +16,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @brief Performs an exclusive scan on a container. The first element will be the init value, the second element will be the
  * first element of the container + the init value, the third element will be the second element + last returned element
  * previously, etc. It contains a .size() method if the input iterable also has a .size() method. Its end() function returns a
- * sentinel rather than an iterator. Example:
+ * sentinel rather than an iterator. Its iterator category is forward. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * auto scan = lz::exclusive_scan(vec, 0); // scan = { 0, 1, 3, 6, 10, 15 }
@@ -34,7 +34,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto scan = vec | lz::exclusive_scan(0); // OK
  * ```
  */
-static const detail::exclusive_scan_adaptor exclusive_scan{};
+static constexpr detail::exclusive_scan_adaptor detail::exclusive_scan_adaptor::exclusive_scan{};
 
 #else
 
@@ -42,13 +42,13 @@ static const detail::exclusive_scan_adaptor exclusive_scan{};
  * @brief Performs an exclusive scan on a container. The first element will be the init value, the second element will be the
  * first element of the container + the init value, the third element will be the second element + last returned element
  * previously, etc. It contains a .size() method if the input iterable also has a .size() method. Its end() function returns a
- * sentinel rather than an iterator. Example:
+ * sentinel rather than an iterator. Its iterator category is forward. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * // std::plus is used as the default binary operation
  * auto scan = lz::exclusive_scan(vec, 0); // scan = { 0, 1, 3, 6, 10, 15 }
  * // so 0 (= 0), 0 + 1 (= 1), 1 + 2 (= 3), 3 + 3 (= 6), 6 + 4 (= 10), 10 + 5 (= 15)
- * 
+ *
  * // or
  * auto scan = vec | lz::exclusive_scan(0); // scan = { 0, 1, 3, 6, 10, 15 }
  * // you can also add a custom operator:

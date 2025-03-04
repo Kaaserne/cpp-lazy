@@ -21,9 +21,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // or
  * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
  * ```
- *
  */
-static const detail::map_adaptor map{};
+static constexpr detail::map_adaptor detail::map_adaptor::map{};
 
 #else
 
@@ -37,7 +36,6 @@ static const detail::map_adaptor map{};
  * // or
  * auto map = lz::map(vec, [](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
  * ```
- *
  */
 LZ_INLINE_VAR constexpr detail::map_adaptor map{};
 

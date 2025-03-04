@@ -175,8 +175,7 @@ TEST_CASE("zip_iterable binary operations", "[zip_iterable][Binary ops]") {
             --end;
         }
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
-            REQUIRE(*(end + i) ==
-                    std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
+            REQUIRE(*(end + i) == std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
         }
     }
 

@@ -19,10 +19,11 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * const char* str = "Hello, World!";
  * auto cstr = lz::c_string(str);
  * // or:
- * auto cstr = "Hello" | lz::c_string;
+ * const char str[] = "Hello, World!";
+ * auto cstr = str | lz::c_string;
  * ```
  */
-static const detail::c_string_adaptor c_string{};
+static constexpr detail::c_string_adaptor detail::c_string_adaptor::c_string{};
 
 #else
 
@@ -33,7 +34,8 @@ static const detail::c_string_adaptor c_string{};
  * const char* str = "Hello, World!";
  * auto cstr = lz::c_string(str);
  * // or:
- * auto cstr = "Hello" | lz::c_string;
+ * const char str[] = "Hello, World!";
+ * auto cstr = str | lz::c_string;
  * ```
  */
 LZ_INLINE_VAR constexpr detail::c_string_adaptor c_string{};

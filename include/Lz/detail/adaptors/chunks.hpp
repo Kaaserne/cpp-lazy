@@ -3,8 +3,9 @@
 #ifndef LZ_CHUNKS_ADAPTOR_HPP
 #define LZ_CHUNKS_ADAPTOR_HPP
 
-#include <Lz/detail/iterables/chunks.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
+#include <Lz/detail/concepts.hpp>
+#include <Lz/detail/iterables/chunks.hpp>
 
 namespace lz {
 namespace detail {
@@ -12,11 +13,44 @@ namespace detail {
 struct chunks_adaptor {
     using adaptor = chunks_adaptor;
 
+#ifdef LZ_HAS_CXX_11
+
+    static constexpr adaptor chunks{};
+
+#endif
+
+    /**
+     * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
+     * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,
+     * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have
+     * a .size() method. Iterator category is the same as its input iterable.
+     *
+     * Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+     * auto chunked = lz::chunks(vec, 3); // chunked = { {1, 2, 3}, {4, 5} }
+     * ```
+     * @param iterable The iterable to chunk
+     * @param chunk_size The size of the chunks
+     */
     template<LZ_CONCEPT_ITERABLE Iterable>
     constexpr chunks_iterable<Iterable> operator()(Iterable&& iterable, std::size_t chunk_size) const {
         return { std::forward<Iterable>(iterable), chunk_size };
     }
 
+    /**
+     * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
+     * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,
+     * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have
+     * a .size() method. Iterator category is the same as its input iterable.
+     *
+     * Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+     * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
+     * ```
+     * @param chunk_size The size of the chunks
+     */
     LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(std::size_t chunk_size) const {
         return { chunk_size };
     }

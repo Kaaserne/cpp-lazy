@@ -36,20 +36,76 @@ TEST_CASE("take_every_iterable changing and creating elements", "[take_every_ite
 }
 
 TEST_CASE("Empty or one element take every") {
-    SECTION("Empty") {
+    SECTION("Empty 1") {
         std::vector<int> vec;
-        auto takeEvery = lz::take_every(vec, 2);
-        REQUIRE(lz::empty(takeEvery));
-        REQUIRE(!lz::has_many(takeEvery));
-        REQUIRE(!lz::has_one(takeEvery));
+        auto take_every = lz::take_every(vec, 2);
+        REQUIRE(take_every.size() == 0);
+        REQUIRE(lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(!lz::has_one(take_every));
+    }
+
+    SECTION("Empty 2") {
+        std::vector<int> vec;
+        auto take_every = lz::take_every(vec, 2, 3);
+        REQUIRE(take_every.size() == 0);
+        REQUIRE(lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(!lz::has_one(take_every));
+    }
+
+    SECTION("Empty 3") {
+        std::list<int> vec;
+        auto take_every = lz::take_every(vec, 2, 3);
+        REQUIRE(take_every.size() == 0);
+        REQUIRE(lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(!lz::has_one(take_every));
+    }
+
+    SECTION("Empty 4") {
+        std::list<int> vec;
+        auto take_every = lz::take_every(vec, 2);
+        REQUIRE(take_every.size() == 0);
+        REQUIRE(lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(!lz::has_one(take_every));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
-        auto takeEvery = lz::take_every(vec, 2);
-        REQUIRE(!lz::empty(takeEvery));
-        REQUIRE(!lz::has_many(takeEvery));
-        REQUIRE(lz::has_one(takeEvery));
+        auto take_every = lz::take_every(vec, 2);
+        REQUIRE(take_every.size() == 1);
+        REQUIRE(!lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(lz::has_one(take_every));
+    }
+
+    SECTION("One element 2") {
+        std::vector<int> vec = { 1 };
+        auto take_every = lz::take_every(vec, 2, 3);
+        REQUIRE(take_every.size() == 1);
+        REQUIRE(lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(!lz::has_one(take_every));
+    }
+
+    SECTION("One element 3") {
+        std::list<int> vec = { 1 };
+        auto take_every = lz::take_every(vec, 2);
+        REQUIRE(take_every.size() == 1);
+        REQUIRE(!lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(lz::has_one(take_every));
+    }
+
+    SECTION("One element 4") {
+        std::list<int> vec = { 1 };
+        auto take_every = lz::take_every(vec, 2, 3);
+        REQUIRE(take_every.size() == 1);
+        REQUIRE(lz::empty(take_every));
+        REQUIRE(!lz::has_many(take_every));
+        REQUIRE(!lz::has_one(take_every));
     }
 }
 
@@ -68,6 +124,7 @@ TEST_CASE("take_every_iterable binary operations", "[take_every_iterable][Binary
     SECTION("Operator++ (bidirectional)") {
         std::list<int> lst = { 1, 2, 3, 4 };
         auto te = lz::take_every(lst, 3);
+        REQUIRE(te.size() == 2);
         auto iter = te.begin();
         REQUIRE(*iter == 1);
         ++iter;
@@ -87,6 +144,7 @@ TEST_CASE("take_every_iterable binary operations", "[take_every_iterable][Binary
     SECTION("Operator-- (bidirectional)") {
         std::list<int> lst = { 1, 2, 3, 4 };
         auto te = lz::take_every(lst, 3);
+        REQUIRE(te.size() == 2);
         auto iter = te.end();
         --iter;
         REQUIRE(*iter == 4);
@@ -156,6 +214,7 @@ TEST_CASE("take_every_iterable to containers", "[take_every_iterable][To contain
     std::array<int, size> array = { 1, 2, 3, 4 };
     constexpr std::size_t offset = 2;
     auto take_every = lz::take_every(array, offset);
+    REQUIRE(take_every.size() == 2);
 
     SECTION("To array") {
         std::array<int, static_cast<std::size_t>(size / offset)> actual = std::move(take_every) | lz::to<std::array<int, offset>>();
@@ -184,4 +243,26 @@ TEST_CASE("take_every_iterable to containers", "[take_every_iterable][To contain
         std::unordered_map<int, int> expected = { std::make_pair(1, 1), std::make_pair(3, 3) };
         REQUIRE(actual == expected);
     }
+}
+
+TEST_CASE("Take every with start offset") {
+    std::array<int, 7> arr = { 1, 2, 3, 4, 5, 6, 7 };
+    auto take_every = arr | lz::take_every(2, 3);
+    REQUIRE(take_every.size() == 2);
+    REQUIRE(*take_every.begin() == 4);
+    REQUIRE(*(take_every.begin() + 1) == 6);
+    REQUIRE((take_every.begin() + 2) == take_every.end());
+
+    std::list<int> lst = { 1, 2, 3 };
+    auto take_every2 = lst | lz::take_every(2, 1);
+    REQUIRE(take_every2.size() == 1);
+    REQUIRE(*take_every2.begin() == 2);
+    REQUIRE(std::next(take_every2.begin()) == take_every2.end());
+
+    std::array<int, 6> arr2 = { 1, 2, 3, 4, 5, 6 };
+    auto take_every3 = arr2 | lz::take_every(2, 3);
+    REQUIRE(take_every3.size() == 2);
+    REQUIRE(*take_every3.begin() == 4);
+    REQUIRE(*(take_every3.begin() + 1) == 6);
+    REQUIRE((take_every3.begin() + 2) == take_every3.end());
 }

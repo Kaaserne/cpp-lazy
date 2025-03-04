@@ -137,9 +137,12 @@ using ref_or_view =
 } // namespace detail
 
 /**
- * @brief Class that contains a reference or a copy of an iterable. If the iterable is an 'actual' container, it will contain a
- * reference to it. If it is a view/iterable, it will contain a copy of it, while maintaining the underlying reference to the
- * container.
+ * @brief Class that contains a reference or a copy of an iterable depending on the type of the iterable. If the iterable is
+ * inherited from `lz::lazy_view`, it will store a copy of the iterable. In all other cases, it will store a reference to the
+ * iterable. This is done because lazy views are generally cheap to copy, because they contain references to the actual container,
+ * rather than the container itself. This class is used in various places in the library to store a reference or a copy of an
+ * iterable, depending on the type of the iterable.
+ * @tparam Iterable The type of the iterable to store a reference or copy of.
  */
 using detail::ref_or_view;
 

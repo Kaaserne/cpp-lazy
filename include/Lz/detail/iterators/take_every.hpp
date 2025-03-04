@@ -74,9 +74,9 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    Iterator _begin{};
-    Iterator _iterator{};
-    S _end{};
+    Iterator _begin;
+    Iterator _iterator;
+    S _end;
     difference_type _offset{};
 
 #ifdef __cpp_if_constexpr

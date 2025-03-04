@@ -5,7 +5,7 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/any_view_helpers.hpp>
-#include <Lz/detail/iterators/anyview/any_impl.hpp>
+#include <Lz/detail/iterators/any_iterable/any_impl.hpp>
 #include <Lz/detail/procs.hpp>
 #include <iterator>
 #include <memory>
@@ -43,7 +43,6 @@ private:
 
     it _begin;
     it _end;
-    // TODO: add .size() methods
 
 public:
     any_iterable() = default;
@@ -73,6 +72,11 @@ public:
 
     LZ_NODISCARD it end() && {
         return std::move(_end);
+    }
+
+    template<class I = IterCat>
+    LZ_NODISCARD detail::enable_if<detail::is_ra_tag<I>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(std::distance(_begin, _end));
     }
 };
 

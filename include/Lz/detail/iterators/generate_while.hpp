@@ -16,7 +16,7 @@ class generate_while_iterator
                       fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::forward_iterator_tag,
                       default_sentinel> {
 
-    GeneratorFunc _func{};
+    GeneratorFunc _func;
     using fn_return_type = decltype(_func());
     fn_return_type _last_returned{};
 
@@ -46,7 +46,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const generate_while_iterator&) const noexcept {
-        return !std::get<0>(_last_returned);
+        return eq(default_sentinel{});
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept {

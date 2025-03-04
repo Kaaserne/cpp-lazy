@@ -22,7 +22,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto res = vec | lz::take(2); // res = {1, 2}
  * ```
  */
-static const detail::take_adaptor take{};
+static constexpr detail::take_adaptor detail::take_adaptor::take{};
 
 #else
 

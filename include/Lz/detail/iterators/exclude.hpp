@@ -23,7 +23,7 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator{};
+    Iterator _iterator;
     difference_type _index{};
     difference_type _from{};
     difference_type _to{};

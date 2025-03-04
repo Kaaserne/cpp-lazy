@@ -10,6 +10,33 @@ namespace detail {
 struct generate_while_adaptor {
     using adaptor = generate_while_adaptor;
 
+#ifdef LZ_HAS_CXX_11
+
+    static constexpr adaptor generate_while{};
+
+#endif
+
+    /**
+     * @brief Generates elements while the predicate returns true. The predicate must return an object that is compatible with
+     * std::get. The first element (std::get<0>) must be an object convertible to bool, the second element (std::get<1>) can be
+     * any type. This iterable does not contain a .size() member function. Its end() function returns a sentinel, rather than an
+     * actual iterator object. Example:
+     * ```cpp
+     * int i = 0;
+     * auto generator = lz::generate_while([&i]() {
+     *    auto copy = i++;
+     *    return std::make_pair(copy != 4, copy);
+     * }); // { 0, 1, 2, 3 }
+     * // or (cxx 14)
+     * auto generator = lz::generate_while([i = 0]() {
+     *   auto pair = std::make_pair(i != 4, i);
+     *    ++i;
+     *   return pair;
+     * }); // { 0, 1, 2, 3 }
+     * ```
+     * @param generator_func The generator function that returns a std::pair compatible object, where pair::first_type is
+     * convertible to bool.
+     */
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_while_iterable<GeneratorFunc> operator()(GeneratorFunc generator_func) const {
         using pair = decltype(generator_func());

@@ -31,6 +31,11 @@
 
 namespace lz {
 
+namespace detail {
+template<class Iterable>
+using make_sized = std::integral_constant<bool, sized<Iterable>::value && !is_ra<iter_t<Iterable>>::value>;
+}
+
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class I, class S = I>
@@ -83,8 +88,25 @@ public:
     }
 };
 
+template<class I, class S>
+class sized_iterable : public basic_iterable<I, S> {
+    using base = basic_iterable<I, S>;
+    std::size_t _size{};
+
+public:
+    constexpr sized_iterable() = default;
+
+    constexpr sized_iterable(I begin, S end, std::size_t size) : base{ std::move(begin), std::move(end) }, _size{ size } {
+    }
+
+    template<class It = I>
+    LZ_NODISCARD constexpr detail::enable_if<!detail::is_ra<It>::value, std::size_t> size() const noexcept {
+        return _size;
+    }
+};
+
 /**
- * @brief Returns an iterable to another iterable or container.
+ * @brief Returns a sized iterable to another iterable or container if `Iterator` is random access.
  * Example:
  * ```cpp
  * int arr[] = { 1, 2, 3, 4, 5 };
@@ -100,9 +122,9 @@ LZ_NODISCARD constexpr basic_iterable<detail::decay_t<Iterator>, detail::decay_t
 to_iterable(Iterator&& begin, S&& end) noexcept {
     return { std::forward<Iterator>(begin), std::forward<S>(end) };
 }
-
+// TODO change function return type?
 /**
- * @brief Returns an iterable to another iterable or container.
+ * @brief Returns a non sized iterable to another iterable or container.
  * Example:
  * ```cpp
  * int arr[] = { 1, 2, 3, 4, 5 };
@@ -113,8 +135,28 @@ to_iterable(Iterator&& begin, S&& end) noexcept {
  * container with `to<Container>()`, used in algorithms, for-each loops, etc...
  */
 template<class Iterable>
-LZ_NODISCARD constexpr basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>> to_iterable(Iterable&& iterable) {
+LZ_NODISCARD constexpr detail::enable_if<!detail::make_sized<Iterable>::value,
+                                         basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>
+to_iterable(Iterable&& iterable) {
     return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) };
+}
+
+/**
+ * @brief Returns a sized iterable to another iterable or container.
+ * Example:
+ * ```cpp
+ * int arr[] = { 1, 2, 3, 4, 5 };
+ * auto iterable = lz::to_iterable(arr);
+ * ```
+ * @param iterable The container or iterable to convert to an iterable.
+ * @return An iterable object that can be converted to an arbitrary container. Can be used in pipe expressions, converted to a
+ * container with `to<Container>()`, used in algorithms, for-each loops, etc...
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr detail::enable_if<detail::make_sized<Iterable>::value,
+                                         sized_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>
+to_iterable(Iterable&& iterable) {
+    return { detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), lz::size(iterable) };
 }
 
 LZ_MODULE_EXPORT_SCOPE_END
@@ -174,19 +216,18 @@ struct iterable_formatter {
 
     template<class Iterable>
     std::ostream&
-    operator()(std::ostream& stream, const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
+    operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
         return stream << (*this)(iterable, separator, format);
     }
 
 #else
 
     template<class Iterable>
-    std::ostream&
-    operator()(std::ostream& stream, const Iterable& iterable, const char* separator = ", ") const {
+    std::ostream& operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
         auto begin = std::begin(iterable);
         auto end = std::end(iterable);
         if (begin == end) {
-            return;
+            return stream;
         }
         stream << *begin++;
         for (; begin != end; ++begin) {
@@ -205,62 +246,72 @@ struct iterable_formatter {
         return { separator, format };
     }
 
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::ostream&, const char*, const char*>
+    operator()(std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
+        return { stream, separator, format };
+    }
+
 #else
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*> operator()(const char* separator = ", ") const {
         return { separator };
     }
 
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::ostream&, const char*>
+    operator()(std::ostream& stream, const char* separator = ", ") const {
+        return { stream, separator };
+    }
+
 #endif
 
 #if !defined(LZ_STANDALONE)
 
-template<class Iterable>
-LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
+    template<class Iterable>
+    LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
 #if FMT_VERSION >= 80000
 
-    return fmt::format(fmt::runtime(format), fmt::join(iterable, separator));
+        return fmt::format(fmt::runtime(format), fmt::join(iterable, separator));
 
 #else
 
-    return fmt::format(format, fmt::join(iterable, separator));
+        return fmt::format(format, fmt::join(iterable, separator));
 
 #endif
-}
+    }
 
 #elif defined(LZ_HAS_FORMAT)
 
-template<class Iterable>
-LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-    auto begin = std::begin(iterable);
-    auto end = std::end(iterable);
-    if (begin == end) {
-        return "";
+    template<class Iterable>
+    LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
+        auto begin = std::begin(iterable);
+        auto end = std::end(iterable);
+        if (begin == end) {
+            return "";
+        }
+
+        std::string result;
+        auto back_inserter = std::back_inserter(result);
+
+        std::vformat_to(back_inserter, format, std::make_format_args(*begin));
+        ++begin;
+
+        std::string_view fmt{ format };
+        std::string_view sep{ separator };
+
+        for (; begin != end; ++begin) {
+            std::vformat_to(back_inserter, sep, std::make_format_args());
+            std::vformat_to(back_inserter, fmt, std::make_format_args(*begin));
+        }
+
+        return result;
     }
-
-    std::string result;
-    auto back_inserter = std::back_inserter(result);
-
-    std::vformat_to(back_inserter, format, std::make_format_args(*begin));
-    ++begin;
-
-    std::string_view fmt{ format };
-    std::string_view sep{ separator };
-
-    for (; begin != end; ++begin) {
-        std::vformat_to(back_inserter, sep, std::make_format_args());
-        std::vformat_to(back_inserter, fmt, std::make_format_args(*begin));
-    }
-
-    return result;
-}
 
 #else
 
     template<class Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ") const {
         std::ostringstream oss;
-        (*this)(oss, iterable, separator);
+        (*this)(iterable, oss, separator);
         return oss.str();
     }
 
@@ -305,7 +356,7 @@ struct iterable_printer {
     template<class Iterable>
     LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
         constexpr iterable_formatter iter_formatter{};
-        std::string result = iter_formatter(iterable, format, separator);
+        std::string result = iter_formatter(iterable, separator, format);
         std::fputs(result.c_str(), stdout);
     }
 
@@ -314,7 +365,7 @@ struct iterable_printer {
     template<class Iterable>
     LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ") const {
         constexpr iterable_formatter formatter{};
-        formatter(std::cout, iterable, separator);
+        formatter(iterable, std::cout, separator);
     }
 
 #endif
@@ -476,12 +527,12 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 template<class Iterable>
 lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
 operator<<(std::ostream& stream, const Iterable& iterable) {
-    return lz::format(stream, iterable);
+    return lz::format(iterable, stream);
 }
 
 template<class Iterable, class Adaptor>
-LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
-    -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value,
+constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
+    -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value && lz::detail::is_iterable<Iterable>::value,
                              decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable)))> {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
 }

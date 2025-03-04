@@ -63,7 +63,7 @@ TEST_CASE("Empty or one element repeat") {
 TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
     constexpr auto times = 5;
     const int to_repeat = 20;
-    auto repeater = to_repeat | lz::repeat(times);
+    auto repeater = lz::repeat(to_repeat, times);
 
     SECTION("To array") {
         std::array<int, times> array = repeater | lz::to<std::array<int, times>>();

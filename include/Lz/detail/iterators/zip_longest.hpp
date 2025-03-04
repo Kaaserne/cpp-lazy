@@ -151,7 +151,7 @@ public:
 
 template<std::size_t... I>
 LZ_CONSTEXPR_CXX_14 std::tuple<decltype(I, bool{})...> create_bool_tuple(std::index_sequence<I...>) noexcept {
-    return std::tuple<decltype(I, bool{})...>{};
+    return { (I, true)... };
 }
 
 template<class IterTuple, class SentinelTuple>
@@ -173,7 +173,7 @@ private:
     IterTuple _begin;
     IterTuple _iterators;
     SentinelTuple _end;
-    bool_tuple _reached_end{};
+    bool_tuple _reached_end{ create_bool_tuple(make_idx_sequence_for_this{}) };
 
     template<class I>
     LZ_CONSTEXPR_CXX_20 optional<reference_or_value_type<ref_t<I>, val_t<I>>>

@@ -15,7 +15,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @brief Performs an inclusive scan on a container. The first element will be the result of the binary operation with init value
  * and the first element of the input iterable. The second element will be the previous result + the next value of the input
  * iterable, the third element will be previous result + the next value of the input iterable, etc. It contains a .size() method
- * if the input iterable also has a .size() method. Its end() function returns a sentinel rather than an iterator. Example:
+ * if the input iterable also has a .size() method. Its end() function returns a sentinel rather than an iterator and its iterator
+ * category is forward. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * // std::plus is used as the default binary operation
@@ -35,7 +36,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto scan = vec | lz::inclusive_scan(0); // OK
  * ```
  */
-static const detail::inclusive_scan_adaptor inclusive_scan{};
+static constexpr detail::inclusive_scan_adaptor detail::inclusive_scan_adaptor::inclusive_scan{};
 
 #else
 
@@ -43,7 +44,8 @@ static const detail::inclusive_scan_adaptor inclusive_scan{};
  * @brief Performs an inclusive scan on a container. The first element will be the result of the binary operation with init value
  * and the first element of the input iterable. The second element will be the previous result + the next value of the input
  * iterable, the third element will be previous result + the next value of the input iterable, etc. It contains a .size() method
- * if the input iterable also has a .size() method. Its end() function returns a sentinel rather than an iterator. Example:
+ * if the input iterable also has a .size() method. Its end() function returns a sentinel rather than an iterator and its iterator
+ * category is forward. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * // std::plus is used as the default binary operation

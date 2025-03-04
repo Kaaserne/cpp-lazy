@@ -21,7 +21,7 @@ TEST_CASE("Empty or one element c_string") {
 }
 
 TEST_CASE("CString binary operations", "[CString][Binary ops]") {
-    const char* string = "123 456 789";
+    const char string[] = "123 456 789";
     auto c_string = string | lz::c_string;
 
     SECTION("Operator++") {

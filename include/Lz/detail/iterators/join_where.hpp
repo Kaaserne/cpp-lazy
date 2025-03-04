@@ -24,14 +24,14 @@ private:
 
     using selector_a_ret_val = decay_t<func_ret_type<SelectorA, ref_type_a>>;
 
-    basic_iterable<IterB, SB> _iterable{};
-    IterA _iter_a{};
-    IterB _begin_b{};
-    SA _end_a{};
+    basic_iterable<IterB, SB> _iterable;
+    IterA _iter_a;
+    IterB _begin_b;
+    SA _end_a;
 
-    SelectorA _selector_a{};
-    SelectorB _selector_b{};
-    ResultSelector _result_selector{};
+    SelectorA _selector_a;
+    SelectorB _selector_b;
+    ResultSelector _result_selector;
 
     LZ_CONSTEXPR_CXX_17 void find_next() {
         using detail::find_if;

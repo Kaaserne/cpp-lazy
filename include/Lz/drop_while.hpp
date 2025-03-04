@@ -15,7 +15,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 /**
  * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
  * true. Once it has returned false, it will no longer do such thing. The iterator category is the same as its input iterable. Its
- * end() function will return the same type as its begin() function, regardless of the iterator category. If its input iterable is
+ * end() function will return a sentinel if its input iterable is forward or less. If its input iterable is
  * random access, then this iterable will have a .size() method. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
@@ -24,15 +24,15 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto dropped = vec | lz::drop_while([](int i) { return i < 3; }); // dropped = { 3, 4, 5 }
  * ```
  */
-static const detail::drop_while_adaptor drop_while{};
+static constexpr detail::drop_while_adaptor detail::drop_while_adaptor::drop_while{};
 
 #else
 
 /**
  * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
- * `true`. Once it has returned `false`, it will no longer do such thing. The iterator category is the same as its input iterable. Its
- * end() function will return the same type as its begin() function, regardless of the iterator category. If its input iterable is
- * random access, then this iterable will have a .size() method. Example:
+ * `true`. Once it has returned `false`, it will no longer do such thing. The iterator category is the same as its input iterable.
+ * Its end() function will return a sentinel if its input iterable is forward or less. If its input iterable is random access,
+ * then this iterable will have a .size() method. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * auto dropped = lz::drop_while(vec, [](int i) { return i < 3; }); // dropped = { 3, 4, 5 }

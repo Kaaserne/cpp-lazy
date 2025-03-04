@@ -26,7 +26,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto unique = vec | lz::unique(std::less<>{});
  * ```
  */
-static const detail::unique_adaptor unique{};
+static constexpr detail::unique_adaptor detail::unique_adaptor::unique{};
 
 #else
 

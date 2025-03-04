@@ -19,27 +19,27 @@ TEST_CASE("Reference and compile test with operator|") {
     REQUIRE(!vec2.empty());
     REQUIRE(!vec3.empty());
     REQUIRE(!vec4.empty());
-    CHECK(&std::get<0>(*cartesian.begin()) == &vec1[0]);
-    CHECK(&std::get<1>(*cartesian.begin()) == &vec2[0]);
-    CHECK(&std::get<2>(*cartesian.begin()) == &vec3[0]);
-    CHECK(&std::get<3>(*cartesian.begin()) == &vec4[0]);
+    REQUIRE(&std::get<0>(*cartesian.begin()) == &vec1[0]);
+    REQUIRE(&std::get<1>(*cartesian.begin()) == &vec2[0]);
+    REQUIRE(&std::get<2>(*cartesian.begin()) == &vec3[0]);
+    REQUIRE(&std::get<3>(*cartesian.begin()) == &vec4[0]);
 
     auto tmp = vec1 | cartesian;
-    CHECK(&std::get<0>(*tmp.begin()) == &vec1[0]);
-    CHECK(&std::get<1>(*tmp.begin()) == &vec1[0]);
-    CHECK(&std::get<2>(*tmp.begin()) == &vec2[0]);
-    CHECK(&std::get<3>(*tmp.begin()) == &vec3[0]);
-    CHECK(&std::get<4>(*tmp.begin()) == &vec4[0]);
+    REQUIRE(&std::get<0>(*tmp.begin()) == &vec1[0]);
+    REQUIRE(&std::get<1>(*tmp.begin()) == &vec1[0]);
+    REQUIRE(&std::get<2>(*tmp.begin()) == &vec2[0]);
+    REQUIRE(&std::get<3>(*tmp.begin()) == &vec3[0]);
+    REQUIRE(&std::get<4>(*tmp.begin()) == &vec4[0]);
 
     cartesian = vec1 | lz::cartesian_product(vec2, vec3, vec4);
     REQUIRE(!vec1.empty());
     REQUIRE(!vec2.empty());
     REQUIRE(!vec3.empty());
     REQUIRE(!vec4.empty());
-    CHECK(&std::get<0>(*cartesian.begin()) == &vec1[0]);
-    CHECK(&std::get<1>(*cartesian.begin()) == &vec2[0]);
-    CHECK(&std::get<2>(*cartesian.begin()) == &vec3[0]);
-    CHECK(&std::get<3>(*cartesian.begin()) == &vec4[0]);
+    REQUIRE(&std::get<0>(*cartesian.begin()) == &vec1[0]);
+    REQUIRE(&std::get<1>(*cartesian.begin()) == &vec2[0]);
+    REQUIRE(&std::get<2>(*cartesian.begin()) == &vec3[0]);
+    REQUIRE(&std::get<3>(*cartesian.begin()) == &vec4[0]);
 }
 
 TEST_CASE("Is sentinel") {

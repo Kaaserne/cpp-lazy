@@ -98,8 +98,8 @@ class intersection_iterator<Iterator, S, Iterator2, S2, BinaryPredicate,
     Iterator2 _iterator2;
     Iterator _begin;
     Iterator2 _begin2;
-    Iterator _end;
-    Iterator2 _end2;
+    S _end;
+    S2 _end2;
     BinaryPredicate _compare;
 
     using iter_traits = std::iterator_traits<Iterator>;
@@ -130,8 +130,8 @@ public:
 
     constexpr intersection_iterator() = default;
 
-    constexpr intersection_iterator(Iterator iterator, Iterator begin, Iterator end, Iterator2 iterator2, Iterator2 begin2,
-                                    Iterator2 end2, BinaryPredicate compare) :
+    constexpr intersection_iterator(Iterator iterator, Iterator begin, S end, Iterator2 iterator2, Iterator2 begin2, S2 end2,
+                                    BinaryPredicate compare) :
         _iterator{ std::move(iterator) },
         _iterator2{ std::move(iterator2) },
         _begin{ std::move(begin) },

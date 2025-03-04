@@ -29,10 +29,28 @@ namespace detail {
 struct flatten_adaptor {
     using adaptor = flatten_adaptor;
 
+#ifdef LZ_HAS_CXX_11
+
+    static constexpr adaptor flatten{};
+
+#endif
+
     // clang-format off
 
-    template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20
+    /**
+     * @brief Flattens a nested iterable. For instance a vector of vectors will be flattened to a single iterable. Returns a
+     * bidirectional iterable if the input is bidirectional, otherwise the same as the input iterable. If its input iterable is
+     * forward or less, the end iterator will be a sentinel. Contains a .size() method if all the input iterables are sized. Example:
+     * ```cpp
+     * std::vector<std::vector<int>> vectors = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+     * auto flattened = lz::flatten(vectors); // { 1, 2, 3, 4, 5, 6, 7 }
+     * // or
+     * auto flattened = vectors | lz::flatten; // { 1, 2, 3, 4, 5, 6, 7 }
+     * ```
+     * @param iterable The iterable(s) to flatten
+     */
+    template<LZ_CONCEPT_ITERABLE Iterable>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     flatten_iterable<Iterable, dimensions<Iterable>::value - !detail::is_c_array<Iterable>::value>
     operator()(Iterable&& iterable) const {
         static_assert(std::is_move_assignable<iter_t<Iterable>>::value || std::is_copy_assignable<iter_t<Iterable>>::value,

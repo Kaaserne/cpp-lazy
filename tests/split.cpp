@@ -7,6 +7,15 @@
 #include <map>
 #include <unordered_map>
 
+TEST_CASE("Split with custom container") {
+    std::string to_split = "Hello world test 123";
+    auto splitter = to_split | lz::t_split<std::vector<char>>(" ");
+    std::vector<std::vector<char>> expected = {
+        { 'H', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, { 't', 'e', 's', 't' }, { '1', '2', '3' }
+    };
+    REQUIRE(lz::equal(splitter, expected));
+}
+
 TEST_CASE("Splitter permutations") {
     SECTION("Starting with one delimiter ending with none") {
         auto cstr = lz::c_string("");

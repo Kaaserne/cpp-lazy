@@ -20,9 +20,9 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<is_sentinel<Ite
     : public iterator<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
-    common_iterator<Iterator, S> _iterator{};
-    S _end{};
-    UnaryPredicate _unary_predicate{};
+    common_iterator<Iterator, S> _iterator;
+    S _end;
+    UnaryPredicate _unary_predicate;
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -74,10 +74,10 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<!is_sentinel<It
     : public iterator<take_while_iterator<Iterator, Iterator, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                       diff_type<Iterator>, std::bidirectional_iterator_tag> {
 
-    Iterator _begin{};
-    Iterator _iterator{};
-    Iterator _end{};
-    UnaryPredicate _unary_predicate{};
+    Iterator _begin;
+    Iterator _iterator;
+    Iterator _end;
+    UnaryPredicate _unary_predicate;
 
     using traits = std::iterator_traits<Iterator>;
 

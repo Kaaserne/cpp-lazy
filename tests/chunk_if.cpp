@@ -6,6 +6,21 @@
 #include <iostream>
 #include <list>
 
+TEST_CASE("Chunk if custom value type") {
+    auto str = lz::c_string(";hello;world;");
+    auto chunked = str | lz::t_chunk_if<std::vector<char>>([](char c) { return c == ';'; });
+    auto it = chunked.begin();
+    REQUIRE(*it == std::vector<char>{});
+    ++it;
+    REQUIRE(*it == std::vector<char>{ 'h', 'e', 'l', 'l', 'o' });
+    ++it;
+    REQUIRE(*it == std::vector<char>{ 'w', 'o', 'r', 'l', 'd' });
+    ++it;
+    REQUIRE(*it == std::vector<char>{});
+    ++it;
+    REQUIRE(it == chunked.end());
+}
+
 TEST_CASE("Chunk if with sentinels") {
     auto cstr = lz::c_string("hello world; this is a message;;");
     auto chunked = lz::chunk_if(cstr, [](char c) { return c == ';'; });

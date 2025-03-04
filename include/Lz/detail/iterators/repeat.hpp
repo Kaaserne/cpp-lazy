@@ -11,7 +11,7 @@ namespace lz {
 namespace detail {
 template<class T>
 class repeat_iterator : public iterator<repeat_iterator<T>, T&, T*, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
-    mutable T _to_repeat{};
+    mutable T _to_repeat;
     std::size_t _amount{};
 
 public:

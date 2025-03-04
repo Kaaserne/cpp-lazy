@@ -23,10 +23,9 @@ public:
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
-    // TODO make common_type for all size implementations with tuple
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence_helper<I...>) const {
-        const std::size_t sizes[] = { lz::size(std::get<I>(_iterables))... };
+        const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... };
         return *std::max_element(std::begin(sizes), std::end(sizes));
     }
 

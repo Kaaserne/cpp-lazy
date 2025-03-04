@@ -8,7 +8,7 @@
 
 namespace lz {
 namespace detail {
-template<class Iterable, bool UseLoopN>
+template<class, bool /* is inf */>
 class loop_iterable;
 
 template<class Iterable>

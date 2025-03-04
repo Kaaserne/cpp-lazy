@@ -28,15 +28,15 @@ TEST_CASE("Formatting") {
         std::ostringstream oss;
         std::cout.rdbuf(oss.rdbuf());
 
-        lz::format(std::cout, arr);
+        lz::format(arr, std::cout);
         REQUIRE(oss.str() == "1, 2, 3, 4, 5");
         oss.str("");
 
-        lz::format(std::cout, arr, ",");
+        lz::format(arr, std::cout, ",");
         REQUIRE(oss.str() == "1,2,3,4,5");
         oss.str("");
 
-        lz::format(std::cout, arr, ", ", "{:02}");
+        lz::format(arr, std::cout, ", ", "{:02}");
         REQUIRE(oss.str() == "01, 02, 03, 04, 05");
         oss.str("");
 
@@ -102,6 +102,32 @@ TEST_CASE("Formatting") {
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1");
+    }
+}
+
+TEST_CASE("To iterable") {
+    SECTION("To iterable random access") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto iterable = lz::to_iterable(vec);
+        REQUIRE(lz::size(iterable) == 5);
+    }
+
+    SECTION("To iterable forward") {
+        std::list<int> lst = { 1, 2, 3, 4, 5 };
+        auto iterable = lz::to_iterable(lst);
+        REQUIRE(lz::size(iterable) == 5);
+    }
+
+    SECTION("To iterable begin end random access") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto iterable = lz::to_iterable(vec.begin(), vec.end());
+        REQUIRE(lz::size(iterable) == 5);
+    }
+
+    SECTION("To iterable begin end bidirectional") {
+        std::list<int> lst = { 1, 2, 3, 4, 5 };
+        auto iterable = lz::to_iterable(lst.begin(), lst.end());
+        static_assert(!lz::sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
     }
 }
 
