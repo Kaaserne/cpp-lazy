@@ -15,7 +15,7 @@ TEST_CASE("take_every_iterable with sentinels") {
     REQUIRE(lz::equal(take_every, expected));
 }
 
-TEST_CASE("take_every_iterable changing and creating elements", "[take_every_iterable][Basic functionality]") {
+TEST_CASE("take_every_iterable changing and creating elements") {
     constexpr std::size_t size = 4;
     std::array<int, size> array = { 1, 2, 3, 4 };
     auto take_every = array | lz::take_every(2);
@@ -109,7 +109,7 @@ TEST_CASE("Empty or one element take every") {
     }
 }
 
-TEST_CASE("take_every_iterable binary operations", "[take_every_iterable][Binary ops]") {
+TEST_CASE("take_every_iterable binary operations") {
     constexpr std::size_t size = 4;
     std::array<int, size> array = { 1, 2, 3, 4 };
     auto take_every = lz::take_every(array, 3);
@@ -209,7 +209,7 @@ TEST_CASE("take_every_iterable binary operations", "[take_every_iterable][Binary
     }
 }
 
-TEST_CASE("take_every_iterable to containers", "[take_every_iterable][To container]") {
+TEST_CASE("take_every_iterable to containers") {
     constexpr std::size_t size = 4;
     std::array<int, size> array = { 1, 2, 3, 4 };
     constexpr std::size_t offset = 2;

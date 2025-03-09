@@ -67,7 +67,7 @@ TEST_CASE("Empty or one element except") {
     }
 }
 
-TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functionality]") {
+TEST_CASE("Except excepts elements and is by reference") {
     std::vector<int> array{ 1, 2, 3, 4, 5 };
     std::vector<int> to_except{ 3, 5 };
 
@@ -107,7 +107,7 @@ TEST_CASE("Except excepts elements and is by reference", "[Except][Basic functio
     }
 }
 
-TEST_CASE("Except binary operations", "[Except][Binary ops]") {
+TEST_CASE("Except binary operations") {
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<int> b = { 2, 3 };
 
@@ -129,7 +129,7 @@ TEST_CASE("Except binary operations", "[Except][Binary ops]") {
     }
 }
 
-TEST_CASE("Except to containers", "[Except][To container]") {
+TEST_CASE("Except to containers") {
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<int> b = { 1, 3 };
     auto except = lz::except(a, b);

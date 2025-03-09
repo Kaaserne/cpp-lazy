@@ -18,7 +18,7 @@ TEST_CASE("Zip with sentinels") {
     static_assert(!std::is_same<decltype(zip.begin()), decltype(zip.end())>::value, "Should be sentinel-like");
 }
 
-TEST_CASE("zip_iterable changing and creating elements", "[zip_iterable][Basic functionality]") {
+TEST_CASE("zip_iterable changing and creating elements") {
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
     std::array<short, 4> c = { 1, 2, 3, 4 };
@@ -30,16 +30,40 @@ TEST_CASE("zip_iterable changing and creating elements", "[zip_iterable][Basic f
         auto zipper = ints | lz::zip(floats);
         auto end = zipper.end();
 
-        REQUIRE(*--end == std::make_tuple(5, 3.3));
-        REQUIRE(*--end == std::make_tuple(4, 1.2));
+        REQUIRE(*--end == std::make_tuple(2, 3.3));
+        REQUIRE(*--end == std::make_tuple(1, 1.2));
         REQUIRE(end == zipper.begin());
         REQUIRE(std::distance(zipper.begin(), zipper.end()) == 2);
         REQUIRE(floats.size() == zipper.size());
 
-        std::array<std::tuple<int, Approx>, 2> expected = { std::make_tuple(5, Approx{ 3.3f }),
-                                                            std::make_tuple(4, Approx{ 1.2f }) };
+        std::array<std::tuple<int, Approx>, 2> expected = { std::make_tuple(2, Approx{ 3.3f }),
+                                                            std::make_tuple(1, Approx{ 1.2f }) };
         auto reversed = lz::reverse(zipper);
         REQUIRE(lz::equal(reversed, expected));
+
+        auto begin = zipper.begin();
+        REQUIRE(*begin == std::make_tuple(1, 1.2));
+        REQUIRE(*(begin + 1) == std::make_tuple(2, 3.3));
+        REQUIRE(begin + 2 == zipper.end());
+
+        end = zipper.end();
+        REQUIRE(*(end - 1) == std::make_tuple(2, 3.3));
+        REQUIRE(*(end - 2) == std::make_tuple(1, 1.2));
+        REQUIRE(end - 2 == zipper.begin());
+
+        REQUIRE(end - begin == 2);
+        REQUIRE((end - 1) - begin == 1);
+        REQUIRE((end - 2) - begin == 0);
+
+        REQUIRE(end - (begin + 1) == 1);
+        REQUIRE(end - (begin + 2) == 0);
+
+        REQUIRE(begin - end == -2);
+        REQUIRE((begin + 1) - end == -1);
+        REQUIRE((begin + 2) - end == 0);
+
+        REQUIRE(begin - (end - 1) == -1);
+        REQUIRE(begin - (end - 2) == 0);
     }
 
     SECTION("Should compile") {
@@ -123,7 +147,7 @@ TEST_CASE("Empty or one element zip") {
     }
 }
 
-TEST_CASE("zip_iterable binary operations", "[zip_iterable][Binary ops]") {
+TEST_CASE("zip_iterable binary operations") {
     constexpr std::size_t size = 4;
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
@@ -203,7 +227,7 @@ TEST_CASE("zip_iterable binary operations", "[zip_iterable][Binary ops]") {
     }
 }
 
-TEST_CASE("zip_iterable to containers", "[zip_iterable][To container]") {
+TEST_CASE("zip_iterable to containers") {
     constexpr std::size_t size = 4;
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };

@@ -188,12 +188,12 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Ite
     -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept
-    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(std::forward<Iterable>(c)))>;
+LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
+    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(c))>;
 
 template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept
-    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(std::forward<Iterable>(c)))>;
+LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
+    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(c))>;
 } // namespace detail
 
 #ifdef LZ_HAS_CXX_17

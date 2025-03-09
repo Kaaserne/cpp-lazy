@@ -34,7 +34,7 @@ TEST_CASE("forward iterator with std move non empty") {
     REQUIRE(!f);
 }
 
-TEST_CASE("Map changing and creating elements", "[Map][Basic functionality]") {
+TEST_CASE("Map changing and creating elements") {
     constexpr std::size_t size = 3;
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
 
@@ -64,7 +64,7 @@ TEST_CASE("Map changing and creating elements", "[Map][Basic functionality]") {
     }
 }
 
-TEST_CASE("Map binary operations", "[Map][Binary ops]") {
+TEST_CASE("Map binary operations") {
     constexpr std::size_t size = 3;
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
 
@@ -136,7 +136,7 @@ TEST_CASE("Empty or one element map") {
     }
 }
 
-TEST_CASE("Map to containers", "[Map][To container]") {
+TEST_CASE("Map to containers") {
     constexpr std::size_t size = 3;
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
     auto map = lz::map(array, [](const TestStruct& t) { return t.test_field_str; });

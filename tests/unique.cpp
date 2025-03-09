@@ -14,7 +14,7 @@ TEST_CASE("Unique using sentinels") {
     REQUIRE(lz::equal(unique, expected));
 }
 
-TEST_CASE("Unique changing and creating elements", "[Unique][Basic functionality]") {
+TEST_CASE("Unique changing and creating elements") {
     std::array<int, 4> arr = { 3, 2, 3, 1 };
     std::sort(arr.begin(), arr.end());
     auto unique = arr | lz::unique;
@@ -37,7 +37,7 @@ TEST_CASE("Unique changing and creating elements", "[Unique][Basic functionality
     }
 }
 
-TEST_CASE("Unique binary operations", "[Unique][Binary ops]") {
+TEST_CASE("Unique binary operations") {
     SECTION("Operator++") {
         std::array<int, 4> arr = { 3, 2, 3, 1 };
         std::sort(arr.begin(), arr.end());
@@ -92,7 +92,7 @@ TEST_CASE("Empty or one element unique") {
     }
 }
 
-TEST_CASE("Unique to container", "[Unique][To container]") {
+TEST_CASE("Unique to container") {
     std::array<int, 4> arr = { 3, 2, 3, 1 };
     std::sort(arr.begin(), arr.end());
     constexpr std::size_t size = 3;

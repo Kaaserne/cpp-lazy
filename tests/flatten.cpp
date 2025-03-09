@@ -80,7 +80,7 @@ TEST_CASE("Empty or one element flatten") {
     }
 }
 
-TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
+TEST_CASE("Should flatten") {
     SECTION("Flatten 1D") {
         std::vector<int> vec = { 1, 2, 3, 4 };
         auto flattened = lz::flatten(vec);
@@ -129,7 +129,7 @@ TEST_CASE("Should flatten", "[Flatten][Basic functionality]") {
     }
 }
 
-TEST_CASE("Flatten binary operations", "[Flatten][Binary ops]") {
+TEST_CASE("Flatten binary operations") {
     std::vector<std::list<int>> nested = { { 1, 2, 3 }, {}, { 1 }, { 4, 5, 6 }, {} };
     auto flattened = nested | lz::flatten;
     REQUIRE(flattened.size() == 7);
@@ -171,7 +171,7 @@ TEST_CASE("Flatten binary operations", "[Flatten][Binary ops]") {
     }
 }
 
-TEST_CASE("Flatten to container", "[Flatten][To container]") {
+TEST_CASE("Flatten to container") {
     std::vector<std::vector<int>> vecs = { { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } };
     auto flattened = lz::flatten(vecs);
     REQUIRE(flattened.size() == 7);

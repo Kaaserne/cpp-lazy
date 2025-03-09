@@ -19,7 +19,7 @@ TEST_CASE("Take with sentinels") {
     REQUIRE(lz::equal(vec, expected));
 }
 
-TEST_CASE("Take changing and creating elements", "[Take][Basic functionality]") {
+TEST_CASE("Take changing and creating elements") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take = lz::take(array, 4);
     REQUIRE(take.size() == 4);
@@ -30,7 +30,7 @@ TEST_CASE("Take changing and creating elements", "[Take][Basic functionality]") 
     REQUIRE(array[0] == 0);
 }
 
-TEST_CASE("Take binary operations", "[Take][Binary ops]") {
+TEST_CASE("Take binary operations") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take = lz::take(array, 4);
     REQUIRE(take.size() == 4);
@@ -103,7 +103,7 @@ TEST_CASE("Empty or one element take") {
     }
 }
 
-TEST_CASE("Take to containers", "[Take][To container]") {
+TEST_CASE("Take to containers") {
     constexpr std::size_t size = 8;
     std::array<int, size> array = { 1, 2, 3, 4, 5, 6, 7, 8 };
     auto take = lz::take(array, 4);

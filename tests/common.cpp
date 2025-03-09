@@ -14,7 +14,7 @@ TEST_CASE("Basic common_iterable test") {
     REQUIRE(std::equal(common.begin(), common.end(), cstr.begin()));
 }
 
-TEST_CASE("common_iterable binary operations", "[common_iterable][Binary ops]") {
+TEST_CASE("common_iterable binary operations") {
     const char* a = "hello ";
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);
@@ -51,7 +51,7 @@ TEST_CASE("common_iterable empty or one element") {
     }
 }
 
-TEST_CASE("common_iterable to containers", "[common_iterable][To container]") {
+TEST_CASE("common_iterable to containers") {
     const char* a = "hello ";
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);

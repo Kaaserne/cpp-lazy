@@ -6,7 +6,7 @@
 #include <map>
 #include <unordered_map>
 
-TEST_CASE("Range changing and creating elements", "[Range][Basic functionality]") {
+TEST_CASE("Range changing and creating elements") {
     SECTION("Looping upwards") {
         int expected_counter = 0;
 
@@ -60,7 +60,7 @@ TEST_CASE("Empty or one element range") {
     }
 }
 
-TEST_CASE("Range binary operations", "[Range][Binary ops]") {
+TEST_CASE("Range binary operations") {
     constexpr int size = 10;
     auto range = lz::range(size);
     auto f_range = lz::range(0., 10.5, 0.5);
@@ -139,7 +139,7 @@ TEST_CASE("Range binary operations", "[Range][Binary ops]") {
     }
 }
 
-TEST_CASE("Range to containers", "[Range][To container]") {
+TEST_CASE("Range to containers") {
     constexpr int size = 10;
     auto range = lz::range(size);
 

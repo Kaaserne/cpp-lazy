@@ -14,8 +14,11 @@ class exclude_iterable : public lazy_view {
     diff_iterable_t<Iterable> _from;
     diff_iterable_t<Iterable> _to;
 
+    using inner_iter = iter_t<Iterable>;
+    using inner_sentinel = sentinel_t<Iterable>;
+
 public:
-    using iterator = exclude_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
+    using iterator = exclude_iterator<inner_iter, inner_sentinel>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -34,14 +37,20 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), std::end(_iterable), _from, _to };
+        return { std::begin(_iterable), std::end(_iterable), _from, _to, 0 };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)), std::end(_iterable), _from, _to };
+        return { detail::begin(std::move(_iterable)), std::end(_iterable), _from, _to, 0 };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
+        return { std::end(_iterable), std::end(_iterable), _from, _to,
+                 static_cast<typename iterator::difference_type>(lz::eager_size(_iterable)) };
+    }
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, inner_sentinel> end() const {
         return std::end(_iterable);
     }
 };

@@ -21,7 +21,7 @@ TEST_CASE("Generate infinite") {
     REQUIRE(begin != generator.begin());
 }
 
-TEST_CASE("Generate changing and creating elements", "[Generate][Basic functionality]") {
+TEST_CASE("Generate changing and creating elements") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
     auto generator = lz::generate(
@@ -40,7 +40,7 @@ TEST_CASE("Generate changing and creating elements", "[Generate][Basic functiona
     }
 }
 
-TEST_CASE("Generate binary operations", "[Generate][Binary ops]") {
+TEST_CASE("Generate binary operations") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
     auto generator = lz::generate(
@@ -81,7 +81,7 @@ TEST_CASE("Empty or one element generate") {
     }
 }
 
-TEST_CASE("Generate to containers", "[Generate][To container]") {
+TEST_CASE("Generate to containers") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
 

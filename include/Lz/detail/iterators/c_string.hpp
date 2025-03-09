@@ -28,14 +28,17 @@ public:
     constexpr c_string_iterator() = default;
 
     constexpr reference dereference() const noexcept {
+        LZ_ASSERT(_it != nullptr, "Cannot dereference a nullptr");
         return *_it;
     }
 
     constexpr pointer arrow() const noexcept {
+        LZ_ASSERT(_it != nullptr, "Cannot dereference a nullptr");
         return _it;
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
+        LZ_ASSERT(_it != nullptr, "Cannot increment a nullptr");
         ++_it;
     }
 

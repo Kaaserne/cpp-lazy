@@ -5,7 +5,7 @@
 #include <map>
 #include <unordered_map>
 
-TEST_CASE("Generate while changing and creating elements", "[Generate while][Basic functionality]") {
+TEST_CASE("Generate while changing and creating elements") {
     const auto compile_test1 = lz::generate_while([]() { return std::make_pair(false, false); });
     static_cast<void>(compile_test1);
 
@@ -53,7 +53,7 @@ TEST_CASE("Empty or one element generate while") {
     }
 }
 
-TEST_CASE("Generate while binary operations", "[Generate while][Binary ops]") {
+TEST_CASE("Generate while binary operations") {
     auto test = lz::generate_while([]() { return std::make_pair(true, 0); });
     static_assert(std::is_same<decltype(*test.begin()), int>::value, "int and decltype(*generator.begin()) are not the same");
 
@@ -90,7 +90,7 @@ TEST_CASE("Generate while binary operations", "[Generate while][Binary ops]") {
     }
 }
 
-TEST_CASE("Generate while to containers", "[GenerateWhile][To container]") {
+TEST_CASE("Generate while to containers") {
     SECTION("To array") {
         int i = 0;
         auto generator = lz::generate_while([&i]() {

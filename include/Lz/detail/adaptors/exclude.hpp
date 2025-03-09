@@ -19,11 +19,12 @@ struct exclude_adaptor {
 #endif
     /**
      * @brief Excludes elements from a container, using two indexes. The first index is means the start index, the second index
-     * means the end index. Contains a .size() method, it's a forward iterator and returns a sentinel. Example:
+     * means the end index. Contains a .size() method if the input iterable contains a .size() method, its iterator category is
+     * the same as the input iterable. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
      * // Exclude index [3, 6)
-     * auto excluded = vec | lz::exclude(3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
+     * auto excluded = lz::exclude(vec, 3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
      * ```
      * @param iterable The iterable to exclude elements from.
      * @param from The start index to exclude.
@@ -36,7 +37,8 @@ struct exclude_adaptor {
 
     /**
      * @brief Excludes elements from a container, using two indexes. The first index is means the start index, the second index
-     * means the end index. Contains a .size() method, it's a forward iterator and returns a sentinel. Example:
+     * means the end index. Contains a .size() method if the input iterable contains a .size() method, its iterator category is
+     * the same as the input iterable. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
      * // Exclude index [3, 6)

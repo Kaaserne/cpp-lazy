@@ -6,7 +6,7 @@
 #include <map>
 #include <unordered_map>
 
-TEST_CASE("repeat_iterable changing and creating elements", "[repeat_iterable][Basic functionality]") {
+TEST_CASE("repeat_iterable changing and creating elements") {
     int to_repeat = 20;
     auto repeater = lz::repeat(to_repeat, 5);
 
@@ -25,7 +25,7 @@ TEST_CASE("repeat_iterable changing and creating elements", "[repeat_iterable][B
     }
 }
 
-TEST_CASE("repeat_iterable binary operations", "[repeat_iterable][Binary ops]") {
+TEST_CASE("repeat_iterable binary operations") {
     const int amount = 5;
     auto repeater = lz::repeat(20, amount);
     auto begin = repeater.begin();
@@ -60,7 +60,7 @@ TEST_CASE("Empty or one element repeat") {
     }
 }
 
-TEST_CASE("repeat_iterable to containers", "[repeat_iterable][To container]") {
+TEST_CASE("repeat_iterable to containers") {
     constexpr auto times = 5;
     const int to_repeat = 20;
     auto repeater = lz::repeat(to_repeat, times);

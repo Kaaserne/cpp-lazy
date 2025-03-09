@@ -13,8 +13,10 @@ class chunks_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     std::size_t _chunk_size;
 
+    using inner_iter = iter_t<Iterable>;
+
 public:
-    using iterator = chunks_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
+    using iterator = chunks_iterator<inner_iter, sentinel_t<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
@@ -30,22 +32,22 @@ public:
         return static_cast<std::size_t>(std::ceil(static_cast<double>(lz::size(_iterable)) / _chunk_size));
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, I> begin() const {
+    template<class I = inner_iter>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() const {
         return { std::begin(_iterable), std::end(_iterable), _chunk_size };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> begin() const {
+    template<class I = inner_iter>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() const {
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const {
+    template<class I = inner_iter>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
     }
 
-    template<class I = iterator>
+    template<class I = inner_iter>
     LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, default_sentinel> end() const {
         return {};
     }

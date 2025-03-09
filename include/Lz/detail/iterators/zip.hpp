@@ -64,8 +64,7 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other, index_sequence_helper<I...>) const {
-        const bool expander[] = { (std::get<I>(_iterators) == std::get<I>(other))... };
-        return std::find(std::begin(expander), std::end(expander), true) != std::end(expander);
+        return std::max({ (std::get<I>(_iterators) == std::get<I>(other))... });
     }
 
 public:

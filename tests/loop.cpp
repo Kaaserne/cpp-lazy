@@ -26,7 +26,7 @@ TEST_CASE("Empty loop iterable") {
     REQUIRE(lz::empty(looper));
 }
 
-TEST_CASE("Basic functionality loop", "[loop_iterable][Basic functionality]") {
+TEST_CASE("Basic functionality loop") {
     std::vector<int> vec = { 1, 2, 3, 4 };
     auto looper = lz::loop(vec);
     static_assert(!std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should be sentinel");

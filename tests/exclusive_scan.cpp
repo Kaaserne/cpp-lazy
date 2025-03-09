@@ -16,7 +16,7 @@ TEST_CASE("Exclusive scan with sentinels") {
     REQUIRE(lz::equal(scan, expected));
 }
 
-TEST_CASE("exclusive_scan basic functionality", "[exclusive_scan][Basic functionality]") {
+TEST_CASE("exclusive_scan basic functionality") {
     static constexpr std::size_t arr_size = 8;
     int arr[arr_size] = { 3, 1, 4, 1, 5, 9, 2, 6 };
     auto scan = arr | lz::exclusive_scan(0);
@@ -53,7 +53,7 @@ TEST_CASE("Empty or one element exclusive scan") {
     }
 }
 
-TEST_CASE("Exclusive scan binary operations", "[exclusive_scan][Binary ops]") {
+TEST_CASE("Exclusive scan binary operations") {
     int arr[] = { 3, 1, 4, 1, 5, 9, 2 };
     auto scan = lz::exclusive_scan(arr, 0);
     REQUIRE(scan.size() == lz::size(arr) + 1);
@@ -84,7 +84,7 @@ TEST_CASE("Exclusive scan binary operations", "[exclusive_scan][Binary ops]") {
     }
 }
 
-TEST_CASE("Exclusive scan to container", "[exclusive_scan][To container]") {
+TEST_CASE("Exclusive scan to container") {
     int to_scan[] = { 2, 5, 6, 4, 87, 8, 45, 7 };
     auto scanner = lz::exclusive_scan(to_scan, 0);
     REQUIRE(scanner.size() == lz::size(to_scan) + 1);

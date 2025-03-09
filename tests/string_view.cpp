@@ -8,7 +8,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("String view basic functionality", "[String view][Basic functionality]") {
+TEST_CASE("String view basic functionality") {
     const std::string str = "Hello world";
     lz::string_view view(str.data(), str.size());
 
@@ -84,5 +84,5 @@ TEST_CASE("String view basic functionality", "[String view][Basic functionality]
         REQUIRE(view[8] == str[8]);
         REQUIRE(view[9] == str[9]);
     }
-}	
+}
 #endif

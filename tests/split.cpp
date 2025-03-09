@@ -77,7 +77,7 @@ TEST_CASE("Splitter permutations") {
     }
 }
 
-TEST_CASE("Splitter changing and creating elements", "[Splitter][Basic functionality]") {
+TEST_CASE("Splitter changing and creating elements") {
     const std::string to_split = "Hello  world  test  123  ";
     const char* delimiter = "  ";
     auto splitter = lz::sv_split(to_split, delimiter);
@@ -126,7 +126,7 @@ TEST_CASE("Empty or one element string splitter") {
     }
 }
 
-TEST_CASE("Splitter binary operations", "[Splitter][Binary ops]") {
+TEST_CASE("Splitter binary operations") {
     std::string to_split = " Hello world test 123 ";
     auto splitter = to_split | lz::sv_split(" ");
     auto it = splitter.begin();
@@ -159,7 +159,7 @@ TEST_CASE("Splitter binary operations", "[Splitter][Binary ops]") {
     }
 }
 
-TEST_CASE("Splitter to containers", "[Splitter][To container]") {
+TEST_CASE("Splitter to containers") {
     std::string to_split = "Hello world test 123 ";
     auto splitter = lz::sv_split(to_split, " ");
     using View = typename decltype(splitter.begin())::value_type;

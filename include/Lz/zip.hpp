@@ -35,6 +35,8 @@ static constexpr detail::zip_adaptor detail::zip_adaptor::zip{};
 
 #else
 
+// TODO add cached_size if that one is finished in docs example
+
 /**
  * @brief Zips two or more iterables together. If the sizes of the iterables are different, the shortest one will be used. It
  * contains a size() method if all the iterables have a size() method. It is the same iterator category as the 'weakest' of the

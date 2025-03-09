@@ -3,8 +3,7 @@
 #include <iostream>
 #include <list>
 
-
-TEST_CASE("regex_split_iterable changing and creating elements", "[regex_split_iterable][Basic functionality]") {
+TEST_CASE("regex_split_iterable changing and creating elements") {
     std::regex r1(R"(\s+)");
 
     SECTION("Empty string") {
@@ -69,7 +68,7 @@ TEST_CASE("Empty or one element regex split") {
     }
 }
 
-TEST_CASE("regex_split_iterable binary operations", "[regex_split_iterable][Binary ops]") {
+TEST_CASE("regex_split_iterable binary operations") {
     std::regex r1(R"(\s+)");
     std::string s = "    Hello, world! How are you?    ";
     auto splitter = lz::regex_split(s, r1);
@@ -89,7 +88,7 @@ TEST_CASE("regex_split_iterable binary operations", "[regex_split_iterable][Bina
     }
 }
 
-TEST_CASE("regex_split_iterable to containers", "[regex_split_iterable][To container]") {
+TEST_CASE("regex_split_iterable to containers") {
     std::regex r1(R"(\s+)");
     std::string s = "    Hello, world! How are you?    ";
     auto splitter = lz::regex_split(s, r1);

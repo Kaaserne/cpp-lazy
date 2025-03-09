@@ -15,7 +15,7 @@ TEST_CASE("rotate_iterable with sentinels") {
     REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
 }
 
-TEST_CASE("rotate_iterable basic functionality", "[rotate_iterable][Basic functionality]") {
+TEST_CASE("rotate_iterable basic functionality") {
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
     auto rotate = lz::rotate(arr, 2);
     REQUIRE(rotate.size() == arr.size());
@@ -37,7 +37,7 @@ TEST_CASE("rotate_iterable basic functionality", "[rotate_iterable][Basic functi
     }
 }
 
-TEST_CASE("rotate_iterable binary operations", "[rotate_iterable][Binary ops]") {
+TEST_CASE("rotate_iterable binary operations") {
     std::array<int, 4> arr = { 1, 2, 3, 4 };
     auto rotate = lz::rotate(arr, 3);
 
@@ -183,7 +183,7 @@ TEST_CASE("Empty or one element rotate") {
     }
 }
 
-TEST_CASE("rotate_iterable to containers", "[rotate_iterable][To container]") {
+TEST_CASE("rotate_iterable to containers") {
     constexpr std::size_t size = 6;
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
     auto rotator = lz::rotate(vec, 2);

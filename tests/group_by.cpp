@@ -37,7 +37,7 @@ TEST_CASE("Empty or one element group by") {
     }
 }
 
-TEST_CASE("group_by changing and creating elements", "[group_by][Basic functionality]") {
+TEST_CASE("group_by changing and creating elements") {
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
 
     std::sort(vec.begin(), vec.end(), [](const std::string& a, const std::string& b) { return a.length() < b.length(); });
@@ -64,7 +64,7 @@ TEST_CASE("group_by changing and creating elements", "[group_by][Basic functiona
     }
 }
 
-TEST_CASE("group_by binary operations", "[group_by][Binary ops]") {
+TEST_CASE("group_by binary operations") {
     std::vector<std::string> vec = { "a", "bb", "ccc", "ccc", "dddd", "dddd" };
     auto grouper = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
 

@@ -13,7 +13,6 @@ namespace detail {
 template<class Iterator, class S, class BinaryPredicate, class = void>
 class unique_iterator;
 
-// TODO add iter_cat_t if std::forward_iterator_tag is hardcoded
 template<class Iterator, class S, class BinaryPredicate>
 class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>::value>>
     : public iterator<unique_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,

@@ -19,7 +19,7 @@ TEST_CASE("Concatenate with sentinels") {
     REQUIRE(lz::equal(actual, expected));
 }
 
-TEST_CASE("Concat changing and creating elements", "[Concat][Basic functionality]") {
+TEST_CASE("Concat changing and creating elements") {
     std::string a = "hello ";
     std::string b = "world";
 
@@ -93,7 +93,7 @@ TEST_CASE("Empty or one element concatenate") {
     }
 }
 
-TEST_CASE("Concat binary operations", "[Concat][Binary ops]") {
+TEST_CASE("Concat binary operations") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);
     REQUIRE(concat.size() == a.size() + b.size());
@@ -155,7 +155,7 @@ TEST_CASE("Concat binary operations", "[Concat][Binary ops]") {
     }
 }
 
-TEST_CASE("Concatenate to containers", "[Concatenate][To container]") {
+TEST_CASE("Concatenate to containers") {
     std::vector<int> v1 = { 1, 2, 3 };
     std::vector<int> v2 = { 4, 5, 6 };
     auto concat = lz::concat(v1, v2);

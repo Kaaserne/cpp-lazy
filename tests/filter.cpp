@@ -34,7 +34,7 @@ TEST_CASE("Empty or one element filter") {
     }
 }
 
-TEST_CASE("Filter filters and is by reference", "[Filter][Basic functionality]") {
+TEST_CASE("Filter filters and is by reference") {
     constexpr size_t size = 3;
     std::array<int, size> array{ 1, 2, 3 };
 
@@ -67,7 +67,7 @@ TEST_CASE("Filter filters and is by reference", "[Filter][Basic functionality]")
     }
 }
 
-TEST_CASE("Filter binary operations", "[Filter][Binary ops]") {
+TEST_CASE("Filter binary operations") {
     constexpr std::size_t size = 3;
     std::array<int, size> array{ 1, 2, 3 };
     std::function<bool(int)> f = [](int i) {
@@ -104,8 +104,7 @@ TEST_CASE("Filter binary operations", "[Filter][Binary ops]") {
     }
 }
 
-
-TEST_CASE("Filter to container", "[Filter][To container]") {
+TEST_CASE("Filter to container") {
     constexpr std::size_t size = 3;
     std::array<int, size> array{ 1, 2, 3 };
 

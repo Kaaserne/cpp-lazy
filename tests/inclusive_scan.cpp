@@ -35,7 +35,7 @@ TEST_CASE("Empty or one element inclusive scan") {
     }
 }
 
-TEST_CASE("Inclusive scan changing and creating elements", "[InclusiveScan][Basic functionality]") {
+TEST_CASE("Inclusive scan changing and creating elements") {
     int arr[32];
     std::iota(std::begin(arr), std::end(arr), 0);
     auto scan = arr | lz::inclusive_scan(0);
@@ -56,7 +56,7 @@ TEST_CASE("Inclusive scan changing and creating elements", "[InclusiveScan][Basi
     REQUIRE(std::equal(std::begin(expected), std::end(expected), std::begin(scan)));
 }
 
-TEST_CASE("Inclusive scan splitter binary operations", "[InclusiveScan][Binary ops]") {
+TEST_CASE("Inclusive scan splitter binary operations") {
     int arr[] = { 1, 2, 3, 4, 5 };
     auto scan = lz::inclusive_scan(arr);
 
@@ -83,7 +83,7 @@ TEST_CASE("Inclusive scan splitter binary operations", "[InclusiveScan][Binary o
     }
 }
 
-TEST_CASE("Inclusive scan splitter to containers", "[InclusiveScan][To container]") {
+TEST_CASE("Inclusive scan splitter to containers") {
     int to_scan[] = { 2, 5, 6, 4, 87, 8, 45, 7 };
     auto scanner = lz::inclusive_scan(to_scan);
 

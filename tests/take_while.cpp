@@ -16,7 +16,7 @@ TEST_CASE("Take while with sentinels") {
     REQUIRE(lz::equal(take_while, c_str_expected));
 }
 
-TEST_CASE("take_while_iterable takes elements and is by reference", "[take_while_iterable][Basic functionality]") {
+TEST_CASE("take_while_iterable takes elements and is by reference") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
@@ -60,7 +60,7 @@ TEST_CASE("Empty or one element drop while") {
     }
 }
 
-TEST_CASE("Drop while takes elements and is by reference", "[take_while_iterable][Basic functionality]") {
+TEST_CASE("Drop while takes elements and is by reference") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
@@ -80,7 +80,7 @@ TEST_CASE("Drop while takes elements and is by reference", "[take_while_iterable
     }
 }
 
-TEST_CASE("take_while_iterable binary operations", "[take_while_iterable][Binary ops]") {
+TEST_CASE("take_while_iterable binary operations") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });
@@ -112,7 +112,7 @@ TEST_CASE("take_while_iterable binary operations", "[take_while_iterable][Binary
     }
 }
 
-TEST_CASE("take_while_iterable to containers", "[take_while_iterable][To container]") {
+TEST_CASE("take_while_iterable to containers") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });

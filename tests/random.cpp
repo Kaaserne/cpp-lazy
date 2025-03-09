@@ -5,7 +5,7 @@
 #include <map>
 #include <unordered_map>
 
-TEST_CASE("random_iterable should be random", "[random_iterable][Basic functionality]") {
+TEST_CASE("random_iterable should be random") {
     constexpr std::size_t size = 5;
 
     SECTION("random_iterable doubles") {
@@ -59,7 +59,7 @@ TEST_CASE("Empty or one element random") {
     }
 }
 
-TEST_CASE("random_iterable binary operations", "[random_iterable][Binary ops]") {
+TEST_CASE("random_iterable binary operations") {
     constexpr std::ptrdiff_t size = 5;
     auto random = lz::common_random(0., 1., size);
     static_assert(std::is_same<decltype(random.begin()), decltype(random.end())>::value, "Should be the same");
@@ -129,7 +129,7 @@ TEST_CASE("random_iterable binary operations", "[random_iterable][Binary ops]") 
     }
 }
 
-TEST_CASE("random_iterable to containers", "[random_iterable][To container]") {
+TEST_CASE("random_iterable to containers") {
     constexpr std::size_t size = 10;
     auto range = lz::random(0., 1., size);
 

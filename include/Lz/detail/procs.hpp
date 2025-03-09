@@ -189,13 +189,13 @@ LZ_NODISCARD constexpr auto eager_size(Iterable&& c) -> detail::enable_if<detail
 
 /**
  * @brief Gets the size of an iterable. If the iterable is not sized, it will calculate the size by iterating over the iterable,
- * which is O(n). Example:
+ * which is O(n), unless it is random access. Example:
  * ```cpp
  * // Sized, making it O(1)
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * std::cout << lz::eager_size(vec) << '\n'; // prints 5
  *
- * // Not sized, making it O(n)
+ * // Not sized, not random access, making it O(n)
  * auto not_sized = lz::c_string("Hello");
  * std::cout << lz::eager_size(not_sized) << '\n'; // prints 5
  * ```
@@ -204,9 +204,9 @@ LZ_NODISCARD constexpr auto eager_size(Iterable&& c) -> detail::enable_if<detail
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, diff_iterable_t<Iterable>> eager_size(Iterable&& c) {
+LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, std::size_t> eager_size(Iterable&& c) {
     using std::distance;
-    return distance(std::begin(c), std::end(c));
+    return static_cast<std::size_t>(distance(std::begin(c), std::end(c)));
 }
 
 LZ_MODULE_EXPORT_SCOPE_END

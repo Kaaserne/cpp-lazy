@@ -80,7 +80,7 @@ TEST_CASE("Empty or one element cartesian product") {
     }
 }
 
-TEST_CASE("Cartesian product changing and creating elements", "[CartesianProduct][Basic functionality]") {
+TEST_CASE("Cartesian product changing and creating elements") {
     std::vector<int> vec = { 1, 2, 3 };
     std::vector<char> chars = { 'a', 'b', 'c' };
     auto cartesian = lz::cartesian_product(vec, chars);
@@ -142,7 +142,7 @@ TEST_CASE("Cartesian product changing and creating elements", "[CartesianProduct
     }
 }
 
-TEST_CASE("Cartesian product binary operations", "[CartesianProduct][Binary ops]") {
+TEST_CASE("Cartesian product binary operations") {
     std::vector<int> vec = { 1, 2 };
     std::vector<char> chars = { 'a', 'b', 'c' };
     std::vector<char> chars2 = { 'a', 'b' };
@@ -245,7 +245,7 @@ TEST_CASE("Cartesian product binary operations", "[CartesianProduct][Binary ops]
     }
 }
 
-TEST_CASE("CartesianProduct to containers", "[CartesianProduct][To container]") {
+TEST_CASE("CartesianProduct to containers") {
     std::vector<int> vec = { 1, 2, 3 };
     std::vector<char> chars = { 'a', 'b', 'c' };
     std::vector<char> chars2 = { 'a', 'b' };

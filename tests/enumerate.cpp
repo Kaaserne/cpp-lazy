@@ -32,7 +32,7 @@ TEST_CASE("Enumerate correct size()") {
     REQUIRE(end->second == 1);
 }
 
-TEST_CASE("Enumerate changing and creating elements", "[Enumerate][Basic functionality]") {
+TEST_CASE("Enumerate changing and creating elements") {
     constexpr std::size_t size = 2;
     std::array<int, size> array = { 1, 2 };
 
@@ -80,7 +80,7 @@ TEST_CASE("Empty or one element enumerate") {
     }
 }
 
-TEST_CASE("Enumerate binary operations", "[Enumerate][Binary ops]") {
+TEST_CASE("Enumerate binary operations") {
     constexpr std::size_t size = 3;
     std::array<int, size> array = { 1, 2, 3 };
     auto enumerate = lz::enumerate(array);
@@ -136,7 +136,7 @@ TEST_CASE("Enumerate binary operations", "[Enumerate][Binary ops]") {
     }
 }
 
-TEST_CASE("Enumerate to containers", "[Enumerate][To container]") {
+TEST_CASE("Enumerate to containers") {
     constexpr std::size_t size = 3;
     std::array<int, size> array = { 1, 2, 3 };
     std::vector<int> vec = { 1, 2, 3 };

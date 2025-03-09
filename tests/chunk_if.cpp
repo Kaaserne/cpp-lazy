@@ -96,7 +96,7 @@ TEST_CASE("Empty or one element chunk_if") {
     }
 }
 
-TEST_CASE("chunk_if changing and creating elements", "[chunk_if][Basic functionality]") {
+TEST_CASE("chunk_if changing and creating elements") {
     std::string s = "hello world; this is a message;;";
     auto chunked = s | lz::sv_chunk_if([](const char c) { return c == ';'; });
     static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
@@ -152,7 +152,7 @@ TEST_CASE("chunk_if variations") {
     }
 }
 
-TEST_CASE("chunk_if binary operations", "[chunk_if][Binary ops]") {
+TEST_CASE("chunk_if binary operations") {
     std::string s = ";hello world;; this is a message;;; testing;;";
     auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
     static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
@@ -195,7 +195,7 @@ TEST_CASE("chunk_if binary operations", "[chunk_if][Binary ops]") {
     }
 }
 
-TEST_CASE("chunk_if to containers", "[chunk_if][To container]") {
+TEST_CASE("chunk_if to containers") {
     std::string s = "hello world; this is a message;;";
     auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
     using Iterator = decltype(*chunked.begin());

@@ -1,8 +1,11 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
+#include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <map>
+#include <unordered_map>
 
 TEST_CASE("Empty or one element c_string") {
     SECTION("Empty") {
@@ -20,7 +23,7 @@ TEST_CASE("Empty or one element c_string") {
     }
 }
 
-TEST_CASE("CString binary operations", "[CString][Binary ops]") {
+TEST_CASE("CString binary operations") {
     const char string[] = "123 456 789";
     auto c_string = string | lz::c_string;
 
@@ -51,35 +54,34 @@ TEST_CASE("CString binary operations", "[CString][Binary ops]") {
     }
 }
 
-// TODO: Add tests for c_string with different types
-// TEST_CASE("CString to containers", "[CString][To container]") {
-//     auto str = lz::c_string("Hello, World!");
-//     auto map_str = lz::c_string("123456789");
+TEST_CASE("CString to containers") {
+    auto str = lz::c_string("Hello, World!");
 
-//     SECTION("To array") {
-//         std::array<char, 14> expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-//         REQUIRE(str.to<std::array<char, 14>>() == expected);
-//     }
+    SECTION("To array") {
+        std::array<char, 14> expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+        REQUIRE((str | lz::to<std::array<char, 14>>()) == expected);
+    }
 
-//     SECTION("To vector") {
-//         std::vector<char> expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-//         REQUIRE(str.to_vector() == expected);
-//     }
+    SECTION("To vector") {
+        std::vector<char> expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+        REQUIRE((str | lz::to<std::vector>()) == expected);
+    }
 
-//     SECTION("To other container using to<>()") {
-//         std::list<char> expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
-//         REQUIRE(str.to<std::list<char>>() == expected);
-//     }
+    SECTION("To other container using to<>()") {
+        std::list<char> expected = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'W', 'o', 'r', 'l', 'd', '!' };
+        REQUIRE((str | lz::to<std::list>()) == expected);
+    }
 
-//     SECTION("To map") {
-//         std::map<char, char> expected = { { '1', '1' }, { '2', '2' }, { '3', '3' }, { '4', '4' }, { '5', '5' },
-//                                           { '6', '6' }, { '7', '7' }, { '8', '8' }, { '9', '9' } };
-//         REQUIRE(map_str.to_map([](char c) { return std::make_pair(c, c); }) == expected);
-//     }
+    SECTION("To map") {
+        std::map<char, char> expected = { { 'H', 'H' }, { 'e', 'e' }, { 'l', 'l' }, { 'o', 'o' }, { ',', ',' },
+                                          { ' ', ' ' }, { 'W', 'W' }, { 'r', 'r' }, { 'd', 'd' }, { '!', '!' } };
+        REQUIRE((str | lz::map([](char c) { return std::make_pair(c, c); }) | lz::to<std::map<char, char>>()) == expected);
+    }
 
-//     SECTION("To unordered map") {
-//         std::unordered_map<char, char> expected = { { '1', '1' }, { '2', '2' }, { '3', '3' }, { '4', '4' }, { '5', '5' },
-//                                                     { '6', '6' }, { '7', '7' }, { '8', '8' }, { '9', '9' } };
-//         REQUIRE(map_str.to_unordered_map([](char c) { return std::make_pair(c, c); }) == expected);
-//     }
-// }
+    SECTION("To unordered map") {
+        std::unordered_map<char, char> expected = { { 'H', 'H' }, { 'e', 'e' }, { 'l', 'l' }, { 'o', 'o' }, { ',', ',' },
+                                                    { ' ', ' ' }, { 'W', 'W' }, { 'r', 'r' }, { 'd', 'd' }, { '!', '!' } };
+        REQUIRE((str | lz::map([](char c) { return std::make_pair(c, c); }) | lz::to<std::unordered_map<char, char>>()) ==
+                expected);
+    }
+}
