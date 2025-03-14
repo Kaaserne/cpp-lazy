@@ -82,6 +82,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& other) const {
+        LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
         const auto iterable_length = _end - _begin;
         if (_iterator > other._iterator) {
             const auto total_diff = iterable_length * (other._amount - _amount - 1);
@@ -92,6 +93,7 @@ public:
     }
 
     constexpr bool eq(const loop_iterator& other) const {
+        LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
         return _amount == other._amount && _iterator == other._iterator;
     }
 

@@ -13,8 +13,11 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 #ifdef LZ_HAS_CXX_11
 
 /**
- * @brief Excepts an iterable with another iterable. Can be used with a custom comparer. Does not contain a .size() method, it's a
- * forward iterator and returns a sentinel. The second iterable must be sorted in order for it to work. Example:
+ * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
+ * argument. Can be used with a custom comparer. Does not contain a .size() method, it's a forward iterator and returns a
+ * sentinel. The second iterable must be sorted in order for it to work. If the input iterable is bidirectional or less and not
+ * sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may
+ * be worth your while to use `lz::cache_size`. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * std::vector<int> to_except = { 5, 3 };
@@ -35,7 +38,9 @@ static constexpr detail::except_adaptor detail::except_adaptor::except{};
 /**
  * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
  * argument. Can be used with a custom comparer. Does not contain a .size() method, it's a forward iterator and returns a
- * sentinel. The second iterable must be sorted in order for it to work. Example:
+ * sentinel. The second iterable must be sorted in order for it to work. If the input iterable is bidirectional or less and not
+ * sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may
+ * be worth your while to use `lz::cache_size`. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * std::vector<int> to_except = { 5, 3 };

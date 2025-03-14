@@ -60,11 +60,12 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    constexpr bool eq(const take_while_iterator& b) const noexcept {
+    constexpr bool eq(const take_while_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return _iterator == _end;
     }
 };
@@ -100,7 +101,7 @@ public:;
         _iterator{ std::move(iterator) },
         _end{ std::move(end) },
         _unary_predicate{ std::move(unary_predicate) } {
-        if (iterator == begin) {
+        if (_iterator == _begin) {
             incremented_check();
         }
     }
@@ -129,6 +130,7 @@ public:;
     }
 
     LZ_CONSTEXPR_CXX_20 bool eq(const take_while_iterator& b) const noexcept {
+        LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 

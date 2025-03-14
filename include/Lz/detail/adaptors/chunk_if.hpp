@@ -99,7 +99,7 @@ struct chunk_if_adaptor<void> {
      * @param predicate The predicate to chunk on.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>>, Iterable, UnaryPredicate>
+    constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>, iter_t<Iterable>>, Iterable, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::move(iterable), std::move(predicate) };
     }

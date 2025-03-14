@@ -1,7 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
-
+#include <list>
 #include <sstream>
 
 TEST_CASE("Formatting") {

@@ -12,7 +12,8 @@ int main() {
     // Output: Hello, World!
     std::cout << '\n';
 
-    for (const char& c : my_str | lz::c_string) {
+    const char my_str_iterable[] = "Hello, World!";
+    for (const char& c : my_str_iterable | lz::c_string) {
         std::cout << c;
         // or use fmt::print("{}\n", c);
     }

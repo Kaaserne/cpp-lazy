@@ -3,6 +3,8 @@
 #ifndef LZ_LZ_HPP
 #define LZ_LZ_HPP
 
+// TODO check includes
+
 #include <Lz/algorithm.hpp>
 #include <Lz/any_iterable.hpp>
 #include <Lz/c_string.hpp>
@@ -34,6 +36,7 @@
 #include <Lz/range.hpp>
 #include <Lz/regex_split.hpp>
 #include <Lz/repeat.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/split.hpp>

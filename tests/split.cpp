@@ -17,6 +17,15 @@ TEST_CASE("Split with custom container") {
 }
 
 TEST_CASE("Splitter permutations") {
+    SECTION("No delimiters at end and begin") {
+        const std::string to_split = "Hello world test 123";
+        auto splitter = lz::sv_split(to_split, " ");
+        auto vec = splitter | lz::to<std::vector>();
+
+        std::vector<lz::string_view> expected = { "Hello", "world", "test", "123" };
+        REQUIRE(lz::equal(splitter, expected));
+    }
+
     SECTION("Starting with one delimiter ending with none") {
         auto cstr = lz::c_string("");
         const std::string to_split = " Hello world test 123";

@@ -10,13 +10,14 @@
 
 namespace lz {
 
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
 #ifdef LZ_HAS_CXX_11
 
 /**
  * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that are in
  * both iterables. Both iterables must be sorted first. Returns a bidirectional iterable if the input iterables are at least
- * bidirectional. Returns a bidirectional iterable if the input iterables are at least bidirectional, otherwise forward. Returns a
- * sentinel if it is a forward iterable. Does not contain a .size() method. Example:
+ * bidirectional, otherwise forward. Returns a sentinel if it is a forward iterable. Does not contain a .size() method. Example:
  * ```cpp
  * std::string a = "aaaabbcccddee";
  * std::string b = "aabccce";
@@ -40,8 +41,7 @@ static constexpr detail::intersection_adaptor detail::intersection_adaptor::inte
 /**
  * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that are in
  * both iterables. Both iterables must be sorted first. Returns a bidirectional iterable if the input iterables are at least
- * bidirectional. Returns a bidirectional iterable if the input iterables are at least bidirectional, otherwise forward. Returns a
- * sentinel if it is a forward iterable. Does not contain a .size() method. Example:
+ * bidirectional, otherwise forward. Returns a sentinel if it is a forward iterable. Does not contain a .size() method. Example:
  * ```cpp
  * std::string a = "aaaabbcccddee";
  * std::string b = "aabccce";
@@ -61,6 +61,8 @@ static constexpr detail::intersection_adaptor detail::intersection_adaptor::inte
 LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
 
 #endif
+
+LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

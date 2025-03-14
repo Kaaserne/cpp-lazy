@@ -10,7 +10,7 @@
 namespace lz {
 namespace detail {
 template<class Iterable, class Iterable2, class BinaryPredicate>
-class intersection_iterable {
+class intersection_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     ref_or_view<Iterable2> _iterable2;
     func_container<BinaryPredicate> _compare;

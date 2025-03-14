@@ -34,14 +34,13 @@ public:
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
-        return lz::size(_iterable);
+        return static_cast<std::size_t>(lz::size(_iterable));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _start, 0 };
     }
 
-    // TODO add && overload is_bidi all iterables
     template<bool Sized = is_sized>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, iterator> begin() && {
         return static_cast<const rotate_iterable&>(*this).begin();

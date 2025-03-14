@@ -29,6 +29,7 @@ include(CTest)
 add_executable(cpp-lazy-tests
 	algorithm.cpp
 	any_iterable.cpp
+	cached_size.cpp
 	cartesian_product.cpp
 	piping.cpp
 	chunk_if.cpp
@@ -48,7 +49,7 @@ add_executable(cpp-lazy-tests
 	inclusive_scan.cpp
 	init.cpp
 	intersection.cpp
-	# iter_tools.cpp
+	iter_tools.cpp
 	join_where.cpp
 	loop.cpp
 	map.cpp
@@ -56,6 +57,7 @@ add_executable(cpp-lazy-tests
 	range.cpp
 	regex_split.cpp
 	repeat.cpp
+	reverse.cpp
 	rotate.cpp
 	split.cpp
 	standalone.cpp

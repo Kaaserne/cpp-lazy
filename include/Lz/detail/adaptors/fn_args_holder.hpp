@@ -25,8 +25,7 @@ struct fn_args_holder {
     operator()(Iterable&& iterable,
                index_sequence_helper<I...>) const& -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
                                                                                        std::get<I>(data)...)) {
-        constexpr Adaptor adaptor;
-        return adaptor(std::forward<Iterable>(iterable), std::get<I>(data)...);
+        return Adaptor{}(std::forward<Iterable>(iterable), std::get<I>(data)...);
     }
 
     template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
@@ -34,8 +33,7 @@ struct fn_args_holder {
     operator()(Iterable&& iterable,
                index_sequence_helper<I...>) && -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
                                                                                    std::get<I>(std::move(data))...)) {
-        constexpr Adaptor adaptor;
-        return adaptor(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
+        return Adaptor{}(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
     }
 
     template<LZ_CONCEPT_ITERABLE Iterable>

@@ -7,10 +7,11 @@ FetchContent_Declare(cpp-lazy SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 FetchContent_MakeAvailable(cpp-lazy)
 
 set(examples
+    # algorithm
     any_iterable
+    basic_iterable
     c_string
     cartesian_product
-
     chunk_if
     chunks
     common

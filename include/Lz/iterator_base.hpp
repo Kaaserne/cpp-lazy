@@ -7,7 +7,11 @@
 #include <iterator>
 
 namespace lz {
-struct default_sentinel {};
+struct default_sentinel {
+    friend constexpr bool operator==(default_sentinel, default_sentinel) noexcept {
+        return true;
+    }
+};
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
 struct iterator;
@@ -89,7 +93,7 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_
     }
 
     LZ_CONSTEXPR_CXX_14 Derived operator--(int) {
-        Derived copy = *static_cast<Derived*>(this);
+        Derived copy = static_cast<Derived&>(*this);
         static_cast<Derived&>(*this).decrement();
         return copy;
     }

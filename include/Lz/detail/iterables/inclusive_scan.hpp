@@ -33,7 +33,7 @@ public:
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
-        return lz::size(_iterable);
+        return static_cast<std::size_t>(lz::size(_iterable));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {

@@ -41,6 +41,8 @@ LZ_INLINE_VAR constexpr detail::map_adaptor map{};
 
 #endif
 
+// TODO add using detail::map_iterable; everywhere
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

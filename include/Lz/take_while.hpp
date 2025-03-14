@@ -7,6 +7,7 @@
 #include <Lz/detail/adaptors/take_while.hpp>
 
 namespace lz {
+
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11

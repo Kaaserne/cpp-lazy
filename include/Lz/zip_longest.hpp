@@ -7,6 +7,7 @@
 #include <Lz/detail/adaptors/zip_longest.hpp>
 
 namespace lz {
+
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
@@ -15,7 +16,9 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @brief Zips multiple iterables together. If one of the iterables is shorter than the others, it will return an empty optional
  * instead of a non empty optional. The optional contains a tuple of `std::reference_wrapper`s to the elements itself if it is not
  * empty. Contains a size() method if all the iterables are sized. Will return the size of the largest iterable. Its iterator
- * category is the same as its 'weakest' input iterables. Please keep in mind that:
+ * category is the same as its 'weakest' input iterables. If the input iterable is exactly bidirectional and not sized (like
+ * `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth
+ * your while to use `lz::cache_size`. Please keep in mind that:
  *   - If all of the input iterables are bidirectional or higher then:
  *     - The zip_longest iterator will be bidirectional
  *     - The zip_longest iterator will get the sizes from the iterables using the size() method, or `lz/std::distance` if that
@@ -37,13 +40,13 @@ static constexpr detail::zip_longest_adaptor detail::zip_longest_adaptor::zip_lo
 
 #else
 
-// TODO add cached_size if that one is finished in docs example
-
 /**
  * @brief Zips multiple iterables together. If one of the iterables is shorter than the others, it will return an empty optional
  * instead of a non empty optional. The optional contains a tuple of `std::reference_wrapper`s to the elements itself if it is not
  * empty. Contains a size() method if all the iterables are sized. Will return the size of the largest iterable. Its iterator
- * category is the same as its 'weakest' input iterables. Please keep in mind that:
+ * category is the same as its 'weakest' input iterables. If the input iterable is exactly bidirectional and not sized (like
+ * `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth
+ * your while to use `lz::cache_size`. Please keep in mind that:
  *   - If all of the input iterables are bidirectional or higher then:
  *     - The zip_longest iterator will be bidirectional
  *     - The zip_longest iterator will get the sizes from the iterables using the size() method, or `lz/std::distance` if that

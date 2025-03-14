@@ -14,8 +14,12 @@ class enumerate_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     IntType _start;
 
+    IntType get_last_index() const {
+        return _start + static_cast<IntType>(lz::eager_size(_iterable));
+    }
+
 public:
-    using iterator = enumerate_iterator<iter_t<Iterable>, sentinel_t<Iterable>, IntType, sized<Iterable>::value>;
+    using iterator = enumerate_iterator<iter_t<Iterable>, sentinel_t<Iterable>, IntType>;
     using const_iterator = iterator;
     using sentinel = typename iterator::sentinel;
     using value_type = typename iterator::value_type;
@@ -28,7 +32,7 @@ public:
 
     template<class I = Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, std::size_t> size() const {
-        return lz::size(_iterable);
+        return static_cast<std::size_t>(lz::size(_iterable));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
@@ -39,20 +43,18 @@ public:
         return { detail::begin(std::move(_iterable)), _start };
     }
 
-    // If iterable is sized, we don't have to return the sentinel because we know how to get the amounts of elements.
-    // Of course, this should be the same as end() - begin(). This way, bidirectional iterators may be used
-    template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, iterator> end() const& {
-        return { std::end(_iterable), _start + static_cast<IntType>(lz::size(_iterable)) };
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, sentinel> end() const& {
+        return { std::end(_iterable), get_last_index() };
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, iterator> end() && {
-        return { detail::end(std::move(_iterable)), _start + static_cast<IntType>(lz::size(_iterable)) };
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, sentinel> end() && {
+        return { detail::end(std::move(_iterable)), get_last_index() };
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value, sentinel> end() const& {
+    template<class I = iter_t<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, sentinel> end() const& {
         return std::end(_iterable);
     }
 };

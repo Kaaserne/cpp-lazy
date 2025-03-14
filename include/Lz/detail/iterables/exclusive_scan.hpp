@@ -30,7 +30,7 @@ public:
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept {
-        const auto size = lz::size(_iterable);
+        const auto size = static_cast<std::size_t>(lz::size(_iterable));
         return size == 0 ? 0 : size + 1;
     }
 

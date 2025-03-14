@@ -53,6 +53,7 @@ public:
     }
 
     constexpr bool eq(const exclusive_scan_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator && _reached_end == b._reached_end;
     }
 

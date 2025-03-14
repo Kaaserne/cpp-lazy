@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/flatten.hpp>
 #include <Lz/detail/ref_or_view.hpp>
+#include <numeric>
 
 namespace lz {
 namespace detail {

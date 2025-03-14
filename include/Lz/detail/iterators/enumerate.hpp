@@ -9,11 +9,11 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class Arithmetic, bool IsSized>
-class enumerate_iterator final
-    : public iterator<enumerate_iterator<Iterator, S, Arithmetic, IsSized>, std::pair<Arithmetic, ref_t<Iterator>>,
-                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>,
-                      conditional<IsSized, iter_cat_t<Iterator>, std::forward_iterator_tag>, conditional<IsSized, Iterator, S>> {
+template<class Iterator, class S, class Arithmetic>
+class enumerate_iterator
+    : public iterator<enumerate_iterator<Iterator, S, Arithmetic>, std::pair<Arithmetic, ref_t<Iterator>>,
+                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>,
+                      sentinel_selector<iter_cat_t<Iterator>, enumerate_iterator<Iterator, S, Arithmetic>, S>> {
 
     Iterator _iterator;
     Arithmetic _index{};

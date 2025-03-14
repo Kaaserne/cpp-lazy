@@ -12,7 +12,7 @@ template<class, bool /* is inf */>
 class loop_iterable;
 
 template<class Iterable>
-class loop_iterable<Iterable, false /* is inf loop */> {
+class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
     using inner_iter = iter_t<Iterable>;
 
     ref_or_view<Iterable> _iterable;
@@ -31,7 +31,7 @@ public:
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
-        return _amount * lz::size(_iterable);
+        return _amount * static_cast<std::size_t>(lz::size(_iterable));
     }
 
     LZ_NODISCARD constexpr iterator begin() const {
@@ -55,7 +55,7 @@ public:
 };
 
 template<class Iterable>
-class loop_iterable<Iterable, true /* is inf loop */> {
+class loop_iterable<Iterable, true /* is inf loop */> : public lazy_view {
     using inner_iter = iter_t<Iterable>;
 
     ref_or_view<Iterable> _iterable;

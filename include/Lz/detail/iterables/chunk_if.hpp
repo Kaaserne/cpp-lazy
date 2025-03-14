@@ -32,7 +32,7 @@ public:
         auto begin = detail::begin(std::move(_iterable));
         auto end = detail::end(std::move(_iterable));
         const auto is_end = end == begin;
-        return { begin, end, _predicate, is_end };
+        return { begin, end, std::move(_predicate), is_end };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {

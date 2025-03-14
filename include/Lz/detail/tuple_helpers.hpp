@@ -20,7 +20,7 @@ public:
     constexpr tuple_expand() = default;
 
     template<class F>
-    explicit constexpr tuple_expand(F&& fn) : _fn(std::forward<F>(fn)) {
+    constexpr tuple_expand(F&& fn) : _fn(std::forward<F>(fn)) {
     }
 
 private:

@@ -78,6 +78,7 @@ public:
     }
 
     constexpr bool eq(const group_by_iterator& rhs) const {
+        LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -167,6 +168,7 @@ public:
     }
 
     constexpr bool eq(const group_by_iterator& rhs) const {
+        LZ_ASSERT(_end == rhs._end && _begin == rhs._begin, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }
 

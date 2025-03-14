@@ -10,7 +10,7 @@
 namespace lz {
 namespace detail {
 template<class... Iterables>
-class zip_longest_iterable {
+class zip_longest_iterable : public lazy_view {
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
     static constexpr bool bidi = is_bidi_tag<iter_tuple_iter_cat_t<std::tuple<iter_t<Iterables>...>>>::value;

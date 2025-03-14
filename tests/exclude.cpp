@@ -2,6 +2,7 @@
 #include <Lz/exclude.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>

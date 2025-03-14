@@ -86,11 +86,12 @@ public:
         find_next();
     }
 
-    constexpr bool eq(const join_where_iterator& b) const noexcept {
+    constexpr bool eq(const join_where_iterator& b) const {
+        LZ_ASSERT(_end_a == b._end_a, "Incompatible iterators");
         return _iter_a == b._iter_a;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return _iter_a == _end_a;
     }
 };

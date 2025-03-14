@@ -55,11 +55,12 @@ public:
         }
     }
 
-    constexpr bool eq(const unique_iterator& b) const noexcept {
+    constexpr bool eq(const unique_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "unique_iterators are not compatible");
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return _iterator == _end;
     }
 };
@@ -128,8 +129,13 @@ public:
         _iterator = std::move(next);
     }
 
-    constexpr bool eq(const unique_iterator& b) const noexcept {
+    constexpr bool eq(const unique_iterator& b) const {
+        LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
+    }
+
+    constexpr bool eq(default_sentinel) const {
+        return _iterator == _end;
     }
 };
 } // namespace detail

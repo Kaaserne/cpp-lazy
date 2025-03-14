@@ -155,9 +155,9 @@ TEST_CASE("Zip longest bidi and not sized") {
     static_assert(lz::detail::is_bidi<decltype(zip.begin())>::value, "Should not be bidi");
     static_assert(!lz::detail::sized<decltype(zip.begin())>::value, "Should not be sized");
 
-    std::tuple<std::optional<int>, std::optional<int>> expected[] = { { 1, 2 },           { 2, 4 },           { 3, 6 },
-                                                                      { 4, lz::nullopt }, { 5, lz::nullopt }, { 6, lz::nullopt },
-                                                                      { 7, lz::nullopt } };
+    std::tuple<lz::optional<int>, lz::optional<int>> expected[] = { { 1, 2 },           { 2, 4 },           { 3, 6 },
+                                                                    { 4, lz::nullopt }, { 5, lz::nullopt }, { 6, lz::nullopt },
+                                                                    { 7, lz::nullopt } };
     REQUIRE(lz::equal(zip, expected));
 }
 
@@ -287,18 +287,15 @@ TEST_CASE("zip_longest_iterable binary operations") {
         --end;
         REQUIRE(end - begin == static_cast<std::ptrdiff_t>(b.size() - 5));
         REQUIRE(end == begin);
-    }
 
-    SECTION("Operator[]()") {
-        REQUIRE(std::get<1>(begin[4]).value() == 5.f);
-    }
-
-    SECTION("Operator<, <, <=, >, >=") {
-        auto end = zipper.end();
-        REQUIRE(begin < end);
-        REQUIRE(begin + 5 > end - 1);
-        REQUIRE(begin + 5 >= end);
-        REQUIRE(begin <= end - 5);
+        end = zipper.end();
+        begin = zipper.begin();
+        REQUIRE(begin - end == -static_cast<std::ptrdiff_t>(5));
+        REQUIRE((begin + 1) - end == -static_cast<std::ptrdiff_t>(4));
+        REQUIRE((begin + 2) - end == -static_cast<std::ptrdiff_t>(3));
+        REQUIRE((begin + 3) - end == -static_cast<std::ptrdiff_t>(2));
+        REQUIRE((begin + 4) - end == -static_cast<std::ptrdiff_t>(1));
+        REQUIRE((begin + 5) - end == 0);
     }
 }
 

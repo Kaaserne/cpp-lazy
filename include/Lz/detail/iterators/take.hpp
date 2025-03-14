@@ -59,7 +59,7 @@ public:
         return _iterator - b._iterator;
     }
 
-    constexpr bool eq(const take_iterator& b) const noexcept {
+    constexpr bool eq(const take_iterator& b) const {
         return _iterator == b._iterator;
     }
 

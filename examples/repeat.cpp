@@ -12,12 +12,4 @@ int main() {
         // Or use fmt::print("{} ", i);
     }
     // Output: 155 155 155 155
-
-    std::cout << '\n';
-
-    for (int& i : 200 | lz::repeat(amount)) {
-        std::cout << i << ' ';
-        // Or use fmt::print("{} ", i);
-    }
-    // Output: 200 200 200 200
 }

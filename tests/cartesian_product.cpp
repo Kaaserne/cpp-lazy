@@ -1,7 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/cartesian_product.hpp>
-#include <Lz/iter_tools.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <list>
@@ -180,6 +180,8 @@ TEST_CASE("Cartesian product binary operations") {
         REQUIRE(*(--iter) == std::make_tuple(1, 'a', 'b'));
         REQUIRE(*(--iter) == std::make_tuple(1, 'a', 'a'));
         REQUIRE(iter == cartesian.begin());
+        ++iter;
+        REQUIRE(*iter == std::make_tuple(1, 'a', 'b'));
     }
 
     SECTION("Operator+(int), tests += as well") {
@@ -260,6 +262,19 @@ TEST_CASE("CartesianProduct to containers") {
             std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b'),
             std::make_tuple(3, 'a', 'a'), std::make_tuple(3, 'a', 'b'), std::make_tuple(3, 'b', 'a'),
             std::make_tuple(3, 'b', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'c', 'b'),
+        };
+        REQUIRE(actual == expected);
+    }
+
+    SECTION("To vector reversed") {
+        auto actual = lz::reverse(cartesian) | lz::to<std::vector>();
+        std::vector<std::tuple<int, char, char>> expected = {
+            std::make_tuple(3, 'c', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'b', 'b'),
+            std::make_tuple(3, 'b', 'a'), std::make_tuple(3, 'a', 'b'), std::make_tuple(3, 'a', 'a'),
+            std::make_tuple(2, 'c', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'b', 'b'),
+            std::make_tuple(2, 'b', 'a'), std::make_tuple(2, 'a', 'b'), std::make_tuple(2, 'a', 'a'),
+            std::make_tuple(1, 'c', 'b'), std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'b', 'b'),
+            std::make_tuple(1, 'b', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'a', 'a'),
         };
         REQUIRE(actual == expected);
     }

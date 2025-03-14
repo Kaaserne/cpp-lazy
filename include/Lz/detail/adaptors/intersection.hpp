@@ -20,8 +20,7 @@ struct intersection_adaptor {
 
     /**
      * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that
-     * are in both iterables. Both iterables must be sorted first. Returns a bidirectional iterable if the input iterables are at
-     * least bidirectional. Returns a bidirectional iterable if the input iterable is at least bidirectional, otherwise forward.
+     * are in both iterables. Returns a bidirectional iterable if the input iterable is at least bidirectional, otherwise forward.
      * Returns a sentinel if it is a forward iterable. Does not contain a .size() method. Example:
      * ```cpp
      * std::string a = "aaaabbcccddee";
@@ -46,8 +45,7 @@ struct intersection_adaptor {
 
     /**
      * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that
-     * are in both iterables. Both iterables must be sorted first. Returns a bidirectional iterable if the input iterables are at
-     * least bidirectional. Returns a bidirectional iterable if the input iterable is at least bidirectional, otherwise forward.
+     * are in both iterables.Returns a bidirectional iterable if the input iterable is at least bidirectional, otherwise forward.
      * Returns a sentinel if it is a forward iterable. Does not contain a .size() method. Example:
      * ```cpp
      * std::string a = "aaaabbcccddee";

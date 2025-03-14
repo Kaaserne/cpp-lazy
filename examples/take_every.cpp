@@ -14,7 +14,7 @@ int main() {
 
     std::cout << '\n';
 
-    auto take_every = lz::take_every(sequence, 2, 1);
+    take_every = lz::take_every(sequence, 2, 1);
 
     for (int& i : take_every) {
         std::cout << i << ' ';

@@ -18,7 +18,7 @@ class split_iterator : public iterator<split_iterator<ValueType, Iterator, S, It
     Iterator2 _to_search;
     S _end;
     S2 _to_search_end;
-    bool _trailingEmpty{ true };
+    bool _ends_with_trailing{ true };
 
     LZ_CONSTEXPR_CXX_14 std::pair<Iterator, Iterator> search() const {
         return detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
@@ -43,7 +43,7 @@ public:
             _sub_range_end = search();
         }
         else {
-            _trailingEmpty = false;
+            _ends_with_trailing = false;
         }
     }
 
@@ -55,8 +55,8 @@ public:
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
-        static_assert(is_ra<Iterator>::value, "Iterator must be a random access");
-        return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end.first - _sub_range_begin) };
+        return { std::addressof(*_sub_range_begin),
+                 static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -64,13 +64,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        if (_trailingEmpty && _sub_range_end.second == _end) {
+        if (_ends_with_trailing && _sub_range_end.second == _end) {
             _sub_range_begin = _sub_range_end.first;
-            _trailingEmpty = false;
+            _ends_with_trailing = false;
             return;
         }
 
-        if (!_trailingEmpty && _sub_range_end.second == _end) {
+        if (!_ends_with_trailing && _sub_range_end.second == _end) {
             _sub_range_begin = _sub_range_end.first = _sub_range_end.second;
             return;
         }
@@ -82,13 +82,14 @@ public:
         }
     }
 
-    constexpr bool eq(const split_iterator& rhs) const noexcept {
+    constexpr bool eq(const split_iterator& rhs) const {
+        LZ_ASSERT(_end == rhs._end && _to_search_end == rhs._to_search_end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end.first == rhs._sub_range_end.first &&
-               _trailingEmpty == rhs._trailingEmpty;
+               _ends_with_trailing == rhs._ends_with_trailing;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _sub_range_begin == _end && !_trailingEmpty;
+        return _sub_range_begin == _end && !_ends_with_trailing;
     }
 };
 } // namespace detail

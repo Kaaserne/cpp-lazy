@@ -139,6 +139,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return eq(b, make_idx_sequence_for_this());
     }
 
@@ -231,7 +232,10 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_longest_iterator& other, index_sequence_helper<I...>) const {
-        return std::max({ (std::get<I>(_distances) - std::get<I>(other._distances))... });
+        const difference_type expand[] = { static_cast<difference_type>(
+            (std::get<I>(_distances) - std::get<I>(other._distances)))... };
+        const auto min_max = std::minmax_element(std::begin(expand), std::end(expand));
+        return *min_max.second <= 0 ? *min_max.first : *min_max.second;
     }
 
     template<class I>
@@ -300,14 +304,12 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const zip_longest_iterator& other) const {
+        LZ_ASSERT(_end == other._end, "Incompatible iterators");
         return minus(other, make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_14 reference operator[](const difference_type offset) const {
-        return *(*this + offset);
-    }
-
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return eq(b, make_idx_sequence_for_this());
     }
 };

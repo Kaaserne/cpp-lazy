@@ -10,7 +10,7 @@ namespace lz {
 namespace detail {
 template<class, bool /* is inf */>
 class generate_iterable;
-
+// TODO generate infinite iterable
 template<class GeneratorFunc>
 class generate_iterable<GeneratorFunc, false> : public lazy_view {
     func_container<GeneratorFunc> _func;

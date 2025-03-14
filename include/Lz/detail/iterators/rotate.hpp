@@ -73,22 +73,23 @@ public:
             else {
                 _iterator += -n;
             }
+            return;
+        }
+        if (n > _end - _iterator) {
+            _iterator = _begin + (n - (_end - _iterator));
         }
         else {
-            if (n > _end - _iterator) {
-                _iterator = _begin + (n - (_end - _iterator));
-            }
-            else {
-                _iterator += n;
-            }
+            _iterator += n;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
+        LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
         return static_cast<difference_type>(_offset - other._offset);
     }
 
     constexpr bool eq(const rotate_iterator& b) const {
+        LZ_ASSERT(_begin == b._begin && _end == b._end, "Incompatible iterators");
         return _offset == b._offset;
     }
 

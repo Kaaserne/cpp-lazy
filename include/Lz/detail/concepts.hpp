@@ -13,7 +13,7 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class I>
-concept basic_iterable = requires(I i) {
+concept iterable = requires(I i) {
     { std::begin(i) } -> std::input_or_output_iterator;
     { std::end(i) } -> std::input_or_output_iterator;
 };
@@ -34,7 +34,7 @@ LZ_MODULE_EXPORT_SCOPE_END
 #define LZ_CONCEPT_ARITHMETIC lz::arithmetic
 #define LZ_CONCEPT_INTEGRAL std::integral
 #define LZ_CONCEPT_INVOCABLE std::invocable
-#define LZ_CONCEPT_ITERABLE lz::basic_iterable
+#define LZ_CONCEPT_ITERABLE lz::iterable
 #define LZ_CONCEPT_ITERATOR std::input_or_output_iterator
 #define LZ_CONCEPT_BIDIRECTIONAL_ITERATOR std::bidirectional_iterator
 #define LZ_CONCEPT_BIDIRECTIONAL_ITERABLE lz::bidirectional_iterable

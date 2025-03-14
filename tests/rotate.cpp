@@ -1,7 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
-#include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
 #include <catch2/catch.hpp>
 #include <list>
@@ -67,7 +67,6 @@ TEST_CASE("rotate_iterable binary operations") {
         REQUIRE(begin == end);
     }
 
-    // TODO add begin = end tests for every iterator
     SECTION("Operator== & Operator!=") {
         REQUIRE(begin != end);
         begin = end;

@@ -21,7 +21,9 @@ public:
     using value_type = typename iterator::value_type;
 
     template<class I>
-    constexpr map_iterable(I&& iterable, UnaryOp unary_op) : _iterable{ iterable }, _unary_op{ std::move(unary_op) } {
+    constexpr map_iterable(I&& iterable, UnaryOp unary_op) :
+        _iterable{ std::forward<Iterable>(iterable) },
+        _unary_op{ std::move(unary_op) } {
     }
 
     constexpr map_iterable() = default;

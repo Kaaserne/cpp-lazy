@@ -4,9 +4,9 @@
 #define LZ_RANGE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/iterator_base.hpp>
-#include <cmath>
 #include <iterator>
 
 namespace lz {
@@ -48,6 +48,7 @@ public:
     }
 
     std::ptrdiff_t constexpr difference(const range_iterator& b) const {
+        LZ_ASSERT(_step == b._step, "Incompatible iterators");
         return static_cast<difference_type>((_iterator - b._iterator) / _step);
     }
 
@@ -56,6 +57,7 @@ public:
     }
 
     constexpr bool eq(const range_iterator& b) const noexcept {
+        LZ_ASSERT(_step == b._step, "Incompatible iterators");
         return _step < 0 ? _iterator <= b._iterator : _iterator >= b._iterator;
     }
 };

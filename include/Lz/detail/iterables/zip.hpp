@@ -7,12 +7,10 @@
 #include <Lz/detail/ref_or_view.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
-// TODO make implementation for reverse correct
-
 namespace lz {
 namespace detail {
 template<class... Iterables>
-class zip_iterable {
+class zip_iterable : public lazy_view {
     using sentinel_tuple = std::tuple<sentinel_t<Iterables>...>;
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
@@ -50,7 +48,7 @@ public:
         return { begin_tuple(std::move(_iterables)) };
     }
 
-    // todo make everything like this: iterator::iterator_category
+    // TODO make everything like this: iterator::iterator_category
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
         return { fake_end_tuple(_iterables, make_index_sequence<sizeof...(Iterables)>{}) };
@@ -73,14 +71,14 @@ public:
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<Iterable, Iterables...>
-    operator|(Iterable&& iterable, zip_iterable<Iterables...>&& concatenate) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(concatenate._iterables));
+    operator|(Iterable&& iterable, zip_iterable<Iterables...>&& zipper) {
+        return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(zipper._iterables));
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<Iterable, Iterables...>
-    operator|(Iterable&& iterable, const zip_iterable<Iterables...>& concatenate) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), concatenate._iterables);
+    operator|(Iterable&& iterable, const zip_iterable<Iterables...>& zipper) {
+        return iterable_tuple_cat(std::forward<Iterable>(iterable), zipper._iterables);
     }
 };
 } // namespace detail

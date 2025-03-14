@@ -50,6 +50,7 @@ public:
     }
 
     constexpr bool eq(const inclusive_scan_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "inclusive_scan_iterators are not compatible");
         return _iterator == b._iterator;
     }
 

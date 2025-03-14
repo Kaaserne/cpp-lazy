@@ -615,8 +615,6 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool none_of(Iterable&& iterable, UnaryPredicat
                    std::forward<UnaryPredicate>(unary_predicate));
 }
 
-// TODO what to do with std::reference_wrapper in std::equal_to etc.
-
 /**
  * @brief Finds the first occurrence of two adjacent elements in the range [begin(iterable), end(iterable)) that satisfy the
  * binary binary_predicate @p binary_predicate

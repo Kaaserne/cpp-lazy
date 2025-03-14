@@ -38,9 +38,8 @@ private:
     IterTuple _iterator;
     SentinelTuple _end;
 
-#ifndef __cpp_if_constexpr
     template<std::size_t I>
-    constexpr enable_if<I == 0, void> next() const noexcept {
+    constexpr enable_if<I == 0, void> next() {
         auto& first = std::get<0>(_iterator);
         if (first == std::get<0>(_end)) {
             return;
@@ -113,17 +112,18 @@ private:
 #endif // LZ_MSVC
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_17 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_17 enable_if<I == 0> operator_plus_impl(difference_type offset) {
+        auto& it = std::get<I>(_iterator);
+        const auto& begin = std::get<I>(_begin);
+        auto end = std::get<I>(_end);
+        const auto distance = std::distance(begin, end);
+
         if (_iterator == _end && offset < 0) {
             do_prev_all<I>();
             ++offset;
         }
 
-        auto& it = std::get<0>(_iterator);
-        const auto& begin = std::get<0>(_begin);
-        auto end = std::get<0>(_end);
-        const auto distance = std::distance(begin, end);
-
+        const auto to_add = offset % distance;
         if (offset == distance) {
             it = std::move(end);
             return;
@@ -132,12 +132,7 @@ private:
     }
 
     template<std::size_t I>
-    enable_if<(I > 0)> operator_plus_impl(const difference_type offset) {
-        if (_iterator == _end && offset < 0) {
-            do_prev_all<I>();
-            ++offset;
-        }
-
+    enable_if<(I > 0)> operator_plus_impl(difference_type offset) {
         auto& it = std::get<I>(_iterator);
         const auto& begin = std::get<I>(_begin);
         auto end = std::get<I>(_end);
@@ -153,96 +148,6 @@ private:
         operator_plus_impl<I - 1>(offset / distance);
     }
 
-#else
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_17 void next() {
-        if constexpr (I == 0) {
-            auto& first = std::get<0>(_iterator);
-            if (first == std::get<0>(_end)) {
-                return;
-            }
-            ++first;
-        }
-        else {
-            auto& prev = std::get<I>(_iterator);
-            ++prev;
-            if (prev == std::get<I>(_end)) {
-                next<I - 1>();
-
-                if (std::get<0>(_iterator) == std::get<0>(_end)) {
-                    return;
-                }
-
-                prev = std::get<I>(_begin);
-            }
-        }
-    }
-
-    template<std::size_t I>
-    void operator_plus_impl(difference_type offset) {
-        auto& it = std::get<I>(_iterator);
-        const auto& begin = std::get<I>(_begin);
-        auto end = std::get<I>(_end);
-        const auto distance = std::distance(begin, end);
-
-        if (_iterator == _end && offset < 0) {
-            do_prev_all<I>();
-            ++offset;
-        }
-
-        const auto to_add = offset % distance;
-
-        if constexpr (I == 0) {
-            if (offset == distance) {
-                it = std::move(end);
-                return;
-            }
-            it += to_add;
-        }
-        else {
-            it += to_add;
-            operator_plus_impl<I - 1>(offset / distance);
-        }
-    }
-
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 void do_prev() {
-        --std::get<I>(_iterator);
-    }
-
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 void do_prev_all() {
-        do_prev<I>();
-        if constexpr (I > 0) {
-            do_prev_all<I - 1>();
-        }
-    }
-
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 void previous() {
-        if constexpr (I == 0) {
-            return;
-        }
-        if (_iterator == _end) {
-            do_prev_all<I - 1>();
-        }
-        else {
-            auto& prev = std::get<I - 1>(_iterator);
-            if (prev == std::get<I - 1>(_begin)) {
-                if constexpr (I != 1) {
-                    prev = std::get<I - 1>(_end);
-                    do_prev<I - 1>();
-                    previous<I - 1>();
-                }
-            }
-            else {
-                do_prev<I - 1>();
-            }
-        }
-    }
-
-#endif // __cpp_if_constexpr
-
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence_helper<Is...>) const {
         return reference{ *std::get<Is>(_iterator)... };
@@ -250,8 +155,9 @@ private:
 
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_20 difference_type distance_impl(index_sequence_helper<Is...>, const cartesian_product_iterator& c) const {
-        difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterator) - std::get<Is>(c._iterator))... };
-        difference_type sizes[] = { std::distance(std::get<Is>(_begin), std::get<Is>(_end))... };
+        const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterator) -
+                                                                           std::get<Is>(c._iterator))... };
+        const difference_type sizes[] = { std::distance(std::get<Is>(_begin), std::get<Is>(_end))... };
 
         difference_type sum = distances[0];
         for (std::size_t i = 1; i < tup_size; i++) {
@@ -262,12 +168,6 @@ private:
     }
 
     using index_sequence_for_this = make_index_sequence<tup_size>;
-
-    LZ_CONSTEXPR_CXX_14 void check_end() {
-        if (std::get<0>(_iterator) == std::get<0>(_end)) {
-            _iterator = _end;
-        }
-    }
 
 public:
     constexpr cartesian_product_iterator() = default;
@@ -297,7 +197,9 @@ public:
 
     void plus_is(const difference_type n) {
         operator_plus_impl<tup_size - 1>(n);
-        check_end();
+        if (std::get<0>(_iterator) == std::get<0>(_end)) {
+            _iterator = _end;
+        }
     }
 
     constexpr bool eq(const cartesian_product_iterator& other) const {

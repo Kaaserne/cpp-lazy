@@ -70,6 +70,7 @@ public:
     }
 
     constexpr bool eq(const except_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
@@ -79,7 +80,7 @@ public:
 };
 
 template<class Iterator, class S, class Iterable, class BinaryPredicate>
-class except_iterator<Iterator, S, Iterable, BinaryPredicate, enable_if<!sized<Iterable>::value>>
+class except_iterator<Iterator, S, Iterable, BinaryPredicate, enable_if<!sized<Iterable>::value /* !is except sized */>>
     : public iterator<except_iterator<Iterator, S, Iterable, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
@@ -92,11 +93,13 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
+    using diff_iterable = diff_iterable_t<Iterable>;
+
     Iterable _to_except{};
     Iterator _iterator{};
-    diff_iterable_t<Iterable> _size{};
+    diff_iterable _size{};
     S _end{};
-    mutable BinaryPredicate _predicate{};
+    BinaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;
@@ -115,7 +118,7 @@ public:
     LZ_CONSTEXPR_CXX_14 except_iterator(Iterator begin, S end, I&& to_except, BinaryPredicate predicate) :
         _iterator{ std::move(begin) },
         _to_except{ std::forward<I>(to_except) },
-        _size{ lz::distance(_to_except.begin(), _to_except.end()) },
+        _size{ static_cast<diff_iterable>(lz::eager_size(to_except)) },
         _end{ std::move(end) },
         _predicate{ std::move(predicate) } {
         if (std::begin(_to_except) == std::end(_to_except)) {
@@ -138,6 +141,7 @@ public:
     }
 
     constexpr bool eq(const except_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 

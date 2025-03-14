@@ -1,4 +1,6 @@
+#include <Lz/c_string.hpp>
 #include <Lz/iter_tools.hpp>
+#include <Lz/zip.hpp>
 #include <catch2/catch.hpp>
 
 #ifdef LZ_HAS_CXX_11
@@ -7,30 +9,13 @@
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
-    auto actual = lz::lines(lz::c_string("hello world\nthis is a message\ntesting"));
-    REQUIRE(actual.distance() == 3);
+    auto actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
+    REQUIRE(lz::distance(actual.begin(), actual.end()) == 3);
+    REQUIRE(lz::equal(actual, expected));
 
-    auto iterable = lz::zip(actual, expected);
-    using value_type = lz::val_iterable_t<decltype(iterable)>;
-
-    iterable.for_each([](const value_type& act_exp) { REQUIRE(lz::equal(std::get<0>(act_exp), std::get<1>(act_exp))); });
-}
-
-TEST_CASE("Unlines") {
-    const auto expected = { lz::c_string("hello world"), lz::c_string("\n"), lz::c_string("this is a message"),
-                            lz::c_string("\n"), lz::c_string("testing") };
-    std::vector<std::string> to_unline = { "hello world", "this is a message", "testing" };
-    auto actual = lz::unlines(to_unline);
-
-    for (const auto& act_exp : lz::zip(actual, expected)) {
-        REQUIRE(lz::equal(std::get<0>(act_exp), std::get<1>(act_exp)));
-    }
-}
-
-TEST_CASE("Reverse") {
-    const lz::string_view actual = "hello world";
-    const lz::string_view expected = "dlrow olleh";
-    REQUIRE(lz::equal(lz::reverse(actual), expected));
+    auto actual2 = lz::lines(lz::c_string("hello world\nthis is a message\ntesting"));
+    REQUIRE(lz::distance(actual2.begin(), actual2.end()) == 3);
+    REQUIRE(lz::equal(actual2, expected));
 }
 
 TEST_CASE("As") {
@@ -38,12 +23,14 @@ TEST_CASE("As") {
         const lz::basic_string_view<char> actual = "hello world";
         const lz::basic_string_view<unsigned char> expected = reinterpret_cast<const unsigned char*>("hello world");
         REQUIRE(lz::equal(lz::as<unsigned char>(actual), expected));
+        REQUIRE(lz::equal(actual | lz::as<unsigned char>, expected));
     }
 
     SECTION("With sentinel") {
         const auto actual = lz::c_string("hello world");
         const auto expected = lz::c_string(reinterpret_cast<const unsigned char*>("hello world"));
         REQUIRE(lz::equal(lz::as<unsigned char>(actual), expected));
+        REQUIRE(lz::equal(actual | lz::as<unsigned char>, expected));
     }
 }
 
@@ -74,6 +61,10 @@ TEST_CASE("Pairwise") {
                                                                std::make_tuple('l', 'l'), std::make_tuple('l', 'o') };
         auto actual_pairwise = lz::pairwise(actual);
         REQUIRE(lz::equal(actual_pairwise, expected));
+        static_assert(!lz::sized<decltype(actual_pairwise)>::value, "Pairwise should not be sized");
+        actual_pairwise = actual | lz::pairwise;
+        static_assert(!lz::sized<decltype(actual_pairwise)>::value, "Pairwise should not be sized");
+        REQUIRE(lz::equal(actual_pairwise, expected));
     }
 
     SECTION("Without sentinels") {
@@ -82,6 +73,10 @@ TEST_CASE("Pairwise") {
                                                              std::make_tuple(4, 5) };
         auto actual_pairwise = lz::pairwise(actual);
         REQUIRE(lz::equal(actual_pairwise, expected));
+        REQUIRE(lz::size(actual_pairwise) == 4);
+        actual_pairwise = actual | lz::pairwise;
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        REQUIRE(lz::size(actual_pairwise) == 4);
     }
 
     SECTION("With sentinels, three adjacent elements") {
@@ -90,55 +85,70 @@ TEST_CASE("Pairwise") {
                                                                      std::make_tuple('e', 'l', 'l'),
                                                                      std::make_tuple('l', 'l', 'o') };
         auto actual_pairwise = lz::pairwise_n<3>(actual);
+        // lz::pairwise_n<lz::size_hint::dynamic>(actual, 3)
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        actual_pairwise = actual | lz::pairwise_n<3>;
         REQUIRE(lz::equal(actual_pairwise, expected));
     }
-}
 
-TEST_CASE("Keys & values") {
-    std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
-    const std::vector<int> expectedKeys = { 1, 2, 3 };
-    const std::vector<std::string> expectedValues = { "hello", "world", "!" };
-    auto keys = lz::keys(m);
-    auto values = lz::values(m);
-    REQUIRE(lz::equal(keys, expectedKeys));
-    REQUIRE(lz::equal(values, expectedValues));
-}
-
-TEST_CASE("Filtermap") {
-    SECTION("With sentinels") {
-        const auto actual = lz::c_string("hello world");
-        const auto expected = lz::c_string("eoo");
-        auto actual_filter_map = lz::filter_map(actual, [](char c) { return c == 'o' || c == 'e'; }, [](char c) { return c; });
-        REQUIRE(lz::equal(actual_filter_map, expected));
-    }
-
-    SECTION("Without sentinels") {
+    SECTION("Without sentinels, three adjacent elements") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
-        const std::vector<int> expected = { 2, 4 };
-        auto actual_filter_map = lz::filter_map(actual, [](int i) { return i % 2 == 0; }, [](int i) { return i; });
-        REQUIRE(lz::equal(actual_filter_map, expected));
+        const std::vector<std::tuple<int, int, int>> expected = { std::make_tuple(1, 2, 3), std::make_tuple(2, 3, 4),
+                                                                  std::make_tuple(3, 4, 5) };
+        auto actual_pairwise = lz::pairwise_n<3>(actual);
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        REQUIRE(lz::size(actual_pairwise) == 3);
+        actual_pairwise = actual | lz::pairwise_n<3>;
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        REQUIRE(lz::size(actual_pairwise) == 3);
     }
 }
 
-TEST_CASE("Trim variants") {
-    SECTION("Drop back while") {
-        const std::vector<int> actual = { 1, 2, 3, 4, 5 };
-        const std::vector<int> expected = { 1, 2, 3 };
-        auto actual_trim_back = lz::drop_back_while(actual, [](int i) { return i > 3; });
-        REQUIRE(lz::equal(actual_trim_back, expected));
-    }
+// TEST_CASE("Keys & values") {
+//     std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+//     const std::vector<int> expectedKeys = { 1, 2, 3 };
+//     const std::vector<std::string> expectedValues = { "hello", "world", "!" };
+//     auto keys = lz::keys(m);
+//     auto values = lz::values(m);
+//     REQUIRE(lz::equal(keys, expectedKeys));
+//     REQUIRE(lz::equal(values, expectedValues));
+// }
 
-    SECTION("Trim without sentinels") {
-        const std::vector<int> actual = { 1, 2, 3, 4, 5 };
-        const std::vector<int> expected = { 3, 4 };
-        auto actual_trim = lz::trim(actual, [](int i) { return i < 3; }, [](int i) { return i > 4; });
-        REQUIRE(lz::equal(actual_trim, expected));
-    }
+// TEST_CASE("Filtermap") {
+//     SECTION("With sentinels") {
+//         const auto actual = lz::c_string("hello world");
+//         const auto expected = lz::c_string("eoo");
+//         auto actual_filter_map = lz::filter_map(actual, [](char c) { return c == 'o' || c == 'e'; }, [](char c) { return c; });
+//         REQUIRE(lz::equal(actual_filter_map, expected));
+//     }
 
-    SECTION("Trim string without sentinels") {
-        const std::string actual = "   hello world   ";
-        const std::string expected = "hello world";
-        auto actual_trim = lz::trim_string(actual);
-        REQUIRE(lz::equal(actual_trim, expected));
-    }
-}
+//     SECTION("Without sentinels") {
+//         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
+//         const std::vector<int> expected = { 2, 4 };
+//         auto actual_filter_map = lz::filter_map(actual, [](int i) { return i % 2 == 0; }, [](int i) { return i; });
+//         REQUIRE(lz::equal(actual_filter_map, expected));
+//     }
+// }
+
+// TEST_CASE("Trim variants") {
+//     SECTION("Drop back while") {
+//         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
+//         const std::vector<int> expected = { 1, 2, 3 };
+//         auto actual_trim_back = lz::drop_back_while(actual, [](int i) { return i > 3; });
+//         REQUIRE(lz::equal(actual_trim_back, expected));
+//     }
+
+//     SECTION("Trim without sentinels") {
+//         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
+//         const std::vector<int> expected = { 3, 4 };
+//         auto actual_trim = lz::trim(actual, [](int i) { return i < 3; }, [](int i) { return i > 4; });
+//         REQUIRE(lz::equal(actual_trim, expected));
+//     }
+
+//     SECTION("Trim string without sentinels") {
+//         const std::string actual = "   hello world   ";
+//         const std::string expected = "hello world";
+//         auto actual_trim = lz::trim_string(actual);
+//         REQUIRE(lz::equal(actual_trim, expected));
+//     }
+// }

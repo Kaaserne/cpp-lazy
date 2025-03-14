@@ -13,6 +13,9 @@
 #endif // __cpp_lib_optional
 
 namespace lz {
+
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
 #ifdef __cpp_lib_optional
 template<class T>
 using optional = std::optional<T>;
@@ -215,7 +218,11 @@ template<class T, class U>
 constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs) {
     return !(lhs < rhs);
 }
+
 #endif // __cpp_lib_optional
+
+LZ_MODULE_EXPORT_SCOPE_END
+
 } // namespace lz
 
 #endif

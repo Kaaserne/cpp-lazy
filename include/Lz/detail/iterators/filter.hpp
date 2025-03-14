@@ -63,6 +63,7 @@ public:
     }
 
     constexpr bool eq(const filter_iterator& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
@@ -128,11 +129,12 @@ public:
         } while (!_predicate(*_iterator) && _iterator != _begin);
     }
 
-    constexpr bool eq(const filter_iterator& b) const noexcept {
+    constexpr bool eq(const filter_iterator& b) const {
+        LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return _iterator == _end;
     }
 };

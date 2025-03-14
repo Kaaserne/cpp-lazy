@@ -7,6 +7,8 @@
 #include <Lz/iterator_base.hpp>
 #include <limits>
 
+// todo create inf loop specialization
+
 namespace lz {
 namespace detail {
 template<class T>

@@ -330,10 +330,12 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const concatenate_iterator& other) const {
+        LZ_ASSERT(_end == other._end && _begin == other._begin, "Incompatible iterators");
         return minus(make_index_sequence<std::tuple_size<IterTuple>::value>(), other);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& b) const {
+        LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return equal_to<IterTuple, SentinelTuple, 0>()(_iterators, b._iterators);
     }
 

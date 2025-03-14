@@ -9,160 +9,156 @@
 // #include <Lz/drop_while.hpp>
 // #include <Lz/filter.hpp>
 // #include <Lz/join.hpp>
-#include <Lz/map.hpp>
-// #include <Lz/split.hpp>
 // #include <Lz/take.hpp>
 // #include <Lz/take_while.hpp>
-// #include <Lz/zip.hpp>
+#include <Lz/zip.hpp>
 // #include <algorithm>
 // #include <cctype>
 // #include <numeric>
 
 namespace lz {
 namespace detail {
-// template<std::size_t I>
-// struct get_fn {
-//     // TODO add const variant
+template<std::size_t I>
+struct get_fn {
+    template<class T>
+    LZ_CONSTEXPR_CXX_14 auto operator()(T&& gettable) const noexcept -> decltype(std::get<I>(std::forward<T>(gettable))) {
+        return std::get<I>(std::forward<T>(gettable));
+    }
+};
 
-//     template<class T>
-//     LZ_CONSTEXPR_CXX_14 auto operator()(T&& gettable) noexcept -> decltype(std::get<I>(std::forward<T>(gettable))) {
-//         return std::get<I>(std::forward<T>(gettable));
-//     }
-// };
-
-// template<class Iterator, std::size_t... N>
-// using iter_tuple = decltype(std::make_tuple(std::next(std::declval<Iterator>(), N)...));
-
-// template<class Iterator, std::size_t... N>
-// using sent_tuple = decltype(std::make_tuple((N, std::declval<Iterator>())...));
-
-// template<class Iterable, std::size_t... N>
-// using pairwise_n_object = zip_iterable<decltype(std::make_tuple(std::next(std::begin(std::declval<Iterable>()), N)...)),
-//                                        decltype(std::make_tuple(std::end((N, std::declval<Iterable>()))...))>;
-
-// template<std::size_t N, class Iterator>
-// LZ_CONSTEXPR_CXX_14 enable_if<N == 0, decay_t<Iterator>> cached_next(Iterator&& iterator) {
-//     return std::forward<Iterator>(iterator);
-// }
-
-// template<std::size_t N, class Iterator>
-// LZ_CONSTEXPR_CXX_14 enable_if<N != 0, decay_t<Iterator>> cached_next(Iterator&& iterator) {
-//     return std::next(cached_next<N - 1>(std::forward<Iterator>(iterator)), 1);
-// }
-
-// template<class Iterable, std::size_t... N>
-// LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) {
-//     return { std::make_tuple(cached_next<N>(std::begin(iterable))...), std::make_tuple(std::end((N, iterable))...) };
-// }
 } // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// /**
-//  * @brief Returns a split_iterable, that splits the string on `'\n'`.
-//  * @param string The string to split on.
-//  * @return Returns a split_iterable iterator, that splits the string on `'\n'`.
-//  */
-// template<class String>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 string_splitter<String, typename String::value_type> lines(const String& string) {
-//     return lz::split(string, "\n");
-// }
-
-// /**
-//  * @brief The exact opposite of `lines`. It joins a container of `std::string` or `std::string_view` container with `'\n'` as
-//  * delimiter.
-//  * @param strings The container of a string type
-//  * @return A Join iterator that joins the strings in the container on `'\n'`.
-//  */
-// template<class Strings>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 join_iterable<iter_t<Strings>, sentinel_t<Strings>> unlines(Strings&& strings) {
-//     return lz::join(strings, "\n");
-// }
-
-// TODO make sized reverse iterator view thingy
-/**
- * @brief Returns an iterable object of which its iterators are reversed.
- * @param iterable The iterable. The iterable must have at least std::bidirectional_iterator_tag.
- * @return An iterable object that contains the reverse order of [begin(iterable) end(iterable))
- */
-template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_17 basic_iterable<std::reverse_iterator<iter_t<Iterable>>> reverse(Iterable&& iterable) {
-    static_assert(detail::is_bidi<iter_t<Iterable>>::value, "Iterable must be at least a bidirectional iterable");
-    using iterator = iter_t<Iterable>;
-    std::reverse_iterator<iterator> rev_begin(detail::begin(std::forward<Iterable>(iterable)));
-    std::reverse_iterator<iterator> rev_end(detail::end(std::forward<Iterable>(iterable)));
-    return { std::move(rev_end), std::move(rev_begin) };
-}
-
-
 #ifdef LZ_HAS_CXX_11
 
-template<class T>
-static const detail::as_adaptor<T> detail::as_adaptor<T>::as{};
-
-#else
+/**
+ * @brief Returns a split_iterable, that splits the string on `'\n'` using `lz::split`. Example:
+ * ```cpp
+ * std::string str = "Hello\nWorld\n!";
+ * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
+ * // or
+ * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
+ * ```
+ */
+static constexpr detail::lines_adaptor detail::lines_adaptor::lines{};
 
 /**
- * @brief Returns an iterable that converts the elements in the given container to the type @p `T`.
+ * @brief Returns an iterable that converts the elements in the given container to the type @p `T`, using `lz::map`.
  * @tparam T The type to convert the elements to.
  * Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto floats = vec | lz::as<float>(); // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * auto floats = lz::as<float>(vec); // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * // or
+ * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * ```
+ */
+template<class T>
+static constexpr detail::as_adaptor<T> detail::as_adaptor<T>::as{};
+
+/**
+ * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * // or
+ * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * ```
+ * @tparam N The amount of adjacent elements to return.
+ */
+template<std::size_t N>
+LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
+
+/**
+ * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * // or
+ * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<2> pairwise{};
+
+#else
+
+/**
+ * @brief Returns a split_iterable, that splits the string on `'\n'` using lz::split. Returns string_views to its substrings.
+ * Example:
+ * ```cpp
+ * std::string str = "Hello\nWorld\n!";
+ * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
+ * // or
+ * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
+ * // or
+ * auto splitted = lz::lines(lz::c_string("Hello\nWorld\n!")); // {"Hello", "World", "!"}
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::lines_adaptor lines{};
+
+/**
+ * @brief Returns an iterable that converts the elements in the given container to the type @p `T` using `lz::map`.
+ * @tparam T The type to convert the elements to.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto floats = lz::as<float>(vec); // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * // or
+ * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
  * ```
  */
 template<class T>
 LZ_INLINE_VAR constexpr detail::as_adaptor<T> as{};
 
+/**
+ * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * // or
+ * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * ```
+ * @tparam N The amount of adjacent elements to return.
+ */
+template<std::size_t N>
+LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
+
+/**
+ * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * // or
+ * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<2> pairwise{};
+
 #endif
 
-// template<class Fn, class... Iterables>
-// using zip_with_iterable = map_iterable<decltype(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...).begin()),
-//                                        decltype(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...).end()),
-//                                        decltype(detail::make_expand_fn(std::move(std::declval<Fn>()),
-//                                                                        detail::make_index_sequence<sizeof...(Iterables)>()))>;
+template<class Fn, class... Iterables>
+using zip_with_iterable =
+    decltype(lz::map(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...), detail::make_expand_fn(std::declval<Fn>())));
 
-// /**
-//  * @brief Zips n containers and applies (simultaneously) the function given as argument, containing each of the containers'
-//  value
-//  * types. Signature must look like: `fn(Iter1::value_type, Iter2::value_type, ..., IterN::value_type)`.
-//  * @param fn The function to apply to each elements in all containers.
-//  * @param iterables The iterables.
-//  * @return A map_iterable<zip_iterable> object that applies fn over each expanded tuple elements from [begin, end)
-//  */
-// template<class Fn, class... Iterables>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, Iterables...> zip_with(Fn fn, Iterables&&... iterables) {
-//     auto zipper = lz::zip(std::forward<Iterables>(iterables)...);
-//     auto tuple_expander_func = detail::make_expand_fn(std::move(fn), detail::make_index_sequence<sizeof...(Iterables)>());
-//     return lz::map(std::move(zipper), std::move(tuple_expander_func));
-// }
-
-// template<class Iterable, std::size_t N>
-// using pairwise_iterable =
-//     decltype(detail::pairwise_n_construct(std::forward<Iterable>(std::declval<Iterable>()), detail::make_index_sequence<N>()));
-
-// /**
-//  * @brief Returns an iterable that accesses N adjacent elements of one container in a std::tuple<T, ...> like fashion.
-//  *
-//  * @tparam N The amount of elements to access.
-//  * @param iterable The container/iterable.
-//  * @return A zip iterator that accesses N adjacent elements of one container.
-//  */
-// template<std::size_t N, LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<Iterable, N> pairwise_n(Iterable&& iterable) {
-//     return detail::pairwise_n_construct(std::forward<Iterable>(iterable), detail::make_index_sequence<N>());
-// }
-
-// /**
-//  * @brief Returns an iterable that accesses two adjacent elements of one container in a std::tuple<T, T> like fashion.
-//  * @param iterable A container/iterable.
-//  * @return A zip iterator that accesses two adjacent elements of one container.
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<Iterable, 2> pairwise(Iterable&& iterable) {
-//     LZ_ASSERT(lz::has_many(iterable), "length of the sequence must be greater than or equal to 2");
-//     return pairwise_n<2>(std::forward<Iterable>(iterable));
-// }
+/**
+ * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`. Cannot
+ * be used in a pipe expression. Example:
+ * ```cpp
+ * auto a = { 1, 2, 3 };
+ * auto b = { 1, 2, 3 };
+ * auto c = { 1, 2, 3 };
+ * auto zipped = lz::zip_with([](int a, int b, int c) { return a + b + c; }, a, b, c); // {3, 6, 9}
+ * ```
+ *
+ * @param iterables The iterables to zip together.
+ * @param fn The function to apply on the elements.
+ * @return A map object that can be iterated over.
+ */
+template<class Fn, class... Iterables>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, Iterables...> zip_with(Fn fn, Iterables&&... iterables) {
+    return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
+}
 
 // /**
 //  * @brief Returns an iterable object that returns all values from an iterable of which its `value_type` supports `std::get<1>`.

@@ -45,12 +45,12 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
-// #ifdef LZ_HAS_CXX_17
+#ifdef LZ_HAS_CXX_17
 
-// template<class... Ts>
-// using conjuction = std::conjunction<Ts...>;
+template<class... Ts>
+using conjunction = std::conjunction<Ts...>;
 
-// #else
+#else
 
 template<bool Value, class T, class... Rest>
 struct conjunction_impl {
@@ -67,7 +67,7 @@ struct conjunction : std::false_type {};
 
 template<class T,  class... Rest>
 struct conjunction<T, Rest...> : conjunction_impl<static_cast<bool>(T::value), T, Rest...>::type {};
-// #endif
+#endif
 
 #ifdef LZ_HAS_CXX_11
 
@@ -348,6 +348,9 @@ struct is_iterable : std::false_type {};
 
 template<class T>
 struct is_iterable<T, void_t<decltype(std::begin(std::declval<T>()), std::end(std::declval<T>()))>> : std::true_type {};
+
+template<typename T, std::size_t N>
+struct is_iterable<T[N]> : std::true_type {};
 
 template<class, class = void>
 struct is_adaptor : std::false_type {};

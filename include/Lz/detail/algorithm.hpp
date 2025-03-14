@@ -354,27 +354,14 @@ LZ_CONSTEXPR_CXX_17 Iterator sized_lower_bound(Iterator begin, const T& value, B
     return begin;
 }
 
-// clang-format off
-
 template<class Iterable, class T, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17
-enable_if<sized<Iterable>::value, iter_t<Iterable>>
-lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
-    const auto size = static_cast<std::ptrdiff_t>(lz::size(iterable));
-    auto begin = detail::begin(std::forward<Iterable>(iterable));
-    return sized_lower_bound(std::move(begin), value, std::move(binary_predicate), size);
-}
+LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
+    using diff = diff_type<iter_t<Iterable>>;
 
-template<class Iterable, class T, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17
-enable_if<!sized<Iterable>::value, iter_t<Iterable>>
-lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
     auto begin = detail::begin(std::forward<Iterable>(iterable));
     auto end = detail::end(std::forward<Iterable>(iterable));
-    const auto size = lz::distance(begin, end);
-    return sized_lower_bound(std::move(begin), value, std::move(binary_predicate), size);
+    return sized_lower_bound(std::move(begin), value, std::move(binary_predicate), static_cast<diff>(lz::eager_size(iterable)));
 }
-// clang-format on
 
 template<class Iterable, class T, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_17 iter_t<Iterable> upper_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {

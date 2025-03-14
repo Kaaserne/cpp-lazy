@@ -107,19 +107,20 @@ public:
         _end{ std::move(end) } {
     }
 
-    constexpr bool has_some() const noexcept {
+    constexpr bool has_some() const {
         return _current != _end;
     }
 
-    constexpr bool has_prev() const noexcept {
+    constexpr bool has_prev() const {
         return _current != _begin;
     }
 
-    constexpr bool eq(const flatten_wrapper& b) const noexcept {
+    constexpr bool eq(const flatten_wrapper& b) const {
+        LZ_ASSERT(_begin == b._begin && _end == b._end, "Incompatible iterators");
         return _current == b._current;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return _current == _end;
     }
 

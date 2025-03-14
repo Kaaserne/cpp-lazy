@@ -24,7 +24,7 @@ public:
 private:
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
-    bool _trailing_empty{ true };
+    bool _ends_with_trailing{ true };
     S _end;
     UnaryPredicate _predicate;
 
@@ -46,7 +46,7 @@ public:
             find_next();
         }
         if (is_empty) {
-            _trailing_empty = false;
+            _ends_with_trailing = false;
         }
     }
 
@@ -67,9 +67,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        if (_trailing_empty && _sub_range_end == _end) {
+        if (_ends_with_trailing && _sub_range_end == _end) {
             _sub_range_begin = _sub_range_end;
-            _trailing_empty = false;
+            _ends_with_trailing = false;
             return;
         }
 
@@ -81,19 +81,20 @@ public:
         }
 
         if (_predicate(*prev)) {
-            _sub_range_begin = _sub_range_end = _trailing_empty ? std::move(prev) : _sub_range_end;
-            _trailing_empty = false;
+            _sub_range_begin = _sub_range_end = _ends_with_trailing ? std::move(prev) : _sub_range_end;
+            _ends_with_trailing = false;
             return;
         }
     }
 
     constexpr bool eq(const chunk_if_iterator& rhs) const {
+        LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
-               _trailing_empty == rhs._trailing_empty;
+               _ends_with_trailing == rhs._ends_with_trailing;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _sub_range_begin == _end && !_trailing_empty;
+        return _sub_range_begin == _end && !_ends_with_trailing;
     }
 };
 } // namespace detail

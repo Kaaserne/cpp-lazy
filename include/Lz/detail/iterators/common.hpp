@@ -13,7 +13,7 @@ namespace detail {
 template<class Iterator, class S>
 class common_iterator : public iterator<common_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                                         diff_type<Iterator>, iter_cat_t<Iterator>> {
-    variant<Iterator, S> _data{};
+    variant<Iterator, S> _data;
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -118,7 +118,14 @@ public:
         using std::get_if;
 #endif
         auto&& iter = get_if<Iterator>(&_data);
-        *iter += n;
+        if (iter) {
+            *iter += n;
+        }
+        auto&& sent_iter = get_if<S>(&_data);
+        if (sent_iter) {
+            *sent_iter += n;
+        }
+        LZ_ASSERT(iter || sent_iter, "Invalid sentinel/iterator state");
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const common_iterator& rhs) const {
@@ -129,7 +136,21 @@ public:
 
         auto&& lhs_iter = get_if<Iterator>(&_data);
         auto&& rhs_iter = get_if<Iterator>(&rhs._data);
-        return *lhs_iter - *rhs_iter;
+        if (lhs_iter && rhs_iter) {
+            return *lhs_iter - *rhs_iter;
+        }
+        if (lhs_iter) {
+            auto&& rhs_iter = get_if<S>(&rhs._data);
+            LZ_ASSERT(rhs_iter, "Invalid sentinel/iterator state");
+            return *lhs_iter - *rhs_iter;
+        }
+        if (rhs_iter) {
+            auto&& lhs_iter = get_if<S>(&_data);
+            LZ_ASSERT(lhs_iter, "Invalid sentinel/iterator state");
+            return *lhs_iter - *rhs_iter;
+        }
+        LZ_ASSERT(false, "Invalid sentinel/iterator state");
+        return 0;
     }
 };
 } // namespace detail

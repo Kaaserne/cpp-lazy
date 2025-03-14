@@ -85,23 +85,25 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _begin;
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
     S _end;
+    std::size_t _distance{};
     std::size_t _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
-        for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
+        for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
         }
     }
 
 public:
-    LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, Iterator begin, Iterator end, const std::size_t chunk_size) :
-        _begin{ std::move(begin) },
-        _sub_range_begin{ iterator },
+    LZ_CONSTEXPR_CXX_20
+    chunks_iterator(Iterator begin, S end, const std::size_t chunk_size, const std::size_t cur_distance) :
+        _sub_range_begin{ begin },
+        _sub_range_end{ std::move(begin) },
         _end{ std::move(end) },
-        _chunk_size{ chunk_size } {
+        _chunk_size{ chunk_size },
+        _distance{ cur_distance } {
         next_chunk();
     }
 
@@ -116,18 +118,24 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 void increment() {
+        LZ_ASSERT(_sub_range_begin != _end, "Out of bounds");
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
 
     LZ_CONSTEXPR_CXX_20 void decrement() {
+        LZ_ASSERT(_distance != 0, "Out of bounds");
         _sub_range_end = _sub_range_begin;
-        for (std::size_t count = 0; count < _chunk_size && _sub_range_begin != _begin; count++, --_sub_range_begin) {
+
+        auto start_pos = _distance % _chunk_size;
+        const auto adjusted_start_pos = start_pos == 0 ? _chunk_size : start_pos;
+
+        for (std::size_t count = 0; count < adjusted_start_pos; count++, --_sub_range_begin, --_distance) {
         }
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "Incompatible iterators");
+        LZ_ASSERT(_chunk_size == rhs._chunk_size && _end == rhs._end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -158,15 +166,16 @@ private:
 public:
     LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, Iterator begin, Iterator end, const std::size_t chunk_size) :
         _begin{ std::move(begin) },
-        _sub_range_begin{ iterator },
+        _sub_range_begin{ std::move(iterator) },
         _end{ std::move(end) },
         _chunk_size{ chunk_size } {
+        LZ_ASSERT(_chunk_size != 0, "Can't increment by 0");
     }
 
     constexpr chunks_iterator() = default;
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 reference dereference() const {
-        auto sub_range_end = _sub_range_begin + std::min(static_cast<difference_type>(_chunk_size), _end - _sub_range_begin);
+        auto sub_range_end = _sub_range_begin + std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin));
         return { _sub_range_begin, sub_range_end };
     }
 
@@ -175,12 +184,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 void increment() {
-        _sub_range_begin += std::min(static_cast<difference_type>(_chunk_size), _end - _sub_range_begin);
+        LZ_ASSERT(_sub_range_begin != _end, "Out of bounds");
+        _sub_range_begin += std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin));
     }
 
     LZ_CONSTEXPR_CXX_20 void decrement() {
-        const auto remaining = _sub_range_begin - _begin;
-        const auto lldiv = std::lldiv(remaining, static_cast<difference_type>(_chunk_size));
+        const auto remaining = static_cast<std::size_t>(_sub_range_begin - _begin);
+        const auto lldiv = std::lldiv(remaining, _chunk_size);
         if (lldiv.rem == 0) {
             _sub_range_begin -= _chunk_size;
         }
@@ -189,45 +199,45 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(const chunks_iterator& rhs) const {
+    LZ_NODISCARD constexpr bool eq(const chunks_iterator& rhs) const {
         LZ_ASSERT(_chunk_size == rhs._chunk_size, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
         return _sub_range_begin == _end;
     }
 
-    LZ_CONSTEXPR_CXX_20 void plus_is(const difference_type offset) {
-        auto to_add = offset * static_cast<difference_type>(_chunk_size);
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
+        const auto s_chunk_size = static_cast<difference_type>(_chunk_size);
+        const auto to_add = offset * s_chunk_size;
 
-        if (to_add > 0) {
+        if (to_add >= 0) {
             const auto current_distance = _end - _sub_range_begin;
             if (to_add <= current_distance) {
                 _sub_range_begin += to_add;
                 return;
             }
-            LZ_ASSERT(to_add - current_distance < static_cast<difference_type>(_chunk_size), "Out of bounds");
+            LZ_ASSERT(to_add - current_distance < s_chunk_size, "Out of bounds");
             _sub_range_begin = _end;
             return;
         }
 
         const auto current_distance = _sub_range_begin - _begin;
-        const auto remainder = current_distance % static_cast<difference_type>(_chunk_size);
+        const auto remainder = current_distance % s_chunk_size;
         if (remainder == 0) {
             _sub_range_begin += to_add;
             return;
         }
         _sub_range_begin -= remainder;
-        to_add = (offset + 1) * static_cast<difference_type>(_chunk_size);
-        _sub_range_begin += to_add;
+        _sub_range_begin += (offset + 1) * s_chunk_size;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 difference_type difference(const chunks_iterator& rhs) const {
+    LZ_NODISCARD difference_type difference(const chunks_iterator& rhs) const {
         LZ_ASSERT(_chunk_size == rhs._chunk_size && _begin == rhs._begin && _end == rhs._end, "Incompatible iterators");
         const auto remaining = _sub_range_begin - rhs._sub_range_begin;
-        const auto lldiv = std::lldiv(remaining, static_cast<difference_type>(_chunk_size));
-        return lldiv.rem == 0 ? lldiv.quot : lldiv.quot + 1;
+        const auto lldiv = std::lldiv(static_cast<std::ptrdiff_t>(remaining), static_cast<std::ptrdiff_t>(_chunk_size));
+        return lldiv.rem == 0 ? lldiv.quot : lldiv.quot + (remaining < 0 ? -1 : 1);
     }
 };
 } // namespace detail

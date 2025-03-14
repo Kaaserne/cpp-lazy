@@ -23,19 +23,21 @@
 namespace lz {
 namespace detail {
 
-[[noreturn]] inline void assertion_fail(const char* file, const int line, const char* func, const char* message) {
+[[noreturn]] inline void
+assertion_fail(const char* file, const int line, const char* func, const char* message, const char* expr) {
 #if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
     auto st = std::stacktrace::current();
     auto str = std::to_string(st);
-    std::fprintf(stderr, "%s:%d assertion failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line, func,
-                 message, str.c_str());
+    std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line,
+                 expr, func, message, str.c_str());
 #else
-    std::fprintf(stderr, "%s:%d assertion failed in function '%s' with message:\n\t%s\n", file, line, func, message);
+    std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\n", file, line, expr, func, message);
 #endif
     std::terminate();
 }
 
-#define LZ_ASSERT(CONDITION, MSG) ((CONDITION) ? ((void)0) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG)))
+#define LZ_ASSERT(CONDITION, MSG)                                                                                                \
+    ((CONDITION) ? ((void)0) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
