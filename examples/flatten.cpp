@@ -1,5 +1,6 @@
 #include <Lz/flatten.hpp>
 #include <iostream>
+#include <vector>
 
 int main() {
     std::vector<std::vector<std::vector<int>>> vectors = {

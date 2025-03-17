@@ -1,4 +1,7 @@
 #include <Lz/cartesian_product.hpp>
+#include <iostream>
+#include <vector>
+
 
 int main() {
     std::vector<int> vec = {1, 2, 3};

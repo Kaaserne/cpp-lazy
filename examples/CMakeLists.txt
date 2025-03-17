@@ -7,7 +7,7 @@ FetchContent_Declare(cpp-lazy SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 FetchContent_MakeAvailable(cpp-lazy)
 
 set(examples
-    # algorithm
+    algorithm
     any_iterable
     basic_iterable
     c_string

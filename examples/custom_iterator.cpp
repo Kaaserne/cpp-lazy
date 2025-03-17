@@ -3,6 +3,7 @@
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <iostream>
+#include <vector>
 
 class custom_fwd_iterator
     : public lz::iterator<
@@ -160,10 +161,6 @@ class custom_iterable : public lz::lazy_view {
     lz::ref_or_view<Iterable> _iterable;
 
 public:
-    // Constructor
-    custom_iterable(Iterable& iterable) : _iterable(iterable) {
-    }
-
     custom_iterable(const Iterable& iterable) : _iterable(iterable) {
     }
 

@@ -1,4 +1,6 @@
 #include <Lz/intersection.hpp>
+#include <vector>
+#include <string>
 
 int main() {
     std::vector<int> a = { 1, 2, 3, 4, 5, 6, 7 };

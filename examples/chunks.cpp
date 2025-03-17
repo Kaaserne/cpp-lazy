@@ -1,4 +1,5 @@
-#include <Lz/Chunks.hpp>
+#include <Lz/chunks.hpp>
+#include <vector>
 
 int main() {
 	std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8};

@@ -1,4 +1,6 @@
 #include <Lz/group_by.hpp>
+#include <vector>
+#include <string>
 
 int main() {
 	std::vector<std::string> vec = {

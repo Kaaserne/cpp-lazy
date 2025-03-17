@@ -1,4 +1,5 @@
 #include <Lz/chunk_if.hpp>
+#include <vector>
 
 int main() {
 	std::string s = "hello world; this is a message;";

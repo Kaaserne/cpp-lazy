@@ -1,5 +1,7 @@
-#include <Lz/Unique.hpp>
+#include <Lz/unique.hpp>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 int main() {
     std::vector<int> vector = {5, 3, 2, 5, 6, 42, 2, 3, 56, 3, 1, 12, 3};

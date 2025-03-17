@@ -14,7 +14,7 @@ int main() {
         },
         amount);
 
-    for (int i : gen) {
+    for (std::size_t i : gen) {
         std::cout << i << ' ';
         // Or use fmt::print("{} ", i);
     }

@@ -1,5 +1,7 @@
 #include <Lz/split.hpp>
 #include <iostream>
+#include <vector>
+
 
 int main() {
     std::string to_split = "Hello world ";
