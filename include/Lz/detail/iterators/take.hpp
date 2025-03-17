@@ -24,6 +24,9 @@ private:
     Iterator _iterator;
     difference_type _n{};
 
+    template<class, class, bool>
+    friend class sized_iterable;
+
 public:
     constexpr take_iterator() = default;
 
@@ -56,11 +59,11 @@ public:
     }
 
     constexpr difference_type difference(const take_iterator& b) const {
-        return _iterator - b._iterator;
+        return b._n - _n;
     }
 
     constexpr bool eq(const take_iterator& b) const {
-        return _iterator == b._iterator;
+        return _n == b._n;
     }
 
     constexpr bool eq(default_sentinel) const noexcept {

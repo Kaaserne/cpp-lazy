@@ -266,6 +266,8 @@ LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
                        std::reverse_iterator<S2>(std::move(begin2)), std::move(binary_predicate));
 }
 
+// TODO add ends_with for fwd iterators
+
 template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_17 Iterator partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
     using std::find_if_not;
