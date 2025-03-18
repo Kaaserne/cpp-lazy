@@ -48,6 +48,10 @@ public:
         --_current;
     }
 
+    LZ_CONSTEXPR_CXX_14 void decrement() noexcept {
+        ++_current;
+    }
+
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
