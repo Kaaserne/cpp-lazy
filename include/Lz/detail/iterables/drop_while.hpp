@@ -41,13 +41,13 @@ public:
         return lz::find_if_not(_iterable, _unary_predicate);
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, sentinel> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const {
         return std::end(_iterable);
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, default_sentinel> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
 };

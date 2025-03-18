@@ -30,28 +30,28 @@ public:
         _binary_predicate{ std::move(binary_predicate) } {
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _binary_predicate };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_binary_predicate) };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _binary_predicate };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, default_sentinel> end() const {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _binary_predicate };
     }
 };

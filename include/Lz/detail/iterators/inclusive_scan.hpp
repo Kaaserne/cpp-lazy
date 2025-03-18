@@ -14,7 +14,7 @@ class inclusive_scan_iterator : public iterator<inclusive_scan_iterator<Iterator
     Iterator _iterator;
     mutable T _reducer;
     S _end;
-    BinaryOp _binary_op;
+    mutable BinaryOp _binary_op;
 
     using traits = std::iterator_traits<Iterator>;
 

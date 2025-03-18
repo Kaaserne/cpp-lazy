@@ -30,35 +30,35 @@ public:
         _compare{ std::move(compare) } {
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), std::begin(_iterable2), std::end(_iterable2), _compare };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         return { detail::begin(std::forward<Iterable>(_iterable)), detail::end(std::forward<Iterable>(_iterable)),
                  detail::begin(std::forward<Iterable2>(_iterable2)), detail::end(std::forward<Iterable2>(_iterable2)),
                  std::move(_compare) };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
         // clang-format off
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), std::begin(_iterable2),
                  std::begin(_iterable2), std::end(_iterable2), _compare };
         // clang-format on
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         // clang-format off
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), std::end(_iterable2),
                  std::begin(_iterable2), std::end(_iterable2), _compare };
         // clang-format on
     }
-    template<class I = iterator>
-    LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, default_sentinel> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
 };

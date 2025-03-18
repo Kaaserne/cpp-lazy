@@ -34,13 +34,16 @@ namespace lz {
 namespace detail {
 template<class I, class S = I>
 class basic_iterable_impl : public lazy_view {
-    I _begin;
-    S _end;
+    using decayed_iterator = decay_t<I>;
+    using decayed_sentinel = decay_t<S>;
+
+    decayed_iterator _begin;
+    decayed_sentinel _end;
 
 public:
-    using iterator = I;
-    using const_iterator = I;
-    using value_type = val_t<I>;
+    using iterator = decayed_iterator;
+    using const_iterator = decayed_iterator;
+    using value_type = val_t<decayed_iterator>;
     using sentinel = S;
 
     constexpr basic_iterable_impl() = default;
@@ -50,91 +53,118 @@ public:
         basic_iterable_impl{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) } {
     }
 
-    constexpr basic_iterable_impl(I begin, S end) : _begin{ std::move(begin) }, _end{ std::move(end) } {
+    constexpr basic_iterable_impl(decayed_iterator begin, decayed_sentinel end) :
+        _begin{ std::move(begin) },
+        _end{ std::move(end) } {
     }
 
-    template<class It = I>
-    LZ_NODISCARD constexpr detail::enable_if<detail::is_ra<It>::value, std::size_t> size() const noexcept {
-        return static_cast<std::size_t>(_end - _begin);
+    template<class It = decayed_iterator>
+    LZ_NODISCARD constexpr enable_if<is_ra<It>::value, std::size_t> size() const noexcept {
+        const auto result = _end - _begin;
+        return result < 0 ? static_cast<std::size_t>(-result) : static_cast<std::size_t>(result);
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend detail::enable_if<detail::is_iterable<detail::decay_t<Rhs>>::value, bool>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<decay_t<Rhs>>::value, bool>
     operator==(const basic_iterable_impl& lhs, Rhs&& rhs) {
         return lz::equal(lhs, std::forward<Rhs>(rhs));
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend detail::enable_if<detail::is_iterable<detail::decay_t<Rhs>>::value, bool>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<decay_t<Rhs>>::value, bool>
     operator!=(const basic_iterable_impl& lhs, Rhs&& rhs) {
         return !(lhs == std::forward<Rhs>(rhs));
     }
 
-    LZ_NODISCARD constexpr I begin() const& {
+    LZ_NODISCARD constexpr decayed_iterator begin() const& {
         return _begin;
     }
 
-    LZ_NODISCARD constexpr S end() const& {
+    LZ_NODISCARD constexpr decayed_sentinel end() const& {
         return _end;
     }
 
-    LZ_NODISCARD constexpr I begin() && {
+    LZ_NODISCARD constexpr decayed_iterator begin() && {
         return std::move(_begin);
     }
 
-    LZ_NODISCARD constexpr S end() && {
+    LZ_NODISCARD constexpr decayed_sentinel end() && {
         return std::move(_end);
     }
 };
 
-template<class I, class S, bool IsSame = std::is_same<I, S>::value>
-class sized_iterable : public basic_iterable_impl<take_iterator<I>, conditional<IsSame, take_iterator<I>, S>> {
-    static constexpr bool is_same_iter_pair = IsSame;
-    using base = basic_iterable_impl<take_iterator<I>, conditional<is_same_iter_pair, take_iterator<I>, S>>;
+template<class I, class S = I>
+class sized_iterable_impl : public lazy_view {
+    using decayed_iterator = decay_t<I>;
+    using decayed_sentinel = decay_t<S>;
 
-    using diff_t = diff_type<I>;
+    using sentinel_type =
+        conditional<std::is_same<decayed_iterator, decayed_sentinel>::value, take_iterator<decayed_iterator>, decayed_sentinel>;
+
+    take_iterator<decayed_iterator> _begin;
+    sentinel_type _end;
+
+    using difference_type = diff_type<decayed_iterator>;
+
 public:
-    constexpr sized_iterable() = default;
+    using iterator = take_iterator<decayed_iterator>;
+    using const_iterator = decayed_iterator;
+    using value_type = val_t<decayed_iterator>;
+    using sentinel = sentinel_type;
 
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    constexpr sized_iterable(Iterable&& iterable) : 
-        sized_iterable{ std::forward<Iterable>(iterable), lz::size(iterable) } {
+    constexpr sized_iterable_impl() = default;
+
+    template<class Cat = typename decayed_iterator::iterator_category, enable_if<is_ra_tag<Cat>::value, int> = 0>
+    constexpr sized_iterable_impl(decayed_iterator begin, decayed_iterator end) :
+        _begin{ std::move(begin), end - begin },
+        _end{ std::move(end), 0 } {
     }
 
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    constexpr sized_iterable(Iterable&& iterable, const std::size_t new_size) :
-        sized_iterable{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), new_size } {
+    template<class Cat = typename decayed_iterator::iterator_category, enable_if<!is_ra_tag<Cat>::value, int> = 0>
+    constexpr sized_iterable_impl(decayed_iterator begin, decayed_sentinel end) = delete; // Must be random access to get size
+
+    constexpr sized_iterable_impl(decayed_iterator begin, std::size_t size) :
+        _begin{ std::move(begin), static_cast<difference_type>(size) } {
     }
 
-    template<bool B = is_same_iter_pair, enable_if<B, int> = 0>
-    constexpr sized_iterable(I begin, S end, std::size_t size) : 
-        base{ { std::move(begin), static_cast<diff_t>(size) }, { std::move(end), 0 } } {
+    template<class It = decayed_iterator>
+    LZ_NODISCARD constexpr enable_if<std::is_same<It, decayed_sentinel>::value, std::size_t> size() const  {
+        const auto result = begin()._n - end()._n;
+        return result < 0 ? static_cast<std::size_t>(-result) : static_cast<std::size_t>(result);
     }
 
-    template<bool B = is_same_iter_pair, enable_if<!B, int> = 0>
-    constexpr sized_iterable(I begin, S end, std::size_t size) : 
-        base{ { std::move(begin), static_cast<diff_t>(size) }, { std::move(end) } } {
+    template<class It = decayed_iterator>
+    LZ_NODISCARD constexpr enable_if<!std::is_same<It, decayed_sentinel>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(begin()._n);
     }
 
-    LZ_NODISCARD constexpr std::size_t size() const noexcept {
-        return static_cast<std::size_t>(base::begin()._n);
+    template<class Rhs>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<decay_t<Rhs>>::value, bool>
+    operator==(const sized_iterable_impl& lhs, Rhs&& rhs) {
+        return lz::equal(lhs, std::forward<Rhs>(rhs));
     }
-};
 
-template<bool>
-struct iterable_spec_choice;
+    template<class Rhs>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<decay_t<Rhs>>::value, bool>
+    operator!=(const sized_iterable_impl& lhs, Rhs&& rhs) {
+        return !(lhs == std::forward<Rhs>(rhs));
+    }
 
-template<>
-struct iterable_spec_choice<true /* is iterable */> {
-    template<LZ_CONCEPT_ITERABLE Iterable, class>
-    using type = conditional<sized<Iterable>::value, sized_iterable<iter_t<Iterable>, sentinel_t<Iterable>>,
-                             basic_iterable_impl<iter_t<Iterable>, sentinel_t<Iterable>>>;
-};
+    LZ_NODISCARD constexpr iterator begin() const& {
+        return _begin;
+    }
 
-template<>
-struct iterable_spec_choice<false /* is iterable */> {
-    template<class I, class S>
-    using type = basic_iterable_impl<I, S>;
+    LZ_NODISCARD constexpr sentinel end() const& {
+        return _end;
+    }
+
+    LZ_NODISCARD constexpr iterator begin() && {
+        return std::move(_begin);
+    }
+
+    LZ_NODISCARD constexpr sentinel end() && {
+        return std::move(_end);
+    }
 };
 } // namespace detail
 
@@ -144,61 +174,21 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @brief A class that can be converted to any container. It is a view over an iterable, meaning it does not own the data. It
  * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
  * It contains the size of the iterable.
- * @tparam It The iterator type.
- * @tparam S The sentinel type.
+ * @tparam It The iterator or iterable type.
+ * @tparam S The sentinel type, if using an iterator/sentinel pair. Otherwise leave as is.
  */
 template<class It, class S = It>
-using sized_iterable = detail::sized_iterable<It, S>;  
+using sized_iterable = detail::sized_iterable_impl<It, S>;
 
 /**
  * @brief A class that can be converted to any container. It is a view over an iterable, meaning it does not own the data. It
  * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
  * It *may* contain the size of the iterable, depending on the iterator category or if the iterable is sized.
- * @tparam It The iterator type.
- * @tparam S The sentinel type.
+ * @tparam It The iterator or iterable type.
+ * @tparam S The sentinel type, if using an iterator/sentinel pair. Otherwise leave as is.
  */
 template<class It, class S = It>
-using basic_iterable = typename detail::iterable_spec_choice<detail::is_iterable<It>::value>::template type<It, S>;
-
-/**
- * @brief Returns a sized iterable (if `Iterator` is random access) to another iterable or container if `Iterator` is random
- * access. Example:
- * ```cpp
- * int arr[] = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::to_iterable(std::begin(arr), std::end(arr));
- * // iterable contains method .size()
- *
- * std::list<int> lst = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::to_iterable(lst.begin(), lst.end());
- * // iterable does not contain method .size()
- * ```
- * @param begin The beginning of the 'iterable'.
- * @param end The ending of the 'iterable'.
- * @return An iterable object that can be converted to an arbitrary container. Can be used in pipe expressions, converted to a
- * container with `to<Container>()`, used in algorithms, for-each loops, etc...
- */
-template<LZ_CONCEPT_ITERATOR Iterator, class S>
-LZ_NODISCARD constexpr basic_iterable<Iterator, S> to_iterable(Iterator begin, S end) {
-    return { std::move(begin), std::move(end) };
-}
-
-// TODO docs & tests
-
-template<LZ_CONCEPT_ITERATOR Iterator, class S>
-LZ_NODISCARD constexpr sized_iterable<Iterator, S> to_iterable(Iterator begin, const std::size_t count) {
-    return { begin, begin, count };
-}
-
-template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD constexpr basic_iterable<Iterable> to_iterable(Iterable&& iterable) {
-    return { std::forward<Iterable>(iterable) };
-}
-
-template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD constexpr sized_iterable<iter_t<Iterable>, sentinel_t<Iterable>>
-to_iterable(Iterable&& iterable, const std::size_t new_size) {
-    return { std::forward<Iterable>(iterable), new_size };
-}
+using basic_iterable = detail::basic_iterable_impl<It, S>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

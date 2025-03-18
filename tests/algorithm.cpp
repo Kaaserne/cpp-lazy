@@ -77,7 +77,7 @@ TEST_CASE("Formatting") {
 
     SECTION("Non empty ostream") {
         std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 5>::iterator> iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1, 2, 3, 4, 5");
@@ -90,7 +90,7 @@ TEST_CASE("Formatting") {
 
     SECTION("Empty ostream") {
         std::array<int, 0> arr = {};
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 0>::iterator> iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "");
@@ -98,7 +98,7 @@ TEST_CASE("Formatting") {
 
     SECTION("One element ostream") {
         std::array<int, 1> arr = { 1 };
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 1>::iterator> iterable(arr.begin(), arr.end());
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1");
@@ -108,25 +108,25 @@ TEST_CASE("Formatting") {
 TEST_CASE("To iterable") {
     SECTION("To iterable random access") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(vec);
+        lz::basic_iterable<std::vector<int>::iterator> iterable(vec.begin(), vec.end());
         REQUIRE(lz::size(iterable) == 5);
     }
 
     SECTION("To iterable forward") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(lst);
+        lz::sized_iterable<std::list<int>::iterator> iterable(lst.begin(), lst.size());
         REQUIRE(lz::size(iterable) == 5);
     }
 
     SECTION("To iterable begin end random access") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(vec.begin(), vec.end());
+        lz::basic_iterable<std::vector<int>::iterator> iterable(vec.begin(), vec.end());
         REQUIRE(lz::size(iterable) == 5);
     }
 
     SECTION("To iterable begin end bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
-        auto iterable = lz::to_iterable(lst.begin(), lst.end());
+        lz::basic_iterable<std::list<int>::iterator> iterable(lst.begin(), lst.end());
         static_assert(!lz::sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
     }
 }
@@ -1055,8 +1055,8 @@ TEST_CASE("Partition") {
         auto iterable = lz::c_string(str);
         auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
-        auto part1 = lz::to_iterable(iterable.begin(), partitioned);
-        auto part2 = lz::to_iterable(partitioned, iterable.end());
+        lz::basic_iterable<decltype(iterable.begin())> part1(iterable.begin(), partitioned);
+        lz::basic_iterable<decltype(iterable.begin()), decltype(iterable.end())> part2(partitioned, iterable.end());
 
         REQUIRE(lz::all_of(part1, [](char c) { return c % 2 == 0; }));
         REQUIRE(lz::none_of(part2, [](char c) { return c % 2 == 0; }));
@@ -1067,8 +1067,8 @@ TEST_CASE("Partition") {
         auto iterable = str | lz::c_string;
         auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
-        auto part1 = lz::to_iterable(iterable.begin(), partitioned);
-        auto part2 = lz::to_iterable(partitioned, iterable.end());
+        lz::basic_iterable<decltype(iterable.begin())> part1(iterable.begin(), partitioned);
+        lz::basic_iterable<decltype(iterable.begin()), decltype(iterable.end())> part2(partitioned, iterable.end());
 
         REQUIRE(lz::all_of(part1, [](char c) { return c % 2 == 0; }));
         REQUIRE(lz::none_of(part2, [](char c) { return c % 2 == 0; }));
@@ -1079,8 +1079,8 @@ TEST_CASE("Partition") {
         auto iterable = lz::c_string(str);
         auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
-        auto part1 = lz::to_iterable(iterable.begin(), partitioned);
-        auto part2 = lz::to_iterable(partitioned, iterable.end());
+        lz::basic_iterable<decltype(iterable.begin())> part1(iterable.begin(), partitioned);
+        lz::basic_iterable<decltype(iterable.begin()), decltype(iterable.end())> part2(partitioned, iterable.end());
 
         REQUIRE(lz::all_of(part1, [](char c) { return c % 2 == 0; }));
         REQUIRE(lz::none_of(part2, [](char c) { return c % 2 == 0; }));
@@ -1091,8 +1091,8 @@ TEST_CASE("Partition") {
         auto iterable = lz::c_string(str);
         auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
-        auto part1 = lz::to_iterable(iterable.begin(), partitioned);
-        auto part2 = lz::to_iterable(partitioned, iterable.end());
+        lz::basic_iterable<decltype(iterable.begin())> part1(iterable.begin(), partitioned);
+        lz::basic_iterable<decltype(iterable.begin()), decltype(iterable.end())> part2(partitioned, iterable.end());
 
         REQUIRE(lz::all_of(part1, [](char c) { return c % 2 == 0; }));
         REQUIRE(lz::none_of(part2, [](char c) { return c % 2 == 0; }));
@@ -1103,8 +1103,8 @@ TEST_CASE("Partition") {
         auto iterable = lz::c_string(str);
         auto partitioned = lz::partition(iterable, [](char c) { return c % 2 == 0; });
 
-        auto part1 = lz::to_iterable(iterable.begin(), partitioned);
-        auto part2 = lz::to_iterable(partitioned, iterable.end());
+        lz::basic_iterable<decltype(iterable.begin())> part1(iterable.begin(), partitioned);
+        lz::basic_iterable<decltype(iterable.begin()), decltype(iterable.end())> part2(partitioned, iterable.end());
 
         REQUIRE(lz::all_of(part2, [](char c) { return c % 2 != 0; }));
         REQUIRE(lz::none_of(part1, [](char c) { return c % 2 != 0; }));

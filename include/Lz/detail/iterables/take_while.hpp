@@ -31,28 +31,28 @@ public:
         _unary_predicate{ std::move(unary_predicate) } {
     }
 
-    template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename iterator::iterator_category>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _unary_predicate };
     }
 
-    template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
+    template<class I = typename iterator::iterator_category>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_unary_predicate) };
     }
 
-    template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename iterator::iterator_category>
+    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
     }
 
-    template<class I = iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
     }
 
-    template<class I = iterator>
-    constexpr enable_if<!is_bidi<I>::value, default_sentinel> end() const noexcept {
+    template<class I = typename iterator::iterator_category>
+    constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
         return {};
     }
 };

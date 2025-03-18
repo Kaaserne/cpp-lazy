@@ -15,7 +15,7 @@ class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator
     mutable T _reducer;
     S _end;
     bool _reached_end{};
-    BinaryOp _binary_op;
+    mutable BinaryOp _binary_op;
 
     using traits = std::iterator_traits<Iterator>;
 

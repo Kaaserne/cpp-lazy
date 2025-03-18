@@ -86,7 +86,7 @@ TEST_CASE("Formatting and compile tests") {
 
     SECTION("Ostream test non empty") {
         std::array<int, 4> arr = { 1, 2, 3, 4 };
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 4>::iterator> iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1, 2, 3, 4");
@@ -94,7 +94,7 @@ TEST_CASE("Formatting and compile tests") {
 
     SECTION("Ostream test empty") {
         std::array<int, 0> arr = {};
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 0>::iterator> iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "");
@@ -102,7 +102,7 @@ TEST_CASE("Formatting and compile tests") {
 
     SECTION("Ostream test one element") {
         std::array<int, 1> arr = { 1 };
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 1>::iterator> iterable(arr);
         std::ostringstream oss;
         oss << iterable;
         REQUIRE(oss.str() == "1");
@@ -114,7 +114,7 @@ TEST_CASE("Formatting and compile tests") {
         std::cout.rdbuf(oss.rdbuf());
 
         std::array<int, 4> arr = { 1, 2, 3, 4 };
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 4>::iterator> iterable(arr);
         std::cout << iterable;
         REQUIRE(oss.str() == "1, 2, 3, 4");
 
@@ -127,7 +127,7 @@ TEST_CASE("Formatting and compile tests") {
         std::cout.rdbuf(oss.rdbuf());
 
         std::array<int, 0> arr = {};
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 0>::iterator> iterable(arr);
         std::cout << iterable;
         REQUIRE(oss.str() == "");
 
@@ -141,7 +141,7 @@ TEST_CASE("Formatting and compile tests") {
         std::cout.rdbuf(oss.rdbuf());
 
         std::array<int, 1> arr = { 1 };
-        auto iterable = lz::to_iterable(arr);
+        lz::basic_iterable<std::array<int, 1>::iterator> iterable(arr);
         std::cout << iterable;
         REQUIRE(oss.str() == "1");
 

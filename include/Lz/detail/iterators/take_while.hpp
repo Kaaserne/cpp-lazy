@@ -22,7 +22,7 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<is_sentinel<Ite
 
     common_iterator<Iterator, S> _iterator;
     S _end;
-    UnaryPredicate _unary_predicate;
+    mutable UnaryPredicate _unary_predicate;
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -78,7 +78,7 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<!is_sentinel<It
     Iterator _begin;
     Iterator _iterator;
     Iterator _end;
-    UnaryPredicate _unary_predicate;
+    mutable UnaryPredicate _unary_predicate;
 
     using traits = std::iterator_traits<Iterator>;
 

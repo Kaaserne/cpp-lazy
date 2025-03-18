@@ -7,9 +7,17 @@ int main() {
     const auto amount = 4;
     const auto repeater = lz::repeat(to_repeat, amount);
 
+#ifdef LZ_HAS_CXX_17
     for (int& i : lz::repeat(to_repeat, amount)) {
         std::cout << i << ' ';
         // Or use fmt::print("{} ", i);
     }
     // Output: 155 155 155 155
+#else
+    lz::for_each(repeater, [](int i) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    });
+    // Output: 155 155 155 155
+#endif
 }

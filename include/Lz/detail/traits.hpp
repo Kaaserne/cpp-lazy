@@ -52,6 +52,8 @@ using conjunction = std::conjunction<Ts...>;
 
 #else
 
+// TODO faster implementation for compiler times
+
 template<bool Value, class T, class... Rest>
 struct conjunction_impl {
     using type = T;
@@ -432,6 +434,9 @@ using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::ty
 
 template<class IterTag>
 using is_bidi_tag = std::is_convertible<IterTag, std::bidirectional_iterator_tag>;
+
+template<class IterTag>
+using is_fwd_tag = std::is_convertible<IterTag, std::forward_iterator_tag>;
 
 template<class Iterator>
 using is_bidi = is_bidi_tag<iter_cat_t<Iterator>>;

@@ -22,7 +22,7 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>
 
     Iterator _iterator;
     S _end;
-    BinaryPredicate _predicate;
+    mutable BinaryPredicate _predicate;
 
 public:
     using iterator_category = std::forward_iterator_tag;
@@ -75,7 +75,7 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator>:
     Iterator _begin{};
     Iterator _iterator{};
     Iterator _end{};
-    BinaryPredicate _predicate{};
+    mutable BinaryPredicate _predicate{};
 
 public:
     using iterator_category = std::forward_iterator_tag;

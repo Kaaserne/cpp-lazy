@@ -26,7 +26,7 @@ private:
     Iterator _sub_range_end;
     bool _ends_with_trailing{ true };
     S _end;
-    UnaryPredicate _predicate;
+    mutable UnaryPredicate _predicate;
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;

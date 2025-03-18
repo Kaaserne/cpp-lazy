@@ -318,9 +318,9 @@ int main() {
         auto distance = lz::distance(v.begin(), pos);
         std::cout << *pos << " with distance " << distance << '\n'; // 2 with distance 1
         ++pos;
-        auto iterable = lz::to_iterable(pos, v.end());
-        pos = lz::adjacent_find(iterable);
-        std::cout << (pos == iterable.end()) << "\n\n"; // true
+        lz::sized_iterable<decltype(v.begin())> iterable(pos, v.end());
+        auto new_pos = lz::adjacent_find(iterable);
+        std::cout << (new_pos == iterable.end()) << "\n\n"; // true
     }
     {
         std::cout << "Count if\n";

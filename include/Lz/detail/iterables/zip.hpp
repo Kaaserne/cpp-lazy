@@ -48,7 +48,6 @@ public:
         return { begin_tuple(std::move(_iterables)) };
     }
 
-    // TODO make everything like this: iterator::iterator_category
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
         return { fake_end_tuple(_iterables, make_index_sequence<sizeof...(Iterables)>{}) };

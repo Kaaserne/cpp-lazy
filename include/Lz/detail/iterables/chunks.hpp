@@ -34,38 +34,38 @@ public:
         return static_cast<std::size_t>(std::ceil(static_cast<double>(lz::size(_iterable)) / _chunk_size));
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_fwd<I>::value && !is_bidi<I>::value, iterator> begin() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_fwd_tag<I>::value && !is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _chunk_size };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_fwd<I>::value && !is_bidi<I>::value, iterator> begin() && {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_fwd_tag<I>::value && !is_bidi_tag<I>::value, iterator> begin() && {
         return { detail::begin(std::forward<Iterable>(_iterable)), detail::end(std::forward<Iterable>(_iterable)), _chunk_size };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value && !is_ra<I>::value, iterator> begin() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_ra_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _chunk_size, 0 };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iterator> begin() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iterator> end() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> end() const& {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value && !is_ra<I>::value, iterator> end() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_ra_tag<I>::value, iterator> end() const& {
         return { std::end(_iterable), std::end(_iterable), _chunk_size, lz::eager_size(_iterable) };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD constexpr enable_if<is_fwd<I>::value && !is_bidi<I>::value, default_sentinel> end() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD constexpr enable_if<is_fwd_tag<I>::value && !is_bidi_tag<I>::value, default_sentinel> end() const& {
         return {};
     }
 };

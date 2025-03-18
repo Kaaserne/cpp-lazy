@@ -10,10 +10,18 @@ int main() {
         return std::make_pair(copy != 4, copy);
     });
 
+#ifdef LZ_HAS_CXX_17
     // Iterator returns the same type as the function pair second type. In this case, int.
     for (int i : generator) {
         std::cout << i << ' ';
         // Or use fmt::print("{} ", i);
     }
     // Output: 0 1 2 3
+#else
+    lz::for_each(generator, [](int i) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    });
+    // Output: 0 1 2 3
+#endif
 }

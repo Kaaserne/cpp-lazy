@@ -23,7 +23,7 @@ class group_by_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterato
     Iterator _sub_range_end;
     Iterator _sub_range_begin;
     S _end;
-    BinaryPredicate _comparer;
+    mutable BinaryPredicate _comparer;
 
     using ref_type = ref_t<Iterator>;
 
@@ -97,7 +97,7 @@ class group_by_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator
     Iterator _sub_range_end;
     Iterator _sub_range_begin;
     S _end;
-    BinaryPredicate _comparer;
+    mutable BinaryPredicate _comparer;
 
     using ref_type = ref_t<Iterator>;
 

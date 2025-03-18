@@ -24,8 +24,8 @@ private:
     Iterator _iterator;
     difference_type _n{};
 
-    template<class, class, bool>
-    friend class sized_iterable;
+    template<class, class>
+    friend class sized_iterable_impl;
 
 public:
     constexpr take_iterator() = default;

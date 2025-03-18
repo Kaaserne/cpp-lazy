@@ -18,6 +18,8 @@ class enumerate_iterable : public lazy_view {
         return _start + static_cast<IntType>(lz::eager_size(_iterable));
     }
 
+    using inner_iter = iter_t<Iterable>;
+
 public:
     using iterator = enumerate_iterator<iter_t<Iterable>, sentinel_t<Iterable>, IntType>;
     using const_iterator = iterator;
@@ -43,18 +45,18 @@ public:
         return { detail::begin(std::move(_iterable)), _start };
     }
 
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, sentinel> end() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const& {
         return { std::end(_iterable), get_last_index() };
     }
 
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, sentinel> end() && {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() && {
         return { detail::end(std::move(_iterable)), get_last_index() };
     }
 
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, sentinel> end() const& {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const& {
         return std::end(_iterable);
     }
 };

@@ -17,7 +17,7 @@ class map_iterator
                       fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>,
                       sentinel_selector<iter_cat_t<Iterator>, map_iterator<Iterator, S, UnaryOp>, S>> {
     Iterator _iterator;
-    UnaryOp _unary_op;
+    mutable UnaryOp _unary_op;
 
     using traits = std::iterator_traits<Iterator>;
 

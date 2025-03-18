@@ -9,6 +9,7 @@ int main() {
     std::regex r(",");
     auto result = lz::regex_split(input, r);
 
+#ifdef LZ_HAS_CXX_17
     for (const lz::string_view word : result) {
         // Use .write if using fmt::string_view
         std::cout.write(word.data(), word.size());
@@ -26,4 +27,23 @@ int main() {
         // Or use fmt::print("{}\n", word);
     }
     // output: Hello World!This is a test
+#else
+    lz::for_each(result, [](const lz::string_view word) {
+        // Use .write if using fmt::string_view
+        std::cout.write(word.data(), word.size());
+        std::cout << ' ';
+        // Or use fmt::print("{}\n", word);
+    });
+    // output: Hello World!This is a test
+
+    std::cout << '\n';
+
+    lz::for_each(input | lz::regex_split(r), [](const lz::string_view word) {
+        // Use .write if using fmt::string_view
+        std::cout.write(word.data(), word.size());
+        std::cout << ' ';
+        // Or use fmt::print("{}\n", word);
+    });
+    // output: Hello World!This is a test
+#endif
 }

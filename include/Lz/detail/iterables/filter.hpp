@@ -33,18 +33,18 @@ public:
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, iterator> begin() && {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         return { std::begin(_iterable), std::begin(_iterable), detail::end(std::move(_iterable)), std::move(_predicate) };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, I> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
     }
 
-    template<class I = iterator>
-    LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, default_sentinel> end() const noexcept {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
         return {};
     }
 };

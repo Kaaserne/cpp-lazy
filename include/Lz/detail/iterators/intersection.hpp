@@ -26,7 +26,7 @@ class intersection_iterator<Iterator, S, Iterator2, S2, BinaryPredicate,
     Iterator2 _iterator2;
     S _end;
     S2 _end2;
-    BinaryPredicate _compare;
+    mutable BinaryPredicate _compare;
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -101,7 +101,7 @@ class intersection_iterator<Iterator, S, Iterator2, S2, BinaryPredicate,
     Iterator2 _begin2;
     S _end;
     S2 _end2;
-    BinaryPredicate _compare;
+    mutable BinaryPredicate _compare;
 
     using iter_traits = std::iterator_traits<Iterator>;
 

@@ -17,7 +17,7 @@ class generate_iterator<GeneratorFunc, false>
     : public iterator<generate_iterator<GeneratorFunc, false>, func_ret_type<GeneratorFunc>,
                       fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
 
-    GeneratorFunc _func;
+    mutable GeneratorFunc _func;
     std::size_t _current{};
 
 public:

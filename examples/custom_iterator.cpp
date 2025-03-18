@@ -204,34 +204,34 @@ int main() {
 
     // ---------------- Custom iterator example ----------------
     std::cout << "Custom forward iterator example, going forward.\n";
-    auto view = lz::to_iterable(custom_fwd_iterator{ 0 }, custom_fwd_iterator{ 10 });
+    lz::basic_iterable<custom_fwd_iterator> view(custom_fwd_iterator{ 0 }, custom_fwd_iterator{ 10 });
     for (/* const */ int& i : view) {
         std::cout << i << '\n';
     }
     std::cout << '\n';
 
     std::cout << "Custom bidirectional iterator example, going backward.\n";
-    auto view2 = lz::to_iterable(custom_bidi_iterator{ 0 }, custom_bidi_iterator{ 10 });
-    for (/* const */ int& i : lz::reverse(view2)) {
+    lz::basic_iterable<custom_bidi_iterator> view1(custom_bidi_iterator{ 0 }, custom_bidi_iterator{ 10 });
+    for (/* const */ int& i : lz::reverse(view1)) {
         std::cout << i << '\n';
     }
     std::cout << '\n';
 
     std::cout << "Custom random access iterator example, going forward.\n";
-    auto view3 = lz::to_iterable(custom_ra_iterator{ 0 }, custom_ra_iterator{ 10 });
-    for (/* const */ int& i : view3) {
+    lz::basic_iterable<custom_ra_iterator> view2(custom_ra_iterator{ 0 }, custom_ra_iterator{ 10 });
+    for (/* const */ int& i : view2) {
         std::cout << i << '\n';
     }
     std::cout << '\n';
 
     std::cout << "Custom random access iterator example, going backward.\n";
-    for (/* [const] */ int& i : lz::reverse(view3)) {
+    for (/* [const] */ int& i : lz::reverse(view2)) {
         std::cout << i << '\n';
     }
     std::cout << '\n';
 
     std::cout << "Custom random access iterator example, going forward with step 2.\n";
-    auto it_start = view3.begin();
+    auto it_start = view2.begin();
     std::cout << "*it_start = " << *it_start << '\n';
     std::cout << "*(it_start + 2) = " << *(it_start + 2) << '\n';
 }

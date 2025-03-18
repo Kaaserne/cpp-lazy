@@ -29,9 +29,9 @@ private:
     IterB _begin_b;
     SA _end_a;
 
-    SelectorA _selector_a;
-    SelectorB _selector_b;
-    ResultSelector _result_selector;
+    mutable SelectorA _selector_a;
+    mutable SelectorB _selector_b;
+    mutable ResultSelector _result_selector;
 
     LZ_CONSTEXPR_CXX_17 void find_next() {
         using detail::find_if;
@@ -44,10 +44,10 @@ private:
                                        [this](ref_t<IterB> b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
 
             if (pos != _iterable.end() && !(to_find < _selector_b(*pos))) {
-                _iterable = lz::to_iterable(pos, _iterable.end());
+                _iterable = lz::basic_iterable<IterB, SB>{ pos, _iterable.end() };
                 return true;
             }
-            _iterable = lz::to_iterable(_begin_b, _iterable.end());
+            _iterable = lz::basic_iterable<IterB, SB>{ _begin_b, _iterable.end() };
             return false;
         });
     }
@@ -82,7 +82,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        _iterable = lz::to_iterable(std::next(_iterable.begin()), _iterable.end());
+        _iterable = lz::basic_iterable<IterB, SB>(std::next(_iterable.begin()), _iterable.end());
         find_next();
     }
 

@@ -44,13 +44,13 @@ public:
         return { detail::begin(std::move(_iterable)), std::end(_iterable), _from, _to, 0 };
     }
 
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value, iterator> end() const {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::end(_iterable), _from, _to,
                  static_cast<typename iterator::difference_type>(lz::eager_size(_iterable)) };
     }
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value, inner_sentinel> end() const {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, inner_sentinel> end() const {
         return std::end(_iterable);
     }
 };

@@ -61,5 +61,5 @@ int main() {
     std::cout << '\n';
 #endif
 
-    std::cout << lz::to_iterable(v) << '\n'; // 1, 2, 3, 4, 5
+    std::cout << lz::basic_iterable<decltype(v.begin())>{ v.begin(), v.end() } << '\n'; // 1, 2, 3, 4, 5
 }

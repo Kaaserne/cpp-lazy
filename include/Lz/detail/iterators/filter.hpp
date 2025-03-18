@@ -35,7 +35,7 @@ public:
 private:
     Iterator _iterator;
     S _end;
-    UnaryPredicate _predicate;
+    mutable UnaryPredicate _predicate;
 
 public:
     LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :
@@ -95,7 +95,7 @@ private:
     Iterator _begin;
     Iterator _iterator;
     S _end;
-    UnaryPredicate _predicate;
+    mutable UnaryPredicate _predicate;
 
 public:
     LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :

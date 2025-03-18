@@ -43,13 +43,13 @@ public:
         return { first, first, last, _amount };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD constexpr enable_if<is_bidi<I>::value, iterator> end() const {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), 0 };
     }
 
-    template<class I = inner_iter>
-    LZ_NODISCARD constexpr enable_if<!is_bidi<I>::value, default_sentinel> end() const {
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
 };
