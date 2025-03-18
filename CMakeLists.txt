@@ -102,7 +102,7 @@ target_include_directories(cpp-lazy
 # ---- Install ----
 include(CMakePackageConfigHelpers)
 
-set(cpp-lazy_directory "cpp-lazy-${PROJECT_VERSION}")
+set(cpp-lazy_directory "cpp-lazy")
 set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${cpp-lazy_directory}")
 set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cpp-lazy_directory}")
 
