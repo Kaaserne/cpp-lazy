@@ -1017,35 +1017,97 @@ TEST_CASE("Contains") {
 
 TEST_CASE("Starts with") {
     SECTION("With non-empty c-string") {
-        const char* str = "Hello";
-        auto iterable = lz::c_string(str);
-        const char* str2 = "He";
-        auto iterable2 = lz::c_string(str2);
+        auto iterable = lz::c_string("Hello");
+        auto iterable2 = lz::c_string("He");
+        REQUIRE(lz::starts_with(iterable, iterable2));
+        iterable2 = lz::c_string("H");
+        REQUIRE(lz::starts_with(iterable, iterable2));
+        iterable2 = lz::c_string("Hello");
         REQUIRE(lz::starts_with(iterable, iterable2));
     }
 
     SECTION("With one element") {
-        const char* str = "H";
-        auto iterable = lz::c_string(str);
-        const char* str2 = "H";
-        auto iterable2 = lz::c_string(str2);
+        auto iterable = lz::c_string("H");
+        auto iterable2 = lz::c_string("H");
         REQUIRE(lz::starts_with(iterable, iterable2));
     }
 
     SECTION("With empty c-string") {
-        const char* str = "";
-        auto iterable = lz::c_string(str);
-        const char* str2 = "H";
-        auto iterable2 = lz::c_string(str2);
+        auto iterable = lz::c_string("");
+        auto iterable2 = lz::c_string("H");
+        REQUIRE(!lz::starts_with(iterable, iterable2));
+
+        iterable = lz::c_string("H");
+        iterable2 = lz::c_string("");
         REQUIRE(!lz::starts_with(iterable, iterable2));
     }
 
     SECTION("Not found c-string") {
-        const char* str = "Hello";
-        auto iterable = lz::c_string(str);
-        const char* str2 = "a";
-        auto iterable2 = lz::c_string(str2);
+        auto iterable = lz::c_string("Hello");
+        auto iterable2 = lz::c_string("a");
         REQUIRE(!lz::starts_with(iterable, iterable2));
+    }
+
+    SECTION("With non-empty string") {
+        auto iterable = std::string("Hello");
+        auto iterable2 = std::string("He");
+        REQUIRE(lz::starts_with(iterable, iterable2));
+    }
+
+    SECTION("With one element string") {
+        auto iterable = std::string("H");
+        auto iterable2 = std::string("H");
+        REQUIRE(lz::starts_with(iterable, iterable2));
+    }
+
+    SECTION("With empty string") {
+        auto iterable = std::string("");
+        auto iterable2 = std::string("H");
+        REQUIRE(!lz::starts_with(iterable, iterable2));
+
+        iterable = std::string("H");
+        iterable2 = std::string("");
+        REQUIRE(!lz::starts_with(iterable, iterable2));
+    }
+
+    SECTION("Not found string") {
+        auto iterable = std::string("Hello");
+        auto iterable2 = std::string("a");
+        REQUIRE(!lz::starts_with(iterable, iterable2));
+    }
+}
+
+TEST_CASE("Ends with") {
+    SECTION("Non bidirectional ") {
+        auto iterable = lz::c_string("");
+        auto iterable2 = lz::c_string("H");
+        REQUIRE(!lz::ends_with(iterable, iterable2));
+
+        iterable2 = lz::c_string("");
+        REQUIRE(lz::ends_with(iterable, iterable2));
+
+        iterable = lz::c_string("Hello");
+        iterable2 = lz::c_string("o");
+        REQUIRE(lz::ends_with(iterable, iterable2));
+        iterable2 = lz::c_string("lo");
+        REQUIRE(lz::ends_with(iterable, iterable2));
+
+        iterable2 = lz::c_string("H");
+        REQUIRE(!lz::ends_with(iterable, iterable2));
+    }
+
+    SECTION("Bidirectional") {
+        std::list<char> lst;
+        std::list<char> lst2;
+        REQUIRE(lz::ends_with(lst, lst2));
+        lst = { 'H' };
+        REQUIRE(!lz::ends_with(lst, lst2));
+        lst = {};
+        lst2 = { 'H' };
+        REQUIRE(!lz::ends_with(lst, lst2));
+        lst = { 'A', 'B' };
+        lst2 = { 'B' };
+        REQUIRE(lz::ends_with(lst, lst2));
     }
 }
 

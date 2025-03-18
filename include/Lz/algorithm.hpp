@@ -408,18 +408,38 @@ starts_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary
 }
 
 /**
- * @brief Checks if the range [begin(iterable), end(iterable)) ends with the range [begin(iterable2), end(iterable2))
+ * @brief Checks if the range [begin(iterable), end(iterable)) ends with the bidirectional range [begin(iterable2),
+ * end(iterable2))
  *
  * @param iterable The iterable to check
- * @param iterable2 The iterable to check for
+ * @param iterable2 The bidirectional iterable to check for
  * @param binary_predicate The binary binary_predicate to check the values with
  * @return `true` if the value is found, `false` otherwise
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<detail::is_bidi<iter_t<Iterable>>::value, bool>
 ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
     return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                              std::begin(iterable2), std::end(iterable2), std::forward<BinaryPredicate>(binary_predicate));
+}
+
+/**
+ * @brief Checks if the range [begin(iterable), end(iterable)) ends with the forward iterable range [begin(iterable2),
+ * end(iterable2)). Needs to know the size of the range [begin(iterable), end(iterable)) and [begin(iterable2), end(iterable2)),
+ * so it may be worth your while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 isn't sized and going
+ * to use this function multiple times.
+ *
+ * @param iterable The iterable to check
+ * @param iterable2 The forward iterable to check for
+ * @param binary_predicate The binary binary_predicate to check the values with
+ * @return `true` if the value is found, `false` otherwise
+ */
+template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<!detail::is_bidi<iter_t<Iterable>>::value, bool>
+ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+    return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
+                             std::begin(iterable2), std::end(iterable2), std::forward<BinaryPredicate>(binary_predicate),
+                             lz::eager_size(iterable), lz::eager_size(iterable2));
 }
 
 /**

@@ -251,7 +251,20 @@ LZ_CONSTEXPR_CXX_14 bool contains(Iterator begin, S end, const T& value) {
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 bool starts_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate) {
+    const bool is_end = begin == end;
+    const bool is_end2 = begin2 == end2;
+
+    if (is_end && is_end2) {
+        return true;
+    }
+    if (is_end || is_end2) {
+        return false;
+    }
+
     while (begin != end && begin2 != end2 && binary_predicate(*begin, *begin2)) {
+        if (begin == end) {
+            return false;
+        }
         ++begin;
         ++begin2;
     }
@@ -266,7 +279,19 @@ LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
                        std::reverse_iterator<S2>(std::move(begin2)), std::move(binary_predicate));
 }
 
-// TODO add ends_with for fwd iterators
+template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
+LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate,
+                                   std::size_t size_of_iterable1, std::size_t size_of_iterable2) {
+    if (size_of_iterable1 < size_of_iterable2) {
+        return false;
+    }
+    while (size_of_iterable1 > size_of_iterable2) {
+        LZ_ASSERT(begin != end, "size of iterable and distance of begin and end do not match");
+        ++begin;
+        --size_of_iterable1;
+    }
+    return starts_with(std::move(begin), std::move(end), std::move(begin2), std::move(end2), std::move(binary_predicate));
+}
 
 template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_17 Iterator partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
