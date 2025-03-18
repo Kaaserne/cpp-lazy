@@ -49,6 +49,8 @@ LZ_INLINE_VAR constexpr detail::unique_adaptor unique{};
 
 #endif
 
+using detail::unique_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // end namespace lz

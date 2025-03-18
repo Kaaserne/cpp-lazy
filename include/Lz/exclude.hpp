@@ -48,6 +48,8 @@ LZ_INLINE_VAR constexpr detail::exclude_adaptor exclude{};
 
 #endif
 
+using detail::exclude_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

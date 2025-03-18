@@ -44,6 +44,8 @@ LZ_INLINE_VAR constexpr detail::concatenate_adaptor concat{};
 
 #endif
 
+using detail::concatenate_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

@@ -45,6 +45,8 @@ LZ_INLINE_VAR constexpr detail::cartesian_product_adaptor cartesian_product{};
 
 #endif
 
+using detail::cartesian_product_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

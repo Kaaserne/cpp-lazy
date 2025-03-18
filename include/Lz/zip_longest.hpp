@@ -68,6 +68,8 @@ LZ_INLINE_VAR constexpr detail::zip_longest_adaptor zip_longest{};
 
 #endif
 
+using detail::zip_longest_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

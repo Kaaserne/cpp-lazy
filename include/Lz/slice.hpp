@@ -40,6 +40,8 @@ LZ_INLINE_VAR constexpr detail::slice_adaptor slice{};
 
 #endif
 
+using detail::slice_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

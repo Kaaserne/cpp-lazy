@@ -62,6 +62,8 @@ LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
 
 #endif
 
+using detail::intersection_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

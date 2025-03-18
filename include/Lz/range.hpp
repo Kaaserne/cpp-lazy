@@ -43,6 +43,8 @@ LZ_INLINE_VAR constexpr detail::range_adaptor range{};
 
 #endif
 
+using detail::range_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

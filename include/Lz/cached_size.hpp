@@ -65,6 +65,8 @@ static constexpr detail::cached_size_adaptor cache_size{};
  */
 LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
 
+using detail::cached_size_iterable;
+
 #endif
 
 } // namespace lz

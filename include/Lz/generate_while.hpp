@@ -59,6 +59,8 @@ LZ_INLINE_VAR constexpr detail::generate_while_adaptor generate_while{};
 
 #endif // LZ_HAS_CXX_11
 
+using detail::generate_while_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

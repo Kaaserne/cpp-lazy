@@ -44,6 +44,8 @@ LZ_INLINE_VAR constexpr detail::drop_while_adaptor drop_while{};
 
 #endif
 
+using detail::drop_while_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

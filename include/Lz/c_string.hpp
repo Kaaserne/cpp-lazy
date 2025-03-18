@@ -42,6 +42,8 @@ LZ_INLINE_VAR constexpr detail::c_string_adaptor c_string{};
 
 #endif
 
+using detail::c_string_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

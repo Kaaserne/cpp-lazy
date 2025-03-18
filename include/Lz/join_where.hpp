@@ -61,6 +61,8 @@ LZ_INLINE_VAR constexpr detail::join_where_adaptor join_where{};
 
 #endif
 
+using detail::join_where_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

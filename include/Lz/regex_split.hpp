@@ -56,6 +56,8 @@ LZ_INLINE_VAR constexpr detail::regex_split_adaptor regex_split{};
 
 #endif
 
+using detail::regex_split_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

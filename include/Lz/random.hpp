@@ -94,8 +94,12 @@ LZ_INLINE_VAR constexpr detail::random_adaptor<true> random{};
 LZ_INLINE_VAR constexpr detail::random_adaptor<false> common_random{};
 
 #endif
-} // namespace lz
+
+using detail::random_iterable;
 
 LZ_MODULE_EXPORT_SCOPE_END
+
+} // namespace lz
+
 
 #endif

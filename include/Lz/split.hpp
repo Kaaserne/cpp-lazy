@@ -8,6 +8,9 @@
 #include <Lz/string_view.hpp>
 
 namespace lz {
+
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
 #ifdef LZ_HAS_CXX_11
 
 /**
@@ -141,6 +144,10 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
 LZ_INLINE_VAR constexpr detail::split_adaptor<lz::string_view> sv_split{};
 
 #endif
+
+using detail::split_iterable;
+
+LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

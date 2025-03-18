@@ -38,6 +38,8 @@ LZ_INLINE_VAR constexpr detail::generate_adaptor generate{};
 
 #endif
 
+using detail::generate_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

@@ -54,6 +54,8 @@ LZ_INLINE_VAR constexpr detail::take_every_adaptor take_every{};
 
 #endif // LZ_HAS_CXX_11
 
+using detail::take_every_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

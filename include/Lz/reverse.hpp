@@ -38,6 +38,8 @@ LZ_INLINE_VAR constexpr detail::reverse_adaptor reverse{};
 
 #endif
 
+using detail::reverse_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

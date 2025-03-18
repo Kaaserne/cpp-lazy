@@ -64,6 +64,8 @@ LZ_INLINE_VAR constexpr detail::loop_adaptor loop{};
 
 #endif
 
+using detail::loop_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

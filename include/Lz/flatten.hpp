@@ -40,6 +40,8 @@ LZ_INLINE_VAR constexpr detail::flatten_adaptor flatten{};
 
 #endif
 
+using detail::flatten_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

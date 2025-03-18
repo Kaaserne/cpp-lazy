@@ -48,6 +48,8 @@ LZ_INLINE_VAR constexpr detail::group_by_adaptor group_by{};
 
 #endif // LZ_HAS_CXX_11
 
+using detail::group_by_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

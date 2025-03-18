@@ -34,6 +34,8 @@ LZ_INLINE_VAR constexpr detail::repeat_adaptor repeat{};
 
 #endif
 
+using detail::repeat_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

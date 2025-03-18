@@ -41,6 +41,8 @@ LZ_INLINE_VAR constexpr detail::take_adaptor take{};
 
 #endif
 
+using detail::take_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

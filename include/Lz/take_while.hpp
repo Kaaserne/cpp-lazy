@@ -42,6 +42,8 @@ LZ_INLINE_VAR constexpr detail::take_while_adaptor take_while{};
 
 #endif
 
+using detail::take_while_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

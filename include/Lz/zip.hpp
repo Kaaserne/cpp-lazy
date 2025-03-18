@@ -60,6 +60,8 @@ LZ_INLINE_VAR constexpr detail::zip_adaptor zip{};
 
 #endif // LZ_HAS_CXX_11
 
+using detail::zip_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

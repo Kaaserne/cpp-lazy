@@ -44,6 +44,8 @@ LZ_INLINE_VAR constexpr detail::filter_adaptor filter{};
 
 #endif
 
+using detail::filter_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

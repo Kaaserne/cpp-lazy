@@ -54,6 +54,8 @@ LZ_INLINE_VAR constexpr detail::enumerate_adaptor enumerate{};
 
 #endif
 
+using detail::enumerate_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

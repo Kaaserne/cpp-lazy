@@ -157,6 +157,8 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 using detail::chunk_if_adaptor;
 
+using detail::chunk_if_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

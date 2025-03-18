@@ -70,6 +70,8 @@ LZ_INLINE_VAR constexpr detail::rotate_adaptor rotate{};
 
 #endif
 
+using detail::rotate_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz

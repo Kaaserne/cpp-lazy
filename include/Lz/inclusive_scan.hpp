@@ -69,6 +69,8 @@ LZ_INLINE_VAR constexpr detail::inclusive_scan_adaptor inclusive_scan{};
 
 #endif
 
+using detail::inclusive_scan_iterable;
+
 LZ_MODULE_EXPORT_SCOPE_END
 } // namespace lz
 
