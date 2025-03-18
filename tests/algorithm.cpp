@@ -1206,6 +1206,75 @@ TEST_CASE("For each while") {
     }
 }
 
+TEST_CASE("For each while n") {
+    SECTION("With non-empty c-string") {
+        const char* str = "Hello";
+        auto iterable = lz::c_string(str);
+        std::string result;
+        lz::for_each_while_n(iterable, 5, [&result](char c) {
+            result += c;
+            return c != 'l';
+        });
+        REQUIRE(result == "Hel");
+
+        result = "";
+        lz::for_each_while_n(iterable, 3, [&result](char c) {
+            result += c;
+            return c != 'o';
+        });
+        REQUIRE(result == "Hel");
+
+        result = "";
+        lz::for_each_while_n(iterable, 0, [&result](char c) {
+            result += c;
+            return c != 'o';
+        });
+        REQUIRE(result.empty());
+    }
+
+    SECTION("With one element") {
+        const char* str = "H";
+        auto iterable = lz::c_string(str);
+        std::string result;
+        lz::for_each_while_n(iterable, 1, [&result](char c) {
+            result += c;
+            return c != 'H';
+        });
+        REQUIRE(result == "H");
+
+        result = "";
+        lz::for_each_while_n(iterable, 0, [&result](char c) {
+            result += c;
+            return c != 'H';
+        });
+        REQUIRE(result.empty());
+
+        result = "";
+        lz::for_each_while_n(iterable, 10, [&result](char c) {
+            result += c;
+            return c != 'H';
+        });
+    }
+
+    SECTION("With empty c-string") {
+        const char* str = "";
+        auto iterable = lz::c_string(str);
+        std::string result;
+        lz::for_each_while_n(iterable, 0, [&result](char c) {
+            result += c;
+            return c != 'H';
+        });
+        REQUIRE(result.empty());
+
+        result = "";
+        lz::for_each_while_n(iterable, 10, [&result](char c) {
+            result += c;
+            return c != 'H';
+        });
+        REQUIRE(result.empty());
+    }
+}
+
 TEST_CASE("Copy") {
     SECTION("With non-empty c-string") {
         const char* str = "Hello";

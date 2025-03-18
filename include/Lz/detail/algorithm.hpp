@@ -308,13 +308,23 @@ LZ_CONSTEXPR_CXX_14 void for_each(Iterator begin, S end, UnaryOp unary_op) {
 }
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, const S& end, UnaryPredicate unary_predicate) {
+LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate unary_predicate) {
     for (; begin != end; ++begin) {
         if (!unary_predicate(*begin)) {
             break;
         }
     }
 }
+
+template<class Iterator, class S, class UnaryOp>
+LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterator begin, S end, std::size_t n, UnaryOp unary_op) {
+    for (std::size_t count = 0; begin != end && count < n; ++begin, ++count) {
+        if (!unary_op(*begin)) {
+            break;
+        }
+    }
+}
+
 template<class SourceIterator, class SourceS, class OutputIterator>
 LZ_CONSTEXPR_CXX_14 void copy(SourceIterator begin, SourceS end, OutputIterator output) {
     for (; begin != end; ++begin, ++output) {

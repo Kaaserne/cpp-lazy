@@ -450,8 +450,6 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterable&& iterable, BinaryOp binar
                         std::move(binary_op));
 }
 
-// TODO add for_each_n, for_each_while_n, copy_n
-
 /**
  * @brief Iterates over the range [begin(iterable), end(iterable)) and applies the unary binary_predicate @p unary_op to
  * each
@@ -476,10 +474,22 @@ LZ_CONSTEXPR_CXX_14 void for_each(Iterable&& iterable, UnaryOp&& unary_op) {
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void for_each_while(Iterable&& iterable, UnaryOp&& unary_op) {
-    static_assert(std::is_convertible<detail::decay_t<decltype(unary_op(*std::begin(iterable)))>, bool>::value,
-                  "Predicate must return boolean like value");
     detail::for_each_while(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                            std::forward<UnaryOp>(unary_op));
+}
+
+/**
+ * @brief Keeps iterating over @p iterable while @p binary_predicate returns true and @p n < distance(begin(iterable),
+ * end(iterable)).
+ *
+ * @param iterable A range
+ * @param n The amount of elements to iterate over
+ * @param unary_op Predicate that must either return true or false
+ */
+template<LZ_CONCEPT_ITERABLE Iterable, class UnaryOp>
+LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterable&& iterable, std::size_t n, UnaryOp&& unary_op) {
+    detail::for_each_while_n(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), n,
+                             std::forward<UnaryOp>(unary_op));
 }
 
 /**

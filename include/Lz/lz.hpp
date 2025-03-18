@@ -3,11 +3,10 @@
 #ifndef LZ_LZ_HPP
 #define LZ_LZ_HPP
 
-// TODO check includes
-
 #include <Lz/algorithm.hpp>
 #include <Lz/any_iterable.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/cached_size.hpp>
 #include <Lz/cartesian_product.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/chunks.hpp>
