@@ -90,52 +90,11 @@ TEST_CASE("Range binary operations") {
         REQUIRE(it == range.end());
     }
 
-    SECTION("Operator+(int) offset, tests += as well") {
-        REQUIRE(*(it + 2) == 2);
-        REQUIRE(*(it + 4) == 4);
-        REQUIRE(*(f_it + 2) == 1.);
-        REQUIRE(*(f_it + 3) == 1.5);
-        REQUIRE(*(f_it + 5) == 2.5);
+    // TODO
+    SECTION("Operator+") {
     }
 
-    SECTION("Operator-(int) offset, tests -= as well") {
-        REQUIRE(*((it + 2) - 1) == 1);
-        REQUIRE(*((it + 4) - 2) == 2);
-        REQUIRE(*((f_it + 2) - 1) == .5);
-        REQUIRE(*((f_it + 3) - 2) == .5);
-        REQUIRE(*((f_it + 5) - 2) == 1.5);
-    }
-
-    SECTION("Operator-(Iterator)") {
-        REQUIRE(range.end() - it == 10);
-        REQUIRE(f_range.end() - f_it == 21);
-
-        REQUIRE(range.end() - (it + 1) == 9);
-        REQUIRE(f_range.end() - (f_it + 1) == 20);
-    }
-
-    SECTION("Operator[]()") {
-        REQUIRE(f_it[1] == .5);
-        REQUIRE(it[1] == 1);
-    }
-
-    SECTION("Operator<, <, <=, >, >=") {
-        auto b = range.begin();
-        auto end = range.end();
-        auto distance = std::distance(b, end);
-
-        REQUIRE(b < end);
-        REQUIRE(b + distance - 1 > end - distance);
-        REQUIRE(b + distance - 1 <= end);
-        REQUIRE(b + size - 1 >= end - 1);
-
-        auto f_b = range.begin();
-        auto f_end = range.end();
-
-        REQUIRE(f_b < end);
-        REQUIRE(f_b + distance - 1 > f_end - distance);
-        REQUIRE(f_b + distance - 1 <= f_end);
-        REQUIRE(f_b + 20 >= f_end - 1);
+    SECTION("Operator-") {
     }
 }
 

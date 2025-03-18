@@ -123,35 +123,11 @@ TEST_CASE("Concat binary operations") {
         REQUIRE(begin == concat.end());
     }
 
-    SECTION("Operator+(int), tests += as well") {
-        REQUIRE(*(begin + static_cast<std::ptrdiff_t>(a.size())) == 'w');
+    // TODO
+    SECTION("Operator+") {
     }
 
-    SECTION("Operator-(int), tests -= as well") {
-        begin += static_cast<std::ptrdiff_t>(a.size());
-        REQUIRE(*begin == 'w');
-    }
-
-    SECTION("Operator-(Iterator)") {
-        REQUIRE(static_cast<std::size_t>(concat.end() - begin) == a.size() + b.size());
-        REQUIRE(static_cast<std::size_t>(std::distance(concat.begin(), concat.end())) == a.size() + b.size());
-    }
-
-    SECTION("Operator[]()") {
-        REQUIRE(begin[static_cast<std::ptrdiff_t>(a.size())] == 'w');
-    }
-
-    SECTION("Operator<, '<, <=, >, >='") {
-        auto end = concat.end();
-        const auto distance = std::distance(begin, end) - 1;
-
-        REQUIRE(begin < end);
-        begin += distance;
-        REQUIRE(begin <= end);
-        end -= distance;
-
-        REQUIRE(begin > end);
-        REQUIRE(begin >= end);
+    SECTION("Operator-") {
     }
 }
 

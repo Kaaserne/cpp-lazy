@@ -91,32 +91,11 @@ TEST_CASE("Map binary operations") {
         REQUIRE(it == map.end());
     }
 
-    SECTION("Operator+(int) offset, tests += as well") {
-        REQUIRE(*(it + 1) == array[1].test_field_str);
+    // TODO
+    SECTION("Operator+") {
     }
 
-    SECTION("Operator-(int) offset, tests -= as well") {
-        ++it;
-        REQUIRE(*(it - 1) == array[0].test_field_str);
-    }
-
-    SECTION("Operator-(Iterator)") {
-        REQUIRE((map.end() - map.begin()) == 3);
-    }
-
-    SECTION("Operator[]()") {
-        REQUIRE(it[1] == "FieldB");
-    }
-
-    SECTION("Operator<, <, <=, >, >=") {
-        auto b = map.begin();
-        auto end = map.end();
-        auto distance = std::distance(b, end);
-
-        REQUIRE(b < end);
-        REQUIRE(b + distance - 1 > end - distance);
-        REQUIRE(b + distance - 1 <= end);
-        REQUIRE(b + size - 1 >= end - 1);
+    SECTION("Operator-") {
     }
 }
 

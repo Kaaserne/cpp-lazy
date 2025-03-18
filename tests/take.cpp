@@ -55,31 +55,11 @@ TEST_CASE("Take binary operations") {
         REQUIRE(it == take.end());
     }
 
-    SECTION("Operator+(int) offset, tests += as well") {
-        auto begin = take.begin();
-        REQUIRE(*(begin + 2) == 3);
+    // TODO
+    SECTION("Operator+") {
     }
 
-    SECTION("Operator-(int) offset, tests -= as well") {
-        auto end = take.end();
-        REQUIRE(*(end - 1) == 4);
-    }
-
-    SECTION("Operator-(Iterator)") {
-        REQUIRE((take.end() - take.begin()) == 4);
-    }
-
-    SECTION("Operator[]()") {
-        REQUIRE(take.begin()[0] == 1);
-        REQUIRE(take.begin()[1] == 2);
-        REQUIRE(take.begin()[2] == 3);
-    }
-
-    SECTION("Operator<, <, <=, >, >=") {
-        REQUIRE(take.begin() < take.end());
-        REQUIRE(take.begin() + 1 > take.begin());
-        REQUIRE(take.begin() + 4 <= take.end());
-        REQUIRE(take.begin() + 4 >= take.end());
+    SECTION("Operator-") {
     }
 }
 

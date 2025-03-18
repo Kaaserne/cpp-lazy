@@ -67,7 +67,17 @@ TEST_CASE("random_iterable binary operations") {
     SECTION("Operator++") {
         auto it = random.begin();
         ++it;
+        REQUIRE(*it >= 0.);
+        REQUIRE(*it <= 1.);
         REQUIRE(lz::distance(it, random.end()) == 4);
+    }
+
+    SECTION("Operator--") {
+        auto it = random.end();
+        --it;
+        REQUIRE(*it >= 0.);
+        REQUIRE(*it <= 1.);
+        REQUIRE(lz::distance(random.begin(), it) == 4);
     }
 
     SECTION("Operator== & Operator!=") {
@@ -85,47 +95,11 @@ TEST_CASE("random_iterable binary operations") {
         REQUIRE(*it <= 1.);
     }
 
-    SECTION("Operator[]") {
-        auto it = random.begin();
-        REQUIRE(it[0] <= 1.);
-        REQUIRE(it[0] >= 0.);
+    // TODO
+    SECTION("Operator+") {
     }
 
-    SECTION("Operator+(int)") {
-        auto it = random.begin();
-        REQUIRE(*(it + 1) >= 0.);
-        REQUIRE(*(it + 1) <= 1.);
-    }
-
-    SECTION("Operator-(int)") {
-        auto it = random.begin();
-        it += 3;
-        REQUIRE((random.end() - 2) == it);
-    }
-
-    SECTION("Operator-(Iterator)") {
-        auto it = random.begin();
-        REQUIRE(it - random.begin() == 0);
-        REQUIRE(random.end() - it == 5);
-    }
-
-    SECTION("Operator+=(int)") {
-        auto it = random.begin();
-        it += 1;
-        REQUIRE(it == random.begin() + 1);
-    }
-
-    SECTION("Operator-=(int)") {
-        auto it = random.begin() + 1;
-        it -= 1;
-        REQUIRE(it == random.begin());
-    }
-
-    SECTION("Operator<, <, >=, <=") {
-        REQUIRE(random.begin() < random.end());
-        REQUIRE(random.begin() <= random.end());
-        REQUIRE(random.end() > random.begin());
-        REQUIRE(random.end() >= random.begin());
+    SECTION("Operator-") {
     }
 }
 

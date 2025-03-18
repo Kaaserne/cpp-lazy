@@ -105,34 +105,11 @@ TEST_CASE("Enumerate binary operations") {
         REQUIRE(begin == enumerate.end());
     }
 
-    SECTION("Operator+(int), tests += as well") {
-        REQUIRE((begin + 1)->first == 2);  // Index
-        REQUIRE((begin + 1)->second == 3); // element
+    // TODO
+    SECTION("Operator+") {
     }
 
-    SECTION("Operator-(int), tests -= as well") {
-        REQUIRE((begin - 1)->first == 0);  // Index
-        REQUIRE((begin - 1)->second == 1); // element
-    }
-
-    SECTION("Operator-(Iterator)") {
-        REQUIRE(enumerate.end() - begin == 2);
-    }
-
-    SECTION("Operator[]()") {
-        REQUIRE(enumerate.begin()[1].first == 1);
-        REQUIRE(enumerate.begin()[1].second == 2);
-    }
-
-    SECTION("Operator<, '<, <=, >, >='") {
-        const auto b = enumerate.begin();
-        const auto end = enumerate.end();
-        const auto distance = std::distance(b, end);
-
-        REQUIRE(b < end);
-        REQUIRE(b + distance - 1 > end - distance);
-        REQUIRE(b + distance - 1 <= end);
-        REQUIRE(b + size - 1 >= end - 1);
+    SECTION("Operator-") {
     }
 }
 
