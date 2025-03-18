@@ -9,6 +9,9 @@
 
 namespace lz {
 namespace detail {
+template<class Iterable>
+using slice_iterable = detail::take_iterable<detail::drop_iterable<Iterable>>;
+
 struct slice_adaptor {
     using adaptor = slice_adaptor;
 
@@ -31,7 +34,7 @@ struct slice_adaptor {
      * @param to The end index of the slice
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr detail::take_iterable<detail::drop_iterable<Iterable>>
+    LZ_NODISCARD constexpr slice_iterable<Iterable>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> from, const diff_iterable_t<Iterable> to) const {
         return { lz::drop(std::forward<Iterable>(iterable), from), to - from };
     }
