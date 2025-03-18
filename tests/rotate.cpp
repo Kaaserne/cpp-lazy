@@ -145,6 +145,22 @@ TEST_CASE("rotate_iterable binary operations") {
         ++begin;
         REQUIRE(end - begin == 0);
         REQUIRE(begin - end == 0);
+        begin = rotate.begin();
+
+        REQUIRE(begin - end == -4);
+        REQUIRE(end - begin == 4);
+        --end;
+        REQUIRE(begin - end == -3);
+        REQUIRE(end - begin == 3);
+        --end;
+        REQUIRE(begin - end == -2);
+        REQUIRE(end - begin == 2);
+        --end;
+        REQUIRE(begin - end == -1);
+        REQUIRE(end - begin == 1);
+        --end;
+        REQUIRE(begin - end == 0);
+        REQUIRE(end - begin == 0);
     }
 }
 
