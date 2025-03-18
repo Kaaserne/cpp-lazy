@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(cpp-lazy
-        VERSION 7.0.2
+        VERSION 8.0.1
         DESCRIPTION
         "A fast C++11/14/17/20 header only library for lazy evaluation and function tools"
         HOMEPAGE_URL "https://github.com/MarcDirven/cpp-lazy"
@@ -103,7 +103,7 @@ target_include_directories(cpp-lazy
 # ---- Install ----
 include(CMakePackageConfigHelpers)
 
-set(cpp-lazy_directory "cpp-lazy-${PROJECT_VERSION}")
+set(cpp-lazy_directory "cpp-lazy")
 set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${cpp-lazy_directory}")
 set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cpp-lazy_directory}")
 
