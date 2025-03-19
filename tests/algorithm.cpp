@@ -2,7 +2,12 @@
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <queue>
+#include <deque>
 #include <sstream>
+#include <forward_list>
+#include <set>
+#include <unordered_set>
 
 TEST_CASE("Formatting") {
     SECTION("Non-empty fmt") {
@@ -128,6 +133,109 @@ TEST_CASE("To iterable") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         lz::basic_iterable<std::list<int>::iterator> iterable(lst.begin(), lst.end());
         static_assert(!lz::sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
+    }
+}
+
+TEST_CASE("To container") {
+    SECTION("To cpp array same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto arr = lz::to<std::array<int, 5>>(vec);
+        REQUIRE(lz::equal(arr, vec));
+        arr = vec | lz::to<std::array<int, 5>>();
+        REQUIRE(lz::equal(arr, vec));
+    }
+
+    SECTION("To std list same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto lst = lz::to<std::list<int>>(vec);
+        REQUIRE(lz::equal(lst, vec));
+        lst = vec | lz::to<std::list<int>>();
+        REQUIRE(lz::equal(lst, vec));
+    }
+
+    SECTION("To vector same iterator pair") {
+        const std::vector<int> v1 = { 1, 2, 3, 4, 5 };
+        auto v2 = lz::to<std::vector<int>>(v1);
+        REQUIRE(lz::equal(v1, v2));
+        v2 = v1 | lz::to<std::vector<int>>();
+        REQUIRE(lz::equal(v1, v2));
+    }
+
+    SECTION("To forward list same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto flst = lz::to<std::forward_list<int>>(vec);
+        REQUIRE(lz::equal(flst, vec));
+        flst = vec | lz::to<std::forward_list<int>>();
+        REQUIRE(lz::equal(flst, vec));
+    }
+
+    SECTION("To queue same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto queue = lz::to<std::queue<int>>(vec);
+        std::size_t i = 0;
+        for (; !queue.empty(); queue.pop(), ++i) {
+            REQUIRE(queue.front() == vec[i]);
+        }
+        queue = vec | lz::to<std::queue<int>>();
+        for (i = 0; !queue.empty(); queue.pop(), ++i) {
+            REQUIRE(queue.front() == vec[i]);
+        }
+    }
+
+    SECTION("To deque same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto deque = lz::to<std::deque<int>>(vec);
+        REQUIRE(lz::equal(deque, vec));
+        deque = vec | lz::to<std::deque<int>>();
+        REQUIRE(lz::equal(deque, vec));
+    }
+
+    SECTION("To set same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto set = lz::to<std::set<int>>(vec);
+        REQUIRE(lz::equal(set, vec));
+        set = vec | lz::to<std::set<int>>();
+        REQUIRE(lz::equal(set, vec));
+    }
+
+    SECTION("To unordered set same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto set = lz::to<std::unordered_set<int>>(vec);
+        REQUIRE(lz::equal(set, vec));
+        set = vec | lz::to<std::unordered_set<int>>();
+        REQUIRE(lz::equal(set, vec));
+    }
+
+    SECTION("To cpp array sentinel iterator pair") {
+        auto c_str = lz::c_string("Hello");
+        auto arr = lz::to<std::array<char, 5>>(c_str);
+        REQUIRE(lz::equal(arr, c_str));
+        arr = c_str | lz::to<std::array<char, 5>>();
+        REQUIRE(lz::equal(arr, c_str));
+    }
+
+    SECTION("To std list sentinel iterator pair") {
+        auto c_str = lz::c_string("Hello");
+        auto lst = lz::to<std::list<char>>(c_str);
+        REQUIRE(lz::equal(lst, c_str));
+        lst = c_str | lz::to<std::list<char>>();
+        REQUIRE(lz::equal(lst, c_str));
+    }
+
+    SECTION("To vector sentinel iterator pair") {
+        auto c_str = lz::c_string("Hello");
+        auto vec = lz::to<std::vector<char>>(c_str);
+        REQUIRE(lz::equal(vec, c_str));
+        vec = c_str | lz::to<std::vector<char>>();
+        REQUIRE(lz::equal(vec, c_str));
+    }
+    // TODO: Add more tests for to container
+    SECTION("To forward list sentinel iterator pair") {
+        auto c_str = lz::c_string("Hello");
+        auto flst = lz::to<std::forward_list<char>>(c_str);
+        REQUIRE(lz::equal(flst, c_str));
+        flst = c_str | lz::to<std::forward_list<char>>();
+        REQUIRE(lz::equal(flst, c_str));
     }
 }
 
