@@ -55,11 +55,43 @@ TEST_CASE("Take binary operations") {
         REQUIRE(it == take.end());
     }
 
-    // TODO
     SECTION("Operator+") {
+        auto begin = take.begin();
+        auto end = take.end();
+
+        auto expected = { 1, 2, 3, 4 };
+        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
+        }
+        REQUIRE(begin + lz::size(take) == take.end());
+        for (std::size_t i = 1; i <= lz::size(take); ++i) {
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::size(take) == take.begin());
+
+        std::advance(begin, lz::size(take));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
+
+        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
+            REQUIRE(*(end + i) == *(expected.begin() + i));
+        }
+        REQUIRE(end + lz::size(take) == take.end());
+        for (std::size_t i = 1; i <= lz::size(take); ++i) {
+            REQUIRE(*(begin - i) == *(expected.end() - i));
+        }
+        REQUIRE(begin - lz::size(take) == take.begin());
     }
 
     SECTION("Operator-") {
+        auto begin = take.begin();
+        auto end = take.end();
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(take) - i));
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take) - i));
+            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
+            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
+        }
     }
 }
 

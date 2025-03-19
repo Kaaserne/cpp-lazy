@@ -84,32 +84,71 @@ TEST_CASE("Enumerate binary operations") {
     constexpr std::size_t size = 3;
     std::array<int, size> array = { 1, 2, 3 };
     auto enumerate = lz::enumerate(array);
-    auto begin = enumerate.begin();
-    ++begin; // Increment by one
 
     SECTION("Operator++") {
-        REQUIRE(begin->first == 1);  // Index
-        REQUIRE(begin->second == 2); // element
+        auto begin = enumerate.begin();
+        ++begin;
+        REQUIRE(begin->first == 1);
+        REQUIRE(begin->second == 2);
     }
 
     SECTION("Operator--") {
-        --begin;
-        // Decrement by one, back at begin()
-        REQUIRE(begin->first == 0);  // Index
-        REQUIRE(begin->second == 1); // element
+        auto end = enumerate.end();
+        --end;
+        REQUIRE(end->first == 2);
+        REQUIRE(end->second == 3);
+        --end;
+        REQUIRE(end->first == 1);
+        REQUIRE(end->second == 2);
+        --end;
+        REQUIRE(end->first == 0);
+        REQUIRE(end->second == 1);
     }
 
     SECTION("Operator== & operator!=") {
+        auto begin = enumerate.begin();
         REQUIRE(begin != enumerate.end());
         begin = enumerate.end();
         REQUIRE(begin == enumerate.end());
     }
 
-    // TODO
     SECTION("Operator+") {
+        auto begin = enumerate.begin();
+        auto end = enumerate.end();
+
+        std::vector<std::pair<int, int>> expected = { { 0, 1 }, { 1, 2 }, { 2, 3 } };
+        for (std::size_t i = 0; i < lz::size(enumerate) - 1; ++i) {
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
+        }
+        REQUIRE(begin + lz::size(enumerate) == enumerate.end());
+        for (std::size_t i = 1; i <= lz::size(enumerate); ++i) {
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::size(enumerate) == enumerate.begin());
+
+        std::advance(begin, lz::size(enumerate));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(enumerate)));
+
+        for (std::size_t i = 0; i < lz::size(enumerate) - 1; ++i) {
+            REQUIRE(*(end + i) == *(expected.begin() + i));
+        }
+        REQUIRE(end + lz::size(enumerate) == enumerate.end());
+        for (std::size_t i = 1; i <= lz::size(enumerate); ++i) {
+            REQUIRE(*(begin - i) == *(enumerate.end() - i));
+        }
+        REQUIRE(begin - lz::size(enumerate) == enumerate.begin());
     }
 
     SECTION("Operator-") {
+        auto begin = enumerate.begin();
+        auto end = enumerate.end();
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(enumerate)); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(enumerate) - i));
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(enumerate) - i));
+            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(enumerate) - i));
+            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(enumerate) - i));
+        }
     }
 }
 
@@ -120,31 +159,31 @@ TEST_CASE("Enumerate to containers") {
 
     SECTION("To array") {
         auto actual_array = array | lz::enumerate | lz::to<std::array<std::pair<int, int>, size>>();
-        auto expceted_pair = std::make_pair(0, 1);
+        auto expected_pair = std::make_pair(0, 1);
 
         for (auto actual_pair : actual_array) {
-            REQUIRE(actual_pair == expceted_pair);
-            expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
+            REQUIRE(actual_pair == expected_pair);
+            expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
         }
     }
 
     SECTION("To vector") {
         auto actual_vec = lz::enumerate(vec) | lz::to<std::vector>();
-        auto expceted_pair = std::make_pair(0, 1);
+        auto expected_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_vec) {
-            REQUIRE(actual_pair == expceted_pair);
-            expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
+            REQUIRE(actual_pair == expected_pair);
+            expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
         }
     }
 
     SECTION("To other container using to<>()") {
         auto actual_list = lz::enumerate(vec) | lz::to<std::list>();
-        auto expceted_pair = std::make_pair(0, 1);
+        auto expected_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_list) {
-            REQUIRE(actual_pair == expceted_pair);
-            expceted_pair = std::make_pair(++expceted_pair.first, ++expceted_pair.second);
+            REQUIRE(actual_pair == expected_pair);
+            expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
         }
     }
 
