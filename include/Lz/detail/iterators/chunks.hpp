@@ -164,7 +164,7 @@ private:
     std::size_t _chunk_size{};
 
 public:
-    LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, Iterator begin, Iterator end, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, Iterator begin, S end, const std::size_t chunk_size) :
         _begin{ std::move(begin) },
         _sub_range_begin{ std::move(iterator) },
         _end{ std::move(end) },

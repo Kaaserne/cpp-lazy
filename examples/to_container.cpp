@@ -6,6 +6,38 @@
 #include <set>
 #include <vector>
 
+// In case you have a custom container, you can specialize `lz::custom_copier` to copy the elements to your container.
+// This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
+// `lz::custom_copier` for your custom container if all of the following are true:
+// - Your custom container does not have a `push_back` method
+// - Your custom container does not have an `insert` method
+// - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
+// - Your custom container does not have a `push` method
+// - Your custom container is not std::array
+template<class T>
+class custom_container {
+    std::vector<T> _vec;
+
+public:
+    void reserve(std::size_t size) {
+        _vec.reserve(size);
+    }
+
+    std::vector<T>& vec() {
+        return _vec;
+    }
+};
+
+// Specialize `lz::custom_copier` for your custom container
+template<class T>
+struct lz::custom_copier<custom_container<T>> {
+    template<class Iterable>
+    void copy(Iterable&& iterable, custom_container<T>& container) const {
+        // Copy the contents of the iterable to the container
+        lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
+    }
+};
+
 int main() {
     char c = 'a';
     auto generator = lz::generate(
@@ -83,4 +115,10 @@ int main() {
         std::cout << val << ' ';
     }
     // Output: b c d e
+
+    auto custom = generator | lz::to<custom_container<char>>();
+    for (char val : custom.vec()) {
+        std::cout << val << ' ';
+    }
+    // Output: a b c d
 }

@@ -116,7 +116,7 @@ TEST_CASE("take_while_iterable to containers") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });
-    (void)take_while;
+
     SECTION("To array") {
         auto arr = take_while | lz::to<std::array<int, 4>>();
         REQUIRE(arr.size() == 4);

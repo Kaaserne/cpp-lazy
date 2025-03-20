@@ -165,6 +165,7 @@ public:
     using reference = optional_iter_tuple_ref_type<IterTuple>;
     using pointer = fake_ptr_proxy<value_type>;
 
+    static constexpr std::size_t tuple_size = std::tuple_size<IterTuple>::value;
 private:
     using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
     using difference_tuple = decltype(zeroes(make_idx_sequence_for_this()));
@@ -274,6 +275,7 @@ public:
         _iterators{ std::move(iterator) },
         _end{ std::move(end) },
         _distances{ distances } {
+        static_assert(tuple_size > 1, "Cannot zip one/zero iterables");
     }
 
     constexpr zip_longest_iterator() = default;

@@ -268,6 +268,7 @@ TEST_CASE("take_every_iterable binary operations") {
         test_operator_plus(expected, uneven_sized_odd_take);
     }
 
+    // TODO
     SECTION("Operator-") {
     }
 }

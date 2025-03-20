@@ -22,9 +22,8 @@ struct except_adaptor {
     /**
      * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
      * argument. Can be used with a custom comparer. Does not contain a .size() method, it's a forward iterator and returns a
-     * sentinel. The second iterable must be sorted in order for it to work. If the input iterable is bidirectional or less and
-     * not sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`),
-     * so it may be worth your while to use `lz::cache_size`. Example:
+     * sentinel. The second iterable must be sorted in order for it to work.
+     * Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * std::vector<int> to_except = { 5, 3 };
@@ -32,10 +31,6 @@ struct except_adaptor {
      * auto excepted = lz::except(vec, to_except); // excepted = { 1, 2, 4 }
      * // or
      * auto excepted = lz::except(vec, to_except, std::less<int>{}); // excepted = { 1, 2, 4 }
-     * // or
-     * auto excepted = vec | lz::except(to_except); // excepted = { 1, 2, 4 }
-     * // or
-     * auto excepted = vec | lz::except(to_except, std::less<int>{}); // excepted = { 1, 2, 4 }
      * ```
      * @param iterable1 The iterable to except.
      * @param iterable2 The iterable that must be skipped in @p iterable1.
@@ -52,9 +47,7 @@ struct except_adaptor {
     /**
      * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
      * argument. Can be used with a custom comparer. Does not contain a .size() method, it's a forward iterator and returns a
-     * sentinel. The second iterable must be sorted in order for it to work. If the input iterable is exactly bidirectional and not sized
-     * (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may be
-     * worth your while to use `lz::cache_size`. Example:
+     * sentinel. The second iterable must be sorted in order for it to work.
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * std::vector<int> to_except = { 5, 3 };

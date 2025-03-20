@@ -23,6 +23,17 @@ struct zip_adaptor {
      * the input iterables. If the weakest is a forward iterator, then the end() function will return the same types as its input
      * iterables. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
      * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
+     * So, all in all: use lz::cache_size if:
+     * - Your iterable is exactly bidirectional (so forward excluded)
+     * - Your iterable is not sized
+     * - You use multiple/a combination of the following iterables:
+     *   - lz::chunks
+     *   - lz::enumerate
+     *   - lz::exclude
+     *   - lz::take_every
+     *   - lz::zip_longest
+     *   - lz::zip
+     * Are planning to call begin() or end() multiple times
      * Example:
      * ```cpp
      * std::vector<int> a = { 1, 2, 3 };

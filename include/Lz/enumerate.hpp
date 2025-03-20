@@ -23,11 +23,24 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```cpp
  * std::forward_list<int> list = {1, 2, 3, 4, 5};
  * auto enumerated = lz::enumerate(list); // enumerated = { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * auto enumerated = lz::enumerate(list, 5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
  *
  * // or
  *
  * auto enumerated = list | lz::enumerate; // enumerated = { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * auto enumerated = list | lz::enumerate(5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
  * ```
+ * So, all in all: use lz::cache_size if:
+ * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is not sized
+ * - You use multiple/a combination of the following iterables:
+ *   - lz::chunks
+ *   - lz::enumerate
+ *   - lz::exclude
+ *   - lz::take_every
+ *   - lz::zip_longest
+ *   - lz::zip
+ * Are planning to call begin() or end() multiple times
  */
 static constexpr detail::enumerate_adaptor detail::enumerate_adaptor::enumerate{};
 
@@ -44,11 +57,24 @@ static constexpr detail::enumerate_adaptor detail::enumerate_adaptor::enumerate{
  * ```cpp
  * std::forward_list<int> list = {1, 2, 3, 4, 5};
  * auto enumerated = lz::enumerate(list); // enumerated = { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * auto enumerated = lz::enumerate(list, 5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
  *
  * // or
  *
  * auto enumerated = list | lz::enumerate; // enumerated = { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * auto enumerated = list | lz::enumerate(5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
  * ```
+ * So, all in all: use lz::cache_size if:
+ * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is not sized
+ * - You use multiple/a combination of the following iterables:
+ *   - lz::chunks
+ *   - lz::enumerate
+ *   - lz::exclude
+ *   - lz::take_every
+ *   - lz::zip_longest
+ *   - lz::zip
+ * Are planning to call begin() or end() multiple times
  */
 LZ_INLINE_VAR constexpr detail::enumerate_adaptor enumerate{};
 

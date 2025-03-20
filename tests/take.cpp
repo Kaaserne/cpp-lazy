@@ -92,6 +92,12 @@ TEST_CASE("Take binary operations") {
             REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
             REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
         }
+
+        for (std::size_t i = 0; i < lz::size(take) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
+            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
+        }
     }
 }
 

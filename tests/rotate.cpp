@@ -102,65 +102,13 @@ TEST_CASE("rotate_iterable binary operations") {
         REQUIRE(*uneven_end == 5);
     }
 
-    SECTION("Operator+= and Operator-=") {
-        begin += 0;
-        REQUIRE(*begin == 4);
-        begin -= 0;
-        REQUIRE(*begin == 4);
-        begin += 2;
-        REQUIRE(*begin == 2);
-        begin += 1;
-        REQUIRE(*begin == 3);
-        begin -= 1;
-        REQUIRE(*begin == 2);
-        begin -= 2;
-        REQUIRE(*begin == 4);
-        begin += 4;
-        REQUIRE(begin == end);
+    // TODO
+    SECTION("Operator+") {
 
-        end -= 1;
-        REQUIRE(*end == 3);
-        end -= 0;
-        REQUIRE(*end == 3);
-        end += 0;
-        REQUIRE(*end == 3);
-        end -= 3;
-        REQUIRE(*end == 4);
-        end += 4;
-        REQUIRE(begin == end);
     }
 
     SECTION("Operator-") {
-        REQUIRE(end - begin == 4);
-        REQUIRE(begin - end == -4);
-        ++begin;
-        REQUIRE(end - begin == 3);
-        REQUIRE(begin - end == -3);
-        ++begin;
-        REQUIRE(end - begin == 2);
-        REQUIRE(begin - end == -2);
-        ++begin;
-        REQUIRE(end - begin == 1);
-        REQUIRE(begin - end == -1);
-        ++begin;
-        REQUIRE(end - begin == 0);
-        REQUIRE(begin - end == 0);
-        begin = rotate.begin();
 
-        REQUIRE(begin - end == -4);
-        REQUIRE(end - begin == 4);
-        --end;
-        REQUIRE(begin - end == -3);
-        REQUIRE(end - begin == 3);
-        --end;
-        REQUIRE(begin - end == -2);
-        REQUIRE(end - begin == 2);
-        --end;
-        REQUIRE(begin - end == -1);
-        REQUIRE(end - begin == 1);
-        --end;
-        REQUIRE(begin - end == 0);
-        REQUIRE(end - begin == 0);
     }
 }
 

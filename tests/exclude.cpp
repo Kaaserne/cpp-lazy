@@ -177,6 +177,22 @@ TEST_CASE("Exclude binary operations") {
             REQUIRE(exEnd3 - (exBeg3 + i) == static_cast<std::ptrdiff_t>(lz::size(excluded3) - i));
             REQUIRE(exBeg3 - (exEnd3 - i) == -static_cast<std::ptrdiff_t>(lz::size(excluded3) - i));
         }
+
+        for (std::size_t i = 0; i < lz::size(excluded1) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((exEnd1 - i) - (exBeg1 + i) == static_cast<std::ptrdiff_t>(lz::size(excluded1) - 2 * i));
+            REQUIRE((exBeg1 + i) - (exEnd1 - i) == -static_cast<std::ptrdiff_t>(lz::size(excluded1) - 2 * i));
+        }
+        for (std::size_t i = 0; i < lz::size(excluded2) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((exEnd2 - i) - (exBeg2 + i) == static_cast<std::ptrdiff_t>(lz::size(excluded2) - 2 * i));
+            REQUIRE((exBeg2 + i) - (exEnd2 - i) == -static_cast<std::ptrdiff_t>(lz::size(excluded2) - 2 * i));
+        }
+        for (std::size_t i = 0; i < lz::size(excluded3) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((exEnd3 - i) - (exBeg3 + i) == static_cast<std::ptrdiff_t>(lz::size(excluded3) - 2 * i));
+            REQUIRE((exBeg3 + i) - (exEnd3 - i) == -static_cast<std::ptrdiff_t>(lz::size(excluded3) - 2 * i));
+        }
     }
 
     SECTION("Operator== & operator!=") {

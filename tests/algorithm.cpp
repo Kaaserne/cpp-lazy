@@ -9,6 +9,40 @@
 #include <set>
 #include <unordered_set>
 
+template<class T>
+class custom_container {
+    std::vector<T> _vec;
+    std::size_t _expected_capacity{};
+
+public:
+    custom_container() = default;
+
+    std::size_t expected_capacity() const {
+        return _expected_capacity;
+    }
+
+    custom_container(std::size_t expected_capacity) : _expected_capacity(expected_capacity) {
+    }
+
+    void reserve(std::size_t size) {
+        _vec.reserve(size);
+    }
+
+    std::vector<T>& vec() {
+        return _vec;
+    }
+};
+
+template<class T>
+struct lz::custom_copier<custom_container<T>> {
+    template<class Iterable>
+    void copy(Iterable&& iterable, custom_container<T>& container) const {
+        REQUIRE(container.vec().empty());
+        REQUIRE(container.vec().capacity() == container.expected_capacity());
+        lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
+    }
+};
+
 TEST_CASE("Formatting") {
     SECTION("Non-empty fmt") {
         std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -193,17 +227,38 @@ TEST_CASE("To container") {
     SECTION("To set same iterator pair") {
         const std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto set = lz::to<std::set<int>>(vec);
-        REQUIRE(lz::equal(set, vec));
+        REQUIRE(set.size() == vec.size());
+        for (std::size_t i = 0; i < vec.size(); ++i) {
+            REQUIRE(set.find(vec[i]) != set.end());
+        }
         set = vec | lz::to<std::set<int>>();
-        REQUIRE(lz::equal(set, vec));
+        REQUIRE(set.size() == vec.size());
+        for (std::size_t i = 0; i < vec.size(); ++i) {
+            REQUIRE(set.find(vec[i]) != set.end());
+        }
     }
 
     SECTION("To unordered set same iterator pair") {
         const std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto set = lz::to<std::unordered_set<int>>(vec);
-        REQUIRE(lz::equal(set, vec));
+        REQUIRE(set.size() == vec.size());
+        for (std::size_t i = 0; i < vec.size(); ++i) {
+            REQUIRE(set.find(vec[i]) != set.end());
+        }
         set = vec | lz::to<std::unordered_set<int>>();
+        REQUIRE(set.size() == vec.size());
+        for (std::size_t i = 0; i < vec.size(); ++i) {
+            REQUIRE(set.find(vec[i]) != set.end());
+        }
         REQUIRE(lz::equal(set, vec));
+    }
+
+    SECTION("To custom container same iterator pair") {
+        const std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto container = lz::to<custom_container<int>>(vec, vec.size());
+        REQUIRE(lz::equal(container.vec(), vec));
+        container = vec | lz::to<custom_container<int>>(vec.size());
+        REQUIRE(lz::equal(container.vec(), vec));
     }
 
     SECTION("To cpp array sentinel iterator pair") {
@@ -229,13 +284,71 @@ TEST_CASE("To container") {
         vec = c_str | lz::to<std::vector<char>>();
         REQUIRE(lz::equal(vec, c_str));
     }
-    // TODO: Add more tests for to container
+
     SECTION("To forward list sentinel iterator pair") {
         auto c_str = lz::c_string("Hello");
         auto flst = lz::to<std::forward_list<char>>(c_str);
         REQUIRE(lz::equal(flst, c_str));
         flst = c_str | lz::to<std::forward_list<char>>();
         REQUIRE(lz::equal(flst, c_str));
+    }
+
+    SECTION("To queue sentinel iterator pair") {
+        auto c_str = lz::c_string("Hello");
+        auto queue = lz::to<std::queue<char>>(c_str);
+        std::size_t i = 0;
+        for (; !queue.empty(); queue.pop(), ++i) {
+            REQUIRE(queue.front() == *std::next(c_str.begin(), i));
+        }
+        queue = c_str | lz::to<std::queue<char>>();
+        i = 0;
+        for (; !queue.empty(); queue.pop(), ++i) {
+            REQUIRE(queue.front() == *std::next(c_str.begin(), i));
+        }
+    }
+
+    SECTION("To deque sentinel iterator pair") {
+        auto c_str = lz::c_string("Hello");
+        auto deque = lz::to<std::deque<char>>(c_str);
+        REQUIRE(lz::equal(deque, c_str));
+        deque = c_str | lz::to<std::deque<char>>();
+        REQUIRE(lz::equal(deque, c_str));
+    }
+
+    SECTION("To set sentinel iterator pair") {
+        auto c_str = lz::c_string("Helo");
+        auto set = lz::to<std::set<char>>(c_str);
+        REQUIRE(set.size() == lz::eager_size(c_str));
+        for (const char c : c_str) {
+            REQUIRE(set.find(c) != set.end());
+        }
+        set = c_str | lz::to<std::set<char>>();
+        REQUIRE(set.size() == lz::eager_size(c_str));
+        for (const char c : c_str) {
+            REQUIRE(set.find(c) != set.end());
+        }
+    }
+
+    SECTION("To unordered set sentinel iterator pair") {
+        auto c_str = lz::c_string("Helo");
+        auto set = lz::to<std::unordered_set<char>>(c_str);
+        REQUIRE(set.size() == lz::eager_size(c_str));
+        for (const char c : c_str) {
+            REQUIRE(set.find(c) != set.end());
+        }
+        set = c_str | lz::to<std::unordered_set<char>>();
+        REQUIRE(set.size() == lz::eager_size(c_str));
+        for (const char c : c_str) {
+            REQUIRE(set.find(c) != set.end());
+        }
+    }
+
+    SECTION("To custom container same iterator pair") {
+        const auto c_str = lz::c_string("Hello");
+        auto container = lz::to<custom_container<int>>(c_str, 0);
+        REQUIRE(lz::equal(container.vec(), c_str));
+        container = c_str | lz::to<custom_container<int>>(0);
+        REQUIRE(lz::equal(container.vec(), c_str));
     }
 }
 

@@ -224,6 +224,14 @@ TEST_CASE("zip_iterable binary operations") {
             REQUIRE((e - beg) == i);
             ++beg;
         }
+
+        beg = zip.begin();
+
+        for (std::size_t i = 0; i < lz::size(zip) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((e - i) - (beg + i) == static_cast<std::ptrdiff_t>(lz::size(zip) - 2 * i));
+            REQUIRE((beg + i) - (e - i) == -static_cast<std::ptrdiff_t>(lz::size(zip) - 2 * i));
+        }
     }
 }
 

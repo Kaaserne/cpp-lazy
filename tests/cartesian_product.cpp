@@ -244,6 +244,13 @@ TEST_CASE("Cartesian product binary operations") {
         REQUIRE(std::distance(iter + 10, iter) == -10);
         REQUIRE(std::distance(iter + 11, iter) == -11);
         REQUIRE(std::distance(iter + 12, iter) == -12);
+
+        auto e = cartesian.end();
+        for (std::size_t i = 0; i < lz::size(cartesian) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((e - i) - (iter + i) == static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
+            REQUIRE((iter + i) - (e - i) == -static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
+        }
     }
 }
 

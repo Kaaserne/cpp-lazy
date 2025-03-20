@@ -241,6 +241,16 @@ TEST_CASE("Chunks binary operations random access") {
             }
         };
 
+        auto test_operator_minus2 = [](decltype(it) iterator, decltype(it_end) end_iterator, std::size_t size) {
+            auto s_size = static_cast<std::ptrdiff_t>(size);
+
+            for (std::ptrdiff_t i = 0; i < s_size / 2; ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end_iterator - i) - (iterator + i) == (s_size - 2 * i));
+                REQUIRE((iterator + i) - (end_iterator - i) == -(s_size - 2 * i));
+            }
+        };
+
         INFO("test_operator_minus(it, it_end, lz::size(uneven_chunksize_even_size))")
         test_operator_minus(it, it_end, lz::size(uneven_chunksize_even_size));
 
@@ -252,6 +262,18 @@ TEST_CASE("Chunks binary operations random access") {
 
         INFO("test_operator_minus(it4, it_end4, lz::size(even_chunksize_uneven_size))")
         test_operator_minus(it4, it_end4, lz::size(even_chunksize_uneven_size));
+
+        INFO("test_operator_minus2(it, it_end, lz::size(uneven_chunksize_even_size))")
+        test_operator_minus2(it, it_end, lz::size(uneven_chunksize_even_size));
+
+        INFO("test_operator_minus2(it2, it_end2, lz::size(even_chunksize_even_size))")
+        test_operator_minus2(it2, it_end2, lz::size(even_chunksize_even_size));
+
+        INFO("test_operator_minus2(it3, it_end3, lz::size(uneven_chunksize_uneven_size))")
+        test_operator_minus2(it3, it_end3, lz::size(uneven_chunksize_uneven_size));
+
+        INFO("test_operator_minus2(it4, it_end4, lz::size(even_chunksize_uneven_size))")
+        test_operator_minus2(it4, it_end4, lz::size(even_chunksize_uneven_size));
     }
 }
 

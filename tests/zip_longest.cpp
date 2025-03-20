@@ -296,6 +296,12 @@ TEST_CASE("zip_longest_iterable binary operations") {
         REQUIRE((begin + 3) - end == -static_cast<std::ptrdiff_t>(2));
         REQUIRE((begin + 4) - end == -static_cast<std::ptrdiff_t>(1));
         REQUIRE((begin + 5) - end == 0);
+
+        for (std::size_t i = 0; i < lz::size(zipper) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(zipper) - 2 * i));
+            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(zipper) - 2 * i));
+        }
     }
 }
 

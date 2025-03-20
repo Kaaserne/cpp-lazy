@@ -45,7 +45,8 @@ TEST_CASE("Concat changing and creating elements") {
     SECTION("Should (be) sort(ed)") {
         std::array<int, 10> arr1 = { 5, 2, 67, 1235, 654, 23, 6, 1324, 6, 34 };
         std::array<int, 10> arr2 = { 756, 23, 465, 1, 6, 4, 1234, 65, 567, 2 };
-        auto concatted = lz::concat(arr1, arr2);
+        std::array<int, 10> arr3 = { 5, 2, 67, 1235, 654, 23, 6, 1324, 6, 34 };
+        auto concatted = lz::concat(arr1, arr2, arr3);
         std::sort(concatted.begin(), concatted.end());
         REQUIRE(std::is_sorted(concatted.begin(), concatted.end()));
     }
@@ -97,37 +98,94 @@ TEST_CASE("Concat binary operations") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);
     REQUIRE(concat.size() == a.size() + b.size());
-    auto begin = concat.begin();
-
-    REQUIRE(*begin == 'h');
 
     SECTION("Operator++") {
+        auto begin = concat.begin();
+        REQUIRE(*begin == 'h');
         ++begin;
         REQUIRE(*begin == 'e');
     }
 
     SECTION("Operator--") {
-        ++begin;
-        --begin;
-        REQUIRE(*begin == 'h');
-        ++begin, ++begin, ++begin, ++begin, ++begin, ++begin;
-        --begin;
-        REQUIRE(*begin == ' ');
-        --begin;
-        REQUIRE(*begin == 'o');
+        auto end = concat.end();
+        --end;
+        REQUIRE(*end == 'd');
+        --end;
+        REQUIRE(*end == 'l');
+        --end;
+        REQUIRE(*end == 'r');
+        --end;
+        REQUIRE(*end == 'o');
+        --end;
+        REQUIRE(*end == 'w');
+        --end;
+        REQUIRE(*end == ' ');
+        --end;
+        REQUIRE(*end == 'o');
+        --end;
+        REQUIRE(*end == 'l');
+        --end;
+        REQUIRE(*end == 'l');
+        --end;
+        REQUIRE(*end == 'e');
+        --end;
+        REQUIRE(*end == 'h');
+        REQUIRE(end == concat.begin());
     }
 
     SECTION("Operator== & operator!=") {
+        auto begin = concat.begin();
         REQUIRE(begin != concat.end());
         begin = concat.end();
         REQUIRE(begin == concat.end());
     }
 
-    // TODO
     SECTION("Operator+") {
+        auto begin = concat.begin();
+        auto end = concat.end();
+
+        auto expected = std::string("hello world");
+        for (std::size_t i = 0; i < lz::size(concat) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
+        }
+        REQUIRE(begin + lz::size(concat) == concat.end());
+        for (std::size_t i = 1; i <= lz::size(concat); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::size(concat) == concat.begin());
+
+        std::advance(begin, lz::size(concat));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(concat)));
+
+        for (std::size_t i = 0; i < lz::size(concat) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end + i) == *(expected.begin() + i));
+        }
+        REQUIRE(end + lz::size(concat) == concat.end());
+        for (std::size_t i = 1; i <= lz::size(concat); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin - i) == *(expected.end() - i));
+        }
+        REQUIRE(begin - lz::size(concat) == concat.begin());
     }
 
     SECTION("Operator-") {
+        auto begin = concat.begin();
+        auto end = concat.end();
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(concat)); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(concat) - i));
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(concat) - i));
+            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(concat) - i));
+            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(concat) - i));
+        }
+        for (std::size_t i = 0; i < lz::size(concat) / 2; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(concat) - 2 * i));
+            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(concat) - 2 * i));
+        }
     }
 }
 

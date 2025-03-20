@@ -117,4 +117,7 @@ TEST_CASE("Loop with non while true argument") {
         REQUIRE(*(end - 8) == 1);
         REQUIRE(looper.begin() == end - 8);
     }
+
+    // TODO
+    SECTION("Operator-") {}
 }

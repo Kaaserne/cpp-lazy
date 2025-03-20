@@ -25,7 +25,6 @@ class cartesian_product_iterator
                       iter_tuple_iter_cat_t<IterTuple>, default_sentinel_selector<IterTuple, SentinelTuple>> {
 
     static constexpr std::size_t tup_size = std::tuple_size<IterTuple>::value;
-    static_assert(tup_size >= 1, "Amount of cartesian product iterables must be larger or equal to 1");
 
 public:
     using value_type = iter_tuple_value_type_t<IterTuple>;
@@ -177,6 +176,7 @@ public:
         _begin{ std::move(begin) },
         _iterator{ std::move(iterator) },
         _end{ std::move(end) } {
+        static_assert(tup_size > 1, "Cannot cartesian product one/zero iterables");
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {

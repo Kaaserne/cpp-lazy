@@ -601,6 +601,38 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  * auto list = lz::to<std::list<int>>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
  * // etc...
  * ```
+ * In case you have a custom container, you can specialize `lz::custom_copier` to copy the elements to your container.
+ * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
+ * `lz::custom_copier` for your custom container if all of the following are true:
+ * - Your custom container does not have a `push_back` method
+ * - Your custom container does not have an `insert` method
+ * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
+ * - Your custom container does not have a `push` method
+ * - Your custom container is not std::array
+ * ```cpp
+ * template<class T>
+ * class custom_container {
+ *    std::vector<T> _vec;
+ *  public:
+ *      void reserve(std::size_t size) {
+ *         _vec.reserve(size);
+ *      }
+ *
+ *      std::vector<T>& vec() {
+ *         return _vec;
+ *      }
+ * };
+ *
+ * // Specialize `lz::custom_copier` for your custom container
+ * template<class T>
+ * struct lz::custom_copier<custom_container<T>> {
+ *    template<class Iterable>
+ *    void copy(Iterable&& iterable, custom_container<T>& container) const {
+ *      // Copy the contents of the iterable to the container. Container is already reserved
+ *      // if it contains a reserve member function and the iterable is sized
+ *      lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
+ *    }
+ * ```
  * @attention Containers like `std::array `cannot be passed as `to<std::array>` since it requires a size. Instead just use
  * `to<std::array<T, N>>(iterable)` or `iterable | to<std::array<T, N>>()`
  * @tparam Container The container to convert to
@@ -611,8 +643,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
 template<class Container, class... Args, LZ_CONCEPT_ITERABLE Iterable,
          class = detail::enable_if<detail::is_iterable<Iterable>::value>>
 LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
-    constexpr to_adaptor<Container> to{};
-    return to(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+    return to_adaptor<Container>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
 
 /**
@@ -628,6 +659,38 @@ LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
  * // or
  * auto list = lz::to<std::list<int>>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
  * // etc...
+ * ```
+ * In case you have a custom container, you can specialize `lz::custom_copier` to copy the elements to your container.
+ * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
+ * `lz::custom_copier` for your custom container if all of the following are true:
+ * - Your custom container does not have a `push_back` method
+ * - Your custom container does not have an `insert` method
+ * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
+ * - Your custom container does not have a `push` method
+ * - Your custom container is not std::array
+ * ```cpp
+ * template<class T>
+ * class custom_container {
+ *    std::vector<T> _vec;
+ *  public:
+ *      void reserve(std::size_t size) {
+ *         _vec.reserve(size);
+ *      }
+ *
+ *      std::vector<T>& vec() {
+ *         return _vec;
+ *      }
+ * };
+ *
+ * // Specialize `lz::custom_copier` for your custom container
+ * template<class T>
+ * struct lz::custom_copier<custom_container<T>> {
+ *    template<class Iterable>
+ *    void copy(Iterable&& iterable, custom_container<T>& container) const {
+ *      // Copy the contents of the iterable to the container. Container is already reserved
+ *      // if it contains a reserve member function and the iterable is sized
+ *      lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
+ *    }
  * ```
  * @attention Containers like `std::array `cannot be passed as `to<std::array>` since it requires a size. Instead just use
  * `to<std::array<T, N>>(iterable)` or `iterable | to<std::array<T, N>>()`
