@@ -47,24 +47,6 @@ using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>
 
 // TODO faster implementation for compiler times
 
-template<bool>
-struct conjunction_fast_impl {
-    template<class T, class... Rest>
-    using type = T;
-};
-
-template<>
-struct conjunction_fast_impl<true> {
-    template<class T, class Next, class... Rest>
-    using type = typename conjunction_fast_impl<static_cast<bool>(Next::value)>::template type<Next, Rest...>;
-};
-
-// template<class... Ts>
-// struct conjunction : std::false_type {};
-
-// template<class T, class... Rest>
-// struct conjunction<T, Rest...> : conjunction_fast_impl<static_cast<bool>(T::value)>::template type<T, Next, Rest...> {};
-
 template<bool Value, class T, class... Rest>
 struct conjunction_impl {
     using type = T;
@@ -241,14 +223,14 @@ LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept;
 
 #endif
 
-    /**
-     * @brief Can be used to get the iterator type of an iterable. Example: `lz::iter_t<std::vector<int>>` will return
-     * `std::vector<int>::iterator`.
-     *
-     * @tparam Iterable The iterable to get the iterator type from.
-     */
-    template<class Iterable>
-    using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
+/**
+ * @brief Can be used to get the iterator type of an iterable. Example: `lz::iter_t<std::vector<int>>` will return
+ * `std::vector<int>::iterator`.
+ *
+ * @tparam Iterable The iterable to get the iterator type from.
+ */
+template<class Iterable>
+using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
 
 /**
  * @brief Can be used to get the sentinel type of an iterable. Example: `lz::sentinel_t<std::vector<int>>` will return
@@ -346,7 +328,7 @@ template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
 
 namespace detail {
-template<class... T>
+template<class>
 using void_t = void;
 
 template<class T, class = void>
