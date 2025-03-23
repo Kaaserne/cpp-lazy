@@ -98,8 +98,7 @@ private:
     template<class Iterable, std::size_t... N>
     LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...>
     pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) const {
-        auto dropped = std::make_tuple(lz::drop(std::forward<Iterable>(iterable), N)...);
-        return lz::zip(std::get<N>(std::move(dropped))...);
+        return lz::zip(lz::drop(std::forward<Iterable>(iterable), N)...);
     }
 
 public:
@@ -125,10 +124,6 @@ public:
     }
 };
 } // namespace detail
-
-enum class size_hint : std::uint8_t {
-    dynamic
-};
 } // namespace lz
 
 #endif // LZ_ITER_TOOLS_ADAPTORS_HPP
