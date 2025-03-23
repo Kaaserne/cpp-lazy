@@ -249,8 +249,9 @@ private:
         }
         const auto surplus = this_iter_length + offset;
         if (surplus > longest) {
-            iterator -= (surplus - longest);
-            this_iter_length -= (surplus - longest);
+            const auto surplus_longest_diff = surplus - longest;
+            iterator -= surplus_longest_diff;
+            this_iter_length -= surplus_longest_diff;
         }
     }
 
