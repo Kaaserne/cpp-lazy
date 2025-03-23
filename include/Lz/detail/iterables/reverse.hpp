@@ -20,7 +20,7 @@ public:
     constexpr reverse_iterable() = default;
 
     template<class I>
-    constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<Iterable>(iterable) } {
+    constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     template<class I = Iterable>

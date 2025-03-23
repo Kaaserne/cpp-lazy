@@ -31,7 +31,7 @@ struct take_while_adaptor {
      * @param unary_predicate The predicate that indicates while to take elements.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr take_while_iterable<Iterable, decay_t<UnaryPredicate>>
+    LZ_NODISCARD constexpr take_while_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(unary_predicate) };
     }
@@ -47,8 +47,7 @@ struct take_while_adaptor {
      * @param unary_predicate The predicate that indicates while to take elements.
      */
     template<class UnaryPredicate>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, decay_t<UnaryPredicate>>
-    operator()(UnaryPredicate&& unary_predicate) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate unary_predicate) const {
         return { std::move(unary_predicate) };
     }
 };

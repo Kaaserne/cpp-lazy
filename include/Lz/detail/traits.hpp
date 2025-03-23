@@ -47,20 +47,17 @@ using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>
 
 // TODO faster implementation for compiler times
 
-// template<bool Value>
-// struct conjunction_fast_impl;
+template<bool>
+struct conjunction_fast_impl {
+    template<class T, class... Rest>
+    using type = T;
+};
 
-// template<>
-// struct conjunction_fast_impl<false> {
-//     template<class T, class... Rest>
-//     using type = T;
-// };
-
-// template<>
-// struct conjunction_fast_impl<true> {
-//     template<class Next, class... Rest>
-//     using type = typename conjunction_fast_impl<static_cast<bool>(Next::value)>::template type<Next, Rest...>;
-// };
+template<>
+struct conjunction_fast_impl<true> {
+    template<class T, class Next, class... Rest>
+    using type = typename conjunction_fast_impl<static_cast<bool>(Next::value)>::template type<Next, Rest...>;
+};
 
 // template<class... Ts>
 // struct conjunction : std::false_type {};
@@ -113,7 +110,7 @@ struct plus {
 #define MAKE_BIN_PRED(OP) lz::detail::OP
 
 template<class T>
-using remove_reference_t = typename std::remove_reference<T>::type;
+using remove_ref = typename std::remove_reference<T>::type;
 
 template<std::size_t, std::size_t...>
 struct index_sequence_helper;
@@ -138,7 +135,7 @@ using tup_element = typename std::tuple_element<I, T>::type;
 #else // ^^^ has cxx 11 vvv cxx > 11
 
 template<class T>
-using remove_reference_t = std::remove_reference_t<T>;
+using remove_ref = std::remove_reference_t<T>;
 
 template<std::size_t... N>
 using index_sequence_helper = std::index_sequence<N...>;
@@ -190,25 +187,25 @@ using remove_cvref = std::remove_cvref_t<T>;
 #else // ^^^ has cxx 20 vvv cxx < 20
 
 template<class T>
-using remove_cvref = typename std::remove_cv<remove_reference_t<T>>::type;
+using remove_cvref = typename std::remove_cv<remove_ref<T>>::type;
 
 #endif // LZ_HAS_CXX_20
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())>;
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())>;
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(c))>;
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))>;
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(c))>;
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))>;
 } // namespace detail
 
 #ifdef LZ_HAS_CXX_17
@@ -267,7 +264,7 @@ using sentinel_t = decltype(detail::end(std::forward<Iterable>(std::declval<Iter
  * @tparam Iterator The iterator to get the value type from.
  */
 template<class Iterator>
-using val_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::value_type;
+using val_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::value_type;
 
 /**
  * @brief Can be used to get the reference type of an iterator. Example: `lz::ref_t<std::vector<int>::iterator>` will return
@@ -276,7 +273,7 @@ using val_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>
  * @tparam Iterator The iterator to get the reference type from.
  */
 template<class Iterator>
-using ref_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::reference;
+using ref_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::reference;
 
 /**
  * @brief Can be used to get the pointer type of an iterator. Example: `lz::ptr_t<std::vector<int>::iterator>` will return
@@ -285,7 +282,7 @@ using ref_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>
  * @tparam Iterator The iterator to get the pointer type from.
  */
 template<class Iterator>
-using ptr_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::pointer;
+using ptr_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::pointer;
 
 /**
  * @brief Can be used to get the difference type of an iterator. Example: `lz::diff_t<std::vector<int>::iterator>` will return
@@ -294,7 +291,7 @@ using ptr_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>
  * @tparam Iterator The iterator to get the difference type from.
  */
 template<class Iterator>
-using diff_type = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::difference_type;
+using diff_type = typename std::iterator_traits<detail::remove_ref<Iterator>>::difference_type;
 
 /**
  * @brief Can be used to get the iterator category of an iterator. Example: `lz::iter_cat_t<std::vector<int>::iterator>` will
@@ -303,7 +300,7 @@ using diff_type = typename std::iterator_traits<detail::remove_reference_t<Itera
  * @tparam Iterator The iterator to get the iterator category from.
  */
 template<class Iterator>
-using iter_cat_t = typename std::iterator_traits<detail::remove_reference_t<Iterator>>::iterator_category;
+using iter_cat_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::iterator_category;
 
 /**
  * @brief Can be used to get the value type of an iterable. Example: `lz::val_iterable_t<std::vector<int>>` will return `int`.

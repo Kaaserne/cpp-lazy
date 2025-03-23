@@ -43,7 +43,7 @@ struct cached_size_adaptor {
      * @param iterable The iterable to cache the size of
      */
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 cached_size_iterable<Iterable> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 cached_size_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
 };

@@ -32,7 +32,7 @@ struct group_by_adaptor {
      * @param binary_predicate The predicate to group by
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate>
-    LZ_NODISCARD constexpr group_by_iterable<Iterable, decay_t<BinaryPredicate>>
+    LZ_NODISCARD constexpr group_by_iterable<remove_ref<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate binary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(binary_predicate) };
     }

@@ -69,13 +69,13 @@ public:
     }
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<Iterable, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, zip_iterable<Iterables...>&& zipper) {
         return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(zipper._iterables));
     }
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<Iterable, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const zip_iterable<Iterables...>& zipper) {
         return iterable_tuple_cat(std::forward<Iterable>(iterable), zipper._iterables);
     }

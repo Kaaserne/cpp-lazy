@@ -12,8 +12,7 @@ struct ref_or_view_helper;
 
 template<class Iterable>
 class ref_or_view_helper<Iterable, false> : public lazy_view {
-    using iterable = remove_reference_t<Iterable>;
-    using pointer = conditional<std::is_const<iterable>::value, const iterable*, iterable*>;
+    using pointer = conditional<std::is_array<Iterable>::value, Iterable*, decltype(std::addressof(std::declval<Iterable&>()))>;
 
     pointer _iterable_ref_ptr{};
 
@@ -24,12 +23,17 @@ public:
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
     }
 
-    template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(ref_or_view_helper<I, false>&& other) = delete; // cannot get address of rvalue
+    template<class T, std::size_t N>
+    constexpr ref_or_view_helper(const T (&iterable)[N]) noexcept : _iterable_ref_ptr{ &iterable } {
+    }
+
+    template<class T, std::size_t N>
+    constexpr ref_or_view_helper(T (&iterable)[N]) noexcept : _iterable_ref_ptr{ &iterable } {
+    }
 
     template<class I>
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(const ref_or_view_helper<I, false>& other) noexcept :
-        ref_or_view_helper{ *other._iterable_ref_ptr } {
+        _iterable_ref_ptr{ other._iterable_ref_ptr } {
     }
 
     template<class I>
@@ -40,9 +44,6 @@ public:
         _iterable_ref_ptr = other._iterable_ref_ptr;
         return *this;
     }
-
-    template<class I>
-    ref_or_view_helper& operator=(ref_or_view_helper<I, false>&& other) = delete; // cannot get address of rvalue
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
@@ -66,34 +67,31 @@ public:
     }
 };
 
-template<class Iterable>
-using is_c_array = std::is_array<remove_reference_t<Iterable>>;
-
+// TODO add test with const array
 // Class that contains a c-array or a view to a ref_or_view<Iterable, true>
 template<class Iterable>
 class ref_or_view_helper<Iterable, true> : public lazy_view {
-    static constexpr bool is_c_array = is_c_array<Iterable>::value;
-    using remove_ref = conditional<is_c_array, Iterable, remove_cvref<Iterable>>;
-    remove_ref _iterable_value;
+    using it = typename std::remove_cv<Iterable>::type;
+    it _iterable_value;
+
+    template<class, bool>
+    friend class ref_or_view_helper;
 
 public:
     constexpr ref_or_view_helper() = default;
 
-    template<class I, bool B = is_c_array, enable_if<B, int> = 0>
-    constexpr ref_or_view_helper(I&& iterable) : _iterable_value{ iterable } {
+    constexpr ref_or_view_helper(it&& iterable) : _iterable_value{ std::move(iterable) } {
     }
 
-    template<class I, bool B = is_c_array, enable_if<!B, int> = 0>
-    constexpr ref_or_view_helper(const I& iterable) : _iterable_value{ iterable } {
-    }
-    template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(ref_or_view_helper<I, true>&& other) :
-        ref_or_view_helper{ std::move(other._iterable_value) } {
+    constexpr ref_or_view_helper(const it& iterable) : _iterable_value{ iterable } {
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(const ref_or_view_helper<I, true>& other) :
-        ref_or_view_helper{ other._iterable_value } {
+    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) : ref_or_view_helper{ std::move(other._iterable_value) } {
+    }
+
+    template<class I>
+    constexpr ref_or_view_helper(const ref_or_view_helper<I, true>& other) : ref_or_view_helper{ other._iterable_value } {
     }
 
     template<class I>
@@ -137,8 +135,8 @@ public:
 };
 
 template<class Iterable>
-using ref_or_view =
-    ref_or_view_helper<Iterable, std::is_base_of<lazy_view, remove_cvref<Iterable>>::value || is_c_array<Iterable>::value>;
+using ref_or_view = ref_or_view_helper<Iterable, std::is_base_of<lazy_view, typename std::remove_cv<Iterable>::type>::value &&
+                                                     !std::is_array<Iterable>::value>;
 } // namespace detail
 
 /**

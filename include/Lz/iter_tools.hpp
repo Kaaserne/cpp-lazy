@@ -5,30 +5,34 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/iter_tools.hpp>
-// #include <Lz/concatenate.hpp>
-// #include <Lz/drop_while.hpp>
-// #include <Lz/filter.hpp>
-// #include <Lz/join.hpp>
-// #include <Lz/take.hpp>
-// #include <Lz/take_while.hpp>
-#include <Lz/zip.hpp>
-// #include <algorithm>
-// #include <cctype>
-// #include <numeric>
 
 namespace lz {
-namespace detail {
-template<std::size_t I>
-struct get_fn {
-    template<class T>
-    LZ_CONSTEXPR_CXX_14 auto operator()(T&& gettable) const noexcept -> decltype(std::get<I>(std::forward<T>(gettable))) {
-        return std::get<I>(std::forward<T>(gettable));
-    }
-};
-
-} // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+template<class Fn, class... Iterables>
+using zip_with_iterable =
+    decltype(lz::map(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...), detail::make_expand_fn(std::declval<Fn>())));
+
+/**
+ * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`. Cannot
+ * be used in a pipe expression. Example:
+ * ```cpp
+ * auto a = { 1, 2, 3 };
+ * auto b = { 1, 2, 3 };
+ * auto c = { 1, 2, 3 };
+ * auto zipped = lz::zip_with([](int a, int b, int c) { return a + b + c; }, a, b, c); // {3, 6, 9}
+ * ```
+ *
+ * @param iterables The iterables to zip together.
+ * @param fn The function to apply on the elements.
+ * @return A map object that can be iterated over.
+ */
+template<class Fn, class... Iterables>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref<Iterables>...>
+zip_with(Fn fn, Iterables&&... iterables) {
+    return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
+}
 
 #ifdef LZ_HAS_CXX_11
 
@@ -68,7 +72,7 @@ static constexpr detail::as_adaptor<T> detail::as_adaptor<T>::as{};
  * @tparam N The amount of adjacent elements to return.
  */
 template<std::size_t N>
-LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
+static constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
 
 /**
  * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip`. Example:
@@ -79,7 +83,96 @@ LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
  * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
  * ```
  */
-LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<2> pairwise{};
+static constexpr detail::pairwise_n_adaptor<2> pairwise{};
+
+/**
+ * @brief Gets the nth element from a tuple-like container, using `std::get` and `lz::map`. Example:
+ * ```cpp
+ * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * auto actual = lz::get_nth<2>(three_tuple_vec); // {3, 6, 9}
+ * // or
+ * auto actual = three_tuple_vec | lz::get_nth<2>; // {3, 6, 9}
+ * ```
+ * @tparam I The index to get from the tuple-like container.
+ */
+template<std::size_t I>
+static constexpr detail::get_n_adaptor<I> detail::get_n_adaptor<I>::get_nth{};
+
+/**
+ * @brief Gets the keys from a tuple-like container, using `std::get<0>` and `lz::map`. Example:
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * auto keys = lz::keys(m); // {1, 2, 3}
+ * // or
+ * auto keys = m | lz::keys; // {1, 2, 3}
+ * ```
+ */
+static constexpr detail::get_n_adaptor<0> detail::get_n_adaptor<0>::keys{};
+
+/**
+ * @brief Gets the values from a tuple-like container, using `std::get<1>` and `lz::map`. Example:
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * auto values = lz::values(m); // {"hello", "world", "!"}
+ * // or
+ * auto values = m | lz::values; // {"hello", "world", "!"}
+ * ```
+ */
+static constexpr detail::get_n_adaptor<1> detail::get_n_adaptor<1>::values{};
+
+/**
+ * @brief Filters an iterable using `predicate` and then maps those elements using `fn`, using `lz::filter` and `lz::map`.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto fm = lz::filter_map(vec, [](int i) { return i % 2 == 0; }, [](int i) { return i * 2; }); // {4, 8}
+ * // or
+ * auto fm = vec | lz::filter_map([](int i) { return i % 2 == 0; }, [](int i) { return i * 2; }); // {4, 8}
+ * ```
+ */
+static constexpr detail::filter_map_adaptor detail::filter_map_adaptor::filter_map{};
+
+/**
+ * @brief Selects elements from the first iterable if the corresponding element in the second iterable is `true`, using
+ * `lz::filter`, `lz::zip` and `lz::map`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::vector<bool> bools = { true, false, true, false, true };
+ * auto selected = lz::select(vec, bools); // {1, 3, 5}
+ * // or
+ * auto selected = lz::select(vec, bools); // {1, 3, 5}
+ * ```
+ */
+static constexpr detail::select_adaptor detail::select_adaptor::select{};
+
+/**
+ * @brief Trims the back of the sequence as long as `predicate` returns `true`, then reverses the sequence again. Essentially
+ * turning the predicate into a not fn, using `lz::reverse`, `lz::drop_back_while` followed by another `lz::reverse`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto trimmed = lz::drop_back_while(vec, [](int i) { return i > 3; }); // {1, 2, 3}
+ * // or
+ * auto trimmed = vec | lz::drop_back_while([](int i) { return i > 3; }); // {1, 2, 3}
+ * ```
+ */
+static constexpr detail::drop_back_while_adaptor detail::drop_back_while_adaptor::drop_back_while{};
+
+/**
+ * Trims the beginning and ending of a sequence, as long as the first predicate returns true for the trimming of the
+ * beginning and as long as the last predicate returns true for the trimming of the ending. This is done using `lz::drop_while`
+ * and `lz::drop_back_while`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto trimmed = lz::trim(vec, [](int i) { return i < 3; }, [](int i) { return i > 4; }); // {3}
+ * // or
+ * auto trimmed = vec | lz::trim([](int i) { return i < 3; }, [](int i) { return i > 4; }); // {3}
+ * std::string str = "  hello  ";
+ * auto trimmed = lz::trim(str); // "hello", uses std::isspace
+ * // or
+ * auto trimmed = str | lz::trim; // "hello", uses std::isspace
+ * ```
+ */
+static constexpr detail::trim_adaptor detail::trim_adaptor::trim{};
 
 #else
 
@@ -112,7 +205,8 @@ template<class T>
 LZ_INLINE_VAR constexpr detail::as_adaptor<T> as{};
 
 /**
- * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`. Example:
+ * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip` and
+ * `lz::drop`. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
@@ -125,7 +219,8 @@ template<std::size_t N>
 LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
 
 /**
- * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip`. Example:
+ * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip` and
+ * `lz::drop`. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
@@ -135,148 +230,99 @@ LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
  */
 LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<2> pairwise{};
 
-#endif
-
-template<class Fn, class... Iterables>
-using zip_with_iterable =
-    decltype(lz::map(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...), detail::make_expand_fn(std::declval<Fn>())));
+/**
+ * @brief Gets the nth element from a tuple-like container, using `std::get` and `lz::map`. Example:
+ * ```cpp
+ * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * auto actual = lz::get_nth<2>(three_tuple_vec); // {3, 6, 9}
+ * // or
+ * auto actual = three_tuple_vec | lz::get_nth<2>; // {3, 6, 9}
+ * ```
+ * @tparam I The index to get from the tuple-like container.
+ */
+template<std::size_t I>
+LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
 
 /**
- * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`. Cannot
- * be used in a pipe expression. Example:
+ * @brief Gets the keys from a tuple-like container, using `std::get<0>` and `lz::map`. Example:
  * ```cpp
- * auto a = { 1, 2, 3 };
- * auto b = { 1, 2, 3 };
- * auto c = { 1, 2, 3 };
- * auto zipped = lz::zip_with([](int a, int b, int c) { return a + b + c; }, a, b, c); // {3, 6, 9}
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * auto keys = lz::keys(m); // {1, 2, 3}
+ * // or
+ * auto keys = m | lz::keys; // {1, 2, 3}
  * ```
- *
- * @param iterables The iterables to zip together.
- * @param fn The function to apply on the elements.
- * @return A map object that can be iterated over.
  */
-template<class Fn, class... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, Iterables...> zip_with(Fn fn, Iterables&&... iterables) {
-    return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
-}
+LZ_INLINE_VAR constexpr detail::get_n_adaptor<0> keys{};
 
-// /**
-//  * @brief Returns an iterable object that returns all values from an iterable of which its `value_type` supports `std::get<1>`.
-//  * Useful for example getting the values (instead of keys) from a `std::(unordered_)map`
-//  * @param iterable The iterable to extract the elements from.
-//  * @return An iterable object that returns the second value of `value_type` using `std::get<1>`. (works for any tuple-like
-//  * interface)`
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::get_fn<1>>
-// values(Iterable&& iterable) {
-//     return lz::map(std::forward<Iterable>(iterable), detail::get_fn<1>());
-// }
+/**
+ * @brief Gets the values from a tuple-like container, using `std::get<1>` and `lz::map`. Example:
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * auto values = lz::values(m); // {"hello", "world", "!"}
+ * // or
+ * auto values = m | lz::values; // {"hello", "world", "!"}
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::get_n_adaptor<1> values{};
 
-// /**
-//  * @brief Returns an iterator object that returns all keys from an iterable of which its `value_type` supports `std::get<0>`.
-//  * Useful for example getting the keys from a `std::(unordered_)map`
-//  * @param iterable The iterable to extract the elements from.
-//  * @return An iterable object that returns the first value of `value_type` using `std::get<0>`. (works for any tuple-like
-//  * interface)`
-//  */
-// template<LZ_CONCEPT_ITERABLE Iterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 map_iterable<iter_t<Iterable>, sentinel_t<Iterable>, detail::get_fn<0>>
-// keys(Iterable&& iterable) {
-//     return lz::map(std::forward<Iterable>(iterable), detail::get_fn<0>());
-// }
+/**
+ * @brief Filters an iterable using `predicate` and then maps those elements using `fn`, using `lz::filter` and `lz::map`.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto fm = lz::filter_map(vec, [](int i) { return i % 2 == 0; }, [](int i) { return i * 2; }); // {4, 8}
+ * // or
+ * auto fm = vec | lz::filter_map([](int i) { return i % 2 == 0; }, [](int i) { return i * 2; }); // {4, 8}
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::filter_map_adaptor filter_map{};
 
-// template<class Iterable, class UnaryFilterPredicate, class UnaryMapOp>
-// using filter_map_iterable =
-//     map_iterable<detail::filter_iterator<iter_t<Iterable>, sentinel_t<Iterable>, UnaryFilterPredicate>,
-//                  typename detail::filter_iterator<iter_t<Iterable>, sentinel_t<Iterable>, UnaryFilterPredicate>::sentinel,
-//                  UnaryMapOp>;
+/**
+ * @brief Selects elements from the first iterable if the corresponding element in the second iterable is `true`, using
+ * `lz::filter`, `lz::zip` and `lz::map`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::vector<bool> bools = { true, false, true, false, true };
+ * auto selected = lz::select(vec, bools); // {1, 3, 5}
+ * // or
+ * auto selected = vec | lz::select(bools); // {1, 3, 5}
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::select_adaptor select{};
 
-// /**
-//  * @brief Creates a map object with filter iterator that, if the filter function returns true, the map function is executed.
-//  * @param iterable The iterable to filter/map.
-//  * @param filter_predicate The function that filters the elements. If this function returns `true`, its corresponding container
-//  * value is passed to the `map_op`.
-//  * @param map_op The function that returns the (new) type.
-//  * @return A map object that can be iterated over. The `value_type` of the this view object is equal to the return value of
-//  * `map_op`.
-//  */
-// template<class Iterable, class UnaryFilterPredicate, class UnaryMapOp>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 filter_map_iterable<Iterable, UnaryFilterPredicate, UnaryMapOp>
-// filter_map(Iterable&& iterable, UnaryFilterPredicate filter_predicate, UnaryMapOp map_op) {
-//     return lz::map(lz::filter(std::forward<Iterable>(iterable), std::move(filter_predicate)), std::move(map_op));
-// }
+/**
+ * @brief Trims the back of the sequence as long as `predicate` returns `true`, then reverses the sequence again. Essentially
+ * turning the predicate into a not fn, using `lz::reverse`, `lz::drop_back_while` followed by another `lz::reverse`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto trimmed = lz::drop_back_while(vec, [](int i) { return i > 3; }); // {1, 2, 3}
+ * // or
+ * auto trimmed = vec | lz::drop_back_while([](int i) { return i > 3; }); // {1, 2, 3}
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::drop_back_while_adaptor drop_back_while{};
 
-// // clang-format off
-// template<class Iterable, class SelectorIterable>
-// using select_iterable = filter_map_iterable<decltype(
-//     lz::zip(std::forward<Iterable>(std::declval<Iterable>()),
-//     std::forward<SelectorIterable>(std::declval<SelectorIterable>()))),
-//                                    detail::get_fn<1>, detail::get_fn<0>>;
-// // clang-format on
+/**
+ * Trims the beginning and ending of a sequence, as long as the first predicate returns true for the trimming of the
+ * beginning and as long as the last predicate returns true for the trimming of the ending. This is done using `lz::drop_while`
+ * and `lz::drop_back_while`. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto trimmed = lz::trim(vec, [](int i) { return i < 3; }, [](int i) { return i > 4; }); // {3}
+ * // or
+ * auto trimmed = vec | lz::trim([](int i) { return i < 3; }, [](int i) { return i > 4; }); // {3}
+ * std::string str = "  hello  ";
+ * auto trimmed = lz::trim(str); // "hello", uses std::isspace
+ * // or
+ * auto trimmed = str | lz::trim; // "hello", uses std::isspace
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::trim_adaptor trim{};
 
-// /**
-//  * @brief Selects elements from `iterable` where its corresponding index in `selectors` is `true` or convertible to `true`.
-//  * @param iterable The iterable to select values from.
-//  * @param selectors The selectors that specifies to select an item in `iterable` yes or no.
-//  * @return A map object that can be iterated over with the excluded elements that `selectors` specify.
-//  */
-// template<class Iterable, class SelectorIterable>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 select_iterable<Iterable, SelectorIterable>
-// select(Iterable&& iterable, SelectorIterable&& selectors) {
-//     return filter_map(zip(std::forward<Iterable>(iterable), std::forward<SelectorIterable>(selectors)), detail::get_fn<1>(),
-//                       detail::get_fn<0>());
-// }
-
-// template<class Iterable>
-// using drop_back_while_iterable = detail::basic_iterable<std::reverse_iterator<std::reverse_iterator<iter_t<Iterable>>>>;
-
-// /**
-//  * @brief Trims the back of a sequence, as long as `predicate` returns true.
-//  *
-//  * @param iterable The iterable to trim
-//  * @param predicate The unary predicate that trims the last elements while it returns `true`
-//  * @return An iterable object.
-//  */
-// template<class Iterable, class UnaryPredicate>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 drop_back_while_iterable<Iterable>
-// drop_back_while(Iterable&& iterable, UnaryPredicate predicate) {
-//     static_assert(detail::is_bidi<iter_t<Iterable>>::value, "Iterator must be at least bidirectional");
-//     return lz::reverse(lz::drop_while(lz::reverse(std::forward<Iterable>(iterable)), std::move(predicate)));
-// }
-
-// template<class Iterable>
-// using trim_iterable = detail::basic_iterable<iter_t<drop_back_while_iterable<detail::basic_iterable<iter_t<Iterable>>>>>;
-
-// /**
-//  * Trims the beginning and ending of a sequence, as long as `first` returns true for the trimming of the
-//  * beginning and as long as `last` returns true for the trimming of the ending.
-//  * @param iterable The iterable to trim
-//  * @param first The unary predicate that trims the first elements while it returns `true`
-//  * @param last The unary predicate that trims the last elements while it returns `true`
-//  * @return An iterator view object.
-//  */
-// template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 trim_iterable<Iterable>
-// trim(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) {
-//     auto taken_first = drop_while(std::forward<Iterable>(iterable), std::move(first));
-//     return drop_back_while(std::move(taken_first), std::move(last));
-// }
-
-// /**
-//  * Trims a string and returns an iterator that skips whitespaces at the front and end.
-//  * @param s The string to trim.
-//  * @return The string, with trimmed spaces/tabs/newlines at the front and end.
-//  */
-// template<class String>
-// LZ_NODISCARD LZ_CONSTEXPR_CXX_20 trim_iterable<String> trim_string(String&& s) {
-//     const auto is_space_fn = [](const char c) {
-//         return static_cast<bool>(std::isspace(static_cast<unsigned char>(c)));
-//     };
-//     return lz::trim(std::forward<String>(s), is_space_fn, is_space_fn);
-// }
-} // End namespace lz
+#endif
 
 LZ_MODULE_EXPORT_SCOPE_END
+
+} // End namespace lz
 
 #endif // LZ_ITER_TOOLS_HPP

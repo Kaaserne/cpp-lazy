@@ -38,7 +38,7 @@ struct common_adaptor {
      * @param iterable The iterable to create a common view from.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr common_iterable<Iterable> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr common_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
         return { std::forward<Iterable>(iterable) };
     }

@@ -30,7 +30,7 @@ struct drop_adaptor {
      * @param n The amount of elements to drop
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr drop_iterable<Iterable>
+    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
         return { iterable, n };
     }

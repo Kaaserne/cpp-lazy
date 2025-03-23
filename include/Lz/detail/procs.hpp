@@ -41,25 +41,25 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
     return std::forward<Iterable>(c).begin();
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if<!std::is_array<remove_reference_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
     return std::forward<Iterable>(c).end();
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::begin(c))> {
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
     return std::begin(c);
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if<std::is_array<remove_reference_t<Iterable>>::value, decltype(std::end(c))> {
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
     return std::end(c);
 }
 

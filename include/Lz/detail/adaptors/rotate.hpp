@@ -42,7 +42,7 @@ struct rotate_adaptor {
      * @param start The amount of elements to rotate the input iterable by.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr rotate_iterable<Iterable>
+    LZ_NODISCARD constexpr rotate_iterable<remove_ref<Iterable>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> start) const {
         return { std::forward<Iterable>(iterable), start };
     }

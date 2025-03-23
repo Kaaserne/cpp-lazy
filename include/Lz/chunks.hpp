@@ -18,7 +18,6 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have a
  * .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
  * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
- * Iterator category is the same as its input iterable.
  * So, all in all: use lz::cache_size if:
  * - Your iterable is exactly bidirectional (so forward excluded)
  * - Your iterable is not sized
@@ -50,7 +49,6 @@ static constexpr detail::chunks_adaptor detail::chunks_adaptor::chunks;
  * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have a
  * .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
  * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
- * Iterator category is the same as its input iterable.
  * So, all in all: use lz::cache_size if:
  * - Your iterable is exactly bidirectional (so forward excluded)
  * - Your iterable is not sized

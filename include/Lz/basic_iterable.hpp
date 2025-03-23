@@ -65,13 +65,13 @@ public:
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<decay_t<Rhs>>::value, bool>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<remove_ref<Rhs>>::value, bool>
     operator==(const basic_iterable_impl& lhs, Rhs&& rhs) {
         return lz::equal(lhs, std::forward<Rhs>(rhs));
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<decay_t<Rhs>>::value, bool>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<remove_ref<Rhs>>::value, bool>
     operator!=(const basic_iterable_impl& lhs, Rhs&& rhs) {
         return !(lhs == std::forward<Rhs>(rhs));
     }
@@ -140,13 +140,13 @@ public:
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<remove_reference_t<Rhs>>::value, bool>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<remove_ref<Rhs>>::value, bool>
     operator==(const sized_iterable_impl& lhs, Rhs&& rhs) {
         return lz::equal(lhs, std::forward<Rhs>(rhs));
     }
 
     template<class Rhs>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<remove_reference_t<Rhs>>::value, bool>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend enable_if<is_iterable<remove_ref<Rhs>>::value, bool>
     operator!=(const sized_iterable_impl& lhs, Rhs&& rhs) {
         return !(lhs == std::forward<Rhs>(rhs));
     }

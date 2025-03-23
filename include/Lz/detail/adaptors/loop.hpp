@@ -30,7 +30,7 @@ struct loop_adaptor {
      * @param iterable The iterable to loop over
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr detail::enable_if<!std::is_integral<Iterable>::value, loop_iterable<Iterable, true>>
+    LZ_NODISCARD constexpr detail::enable_if<!std::is_integral<Iterable>::value, loop_iterable<remove_ref<Iterable>, true>>
     operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
@@ -49,7 +49,8 @@ struct loop_adaptor {
      * @param amount The amount of times to loop over the iterable
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr loop_iterable<Iterable, false> operator()(Iterable&& iterable, const std::size_t amount) const {
+    LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, false>
+    operator()(Iterable&& iterable, const std::size_t amount) const {
         return { std::forward<Iterable>(iterable), amount };
     }
 

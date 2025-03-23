@@ -56,13 +56,13 @@ public:
     }
 
     template<class Iterable>
-    friend concatenate_iterable<Iterable, Iterables...>
+    friend concatenate_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, concatenate_iterable<Iterables...>&& concatenate) {
         return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(concatenate._iterables));
     }
 
     template<class Iterable>
-    friend concatenate_iterable<Iterable, Iterables...>
+    friend concatenate_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const concatenate_iterable<Iterables...>& concatenate) {
         return iterable_tuple_cat(std::forward<Iterable>(iterable), concatenate._iterables);
     }

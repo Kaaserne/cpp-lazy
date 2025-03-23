@@ -51,16 +51,15 @@ public:
     }
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<Iterable, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, cartesian_product_iterable<Iterables...>&& cartesian) {
-        return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))),
-                                std::move(cartesian._iterables)) };
+        return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(cartesian._iterables));
     }
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<Iterable, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const cartesian_product_iterable<Iterables...>& cartesian) {
-        return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))), cartesian._iterables) };
+        return iterable_tuple_cat(std::forward<Iterable>(iterable), cartesian._iterables);
     }
 };
 

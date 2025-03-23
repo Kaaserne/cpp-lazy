@@ -27,7 +27,7 @@ struct reverse_adaptor {
      * @param iterable
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr reverse_iterable<Iterable> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr reverse_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
 };

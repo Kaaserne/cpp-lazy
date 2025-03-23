@@ -34,7 +34,7 @@ struct slice_adaptor {
      * @param to The end index of the slice
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr slice_iterable<Iterable>
+    LZ_NODISCARD constexpr slice_iterable<remove_ref<Iterable>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> from, const diff_iterable_t<Iterable> to) const {
         return { lz::drop(std::forward<Iterable>(iterable), from), to - from };
     }

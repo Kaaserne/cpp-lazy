@@ -8,6 +8,8 @@
 #include <Lz/detail/traits.hpp>
 #include <tuple>
 
+// TODO add lz::decay_to iterable
+
 namespace lz {
 namespace detail {
 
@@ -56,15 +58,16 @@ constexpr tuple_expand<decay_t<Fn>> make_expand_fn(Fn&& fn) {
 }
 
 template<class Iterable, class... Ts>
-LZ_CONSTEXPR_CXX_14 std::tuple<ref_or_view<Iterable>, decay_t<Ts>...>
+LZ_CONSTEXPR_CXX_14 std::tuple<ref_or_view<remove_ref<Iterable>>, Ts...>
 iterable_tuple_cat(Iterable&& iterable, const std::tuple<Ts...>& iterables) {
-    return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))), iterables) };
+    return { std::tuple_cat(std::make_tuple(ref_or_view<remove_ref<Iterable>>(std::forward<Iterable>(iterable))), iterables) };
 }
 
 template<class Iterable, class... Ts>
-LZ_CONSTEXPR_CXX_14 std::tuple<ref_or_view<Iterable>, decay_t<Ts>...>
+LZ_CONSTEXPR_CXX_14 std::tuple<ref_or_view<remove_ref<Iterable>>, Ts...>
 iterable_tuple_cat(Iterable&& iterable, std::tuple<Ts...>&& iterables) {
-    return { std::tuple_cat(std::make_tuple(ref_or_view<Iterable>(std::forward<Iterable>(iterable))), std::move(iterables)) };
+    return { std::tuple_cat(std::make_tuple(ref_or_view<remove_ref<Iterable>>(std::forward<Iterable>(iterable))),
+                            std::move(iterables)) };
 }
 
 template<class IterableTuple, std::size_t... I>

@@ -32,7 +32,7 @@ struct cartesian_product_adaptor {
      * @param iterables The iterables to perform the cartesian product on.
      */
     template<LZ_CONCEPT_ITERABLE... Iterables>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 cartesian_product_iterable<Iterables...> operator()(Iterables&&... iterables) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 cartesian_product_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {
         return { std::forward<Iterables>(iterables)... };
     }
 };

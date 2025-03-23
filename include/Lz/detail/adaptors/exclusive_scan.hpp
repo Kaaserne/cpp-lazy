@@ -47,7 +47,7 @@ struct exclusive_scan_adaptor {
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr enable_if<is_invocable<BinaryOp, ref_iterable_t<Iterable>, decay_t<T>>::value,
-                                     exclusive_scan_iterable<Iterable, decay_t<T>, BinaryOp>>
+                                     exclusive_scan_iterable<remove_ref<Iterable>, decay_t<T>, BinaryOp>>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const {
         return { std::forward<Iterable>(iterable), std::forward<T>(init), std::move(binary_op) };
     }

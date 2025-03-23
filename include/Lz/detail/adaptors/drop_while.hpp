@@ -31,7 +31,7 @@ struct drop_while_adaptor {
      * @param unary_predicate The predicate to drop elements with
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr drop_while_iterable<Iterable, UnaryPredicate>
+    LZ_NODISCARD constexpr drop_while_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(unary_predicate) };
     }

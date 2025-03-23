@@ -22,7 +22,7 @@ public:
 
     template<class I>
     constexpr map_iterable(I&& iterable, UnaryOp unary_op) :
-        _iterable{ std::forward<Iterable>(iterable) },
+        _iterable{ std::forward<I>(iterable) },
         _unary_op{ std::move(unary_op) } {
     }
 

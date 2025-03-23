@@ -17,6 +17,7 @@ struct intersection_adaptor {
     static constexpr adaptor intersection{};
 
 #endif
+    // clang-format off
 
     /**
      * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that
@@ -38,10 +39,13 @@ struct intersection_adaptor {
      * @param compare The comparison function. std::less<> by default
      */
     template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable2>::value, intersection_iterable<Iterable, Iterable2, BinaryPredicate>>
+    LZ_NODISCARD constexpr
+    enable_if<is_iterable<Iterable2>::value, intersection_iterable<remove_ref<Iterable>, remove_ref<Iterable2>, BinaryPredicate>>
     operator()(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate compare = {}) const {
         return { std::forward<Iterable>(iterable), std::forward<Iterable2>(iterable2), std::move(compare) };
     }
+
+    // clang-format on
 
     /**
      * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that

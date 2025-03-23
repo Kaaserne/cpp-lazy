@@ -31,7 +31,7 @@ struct filter_adaptor {
      * @param predicate The predicate to filter on
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr filter_iterable<Iterable, UnaryPredicate>
+    LZ_NODISCARD constexpr filter_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
     }

@@ -33,7 +33,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, unique_iterable<Iterable, BinaryPredicate>>
+    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, unique_iterable<remove_ref<Iterable>, BinaryPredicate>>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
     }

@@ -178,7 +178,7 @@ TEST_CASE("Chunks binary operations random access") {
 
     SECTION("Operator+") {
         auto test_iterator = [](const std::vector<std::vector<int>>& expected,
-                                lz::detail::chunks_iterable<std::vector<int>&> chunked) {
+                                lz::detail::chunks_iterable<std::vector<int>> chunked) {
             auto iterator = chunked.begin();
             auto end_iterator = chunked.end();
             REQUIRE(iterator + 0 == iterator);

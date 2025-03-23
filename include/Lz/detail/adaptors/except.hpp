@@ -18,7 +18,8 @@ struct except_adaptor {
     static constexpr adaptor except{};
 
 #endif
-
+    // clang-format off
+    
     /**
      * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
      * argument. Can be used with a custom comparer. Does not contain a .size() method, it's a forward iterator and returns a
@@ -37,12 +38,11 @@ struct except_adaptor {
      * @param binary_predicate The binary predicate to use for comparison.
      */
     template<LZ_CONCEPT_ITERABLE Iterable1, LZ_CONCEPT_ITERABLE Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable2>::value, except_iterable<Iterable1, Iterable2, BinaryPredicate>>
+    LZ_NODISCARD constexpr 
+    enable_if<is_iterable<Iterable2>::value, except_iterable<remove_ref<Iterable1>, remove_ref<Iterable2>, BinaryPredicate>>
     operator()(Iterable1&& iterable1, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable1>(iterable1), std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }
-
-    // clang-format off
 
     /**
      * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable

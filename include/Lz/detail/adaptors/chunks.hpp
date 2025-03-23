@@ -23,9 +23,8 @@ struct chunks_adaptor {
      * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
      * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,
      * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have
-     *a .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
+     * a .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
      * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
-     * Iterator category is the same as its input iterable.
      * So, all in all: use lz::cache_size if:
      * - Your iterable is exactly bidirectional (so forward excluded)
      * - Your iterable is not sized
@@ -49,7 +48,7 @@ struct chunks_adaptor {
      * @param iterable The iterable to chunk* @param chunk_size The size of the chunks
      **/
     template<LZ_CONCEPT_ITERABLE Iterable>
-    constexpr chunks_iterable<Iterable> operator()(Iterable&& iterable, std::size_t chunk_size) const {
+    constexpr chunks_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, std::size_t chunk_size) const {
         return { std::forward<Iterable>(iterable), chunk_size };
     }
 
@@ -59,7 +58,6 @@ struct chunks_adaptor {
      * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have
      *a .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
      * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
-     * Iterator category is the same as its input iterable.
      * So, all in all: use lz::cache_size if:
      * - Your iterable is exactly bidirectional (so forward excluded)
      * - Your iterable is not sized

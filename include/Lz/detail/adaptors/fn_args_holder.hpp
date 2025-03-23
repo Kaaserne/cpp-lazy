@@ -17,7 +17,7 @@ struct fn_args_holder {
     using adaptor = fn_args_holder<Adaptor, Ts...>;
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) noexcept : data(std::forward<Args>(args)...) {
+    LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) : data(std::forward<Args>(args)...) {
     }
 
     template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
