@@ -158,6 +158,8 @@ public:
 
 template<class Iterable>
 class custom_iterable : public lz::lazy_view {
+    // Holds a reference or a copy of the iterable, depending whether Iterable is inherited from lazy_view
+    // So std::vector<int> will be hold by reference, but lz::range(0, 10) will be copied
     lz::ref_or_view<Iterable> _iterable;
 
 public:
@@ -176,7 +178,7 @@ public:
 };
 
 template<class Iterable>
-custom_iterable<Iterable> make_custom_iterable(Iterable&& iterable) {
+custom_iterable<typename std::remove_reference<Iterable>::type> make_custom_iterable(Iterable&& iterable) {
     return { iterable };
 }
 
@@ -186,7 +188,7 @@ int main() {
     // Custom iterable example, with for e.g. std::vector. We add a reference to the vector so that the contents are not copied
     std::cout << "Custom iterable example.\n";
     std::vector<int> vec = { 1, 2, 3, 4, 5 };
-    custom_iterable<std::vector<int>&> custom(vec);
+    custom_iterable<std::vector<int>> custom(vec);
     static_cast<void>(custom); // To silence the warning
 
     // for lz iterators however, you can use the following code:
