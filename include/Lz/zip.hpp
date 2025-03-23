@@ -25,6 +25,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  *   - lz::chunks
  *   - lz::enumerate
  *   - lz::exclude
+ *   - lz::take
  *   - lz::take_every
  *   - lz::zip_longest
  *   - lz::zip
@@ -61,6 +62,7 @@ static constexpr detail::zip_adaptor detail::zip_adaptor::zip{};
  *   - lz::chunks
  *   - lz::enumerate
  *   - lz::exclude
+ *   - lz::take
  *   - lz::take_every
  *   - lz::zip_longest
  *   - lz::zip

@@ -95,11 +95,57 @@ TEST_CASE("random_iterable binary operations") {
         REQUIRE(*it <= 1.);
     }
 
-    // TODO
     SECTION("Operator+") {
+        auto begin = random.begin();
+        auto end = random.end();
+
+        auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        for (std::size_t i = 0; i < lz::size(random) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin + i) >= 0.);
+            REQUIRE(*(begin + i) <= 1.);
+        }
+        REQUIRE(begin + lz::size(random) == random.end());
+        for (std::size_t i = 1; i <= lz::size(random); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end - i) >= 0.);
+            REQUIRE(*(end - i) <= 1.);
+        }
+        REQUIRE(end - lz::size(random) == random.begin());
+
+        std::advance(begin, lz::size(random));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(random)));
+
+        for (std::size_t i = 0; i < lz::size(random) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end + i) >= 0.);
+            REQUIRE(*(end + i) <= 1.);
+        }
+        REQUIRE(end + lz::size(random) == random.end());
+        for (std::size_t i = 1; i <= lz::size(random); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin - i) >= 0.);
+            REQUIRE(*(begin - i) <= 1.);
+        }
+        REQUIRE(begin - lz::size(random) == random.begin());
     }
 
     SECTION("Operator-") {
+        auto begin = random.begin();
+        auto end = random.end();
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(random)); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(random) - i));
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(random) - i));
+            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(random) - i));
+            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(random) - i));
+        }
+
+        for (std::size_t i = 0; i < lz::size(random); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(random) - 2 * i));
+            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(random) - 2 * i));
+        }
     }
 }
 

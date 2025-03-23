@@ -177,6 +177,8 @@ TEST_CASE("zip_iterable binary operations") {
     }
 
     SECTION("Operator+(int)") {
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(zipper.end() + 0 == zipper.end());
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
             REQUIRE(*(begin + i) ==
                     std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
@@ -190,6 +192,8 @@ TEST_CASE("zip_iterable binary operations") {
         while (begin != end) {
             ++begin;
         }
+        REQUIRE(begin + 0 == begin);
+
         for (std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
             REQUIRE(*(begin - i) == std::make_tuple(*std::prev(a.end(), i), *std::prev(b.end(), i), *std::prev(c.end(), i)));
         }
@@ -198,6 +202,7 @@ TEST_CASE("zip_iterable binary operations") {
         while (end != begin) {
             --end;
         }
+        REQUIRE(end + 0 == end);
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
             REQUIRE(*(end + i) == std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
         }
@@ -227,7 +232,7 @@ TEST_CASE("zip_iterable binary operations") {
 
         beg = zip.begin();
 
-        for (std::size_t i = 0; i < lz::size(zip) / 2; ++i) {
+        for (std::size_t i = 0; i < lz::size(zip); ++i) {
             INFO("With i = " << i);
             REQUIRE((e - i) - (beg + i) == static_cast<std::ptrdiff_t>(lz::size(zip) - 2 * i));
             REQUIRE((beg + i) - (e - i) == -static_cast<std::ptrdiff_t>(lz::size(zip) - 2 * i));

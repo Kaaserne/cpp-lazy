@@ -91,11 +91,53 @@ TEST_CASE("Map binary operations") {
         REQUIRE(it == map.end());
     }
 
-    // TODO
     SECTION("Operator+") {
+        auto begin = map.begin();
+        auto end = map.end();
+
+        std::vector<std::string> expected = { "FieldA", "FieldB", "FieldC" };
+        for (std::size_t i = 0; i < lz::size(map) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
+        }
+        REQUIRE(begin + lz::size(map) == map.end());
+        for (std::size_t i = 1; i <= lz::size(map); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::size(map) == map.begin());
+
+        std::advance(begin, lz::size(map));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(map)));
+
+        for (std::size_t i = 0; i < lz::size(map) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end + i) == *(expected.begin() + i));
+        }
+        REQUIRE(end + lz::size(map) == map.end());
+        for (std::size_t i = 1; i <= lz::size(map); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin - i) == *(expected.end() - i));
+        }
+        REQUIRE(begin - lz::size(map) == map.begin());
     }
 
     SECTION("Operator-") {
+        auto begin = map.begin();
+        auto end = map.end();
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(map)); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(map) - i));
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(map) - i));
+            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(map) - i));
+            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(map) - i));
+        }
+
+        for (std::size_t i = 0; i < lz::size(map) ; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(map) - 2 * i));
+            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(map) - 2 * i));
+        }
     }
 }
 

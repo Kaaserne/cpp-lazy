@@ -181,6 +181,9 @@ TEST_CASE("Chunks binary operations random access") {
                                 lz::detail::chunks_iterable<std::vector<int>&> chunked) {
             auto iterator = chunked.begin();
             auto end_iterator = chunked.end();
+            REQUIRE(iterator + 0 == iterator);
+            REQUIRE(end_iterator + 0 == end_iterator);
+
             for (std::size_t i = 0; i < lz::size(chunked); ++i) {
                 INFO("With i = " << i << "; iterator = [" << lz::format(*iterator) << "]; expected = ["
                                  << lz::format(expected.at(i)) << ']');
@@ -198,6 +201,9 @@ TEST_CASE("Chunks binary operations random access") {
 
             std::advance(iterator, lz::size(chunked));
             std::advance(end_iterator, -static_cast<std::ptrdiff_t>(lz::size(chunked)));
+
+            REQUIRE(iterator + 0 == iterator);
+            REQUIRE(end_iterator + 0 == end_iterator);
 
             for (std::size_t i = 0; i < lz::size(chunked); ++i) {
                 INFO("With i = " << i << "; iterator = [" << lz::format(*end_iterator) << "]; expected = ["
@@ -244,7 +250,7 @@ TEST_CASE("Chunks binary operations random access") {
         auto test_operator_minus2 = [](decltype(it) iterator, decltype(it_end) end_iterator, std::size_t size) {
             auto s_size = static_cast<std::ptrdiff_t>(size);
 
-            for (std::ptrdiff_t i = 0; i < s_size / 2; ++i) {
+            for (std::ptrdiff_t i = 0; i < s_size; ++i) {
                 INFO("With i = " << i);
                 REQUIRE((end_iterator - i) - (iterator + i) == (s_size - 2 * i));
                 REQUIRE((iterator + i) - (end_iterator - i) == -(s_size - 2 * i));

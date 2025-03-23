@@ -6,9 +6,9 @@
 #include <set>
 #include <vector>
 
-// In case you have a custom container, you can specialize `lz::custom_copier` to copy the elements to your container.
+// In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
 // This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
-// `lz::custom_copier` for your custom container if all of the following are true:
+// `lz::custom_copier_for` for your custom container if all of the following are true:
 // - Your custom container does not have a `push_back` method
 // - Your custom container does not have an `insert` method
 // - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -28,9 +28,9 @@ public:
     }
 };
 
-// Specialize `lz::custom_copier` for your custom container
+// Specialize `lz::custom_copier_for` for your custom container
 template<class T>
-struct lz::custom_copier<custom_container<T>> {
+struct lz::custom_copier_for<custom_container<T>> {
     template<class Iterable>
     void copy(Iterable&& iterable, custom_container<T>& container) const {
         // Copy the contents of the iterable to the container

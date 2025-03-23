@@ -9,6 +9,7 @@ int main() {
      * - `lz::chunks`
      * - `lz::enumerate`
      * - `lz::exclude`
+     * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`
      * - `lz::zip`
@@ -52,6 +53,7 @@ int main() {
      *   - lz::chunks
      *   - lz::enumerate
      *   - lz::exclude
+     *   - lz::take
      *   - lz::take_every
      *   - lz::zip_longest
      *   - lz::zip

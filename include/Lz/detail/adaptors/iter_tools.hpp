@@ -5,6 +5,7 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
+#include <Lz/drop.hpp>
 #include <Lz/map.hpp>
 #include <Lz/split.hpp>
 #include <Lz/zip.hpp>
@@ -92,41 +93,13 @@ struct pairwise_n_adaptor {
 
 private:
     template<class Iterable, std::size_t... N>
-    using pairwise_n_sized_object =
-        zip_iterable<decay_t<decltype((N, std::declval<sized_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>()))>...>;
+    using pairwise_n_object = zip_iterable<drop_iterable<decltype(N, std::declval<Iterable>())>...>;
 
     template<class Iterable, std::size_t... N>
-    using pairwise_n_object =
-        zip_iterable<decay_t<decltype((N, std::declval<basic_iterable_impl<iter_t<Iterable>, sentinel_t<Iterable>>>()))>...>;
-
-    template<std::size_t N, class Iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<N == 0, decay_t<Iterator>> cached_next(Iterator&& iterator) const {
-        return std::forward<Iterator>(iterator);
-    }
-
-    template<std::size_t N, class Iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<N != 0, decay_t<Iterator>> cached_next(Iterator&& iterator) const {
-        return std::next(cached_next<N - 1>(std::forward<Iterator>(iterator)), 1);
-    }
-
-    template<class Iterable, std::size_t... N>
-    LZ_CONSTEXPR_CXX_14 enable_if<sized<Iterable>::value, pairwise_n_sized_object<Iterable, N...>>
+    LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...>
     pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) const {
-        auto new_begin = std::make_tuple(cached_next<N>(std::begin(iterable))...);
-        auto ends = std::make_tuple(std::end((N, iterable))...);
-
-        return lz::zip(sized_iterable<decay_t<decltype(std::get<N>(new_begin))>, decay_t<decltype(std::get<N>(ends))>>{
-            std::get<N>(new_begin), static_cast<std::size_t>(lz::size(iterable)) - N }...);
-    }
-
-    template<class Iterable, std::size_t... N>
-    LZ_CONSTEXPR_CXX_14 enable_if<!sized<Iterable>::value, pairwise_n_object<Iterable, N...>>
-    pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) const {
-        auto new_begin = std::make_tuple(cached_next<N>(std::begin(iterable))...);
-        auto ends = std::make_tuple(std::end((N, iterable))...);
-
-        return lz::zip(basic_iterable<decay_t<decltype(std::get<N>(new_begin))>, decay_t<decltype(std::get<N>(ends))>>{
-            std::get<N>(new_begin), std::get<N>(ends) }...);
+        auto dropped = std::make_tuple(lz::drop(std::forward<Iterable>(iterable), N)...);
+        return lz::zip(std::get<N>(std::move(dropped))...);
     }
 
 public:

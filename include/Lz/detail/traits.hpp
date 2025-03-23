@@ -45,14 +45,28 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
-#ifdef LZ_HAS_CXX_17
-
-template<class... Ts>
-using conjunction = std::conjunction<Ts...>;
-
-#else
-
 // TODO faster implementation for compiler times
+
+// template<bool Value>
+// struct conjunction_fast_impl;
+
+// template<>
+// struct conjunction_fast_impl<false> {
+//     template<class T, class... Rest>
+//     using type = T;
+// };
+
+// template<>
+// struct conjunction_fast_impl<true> {
+//     template<class Next, class... Rest>
+//     using type = typename conjunction_fast_impl<static_cast<bool>(Next::value)>::template type<Next, Rest...>;
+// };
+
+// template<class... Ts>
+// struct conjunction : std::false_type {};
+
+// template<class T, class... Rest>
+// struct conjunction<T, Rest...> : conjunction_fast_impl<static_cast<bool>(T::value)>::template type<T, Next, Rest...> {};
 
 template<bool Value, class T, class... Rest>
 struct conjunction_impl {
@@ -69,7 +83,6 @@ struct conjunction : std::false_type {};
 
 template<class T,  class... Rest>
 struct conjunction<T, Rest...> : conjunction_impl<static_cast<bool>(T::value), T, Rest...>::type {};
-#endif
 
 #ifdef LZ_HAS_CXX_11
 

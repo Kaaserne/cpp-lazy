@@ -7,7 +7,7 @@
 #include <Lz/iterator_base.hpp>
 #include <limits>
 
-// todo create inf loop specialization
+// TODO create inf loop specialization
 
 namespace lz {
 namespace detail {
@@ -28,7 +28,7 @@ public:
 
     constexpr repeat_iterator() = default;
 
-    constexpr reference dereference() const noexcept {
+    constexpr reference dereference() const {
         return _to_repeat;
     }
 

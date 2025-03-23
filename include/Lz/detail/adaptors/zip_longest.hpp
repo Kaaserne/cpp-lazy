@@ -30,6 +30,7 @@ struct zip_longest_adaptor {
      *   - lz::chunks
      *   - lz::enumerate
      *   - lz::exclude
+     *   - lz::take
      *   - lz::take_every
      *   - lz::zip_longest
      *   - lz::zip

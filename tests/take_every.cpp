@@ -228,6 +228,8 @@ TEST_CASE("take_every_iterable binary operations") {
         auto test_operator_plus = [](const std::initializer_list<int> expected, decltype(even_sized_even_take) input) {
             auto it = input.begin();
             auto end = input.end();
+            REQUIRE(it + 0 == it);
+            REQUIRE(end + 0 == end);
 
             for (std::size_t i = 0; i < lz::size(input); ++i) {
                 INFO("With i = " << i);
@@ -237,6 +239,7 @@ TEST_CASE("take_every_iterable binary operations") {
             REQUIRE(it + lz::size(input) == end);
             std::advance(it, lz::size(input));
             REQUIRE(it == end);
+            REQUIRE(it + 0 == it);
 
             for (std::size_t i = 1; i <= lz::size(input); ++i) {
                 INFO("With i = " << i);
@@ -251,6 +254,7 @@ TEST_CASE("take_every_iterable binary operations") {
             REQUIRE(end - lz::size(input) == input.begin());
             std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(input)));
             REQUIRE(end == input.begin());
+            REQUIRE(end + 0 == end);
 
             for (std::size_t i = 0; i < lz::size(input); ++i) {
                 INFO("With i = " << i);
@@ -268,8 +272,42 @@ TEST_CASE("take_every_iterable binary operations") {
         test_operator_plus(expected, uneven_sized_odd_take);
     }
 
-    // TODO
     SECTION("Operator-") {
+        std::vector<int> even_sized = { 1, 2, 3, 4 };
+        std::vector<int> odd_sized = { 1, 2, 3, 4, 5 };
+        auto even_sized_even_take = lz::take_every(even_sized, 2);
+        auto even_sized_odd_take = lz::take_every(even_sized, 3);
+        auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
+        auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
+
+        using iterable = decltype(even_sized_even_take);
+        auto test_iterable = [](const iterable& iterable) {
+            auto begin = iterable.begin();
+            auto end = iterable.end();
+
+            for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(iterable)); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+            }
+
+            for (std::size_t i = 0; i < lz::size(iterable); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable) - 2 * i));
+                REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(iterable) - 2 * i));
+            }
+        };
+
+        INFO("even_sized_even_take");
+        test_iterable(even_sized_even_take);
+        INFO("even_sized_odd_take");
+        test_iterable(even_sized_odd_take);
+        INFO("uneven_sized_even_take");
+        test_iterable(uneven_sized_even_take);
+        INFO("uneven_sized_odd_take");
+        test_iterable(uneven_sized_odd_take);
     }
 }
 

@@ -85,7 +85,6 @@ TEST_CASE("Pairwise") {
                                                                      std::make_tuple('e', 'l', 'l'),
                                                                      std::make_tuple('l', 'l', 'o') };
         auto actual_pairwise = lz::pairwise_n<3>(actual);
-        // lz::pairwise_n<lz::size_hint::dynamic>(actual, 3)
         REQUIRE(lz::equal(actual_pairwise, expected));
         actual_pairwise = actual | lz::pairwise_n<3>;
         REQUIRE(lz::equal(actual_pairwise, expected));

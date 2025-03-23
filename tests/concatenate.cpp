@@ -143,6 +143,8 @@ TEST_CASE("Concat binary operations") {
     SECTION("Operator+") {
         auto begin = concat.begin();
         auto end = concat.end();
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
 
         auto expected = std::string("hello world");
         for (std::size_t i = 0; i < lz::size(concat) - 1; ++i) {
@@ -158,6 +160,8 @@ TEST_CASE("Concat binary operations") {
 
         std::advance(begin, lz::size(concat));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(concat)));
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
 
         for (std::size_t i = 0; i < lz::size(concat) - 1; ++i) {
             INFO("With i = " << i);
@@ -181,7 +185,7 @@ TEST_CASE("Concat binary operations") {
             REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(concat) - i));
             REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(concat) - i));
         }
-        for (std::size_t i = 0; i < lz::size(concat) / 2; ++i) {
+        for (std::size_t i = 0; i < lz::size(concat); ++i) {
             INFO("With i = " << i);
             REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(concat) - 2 * i));
             REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(concat) - 2 * i));

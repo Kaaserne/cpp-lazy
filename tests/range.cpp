@@ -93,25 +93,33 @@ TEST_CASE("Range binary operations") {
     SECTION("Operator+") {
         auto begin = range.begin();
         auto end = range.end();
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
 
         auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
+            INFO("With i = " << i);
             REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
         REQUIRE(begin + lz::size(range) == range.end());
         for (std::size_t i = 1; i <= lz::size(range); ++i) {
+            INFO("With i = " << i);
             REQUIRE(*(end - i) == *(expected.end() - i));
         }
         REQUIRE(end - lz::size(range) == range.begin());
 
         std::advance(begin, lz::size(range));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(range)));
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
 
         for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
+            INFO("With i = " << i);
             REQUIRE(*(end + i) == *(expected.begin() + i));
         }
         REQUIRE(end + lz::size(range) == range.end());
         for (std::size_t i = 1; i <= lz::size(range); ++i) {
+            INFO("With i = " << i);
             REQUIRE(*(begin - i) == *(expected.end() - i));
         }
         REQUIRE(begin - lz::size(range) == range.begin());
@@ -128,7 +136,7 @@ TEST_CASE("Range binary operations") {
             REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(range) - i));
         }
 
-        for (std::size_t i = 0; i < lz::size(range) / 2; ++i) {
+        for (std::size_t i = 0; i < lz::size(range) ; ++i) {
             INFO("With i = " << i);
             REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
             REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));

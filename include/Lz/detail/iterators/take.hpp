@@ -7,10 +7,10 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator>
+template<class Iterator, class S>
 class take_iterator
-    : public iterator<take_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, take_iterator<Iterator>>> {
+    : public iterator<take_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, take_iterator<Iterator, S>, S>> {
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -22,17 +22,11 @@ public:
 
 private:
     Iterator _iterator;
-    difference_type _n{};
-
-    template<class, class>
-    friend class sized_iterable_impl;
 
 public:
     constexpr take_iterator() = default;
 
-    constexpr take_iterator(Iterator iterator, const difference_type start) noexcept :
-        _iterator{ std::move(iterator) },
-        _n{ start } {
+    constexpr take_iterator(Iterator iterator) : _iterator{ std::move(iterator) } {
     }
 
     constexpr reference dereference() const {
@@ -45,29 +39,26 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
-        --_n;
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_iterator;
-        ++_n;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         _iterator += offset;
-        _n -= offset;
     }
 
     constexpr difference_type difference(const take_iterator& b) const {
-        return b._n - _n;
+        return _iterator - b._iterator;
     }
 
     constexpr bool eq(const take_iterator& b) const {
-        return _n == b._n;
+        return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
-        return _n == 0;
+    constexpr bool eq(const S& sentinel) const {
+        return _iterator == sentinel;
     }
 };
 } // namespace detail

@@ -30,7 +30,7 @@ TEST_CASE("Take changing and creating elements") {
     REQUIRE(array[0] == 0);
 }
 
-TEST_CASE("Take binary operations") {
+TEST_CASE("Take binary operations where n is smaller than size") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take = lz::take(array, 4);
     REQUIRE(take.size() == 4);
@@ -93,11 +93,64 @@ TEST_CASE("Take binary operations") {
             REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
         }
 
-        for (std::size_t i = 0; i < lz::size(take) / 2; ++i) {
+        for (std::size_t i = 0; i < lz::size(take); ++i) {
             INFO("With i = " << i);
             REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
             REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
         }
+    }
+}
+
+TEST_CASE("Take binary operations where n is larger than size") {
+    std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    auto take = lz::take(array, 20);
+    REQUIRE(take.size() == 10);
+
+    SECTION("Operator++") {
+        auto begin = take.begin();
+        ++begin;
+        REQUIRE(*begin == 2);
+    }
+
+    SECTION("Operator--") {
+        auto end = take.end();
+        --end;
+        REQUIRE(*end == 10);
+    }
+
+    SECTION("Operator== & Operator!=") {
+        REQUIRE(take.begin() != take.end());
+        REQUIRE_FALSE(take.begin() == take.end());
+        auto it = take.begin();
+        it = take.end();
+        REQUIRE(it == take.end());
+    }
+
+    SECTION("Operator+") {
+        auto begin = take.begin();
+        auto end = take.end();
+
+        auto expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
+        }
+        REQUIRE(begin + lz::size(take) == take.end());
+        for (std::size_t i = 1; i <= lz::size(take); ++i) {
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::size(take) == take.begin());
+
+        std::advance(begin, lz::size(take));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
+
+        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
+            REQUIRE(*(end + i) == *(expected.begin() + i));
+        }
+        REQUIRE(end + lz::size(take) == take.end());
+        for (std::size_t i = 1; i <= lz::size(take); ++i) {
+            REQUIRE(*(begin - i) == *(expected.end() - i));
+        }
+        REQUIRE(begin - lz::size(take) == take.begin());
     }
 }
 

@@ -43,81 +43,110 @@ TEST_CASE("Basic functionality loop") {
 }
 
 TEST_CASE("Loop with non while true argument") {
-    std::array<int, 4> arr = { 1, 2, 3, 4 };
+    std::vector<int> vec = { 1, 2, 3, 4 };
 
     SECTION("Empty") {
-        auto looper = lz::loop(arr, 0);
+        auto looper = lz::loop(vec, 0);
         static_assert(std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should not be sentinel");
         REQUIRE(looper.size() == 0);
         REQUIRE(lz::empty(looper));
 
-        std::vector<int> vec;
-        auto looper2 = lz::loop(vec, 0);
+        std::vector<int> v;
+        auto looper2 = lz::loop(v, 0);
         REQUIRE(looper2.size() == 0);
         REQUIRE(lz::empty(looper2));
     }
 
     SECTION("Size") {
-        auto looper = lz::loop(arr, 2);
+        auto looper = lz::loop(vec, 2);
         REQUIRE(looper.size() == 8);
         REQUIRE(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
     }
 
     SECTION("To vector") {
-        auto looper = lz::loop(arr, 2);
+        auto looper = lz::loop(vec, 2);
         std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
         REQUIRE((looper | lz::to<std::vector>()) == expected);
     }
 
-    SECTION("Distance positive") {
-        auto looper = lz::loop(arr, 2);
-        auto begin = looper.begin();
-
-        for (std::size_t i = 0, start = 8; i < looper.size(); ++i, --start, ++begin) {
-            REQUIRE(looper.end() - begin == static_cast<std::ptrdiff_t>(start));
-        }
-
-        begin = looper.begin();
-        auto end = looper.end();
-
-        for (std::size_t i = 0, start = 8; i < looper.size(); ++i, --start, --end) {
-            REQUIRE(end - begin == static_cast<std::ptrdiff_t>(start));
-        }
-    }
-
-    SECTION("Distance negative") {
-        auto looper = lz::loop(arr, 3);
-        auto begin = looper.begin();
-        for (std::ptrdiff_t i = -static_cast<std::ptrdiff_t>(looper.size()); i < 0; ++i, ++begin) {
-            REQUIRE(std::distance(looper.end(), begin) == i);
-        }
-    }
-
-    // TODO Create more tests for these operators in all tests
     SECTION("Operator+") {
-        auto looper = lz::loop(arr, 2);
-        auto begin = looper.begin();
-        REQUIRE(*(begin + 1) == 2);
-        REQUIRE(*(begin + 2) == 3);
-        REQUIRE(*(begin + 3) == 4);
-        REQUIRE(*(begin + 4) == 1);
-        REQUIRE(*(begin + 5) == 2);
-        REQUIRE(*(begin + 6) == 3);
-        REQUIRE(*(begin + 7) == 4);
-        REQUIRE(begin + 8 == looper.end());
+        auto test_looper = [](const decltype(lz::loop(vec, 0))& l, std::initializer_list<int> expected) {
+            auto begin = l.begin();
+            auto end = l.end();
+            REQUIRE(begin + 0 == begin);
+            REQUIRE(end + 0 == end);
 
-        auto end = looper.end();
-        REQUIRE(*(end - 1) == 4);
-        REQUIRE(*(end - 2) == 3);
-        REQUIRE(*(end - 3) == 2);
-        REQUIRE(*(end - 4) == 1);
-        REQUIRE(*(end - 5) == 4);
-        REQUIRE(*(end - 6) == 3);
-        REQUIRE(*(end - 7) == 2);
-        REQUIRE(*(end - 8) == 1);
-        REQUIRE(looper.begin() == end - 8);
+            for (std::size_t i = 0; i < lz::size(l) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin + i) == *(expected.begin() + i));
+            }
+            REQUIRE(begin + lz::size(l) == l.end());
+
+            REQUIRE(end - 0 == end);
+            for (std::size_t i = 1; i <= lz::size(l); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end - i) == *(expected.end() - i));
+            }
+            REQUIRE(end - lz::size(l) == l.begin());
+
+            std::advance(begin, lz::size(l));
+            std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(l)));
+
+            REQUIRE(begin + 0 == begin);
+            REQUIRE(end + 0 == end);
+
+            for (std::size_t i = 0; i < lz::size(l) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end + i) == *(expected.begin() + i));
+            }
+            REQUIRE(end + lz::size(l) == l.end());
+            for (std::size_t i = 1; i <= lz::size(l); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin - i) == *(expected.end() - i));
+            }
+            REQUIRE(begin - lz::size(l) == l.begin());
+        };
+
+        auto looper = lz::loop(vec, 2);
+        auto expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
+        INFO("lz::loop(vec, 2)");
+        test_looper(looper, expected);
+
+        looper = lz::loop(vec, 1);
+        expected = { 1, 2, 3, 4 };
+        INFO("lz::loop(vec, 1)");
+        test_looper(looper, expected);
     }
 
-    // TODO
-    SECTION("Operator-") {}
+    
+    SECTION("Operator-") {
+        auto test_looper = [](const decltype(lz::loop(vec, 2))& l) {
+            auto begin = l.begin();
+            auto end = l.end();
+
+            for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(l)); ++i) {
+                INFO("With i = " << i);
+                CHECK((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(l) - i));
+                CHECK(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(l) - i));
+                CHECK((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(l) - i));
+                CHECK(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(l) - i));
+            }
+            for (std::size_t i = 0; i < lz::size(l); ++i) {
+                INFO("With i = " << i);
+                CHECK((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(l) - 2 * i));
+                CHECK((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(l) - 2 * i));
+            }
+        };
+        auto looper = lz::loop(vec, 2);
+        INFO("lz::loop(vec, 2)");
+        test_looper(looper);
+
+        looper = lz::loop(vec, 1);
+        INFO("lz::loop(vec, 1)");
+        test_looper(looper);
+
+        looper = lz::loop(vec, 3);
+        INFO("lz::loop(vec, 3)");
+        test_looper(looper);
+    }
 }

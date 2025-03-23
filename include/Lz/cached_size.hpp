@@ -19,6 +19,7 @@ namespace lz {
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
+ * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
@@ -40,6 +41,7 @@ namespace lz {
  *   - lz::chunks
  *   - lz::enumerate
  *   - lz::exclude
+ *   - lz::take
  *   - lz::take_every
  *   - lz::zip_longest
  *   - lz::zip
@@ -59,6 +61,7 @@ static constexpr detail::cached_size_adaptor cache_size{};
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
+ * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
@@ -80,6 +83,7 @@ static constexpr detail::cached_size_adaptor cache_size{};
  *   - lz::chunks
  *   - lz::enumerate
  *   - lz::exclude
+ *   - lz::take
  *   - lz::take_every
  *   - lz::zip_longest
  *   - lz::zip

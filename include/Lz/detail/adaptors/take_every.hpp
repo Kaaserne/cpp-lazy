@@ -30,6 +30,7 @@ struct take_every_adaptor {
      *   - lz::chunks
      *   - lz::enumerate
      *   - lz::exclude
+     *   - lz::take
      *   - lz::take_every
      *   - lz::zip_longest
      *   - lz::zip
@@ -62,6 +63,7 @@ struct take_every_adaptor {
      *   - lz::chunks
      *   - lz::enumerate
      *   - lz::exclude
+     *   - lz::take
      *   - lz::take_every
      *   - lz::zip_longest
      *   - lz::zip

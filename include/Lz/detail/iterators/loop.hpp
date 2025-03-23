@@ -23,7 +23,7 @@ class loop_iterator<Iterator, S, false>
     Iterator _begin;
     Iterator _iterator;
     S _end;
-    std::ptrdiff_t _amount{};
+    std::size_t _rotations_left{};
 
 public:
     using reference = typename traits::reference;
@@ -36,7 +36,7 @@ public:
         _begin{ std::move(begin) },
         _iterator{ std::move(iterator) },
         _end{ std::move(end) },
-        _amount{ static_cast<std::ptrdiff_t>(amount) } {
+        _rotations_left{ amount } {
     }
 
     constexpr reference dereference() const {
@@ -50,13 +50,12 @@ public:
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         if (_iterator == _end) {
-            --_amount;
-            if (_amount == 0) {
-                return;
-            }
-            else {
-                _iterator = _begin;
-            }
+            --_rotations_left;
+            _iterator = _begin;
+        }
+        if (static_cast<difference_type>(_rotations_left) == -1) {
+            _iterator = _end;
+            _rotations_left = 0;
         }
     }
 
@@ -64,41 +63,40 @@ public:
         --_iterator;
         if (_iterator == _begin) {
             _iterator = _end;
-            ++_amount;
+            ++_rotations_left;
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 void plus_is(difference_type offset) {
-        const auto iterable_length = _end - _begin;
-        _amount -= offset / iterable_length;
-        _iterator += offset % iterable_length;
-
-        if (_amount == 0 && _iterator == _begin) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
+        // {1, 2, 3, 4}(1, 2, 3, 4)
+        const auto iter_length = _end - _begin;
+        const auto remainder = offset % iter_length;
+        _iterator += offset % iter_length;
+        _rotations_left -= offset / iter_length;
+        if (_iterator == _begin && static_cast<difference_type>(_rotations_left) == -1) {
+            // We are exactly at end (rotations left is unsigned)
             _iterator = _end;
+            _rotations_left = 0;
         }
-        else if (-offset == iterable_length * _amount) {
+        else if (_iterator == _end && offset < 0 && remainder == 0) {
             _iterator = _begin;
+            --_rotations_left;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& other) const {
         LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
-        const auto iterable_length = _end - _begin;
-        if (_iterator > other._iterator) {
-            const auto total_diff = iterable_length * (other._amount - _amount - 1);
-            return total_diff + (_iterator - other._iterator);
-        }
-        const auto total_diff = iterable_length * (other._amount - _amount);
-        return total_diff + ((_iterator - other._iterator) + iterable_length);
+        const auto rotations_left_diff = static_cast<difference_type>(other._rotations_left - _rotations_left);
+        return (_iterator - other._iterator) + rotations_left_diff * (_end - _begin);
     }
 
     constexpr bool eq(const loop_iterator& other) const {
         LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
-        return _amount == other._amount && _iterator == other._iterator;
+        return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _amount == 0;
+        return _rotations_left == 0 && _iterator == _end;
     }
 };
 

@@ -98,43 +98,45 @@ class sized_iterable_impl : public lazy_view {
     using decayed_iterator = decay_t<I>;
     using decayed_sentinel = decay_t<S>;
 
-    using sentinel_type =
-        conditional<std::is_same<decayed_iterator, decayed_sentinel>::value, take_iterator<decayed_iterator>, decayed_sentinel>;
-
-    take_iterator<decayed_iterator> _begin;
-    sentinel_type _end;
-
-    using difference_type = diff_type<decayed_iterator>;
+    I _begin;
+    S _end;
+    std::size_t _size{};
 
 public:
-    using iterator = take_iterator<decayed_iterator>;
+    using iterator = take_iterator<decayed_iterator, S>;
     using const_iterator = decayed_iterator;
     using value_type = val_t<decayed_iterator>;
-    using sentinel = sentinel_type;
+    using sentinel = S;
 
+private:
+    using diff_type = typename iterator::difference_type;
+
+public:
     constexpr sized_iterable_impl() = default;
 
     template<class Cat = typename decayed_iterator::iterator_category, enable_if<is_ra_tag<Cat>::value, int> = 0>
-    constexpr sized_iterable_impl(decayed_iterator begin, decayed_iterator end) :
-        _begin{ std::move(begin), end - begin },
-        _end{ std::move(end), 0 } {
+    constexpr sized_iterable_impl(decayed_iterator begin, S end) :
+        _begin{ begin },
+        _end{ end },
+        _size{ static_cast<std::size_t>(end - begin) } {
     }
 
     template<class Cat = typename decayed_iterator::iterator_category, enable_if<!is_ra_tag<Cat>::value, int> = 0>
-    constexpr sized_iterable_impl(decayed_iterator begin, decayed_sentinel end) = delete; // Must be random access to get size
+    constexpr sized_iterable_impl(decayed_iterator begin,
+                                  decayed_sentinel end) = delete; // Iterator must be random access to get size
 
-    constexpr sized_iterable_impl(decayed_iterator begin, std::size_t size) :
-        _begin{ std::move(begin), static_cast<difference_type>(size) } {
+    template<class Iterable, enable_if<sized<Iterable>::value, int> = 0>
+    constexpr sized_iterable_impl(Iterable&& iterable) :
+        _begin{ detail::begin(std::forward<Iterable>(iterable)) },
+        _end{ detail::end(iterable) },
+        _size{ lz::size(iterable) } {
     }
 
-    template<class It = decayed_iterator>
-    LZ_NODISCARD constexpr enable_if<std::is_same<It, decayed_sentinel>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(begin()._n - end()._n) ;
-    }
+    template<class Iterable, enable_if<!sized<Iterable>::value, int> = 0>
+    constexpr sized_iterable_impl(Iterable&& iterable) = delete; // Iterable must be sized
 
-    template<class It = decayed_iterator>
-    LZ_NODISCARD constexpr enable_if<!std::is_same<It, decayed_sentinel>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(begin()._n);
+    LZ_NODISCARD constexpr std::size_t size() const noexcept {
+        return _size;
     }
 
     template<class Rhs>
@@ -170,21 +172,21 @@ public:
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
- * @brief A class that can be converted to any container. It is a view over an iterable, meaning it does not own the data. It
+ * @brief A class that can be converted to any container. It only contains the iterators and
  * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
  * It contains the size of the iterable.
- * @tparam It The iterator or iterable type.
- * @tparam S The sentinel type, if using an iterator/sentinel pair. Otherwise leave as is.
+ * @tparam It The iterator type.
+ * @tparam S The sentinel type.
  */
 template<class It, class S = It>
 using sized_iterable = detail::sized_iterable_impl<It, S>;
 
 /**
- * @brief A class that can be converted to any container. It is a view over an iterable, meaning it does not own the data. It
+ * @brief A class that can be converted to any container. It only contains the iterators and
  * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
- * It *may* contain the size of the iterable, depending on the iterator category or if the iterable is sized.
- * @tparam It The iterator or iterable type.
- * @tparam S The sentinel type, if using an iterator/sentinel pair. Otherwise leave as is.
+ * It *may* contain the size of the iterable, depending on the iterator category (needs to be random access).
+ * @tparam It The iterator type.
+ * @tparam S The sentinel type.
  */
 template<class It, class S = It>
 using basic_iterable = detail::basic_iterable_impl<It, S>;
@@ -229,10 +231,11 @@ struct has_push_back<Container, void_t<decltype(0, std::declval<Container>().pus
     : std::true_type {};
 
 template<class Container, class = void>
-struct custom_copier : std::false_type {};
+struct custom_copier_for;
 
 template<class Container>
-struct custom_copier<Container, void_t<decltype(0, std::declval<Container>().push(std::declval<typename Container::value_type>()))>> {
+struct custom_copier_for<Container,
+                         void_t<decltype(0, std::declval<Container>().push(std::declval<typename Container::value_type>()))>> {
     template<class Iterable>
     LZ_CONSTEXPR_CXX_20 void copy(Iterable&& iterable, Container& container) const {
         using ref = ref_iterable_t<Iterable>;
@@ -242,7 +245,7 @@ struct custom_copier<Container, void_t<decltype(0, std::declval<Container>().pus
 
 // std::array doesnt have push_back, insert, insert_after... etc, so just use copy
 template<class T, std::size_t N>
-struct custom_copier<std::array<T, N>> {
+struct custom_copier_for<std::array<T, N>> {
     template<class Iterable>
     LZ_CONSTEXPR_CXX_20 void copy(Iterable&& iterable, std::array<T, N>& container) const {
         lz::copy(std::forward<Iterable>(iterable), container.begin());
@@ -305,9 +308,8 @@ template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
 enable_if<!has_push_back<Container>::value && !has_insert<Container>::value && !has_insert_after<Container>::value>
 copy_to_container(Iterable&& iterable, Container& container) {
-    custom_copier<Container>{}.copy(std::forward<Iterable>(iterable), container);
+    custom_copier_for<Container>{}.copy(std::forward<Iterable>(iterable), container);
 }
-
 
 template<class Container>
 struct container_constructor {
@@ -421,8 +423,9 @@ struct iterable_formatter {
         std::string_view fmt{ format };
         std::string_view sep{ separator };
 
+        const auto empty_fmt_args = std::make_format_args();
         for (; begin != end; ++begin) {
-            std::vformat_to(back_inserter, sep, std::make_format_args());
+            std::vformat_to(back_inserter, sep, empty_fmt_args);
             std::vformat_to(back_inserter, fmt, std::make_format_args(*begin));
         }
 
@@ -601,9 +604,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  * auto list = lz::to<std::list<int>>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
  * // etc...
  * ```
- * In case you have a custom container, you can specialize `lz::custom_copier` to copy the elements to your container.
+ * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
  * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
- * `lz::custom_copier` for your custom container if all of the following are true:
+ * `lz::custom_copier_for` for your custom container if all of the following are true:
  * - Your custom container does not have a `push_back` method
  * - Your custom container does not have an `insert` method
  * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -623,9 +626,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  *      }
  * };
  *
- * // Specialize `lz::custom_copier` for your custom container
+ * // Specialize `lz::custom_copier_for` for your custom container
  * template<class T>
- * struct lz::custom_copier<custom_container<T>> {
+ * struct lz::custom_copier_for<custom_container<T>> {
  *    template<class Iterable>
  *    void copy(Iterable&& iterable, custom_container<T>& container) const {
  *      // Copy the contents of the iterable to the container. Container is already reserved
@@ -660,9 +663,9 @@ LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
  * auto list = lz::to<std::list<int>>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
  * // etc...
  * ```
- * In case you have a custom container, you can specialize `lz::custom_copier` to copy the elements to your container.
+ * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
  * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
- * `lz::custom_copier` for your custom container if all of the following are true:
+ * `lz::custom_copier_for` for your custom container if all of the following are true:
  * - Your custom container does not have a `push_back` method
  * - Your custom container does not have an `insert` method
  * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -682,9 +685,9 @@ LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
  *      }
  * };
  *
- * // Specialize `lz::custom_copier` for your custom container
+ * // Specialize `lz::custom_copier_for` for your custom container
  * template<class T>
- * struct lz::custom_copier<custom_container<T>> {
+ * struct lz::custom_copier_for<custom_container<T>> {
  *    template<class Iterable>
  *    void copy(Iterable&& iterable, custom_container<T>& container) const {
  *      // Copy the contents of the iterable to the container. Container is already reserved
@@ -711,30 +714,30 @@ LZ_NODISCARD constexpr Cont to(Iterable&& iterable, Args&&... args) {
  * Example:
  * ```cpp
  * template<class T>
- * class MyContainer { 
+ * class my_container {
  *     void my_inserter(T t) { ... }
  * };
- * 
+ *
  * template<class T>
- * lz::custom_copier<MyContainer<T>> {
+ * lz::custom_copier_for<my_container<T>> {
  *     template<class Iterable>
- *     void copy(Iterable&& iterable, MyContainer<T>& container) {
+ *     void copy(Iterable&& iterable, my_container<T>& container) {
  *         // Copy the iterable to the container, for example:
- *         // Container is already reserved if it contains a reserve member function
+ *         // Container is already reserved if it contains a reserve member function and iterable is sized
  *         for (auto&& i : iterable) {
  *             container.my_inserter(i);
  *         }
  *     }
  * };
- * 
+ *
  * // or you can use enable if
  * template<class T>
- * lz::custom_copier<MyContainer<T>, std::enable_if_t<...>> {
+ * lz::custom_copier_for<my_container<T>, std::enable_if_t<...>> {
  *     // Same as above
  * };
  * ```
  */
-using detail::custom_copier;
+using detail::custom_copier_for;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

@@ -59,11 +59,11 @@ public:
         return _iterator - b._iterator;
     }
 
-    constexpr bool eq(const map_iterator& b) const noexcept {
+    constexpr bool eq(const map_iterator& b) const {
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(const S& s) const noexcept {
+    constexpr bool eq(const S& s) const {
         return _iterator == s;
     }
 };

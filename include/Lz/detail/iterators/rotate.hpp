@@ -64,6 +64,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
+        LZ_ASSERT((n < 0 ? -n : n) <= (_end - _begin), "Cannot increment/decrement after fake iterator end/begin");
         _offset += n;
         if (n < 0) {
             n = -n;
@@ -75,7 +76,7 @@ public:
             }
             return;
         }
-        if (n > _end - _iterator) {
+        if (n >= _end - _iterator) {
             _iterator = _begin + (n - (_end - _iterator));
         }
         else {

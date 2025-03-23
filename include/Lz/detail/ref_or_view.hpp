@@ -66,18 +66,26 @@ public:
     }
 };
 
+template<class Iterable>
+using is_c_array = std::is_array<remove_reference_t<Iterable>>;
+
 // Class that contains a c-array or a view to a ref_or_view<Iterable, true>
 template<class Iterable>
 class ref_or_view_helper<Iterable, true> : public lazy_view {
-    Iterable _iterable_value;
+    static constexpr bool is_c_array = is_c_array<Iterable>::value;
+    using remove_ref = conditional<is_c_array, Iterable, remove_cvref<Iterable>>;
+    remove_ref _iterable_value;
 
 public:
     constexpr ref_or_view_helper() = default;
 
-    template<class I>
-    constexpr ref_or_view_helper(I&& iterable) : _iterable_value{ std::forward<I>(iterable) } {
+    template<class I, bool B = is_c_array, enable_if<B, int> = 0>
+    constexpr ref_or_view_helper(I&& iterable) : _iterable_value{ iterable } {
     }
 
+    template<class I, bool B = is_c_array, enable_if<!B, int> = 0>
+    constexpr ref_or_view_helper(const I& iterable) : _iterable_value{ iterable } {
+    }
     template<class I>
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(ref_or_view_helper<I, true>&& other) :
         ref_or_view_helper{ std::move(other._iterable_value) } {
@@ -127,9 +135,6 @@ public:
         return detail::end(std::move(_iterable_value));
     }
 };
-
-template<class Iterable>
-using is_c_array = std::is_array<remove_reference_t<Iterable>>;
 
 template<class Iterable>
 using ref_or_view =

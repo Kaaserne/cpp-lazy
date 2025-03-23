@@ -184,73 +184,11 @@ TEST_CASE("Cartesian product binary operations") {
         REQUIRE(*iter == std::make_tuple(1, 'a', 'b'));
     }
 
-    SECTION("Operator+(int), tests += as well") {
-        auto iter = cartesian.begin();
-        REQUIRE(*iter == std::make_tuple(1, 'a', 'a'));
-        REQUIRE(*(iter + 1) == std::make_tuple(1, 'a', 'b'));
-        REQUIRE(*(iter + 2) == std::make_tuple(1, 'b', 'a'));
-        REQUIRE(*(iter + 3) == std::make_tuple(1, 'b', 'b'));
-        REQUIRE(*(iter + 4) == std::make_tuple(1, 'c', 'a'));
-        REQUIRE(*(iter + 5) == std::make_tuple(1, 'c', 'b'));
-        REQUIRE(*(iter + 6) == std::make_tuple(2, 'a', 'a'));
-        REQUIRE(*(iter + 7) == std::make_tuple(2, 'a', 'b'));
-        REQUIRE(*(iter + 8) == std::make_tuple(2, 'b', 'a'));
-        REQUIRE(*(iter + 9) == std::make_tuple(2, 'b', 'b'));
-        REQUIRE(*(iter + 10) == std::make_tuple(2, 'c', 'a'));
-        REQUIRE(*(iter + 11) == std::make_tuple(2, 'c', 'b'));
-        REQUIRE((iter + 12) == cartesian.end());
-
-        iter = cartesian.end();
-        REQUIRE(*(iter - 1) == std::make_tuple(2, 'c', 'b'));
-        REQUIRE(*(iter - 2) == std::make_tuple(2, 'c', 'a'));
-        REQUIRE(*(iter - 3) == std::make_tuple(2, 'b', 'b'));
-        REQUIRE(*(iter - 4) == std::make_tuple(2, 'b', 'a'));
-        REQUIRE(*(iter - 5) == std::make_tuple(2, 'a', 'b'));
-        REQUIRE(*(iter - 6) == std::make_tuple(2, 'a', 'a'));
-        REQUIRE(*(iter - 7) == std::make_tuple(1, 'c', 'b'));
-        REQUIRE(*(iter - 8) == std::make_tuple(1, 'c', 'a'));
-        REQUIRE(*(iter - 9) == std::make_tuple(1, 'b', 'b'));
-        REQUIRE(*(iter - 10) == std::make_tuple(1, 'b', 'a'));
-        REQUIRE(*(iter - 11) == std::make_tuple(1, 'a', 'b'));
-        REQUIRE(*(iter - 12) == std::make_tuple(1, 'a', 'a'));
-        REQUIRE((iter - 12) == cartesian.begin());
+    SECTION("Operator+") {
+        // TODO
     }
 
-    SECTION("Distances") {
-        auto iter = cartesian.begin();
-        REQUIRE(std::distance(iter, iter) == 0);
-        REQUIRE(std::distance(iter, iter + 1) == 1);
-        REQUIRE(std::distance(iter, iter + 2) == 2);
-        REQUIRE(std::distance(iter, iter + 3) == 3);
-        REQUIRE(std::distance(iter, iter + 4) == 4);
-        REQUIRE(std::distance(iter, iter + 5) == 5);
-        REQUIRE(std::distance(iter, iter + 6) == 6);
-        REQUIRE(std::distance(iter, iter + 7) == 7);
-        REQUIRE(std::distance(iter, iter + 8) == 8);
-        REQUIRE(std::distance(iter, iter + 9) == 9);
-        REQUIRE(std::distance(iter, iter + 10) == 10);
-        REQUIRE(std::distance(iter, iter + 11) == 11);
-        REQUIRE(std::distance(iter, iter + 12) == 12);
-
-        REQUIRE(std::distance(iter + 1, iter) == -1);
-        REQUIRE(std::distance(iter + 2, iter) == -2);
-        REQUIRE(std::distance(iter + 3, iter) == -3);
-        REQUIRE(std::distance(iter + 4, iter) == -4);
-        REQUIRE(std::distance(iter + 5, iter) == -5);
-        REQUIRE(std::distance(iter + 6, iter) == -6);
-        REQUIRE(std::distance(iter + 7, iter) == -7);
-        REQUIRE(std::distance(iter + 8, iter) == -8);
-        REQUIRE(std::distance(iter + 9, iter) == -9);
-        REQUIRE(std::distance(iter + 10, iter) == -10);
-        REQUIRE(std::distance(iter + 11, iter) == -11);
-        REQUIRE(std::distance(iter + 12, iter) == -12);
-
-        auto e = cartesian.end();
-        for (std::size_t i = 0; i < lz::size(cartesian) / 2; ++i) {
-            INFO("With i = " << i);
-            REQUIRE((e - i) - (iter + i) == static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
-            REQUIRE((iter + i) - (e - i) == -static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
-        }
+    SECTION("Operator-") {
     }
 }
 

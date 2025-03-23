@@ -34,13 +34,23 @@ public:
         return _amount * static_cast<std::size_t>(lz::size(_iterable));
     }
 
-    LZ_NODISCARD constexpr iterator begin() const {
-        auto first = std::begin(_iterable);
-        auto last = std::end(_iterable);
+    LZ_NODISCARD constexpr iterator begin() const& {
+        auto first = detail::begin(std::move(_iterable));
+        auto last = detail::end(std::move(_iterable));
         if (first == last || _amount == 0) {
             return { last, first, last, 0 };
         }
-        return { first, first, last, _amount };
+        return { first, first, last, _amount - 1 };
+    }
+
+    template<class I = typename inner_iter::iterator_category>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+        auto first = detail::begin(std::move(_iterable));
+        auto last = detail::end(std::move(_iterable));
+        if (first == last || _amount == 0) {
+            return { last, first, last, 0 };
+        }
+        return { first, first, last, _amount - 1 };
     }
 
     template<class I = typename inner_iter::iterator_category>
@@ -71,8 +81,12 @@ public:
     constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
-    LZ_NODISCARD constexpr iterator begin() const {
+    LZ_NODISCARD constexpr iterator begin() const& {
         return { std::begin(_iterable), std::end(_iterable) };
+    }
+
+    LZ_NODISCARD constexpr iterator begin() && {
+        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)) };
     }
 
     template<class I = inner_iter>

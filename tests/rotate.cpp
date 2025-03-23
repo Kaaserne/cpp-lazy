@@ -16,13 +16,13 @@ TEST_CASE("rotate_iterable with sentinels") {
 }
 
 TEST_CASE("rotate_iterable basic functionality") {
-    std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
-    auto rotate = lz::rotate(arr, 2);
-    REQUIRE(rotate.size() == arr.size());
+    std::array<int, 5> vec = { 1, 2, 3, 4, 5 };
+    auto rotate = lz::rotate(vec, 2);
+    REQUIRE(rotate.size() == vec.size());
 
     SECTION("Should be correct length") {
         auto beg = rotate.begin();
-        REQUIRE(std::distance(beg, rotate.end()) == static_cast<std::ptrdiff_t>(arr.size()));
+        REQUIRE(std::distance(beg, rotate.end()) == static_cast<std::ptrdiff_t>(vec.size()));
         ++beg, ++beg;
         REQUIRE(std::distance(beg, rotate.end()) == 3);
         ++beg;
@@ -38,16 +38,15 @@ TEST_CASE("rotate_iterable basic functionality") {
 }
 
 TEST_CASE("rotate_iterable binary operations") {
-    std::array<int, 4> arr = { 1, 2, 3, 4 };
-    auto rotate = lz::rotate(arr, 3);
-
-    auto begin = rotate.begin();
-    auto end = rotate.end();
-
-    REQUIRE(*begin == 4);
-    REQUIRE(*end == 4);
+    std::vector<int> vec = { 1, 2, 3, 4 };
+    auto rotate = lz::rotate(vec, 3);
 
     SECTION("Operator++") {
+        auto begin = rotate.begin();
+        auto end = rotate.end();
+
+        REQUIRE(*begin == 4);
+        REQUIRE(*end == 4);
         ++begin;
         REQUIRE(*begin == 1);
         ++end;
@@ -55,6 +54,8 @@ TEST_CASE("rotate_iterable binary operations") {
     }
 
     SECTION("Operator--") {
+        auto begin = rotate.begin();
+        auto end = rotate.end();
         REQUIRE(begin != end);
         --end;
         REQUIRE(*end == 3);
@@ -68,6 +69,8 @@ TEST_CASE("rotate_iterable binary operations") {
     }
 
     SECTION("Operator== & Operator!=") {
+        auto begin = rotate.begin();
+        auto end = rotate.end();
         REQUIRE(begin != end);
         begin = end;
         REQUIRE(begin == end);
@@ -102,13 +105,91 @@ TEST_CASE("rotate_iterable binary operations") {
         REQUIRE(*uneven_end == 5);
     }
 
-    // TODO
     SECTION("Operator+") {
+        auto do_test = [](const decltype(rotate)& rotator, std::initializer_list<int> expected) {
+            auto begin = rotator.begin();
+            auto end = rotator.end();
+            REQUIRE(begin + 0 == begin);
+            REQUIRE(end + 0 == end);
 
+            for (std::size_t i = 0; i < lz::size(rotator) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin + i) == *(expected.begin() + i));
+            }
+            REQUIRE(begin + lz::size(rotator) == rotator.end());
+            for (std::size_t i = 1; i <= lz::size(rotator); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end - i) == *(rotator.end() - i));
+            }
+            REQUIRE(end - lz::size(rotator) == rotator.begin());
+
+            std::advance(begin, lz::size(rotator));
+            std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(rotator)));
+            REQUIRE(begin + 0 == begin);
+            REQUIRE(end + 0 == end);
+
+            for (std::size_t i = 0; i < lz::size(rotator) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end + i) == *(rotator.begin() + i));
+            }
+            REQUIRE(end + lz::size(rotator) == rotator.end());
+            for (std::size_t i = 1; i <= lz::size(rotator); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin - i) == *(rotator.end() - i));
+            }
+            REQUIRE(begin - lz::size(rotator) == rotator.begin());
+        };
+
+        INFO("lz::rotate(container, 3)");
+        auto expected = { 4, 1, 2, 3 };
+        do_test(rotate, expected);
+
+        std::vector<int> container = { 1, 2, 3, 4, 5 };
+        INFO("lz::rotate(container, 3)");
+        auto rotator = lz::rotate(container, 3);
+        expected = { 4, 5, 1, 2, 3 };
+        do_test(rotator, expected);
+
+        container = { 1, 2, 3, 4 };
+        rotator = lz::rotate(container, 2);
+        expected = { 3, 4, 1, 2 };
+        INFO("lz::rotate(container, 2)");
+        do_test(rotator, expected);
     }
 
     SECTION("Operator-") {
+        using iterable = decltype(rotate);
+        auto test_iterable = [](const iterable& iterable) {
+            auto begin = iterable.begin();
+            auto end = iterable.end();
 
+            for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(iterable)); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+            }
+
+            for (std::size_t i = 0; i < lz::size(iterable); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable) - 2 * i));
+                REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(iterable) - 2 * i));
+            }
+        };
+
+        INFO("test_iterable(rotate)");
+        test_iterable(rotate);
+
+        std::vector<int> container = { 1, 2, 3, 4, 5 };
+        auto rotator = lz::rotate(container, 3);
+        INFO("lz::rotate(container, 3)");
+        test_iterable(rotator);
+
+        container = { 1, 2, 3, 4 };
+        rotator = lz::rotate(container, 2);
+        INFO("lz::rotate(container, 2)");
+        test_iterable(rotator);
     }
 }
 

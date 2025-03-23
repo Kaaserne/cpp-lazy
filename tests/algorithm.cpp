@@ -34,7 +34,7 @@ public:
 };
 
 template<class T>
-struct lz::custom_copier<custom_container<T>> {
+struct lz::custom_copier_for<custom_container<T>> {
     template<class Iterable>
     void copy(Iterable&& iterable, custom_container<T>& container) const {
         REQUIRE(container.vec().empty());
@@ -153,7 +153,7 @@ TEST_CASE("To iterable") {
 
     SECTION("To iterable forward") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
-        lz::sized_iterable<std::list<int>::iterator> iterable(lst.begin(), lst.size());
+        lz::sized_iterable<std::list<int>::iterator> iterable(lst);
         REQUIRE(lz::size(iterable) == 5);
     }
 

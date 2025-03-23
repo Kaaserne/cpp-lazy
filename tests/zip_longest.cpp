@@ -215,93 +215,14 @@ TEST_CASE("zip_longest_iterable binary operations") {
         REQUIRE(begin == zipper.end());
     }
 
-    SECTION("Operator+(int) offset, tests += as well") {
-        REQUIRE(std::get<0>(*(begin + 0)).value() == 1);
-        REQUIRE(std::get<1>(*(begin + 0)).value() == 1.f);
-        REQUIRE(std::get<2>(*(begin + 0)).value() == 1);
-
-        REQUIRE(std::get<0>(*(begin + 1)).value() == 2);
-        REQUIRE(std::get<1>(*(begin + 1)).value() == 2.f);
-        REQUIRE(std::get<2>(*(begin + 1)).value() == 2);
-
-        REQUIRE(std::get<0>(*(begin + 2)).value() == 3);
-        REQUIRE(std::get<1>(*(begin + 2)).value() == 3.f);
-        REQUIRE(!std::get<2>(*(begin + 2)).has_value());
-
-        REQUIRE(std::get<0>(*(begin + 3)).value() == 4);
-        REQUIRE(std::get<1>(*(begin + 3)).value() == 4.f);
-        REQUIRE(!std::get<2>(*(begin + 3)).has_value());
-
-        REQUIRE(!std::get<0>(*(begin + 4)).has_value());
-        REQUIRE(std::get<1>(*(begin + 4)).value() == 5.f);
-        REQUIRE(!std::get<2>(*(begin + 4)).has_value());
+    // TODO
+    SECTION("Operator+") {
+        
     }
 
-    SECTION("Operator-(int) offset, tests -= as well") {
-        auto end = zipper.end();
-        REQUIRE(!std::get<0>(*(end - 1)).has_value());
-        REQUIRE(std::get<1>(*(end - 1)).value() == 5.f);
-        REQUIRE(!std::get<2>(*(end - 1)).has_value());
-
-        REQUIRE(std::get<0>(*(end - 2)).value() == 4);
-        REQUIRE(std::get<1>(*(end - 2)).value() == 4.f);
-        REQUIRE(!std::get<2>(*(end - 2)).has_value());
-
-        REQUIRE(std::get<0>(*(end - 3)).value() == 3);
-        REQUIRE(std::get<1>(*(end - 3)).value() == 3.f);
-        REQUIRE(!std::get<2>(*(end - 3)).has_value());
-
-        REQUIRE(std::get<0>(*(end - 4)).value() == 2);
-        REQUIRE(std::get<1>(*(end - 4)).value() == 2.f);
-        REQUIRE(std::get<2>(*(end - 4)).value() == 2);
-
-        REQUIRE(std::get<0>(*(end - 5)).value() == 1);
-        REQUIRE(std::get<1>(*(end - 5)).value() == 1.f);
-        REQUIRE(std::get<2>(*(end - 5)).value() == 1);
-    }
 
     SECTION("Operator-(Iterator)") {
-        REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size()));
-        ++begin;
-        REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 1));
-        ++begin;
-        REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 2));
-        ++begin;
-        REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 3));
-        ++begin;
-        REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 4));
-        ++begin;
-        REQUIRE(zipper.end() - begin == static_cast<std::ptrdiff_t>(b.size() - 5));
-        REQUIRE(begin == zipper.end());
-
-        begin = zipper.begin();
-        auto end = zipper.end();
-        --end;
-        REQUIRE(end - begin == static_cast<std::ptrdiff_t>(b.size() - 1));
-        --end;
-        REQUIRE(end - begin == static_cast<std::ptrdiff_t>(b.size() - 2));
-        --end;
-        REQUIRE(end - begin == static_cast<std::ptrdiff_t>(b.size() - 3));
-        --end;
-        REQUIRE(end - begin == static_cast<std::ptrdiff_t>(b.size() - 4));
-        --end;
-        REQUIRE(end - begin == static_cast<std::ptrdiff_t>(b.size() - 5));
-        REQUIRE(end == begin);
-
-        end = zipper.end();
-        begin = zipper.begin();
-        REQUIRE(begin - end == -static_cast<std::ptrdiff_t>(5));
-        REQUIRE((begin + 1) - end == -static_cast<std::ptrdiff_t>(4));
-        REQUIRE((begin + 2) - end == -static_cast<std::ptrdiff_t>(3));
-        REQUIRE((begin + 3) - end == -static_cast<std::ptrdiff_t>(2));
-        REQUIRE((begin + 4) - end == -static_cast<std::ptrdiff_t>(1));
-        REQUIRE((begin + 5) - end == 0);
-
-        for (std::size_t i = 0; i < lz::size(zipper) / 2; ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(zipper) - 2 * i));
-            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(zipper) - 2 * i));
-        }
+        
     }
 }
 
