@@ -70,13 +70,6 @@
 #define LZ_NODISCARD
 #endif // LZ_HAS_ATTRIBUTE(nodiscard)
 
-#ifdef __cpp_ref_qualifiers
-#define LZ_HAS_REF_QUALIFIER
-#define LZ_CONST_REF_QUALIFIER const&
-#else
-#define LZ_CONST_REF_QUALIFIER
-#endif // __cpp_ref_qualifiers
-
 #if LZ_HAS_INCLUDE(<string_view>) && (defined(LZ_HAS_CXX_17) && (defined(__cpp_lib_string_view)))
 #define LZ_HAS_STRING_VIEW
 #endif // has string view
@@ -90,12 +83,6 @@
 #else
 #define LZ_CONSTEXPR_IF
 #endif // __cpp_if_constexpr
-
-#if defined(__cpp_lib_to_chars) && LZ_HAS_INCLUDE(<charconv>) && (defined(LZ_HAS_CXX_17))
-#define LZ_HAS_CHARCONV (true)
-#else
-#define LZ_HAS_CHARCONV (false)
-#endif
 
 #ifndef LZ_MODULE_EXPORT
 #define LZ_MODULE_EXPORT_SCOPE_BEGIN
