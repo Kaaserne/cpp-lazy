@@ -70,7 +70,7 @@ TEST_CASE("Loop with non while true argument") {
     }
 
     SECTION("Operator+") {
-        auto test_looper = [](const decltype(lz::loop(vec, 0))& l, std::initializer_list<int> expected) {
+        auto test_looper = [](const decltype(lz::loop(vec, 0))& l, std::vector<int> expected) {
             auto begin = l.begin();
             auto end = l.end();
             REQUIRE(begin + 0 == begin);
@@ -108,14 +108,14 @@ TEST_CASE("Loop with non while true argument") {
         };
 
         auto looper = lz::loop(vec, 2);
-        auto expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
+        std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
         INFO("lz::loop(vec, 2)");
-        test_looper(looper, expected);
+        test_looper(looper, std::move(expected));
 
         looper = lz::loop(vec, 1);
         expected = { 1, 2, 3, 4 };
         INFO("lz::loop(vec, 1)");
-        test_looper(looper, expected);
+        test_looper(looper, std::move(expected));
     }
 
     

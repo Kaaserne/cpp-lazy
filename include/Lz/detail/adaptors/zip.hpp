@@ -11,12 +11,6 @@ namespace detail {
 struct zip_adaptor {
     using adaptor = zip_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor zip{};
-
-#endif
-
     /**
      * @brief Zips two or more iterables together. If the sizes of the iterables are different, the shortest one will be used. It
      * contains a size() method if all the iterables have a size() method. It is the same iterator category as the 'weakest' of

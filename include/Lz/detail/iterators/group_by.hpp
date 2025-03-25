@@ -126,10 +126,10 @@ public:
 
     constexpr group_by_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator iterator, Iterator begin, S end, BinaryPredicate binary_predicate) :
+    LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator it, Iterator begin, S end, BinaryPredicate binary_predicate) :
         _begin{ std::move(begin) },
-        _sub_range_end{ iterator },
-        _sub_range_begin{ std::move(iterator) },
+        _sub_range_end{ it },
+        _sub_range_begin{ std::move(it) },
         _end{ std::move(end) },
         _comparer{ std::move(binary_predicate) } {
         if (_sub_range_begin == _end) {

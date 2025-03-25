@@ -47,7 +47,7 @@ namespace lz {
  *   - lz::zip
  * Are planning to call begin() or end() multiple times
  */
-static constexpr detail::cached_size_adaptor cache_size{};
+constexpr detail::cached_size_adaptor cache_size{};
 
 #else
 

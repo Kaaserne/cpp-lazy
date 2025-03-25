@@ -38,9 +38,9 @@ private:
     }
 
 public:
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator iterator, S end, const std::size_t chunk_size) :
-        _sub_range_begin{ iterator },
-        _sub_range_end{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const std::size_t chunk_size) :
+        _sub_range_begin{ it },
+        _sub_range_end{ std::move(it) },
         _end{ std::move(end) },
         _chunk_size{ chunk_size } {
         next_chunk();
@@ -88,8 +88,8 @@ private:
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
     S _end;
-    std::size_t _distance{};
     std::size_t _chunk_size{};
+    std::size_t _distance{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
         for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
@@ -164,9 +164,9 @@ private:
     std::size_t _chunk_size{};
 
 public:
-    LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator iterator, Iterator begin, S end, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_20 chunks_iterator(Iterator it, Iterator begin, S end, const std::size_t chunk_size) :
         _begin{ std::move(begin) },
-        _sub_range_begin{ std::move(iterator) },
+        _sub_range_begin{ std::move(it) },
         _end{ std::move(end) },
         _chunk_size{ chunk_size } {
         LZ_ASSERT(_chunk_size != 0, "Can't increment by 0");

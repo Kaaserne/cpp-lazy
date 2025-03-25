@@ -10,13 +10,7 @@ namespace lz {
 namespace detail {
 struct common_adaptor {
     using adaptor = common_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor common{};
-
-#endif
-
+    
     /**
      * Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
      * must return a different type than its end() function), otherwise a static assertion will fail.

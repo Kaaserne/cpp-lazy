@@ -43,7 +43,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  *   - lz::zip
  * Are planning to call begin() or end() multiple times
  */
-static constexpr detail::enumerate_adaptor detail::enumerate_adaptor::enumerate{};
+constexpr detail::enumerate_adaptor enumerate{};
 
 #else
 

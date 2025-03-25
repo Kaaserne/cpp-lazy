@@ -106,7 +106,7 @@ TEST_CASE("rotate_iterable binary operations") {
     }
 
     SECTION("Operator+") {
-        auto do_test = [](const decltype(rotate)& rotator, std::initializer_list<int> expected) {
+        auto do_test = [](const decltype(rotate)& rotator, std::vector<int> expected) {
             auto begin = rotator.begin();
             auto end = rotator.end();
             REQUIRE(begin + 0 == begin);
@@ -141,25 +141,25 @@ TEST_CASE("rotate_iterable binary operations") {
         };
 
         INFO("lz::rotate(container, 3)");
-        auto expected = { 4, 1, 2, 3 };
-        do_test(rotate, expected);
+        std::vector<int> expected = { 4, 1, 2, 3 };
+        do_test(rotate, std::move(expected));
 
         std::vector<int> container = { 1, 2, 3, 4, 5 };
         INFO("lz::rotate(container, 3)");
         auto rotator = lz::rotate(container, 3);
         expected = { 4, 5, 1, 2, 3 };
-        do_test(rotator, expected);
+        do_test(rotator, std::move(expected));
 
         container = { 1, 2, 3, 4 };
         rotator = lz::rotate(container, 2);
         expected = { 3, 4, 1, 2 };
         INFO("lz::rotate(container, 2)");
-        do_test(rotator, expected);
+        do_test(rotator, std::move(expected));
     }
 
     SECTION("Operator-") {
-        using iterable = decltype(rotate);
-        auto test_iterable = [](const iterable& iterable) {
+        using lz_iterable = decltype(rotate);
+        auto test_iterable = [](const lz_iterable& iterable) {
             auto begin = iterable.begin();
             auto end = iterable.end();
 

@@ -20,13 +20,13 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```cpp
  * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
  * std::sort(vec.begin(), vec.end());
- * auto unique = lz::unique(vec /* custom comparer can be passed as second argument *\/);
+ * auto unique = lz::unique(vec); // second argument is custom comparer (optional)
  * // or
  * auto unique = vec | lz::unique; // custom comparer can be passed as argument as well:
  * auto unique = vec | lz::unique(std::less<>{});
  * ```
  */
-static constexpr detail::unique_adaptor detail::unique_adaptor::unique{};
+constexpr detail::unique_adaptor unique{};
 
 #else
 
@@ -38,7 +38,7 @@ static constexpr detail::unique_adaptor detail::unique_adaptor::unique{};
  * ```cpp
  * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
  * std::sort(vec.begin(), vec.end());
- * auto unique = lz::unique(vec /* custom comparer can be passed as second argument *\/);
+ * auto unique = lz::unique(vec);  // second argument is custom comparer (optional)
  * // or
  * auto unique = vec | lz::unique;
  * // custom comparer can be passed as argument as well:

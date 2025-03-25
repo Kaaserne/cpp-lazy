@@ -27,8 +27,8 @@ public:
 
     constexpr exclusive_scan_iterator() = default;
 
-    constexpr exclusive_scan_iterator(Iterator iterator, S end, T init, BinaryOp binary_op) :
-        _iterator{ std::move(iterator) },
+    constexpr exclusive_scan_iterator(Iterator it, S end, T init, BinaryOp binary_op) :
+        _iterator{ std::move(it) },
         _reducer{ std::move(init) },
         _end{ std::move(end) },
         _reached_end{ _iterator == _end },

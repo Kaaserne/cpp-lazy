@@ -94,7 +94,7 @@ public:
         return _offset == b._offset;
     }
 
-    constexpr bool eq(const Iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const Iterator& b) const {
         if (_offset == 0 && _iterator != _end) {
             return false;
         }

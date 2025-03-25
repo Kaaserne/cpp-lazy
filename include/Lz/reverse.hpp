@@ -21,7 +21,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto reversed = v | lz::reverse; // { 5, 4, 3, 2, 1 }
  * ```
  */
-static constexpr detail::reverse_adaptor detail::reverse_adaptor::reverse{};
+constexpr detail::reverse_adaptor reverse{};
 
 #else
 

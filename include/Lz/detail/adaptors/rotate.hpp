@@ -11,12 +11,6 @@ namespace detail {
 struct rotate_adaptor {
     using adaptor = rotate_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor rotate{};
-
-#endif
-
     /**
      * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
      * Its iterator category is the same as the input iterable if it has a .size() method. If the input iterable does not have a

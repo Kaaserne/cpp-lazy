@@ -170,11 +170,11 @@ public:
         return const_cast<T&>(static_cast<const optional<T>*>(this)->value());
     }
 
-    LZ_NODISCARD constexpr T& operator*() noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T& operator*() noexcept {
         return const_cast<T&>(static_cast<const optional<T>*>(this)->operator*());
     }
 
-    LZ_NODISCARD constexpr const T& operator*() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 const T& operator*() const noexcept {
         return _value;
     }
 

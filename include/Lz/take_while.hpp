@@ -23,7 +23,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto take_while = vec | lz::take_while([](int i) { return i < 3; }); // {1, 2}
  * ```
  */
-static constexpr detail::take_while_adaptor detail::take_while_adaptor::take_while{};
+constexpr detail::take_while_adaptor take_while{};
 
 #else
 

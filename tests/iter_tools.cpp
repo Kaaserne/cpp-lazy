@@ -10,28 +10,45 @@
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
-    auto actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
-    REQUIRE(lz::distance(actual.begin(), actual.end()) == 3);
+    auto actual = lz::lines("hello world\nthis is a message\ntesting");
     REQUIRE(lz::equal(actual, expected));
 
     auto actual2 = lz::lines(lz::c_string("hello world\nthis is a message\ntesting"));
-    REQUIRE(lz::distance(actual2.begin(), actual2.end()) == 3);
     REQUIRE(lz::equal(actual2, expected));
+    actual2 = lz::c_string("hello world\nthis is a message\ntesting") | lz::lines;
+    REQUIRE(lz::equal(actual2, expected));
+
+    lz::string_view to_split = "hello world\nthis is a message\ntesting";
+    auto actual3 = lz::lines(to_split);
+    REQUIRE(lz::equal(actual3, expected));
+    actual3 = to_split | lz::lines;
+    REQUIRE(lz::equal(actual3, expected));
 }
 
 TEST_CASE("As") {
     SECTION("Without sentinel") {
         const lz::basic_string_view<char> actual = "hello world";
         const lz::basic_string_view<unsigned char> expected = reinterpret_cast<const unsigned char*>("hello world");
+#ifdef LZ_HAS_CXX_11
+        REQUIRE(lz::equal(actual | lz::as<unsigned char>{}, expected));
+        REQUIRE(lz::equal(lz::as<unsigned char>{}(actual), expected));
+#else
         REQUIRE(lz::equal(lz::as<unsigned char>(actual), expected));
         REQUIRE(lz::equal(actual | lz::as<unsigned char>, expected));
+#endif
+
     }
 
     SECTION("With sentinel") {
         const auto actual = lz::c_string("hello world");
         const auto expected = lz::c_string(reinterpret_cast<const unsigned char*>("hello world"));
+#ifdef LZ_HAS_CXX_11
+        REQUIRE(lz::equal(lz::as<unsigned char>{}(actual), expected));
+        REQUIRE(lz::equal(actual | lz::as<unsigned char>{}, expected));
+#else
         REQUIRE(lz::equal(lz::as<unsigned char>(actual), expected));
         REQUIRE(lz::equal(actual | lz::as<unsigned char>, expected));
+#endif
     }
 }
 
@@ -87,22 +104,38 @@ TEST_CASE("Pairwise") {
         const std::vector<std::tuple<char, char, char>> expected = { std::make_tuple('h', 'e', 'l'),
                                                                      std::make_tuple('e', 'l', 'l'),
                                                                      std::make_tuple('l', 'l', 'o') };
+#ifdef LZ_HAS_CXX_11
+        auto actual_pairwise = lz::pairwise_n<3>{}(actual);
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        actual_pairwise = actual | lz::pairwise_n<3>{};
+        REQUIRE(lz::equal(actual_pairwise, expected));
+#else
         auto actual_pairwise = lz::pairwise_n<3>(actual);
         REQUIRE(lz::equal(actual_pairwise, expected));
         actual_pairwise = actual | lz::pairwise_n<3>;
         REQUIRE(lz::equal(actual_pairwise, expected));
+#endif
     }
 
     SECTION("Without sentinels, three adjacent elements") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<std::tuple<int, int, int>> expected = { std::make_tuple(1, 2, 3), std::make_tuple(2, 3, 4),
                                                                   std::make_tuple(3, 4, 5) };
+#ifdef LZ_HAS_CXX_11
+        auto actual_pairwise = lz::pairwise_n<3>{}(actual);
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        REQUIRE(lz::size(actual_pairwise) == 3);
+        actual_pairwise = actual | lz::pairwise_n<3>{};
+        REQUIRE(lz::equal(actual_pairwise, expected));
+        REQUIRE(lz::size(actual_pairwise) == 3);
+#else
         auto actual_pairwise = lz::pairwise_n<3>(actual);
         REQUIRE(lz::equal(actual_pairwise, expected));
         REQUIRE(lz::size(actual_pairwise) == 3);
         actual_pairwise = actual | lz::pairwise_n<3>;
         REQUIRE(lz::equal(actual_pairwise, expected));
         REQUIRE(lz::size(actual_pairwise) == 3);
+#endif
     }
 }
 
@@ -120,11 +153,18 @@ TEST_CASE("Keys & values") {
     REQUIRE(lz::equal(values, expected_values));
 
     const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-    const auto expected = { 3, 6, 9 };
+    const std::vector<int> expected = { 3, 6, 9 };
+#ifdef LZ_HAS_CXX_11
+    auto actual = lz::get_nth<2>{}(three_tuple_vec);
+    REQUIRE(lz::equal(actual, expected));
+    actual = three_tuple_vec | lz::get_nth<2>{};
+    REQUIRE(lz::equal(actual, expected));
+#else
     auto actual = lz::get_nth<2>(three_tuple_vec);
     REQUIRE(lz::equal(actual, expected));
     actual = three_tuple_vec | lz::get_nth<2>;
     REQUIRE(lz::equal(actual, expected));
+#endif
 }
 
 TEST_CASE("Filtermap") {
@@ -162,15 +202,14 @@ TEST_CASE("Filtermap") {
 }
 
 TEST_CASE("Select") {
-    auto to_select = { 1, 2, 3, 4, 5, 6 };
-    auto selector = { true, false, true, false, true, false };
-    const auto expected = { 1, 3, 5 };
+    std::array<int, 6> to_select = { 1, 2, 3, 4, 5, 6 };
+    std::array<bool, to_select.size()> selector = { true, false, true, false, true, false };
+    const std::vector<int> expected = { 1, 3, 5 };
     auto actual = lz::select(to_select, selector);
     REQUIRE(lz::equal(actual, expected));
     actual = to_select | lz::select(selector);
     REQUIRE(lz::equal(actual, expected));
 }
-// TODO
 
 TEST_CASE("Trim variants") {
     SECTION("Drop back while") {

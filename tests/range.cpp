@@ -96,7 +96,7 @@ TEST_CASE("Range binary operations") {
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
             INFO("With i = " << i);
             REQUIRE(*(begin + i) == *(expected.begin() + i));

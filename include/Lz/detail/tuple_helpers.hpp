@@ -27,13 +27,13 @@ public:
 
 private:
     template<class Tuple, std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence_helper<I...>)
+    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence<I...>)
         -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
         return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
     }
 
     template<class Tuple, std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence_helper<I...>) const
+    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence<I...>) const
         -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
         return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
     }
@@ -71,13 +71,13 @@ iterable_tuple_cat(Iterable&& iterable, std::tuple<Ts...>&& iterables) {
 }
 
 template<class IterableTuple, std::size_t... I>
-LZ_CONSTEXPR_CXX_14 auto begin_tuple_impl(IterableTuple&& iterable_tuple, std::index_sequence<I...>)
+LZ_CONSTEXPR_CXX_14 auto begin_tuple_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
     -> decltype(std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {
     return std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
 }
 
 template<class IterableTuple, std::size_t... I>
-LZ_CONSTEXPR_CXX_14 auto end_tuple_impl(IterableTuple&& iterable_tuple, std::index_sequence<I...>)
+LZ_CONSTEXPR_CXX_14 auto end_tuple_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
     -> decltype(std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {
     return std::make_tuple(detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...);
 }

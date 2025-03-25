@@ -24,8 +24,8 @@ public:
     using pointer = fake_ptr_proxy<Arithmetic>;
     using reference = Arithmetic;
 
-    constexpr range_iterator(const Arithmetic iterator, const Arithmetic step) noexcept :
-        _iterator{ iterator },
+    constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept :
+        _iterator{ it },
         _step{ step } {
     }
 

@@ -14,7 +14,7 @@ TEST_CASE("Dimensions & sized") {
     static_assert(lz::dimensions<decltype(arr)>::value == 1, "Dimensions of array should be 1");
     int arr2[3][3];
     static_assert(lz::dimensions<decltype(arr2)>::value == 2, "Dimensions of array should be 2");
-    int arr3[3][3][3];
+    const int arr3[3][3][3]{};
     static_assert(lz::dimensions<decltype(arr3)>::value == 3, "Dimensions of array should be 3");
 
     std::vector<int> vec;
@@ -28,7 +28,7 @@ TEST_CASE("Dimensions & sized") {
     static_assert(lz::dimensions<decltype(arr4)>::value == 1, "Dimensions of array should be 1");
     std::array<std::array<int, 3>, 3> arr5;
     static_assert(lz::dimensions<decltype(arr5)>::value == 2, "Dimensions of array should be 2");
-    std::array<std::array<std::array<int, 3>, 3>, 3> arr6;
+    const std::array<std::array<std::array<int, 3>, 3>, 3> arr6{};
     static_assert(lz::dimensions<decltype(arr6)>::value == 3, "Dimensions of array should be 3");
 
     auto str = lz::c_string("Hello, World!");

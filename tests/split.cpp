@@ -9,7 +9,11 @@
 
 TEST_CASE("Split with custom container") {
     std::string to_split = "Hello world test 123";
-    auto splitter = to_split | lz::t_split<std::vector<char>>(" ");
+#ifdef LZ_HAS_CXX_11
+    auto splitter = to_split | lz::t_split<std::vector<char>>{}(" ");
+#else
+    auto splitter = lz::t_split<std::vector<char>>(to_split, " ");
+#endif
     std::vector<std::vector<char>> expected = {
         { 'H', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, { 't', 'e', 's', 't' }, { '1', '2', '3' }
     };
@@ -27,7 +31,6 @@ TEST_CASE("Splitter permutations") {
     }
 
     SECTION("Starting with one delimiter ending with none") {
-        auto cstr = lz::c_string("");
         const std::string to_split = " Hello world test 123";
         auto splitter = lz::s_split(to_split, " ");
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
@@ -90,8 +93,6 @@ TEST_CASE("Splitter changing and creating elements") {
     const std::string to_split = "Hello  world  test  123  ";
     const char* delimiter = "  ";
     auto splitter = lz::sv_split(to_split, delimiter);
-
-    auto it = splitter.begin();
 
     SECTION("Should split on delimiter") {
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
@@ -171,7 +172,6 @@ TEST_CASE("Splitter binary operations") {
 TEST_CASE("Splitter to containers") {
     std::string to_split = "Hello world test 123 ";
     auto splitter = lz::sv_split(to_split, " ");
-    using View = typename decltype(splitter.begin())::value_type;
 
     SECTION("To array") {
         std::array<std::string, 5> expected = { "Hello", "world", "test", "123", "" };

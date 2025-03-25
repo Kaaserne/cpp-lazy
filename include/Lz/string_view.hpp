@@ -154,6 +154,13 @@ private:
     std::size_t _size;
 };
 
+#ifdef LZ_HAS_CXX_11
+
+template<class CharT>
+constexpr std::size_t basic_string_view<CharT>::npos;
+
+#endif
+
 // Equality operator
 template<class CharT>
 LZ_CONSTEXPR_CXX_17 bool operator==(const basic_string_view<CharT>& lhs, const basic_string_view<CharT>& rhs) noexcept {

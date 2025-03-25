@@ -12,12 +12,6 @@ namespace detail {
 struct join_where_adaptor {
     using adaptor = join_where_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor join_where{};
-
-#endif
-
     /**
      * @brief Performs an SQL-like join on two iterables where the join condition is specified by the selectors. Its end()
      * function returns a sentinel, it contains a forward iterator. It also does not contain a size() method. The second iterable
@@ -75,7 +69,8 @@ struct join_where_adaptor {
      * b(*iter_b)`) is met
      */
     template<LZ_CONCEPT_ITERABLE IterableB, class SelectorA, class SelectorB, class ResultSelector>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, IterableB, SelectorA, SelectorB, ResultSelector>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+    fn_args_holder<adaptor, IterableB, SelectorA, SelectorB, ResultSelector>
     operator()(IterableB&& iterable_b, SelectorA a, SelectorB b, ResultSelector result_selector) const {
         return { std::forward<IterableB>(iterable_b), std::move(a), std::move(b), std::move(result_selector) };
     }

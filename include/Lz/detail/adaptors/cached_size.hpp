@@ -10,12 +10,6 @@ namespace detail {
 struct cached_size_adaptor {
     using adaptor = cached_size_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor cache_size;
-
-#endif
-
     /**
      * @brief Creates an iterable with a size. Gets the size eagerly (using `lz::eager_size`), so if the input iterable is
      * bidirectional or less and is not sized, the entire iterable will be traversed. This can be handy if you want to

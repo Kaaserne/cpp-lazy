@@ -89,7 +89,7 @@ public:
         _index += offset;
         const auto is_positive_offset = offset > 0;
 
-        if ((!is_positive_offset || _index < _from) && (is_positive_offset || _index >= _to) || (_from == 0)) {
+        if (((!is_positive_offset || _index < _from) && (is_positive_offset || _index >= _to)) || (_from == 0)) {
             return;
         }
 

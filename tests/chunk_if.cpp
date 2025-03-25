@@ -8,7 +8,11 @@
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");
+#ifdef LZ_HAS_CXX_11
+    auto chunked = str | lz::t_chunk_if<std::vector<char>>{}([](char c) { return c == ';'; });
+#else
     auto chunked = str | lz::t_chunk_if<std::vector<char>>([](char c) { return c == ';'; });
+#endif
     auto it = chunked.begin();
     REQUIRE(*it == std::vector<char>{});
     ++it;
@@ -25,9 +29,9 @@ TEST_CASE("Chunk if with sentinels") {
     auto cstr = lz::c_string("hello world; this is a message;;");
     auto chunked = lz::chunk_if(cstr, [](char c) { return c == ';'; });
     auto it = chunked.begin();
-    auto expected = { "hello world", " this is a message", "", "" };
+    std::vector<std::string> expected = { "hello world", " this is a message", "", "" };
     for (const auto& str : expected) {
-        REQUIRE(lz::equal(*it, lz::c_string(str)));
+        REQUIRE(lz::equal(*it, str));
         ++it;
     }
     REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
@@ -41,7 +45,7 @@ TEST_CASE("Non string literal test") {
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
     auto chunked = lz::chunk_if(arr, is_even);
 
-    auto expected = { 1 };
+    std::vector<int> expected = { 1 };
     auto it = chunked.begin();
     REQUIRE(lz::equal(*it, expected));
     ++it;

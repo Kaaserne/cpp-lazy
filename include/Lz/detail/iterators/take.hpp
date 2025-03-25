@@ -26,7 +26,7 @@ private:
 public:
     constexpr take_iterator() = default;
 
-    constexpr take_iterator(Iterator iterator) : _iterator{ std::move(iterator) } {
+    constexpr take_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 
     constexpr reference dereference() const {

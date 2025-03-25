@@ -34,7 +34,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto looper = vec | lz::loop; // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
  * ```
  */
-static constexpr detail::loop_adaptor detail::loop_adaptor::loop{};
+constexpr detail::loop_adaptor loop{};
 
 #else
 

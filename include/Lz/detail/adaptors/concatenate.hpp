@@ -11,12 +11,6 @@ namespace detail {
 struct concatenate_adaptor {
     using adaptor = concatenate_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor concat{};
-
-#endif
-
     /**
      * @brief Concatenates multiple iterables into one iterable. Contains a .size() function if all iterables have a .size()
      * function. The size is the sum of all the sizes of the iterables. Contains a sentinel if one of the iterables contains a

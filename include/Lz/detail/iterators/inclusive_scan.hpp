@@ -27,8 +27,8 @@ public:
 
     constexpr inclusive_scan_iterator() = default;
 
-    constexpr inclusive_scan_iterator(Iterator iterator, S end, T init, BinaryOp bin_op) :
-        _iterator{ std::move(iterator) },
+    constexpr inclusive_scan_iterator(Iterator it, S end, T init, BinaryOp bin_op) :
+        _iterator{ std::move(it) },
         _reducer{ std::move(init) },
         _end{ std::move(end) },
         _binary_op{ std::move(bin_op) } {

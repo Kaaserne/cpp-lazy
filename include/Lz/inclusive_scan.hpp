@@ -36,7 +36,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto scan = vec | lz::inclusive_scan(0); // OK
  * ```
  */
-static constexpr detail::inclusive_scan_adaptor detail::inclusive_scan_adaptor::inclusive_scan{};
+constexpr detail::inclusive_scan_adaptor inclusive_scan{};
 
 #else
 

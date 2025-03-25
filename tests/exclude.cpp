@@ -22,13 +22,13 @@ TEST_CASE("Exclude changing and creating elements") {
     auto excluded2 = lz::exclude(arr, 0, 2);
     auto excluded3 = lz::exclude(arr, 8, 10);
 
-    auto excluded_expected1 = { 1, 2, 3, 6, 7, 8, 9, 10 };
+    std::vector<int> excluded_expected1 = { 1, 2, 3, 6, 7, 8, 9, 10 };
     REQUIRE(lz::equal(excluded1, excluded_expected1));
 
-    auto excluded_expected2 = { 3, 4, 5, 6, 7, 8, 9, 10 };
+    std::vector<int> excluded_expected2 = { 3, 4, 5, 6, 7, 8, 9, 10 };
     REQUIRE(lz::equal(excluded2, excluded_expected2));
 
-    auto excluded_expected3 = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    std::vector<int> excluded_expected3 = { 1, 2, 3, 4, 5, 6, 7, 8 };
     REQUIRE(lz::equal(excluded3, excluded_expected3));
 
     SECTION("Should Exclude out element") {
@@ -74,8 +74,7 @@ TEST_CASE("Exclude binary operations") {
 
     SECTION("Operator--") {
         auto vec = lz::reverse(excluded1) | lz::to<std::vector>();
-        // auto excluded_expected1 = { 1, 2, 3, 6, 7, 8, 9, 10 };
-        auto expected = { 10, 9, 8, 7, 6, 3, 2, 1 };
+        std::vector<int> expected = { 10, 9, 8, 7, 6, 3, 2, 1 };
         REQUIRE(lz::equal(vec, expected));
 
         vec = lz::reverse(excluded2) | lz::to<std::vector>();
@@ -88,7 +87,7 @@ TEST_CASE("Exclude binary operations") {
     }
 
     SECTION("Operator+") {
-        auto expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
+        std::vector<int> expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
         for (std::size_t i = 0; i < lz::size(excluded1); ++i) {
             INFO("With i = " << i);
             REQUIRE(*(exBeg1 + i) == *(expected.begin() + i));

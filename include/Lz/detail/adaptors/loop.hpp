@@ -12,12 +12,6 @@ namespace detail {
 struct loop_adaptor {
     using adaptor = loop_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor loop{};
-
-#endif
-
     /**
      * @brief Loops over an iterable infinately. Does not contain a .size() method. Loop infinitely over the input iterable. Its
      * input iterator category will always be forward. It also returns a default_sentinel. Example:
@@ -65,7 +59,7 @@ struct loop_adaptor {
      * @param iterable The iterable to loop over
      * @param amount The amount of times to loop over the iterable
      */
-    LZ_NODISCARD constexpr fn_args_holder<adaptor, std::size_t> operator()(const std::size_t amount) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t amount) const {
         return { amount };
     }
 };

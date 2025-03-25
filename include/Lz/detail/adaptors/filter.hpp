@@ -12,12 +12,6 @@ namespace detail {
 struct filter_adaptor {
     using adaptor = filter_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor filter{};
-
-#endif
-
     /**
      * @brief Drops elements based on a condition predicate. If it returns `false`, the element in question is dropped. If it
      * returns `true` then this item is will be yielded. If the input iterable is forward an end() sentinel is returned, otherwise

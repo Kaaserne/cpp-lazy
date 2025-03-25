@@ -123,14 +123,6 @@ template<bool UseSentinel>
 struct random_adaptor {
     using adaptor = random_adaptor<UseSentinel>;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor<false> common_random{};
-
-    static constexpr adaptor<true> random{};
-
-#endif
-
     /**
      * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
      * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end

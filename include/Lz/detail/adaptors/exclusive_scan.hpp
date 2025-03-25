@@ -13,12 +13,6 @@ namespace detail {
 struct exclusive_scan_adaptor {
     using adaptor = exclusive_scan_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor exclusive_scan{};
-
-#endif
-
     /**
      * @brief Performs an exclusive scan on a container. The first element will be the init value, the second element will be the
      * first element of the container + the init value, the third element will be the second element + last returned element

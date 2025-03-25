@@ -15,7 +15,7 @@ class concatenate_iterable : public lazy_view {
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
     template<std::size_t... I>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence_helper<I...>) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
         const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... };
         return std::accumulate(std::begin(sizes), std::end(sizes), std::size_t{ 0 });
     }

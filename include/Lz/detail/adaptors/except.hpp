@@ -12,12 +12,7 @@ namespace lz {
 namespace detail {
 struct except_adaptor {
     using adaptor = except_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor except{};
-
-#endif
+    
     // clang-format off
     
     /**

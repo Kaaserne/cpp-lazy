@@ -10,12 +10,6 @@ namespace detail {
 struct generate_while_adaptor {
     using adaptor = generate_while_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor generate_while{};
-
-#endif
-
     /**
      * @brief Generates elements while the predicate returns true. The predicate must return an object that is compatible with
      * std::get. The first element (std::get<0>) must be an object convertible to bool, the second element (std::get<1>) can be

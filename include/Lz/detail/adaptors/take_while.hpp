@@ -13,12 +13,6 @@ namespace detail {
 struct take_while_adaptor {
     using adaptor = take_while_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor take_while{};
-
-#endif
-
     /**
      * @brief Takes elements from an iterable while the given predicte returns `true`. Will return a bidirectional iterable if the
      * given iterable is at least bidirectional. Does not contain a size() method and if its input iterable is forward, will

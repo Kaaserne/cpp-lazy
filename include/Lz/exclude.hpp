@@ -38,7 +38,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto excluded = vec | lz::exclude(3, 6); // excluded = { 1, 2, 3, 6, 7, 8, 9 }
  * ```
  */
-static constexpr detail::exclude_adaptor detail::exclude_adaptor::exclude{};
+constexpr detail::exclude_adaptor exclude{};
 
 #else
 

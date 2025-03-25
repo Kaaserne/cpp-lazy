@@ -54,8 +54,8 @@ public:
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     any_iterable(Iterable&& iterable) :
-        _begin{ std::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
-        _end{ std::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
+        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
     }
 
     LZ_NODISCARD it begin() const& {

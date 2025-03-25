@@ -12,11 +12,6 @@ namespace detail {
 struct intersection_adaptor {
     using adaptor = intersection_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor intersection{};
-
-#endif
     // clang-format off
 
     /**

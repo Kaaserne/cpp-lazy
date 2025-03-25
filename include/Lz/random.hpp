@@ -31,7 +31,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto random = lz::common_random(dist, gen, 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } (random * numbers)
  * ```
  */
-static constexpr detail::random_adaptor<false> detail::random_adaptor<false>::common_random;
+constexpr detail::random_adaptor<false> common_random;
 
 /**
  * @brief Creates n random numbers in the range [min, max]. It contains a .size() method, is random_access and its begin() and
@@ -50,7 +50,7 @@ static constexpr detail::random_adaptor<false> detail::random_adaptor<false>::co
  * auto random = lz::random(dist, gen, 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } (random * numbers)
  * ```
  */
-static constexpr detail::random_adaptor<true> detail::random_adaptor<true>::random;
+constexpr detail::random_adaptor<true> random;
 
 #else
 

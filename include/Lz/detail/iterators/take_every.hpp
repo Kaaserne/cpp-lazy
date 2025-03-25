@@ -31,8 +31,8 @@ public:
     std::size_t _offset;
 
 public:
-    constexpr take_every_iterator(Iterator iterator, S end, const std::size_t offset) :
-        _iterator{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, S end, const std::size_t offset) :
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _offset{ offset } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
@@ -83,8 +83,8 @@ public:
     std::size_t _distance{};
 
 public:
-    constexpr take_every_iterator(Iterator iterator, S end, const std::size_t offset, const std::size_t distance) :
-        _iterator{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, S end, const std::size_t offset, const std::size_t distance) :
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _offset{ offset },
         _distance{ distance } {
@@ -146,9 +146,9 @@ public:
     std::size_t _offset{};
 
 public:
-    constexpr take_every_iterator(Iterator iterator, Iterator begin, S end, const std::size_t offset) :
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, Iterator begin, S end, const std::size_t offset) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(iterator) },
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _offset{ offset } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");

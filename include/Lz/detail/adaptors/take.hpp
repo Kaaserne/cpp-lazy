@@ -12,12 +12,6 @@ namespace detail {
 struct take_adaptor {
     using adaptor = take_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor take{};
-
-#endif
-
     /**
      * @brief This adaptor is used to take the first n elements of an iterable. The iterator category is the same as the input
      * iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. Has a .size()

@@ -34,7 +34,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto scan = vec | lz::exclusive_scan(0); // OK
  * ```
  */
-static constexpr detail::exclusive_scan_adaptor detail::exclusive_scan_adaptor::exclusive_scan{};
+constexpr detail::exclusive_scan_adaptor exclusive_scan{};
 
 #else
 

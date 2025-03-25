@@ -12,12 +12,6 @@ namespace detail {
 struct enumerate_adaptor {
     using adaptor = enumerate_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor enumerate{};
-
-#endif
-
     /**
      * @brief Returns an iterable that enumerates the elements of the input iterable, meaning it returns a std::pair<IntType,
      * ValueType>, where std::pair::first_type is an integer (corresponding to the current index) and std::pair::second_type is

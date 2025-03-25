@@ -4,7 +4,7 @@
 
 TEST_CASE("Reverse basic test") {
     const std::vector<int> v = { 1, 2, 3, 4, 5 };
-    const auto expected = { 5, 4, 3, 2, 1 };
+    const std::vector<int> expected = { 5, 4, 3, 2, 1 };
 
     auto reversed = lz::reverse(v);
     REQUIRE(lz::size(reversed) == 5);

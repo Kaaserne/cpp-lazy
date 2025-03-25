@@ -24,7 +24,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto concatenated = a | lz::concat(b); // concatenated = {1, 2, 3, 4}
  * ```
  */
-static constexpr detail::concatenate_adaptor detail::concatenate_adaptor::concat{};
+constexpr detail::concatenate_adaptor concat{};
 
 #else
 

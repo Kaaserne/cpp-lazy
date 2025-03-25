@@ -19,7 +19,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto repeater = lz::repeat(20, 5); // {20, 20, 20, 20, 20}
  * ```
  */
-static constexpr detail::repeat_adaptor detail::repeat_adaptor::repeat{};
+constexpr detail::repeat_adaptor repeat{};
 
 #else
 

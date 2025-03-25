@@ -28,8 +28,8 @@ public:
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr map_iterator(Iterator iterator, UnaryOp unary_op) :
-        _iterator{ std::move(iterator) },
+    constexpr map_iterator(Iterator it, UnaryOp unary_op) :
+        _iterator{ std::move(it) },
         _unary_op{ std::move(unary_op) } {
     }
 

@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/any_iterable/iterator_base.hpp>
 #include <Lz/iterator_base.hpp>
+#include <Lz/detail/unique_ptr.hpp>
 #include <iterator>
 
 namespace lz {
@@ -15,7 +16,7 @@ class iterator_wrapper : public iterator<iterator_wrapper<T, Reference, IterCat,
                                          DiffType, IterCat> {
 
     using any_iter_base = iterator_base<Reference, IterCat, DiffType>;
-    std::unique_ptr<any_iter_base> _implementation;
+    mutable detail::unique_ptr<any_iter_base> _implementation;
 
 public:
     using value_type = T;
@@ -26,10 +27,10 @@ public:
 
     constexpr iterator_wrapper() = default;
 
-    iterator_wrapper(const std::unique_ptr<any_iter_base>& ptr) : _implementation{ ptr->clone() } {
+    iterator_wrapper(const detail::unique_ptr<any_iter_base>& ptr) : _implementation{ ptr->clone() } {
     }
 
-    iterator_wrapper(std::unique_ptr<any_iter_base>&& ptr) noexcept : _implementation{ std::move(ptr) } {
+    iterator_wrapper(detail::unique_ptr<any_iter_base>&& ptr) noexcept : _implementation{ std::move(ptr) } {
     }
 
     iterator_wrapper(const iterator_wrapper& other) : _implementation{ other._implementation->clone() } {

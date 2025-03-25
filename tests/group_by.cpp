@@ -70,7 +70,7 @@ TEST_CASE("group_by binary operations") {
 
     SECTION("Operator++") {
         auto it = grouper.begin();
-        auto expected = { "a" };
+        std::vector<std::string> expected = { "a" };
         REQUIRE(lz::equal(it->second, expected));
         REQUIRE(it->first == "a");
         ++it;
@@ -113,7 +113,7 @@ TEST_CASE("group_by binary operations") {
     SECTION("Operator--") {
         auto it = grouper.end();
         --it;
-        auto expected = { "dddd", "dddd" };
+        std::vector<std::string> expected = { "dddd", "dddd" };
         REQUIRE(it->first == "dddd");
         REQUIRE(lz::equal(it->second, expected));
         --it;

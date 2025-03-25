@@ -18,9 +18,9 @@ using zip_with_iterable =
  * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`. Cannot
  * be used in a pipe expression. Example:
  * ```cpp
- * auto a = { 1, 2, 3 };
- * auto b = { 1, 2, 3 };
- * auto c = { 1, 2, 3 };
+ * std::vector<int> a = { 1, 2, 3 };
+ * std::vector<int> b = { 1, 2, 3 };
+ * std::vector<int> c = { 1, 2, 3 };
  * auto zipped = lz::zip_with([](int a, int b, int c) { return a + b + c; }, a, b, c); // {3, 6, 9}
  * ```
  *
@@ -45,7 +45,7 @@ zip_with(Fn fn, Iterables&&... iterables) {
  * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
  * ```
  */
-static constexpr detail::lines_adaptor detail::lines_adaptor::lines{};
+constexpr detail::lines_adaptor lines{};
 
 /**
  * @brief Returns an iterable that converts the elements in the given container to the type @p `T`, using `lz::map`.
@@ -58,8 +58,9 @@ static constexpr detail::lines_adaptor detail::lines_adaptor::lines{};
  * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
  * ```
  */
+// TODO make docs correct
 template<class T>
-static constexpr detail::as_adaptor<T> detail::as_adaptor<T>::as{};
+using as = detail::as_adaptor<T>;
 
 /**
  * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`. Example:
@@ -71,8 +72,9 @@ static constexpr detail::as_adaptor<T> detail::as_adaptor<T>::as{};
  * ```
  * @tparam N The amount of adjacent elements to return.
  */
+// TODO make docs correct
 template<std::size_t N>
-static constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
+using pairwise_n = detail::pairwise_n_adaptor<N>;
 
 /**
  * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip`. Example:
@@ -95,8 +97,9 @@ static constexpr detail::pairwise_n_adaptor<2> pairwise{};
  * ```
  * @tparam I The index to get from the tuple-like container.
  */
+// TODO docs
 template<std::size_t I>
-static constexpr detail::get_n_adaptor<I> detail::get_n_adaptor<I>::get_nth{};
+using get_nth = detail::get_n_adaptor<I>;
 
 /**
  * @brief Gets the keys from a tuple-like container, using `std::get<0>` and `lz::map`. Example:
@@ -107,7 +110,7 @@ static constexpr detail::get_n_adaptor<I> detail::get_n_adaptor<I>::get_nth{};
  * auto keys = m | lz::keys; // {1, 2, 3}
  * ```
  */
-static constexpr detail::get_n_adaptor<0> detail::get_n_adaptor<0>::keys{};
+constexpr detail::get_n_adaptor<0> keys{};
 
 /**
  * @brief Gets the values from a tuple-like container, using `std::get<1>` and `lz::map`. Example:
@@ -118,7 +121,7 @@ static constexpr detail::get_n_adaptor<0> detail::get_n_adaptor<0>::keys{};
  * auto values = m | lz::values; // {"hello", "world", "!"}
  * ```
  */
-static constexpr detail::get_n_adaptor<1> detail::get_n_adaptor<1>::values{};
+constexpr detail::get_n_adaptor<1> values{};
 
 /**
  * @brief Filters an iterable using `predicate` and then maps those elements using `fn`, using `lz::filter` and `lz::map`.
@@ -130,7 +133,7 @@ static constexpr detail::get_n_adaptor<1> detail::get_n_adaptor<1>::values{};
  * auto fm = vec | lz::filter_map([](int i) { return i % 2 == 0; }, [](int i) { return i * 2; }); // {4, 8}
  * ```
  */
-static constexpr detail::filter_map_adaptor detail::filter_map_adaptor::filter_map{};
+constexpr detail::filter_map_adaptor filter_map{};
 
 /**
  * @brief Selects elements from the first iterable if the corresponding element in the second iterable is `true`, using
@@ -143,7 +146,7 @@ static constexpr detail::filter_map_adaptor detail::filter_map_adaptor::filter_m
  * auto selected = lz::select(vec, bools); // {1, 3, 5}
  * ```
  */
-static constexpr detail::select_adaptor detail::select_adaptor::select{};
+constexpr detail::select_adaptor select{};
 
 /**
  * @brief Trims the back of the sequence as long as `predicate` returns `true`, then reverses the sequence again. Essentially
@@ -155,7 +158,7 @@ static constexpr detail::select_adaptor detail::select_adaptor::select{};
  * auto trimmed = vec | lz::drop_back_while([](int i) { return i > 3; }); // {1, 2, 3}
  * ```
  */
-static constexpr detail::drop_back_while_adaptor detail::drop_back_while_adaptor::drop_back_while{};
+constexpr detail::drop_back_while_adaptor drop_back_while{};
 
 /**
  * Trims the beginning and ending of a sequence, as long as the first predicate returns true for the trimming of the
@@ -172,7 +175,7 @@ static constexpr detail::drop_back_while_adaptor detail::drop_back_while_adaptor
  * auto trimmed = str | lz::trim; // "hello", uses std::isspace
  * ```
  */
-static constexpr detail::trim_adaptor detail::trim_adaptor::trim{};
+constexpr detail::trim_adaptor trim{};
 
 #else
 

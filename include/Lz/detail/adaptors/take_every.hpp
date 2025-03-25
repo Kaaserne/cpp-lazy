@@ -12,12 +12,6 @@ namespace detail {
 struct take_every_adaptor {
     using adaptor = take_every_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor take_every{};
-
-#endif
-
     /**
      * @brief Takes every `offset` element from the iterable, starting from `start`. Returns the same iterator category as the
      * input iterable. Contains a size() method if the input iterable is sized. If input iterable is forward or less, the end()
@@ -77,7 +71,7 @@ struct take_every_adaptor {
      * @param offset The offset to take every element from
      * @param start The start offset
      */
-    LZ_NODISCARD constexpr fn_args_holder<adaptor, std::size_t, std::size_t>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t, std::size_t>
     operator()(const std::size_t offset, const std::size_t start = 0) const {
         return { offset, start };
     }

@@ -13,12 +13,6 @@ namespace detail {
 struct chunks_adaptor {
     using adaptor = chunks_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor chunks{};
-
-#endif
-
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
      * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,

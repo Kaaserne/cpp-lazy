@@ -15,8 +15,6 @@ class group_by_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     func_container<BinaryPredicate> _binary_predicate;
 
-    using inner_iter = iter_t<Iterable>;
-
 public:
     using iterator = group_by_iterator<iter_t<Iterable>, sentinel_t<Iterable>, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
@@ -30,27 +28,27 @@ public:
         _binary_predicate{ std::move(binary_predicate) } {
     }
 
-    template<class I = typename inner_iter::iterator_category>
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _binary_predicate };
     }
 
-    template<class I = typename inner_iter::iterator_category>
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_binary_predicate) };
     }
 
-    template<class I = typename inner_iter::iterator_category>
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _binary_predicate };
     }
 
-    template<class I = typename inner_iter::iterator_category>
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
 
-    template<class I = typename inner_iter::iterator_category>
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _binary_predicate };
     }

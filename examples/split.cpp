@@ -45,7 +45,7 @@ int main() {
 
     std::cout << "\n\nUsing other container types:\n";
     std::vector<int> to_split2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    auto to_split_on = { 5 };
+    std::array<int, 1> to_split_on = { 5 };
     // to_split_on must be by reference!
     const auto splitter3 = lz::split(to_split2, to_split_on);
     // Returns an iterable of iterables
@@ -112,7 +112,7 @@ int main() {
 
     std::cout << "\n\nUsing other container types:\n";
     std::vector<int> to_split2 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-    auto to_split_on = { 5 };
+    std::array<int, 1> to_split_on = { 5 };
     // to_split_on must be by reference!
     const auto splitter3 = lz::split(to_split2, to_split_on);
     // Returns an iterable of iterables

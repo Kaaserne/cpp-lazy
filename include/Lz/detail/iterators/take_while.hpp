@@ -40,8 +40,8 @@ public:
 
     constexpr take_while_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator iterator, S end, UnaryPredicate unary_predicate) :
-        _iterator{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator it, S end, UnaryPredicate unary_predicate) :
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _unary_predicate{ std::move(unary_predicate) } {
         incremented_check();
@@ -88,7 +88,7 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<!is_sentinel<It
         }
     }
 
-public:;
+public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
@@ -96,9 +96,9 @@ public:;
 
     constexpr take_while_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator iterator, Iterator begin, Iterator end, UnaryPredicate unary_predicate) :
+    LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator it, Iterator begin, Iterator end, UnaryPredicate unary_predicate) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(iterator) },
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _unary_predicate{ std::move(unary_predicate) } {
         if (_iterator == _begin) {

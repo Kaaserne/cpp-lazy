@@ -9,20 +9,18 @@
 namespace lz {
 namespace detail {
 template<class C>
-class c_string_iterator : public iterator<c_string_iterator<C>, decltype(*std::declval<C>()), C, std::ptrdiff_t,
+class c_string_iterator : public iterator<c_string_iterator<C>, C&, C*, std::ptrdiff_t,
                                           std::forward_iterator_tag, default_sentinel> {
 
-    C _it{};
-
-    using ptr_removed = typename std::remove_pointer<C>::type;
+    C* _it{};
 
 public:
-    using value_type = typename std::remove_const<ptr_removed>::type;
+    using value_type = typename std::remove_const<C>::type;
     using difference_type = std::ptrdiff_t;
-    using pointer = C;
-    using reference = decltype(*std::declval<C>());
+    using pointer = C*;
+    using reference = C&;
 
-    constexpr c_string_iterator(C it) noexcept : _it{ it } {
+    constexpr c_string_iterator(C* it) noexcept : _it{ it } {
     }
 
     constexpr c_string_iterator() = default;

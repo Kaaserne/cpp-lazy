@@ -29,8 +29,9 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```
  * @tparam ValueType The value type of the chunked iterable.
  */
+// TODO
 template<class ValueType>
-static constexpr detail::chunk_if_adaptor<ValueType> detail::chunk_if_adaptor<ValueType>::t_chunk_if;
+using t_chunk_if = detail::chunk_if_adaptor<ValueType>;
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
@@ -46,7 +47,7 @@ static constexpr detail::chunk_if_adaptor<ValueType> detail::chunk_if_adaptor<Va
  * auto chunked = vec | lz::chunk_if([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
  * ```
  */
-static constexpr detail::chunk_if_adaptor<void> detail::chunk_if_adaptor<void>::chunk_if{};
+constexpr detail::chunk_if_adaptor<void> chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
@@ -63,7 +64,7 @@ static constexpr detail::chunk_if_adaptor<void> detail::chunk_if_adaptor<void>::
  * // chunked = { string_view{"hello"}, string_view{"world"}, string_view{""}, string_view{""} }
  * ```
  */
-static constexpr detail::chunk_if_adaptor<lz::string_view> detail::chunk_if_adaptor<lz::string_view>::sv_chunk_if{};
+constexpr detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
@@ -80,7 +81,7 @@ static constexpr detail::chunk_if_adaptor<lz::string_view> detail::chunk_if_adap
  * // chunked = { std::string{"hello"}, std::string{"world"}, std::string{""}, std::string{""} }
  * ```
  */
-static constexpr detail::chunk_if_adaptor<std::string> detail::chunk_if_adaptor<std::string>::s_chunk_if{};
+constexpr detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 #else
 

@@ -40,46 +40,56 @@ struct trim_fn {
 };
 
 struct lines_adaptor {
+private:
+    template<class CharT, class Iterable>
+    using lines_iterable = split_iterable<basic_string_view<CharT>, Iterable, c_string_iterable<const CharT>>;
+
+public:
     using adaptor = lines_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor lines{};
-
-#endif
-
     /**
-     * @brief Returns a split_iterable, that splits the string on `'\n'` using `lz::split`. Returns string_views to its
+     * @brief Returns a split_iterable, that splits the string on `'\n'` using `lz::sv_split`. Returns string_views to its
      * substrings. Example:
      * ```cpp
      * std::string str = "Hello\nWorld\n!";
      * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
      * // or
      * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
-     * // or, little bit slower since lz::c_string is not random access
+     * // or, little bit slower since lz::c_string is used here, which is not random access
      * auto splitted = lz::lines(lz::c_string("Hello\nWorld\n!")); // {"Hello", "World", "!"}
      * // or with string_view
-     * auto splitted = lz::lines(lz::string_view("Hello\nWorld\n!")); // {"Hello", "World", "!"}
-     * // dangling reference, do not do this
-     * // auto splitted = lz::lines("Hello\nWorld\n!");
+     * lz::string_view str = "Hello\nWorld\n!";
+     * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
      * ```
      * @param string The string to split on "\n".
      */
     template<LZ_CONCEPT_ITERABLE String>
-    LZ_NODISCARD constexpr auto operator()(String&& string) const -> decltype(lz::sv_split(std::forward<String>(string), "\n")) {
-        return lz::sv_split(std::forward<String>(string), "\n");
+    LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref<String>> operator()(String&& string) const {
+        using char_type = val_iterable_t<String>;
+        return lz::sv_split(std::forward<String>(string), static_cast<const char_type*>("\n"));
+    }
+    /**
+     * @brief Returns a split_iterable, that splits the string on `'\n'` using `lz::sv_split`. Returns string_views to its
+     * substrings. Example:
+     * ```cpp
+     * std::string str = "Hello\nWorld\n!";
+     * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
+     * // or
+     * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
+     * // or, little bit slower since lz::c_string is used here, which is not random access
+     * auto splitted = lz::lines("Hello\nWorld\n!"); // {"Hello", "World", "!"}
+     * ```
+     * @param string The string to split on "\n".
+     */
+    template<class CharT>
+    LZ_NODISCARD constexpr lines_iterable<CharT, c_string_iterable<const CharT>> operator()(const CharT* string) const {
+        return lz::sv_split(lz::c_string(string), static_cast<const CharT*>("\n"));
     }
 };
 
 template<class T>
 struct as_adaptor {
     using adaptor = as_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor as{};
-
-#endif
 
     /**
      * @brief Returns an iterable that converts the elements in the given container to the type @p `T` using `lz::map`.
@@ -102,21 +112,13 @@ template<std::size_t Neighbours>
 struct pairwise_n_adaptor {
     using adaptor = pairwise_n_adaptor<Neighbours>;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr pairwise_n_adaptor<2> pairwise{};
-
-    static constexpr adaptor pairwise_n{};
-
-#endif
-
 private:
     template<class Iterable, std::size_t... N>
     using pairwise_n_object = zip_iterable<drop_iterable<remove_ref<decltype(N, std::declval<Iterable>())>>...>;
 
     template<class Iterable, std::size_t... N>
     LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...>
-    pairwise_n_construct(Iterable&& iterable, index_sequence_helper<N...>) const {
+    pairwise_n_construct(Iterable&& iterable, index_sequence<N...>) const {
         return lz::zip(lz::drop(std::forward<Iterable>(iterable), N)...);
     }
 
@@ -147,16 +149,6 @@ template<std::size_t N>
 struct get_n_adaptor {
     using adaptor = get_n_adaptor<N>;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor get_nth{};
-
-    static constexpr get_n_adaptor<0> keys{};
-
-    static constexpr get_n_adaptor<1> values{};
-
-#endif
-
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 map_iterable<remove_ref<Iterable>, get_fn<N>> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), get_fn<N>{});
@@ -168,12 +160,6 @@ using filter_map_iterable = map_iterable<filter_iterable<Iterable, UnaryFilterPr
 
 struct filter_map_adaptor {
     using adaptor = filter_map_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor filter_map{};
-
-#endif
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryFilterPredicate, class UnaryMapOp>
     LZ_NODISCARD constexpr filter_map_iterable<remove_ref<Iterable>, UnaryFilterPredicate, UnaryMapOp>
@@ -194,12 +180,6 @@ using select_iterable = filter_map_iterable<zip_iterable<Iterable, SelectorItera
 struct select_adaptor {
     using adaptor = select_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor select{};
-
-#endif
-
     template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE SelectorIterable>
     LZ_NODISCARD constexpr select_iterable<remove_ref<Iterable>, remove_ref<SelectorIterable>>
     operator()(Iterable&& iterable, SelectorIterable&& selectors) const {
@@ -208,8 +188,7 @@ struct select_adaptor {
     }
 
     template<class SelectorIterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, remove_ref<SelectorIterable>>
-    operator()(SelectorIterable&& selectors) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, SelectorIterable> operator()(SelectorIterable&& selectors) const {
         return { std::forward<SelectorIterable>(selectors) };
     }
 };
@@ -219,12 +198,6 @@ using drop_back_iterable = reverse_iterable<drop_while_iterable<reverse_iterable
 
 struct drop_back_while_adaptor {
     using adaptor = drop_back_while_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor drop_back_while{};
-
-#endif
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 drop_back_iterable<remove_ref<Iterable>, UnaryPredicate>
@@ -243,12 +216,7 @@ using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable, UnaryPred
 
 struct trim_adaptor {
     using adaptor = trim_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor trim{};
-
-#endif
+    
     // clang-format off
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>

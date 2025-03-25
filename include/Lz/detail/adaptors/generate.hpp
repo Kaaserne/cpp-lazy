@@ -10,12 +10,6 @@ namespace detail {
 struct generate_adaptor {
     using adaptor = generate_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor generate{};
-
-#endif
-
     /**
      * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
      * returns a sentinel. Example:

@@ -12,12 +12,6 @@ namespace detail {
 struct cartesian_product_adaptor {
     using adaptor = cartesian_product_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor cartesian_product{};
-
-#endif
-
     /**
      * @brief Performs a cartesian product on the given iterables. This means that it will return all possible combinations
      * of the elements of the given iterables. Contains a .size() function if all of the iterables have a .size() function.

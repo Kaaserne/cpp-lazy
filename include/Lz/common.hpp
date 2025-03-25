@@ -31,7 +31,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * Will not result in an iterable where its end() and begin() functions return the same type. This is because
  * the common view is created first and then the take view is created. The take view will return another sentinel.
  */
-static constexpr detail::common_adaptor detail::common_adaptor::common{};
+constexpr detail::common_adaptor common{};
 
 #else
 

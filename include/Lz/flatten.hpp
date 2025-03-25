@@ -21,7 +21,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto flattened = vectors | lz::flatten; // { 1, 2, 3, 4, 5, 6, 7 }
  * ```
  */
-static constexpr detail::flatten_adaptor detail::flatten_adaptor::flatten{};
+constexpr detail::flatten_adaptor flatten{};
 
 #else
 

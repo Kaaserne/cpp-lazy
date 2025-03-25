@@ -15,7 +15,10 @@ TEST_CASE("Enumerate with sentinels") {
                   "Begin and end should not be the same type");
     auto taken = lz::take(enumerated, 3);
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
-    REQUIRE(lz::equal(taken, expected));
+
+    using ref_taken = lz::ref_iterable_t<decltype(taken)>;
+    using ref_expected = lz::ref_iterable_t<decltype(expected)>;
+    REQUIRE(lz::equal(taken, expected, [](const ref_taken& a, const ref_expected& b) { return a.first == b.first && a.second == b.second; }));
 }
 
 TEST_CASE("Enumerate correct size()") {
@@ -118,23 +121,31 @@ TEST_CASE("Enumerate binary operations") {
 
         std::vector<std::pair<int, int>> expected = { { 0, 1 }, { 1, 2 }, { 2, 3 } };
         for (std::size_t i = 0; i < lz::size(enumerate) - 1; ++i) {
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
+            INFO("With i = " << i);
+            REQUIRE((*(begin + i)).first == (*(expected.begin() + i)).first);
+            REQUIRE((*(begin + i)).second == (*(expected.begin() + i)).second);
         }
         REQUIRE(begin + lz::size(enumerate) == enumerate.end());
         for (std::size_t i = 1; i <= lz::size(enumerate); ++i) {
-            REQUIRE(*(end - i) == *(expected.end() - i));
+            INFO("With i = " << i);
+            REQUIRE((*(end - i)).first == (*(expected.end() - i)).first);
+            REQUIRE((*(end - i)).second == (*(expected.end() - i)).second);
         }
         REQUIRE(end - lz::size(enumerate) == enumerate.begin());
 
         std::advance(begin, lz::size(enumerate));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(enumerate)));
 
-        for (std::size_t i = 0; i < lz::size(enumerate) - 1; ++i) {
-            REQUIRE(*(end + i) == *(expected.begin() + i));
+        for (std::size_t i = 1; i <= lz::size(enumerate); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((*(begin - i)).first == (*(expected.end() - i)).first);
+            REQUIRE((*(begin - i)).second == (*(expected.end() - i)).second);
         }
         REQUIRE(end + lz::size(enumerate) == enumerate.end());
-        for (std::size_t i = 1; i <= lz::size(enumerate); ++i) {
-            REQUIRE(*(begin - i) == *(enumerate.end() - i));
+        for (std::size_t i = 0; i < lz::size(enumerate) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE((*(end + i)).first == (*(expected.begin() + i)).first);
+            REQUIRE((*(end + i)).second == (*(expected.begin() + i)).second);
         }
         REQUIRE(begin - lz::size(enumerate) == enumerate.begin());
     }
@@ -178,7 +189,8 @@ TEST_CASE("Enumerate to containers") {
         auto expected_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_vec) {
-            REQUIRE(actual_pair == expected_pair);
+            REQUIRE(actual_pair.first == expected_pair.first);
+            REQUIRE(actual_pair.second == expected_pair.second);
             expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
         }
     }
@@ -188,7 +200,8 @@ TEST_CASE("Enumerate to containers") {
         auto expected_pair = std::make_pair(0, 1);
 
         for (const auto& actual_pair : actual_list) {
-            REQUIRE(actual_pair == expected_pair);
+            REQUIRE(actual_pair.first == expected_pair.first);
+            REQUIRE(actual_pair.second == expected_pair.second);
             expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
         }
     }
@@ -227,6 +240,8 @@ TEST_CASE("Enumerate to containers") {
         std::list<int> to_enumerate = { 1, 2, 3 };
         auto enumerated = lz::enumerate(to_enumerate);
         std::array<std::pair<int, int>, 3> expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
-        REQUIRE(lz::equal(enumerated, expected));
+        using ref_enumerated = lz::ref_iterable_t<decltype(enumerated)>;    
+        using ref_expected = lz::ref_iterable_t<decltype(expected)>;
+        REQUIRE(lz::equal(enumerated, expected, [](const ref_enumerated& a, const ref_expected& b) { return a.first == b.first && a.second == b.second; }));
     }
 }

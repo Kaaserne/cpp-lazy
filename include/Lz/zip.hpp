@@ -45,7 +45,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto zipped2 = lz::zip(a, d); // { (1, 10) }
  * ```
  */
-static constexpr detail::zip_adaptor detail::zip_adaptor::zip{};
+constexpr detail::zip_adaptor zip{};
 
 #else
 

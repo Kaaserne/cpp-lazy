@@ -39,7 +39,7 @@ public:
 
 private:
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence_helper<I...>, const concatenate_iterator& other) const {
+    LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>, const concatenate_iterator& other) const {
         const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
                                                                         std::get<I>(other._iterators))... };
         return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });

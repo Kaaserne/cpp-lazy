@@ -42,7 +42,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto take_every = vec | lz::take_every(2, 1); // 2, 4
  * ```
  */
-static constexpr detail::take_every_adaptor detail::take_every_adaptor::take_every{};
+constexpr detail::take_every_adaptor take_every{};
 
 #else
 

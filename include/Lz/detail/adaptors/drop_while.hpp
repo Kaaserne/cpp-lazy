@@ -12,12 +12,6 @@ namespace detail {
 struct drop_while_adaptor {
     using adaptor = drop_while_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr drop_while_adaptor drop_while{};
-
-#endif
-
     /**
      * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
      * `true`. Once it has returned `false`, it will no longer do such thing. The iterator category is the same as its input

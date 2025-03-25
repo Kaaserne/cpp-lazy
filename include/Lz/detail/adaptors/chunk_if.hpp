@@ -14,16 +14,6 @@ template<class ValueType>
 struct chunk_if_adaptor {
     using adaptor = chunk_if_adaptor<ValueType>;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor t_chunk_if{};
-
-    static constexpr chunk_if_adaptor<lz::string_view> sv_chunk_if{};
-
-    static constexpr chunk_if_adaptor<std::string> s_chunk_if{};
-
-#endif
-
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The
      * iterator category is forward, and returns a sentinel. It returns an iterable of some type T of which T must be
@@ -80,12 +70,6 @@ struct chunk_if_adaptor {
 template<>
 struct chunk_if_adaptor<void> {
     using adaptor = chunk_if_adaptor<void>;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor chunk_if{};
-
-#endif
 
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The

@@ -34,7 +34,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto intersect = a | lz::intersection(b, std::less<>{}); // { 'a', 'a', 'b', 'c', 'c', 'c', 'e' }
  * ```
  */
-static constexpr detail::intersection_adaptor detail::intersection_adaptor::intersection{};
+constexpr detail::intersection_adaptor intersection{};
 
 #else
 

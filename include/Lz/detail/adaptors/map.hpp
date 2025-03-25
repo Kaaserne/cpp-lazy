@@ -12,12 +12,6 @@ namespace detail {
 struct map_adaptor {
     using adaptor = map_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor map{};
-
-#endif
-
     /**
      * @brief This adaptor is used to apply a function to each element in an iterable. The iterator category is the same as the
      * input iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. If its

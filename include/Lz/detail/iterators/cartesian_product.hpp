@@ -38,7 +38,7 @@ private:
     SentinelTuple _end;
 
     template<std::size_t I>
-    constexpr enable_if<I == 0, void> next() {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> next() {
         auto& first = std::get<0>(_iterator);
         if (first == std::get<0>(_end)) {
             return;
@@ -56,7 +56,7 @@ private:
 #endif // LZ_MSVC
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_17 enable_if<(I > 0), void> next() {
+    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> next() {
         auto& prev = std::get<I>(_iterator);
         ++prev;
         if (prev == std::get<I>(_end)) {
@@ -148,12 +148,12 @@ private:
     }
 
     template<std::size_t... Is>
-    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence_helper<Is...>) const {
+    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<Is...>) const {
         return reference{ *std::get<Is>(_iterator)... };
     }
 
     template<std::size_t... Is>
-    LZ_CONSTEXPR_CXX_20 difference_type distance_impl(index_sequence_helper<Is...>, const cartesian_product_iterator& c) const {
+    LZ_CONSTEXPR_CXX_20 difference_type distance_impl(index_sequence<Is...>, const cartesian_product_iterator& c) const {
         const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterator) -
                                                                            std::get<Is>(c._iterator))... };
         const difference_type sizes[] = { std::distance(std::get<Is>(_begin), std::get<Is>(_end))... };
@@ -172,9 +172,9 @@ public:
     constexpr cartesian_product_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14
-    cartesian_product_iterator(IterTuple iterator, IterTuple begin, SentinelTuple end) :
+    cartesian_product_iterator(IterTuple it, IterTuple begin, SentinelTuple end) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(iterator) },
+        _iterator{ std::move(it) },
         _end{ std::move(end) } {
         static_assert(tup_size > 1, "Cannot cartesian product one/zero iterables");
     }

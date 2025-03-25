@@ -14,7 +14,7 @@ class cartesian_product_iterable : public lazy_view {
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
     template<std::size_t... Is>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence_helper<Is...>) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<Is...>) const {
         const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(std::get<Is>(_iterables)))... };
         return std::accumulate(std::begin(sizes), std::end(sizes), std::size_t{ 1 }, std::multiplies<std::size_t>{});
     }

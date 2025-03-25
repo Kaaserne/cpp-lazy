@@ -251,7 +251,8 @@ TEST_CASE("CartesianProduct to containers") {
     }
 
     SECTION("To map") {
-        auto actual = cartesian | lz::map([](const auto& elm) {
+        using elm_type = std::tuple<int, char, char>;
+        auto actual = cartesian | lz::map([](const elm_type& elm) {
                           return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));
                       }) |
                       lz::to<std::map<int, std::pair<char, char>>>();
@@ -265,7 +266,8 @@ TEST_CASE("CartesianProduct to containers") {
     }
 
     SECTION("To unordered map") {
-        auto actual = cartesian | lz::map([](const auto& elm) {
+        using elm_type = std::tuple<int, char, char>;
+        auto actual = cartesian | lz::map([](const elm_type& elm) {
                           return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));
                       }) |
                       lz::to<std::unordered_map<int, std::pair<char, char>>>();

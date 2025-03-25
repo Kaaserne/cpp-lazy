@@ -32,9 +32,9 @@ public:
     using difference_type = typename traits::difference_type;
     using iterator_category = typename traits::iterator_category;
 
-    constexpr loop_iterator(Iterator iterator, Iterator begin, S end, std::size_t amount) :
+    constexpr loop_iterator(Iterator it, Iterator begin, S end, std::size_t amount) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(iterator) },
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _rotations_left{ amount } {
     }
@@ -107,8 +107,8 @@ class loop_iterator<Iterator, S, true>
 
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _begin;
     Iterator _iterator;
+    Iterator _begin;
     S _end;
 
 public:

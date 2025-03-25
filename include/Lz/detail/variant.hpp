@@ -68,9 +68,7 @@ class variant {
     }
 
 public:
-    static constexpr auto npos = static_cast<std::size_t>(-1);
-
-    variant() noexcept : _state(state::none) {
+    constexpr variant() noexcept : _state(state::none) {
     }
 
     variant(const T& t) : _state(state::t) {
@@ -89,51 +87,52 @@ public:
         ::new (std::addressof(_variant._t2)) T2(std::move(t2));
     }
 
-    variant(const variant& other) : _state(other._state) {
+    LZ_CONSTEXPR_CXX_14 variant(const variant& other) : _state{ other._state } {
         construct(other._variant._t, other._variant._t2);
     }
 
-    variant(variant&& other) noexcept : _state(other._state) {
+   LZ_CONSTEXPR_CXX_14  variant(variant&& other) noexcept : _state{ other._state } {
         other._state = state::none;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
     }
 
-    variant& operator=(const T& t) {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(const T& t) {
         reconstruct(state::t, _variant._t, t);
         return *this;
     }
 
-    variant& operator=(const T2& t2) {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(const T2& t2) {
         reconstruct(state::t2, _variant._t2, t2);
         return *this;
     }
 
-    variant& operator=(T&& t) noexcept {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(T&& t) noexcept {
         reconstruct(state::t, _variant._t, std::move(t));
         return *this;
     }
 
-    variant& operator=(T2&& t2) noexcept {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(T2&& t2) noexcept {
         reconstruct(state::t2, _variant._t2, std::move(t2));
         return *this;
     }
 
-    variant& operator=(const variant& other) {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(const variant& other) {
         this->~variant();
         _state = other._state;
         construct(other._variant._t, other._variant._t2);
         return *this;
     }
 
-    variant& operator=(variant&& other) noexcept {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(variant&& other) noexcept {
         this->~variant();
         _state = other._state;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
+        other._state = state::none;
         return *this;
     }
     
     template<class U>
-    const U* get_if() const {
+    LZ_CONSTEXPR_CXX_14 const U* get_if() const {
         constexpr auto is_t = std::is_same<T, U>::value;
         if (_state == state::t && is_t) {
             return reinterpret_cast<const U*>(std::addressof(_variant._t));
@@ -146,12 +145,12 @@ public:
     }
 
     template<class U>
-    U* get_if() {
+    LZ_CONSTEXPR_CXX_14 U* get_if() {
         return const_cast<U*>(static_cast<const variant&>(*this).get_if<U>());
     }
 
     template<class U>
-    const U& get() const {
+    LZ_CONSTEXPR_CXX_14 const U& get() const {
         if (const auto* u = get_if<U>()) {
             return *u;
         }
@@ -159,7 +158,7 @@ public:
     }
 
     template<class U>
-    U& get() {
+    LZ_CONSTEXPR_CXX_14 U& get() {
         return const_cast<U&>(static_cast<const variant&>(*this).get<U>());
     }
 
@@ -172,29 +171,29 @@ public:
             _variant._t2.~T2();
             break;
         default:
-            _state = state::none;
             break;
         }
+        _state = state::none;
     }
 };
 
 template<class T, class U, class V>
-const T& get(const variant<U, V>& t) {
+LZ_CONSTEXPR_CXX_14 const T& get(const variant<U, V>& t) {
     return t.template get<T>();
 }
 
 template<class T, class U, class V>
-T& get(variant<U, V>& t) {
+LZ_CONSTEXPR_CXX_14 T& get(variant<U, V>& t) {
     return t.template get<T>();
 }
 
 template<class T, class U, class V>
-const T* get_if(const variant<U, V>* t) {
+LZ_CONSTEXPR_CXX_14 const T* get_if(const variant<U, V>* t) {
     return t->template get_if<T>();
 }
 
 template<class T, class U, class V>
-T* get_if(variant<U, V>* t) {
+LZ_CONSTEXPR_CXX_14 T* get_if(variant<U, V>* t) {
     return t->template get_if<T>();
 }
 

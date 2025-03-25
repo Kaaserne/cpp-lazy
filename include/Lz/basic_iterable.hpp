@@ -313,11 +313,11 @@ copy_to_container(Iterable&& iterable, Container& container) {
 
 template<class Container>
 struct container_constructor {
-    template<class Container, LZ_CONCEPT_ITERABLE Iterable, class... Args>
+    template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
-    LZ_NODISCARD constexpr enable_if<can_construct<Container, Iterable, Args...>::value, Container>
+    LZ_NODISCARD constexpr enable_if<can_construct<Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
         return Container(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                          std::forward<Args>(args)...);
@@ -325,7 +325,7 @@ struct container_constructor {
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20
-    enable_if<!can_construct<Container, Iterable, Args...>::value, Container>
+    enable_if<!can_construct<Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
         Container container(std::forward<Args>(args)...);
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
@@ -525,9 +525,9 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #ifdef LZ_HAS_CXX_11
 
-static const detail::iterable_printer print{};
+constexpr detail::iterable_printer print{};
 
-static const detail::iterable_formatter format{};
+constexpr detail::iterable_formatter format{};
 
 #else
 

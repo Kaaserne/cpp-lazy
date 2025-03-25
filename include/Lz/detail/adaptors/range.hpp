@@ -10,12 +10,6 @@ namespace detail {
 struct range_adaptor {
     using adaptor = range_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor range{};
-
-#endif
-
     /**
      * @brief Creates n amount of numbers starting from 0 (or specified otherwise). It contains a
      * .size() method and is random access. Example:

@@ -23,12 +23,12 @@ public:
     using is = make_index_sequence<sizeof...(Iterables)>;
 
     template<std::size_t... Is>
-    std::tuple<decltype(Is, std::ptrdiff_t{})...> sizes(index_sequence_helper<Is...>) const {
+    std::tuple<decltype(Is, std::ptrdiff_t{})...> sizes(index_sequence<Is...>) const {
         return { static_cast<std::ptrdiff_t>(lz::eager_size(std::get<Is>(_iterables)))... };
     }
 
     template<std::size_t... I>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence_helper<I...>) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
         return std::max({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
     }
 

@@ -13,12 +13,6 @@ namespace detail {
 struct inclusive_scan_adaptor {
     using adaptor = inclusive_scan_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor inclusive_scan{};
-
-#endif
-
     // clang-format off
 
     /**

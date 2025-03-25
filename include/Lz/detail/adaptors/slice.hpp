@@ -15,12 +15,6 @@ using slice_iterable = detail::take_iterable<detail::drop_iterable<Iterable>>;
 struct slice_adaptor {
     using adaptor = slice_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor slice{};
-
-#endif
-
     /**
      * @brief This adaptor is used to slice an iterable from `from` to `to`. The iterator category is the same as the input
      * iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. If its input

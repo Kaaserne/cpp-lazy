@@ -29,19 +29,19 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iterator begin() const& {
-        return std::make_reverse_iterator(std::end(_iterable));
+        return iterator(std::end(_iterable));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 sentinel end() const& {
-        return std::make_reverse_iterator(std::begin(_iterable));
+        return sentinel(std::begin(_iterable));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iterator begin() && {
-        return std::make_reverse_iterator(detail::end(std::move(_iterable)));
+        return iterator(detail::end(std::move(_iterable)));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 sentinel end() && {
-        return std::make_reverse_iterator(detail::begin(std::move(_iterable)));
+        return sentinel(detail::begin(std::move(_iterable)));
     }
 };
 } // namespace detail

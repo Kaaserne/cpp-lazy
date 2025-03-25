@@ -12,12 +12,6 @@ namespace detail {
 struct exclude_adaptor {
     using adaptor = exclude_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor exclude{};
-
-#endif
-
     /**
      * @brief Excludes elements from a container, using two indexes. The first index is means the start index, the second index
      * means the end index. Contains a .size() method if the input iterable contains a .size() method, its iterator category is

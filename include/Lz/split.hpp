@@ -26,8 +26,9 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```
  * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
  */
+// TODO docs
 template<class ValueType>
-static constexpr detail::split_adaptor<ValueType> detail::split_adaptor<ValueType>::t_split{};
+using t_split = detail::split_adaptor<ValueType>;
 
 /**
  * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
@@ -43,7 +44,7 @@ static constexpr detail::split_adaptor<ValueType> detail::split_adaptor<ValueTyp
  * // auto splitted = arr | lz::split({1, 2}); // Dangling reference, do not do this
  * ```
  */
-static constexpr detail::split_adaptor<void> detail::split_adaptor<void>::split{};
+constexpr detail::split_adaptor<void> split{};
 
 /**
  * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
@@ -54,10 +55,10 @@ static constexpr detail::split_adaptor<void> detail::split_adaptor<void>::split{
  * // auto splitted = lz::s_split(str, std::string(", ")); // Dangling reference, do not do this
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is std::string
- * // auto splitted = str | lz::s_split(std::string(", ")); // Dangling reference, do not do this
+ * // auto splitted = str | lz::s_split(lz::string_view(", ")); // Dangling reference, do not do this
  * ```
  */
-static constexpr detail::split_adaptor<std::basic_string> detail::split_adaptor<std::basic_string>::s_split{};
+constexpr detail::split_adaptor<std::string> s_split{};
 
 /**
  * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
@@ -68,10 +69,10 @@ static constexpr detail::split_adaptor<std::basic_string> detail::split_adaptor<
  * // auto splitted = lz::sv_split(str, std::string(", ")); // Dangling reference, do not do this
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is a string_view
- * // auto splitted = str | lz::sv_split(std::string(", ")); // Dangling reference, do not do this
+ * // auto splitted = str | lz::sv_split(lz::string_view(", ")); // Dangling reference, do not do this
  * ```
  */
-static constexpr detail::split_adaptor<lz::basic_string_view> detail::split_adaptor<lz::basic_string_view>::sv_split{};
+constexpr detail::split_adaptor<lz::string_view> sv_split{};
 
 #else
 
@@ -117,10 +118,9 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<void> split{};
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is std::string
  * // auto splitted = str | lz::s_split(std::string(", ")); // Dangling reference, do not do this
- * // auto splitted = lz::s_split("Hello, World!", ", "); // Dangling reference, do not do this, instead do:
- * auto splitted = lz::s_split(lz::string_view("Hello, World!"), ", "); // {"Hello", "World!"}
+ * // auto splitted = lz::s_split(lz::string_view("Hello, World!"), ", "); // Dangling reference, do not do this, instead do:
  * // or
- * auto splitted = lz::s_split(lz::c_string("Hello, World!"), ", "); // slower alternative (not random access)
+ * auto splitted = lz::s_split("Hello, World!", ", "); // slower alternative (not random access), uses lz::c_string internally
  * ```
  */
 LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
@@ -135,10 +135,9 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
  * // or
  * auto splitted = str | lz::sv_split(", "); // {"Hello", "World!"} where value_type is a string_view
  * // auto splitted = str | lz::sv_split(std::string(", ")); // Dangling reference, do not do this
- * // auto splitted = lz::sv_split("Hello, World!", ", "); // Dangling reference, do not do this, instead do:
- * auto splitted = lz::sv_split(lz::string_view("Hello, World!"), ", "); // {"Hello", "World!"}
+ * // auto splitted = lz::sv_split(lz::string_view("Hello, World!"), ", "); // Dangling reference, do not do this
  * // or
- * auto splitted = lz::sv_split(lz::c_string("Hello, World!"), ", "); // slower alternative (not random access)
+ * auto splitted = lz::s_split("Hello, World!", ", "); // slower alternative (not random access), uses lz::c_string internally
  * ```
  */
 LZ_INLINE_VAR constexpr detail::split_adaptor<lz::string_view> sv_split{};

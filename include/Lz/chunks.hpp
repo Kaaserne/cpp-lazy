@@ -39,7 +39,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
  * ```
  */
-static constexpr detail::chunks_adaptor detail::chunks_adaptor::chunks;
+constexpr detail::chunks_adaptor chunks;
 
 #else
 

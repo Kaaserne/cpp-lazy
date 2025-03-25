@@ -32,7 +32,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ); // joined contains: {{1, 2}, {3, 4}, {4, 5}}
  * ```
  */
-static constexpr detail::join_where_adaptor detail::join_where_adaptor::join_where{};
+constexpr detail::join_where_adaptor join_where{};
 
 #else
 

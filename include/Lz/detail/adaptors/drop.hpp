@@ -12,12 +12,6 @@ namespace detail {
 struct drop_adaptor {
     using adaptor = drop_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor drop{};
-
-#endif
-
     /**
      * @brief This adaptor is used to drop the first n elements of an iterable. The iterator category is the same as the input
      * iterator category. Its end() function will return the same type as its input iterable. If its input iterable has a

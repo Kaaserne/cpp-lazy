@@ -13,13 +13,11 @@ class loop_iterable;
 
 template<class Iterable>
 class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
-    using inner_iter = iter_t<Iterable>;
-
     ref_or_view<Iterable> _iterable;
     std::size_t _amount{};
 
 public:
-    using iterator = loop_iterator<inner_iter, sentinel_t<Iterable>, false>;
+    using iterator = loop_iterator<iter_t<Iterable>, sentinel_t<Iterable>, false>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -34,7 +32,7 @@ public:
         return _amount * static_cast<std::size_t>(lz::size(_iterable));
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         auto first = detail::begin(std::move(_iterable));
         auto last = detail::end(std::move(_iterable));
         if (first == last || _amount == 0) {
@@ -43,8 +41,8 @@ public:
         return { first, first, last, _amount - 1 };
     }
 
-    template<class I = typename inner_iter::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         auto first = detail::begin(std::move(_iterable));
         auto last = detail::end(std::move(_iterable));
         if (first == last || _amount == 0) {
@@ -53,12 +51,12 @@ public:
         return { first, first, last, _amount - 1 };
     }
 
-    template<class I = typename inner_iter::iterator_category>
-    LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), 0 };
     }
 
-    template<class I = typename inner_iter::iterator_category>
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
@@ -66,12 +64,10 @@ public:
 
 template<class Iterable>
 class loop_iterable<Iterable, true /* is inf loop */> : public lazy_view {
-    using inner_iter = iter_t<Iterable>;
-
     ref_or_view<Iterable> _iterable;
 
 public:
-    using iterator = loop_iterator<inner_iter, sentinel_t<Iterable>, true>;
+    using iterator = loop_iterator<iter_t<Iterable>, sentinel_t<Iterable>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -81,15 +77,14 @@ public:
     constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable), std::end(_iterable) };
     }
 
-    LZ_NODISCARD constexpr iterator begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)) };
     }
 
-    template<class I = inner_iter>
     LZ_NODISCARD constexpr default_sentinel end() const {
         return {};
     }

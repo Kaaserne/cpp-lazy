@@ -26,8 +26,8 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
-    constexpr enumerate_iterator(Iterator iterator, const Arithmetic start) : 
-        _iterator{ std::move(iterator) },
+    constexpr enumerate_iterator(Iterator it, const Arithmetic start) : 
+        _iterator{ std::move(it) },
         _index{ start } {
     }
 

@@ -38,8 +38,8 @@ private:
     mutable UnaryPredicate _predicate;
 
 public:
-    LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :
-        _iterator{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator it, Iterator begin, S end, UnaryPredicate up) :
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _predicate{ std::move(up) } {
         if (_iterator == begin) {
@@ -98,9 +98,9 @@ private:
     mutable UnaryPredicate _predicate;
 
 public:
-    LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator iterator, Iterator begin, S end, UnaryPredicate up) :
+    LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator it, Iterator begin, S end, UnaryPredicate up) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(iterator) },
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _predicate{ std::move(up) } {
         if (_iterator == _begin) {

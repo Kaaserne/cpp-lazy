@@ -26,7 +26,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
  * ```
  */
-static constexpr detail::group_by_adaptor detail::group_by_adaptor::group_by{};
+constexpr detail::group_by_adaptor group_by{};
 
 #else
 

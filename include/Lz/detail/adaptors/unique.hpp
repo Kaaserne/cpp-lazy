@@ -12,12 +12,6 @@ namespace detail {
 struct unique_adaptor {
     using adaptor = unique_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor unique{};
-
-#endif
-
     /**
      * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted
      * beforehand. This iterator will 'decay' into a bidirectional one if the input iterator is bidirectional or higher. If the

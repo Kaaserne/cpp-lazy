@@ -21,7 +21,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto slice = vec | lz::slice(2, 6); // slice = { 3, 4, 5, 6 }
  * ```
  */
-static constexpr detail::slice_adaptor detail::slice_adaptor::slice{};
+constexpr detail::slice_adaptor slice{};
 
 #else
 

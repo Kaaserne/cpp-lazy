@@ -4,7 +4,9 @@
 #define LZ_ANY_VIEW_ITERATOR_IMPL_HPP
 
 #include <Lz/detail/iterators/common.hpp>
+#include <Lz/detail/unique_ptr.hpp>
 #include <Lz/iterator_base.hpp>
+#include <iterator>
 
 namespace lz {
 namespace detail {
@@ -55,8 +57,8 @@ public:
         return _iter == static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::unique_ptr<any_iter_base> clone() const override {
-        return std::make_unique<any_iterator_impl>(_iter);
+    detail::unique_ptr<any_iter_base> clone() const override {
+        return detail::make_unique<any_iterator_impl>(_iter);
     }
 };
 
@@ -102,8 +104,8 @@ public:
         return _iter == static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::unique_ptr<any_iter_base> clone() const override {
-        return std::make_unique<any_iterator_impl>(_iter);
+    detail::unique_ptr<any_iter_base> clone() const override {
+        return detail::make_unique<any_iterator_impl>(_iter);
     }
 };
 
@@ -151,8 +153,8 @@ public:
         return _iter == static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::unique_ptr<any_iter_base> clone() const override {
-        return std::make_unique<any_iterator_impl>(_iter);
+    detail::unique_ptr<any_iter_base> clone() const override {
+        return detail::make_unique<any_iterator_impl>(_iter);
     }
 };
 
@@ -212,8 +214,8 @@ public:
         return _iter < static_cast<const any_iterator_impl&>(other)._iter;
     }
 
-    std::unique_ptr<any_iter_base> clone() const override {
-        return std::make_unique<any_iterator_impl>(_iter);
+    detail::unique_ptr<any_iter_base> clone() const override {
+        return detail::make_unique<any_iterator_impl>(_iter);
     }
 };
 } // namespace detail

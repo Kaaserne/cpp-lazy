@@ -30,7 +30,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto excepted = vec | lz::except(to_except, std::less<int>{}); // excepted = { 1, 2, 4 }
  * ```
  */
-static constexpr detail::except_adaptor detail::except_adaptor::except{};
+constexpr detail::except_adaptor except{};
 
 #else
 

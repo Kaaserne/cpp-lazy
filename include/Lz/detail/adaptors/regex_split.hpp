@@ -18,12 +18,6 @@ struct regex_split_adaptor {
     template<class String>
     using regex_it = std::regex_token_iterator<const_iter<String>>;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor regex_split{};
-
-#endif
-
     /**
      * @brief Splits a string based on a regex. The regex must be by reference. The `begin()` and `end()` types are different, but
      * `end()` is not an 'actual' sentinel. Rather, its the same type as its input iterator `end()` type. For std::regex, this

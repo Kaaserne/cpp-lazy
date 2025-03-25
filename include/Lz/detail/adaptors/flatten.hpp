@@ -12,7 +12,7 @@ template<class, class = void>
 struct dimensions;
 
 template<LZ_CONCEPT_ITERABLE Iterable>
-struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> : detail::count_dims<iter_t<Iterable>> {};
+struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> : detail::count_dims<Iterable> {};
 
 template<LZ_CONCEPT_ITERABLE Iterable>
 struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
@@ -28,12 +28,6 @@ inline constexpr std::size_t dimensions_v = dimensions<Iterable>::value;
 namespace detail {
 struct flatten_adaptor {
     using adaptor = flatten_adaptor;
-
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor flatten{};
-
-#endif
 
     // clang-format off
 

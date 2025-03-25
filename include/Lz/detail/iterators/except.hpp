@@ -26,8 +26,8 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterable _to_except;
     Iterator _iterator;
+    Iterable _to_except;
     S _end;
     BinaryPredicate _predicate;
 
@@ -95,11 +95,11 @@ public:
 private:
     using diff_iterable = diff_iterable_t<Iterable>;
 
-    Iterable _to_except{};
-    Iterator _iterator{};
+    Iterator _iterator;
+    Iterable _to_except;
     diff_iterable _size{};
-    S _end{};
-    BinaryPredicate _predicate{};
+    S _end;
+    BinaryPredicate _predicate;
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;

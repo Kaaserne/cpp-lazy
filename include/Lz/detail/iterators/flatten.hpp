@@ -8,67 +8,8 @@
 
 namespace lz {
 namespace detail {
-template<class, class = void>
-struct has_value_type : std::false_type {};
-
-template<class T>
-struct has_value_type<T, void_t<typename T::value_type>> : std::true_type {};
-
-template<class, class = void>
-struct has_diff_type : std::false_type {};
-
-template<class T>
-struct has_diff_type<T, void_t<typename T::difference_type>> : std::true_type {};
-
-template<class, class = void>
-struct has_ptr : std::false_type {};
-
-template<class T>
-struct has_ptr<T, void_t<typename T::pointer>> : std::true_type {};
-
-template<class, class = void>
-struct has_iter_cat : std::false_type {};
-
-template<class T>
-struct has_iter_cat<T, void_t<typename T::iterator_category>> : std::true_type {};
-
-template<class, class = void>
-struct has_ref : std::false_type {};
-
-template<class T>
-struct has_ref<T, void_t<typename T::reference>> : std::true_type {};
-
-template<class T>
-struct is_iterator {
-    static constexpr bool value = has_value_type<T>::value && has_diff_type<T>::value && has_ptr<T>::value && has_ref<T>::value &&
-                                  has_iter_cat<T>::value;
-};
-
-template<class T, class = void>
-struct traits_or_underlying_type_helper {
-    using type = T;
-};
-
-template<class T>
-struct traits_or_underlying_type_helper<T, void_t<typename T::iterator>> {
-    using type = std::iterator_traits<typename T::iterator>;
-};
-
-template<class T, class U = void>
-using traits_or_underlying_type = typename traits_or_underlying_type_helper<T, U>::type;
-
-template<bool B>
+template<bool>
 struct count_dims_helper;
-
-template<>
-struct count_dims_helper<true> {
-    template<class T>
-    using inner = traits_or_underlying_type<typename T::value_type>;
-
-    template<class T>
-    using type = std::integral_constant<std::size_t,
-                                        1 + count_dims_helper<is_iterator<inner<T>>::value>::template type<inner<T>>::value>;
-};
 
 template<>
 struct count_dims_helper<false> {
@@ -76,8 +17,16 @@ struct count_dims_helper<false> {
     using type = std::integral_constant<std::size_t, 0>;
 };
 
+template<>
+struct count_dims_helper<true> {
+    template<class T>
+    using type = std::integral_constant<std::size_t, 
+        1 + count_dims_helper<
+            is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::template type<decltype(*std::begin(std::declval<T>()))>::value>;
+};
+
 template<class T>
-using count_dims = typename count_dims_helper<is_iterator<T>::value>::template type<T>;
+using count_dims = typename count_dims_helper<is_iterable<T>::value>::template type<T>;
 
 // Improvement of https://stackoverflow.com/a/21076724/8729023
 template<class Iterator, class S>
@@ -132,11 +81,11 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    constexpr void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_current;
     }
 
-    constexpr void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         --_current;
     }
 };

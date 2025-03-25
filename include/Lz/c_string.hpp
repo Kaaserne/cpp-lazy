@@ -23,7 +23,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto cstr = str | lz::c_string;
  * ```
  */
-static constexpr detail::c_string_adaptor detail::c_string_adaptor::c_string{};
+constexpr detail::c_string_adaptor c_string{};
 
 #else
 

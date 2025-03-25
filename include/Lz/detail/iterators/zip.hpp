@@ -30,27 +30,27 @@ private:
     IterTuple _iterators;
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence_helper<I...>) const {
+    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
         return reference{ *std::get<I>(_iterators)... };
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void increment(index_sequence_helper<I...>) {
+    LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
         decompose((++std::get<I>(_iterators), 0)...);
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void decrement(index_sequence_helper<I...>) {
+    LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
         decompose((--std::get<I>(_iterators), 0)...);
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence_helper<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence<I...>, const difference_type offset) {
         decompose(((std::get<I>(_iterators) += offset), 0)...);
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_iterator& other, index_sequence_helper<I...>) const {
+    LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
         const difference_type expand[] = { static_cast<difference_type>(
             (std::get<I>(_iterators) - std::get<I>(other._iterators)))... };
         const auto min_max = std::minmax_element(std::begin(expand), std::end(expand));
@@ -58,12 +58,12 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other, index_sequence_helper<I...>) const {
-        return eq(other._iterators, index_sequence_helper<I...>{});
+    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other, index_sequence<I...>) const {
+        return eq(other._iterators, index_sequence<I...>{});
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other, index_sequence_helper<I...>) const {
+    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other, index_sequence<I...>) const {
         return std::max({ (std::get<I>(_iterators) == std::get<I>(other))... });
     }
 

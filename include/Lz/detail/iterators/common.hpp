@@ -140,14 +140,14 @@ public:
             return *lhs_iter - *rhs_iter;
         }
         if (lhs_iter) {
-            auto&& rhs_iter = get_if<S>(&rhs._data);
-            LZ_ASSERT(rhs_iter, "Invalid sentinel/iterator state");
-            return *lhs_iter - *rhs_iter;
+            auto&& rhs_s = get_if<S>(&rhs._data);
+            LZ_ASSERT(rhs_s, "Invalid sentinel/iterator state");
+            return *lhs_iter - *rhs_s;
         }
         if (rhs_iter) {
-            auto&& lhs_iter = get_if<S>(&_data);
-            LZ_ASSERT(lhs_iter, "Invalid sentinel/iterator state");
-            return *lhs_iter - *rhs_iter;
+            auto&& lhs_s = get_if<S>(&_data);
+            LZ_ASSERT(lhs_s, "Invalid sentinel/iterator state");
+            return *lhs_s - *rhs_iter;
         }
         LZ_ASSERT(false, "Invalid sentinel/iterator state");
         return 0;

@@ -59,7 +59,7 @@ TEST_CASE("Take binary operations where n is smaller than size") {
         auto begin = take.begin();
         auto end = take.end();
 
-        auto expected = { 1, 2, 3, 4 };
+        std::vector<int> expected = { 1, 2, 3, 4 };
         for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
             REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
@@ -130,7 +130,7 @@ TEST_CASE("Take binary operations where n is larger than size") {
         auto begin = take.begin();
         auto end = take.end();
 
-        auto expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
             REQUIRE(*(begin + i) == *(expected.begin() + i));
         }

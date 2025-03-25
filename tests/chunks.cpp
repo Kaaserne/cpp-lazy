@@ -8,7 +8,7 @@ TEST_CASE("Chunks changing and creating elements") {
     std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7 };
     auto chunked = lz::chunks(v, 3);
     auto it = chunked.begin();
-    auto expected = { 1, 2, 3 };
+    std::vector<int> expected = { 1, 2, 3 };
     REQUIRE(lz::equal(*it, expected));
     ++it;
     expected = { 4, 5, 6 };
@@ -73,7 +73,7 @@ TEST_CASE("Chunks binary operations random access") {
     auto it_end4 = even_chunksize_uneven_size.end();
 
     SECTION("Operator++") {
-        auto expected = { 1, 2, 3 };
+        std::vector<int> expected = { 1, 2, 3 };
         REQUIRE(lz::equal(*it, expected));
         ++it;
         expected = { 4, 5, 6 };
@@ -126,7 +126,7 @@ TEST_CASE("Chunks binary operations random access") {
 
     SECTION("Operator--") {
         --it_end;
-        auto expected = { 7, 8 };
+        std::vector<int> expected = { 7, 8 };
         REQUIRE(lz::equal(*it_end, expected));
         --it_end;
         expected = { 4, 5, 6 };
@@ -316,7 +316,7 @@ TEST_CASE("Chunks binary operations bidirectional access") {
     auto it_end4 = even_chunksize_uneven_size.end();
 
     SECTION("Operator++") {
-        auto expected = { 1, 2, 3 };
+        std::vector<int> expected = { 1, 2, 3 };
         REQUIRE(lz::equal(*it, expected));
         ++it;
         expected = { 4, 5, 6 };
@@ -369,7 +369,7 @@ TEST_CASE("Chunks binary operations bidirectional access") {
 
     SECTION("Operator--") {
         --it_end;
-        auto expected = { 7, 8 };
+        std::vector<int> expected = { 7, 8 };
         REQUIRE(lz::equal(*it_end, expected));
         --it_end;
         expected = { 4, 5, 6 };
@@ -434,17 +434,13 @@ TEST_CASE("Chunks with sentinels / fwd") {
                   "Should not be sentinel");
 
     auto it = uneven_chunksize_even_size.begin();
-    auto it_end = uneven_chunksize_even_size.end();
     auto it2 = even_chunksize_even_size.begin();
-    auto it_end2 = even_chunksize_even_size.end();
 
     auto it3 = uneven_chunksize_uneven_size.begin();
-    auto it_end3 = uneven_chunksize_uneven_size.end();
     auto it4 = even_chunksize_uneven_size.begin();
-    auto it_end4 = even_chunksize_uneven_size.end();
 
     SECTION("Operator++") {
-        auto expected = { '1', '2', '3' };
+        std::vector<int> expected = { '1', '2', '3' };
         REQUIRE(lz::equal(*it, expected));
         ++it;
         expected = { '4', '5', '6' };

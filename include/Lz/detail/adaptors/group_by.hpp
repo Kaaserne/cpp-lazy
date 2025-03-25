@@ -12,12 +12,6 @@ namespace detail {
 struct group_by_adaptor {
     using adaptor = group_by_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor group_by{};
-
-#endif
-
     /**
      * @brief Creates chunks of elements of which the predicate returns true. Input iterable must be sorted first before using
      * this function. Its end iterator is a sentinel one. Therefore, its begin() and end() types are not the same. The iterable

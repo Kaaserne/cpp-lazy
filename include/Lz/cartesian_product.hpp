@@ -24,7 +24,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto product = a | lz::cartesian_product(b); // product = {{1, 3}, {1, 4}, {2, 3}, {2, 4}}
  * ```
  */
-static constexpr detail::cartesian_product_adaptor detail::cartesian_product_adaptor::cartesian_product{};
+ constexpr detail::cartesian_product_adaptor cartesian_product{};
 
 #else
 

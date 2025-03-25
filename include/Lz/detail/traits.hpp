@@ -67,25 +67,25 @@ struct conjunction<T, Rest...> : conjunction_impl<static_cast<bool>(T::value), T
 
 struct less {
     template<class T, class U>
-    LZ_NODISCARD constexpr operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&> < static_cast<U&&>(rhs)))
-        ->decltype(static_cast<T&&> < static_cast<U&&>(rhs)) {
-        return static_cast<T&&> < static_cast<U&&>(rhs);
+    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&>(lhs) < static_cast<U&&>(rhs)))
+        ->decltype(static_cast<T&&>(lhs) < static_cast<U&&>(rhs)) {
+        return static_cast<T&&>(lhs) < static_cast<U&&>(rhs);
     }
 };
 
 struct equal_to {
     template<class T, class U>
-    LZ_NODISCARD constexpr operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&> == static_cast<U&&>(rhs)))
-        ->decltype(static_cast<T&&> == static_cast<U&&>(rhs)) {
-        return static_cast<T&&> == static_cast<U&&>(rhs);
+    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&>(lhs) == static_cast<U&&>(rhs)))
+        ->decltype(static_cast<T&&>(lhs) == static_cast<U&&>(rhs)) {
+        return static_cast<T&&>(lhs) == static_cast<U&&>(rhs);
     }
 };
 
 struct plus {
     template<class T, class U>
-    LZ_NODISCARD constexpr operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&> + static_cast<U&&>(rhs)))
-        ->decltype(static_cast<T&&> + static_cast<U&&>(rhs)) {
-        return static_cast<T&&> + static_cast<U&&>(rhs);
+    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&>(lhs) + static_cast<U&&>(rhs)))
+        ->decltype(static_cast<T&&>(lhs) + static_cast<U&&>(rhs)) {
+        return static_cast<T&&>(lhs) + static_cast<U&&>(rhs);
     }
 };
 
@@ -94,15 +94,15 @@ struct plus {
 template<class T>
 using remove_ref = typename std::remove_reference<T>::type;
 
-template<std::size_t, std::size_t...>
-struct index_sequence_helper;
+template<std::size_t...>
+struct index_sequence {};
 
 template<std::size_t N, std::size_t... Rest>
 struct index_sequence_helper : public index_sequence_helper<N - 1, N - 1, Rest...> {};
 
 template<std::size_t... Next>
 struct index_sequence_helper<0, Next...> {
-    using type = index_sequence_helper<Next...>;
+    using type = index_sequence<Next...>;
 };
 
 template<std::size_t N>
@@ -120,7 +120,7 @@ template<class T>
 using remove_ref = std::remove_reference_t<T>;
 
 template<std::size_t... N>
-using index_sequence_helper = std::index_sequence<N...>;
+using index_sequence = std::index_sequence<N...>;
 
 template<std::size_t N>
 using make_index_sequence = std::make_index_sequence<N>;

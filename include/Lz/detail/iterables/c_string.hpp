@@ -9,10 +9,7 @@ namespace lz {
 namespace detail {
 template<class C>
 class c_string_iterable : public lazy_view {
-
-    static_assert(std::is_pointer<C>::value, "C must be a pointer");
-
-    C _begin{};
+    C* _begin{};
 
 public:
     using iterator = c_string_iterator<C>;
@@ -20,7 +17,7 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr c_string_iterable(C begin) noexcept : _begin{ begin } {
+    constexpr c_string_iterable(C* begin) noexcept : _begin{ begin } {
     }
 
     constexpr c_string_iterable() = default;

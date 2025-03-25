@@ -37,7 +37,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // rotated = { 2, 4 }
  * ```
  */
-static constexpr detail::rotate_adaptor detail::rotate_adaptor::rotate{};
+constexpr detail::rotate_adaptor rotate{};
 
 #else
 

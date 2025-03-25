@@ -63,28 +63,8 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
     return std::end(c);
 }
 
-template<class Arithmetic>
-LZ_CONSTEXPR_CXX_14 bool is_even(const Arithmetic value) noexcept {
-    return (value % 2) == 0;
-}
-
 template<class... Ts>
 constexpr void decompose(const Ts&...) noexcept {
-}
-
-template<class Result, class Arithmetic>
-LZ_CONSTEXPR_CXX_14 Result round_even(const Arithmetic a, const Arithmetic b) noexcept {
-    LZ_ASSERT(a != 0 && b != 0, "division by zero error");
-    if (b == 1) {
-        return static_cast<Result>(a);
-    }
-    if (b == -1) {
-        return -static_cast<Result>(a);
-    }
-    if (is_even(a) && is_even(b)) {
-        return static_cast<Result>(a / b);
-    }
-    return static_cast<Result>(a / b) + 1;
 }
 
 template<class Iterator, class S>

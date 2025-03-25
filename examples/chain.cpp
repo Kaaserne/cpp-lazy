@@ -1,5 +1,7 @@
 #include <Lz/Lz.hpp>
 
+// TODO lz::as for cxx 11
+
 int main() {
     int arr[]{ 3, 2, 4, 5 };
     int arr2[]{ 3, 2, 5, 5 };

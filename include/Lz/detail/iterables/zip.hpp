@@ -15,12 +15,12 @@ class zip_iterable : public lazy_view {
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
     template<std::size_t... I>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence_helper<I...>) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
         return std::min({ static_cast<std::size_t>(lz::eager_size(std::get<I>(_iterables)))... });
     }
 
     template<class I, std::size_t... Is>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_tuple fake_end_tuple(I&& iterables, index_sequence_helper<Is...> is) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_tuple fake_end_tuple(I&& iterables, index_sequence<Is...> is) const {
         return { std::next(std::begin(std::get<Is>(std::forward<I>(iterables))), static_cast<std::ptrdiff_t>(size(is)))... };
     }
 

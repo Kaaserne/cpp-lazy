@@ -1,4 +1,4 @@
-#include <Catch2/catch.hpp>
+#include <catch2/catch.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/chunks.hpp>
 #include <Lz/enumerate.hpp>
@@ -12,7 +12,7 @@ TEST_CASE("Correct size") {
     auto cached = filtered | lz::cache_size;
 
     REQUIRE(cached.size() == 5);
-    auto expected = { 0, 2, 4, 6, 8 };
+    std::vector<int> expected = { 0, 2, 4, 6, 8 };
     REQUIRE(lz::equal(cached, expected));
 }
 
@@ -23,6 +23,12 @@ TEST_CASE("Correct size i.c.m. with other iterators") {
     auto iterable = filtered | lz::cache_size | lz::chunks(3) | lz::enumerate;
 
     REQUIRE(iterable.size() == 2);
-    std::vector<std::pair<std::size_t, std::vector<int>>> expected{ { 0, { 0, 2, 4 } }, { 1, { 6, 8 } } };
-    REQUIRE(lz::equal(iterable, expected));
+    std::vector<std::pair<int, std::vector<int>>> expected{ { 0, { 0, 2, 4 } }, { 1, { 6, 8 } } };
+
+    using r1 = lz::ref_iterable_t<decltype(iterable)>;
+    using r2 = lz::ref_iterable_t<decltype(expected)>;
+
+    REQUIRE(lz::equal(iterable, expected, [](const r1& p1, const r2& p2) {
+        return p1.first == p2.first && p1.second == p2.second;
+    }));
 }

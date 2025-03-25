@@ -10,12 +10,6 @@ namespace detail {
 struct reverse_adaptor {
     using adaptor = reverse_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor reverse{};
-
-#endif
-
     /**
      * @brief Reveres the iterable. Contains a size method if the iterable has a size method. Example:
      * ```cpp

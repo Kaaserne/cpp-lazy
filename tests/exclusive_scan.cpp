@@ -12,7 +12,7 @@ TEST_CASE("Exclusive scan with sentinels") {
     int i = 0;
     auto generator = lz::generate([&i]() { return i++; }, 5);
     auto scan = lz::exclusive_scan(generator, 0);
-    auto expected = { 0, 0, 1, 3, 6, 10 };
+    std::vector<int> expected = { 0, 0, 1, 3, 6, 10 };
     REQUIRE(lz::equal(scan, expected));
 }
 

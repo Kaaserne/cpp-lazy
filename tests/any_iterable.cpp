@@ -104,8 +104,13 @@ TEST_CASE("Creating a basic any iterable from std::list, bidirectional iterator"
 
 TEST_CASE("Creating a complex any iterable, std::forward_iterator_tag") {
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+    
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>> view =
+#ifdef LZ_HAS_CXX_11
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(static_cast<std::ptrdiff_t>(vec.size()));
+#else
         vec | lz::as<int&> | lz::enumerate | lz::take(static_cast<std::ptrdiff_t>(vec.size()));
+#endif
     std::pair<int, int&> pair = *view.begin();
     REQUIRE(pair.first == 0);
     REQUIRE(pair.second == vec[0]);
@@ -114,7 +119,11 @@ TEST_CASE("Creating a complex any iterable, std::forward_iterator_tag") {
 TEST_CASE("Creating a complex any iterable, std::bidirectional_iterator_tag") {
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::bidirectional_iterator_tag> view =
+#ifdef LZ_HAS_CXX_11
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(static_cast<std::ptrdiff_t>(vec.size()));
+#else
         vec | lz::as<int&> | lz::enumerate | lz::take(static_cast<std::ptrdiff_t>(vec.size()));
+#endif
     std::pair<int, int&> pair = *view.begin();
     REQUIRE(pair.first == 0);
     REQUIRE(pair.second == vec[0]);
@@ -123,7 +132,11 @@ TEST_CASE("Creating a complex any iterable, std::bidirectional_iterator_tag") {
 TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::random_access_iterator_tag> view =
+#ifdef LZ_HAS_CXX_11
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(static_cast<std::ptrdiff_t>(vec.size()));
+#else
         vec | lz::as<int&> | lz::enumerate | lz::take(static_cast<std::ptrdiff_t>(vec.size()));
+#endif
     std::pair<int, int&> pair = *view.begin();
     REQUIRE(view.size() == vec.size());
     REQUIRE(pair.first == 0);

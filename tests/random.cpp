@@ -99,7 +99,6 @@ TEST_CASE("random_iterable binary operations") {
         auto begin = random.begin();
         auto end = random.end();
 
-        auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         for (std::size_t i = 0; i < lz::size(random) - 1; ++i) {
             INFO("With i = " << i);
             REQUIRE(*(begin + i) >= 0.);

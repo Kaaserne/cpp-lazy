@@ -30,7 +30,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto splitter = lz::regex_split(begin, end); // { "Hello,", "world!", "How", "are", "you?" }
  * ```
  */
-static constexpr detail::regex_split_adaptor detail::regex_split_adaptor::regex_split{};
+constexpr detail::regex_split_adaptor regex_split{};
 
 #else
 

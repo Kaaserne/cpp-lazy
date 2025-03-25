@@ -34,7 +34,9 @@ class intersection_iterator<Iterator, S, Iterator2, S2, BinaryPredicate,
         using detail::find_if;
         using std::find_if;
 
-        _iterator = find_if(std::move(_iterator), _end, [this](const auto& value) {
+        using ref_type = ref_t<Iterator>;
+
+        _iterator = find_if(std::move(_iterator), _end, [this](ref_type value) {
             while (_iterator2 != _end2) {
                 if (_compare(value, *_iterator2)) {
                     return false;
@@ -56,8 +58,8 @@ public:
 
     constexpr intersection_iterator() = default;
 
-    constexpr intersection_iterator(Iterator iterator, S end, Iterator2 iterator2, S2 end2, BinaryPredicate compare) :
-        _iterator{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 intersection_iterator(Iterator it, S end, Iterator2 iterator2, S2 end2, BinaryPredicate compare) :
+        _iterator{ std::move(it) },
         _iterator2{ std::move(iterator2) },
         _end{ std::move(end) },
         _end2{ std::move(end2) },
@@ -109,7 +111,9 @@ class intersection_iterator<Iterator, S, Iterator2, S2, BinaryPredicate,
         using detail::find_if;
         using std::find_if;
 
-        _iterator = find_if(std::move(_iterator), _end, [this](const auto& value) {
+        using ref_type = ref_t<Iterator>;
+
+        _iterator = find_if(std::move(_iterator), _end, [this](ref_type value) {
             while (_iterator2 != _end2) {
                 if (_compare(value, *_iterator2)) {
                     return false;
@@ -131,9 +135,9 @@ public:
 
     constexpr intersection_iterator() = default;
 
-    constexpr intersection_iterator(Iterator iterator, Iterator begin, S end, Iterator2 iterator2, Iterator2 begin2, S2 end2,
-                                    BinaryPredicate compare) :
-        _iterator{ std::move(iterator) },
+    LZ_CONSTEXPR_CXX_14 
+    intersection_iterator(Iterator it, Iterator begin, S end, Iterator2 iterator2, Iterator2 begin2, S2 end2, BinaryPredicate compare) :
+        _iterator{ std::move(it) },
         _iterator2{ std::move(iterator2) },
         _begin{ std::move(begin) },
         _begin2{ std::move(begin2) },

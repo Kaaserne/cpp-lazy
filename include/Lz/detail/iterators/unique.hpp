@@ -25,7 +25,6 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>
     mutable BinaryPredicate _predicate;
 
 public:
-    using iterator_category = std::forward_iterator_tag;
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
@@ -78,15 +77,14 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator>:
     mutable BinaryPredicate _predicate{};
 
 public:
-    using iterator_category = std::forward_iterator_tag;
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr unique_iterator(Iterator iterator, Iterator begin, Iterator end, BinaryPredicate compare) :
+    constexpr unique_iterator(Iterator it, Iterator begin, Iterator end, BinaryPredicate compare) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(iterator) },
+        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _predicate{ std::move(compare) } {
     }

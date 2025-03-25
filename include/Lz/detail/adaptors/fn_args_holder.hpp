@@ -17,22 +17,22 @@ struct fn_args_holder {
     using adaptor = fn_args_holder<Adaptor, Ts...>;
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) : data(std::forward<Args>(args)...) {
+    LZ_CONSTEXPR_CXX_14 fn_args_holder(Args&&... args) : data{ std::forward<Args>(args)... } {
     }
 
     template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
-               index_sequence_helper<I...>) const& -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
-                                                                                       std::get<I>(data)...)) {
+               index_sequence<I...>) const& -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
+                                                                                std::get<I>(data)...)) {
         return Adaptor{}(std::forward<Iterable>(iterable), std::get<I>(data)...);
     }
 
     template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
-               index_sequence_helper<I...>) && -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
-                                                                                   std::get<I>(std::move(data))...)) {
+               index_sequence<I...>) && -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
+                                                                            std::get<I>(std::move(data))...)) {
         return Adaptor{}(std::forward<Iterable>(iterable), std::get<I>(std::move(data))...);
     }
 

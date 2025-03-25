@@ -10,12 +10,6 @@ namespace detail {
 struct repeat_adaptor {
     using adaptor = repeat_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor repeat{};
-
-#endif
-
     /**
      * @brief Returns an element n times. It returns a sentinel as its end() iterator. It contains a .size() method which is equal
      * to the amount of times the element is repeated. Its iterator category is forward. Example:

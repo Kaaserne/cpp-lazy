@@ -11,12 +11,6 @@ namespace detail {
 struct zip_longest_adaptor {
     using adaptor = zip_longest_adaptor;
 
-#ifdef LZ_HAS_CXX_11
-
-    static constexpr adaptor zip_longest{};
-
-#endif
-
     /**
      * @brief Zips multiple iterables together. If one of the iterables is shorter than the others, it will return an empty
      *optional instead of a non empty optional. The optional contains a tuple of `std::reference_wrapper`s to the elements itself

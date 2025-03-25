@@ -45,7 +45,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // iterable. For `a` however, `a.size()` is used.
  * ```
  */
-static constexpr detail::zip_longest_adaptor detail::zip_longest_adaptor::zip_longest{};
+constexpr detail::zip_longest_adaptor zip_longest{};
 
 #else
 

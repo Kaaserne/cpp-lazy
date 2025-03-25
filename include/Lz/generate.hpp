@@ -21,7 +21,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * lz::generate([]() { return 10; }); // Generates infinite times the number 10
  * ```
  */
-static constexpr detail::generate_adaptor detail::generate_adaptor::generate{};
+constexpr detail::generate_adaptor generate{};
 
 #else
 

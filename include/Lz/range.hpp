@@ -23,7 +23,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto range = lz::range(0.0, 1.0, 0.2); // {0.0, 0.2, 0.4, 0.6, 0.8} (T = double)
  * ```
  */
-static constexpr detail::range_adaptor detail::range_adaptor::range{};
+constexpr detail::range_adaptor range{};
 
 #else
 

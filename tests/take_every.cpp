@@ -225,7 +225,7 @@ TEST_CASE("take_every_iterable binary operations") {
         auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
         auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
-        auto test_operator_plus = [](const std::initializer_list<int> expected, decltype(even_sized_even_take) input) {
+        auto test_operator_plus = [](std::vector<int> expected, decltype(even_sized_even_take) input) {
             auto it = input.begin();
             auto end = input.end();
             REQUIRE(it + 0 == it);
@@ -262,14 +262,14 @@ TEST_CASE("take_every_iterable binary operations") {
             }
         };
 
-        auto expected = { 1, 3 };
-        test_operator_plus(expected, even_sized_even_take);
+        std::vector<int> expected = { 1, 3 };
+        test_operator_plus(std::move(expected), even_sized_even_take);
         expected = { 1, 4 };
-        test_operator_plus(expected, even_sized_odd_take);
+        test_operator_plus(std::move(expected), even_sized_odd_take);
         expected = { 1, 3, 5 };
-        test_operator_plus(expected, uneven_sized_even_take);
+        test_operator_plus(std::move(expected), uneven_sized_even_take);
         expected = { 1, 4 };
-        test_operator_plus(expected, uneven_sized_odd_take);
+        test_operator_plus(std::move(expected), uneven_sized_odd_take);
     }
 
     SECTION("Operator-") {
@@ -280,8 +280,8 @@ TEST_CASE("take_every_iterable binary operations") {
         auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
         auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
-        using iterable = decltype(even_sized_even_take);
-        auto test_iterable = [](const iterable& iterable) {
+        using lz_iterable = decltype(even_sized_even_take);
+        auto test_iterable = [](const lz_iterable& iterable) {
             auto begin = iterable.begin();
             auto end = iterable.end();
 

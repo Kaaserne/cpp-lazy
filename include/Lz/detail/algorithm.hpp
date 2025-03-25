@@ -17,7 +17,7 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance(Iterator begin, S end);
+constexpr diff_type<Iterator> distance(Iterator begin, S end);
 
 /**
  * This value is returned when index_of(_if) does not find the value specified.
@@ -396,7 +396,6 @@ LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& v
     using diff = diff_type<iter_t<Iterable>>;
 
     auto begin = detail::begin(std::forward<Iterable>(iterable));
-    auto end = detail::end(std::forward<Iterable>(iterable));
     return sized_lower_bound(std::move(begin), value, std::move(binary_predicate), static_cast<diff>(lz::eager_size(iterable)));
 }
 
@@ -409,7 +408,6 @@ LZ_CONSTEXPR_CXX_17 iter_t<Iterable> upper_bound(Iterable&& iterable, const T& v
 
 template<class Iterable, class T, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_17 bool binary_search(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
-    auto begin = detail::begin(std::forward<Iterable>(iterable));
     auto end = detail::end(std::forward<Iterable>(iterable));
     auto it = detail::lower_bound(std::forward<Iterable>(iterable), value, binary_predicate);
     return it != end && !binary_predicate(value, *it);

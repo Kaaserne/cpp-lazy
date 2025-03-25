@@ -21,6 +21,7 @@ public:
 
     template<class I>
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
+        static_assert(std::is_lvalue_reference<I>::value, "Cannot only bind to lvalues");
     }
 
     template<class T, std::size_t N>
