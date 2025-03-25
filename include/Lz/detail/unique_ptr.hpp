@@ -58,7 +58,7 @@ public:
         }
     }
 
-    const T* get() const noexcept {
+    constexpr const T* get() const noexcept {
         return _ptr;
     }
 
@@ -81,7 +81,7 @@ public:
         return *_ptr;
     }
 
-    const T& operator*() const noexcept {
+    constexpr const T& operator*() const noexcept {
         check_pointer_compat();
         return *_ptr;
     }
@@ -91,7 +91,7 @@ public:
         return _ptr;
     }
 
-    const T* operator->() const noexcept {
+    constexpr const T* operator->() const noexcept {
         check_pointer_compat();
         return _ptr;
     }

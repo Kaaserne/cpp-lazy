@@ -350,7 +350,7 @@ template<class, class = void>
 struct is_adaptor : std::false_type {};
 
 template<class T>
-struct is_adaptor<T, void_t<typename decay_t<T>::adaptor>> : std::true_type {};
+struct is_adaptor<T, void_t<remove_cvref<T>>> : std::true_type {};
 
 template<class... Args>
 struct first_arg_helper {};

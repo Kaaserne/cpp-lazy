@@ -13,20 +13,48 @@ struct count_dims_helper;
 
 template<>
 struct count_dims_helper<false> {
+#ifdef LZ_HAS_CXX_11
+
     template<class>
     using type = std::integral_constant<std::size_t, 0>;
+
+#else
+
+    template<class>
+    static constexpr std::size_t value = 0;
+
+#endif
 };
 
 template<>
 struct count_dims_helper<true> {
+#ifdef LZ_HAS_CXX_11
+
     template<class T>
-    using type = std::integral_constant<std::size_t, 
-        1 + count_dims_helper<
-            is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::template type<decltype(*std::begin(std::declval<T>()))>::value>;
+    using type =
+        std::integral_constant<std::size_t, 1 + count_dims_helper<is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::
+                                                    template type<decltype(*std::begin(std::declval<T>()))>::value>;
+
+#else
+
+    template<class T>
+    static constexpr std::size_t value = 1 + count_dims_helper<
+        is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::template value<decltype(*std::begin(std::declval<T>()))>;
+
+#endif
 };
+
+#ifdef LZ_HAS_CXX_11
 
 template<class T>
 using count_dims = typename count_dims_helper<is_iterable<T>::value>::template type<T>;
+
+#else
+
+template<class T>
+using count_dims = std::integral_constant<std::size_t, count_dims_helper<is_iterable<T>::value>::template value<T>>;
+
+#endif
 
 // Improvement of https://stackoverflow.com/a/21076724/8729023
 template<class Iterator, class S>
