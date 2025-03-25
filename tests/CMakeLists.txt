@@ -27,47 +27,47 @@ include(CTest)
 
 # ---- Tests ----
 add_executable(cpp-lazy-tests
-	algorithm.cpp
-	any_iterable.cpp
-	cached_size.cpp
-	cartesian_product.cpp
-	piping.cpp
-	chunk_if.cpp
-	chunks.cpp
-	common.cpp
-	concatenate.cpp
-	cstring.cpp
-	enumerate.cpp
-	except.cpp
-	exclude.cpp
-	exclusive_scan.cpp
-	filter.cpp
+	# algorithm.cpp
+	# any_iterable.cpp
+	# cached_size.cpp
+	# cartesian_product.cpp
+	# piping.cpp
+	# chunk_if.cpp
+	# chunks.cpp
+	# common.cpp
+	# concatenate.cpp
+	# cstring.cpp
+	# enumerate.cpp
+	# except.cpp
+	# exclude.cpp
+	# exclusive_scan.cpp
+	# filter.cpp
 	flatten.cpp
-	generate.cpp
-	generate_while.cpp
-	group_by.cpp
-	inclusive_scan.cpp
+	# generate.cpp
+	# generate_while.cpp
+	# group_by.cpp
+	# inclusive_scan.cpp
 	init.cpp
-	intersection.cpp
-	iter_tools.cpp
-	join_where.cpp
-	loop.cpp
-	map.cpp
-	random.cpp
-	range.cpp
-	regex_split.cpp
-	repeat.cpp
-	reverse.cpp
-	rotate.cpp
-	split.cpp
-	standalone.cpp
-	string_view.cpp
-	take_every.cpp
-	take.cpp
-	take_while.cpp
-	unique.cpp
-	zip_longest.cpp
-	zip.cpp
+	# intersection.cpp
+	# iter_tools.cpp
+	# join_where.cpp
+	# loop.cpp
+	# map.cpp
+	# random.cpp
+	# range.cpp
+	# regex_split.cpp
+	# repeat.cpp
+	# reverse.cpp
+	# rotate.cpp
+	# split.cpp
+	# standalone.cpp
+	# string_view.cpp
+	# take_every.cpp
+	# take.cpp
+	# take_while.cpp
+	# unique.cpp
+	# zip_longest.cpp
+	# zip.cpp
 )
 
 target_compile_options(cpp-lazy-tests

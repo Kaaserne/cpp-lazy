@@ -59,11 +59,10 @@ using count_dims = std::integral_constant<std::size_t, count_dims_helper<is_iter
 // Improvement of https://stackoverflow.com/a/21076724/8729023
 template<class Iterator, class S>
 class flatten_wrapper
-    : public iterator<
-          flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-          common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>,
-          sentinel_selector<common_type<std::bidirectional_iterator_tag, iter_cat_t<Iterator>>, flatten_wrapper<Iterator, S>>> {
+    : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, flatten_wrapper<Iterator, S>>> {
 
+    // TODO remove _begin if not bidirectional
     Iterator _begin;
     Iterator _current;
     S _end;
@@ -84,12 +83,20 @@ public:
         _end{ std::move(end) } {
     }
 
-    constexpr bool has_some() const {
+    constexpr bool has_next() const {
         return _current != _end;
     }
 
     constexpr bool has_prev() const {
         return _current != _begin;
+    }
+
+    constexpr difference_type distance_to_begin() const {
+        return _current - _begin;
+    }
+
+    constexpr difference_type distance_to_end() const {
+        return _end - _current;
     }
 
     constexpr bool eq(const flatten_wrapper& b) const {
@@ -116,6 +123,10 @@ public:
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_current;
     }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
+        return _current - other._current;
+    }
 };
 
 template<class, class, std::size_t>
@@ -128,7 +139,7 @@ using inner =
 template<class Iterator, class S, std::size_t N>
 class flatten_iterator
     : public iterator<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>, fake_ptr_proxy<ref_t<inner<Iterator, N>>>,
-                      diff_type<inner<Iterator, N>>, common_type<std::bidirectional_iterator_tag, iter_cat_t<inner<Iterator, N>>>,
+                      diff_type<inner<Iterator, N>>, iter_cat_t<inner<Iterator, N>>,
                       sentinel_selector<iter_cat_t<inner<Iterator, N>>, flatten_iterator<Iterator, S, N>>> {
 
     using this_inner = inner<Iterator, N>;
@@ -141,13 +152,13 @@ public:
 
 private:
     LZ_CONSTEXPR_CXX_14 void advance() {
-        if (_inner_iter.has_some()) {
+        if (_inner_iter.has_next()) {
             return;
         }
-        for (++_outer_iter; _outer_iter.has_some(); ++_outer_iter) {
+        for (++_outer_iter; _outer_iter.has_next(); ++_outer_iter) {
             auto begin = std::begin(*_outer_iter);
             _inner_iter = this_inner(begin, begin, std::end(*_outer_iter));
-            if (_inner_iter.has_some()) {
+            if (_inner_iter.has_next()) {
                 return;
             }
         }
@@ -162,19 +173,27 @@ public:
 
     LZ_CONSTEXPR_CXX_14 flatten_iterator(Iterator it, Iterator begin, S end) :
         _outer_iter{ std::move(it), std::move(begin), std::move(end) } {
-        if (_outer_iter.has_some()) {
+        if (_outer_iter.has_next()) {
             auto beg = std::begin(*_outer_iter);
             _inner_iter = this_inner(beg, beg, std::end(*_outer_iter));
             this->advance();
         }
     }
 
-    constexpr bool has_some() const {
-        return _outer_iter.has_some();
+    constexpr bool has_next() const {
+        return _outer_iter.has_next();
     }
 
     constexpr bool has_prev() const {
-        return _inner_iter.has_prev() || _outer_iter.has_prev();
+        return _outer_iter.has_prev();
+    }
+
+    constexpr difference_type distance_to_begin() const {
+        return _inner_iter.distance_to_begin();
+    }
+
+    constexpr difference_type distance_to_end() const {
+        return _inner_iter.distance_to_end();
     }
 
     constexpr bool eq(const flatten_iterator& b) const noexcept {
@@ -182,7 +201,7 @@ public:
     }
 
     constexpr bool eq(default_sentinel) const noexcept {
-        return !has_some();
+        return !has_next();
     }
 
     constexpr reference dereference() const {
@@ -199,19 +218,55 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        // { {}, {1}, {} };
         if (_inner_iter.has_prev()) {
             --_inner_iter;
             return;
         }
         while (_outer_iter.has_prev()) {
             --_outer_iter;
-            const auto end = std::end(*_outer_iter);
-            _inner_iter = this_inner(end, std::begin(*_outer_iter), end);
+            if (std::begin(*_outer_iter) == std::end(*_outer_iter)) {
+                continue;
+            }
+            _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
             if (_inner_iter.has_prev()) {
                 --_inner_iter;
-                return;
             }
         }
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
+        // { { { 1, 2 }, {}, {} }, { {}, { 3, 4 } }, { {} } }
+        auto outer_iter = _outer_iter;
+        auto inner_iter = _inner_iter;
+
+        difference_type total = 0;
+        if (outer_iter < other._outer_iter) {
+            if (inner_iter.has_prev() && inner_iter.has_next()) {
+                // We've incremented relative to begin/end
+                total += inner_iter.distance_to_begin();
+            }
+            while (outer_iter != other._outer_iter && outer_iter.has_next()) {
+                inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
+                if (outer_iter.has_next()) {
+                    total -= inner_iter.distance_to_end();
+                }
+                ++outer_iter;
+            }
+            return total;
+        }
+        while (outer_iter != other._outer_iter) {
+            if (inner_iter.has_prev() && inner_iter.has_next()) {
+                // We've incremented relative to begin/end
+                total -= inner_iter.distance_to_end();
+            }
+            --outer_iter;
+            inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
+            if (outer_iter.has_next()) {
+                total += inner_iter.distance_to_end();
+            }
+        }
+        return total;
     }
 };
 
@@ -219,9 +274,8 @@ template<class Iterator, class S>
 class flatten_iterator<Iterator, S, 0>
     : public iterator<flatten_iterator<Iterator, S, 0>, ref_t<flatten_wrapper<Iterator, S>>,
                       fake_ptr_proxy<ref_t<flatten_wrapper<Iterator, S>>>, diff_type<flatten_wrapper<Iterator, S>>,
-                      common_type<std::bidirectional_iterator_tag, iter_cat_t<flatten_wrapper<Iterator, S>>>,
-                      sentinel_selector<common_type<iter_cat_t<flatten_wrapper<Iterator, S>>, std::bidirectional_iterator_tag>,
-                                        flatten_iterator<Iterator, S, 0>>> {
+                      iter_cat_t<flatten_wrapper<Iterator, S>>,
+                      sentinel_selector<iter_cat_t<flatten_wrapper<Iterator, S>>, flatten_iterator<Iterator, S, 0>>> {
 
     flatten_wrapper<Iterator, S> _range;
     using traits = std::iterator_traits<Iterator>;
@@ -237,12 +291,20 @@ public:
     constexpr flatten_iterator(Iterator it, Iterator begin, S end) : _range{ std::move(it), std::move(begin), std::move(end) } {
     }
 
-    constexpr bool has_prev() const noexcept {
+    constexpr bool has_prev() const {
         return _range.has_prev();
     }
 
-    constexpr bool has_some() const noexcept {
-        return _range.has_some();
+    constexpr bool has_next() const {
+        return _range.has_next();
+    }
+
+    constexpr difference_type distance_to_begin() const {
+        return _range.distance_to_begin();
+    }
+
+    constexpr difference_type distance_to_end() const {
+        return _range.distance_to_end();
     }
 
     constexpr reference dereference() const {
@@ -253,20 +315,24 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    constexpr bool eq(const flatten_iterator& b) const noexcept {
+    constexpr bool eq(const flatten_iterator& b) const {
         return _range == b._range;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return _range.eq(default_sentinel{});
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_range;
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         --_range;
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
+        return _range - other._range;
     }
 };
 } // namespace detail
