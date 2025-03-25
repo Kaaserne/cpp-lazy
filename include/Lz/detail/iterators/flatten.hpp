@@ -185,7 +185,7 @@ public:
     }
 
     constexpr bool has_prev() const {
-        return _outer_iter.has_prev();
+        return _outer_iter.has_prev() || _inner_iter.has_prev();
     }
 
     constexpr difference_type distance_to_begin() const {
@@ -223,16 +223,14 @@ public:
             --_inner_iter;
             return;
         }
-        while (_outer_iter.has_prev()) {
-            --_outer_iter;
-            if (std::begin(*_outer_iter) == std::end(*_outer_iter)) {
-                continue;
-            }
-            _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+        for (--_outer_iter; _outer_iter.has_prev(); --_outer_iter) {
+            auto end = std::end(*_outer_iter);
+            _inner_iter = this_inner(end, std::begin(*_outer_iter), end);
             if (_inner_iter.has_prev()) {
                 --_inner_iter;
             }
         }
+        
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
