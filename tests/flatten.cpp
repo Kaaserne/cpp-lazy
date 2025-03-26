@@ -11,25 +11,14 @@
 
 TEST_CASE("tmp") {
     SECTION("A") {
-        std::vector<std::vector<std::vector<int>>> vec = {
-            {}, { { 1, 2, 3 }, {}, { 4 } }, { { 5, 6 }, { 7 }, {} }, { {} }, { {} }
-        };
+        std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 }, {}, {}, {}, {} };
         auto flattened = lz::flatten(vec);
-        // auto beg = flattened.begin();
-        // auto val2 = beg - flattened.end();
-        // ++beg;
-        // val2 = beg - flattened.end();
-        // (void)val2;
-
         auto end = flattened.end();
-        auto val = end - flattened.begin();
+        auto size = flattened.begin() - end;
         --end;
-        --end;
-        std::cout << *end << '\n';
-        val = end - flattened.begin();
+        size = flattened.begin() - end;
+        (void)size;
 
-        std::cout << val << '\n';
-        REQUIRE(true);
     }
 }
 

@@ -248,7 +248,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
-        // { { { 1, 2 }, {}, {} }, { {}, { 3, 4 } }, { {} } }
         auto outer_iter = _outer_iter;
         auto inner_iter = _inner_iter;
 
@@ -258,6 +257,10 @@ public:
                 // We've incremented relative to begin/end
                 total += inner_iter.distance_to_begin();
             }
+            if (other._inner_iter.has_prev() && other._inner_iter.has_next()) {
+                // Other has incremented relative to begin/end
+                total += other._inner_iter.distance_to_begin();
+            }
             while (outer_iter != other._outer_iter && outer_iter.has_next()) {
                 inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
                 if (outer_iter.has_next()) {
@@ -265,20 +268,12 @@ public:
                 }
                 ++outer_iter;
             }
+            if (inner_iter.has_next() && other._inner_iter.has_next()) {
+                total -= inner_iter - other._inner_iter;
+            }
             return total;
         }
-        while (outer_iter != other._outer_iter) {
-            if (inner_iter.has_prev() && inner_iter.has_next()) {
-                // We've incremented relative to begin/end
-                total -= inner_iter.distance_to_end();
-            }
-            --outer_iter;
-            inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
-            if (outer_iter.has_next()) {
-                total += inner_iter.distance_to_end();
-            }
-        }
-        return total;
+        return -other.difference(*this);
     }
 };
 
