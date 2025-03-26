@@ -1290,7 +1290,7 @@ TEST_CASE("Starts with") {
 }
 
 TEST_CASE("Ends with") {
-    SECTION("Non bidirectional ") {
+    SECTION("Forward non sized") {
         auto iterable = lz::c_string("");
         auto iterable2 = lz::c_string("H");
         REQUIRE(!lz::ends_with(iterable, iterable2));
@@ -1308,7 +1308,7 @@ TEST_CASE("Ends with") {
         REQUIRE(!lz::ends_with(iterable, iterable2));
     }
 
-    SECTION("Bidirectional") {
+    SECTION("Bidirectional sized") {
         std::list<char> lst;
         std::list<char> lst2;
         REQUIRE(lz::ends_with(lst, lst2));
