@@ -165,6 +165,14 @@ private:
         _inner_iter = {};
     }
 
+    LZ_CONSTEXPR_CXX_14 void previous_outer() {
+        --_outer_iter;
+        _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+        if (_inner_iter.has_prev()) {
+            --_inner_iter;
+        }
+    }
+
     flatten_wrapper<Iterator, S> _outer_iter;
     this_inner _inner_iter;
 
@@ -218,19 +226,25 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        // { {}, {1}, {} };
+        if (!_outer_iter.has_next()) {
+            while (_outer_iter.has_prev()) {
+                if (_inner_iter.has_next()) {
+                    return;
+                }
+                previous_outer();
+            }
+            return;
+        }
         if (_inner_iter.has_prev()) {
             --_inner_iter;
             return;
         }
-        for (--_outer_iter; _outer_iter.has_prev(); --_outer_iter) {
-            auto end = std::end(*_outer_iter);
-            _inner_iter = this_inner(end, std::begin(*_outer_iter), end);
+        while (_outer_iter.has_prev()) {
             if (_inner_iter.has_prev()) {
-                --_inner_iter;
+                return;
             }
+            previous_outer();
         }
-        
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
