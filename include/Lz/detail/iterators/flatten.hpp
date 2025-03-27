@@ -5,6 +5,7 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
+#include <numeric>
 
 namespace lz {
 namespace detail {
@@ -38,8 +39,9 @@ struct count_dims_helper<true> {
 #else
 
     template<class T>
-    static constexpr std::size_t value = 1 + count_dims_helper<
-        is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::template value<decltype(*std::begin(std::declval<T>()))>;
+    static constexpr std::size_t value =
+        1 + count_dims_helper<is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::template value<decltype(*std::begin(
+                std::declval<T>()))>;
 
 #endif
 };
@@ -172,6 +174,10 @@ private:
     LZ_CONSTEXPR_CXX_14 void previous_outer() {
         --_outer_iter;
         _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+    }
+
+    LZ_CONSTEXPR_CXX_14 void try_previous_inner() {
+        previous_outer();
         if (_inner_iter.has_prev()) {
             --_inner_iter;
         }
@@ -232,10 +238,11 @@ public:
     LZ_CONSTEXPR_CXX_14 void decrement() {
         if (!_outer_iter.has_next()) {
             while (_outer_iter.has_prev()) {
+                // Check if we decremented relative to end
                 if (_inner_iter.has_next()) {
                     return;
                 }
-                previous_outer();
+                try_previous_inner();
             }
             return;
         }
@@ -244,15 +251,15 @@ public:
             return;
         }
         while (_outer_iter.has_prev()) {
-            if (_inner_iter.has_prev()) {
+            try_previous_inner();
+            if (_inner_iter.has_next()) {
                 return;
             }
-            previous_outer();
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
-        if (n > 0) {
+        while (n >= 0) {
             if (_inner_iter.has_next()) {
                 const auto end_to_current = _inner_iter.end_to_current();
                 if (n < end_to_current) {
@@ -264,11 +271,38 @@ public:
             }
             if (_outer_iter.has_next()) {
                 ++_outer_iter;
-                auto begin = std::begin(*_outer_iter);
-                _inner_iter = this_inner(begin, begin, std::end(*_outer_iter));
-                this->plus_is(n);
+                if (_outer_iter.has_next()) {
+                    _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+                    continue;
+                }
+                _inner_iter = {};
             }
-            return;
+            if (n == 0) {
+                return;
+            }
+        }
+        // We have to decrement, but we may still be "uninitialized", so first, initialize all the ends
+        while (_outer_iter.has_prev()) {
+            // Check if we decremented relative to end
+            if (_inner_iter.has_next()) {
+                return;
+            }
+            --_outer_iter;
+            _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+            while (n < 0) {
+                if (_inner_iter.has_prev()) {
+                    const auto current_to_begin = _inner_iter.current_to_begin();
+                    if (-n <= current_to_begin) {
+                        _inner_iter += n;
+                        return;
+                    }
+                    _inner_iter -= current_to_begin;
+                    n += current_to_begin;
+                }
+                if (_outer_iter.has_prev()) {
+                    previous_outer();
+                }
+            }
         }
     }
 
@@ -277,34 +311,24 @@ public:
             return _inner_iter - other._inner_iter;
         }
 
-        auto outer_iter = _outer_iter;
-        difference_type total = 0;
+        if (_outer_iter > other._outer_iter) {
+            // Make sure to make distance negative or positive again
+            return -other.difference(*this);
+        }
 
-        // We've incremented relative to begin/end
-        if (_inner_iter.has_prev() && _inner_iter.has_next()) {
+        difference_type total = 0;
+        if (_inner_iter.has_next() && _inner_iter.has_prev()) {
             total += _inner_iter.current_to_begin();
         }
-        if (outer_iter > other._outer_iter) {
-            // Make sure to make distance positive again (because it was negative) if this is larger than other
-            return -other.difference(*this) + total;
+        if (other._inner_iter.has_next() && other._inner_iter.has_prev()) {
+            total -= other._inner_iter.current_to_begin();
         }
 
-        // Other has incremented relative to begin/end
-        if (other._inner_iter.has_prev() && other._inner_iter.has_next()) {
-            total += other._inner_iter.current_to_begin();
-        }
-
-        while (outer_iter != other._outer_iter) {
-            total -= std::end(*outer_iter) - std::begin(*outer_iter);
-            ++outer_iter;
-        }
-
-        if (outer_iter.has_next()) {
-            const auto inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
-            total += inner_iter - other._inner_iter;
-        }
-
-        return total;
+        using ref = decltype(*_outer_iter);
+        return std::accumulate(_outer_iter, other._outer_iter, total, [](difference_type total, ref inner) {
+            return total - (this_inner(std::end(inner), std::begin(inner), std::end(inner)) -
+                            this_inner(std::begin(inner), std::begin(inner), std::end(inner)));
+        });
     }
 };
 

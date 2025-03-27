@@ -212,22 +212,26 @@ template<class Container, class = void>
 struct has_insert_after : std::false_type {};
 
 template<class Container>
-struct has_insert_after<Container, void_t<decltype(0, std::declval<Container>().insert_after(std::declval<typename Container::const_iterator>(),
-                                                                                             std::declval<typename Container::value_type>()))>>
+struct has_insert_after<
+    Container, void_t<decltype(0, std::declval<Container>().insert_after(std::declval<typename Container::const_iterator>(),
+                                                                         std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
-template<class Container, class = void> 
+template<class Container, class = void>
 struct has_insert : std::false_type {};
 
 template<class Container>
-struct has_insert<Container, void_t<decltype(0, std::declval<Container>().insert(std::declval<typename Container::iterator>(),
-                                                                                 std::declval<typename Container::value_type>()))>> : std::true_type {};
+struct has_insert<Container,
+                  void_t<decltype(0, std::declval<Container>().insert(std::declval<typename Container::iterator>(),
+                                                                      std::declval<typename Container::value_type>()))>>
+    : std::true_type {};
 
 template<class Container, class = void>
 struct has_push_back : std::false_type {};
 
 template<class Container>
-struct has_push_back<Container, void_t<decltype(0, std::declval<Container>().push_back(std::declval<typename Container::value_type>()))>>
+struct has_push_back<Container,
+                     void_t<decltype(0, std::declval<Container>().push_back(std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
 template<class Container, class = void>
@@ -258,8 +262,8 @@ struct custom_copier_for<std::array<T, N>> {
 // - has_insert_after
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
-enable_if<has_push_back<Container>::value && has_insert<Container>::value && has_insert_after<Container>::value>
-copy_to_container(Iterable&& iterable, Container& container) {
+    enable_if<has_push_back<Container>::value && has_insert<Container>::value && has_insert_after<Container>::value>
+    copy_to_container(Iterable&& iterable, Container& container) {
     lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container));
 }
 
@@ -268,8 +272,8 @@ copy_to_container(Iterable&& iterable, Container& container) {
 // - insert
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
-enable_if<has_push_back<Container>::value && has_insert<Container>::value && !has_insert_after<Container>::value>
-copy_to_container(Iterable&& iterable, Container& container) {
+    enable_if<has_push_back<Container>::value && has_insert<Container>::value && !has_insert_after<Container>::value>
+    copy_to_container(Iterable&& iterable, Container& container) {
     lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container));
 }
 
@@ -278,8 +282,8 @@ copy_to_container(Iterable&& iterable, Container& container) {
 // - insert_after
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
-enable_if<!has_push_back<Container>::value && has_insert<Container>::value && has_insert_after<Container>::value>
-copy_to_container(Iterable&& iterable, Container& container) {
+    enable_if<!has_push_back<Container>::value && has_insert<Container>::value && has_insert_after<Container>::value>
+    copy_to_container(Iterable&& iterable, Container& container) {
     lz::copy(std::forward<Iterable>(iterable), std::inserter(container, container.begin()));
 }
 
@@ -287,8 +291,8 @@ copy_to_container(Iterable&& iterable, Container& container) {
 // - insert_after (use insert_after)
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
-enable_if<!has_push_back<Container>::value && !has_insert<Container>::value && has_insert_after<Container>::value>
-copy_to_container(Iterable&& iterable, Container& container) {
+    enable_if<!has_push_back<Container>::value && !has_insert<Container>::value && has_insert_after<Container>::value>
+    copy_to_container(Iterable&& iterable, Container& container) {
     using ref = ref_iterable_t<Iterable>;
     auto it = container.before_begin();
     lz::for_each(iterable, [&container, &it](ref value) { it = container.insert_after(it, value); });
@@ -298,16 +302,16 @@ copy_to_container(Iterable&& iterable, Container& container) {
 // - insert (use insert)
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
-enable_if<!has_push_back<Container>::value && has_insert<Container>::value && !has_insert_after<Container>::value>
-copy_to_container(Iterable&& iterable, Container& container) {
+    enable_if<!has_push_back<Container>::value && has_insert<Container>::value && !has_insert_after<Container>::value>
+    copy_to_container(Iterable&& iterable, Container& container) {
     lz::copy(std::forward<Iterable>(iterable), std::inserter(container, container.begin()));
 }
 
 // Container has none of the above, so try to use push, or a custom copier
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
-enable_if<!has_push_back<Container>::value && !has_insert<Container>::value && !has_insert_after<Container>::value>
-copy_to_container(Iterable&& iterable, Container& container) {
+    enable_if<!has_push_back<Container>::value && !has_insert<Container>::value && !has_insert_after<Container>::value>
+    copy_to_container(Iterable&& iterable, Container& container) {
     custom_copier_for<Container>{}.copy(std::forward<Iterable>(iterable), container);
 }
 
@@ -324,8 +328,7 @@ struct container_constructor {
     }
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20
-    enable_if<!can_construct<Iterable, Args...>::value, Container>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!can_construct<Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
         Container container(std::forward<Args>(args)...);
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
@@ -334,177 +337,14 @@ struct container_constructor {
     }
 };
 
-struct iterable_formatter {
-    using adaptor = iterable_formatter;
-
-#if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    std::ostream&
-    operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
-        return stream << (*this)(iterable, separator, format);
-    }
-
-#else
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    std::ostream& operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
-        auto begin = std::begin(iterable);
-        auto end = std::end(iterable);
-        if (begin == end) {
-            return stream;
-        }
-        stream << *begin++;
-        for (; begin != end; ++begin) {
-            stream << separator << *begin;
-        }
-
-        return stream;
-    }
-
-#endif
-
-#if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*, const char*>
-    operator()(const char* separator = ", ", const char* format = "{}") const {
-        return { separator, format };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::ostream&, const char*, const char*>
-    operator()(std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
-        return { stream, separator, format };
-    }
-
-#else
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*> operator()(const char* separator = ", ") const {
-        return { separator };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::ostream&, const char*>
-    operator()(std::ostream& stream, const char* separator = ", ") const {
-        return { stream, separator };
-    }
-
-#endif
-
-#if !defined(LZ_STANDALONE)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-#if FMT_VERSION >= 80000
-
-        return fmt::format(fmt::runtime(format), fmt::join(iterable, separator));
-
-#else
-
-        return fmt::format(format, fmt::join(iterable, separator));
-
-#endif
-    }
-
-#elif defined(LZ_HAS_FORMAT)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-        auto begin = std::begin(iterable);
-        auto end = std::end(iterable);
-        if (begin == end) {
-            return "";
-        }
-
-        std::string result;
-        auto back_inserter = std::back_inserter(result);
-
-        std::vformat_to(back_inserter, format, std::make_format_args(*begin));
-        ++begin;
-
-        std::string_view fmt{ format };
-        std::string_view sep{ separator };
-
-        const auto empty_fmt_args = std::make_format_args();
-        for (; begin != end; ++begin) {
-            std::vformat_to(back_inserter, sep, empty_fmt_args);
-            std::vformat_to(back_inserter, fmt, std::make_format_args(*begin));
-        }
-
-        return result;
-    }
-
-#else
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ") const {
-        std::ostringstream oss;
-        (*this)(iterable, oss, separator);
-        return oss.str();
-    }
-
-#endif
-};
-
-struct iterable_printer {
-    using adaptor = iterable_printer;
-
-#if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*, const char*>
-    operator()(const char* separator = ", ", const char* format = "{}") const {
-        return { separator, format };
-    }
-
-#else
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*> operator()(const char* separator = ", ") const {
-        return { separator };
-    }
-
-#endif
-
-#if !defined(LZ_STANDALONE)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-#if FMT_VERSION >= 80000
-
-        fmt::print(fmt::runtime(format), fmt::join(iterable, separator));
-
-#else
-
-        fmt::print(format, fmt::join(iterable, separator));
-
-#endif
-    }
-
-#elif defined(LZ_HAS_FORMAT)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-        constexpr iterable_formatter iter_formatter{};
-        std::string result = iter_formatter(iterable, separator, format);
-        std::fputs(result.c_str(), stdout);
-    }
-
-#else
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ") const {
-        constexpr iterable_formatter formatter{};
-        formatter(iterable, std::cout, separator);
-    }
-
-#endif
-};
-} // namespace detail
-
 template<class Container>
 struct to_adaptor {
     using adaptor = to_adaptor<Container>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     LZ_NODISCARD constexpr Container operator()(Iterable&& iterable, Args&&... args) const {
-        return detail::container_constructor<Container>{}.construct(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+        return detail::container_constructor<Container>{}.construct(std::forward<Iterable>(iterable),
+                                                                    std::forward<Args>(args)...);
     }
 };
 
@@ -512,30 +352,16 @@ template<template<class...> class Container>
 struct template_combiner {
     using adaptor = template_combiner<Container>;
 
-    template<LZ_CONCEPT_ITERABLE Iterable, class... Args, class Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>>
+    template<LZ_CONCEPT_ITERABLE Iterable, class... Args,
+             class Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>>
     LZ_NODISCARD constexpr Cont operator()(Iterable&& iterable, Args&&... args) const {
         constexpr to_adaptor<Cont> to_adaptor{};
         return to_adaptor(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
     }
 };
+} // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-// TODO docs
-
-#ifdef LZ_HAS_CXX_11
-
-constexpr detail::iterable_printer print{};
-
-constexpr detail::iterable_formatter format{};
-
-#else
-
-LZ_INLINE_VAR constexpr detail::iterable_printer print{};
-
-LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
-
-#endif
 
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be used in a pipe expression.
@@ -558,7 +384,7 @@ LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
  * @return The `Container`
  */
 template<class Container, class... Args, class = detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value>,
-         class Closure = detail::fn_args_holder<to_adaptor<Container>, detail::decay_t<Args>...>>
+         class Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
     return Closure{ std::forward<Args>(args)... };
 }
@@ -585,7 +411,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  */
 template<template<class...> class Container, class... Args,
          class = detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value>,
-         class Closure = detail::fn_args_holder<template_combiner<Container>, detail::decay_t<Args>...>>
+         class Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
     return Closure{ std::forward<Args>(args)... };
 }
@@ -646,7 +472,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
 template<class Container, class... Args, LZ_CONCEPT_ITERABLE Iterable,
          class = detail::enable_if<detail::is_iterable<Iterable>::value>>
 LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
-    return to_adaptor<Container>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+    return detail::to_adaptor<Container>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
 
 /**
@@ -745,30 +571,12 @@ LZ_MODULE_EXPORT_SCOPE_END
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-/**
- * @brief Streams a `lz` iterable to an output stream. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto filter = lz::filter(vec, [](int i) { return i % 2 == 0; });
- * std::cout << filter; // 2, 4
- * ```
- *
- * @param stream The stream to output to
- * @param iterable The `lz` iterable to output
- */
-template<LZ_CONCEPT_ITERABLE Iterable>
-lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
-operator<<(std::ostream& stream, const Iterable& iterable) {
-    return lz::format(iterable, stream);
-}
-
 template<LZ_CONCEPT_ITERABLE Iterable, class Adaptor>
 constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
     -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value && lz::detail::is_iterable<Iterable>::value,
                              decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable)))> {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
 }
-
 
 LZ_MODULE_EXPORT_SCOPE_END
 
