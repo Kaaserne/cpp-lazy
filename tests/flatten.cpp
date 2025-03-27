@@ -14,10 +14,16 @@ TEST_CASE("tmp") {
         std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 }, {}, {}, {}, {} };
         auto flattened = lz::flatten(vec);
         auto end = flattened.end();
-        auto size = flattened.begin() - end;
-        --end;
-        size = flattened.begin() - end;
-        (void)size;
+        auto begin = flattened.begin();
+        begin += 4;
+        (void)begin;
+        // auto size = end - begin;
+        // --end;
+        // size = end - begin;
+        // ++begin;
+        // size = end - begin;
+        // --begin;
+        // (void)size;
 
     }
 }

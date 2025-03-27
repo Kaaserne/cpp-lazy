@@ -91,11 +91,11 @@ public:
         return _current != _begin;
     }
 
-    constexpr difference_type distance_to_begin() const {
+    constexpr difference_type current_to_begin() const {
         return _current - _begin;
     }
 
-    constexpr difference_type distance_to_end() const {
+    constexpr difference_type end_to_current() const {
         return _end - _current;
     }
 
@@ -122,6 +122,10 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_current;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
+        _current += n;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
@@ -196,19 +200,19 @@ public:
         return _outer_iter.has_prev() || _inner_iter.has_prev();
     }
 
-    constexpr difference_type distance_to_begin() const {
-        return _inner_iter.distance_to_begin();
+    constexpr difference_type current_to_begin() const {
+        return _inner_iter.current_to_begin();
     }
 
-    constexpr difference_type distance_to_end() const {
-        return _inner_iter.distance_to_end();
+    constexpr difference_type end_to_current() const {
+        return _inner_iter.end_to_current();
     }
 
-    constexpr bool eq(const flatten_iterator& b) const noexcept {
+    constexpr bool eq(const flatten_iterator& b) const {
         return _outer_iter == b._outer_iter && _inner_iter == b._inner_iter;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const {
         return !has_next();
     }
 
@@ -247,33 +251,60 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
-        auto outer_iter = _outer_iter;
-        auto inner_iter = _inner_iter;
-
-        difference_type total = 0;
-        if (outer_iter < other._outer_iter) {
-            if (inner_iter.has_prev() && inner_iter.has_next()) {
-                // We've incremented relative to begin/end
-                total += inner_iter.distance_to_begin();
-            }
-            if (other._inner_iter.has_prev() && other._inner_iter.has_next()) {
-                // Other has incremented relative to begin/end
-                total += other._inner_iter.distance_to_begin();
-            }
-            while (outer_iter != other._outer_iter && outer_iter.has_next()) {
-                inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
-                if (outer_iter.has_next()) {
-                    total -= inner_iter.distance_to_end();
+    LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
+        if (n > 0) {
+            if (_inner_iter.has_next()) {
+                const auto end_to_current = _inner_iter.end_to_current();
+                if (n < end_to_current) {
+                    _inner_iter += n;
+                    return;
                 }
-                ++outer_iter;
+                _inner_iter += end_to_current;
+                n -= end_to_current;
             }
-            if (inner_iter.has_next() && other._inner_iter.has_next()) {
-                total -= inner_iter - other._inner_iter;
+            if (_outer_iter.has_next()) {
+                ++_outer_iter;
+                auto begin = std::begin(*_outer_iter);
+                _inner_iter = this_inner(begin, begin, std::end(*_outer_iter));
+                this->plus_is(n);
             }
-            return total;
+            return;
         }
-        return -other.difference(*this);
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
+        if (_outer_iter == other._outer_iter) {
+            return _inner_iter - other._inner_iter;
+        }
+
+        auto outer_iter = _outer_iter;
+        difference_type total = 0;
+
+        // We've incremented relative to begin/end
+        if (_inner_iter.has_prev() && _inner_iter.has_next()) {
+            total += _inner_iter.current_to_begin();
+        }
+        if (outer_iter > other._outer_iter) {
+            // Make sure to make distance positive again (because it was negative) if this is larger than other
+            return -other.difference(*this) + total;
+        }
+
+        // Other has incremented relative to begin/end
+        if (other._inner_iter.has_prev() && other._inner_iter.has_next()) {
+            total += other._inner_iter.current_to_begin();
+        }
+
+        while (outer_iter != other._outer_iter) {
+            total -= std::end(*outer_iter) - std::begin(*outer_iter);
+            ++outer_iter;
+        }
+
+        if (outer_iter.has_next()) {
+            const auto inner_iter = this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter));
+            total += inner_iter - other._inner_iter;
+        }
+
+        return total;
     }
 };
 
@@ -306,12 +337,12 @@ public:
         return _range.has_next();
     }
 
-    constexpr difference_type distance_to_begin() const {
-        return _range.distance_to_begin();
+    constexpr difference_type current_to_begin() const {
+        return _range.current_to_begin();
     }
 
-    constexpr difference_type distance_to_end() const {
-        return _range.distance_to_end();
+    constexpr difference_type end_to_current() const {
+        return _range.end_to_current();
     }
 
     constexpr reference dereference() const {
@@ -336,6 +367,10 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_range;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
+        _range += n;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {

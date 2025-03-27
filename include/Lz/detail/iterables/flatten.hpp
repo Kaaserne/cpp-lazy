@@ -42,7 +42,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<I == 1, std::size_t> size_all(Iterabl
 }
 
 template<std::size_t I, class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<(I > 1), std::size_t> size_all(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<(I > 1), std::size_t> size_all(Iterable&& iterable) {
     using lz::detail::accumulate;
     using std::accumulate;
     return accumulate(std::begin(iterable), std::end(iterable), std::size_t{ 0 },
@@ -68,7 +68,7 @@ public:
     }
 
     template<class T = all_sized<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<T::value, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
         return size_all<Dims + 1>(_iterable);
     }
 
