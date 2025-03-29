@@ -47,7 +47,7 @@ private:
     }
 
     template<std::size_t I>
-    constexpr enable_if<I == 0, void> previous() const noexcept {
+    constexpr enable_if<I == 0> previous() const noexcept {
     }
 
 #ifdef LZ_MSVC
