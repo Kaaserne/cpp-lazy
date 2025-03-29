@@ -259,50 +259,34 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
-        while (n >= 0) {
-            if (_inner_iter.has_next()) {
-                const auto end_to_current = _inner_iter.end_to_current();
-                if (n < end_to_current) {
-                    _inner_iter += n;
-                    return;
-                }
-                _inner_iter += end_to_current;
-                n -= end_to_current;
+        while (n > 0) {
+            // Check the distance of the inner iterator to the end
+            auto inner_distance = _inner_iter.end_to_current();
+            if (n < inner_distance) {
+                // n fits, just increment the inner iterator
+                _inner_iter += n;
+                return;
             }
+
+            // n doesn't fit, increment the inner iterator to the end
+            _inner_iter += inner_distance;
+            n -= inner_distance;
+
+            // Check if the inner iterator (possibily recursively) has next
+            if (_inner_iter.has_next()) {
+                continue;
+            }
+
+            // Inner didnt have any elements left, go to next outer
+            ++_outer_iter;
             if (_outer_iter.has_next()) {
-                ++_outer_iter;
-                if (_outer_iter.has_next()) {
-                    _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
-                    continue;
-                }
-                _inner_iter = {};
+                auto begin = std::begin(*_outer_iter);
+                _inner_iter = this_inner(begin, begin, std::end(*_outer_iter));
+                continue;
             }
-            if (n == 0) {
-                return;
-            }
-        }
-        // We have to decrement, but we may still be "uninitialized", so first, initialize all the ends
-        while (_outer_iter.has_prev()) {
-            // Check if we decremented relative to end
-            if (_inner_iter.has_next()) {
-                return;
-            }
-            --_outer_iter;
-            _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
-            while (n < 0) {
-                if (_inner_iter.has_prev()) {
-                    const auto current_to_begin = _inner_iter.current_to_begin();
-                    if (-n <= current_to_begin) {
-                        _inner_iter += n;
-                        return;
-                    }
-                    _inner_iter -= current_to_begin;
-                    n += current_to_begin;
-                }
-                if (_outer_iter.has_prev()) {
-                    previous_outer();
-                }
-            }
+            // Outer iterator has no next, we are done. Set _inner_iter to end/empty
+            _inner_iter = {};
+            return;
         }
     }
 
@@ -318,12 +302,15 @@ public:
 
         difference_type total = 0;
         if (_inner_iter.has_next() && _inner_iter.has_prev()) {
+            // Check how much 'we' incremented
             total += _inner_iter.current_to_begin();
         }
         if (other._inner_iter.has_next() && other._inner_iter.has_prev()) {
+            // Check how much other incremented
             total -= other._inner_iter.current_to_begin();
         }
 
+        // Check remaining, 'in between' iterators
         using ref = decltype(*_outer_iter);
         return std::accumulate(_outer_iter, other._outer_iter, total, [](difference_type total, ref inner) {
             return total - (this_inner(std::end(inner), std::begin(inner), std::end(inner)) -
