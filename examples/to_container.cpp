@@ -33,7 +33,8 @@ template<class T>
 struct lz::custom_copier_for<custom_container<T>> {
     template<class Iterable>
     void copy(Iterable&& iterable, custom_container<T>& container) const {
-        // Copy the contents of the iterable to the container
+        container.reserve(iterable.size());
+        // Copy the contents of the iterable to the container. Container is not yet reserved
         lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
     }
 };

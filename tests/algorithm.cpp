@@ -1,12 +1,12 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
+#include <deque>
+#include <forward_list>
 #include <list>
 #include <queue>
-#include <deque>
-#include <sstream>
-#include <forward_list>
 #include <set>
+#include <sstream>
 #include <unordered_set>
 
 template<class T>
@@ -37,8 +37,8 @@ template<class T>
 struct lz::custom_copier_for<custom_container<T>> {
     template<class Iterable>
     void copy(Iterable&& iterable, custom_container<T>& container) const {
+        container.reserve(iterable.size());
         REQUIRE(container.vec().empty());
-        REQUIRE(container.vec().capacity() == container.expected_capacity());
         lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
     }
 };
@@ -122,7 +122,7 @@ TEST_CASE("Formatting") {
         REQUIRE(oss.str() == "1, 2, 3, 4, 5");
 
         oss.str("");
-        
+
         oss << iterable;
         REQUIRE(oss.str() == "1, 2, 3, 4, 5");
     }

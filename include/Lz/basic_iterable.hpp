@@ -264,6 +264,7 @@ template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
     enable_if<has_push_back<Container>::value && has_insert<Container>::value && has_insert_after<Container>::value>
     copy_to_container(Iterable&& iterable, Container& container) {
+    prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container));
 }
 
@@ -274,6 +275,7 @@ template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
     enable_if<has_push_back<Container>::value && has_insert<Container>::value && !has_insert_after<Container>::value>
     copy_to_container(Iterable&& iterable, Container& container) {
+    prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container));
 }
 
@@ -284,6 +286,7 @@ template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
     enable_if<!has_push_back<Container>::value && has_insert<Container>::value && has_insert_after<Container>::value>
     copy_to_container(Iterable&& iterable, Container& container) {
+    prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     lz::copy(std::forward<Iterable>(iterable), std::inserter(container, container.begin()));
 }
 
@@ -294,7 +297,9 @@ LZ_CONSTEXPR_CXX_20
     enable_if<!has_push_back<Container>::value && !has_insert<Container>::value && has_insert_after<Container>::value>
     copy_to_container(Iterable&& iterable, Container& container) {
     using ref = ref_iterable_t<Iterable>;
+    prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     auto it = container.before_begin();
+    // TODO maybe remove ref for std move?
     lz::for_each(iterable, [&container, &it](ref value) { it = container.insert_after(it, value); });
 }
 
@@ -304,6 +309,7 @@ template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20
     enable_if<!has_push_back<Container>::value && has_insert<Container>::value && !has_insert_after<Container>::value>
     copy_to_container(Iterable&& iterable, Container& container) {
+    prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     lz::copy(std::forward<Iterable>(iterable), std::inserter(container, container.begin()));
 }
 
@@ -331,7 +337,6 @@ struct container_constructor {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if<!can_construct<Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) const {
         Container container(std::forward<Args>(args)...);
-        prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         copy_to_container(std::forward<Iterable>(iterable), container);
         return container;
     }
@@ -457,8 +462,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  * struct lz::custom_copier_for<custom_container<T>> {
  *    template<class Iterable>
  *    void copy(Iterable&& iterable, custom_container<T>& container) const {
- *      // Copy the contents of the iterable to the container. Container is already reserved
- *      // if it contains a reserve member function and the iterable is sized
+ *      // Copy the contents of the iterable to the container. Container is not reserved
+ *      // if it contains a reserve member
  *      lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
  *    }
  * ```
@@ -516,8 +521,8 @@ LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
  * struct lz::custom_copier_for<custom_container<T>> {
  *    template<class Iterable>
  *    void copy(Iterable&& iterable, custom_container<T>& container) const {
- *      // Copy the contents of the iterable to the container. Container is already reserved
- *      // if it contains a reserve member function and the iterable is sized
+ *      // Copy the contents of the iterable to the container. Container is not reserved
+ *      // if it contains a reserve member
  *      lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
  *    }
  * ```
@@ -549,7 +554,7 @@ LZ_NODISCARD constexpr Cont to(Iterable&& iterable, Args&&... args) {
  *     template<class Iterable>
  *     void copy(Iterable&& iterable, my_container<T>& container) {
  *         // Copy the iterable to the container, for example:
- *         // Container is already reserved if it contains a reserve member function and iterable is sized
+ *         Container is not reserved if it contains a reserve member
  *         for (auto&& i : iterable) {
  *             container.my_inserter(i);
  *         }
