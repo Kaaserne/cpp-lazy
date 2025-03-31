@@ -15,6 +15,9 @@ struct default_sentinel;
 struct lazy_view {};
 
 namespace detail {
+template<class>
+using void_t = void;
+
 template<bool B>
 struct enable_if_impl;
 
@@ -146,13 +149,13 @@ template<class Function, class = void>
 struct is_invocable_impl_no_args : std::false_type {};
 
 template<class Function>
-struct is_invocable_impl_no_args<Function, std::void_t<decltype(std::declval<Function>()())>> : std::true_type {};
+struct is_invocable_impl_no_args<Function, void_t<decltype(std::declval<Function>()())>> : std::true_type {};
 
 template<class, class Function, class...>
 struct is_invocable_impl_n_args : std::false_type {};
 
 template<class Function, class... Args>
-struct is_invocable_impl_n_args<std::void_t<decltype(std::declval<Function>()(std::declval<Args>()...))>, Function, Args...>
+struct is_invocable_impl_n_args<void_t<decltype(std::declval<Function>()(std::declval<Args>()...))>, Function, Args...>
     : std::true_type {};
 
 template<class F, class... Args>
@@ -328,8 +331,6 @@ template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
 
 namespace detail {
-template<class>
-using void_t = void;
 
 template<class T, class = void>
 struct sized : std::false_type {};
