@@ -162,8 +162,7 @@ private:
             return;
         }
         for (++_outer_iter; _outer_iter.has_next(); ++_outer_iter) {
-            auto begin = std::begin(*_outer_iter);
-            _inner_iter = this_inner(begin, begin, std::end(*_outer_iter));
+            _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
             if (_inner_iter.has_next()) {
                 return;
             }
@@ -261,7 +260,7 @@ public:
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         while (n > 0) {
             // Check the distance of the inner iterator to the end
-            auto inner_distance = _inner_iter.end_to_current();
+            const auto inner_distance = _inner_iter.end_to_current();
             if (n < inner_distance) {
                 // n fits, just increment the inner iterator
                 _inner_iter += n;
@@ -280,13 +279,33 @@ public:
             // Inner didnt have any elements left, go to next outer
             ++_outer_iter;
             if (_outer_iter.has_next()) {
-                auto begin = std::begin(*_outer_iter);
-                _inner_iter = this_inner(begin, begin, std::end(*_outer_iter));
+                _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
                 continue;
             }
             // Outer iterator has no next, we are done. Set _inner_iter to end/empty
             _inner_iter = {};
             return;
+        }
+
+        while (n < 0) {
+            difference_type inner_distance;
+            if (!_outer_iter.has_next()) {
+                --_outer_iter;
+                _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+                inner_distance = _inner_iter.end_to_current();
+            }
+            else {
+                inner_distance = _inner_iter.current_to_begin();
+            }
+
+            if (-n < inner_distance) {
+                // n fits, just decrement the inner iterator
+                _inner_iter -= -n;
+                return;
+            }
+
+            _inner_iter -= inner_distance;
+            n += inner_distance;
         }
     }
 
