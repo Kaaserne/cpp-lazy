@@ -59,12 +59,14 @@ using count_dims = std::integral_constant<std::size_t, count_dims_helper<is_iter
 #endif
 
 // Improvement of https://stackoverflow.com/a/21076724/8729023
-template<class Iterator, class S>
-class flatten_wrapper
-    : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, flatten_wrapper<Iterator, S>>> {
+template<class T, class S, class = void>
+struct flatten_wrapper;
 
-    // TODO remove _begin if not bidirectional
+template<class Iterator, class S>
+class flatten_wrapper<Iterator, S, enable_if<is_bidi<Iterator>::value>>
+    : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, flatten_wrapper<Iterator, S>> {
+
     Iterator _begin;
     Iterator _current;
     S _end;
@@ -132,6 +134,55 @@ public:
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
         return _current - other._current;
+    }
+};
+
+template<class Iterator, class S>
+class flatten_wrapper<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
+    : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, default_sentinel> {
+
+    Iterator _current;
+    S _end;
+
+    using traits = std::iterator_traits<Iterator>;
+
+public:
+    using reference = typename traits::reference;
+    using pointer = fake_ptr_proxy<reference>;
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+
+    constexpr flatten_wrapper() = default;
+
+    constexpr flatten_wrapper(Iterator /* iterator */, Iterator begin, S end) :
+        _current{ std::move(begin) },
+        _end{ std::move(end) } {
+    }
+
+    constexpr bool has_next() const {
+        return _current != _end;
+    }
+
+    constexpr bool eq(const flatten_wrapper& b) const {
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
+        return _current == b._current;
+    }
+
+    constexpr bool eq(default_sentinel) const {
+        return _current == _end;
+    }
+
+    constexpr reference dereference() const {
+        return *_current;
+    }
+
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
+
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_current;
     }
 };
 
@@ -266,16 +317,13 @@ public:
                 _inner_iter += n;
                 return;
             }
-
             // n doesn't fit, increment the inner iterator to the end
             _inner_iter += inner_distance;
             n -= inner_distance;
-
             // Check if the inner iterator (possibily recursively) has next
             if (_inner_iter.has_next()) {
                 continue;
             }
-
             // Inner didnt have any elements left, go to next outer
             ++_outer_iter;
             if (_outer_iter.has_next()) {
@@ -289,16 +337,17 @@ public:
 
         while (n < 0) {
             difference_type inner_distance;
-            if (!_outer_iter.has_next()) {
+            if (!_outer_iter.has_next() && !_inner_iter.has_next()) {
                 --_outer_iter;
                 _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
                 inner_distance = _inner_iter.end_to_current();
+                _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
             }
             else {
                 inner_distance = _inner_iter.current_to_begin();
             }
 
-            if (-n < inner_distance) {
+            if (-n <= inner_distance) {
                 // n fits, just decrement the inner iterator
                 _inner_iter -= -n;
                 return;
@@ -306,6 +355,14 @@ public:
 
             _inner_iter -= inner_distance;
             n += inner_distance;
+            if (_inner_iter.has_prev()) {
+                continue;
+            }
+            // Inner iterator has no previous, go to previous outer
+            if (_outer_iter.has_prev()) {
+                --_outer_iter;
+                _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+            }
         }
     }
 
