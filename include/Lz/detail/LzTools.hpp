@@ -93,7 +93,7 @@
 #        include <charconv>
 #    endif
 
-#    if !defined(LZ_STANDALONE) || !defined(LZ_MODULE_EXPORT)
+#    if !defined(LZ_STANDALONE)
 #        include <fmt/format.h>
 #        include <fmt/ranges.h>
 #    endif

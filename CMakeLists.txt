@@ -17,7 +17,7 @@ endif()
 include(GNUInstallDirs)
 set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installation directory of the include files")
 
-option(CPP-LAZY_USE_MODULES "Enable C++20's modules" NO)
+option(CPP-LAZY_USE_MODULES "Enable C++20's modules, experimental" NO)
 
 if (CPP-LAZY_USE_MODULES)
 	set(CPP-LAZY_SOURCE_FILES "src/lz.cppm")
