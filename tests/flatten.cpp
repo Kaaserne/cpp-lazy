@@ -49,6 +49,8 @@ TEST_CASE("Flatten with sentinels") {
 
     std::forward_list<c_string> lst = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
     auto flattened = lz::flatten(lst);
+    static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
+
     auto str = flattened | lz::to<std::string>();
     REQUIRE(str == "Hello, World!");
 
@@ -57,7 +59,15 @@ TEST_CASE("Flatten with sentinels") {
 
     c_string arr[] = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
     auto flattened_array = lz::flatten(arr);
+    static_assert(lz::detail::is_fwd<decltype(flattened_array.begin())>::value, "Flattened should be fwd");
+
     REQUIRE((flattened_array | lz::to<std::string>()) == "Hello, World!");
+
+    std::forward_list<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 } };
+    auto flattened_lst = lz::flatten(vec);
+    static_assert(lz::detail::is_fwd<decltype(flattened_lst.begin())>::value, "Flattened should be fwd");
+    auto expected = std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 };
+    REQUIRE(lz::equal(flattened_lst, expected));
 }
 
 TEST_CASE("Empty or one element flatten") {
@@ -160,27 +170,23 @@ void test_operator_plus_is(const Vector& vec, const ExpectedIterable& expected) 
         INFO("With i = " << i);
         REQUIRE(*(end - i) == *(expected.end() - i));
     }
-    // REQUIRE(end - lz::size(flattened) == flattened.begin());
+    REQUIRE(end - lz::size(flattened) == flattened.begin());
 
-    // std::advance(begin, lz::size(flattened));
-    // std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(flattened)));
-    // REQUIRE(begin + 0 == begin);
-    // REQUIRE(end + 0 == end);
-    // std::advance(begin, lz::size(flattened));
-    // std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(flattened)));
-    // REQUIRE(begin + 0 == begin);
-    // REQUIRE(end + 0 == end);
+    std::advance(begin, lz::size(flattened));
+    std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(flattened)));
+    REQUIRE(begin + 0 == begin);
+    REQUIRE(end + 0 == end);
 
-    // for (std::size_t i = 0; i < lz::size(flattened) - 1; ++i) {
-    //     INFO("With i = " << i);
-    //     REQUIRE(*(end + i) == *(expected.begin() + i));
-    // }
-    // REQUIRE(end + lz::size(flattened) == flattened.end());
-    // for (std::size_t i = 1; i <= lz::size(flattened); ++i) {
-    //     INFO("With i = " << i);
-    //     REQUIRE(*(begin - i) == *(expected.end() - i));
-    // }
-    // REQUIRE(begin - lz::size(flattened) == flattened.begin());
+    for (std::size_t i = 0; i < lz::size(flattened) - 1; ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(end + i) == *(expected.begin() + i));
+    }
+    REQUIRE(end + lz::size(flattened) == flattened.end());
+    for (std::size_t i = 1; i <= lz::size(flattened); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(begin - i) == *(expected.end() - i));
+    }
+    REQUIRE(begin - lz::size(flattened) == flattened.begin());
 }
 
 template<class Vector>
@@ -192,16 +198,16 @@ void test_operator_min(const Vector& vec) {
 
     for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(flattened)); ++i) {
         INFO("With i = " << i);
-        //     REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
-        //     REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
-        //     REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
-        //     REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
+        REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
+        REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
+        REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
+        REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
     }
 
     for (std::size_t i = 0; i < lz::size(flattened); ++i) {
         INFO("With i = " << i);
-        //     REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
-        //     REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
+        REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
+        REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
     }
 }
 
@@ -214,70 +220,98 @@ TEST_CASE("Should flatten permutations") {
         REQUIRE(flattened.size() == 4);
     }
 
-    // SECTION("Flatten 2D") {
-    //     std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7 };
+    SECTION("Flatten 2D") {
+        std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7 };
 
-    //     std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1, 2, 3 }, { 4, 5 }, { 6, 7 } }");
+        std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { { 1, 2, 3 }, {}, { 4, 5 }, { 6, 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1, 2, 3 }, {}, { 4, 5 }, { 6, 7 } }");
+        vec = { { 1, 2, 3 }, {}, { 4, 5 }, { 6, 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } }");
+        vec = { { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 }, {} };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1, 2, 3 }, { 4, 5 }, { 6, 7 }, {} }");
+        vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 }, {} };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 } }");
+        vec = { { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { {}, { 1, 2, 3 }, { 4, 5, 6, 7 }, {} };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ {}, { 1, 2, 3 }, { 4, 5, 6, 7 }, {} }");
+        vec = { {}, { 1, 2, 3 }, { 4, 5, 6, 7 }, {} };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { {}, {}, {}, { 1, 2, 3, 4, 5, 6, 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ {}, {}, {}, { 1, 2, 3, 4, 5, 6, 7 } }");
+        vec = { {}, {}, {}, { 1, 2, 3, 4, 5, 6, 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { { 1, 2, 3, 4, 5, 6, 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1, 2, 3, 4, 5, 6, 7 } }");
+        vec = { { 1, 2, 3, 4, 5, 6, 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } }");
+        vec = { { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
 
-    //     vec = { {}, {}, { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 }, {}, {} };
-    //     test_flatten_operators_mm_and_pp(vec, expected);
-    //     test_operator_plus_is(vec, expected);
-    //     test_operator_min(vec, "{ {}, {}, { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 }, {}, {} }");
-    // }
+        vec = { {}, {}, { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 }, {}, {} };
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+    }
 
     SECTION("Flatten 3D") {
         std::vector<int> expected = { 1, 4, 5, 6, 7, 8, 9 };
 
         std::vector<std::vector<std::vector<int>>> vec = { { { 1 }, { 4, 5 } }, { { 6, 7, 8, 9 } } };
         test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
         test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_min(vec);
+
+        vec = { { { 1 } }, { { 4 } }, { { 5 } }, { { 6 } }, { { 7 } }, { { 8 } }, { { 9 } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+
+        vec = { { { 1 }, {}, { 4, 5 } }, { {}, { 6, 7, 8, 9 } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+
+        vec = { { { 1 }, {}, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+
+        vec = { { {}, {}, { 1 }, { 4, 5 } }, { {}, { 6, 7, 8, 9 } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+
+        vec = { { {}, {}, { 1 }, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 } } };
+        test_operator_plus_is(vec, expected);
+
+        vec = { { {}, {}, { 1 }, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 }, {}, {} }, {}, {} };
+        test_operator_plus_is(vec, expected);
     }
 
     SECTION("Flatten 4D") {
+        std::vector<int> expected = { 1, 4, 5, 6, 7, 8, 9 };
+
+        std::vector<std::vector<std::vector<std::vector<int>>>> vec = { { { { 1 }, { 4, 5 } } }, { { { 6, 7, 8, 9 } } } };
+        test_operator_plus_is(vec, expected);
+        test_flatten_operators_mm_and_pp(vec, expected);
+        test_operator_min(vec);
     }
 
     SECTION("Should be by ref") {

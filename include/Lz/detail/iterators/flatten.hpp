@@ -5,7 +5,6 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
-#include <numeric>
 
 namespace lz {
 namespace detail {
@@ -68,7 +67,7 @@ class flatten_wrapper<Iterator, S, enable_if<is_bidi<Iterator>::value>>
                       iter_cat_t<Iterator>, flatten_wrapper<Iterator, S>> {
 
     Iterator _begin;
-    Iterator _current;
+    Iterator _iterator;
     S _end;
 
     using traits = std::iterator_traits<Iterator>;
@@ -83,37 +82,57 @@ public:
 
     constexpr flatten_wrapper(Iterator current, Iterator begin, S end) :
         _begin{ std::move(begin) },
-        _current{ std::move(current) },
+        _iterator{ std::move(current) },
         _end{ std::move(end) } {
     }
 
     constexpr bool has_next() const {
-        return _current != _end;
+        return _iterator != _end;
     }
 
     constexpr bool has_prev() const {
-        return _current != _begin;
+        return _iterator != _begin;
+    }
+
+    constexpr bool has_prev_inner() const {
+        return _iterator != _begin;
+    }
+
+    constexpr Iterator iterator() const {
+        return _iterator;
+    }
+
+    constexpr void iterator(Iterator c) {
+        _iterator = std::move(c);
+    }
+
+    constexpr S end() const {
+        return _end;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void initialize_last() {
+        _iterator = _end;
     }
 
     constexpr difference_type current_to_begin() const {
-        return _current - _begin;
+        return _iterator - _begin;
     }
 
     constexpr difference_type end_to_current() const {
-        return _end - _current;
+        return _end - _iterator;
     }
 
     constexpr bool eq(const flatten_wrapper& b) const {
         LZ_ASSERT(_begin == b._begin && _end == b._end, "Incompatible iterators");
-        return _current == b._current;
+        return _iterator == b._iterator;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _current == _end;
+        return _iterator == _end;
     }
 
     constexpr reference dereference() const {
-        return *_current;
+        return *_iterator;
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -121,19 +140,19 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        ++_current;
+        ++_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        --_current;
+        --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
-        _current += n;
+        _iterator += n;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
-        return _current - other._current;
+        return _iterator - other._iterator;
     }
 };
 
@@ -142,7 +161,7 @@ class flatten_wrapper<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
     : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
                       iter_cat_t<Iterator>, default_sentinel> {
 
-    Iterator _current;
+    Iterator _iterator;
     S _end;
 
     using traits = std::iterator_traits<Iterator>;
@@ -156,25 +175,37 @@ public:
     constexpr flatten_wrapper() = default;
 
     constexpr flatten_wrapper(Iterator /* iterator */, Iterator begin, S end) :
-        _current{ std::move(begin) },
+        _iterator{ std::move(begin) },
         _end{ std::move(end) } {
     }
 
     constexpr bool has_next() const {
-        return _current != _end;
+        return _iterator != _end;
     }
 
     constexpr bool eq(const flatten_wrapper& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
-        return _current == b._current;
+        return _iterator == b._iterator;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _current == _end;
+        return _iterator == _end;
+    }
+
+    constexpr Iterator iterator() const {
+        return _iterator;
+    }
+
+    constexpr void iterator(Iterator c) {
+        _iterator = std::move(c);
+    }
+
+    constexpr S end() const {
+        return _end;
     }
 
     constexpr reference dereference() const {
-        return *_current;
+        return *_iterator;
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -182,7 +213,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        ++_current;
+        ++_iterator;
     }
 };
 
@@ -194,12 +225,36 @@ using inner =
     flatten_iterator<decltype(std::begin(*std::declval<Iterator>())), decltype(std::end(*std::declval<Iterator>())), N - 1>;
 
 template<class Iterator, class S, std::size_t N>
+using iter_cat = common_type<iter_cat_t<inner<Iterator, N>>, iter_cat_t<flatten_wrapper<Iterator, S>>>;
+
+template<class Iterator, class S, std::size_t N>
 class flatten_iterator
     : public iterator<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>, fake_ptr_proxy<ref_t<inner<Iterator, N>>>,
-                      diff_type<inner<Iterator, N>>, iter_cat_t<inner<Iterator, N>>,
-                      sentinel_selector<iter_cat_t<inner<Iterator, N>>, flatten_iterator<Iterator, S, N>>> {
+                      diff_type<inner<Iterator, N>>, iter_cat<Iterator, S, N>,
+                      sentinel_selector<iter_cat<Iterator, S, N>, flatten_iterator<Iterator, S, N>>> {
 
     using this_inner = inner<Iterator, N>;
+
+    void find_next_non_empty_inner() {
+        using lz::detail::find_if;
+        using std::find_if;
+        using ref = decltype(*_outer_iter.iterator());
+
+        ++_outer_iter;
+        _outer_iter.iterator(find_if(_outer_iter.iterator(), _outer_iter.end(), [this](const ref& inner) {
+            _inner_iter = this_inner(std::begin(inner), std::begin(inner), std::end(inner));
+            return _inner_iter.has_next();
+        }));
+    }
+
+    void find_prev_non_empty_inner() {
+        while (!_inner_iter.has_prev()) {
+            if (!_outer_iter.has_prev()) {
+                return;
+            }
+            previous_outer();
+        }
+    }
 
 public:
     using reference = typename this_inner::reference;
@@ -212,11 +267,10 @@ private:
         if (_inner_iter.has_next()) {
             return;
         }
-        for (++_outer_iter; _outer_iter.has_next(); ++_outer_iter) {
-            _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
-            if (_inner_iter.has_next()) {
-                return;
-            }
+
+        find_next_non_empty_inner();
+        if (_inner_iter.has_next()) {
+            return;
         }
         _inner_iter = {};
     }
@@ -242,8 +296,7 @@ public:
     LZ_CONSTEXPR_CXX_14 flatten_iterator(Iterator it, Iterator begin, S end) :
         _outer_iter{ std::move(it), std::move(begin), std::move(end) } {
         if (_outer_iter.has_next()) {
-            auto beg = std::begin(*_outer_iter);
-            _inner_iter = this_inner(beg, beg, std::end(*_outer_iter));
+            _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
             this->advance();
         }
     }
@@ -254,6 +307,10 @@ public:
 
     constexpr bool has_prev() const {
         return _outer_iter.has_prev() || _inner_iter.has_prev();
+    }
+
+    constexpr bool has_prev_inner() const {
+        return _inner_iter.has_prev_inner();
     }
 
     constexpr difference_type current_to_begin() const {
@@ -308,6 +365,21 @@ public:
         }
     }
 
+    LZ_CONSTEXPR_CXX_14 void initialize_last() {
+        if (_inner_iter.has_prev_inner()) {
+            // inner is not empty, return
+            return;
+        }
+
+        find_prev_non_empty_inner();
+        if (_inner_iter.has_prev_inner()) {
+            // inner is not empty, return
+            return;
+        }
+        // inner is empty, proceed to previous
+        _inner_iter.initialize_last();
+    }
+
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         while (n > 0) {
             // Check the distance of the inner iterator to the end
@@ -325,9 +397,9 @@ public:
                 continue;
             }
             // Inner didnt have any elements left, go to next outer
-            ++_outer_iter;
-            if (_outer_iter.has_next()) {
-                _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+            find_next_non_empty_inner();
+            // Check if the find_if found an inner iterator with elements
+            if (_inner_iter.has_next()) {
                 continue;
             }
             // Outer iterator has no next, we are done. Set _inner_iter to end/empty
@@ -336,33 +408,28 @@ public:
         }
 
         while (n < 0) {
-            difference_type inner_distance;
-            if (!_outer_iter.has_next() && !_inner_iter.has_next()) {
-                --_outer_iter;
-                _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
-                inner_distance = _inner_iter.end_to_current();
-                _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
-            }
-            else {
-                inner_distance = _inner_iter.current_to_begin();
-            }
+            // Because end may be empty, initialized with = {}, we initialize all iterators with end
+            initialize_last();
 
+            // Get inner distance
+            difference_type inner_distance = _inner_iter.current_to_begin();
             if (-n <= inner_distance) {
-                // n fits, just decrement the inner iterator
-                _inner_iter -= -n;
+                // Fits
+                _inner_iter += n;
                 return;
             }
 
-            _inner_iter -= inner_distance;
             n += inner_distance;
+            // Doesn't fit, decrement the inner iterator to the beginning, possibly recursively
+            _inner_iter -= inner_distance;
+
             if (_inner_iter.has_prev()) {
+                // _inner_iter.outer still has previous elements
                 continue;
             }
-            // Inner iterator has no previous, go to previous outer
-            if (_outer_iter.has_prev()) {
-                --_outer_iter;
-                _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
-            }
+
+            // Get the previous non empty inner iterator
+            find_prev_non_empty_inner();
         }
     }
 
@@ -377,21 +444,20 @@ public:
         }
 
         difference_type total = 0;
-        if (_inner_iter.has_next() && _inner_iter.has_prev()) {
-            // Check how much 'we' incremented
-            total += _inner_iter.current_to_begin();
-        }
-        if (other._inner_iter.has_next() && other._inner_iter.has_prev()) {
-            // Check how much other incremented
-            total -= other._inner_iter.current_to_begin();
+        auto outer_iter = _outer_iter;
+
+        total -= this_inner(std::end(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter)) - _inner_iter;
+        if (other._outer_iter.has_next()) {
+            total += this_inner(std::begin(*other._outer_iter), std::begin(*other._outer_iter), std::end(*other._outer_iter)) -
+                     other._inner_iter;
         }
 
-        // Check remaining, 'in between' iterators
-        using ref = decltype(*_outer_iter);
-        return std::accumulate(_outer_iter, other._outer_iter, total, [](difference_type total, ref inner) {
-            return total - (this_inner(std::end(inner), std::begin(inner), std::end(inner)) -
-                            this_inner(std::begin(inner), std::begin(inner), std::end(inner)));
-        });
+        for (++outer_iter; outer_iter != other._outer_iter; ++outer_iter) {
+            total -= (this_inner(std::end(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter)) -
+                      this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter)));
+        }
+
+        return total;
     }
 };
 
@@ -402,7 +468,7 @@ class flatten_iterator<Iterator, S, 0>
                       iter_cat_t<flatten_wrapper<Iterator, S>>,
                       sentinel_selector<iter_cat_t<flatten_wrapper<Iterator, S>>, flatten_iterator<Iterator, S, 0>>> {
 
-    flatten_wrapper<Iterator, S> _range;
+    flatten_wrapper<Iterator, S> _iterator;
     using traits = std::iterator_traits<Iterator>;
 
 public:
@@ -413,27 +479,36 @@ public:
 
     constexpr flatten_iterator() = default;
 
-    constexpr flatten_iterator(Iterator it, Iterator begin, S end) : _range{ std::move(it), std::move(begin), std::move(end) } {
+    constexpr flatten_iterator(Iterator it, Iterator begin, S end) :
+        _iterator{ std::move(it), std::move(begin), std::move(end) } {
     }
 
     constexpr bool has_prev() const {
-        return _range.has_prev();
+        return _iterator.has_prev();
     }
 
     constexpr bool has_next() const {
-        return _range.has_next();
+        return _iterator.has_next();
+    }
+
+    constexpr bool has_prev_inner() const {
+        return _iterator.has_prev_inner();
+    }
+
+    void initialize_last() {
+        _iterator.initialize_last();
     }
 
     constexpr difference_type current_to_begin() const {
-        return _range.current_to_begin();
+        return _iterator.current_to_begin();
     }
 
     constexpr difference_type end_to_current() const {
-        return _range.end_to_current();
+        return _iterator.end_to_current();
     }
 
     constexpr reference dereference() const {
-        return *_range;
+        return *_iterator;
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -441,27 +516,27 @@ public:
     }
 
     constexpr bool eq(const flatten_iterator& b) const {
-        return _range == b._range;
+        return _iterator == b._iterator;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _range.eq(default_sentinel{});
+        return _iterator.eq(default_sentinel{});
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        ++_range;
+        ++_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        --_range;
+        --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
-        _range += n;
+        _iterator += n;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
-        return _range - other._range;
+        return _iterator - other._iterator;
     }
 };
 } // namespace detail
