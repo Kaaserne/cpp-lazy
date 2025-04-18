@@ -285,24 +285,32 @@ TEST_CASE("Should flatten permutations") {
         vec = { { { 1 } }, { { 4 } }, { { 5 } }, { { 6 } }, { { 7 } }, { { 8 } }, { { 9 } } };
         test_operator_plus_is(vec, expected);
         test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
 
         vec = { { { 1 }, {}, { 4, 5 } }, { {}, { 6, 7, 8, 9 } } };
         test_operator_plus_is(vec, expected);
         test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
 
         vec = { { { 1 }, {}, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 } } };
         test_operator_plus_is(vec, expected);
         test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
 
         vec = { { {}, {}, { 1 }, { 4, 5 } }, { {}, { 6, 7, 8, 9 } } };
         test_operator_plus_is(vec, expected);
         test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
 
         vec = { { {}, {}, { 1 }, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 } } };
         test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
 
         vec = { { {}, {}, { 1 }, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 }, {}, {} }, {}, {} };
         test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
     }
 
     SECTION("Flatten 4D") {
@@ -312,6 +320,26 @@ TEST_CASE("Should flatten permutations") {
         test_operator_plus_is(vec, expected);
         test_flatten_operators_mm_and_pp(vec, expected);
         test_operator_min(vec);
+
+        vec = { { { { 1 } }, { { { 4 } }, { { 5 } }, { { 6 } }, { { 7 } }, { { 8 } }, { { 9 } } } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
+
+        vec = { { { { 1 }, {}, { 4, 5 } }, { {}, { 6, 7, 8, 9 } } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
+
+        vec = { { { {}, {}, { 1 }, { 4, 5 } }, { {}, { 6, 7, 8, 9 } } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
+
+        vec = { { { {}, {}, { 1 }, { 4, 5 } }, { {}, {}, { 6, 7, 8, 9 } } } };
+        test_operator_plus_is(vec, expected);
+        test_operator_min(vec);
+        test_flatten_operators_mm_and_pp(vec, expected);
     }
 
     SECTION("Should be by ref") {

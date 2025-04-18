@@ -95,7 +95,11 @@ public:
     }
 
     constexpr bool has_prev_inner() const {
-        return _iterator != _begin;
+        return has_prev();
+    }
+
+    constexpr bool has_next_inner() const {
+        return has_next();
     }
 
     constexpr Iterator iterator() const {
@@ -313,6 +317,10 @@ public:
         return _inner_iter.has_prev_inner();
     }
 
+    constexpr bool has_next_inner() const {
+        return _inner_iter.has_next();
+    }
+
     constexpr difference_type current_to_begin() const {
         return _inner_iter.current_to_begin();
     }
@@ -344,24 +352,21 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         if (!_outer_iter.has_next()) {
-            while (_outer_iter.has_prev()) {
-                // Check if we decremented relative to end
-                if (_inner_iter.has_next()) {
-                    return;
-                }
-                try_previous_inner();
-            }
-            return;
-        }
-        if (_inner_iter.has_prev()) {
+            initialize_last();
             --_inner_iter;
             return;
         }
-        while (_outer_iter.has_prev()) {
-            try_previous_inner();
-            if (_inner_iter.has_next()) {
+
+        if (_inner_iter.has_prev()) {
+            --_inner_iter;
+            if (_inner_iter.has_next_inner()) {
                 return;
             }
+        }
+
+        find_prev_non_empty_inner();
+        if (_inner_iter.has_prev()) {
+            --_inner_iter;
         }
     }
 
@@ -493,6 +498,10 @@ public:
 
     constexpr bool has_prev_inner() const {
         return _iterator.has_prev_inner();
+    }
+
+    constexpr bool has_next_inner() const {
+        return _iterator.has_next_inner();
     }
 
     void initialize_last() {
