@@ -1,6 +1,7 @@
 #define LZ_STANDALONE
 
 #include <Lz/split.hpp>
+#include <Lz/stream.hpp>
 #include <catch2/catch.hpp>
 
 TEST_CASE("Formatting and compile tests") {

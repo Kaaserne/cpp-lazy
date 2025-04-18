@@ -1,5 +1,6 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/stream.hpp>
 #include <catch2/catch.hpp>
 #include <deque>
 #include <forward_list>
@@ -37,7 +38,7 @@ template<class T>
 struct lz::custom_copier_for<custom_container<T>> {
     template<class Iterable>
     void copy(Iterable&& iterable, custom_container<T>& container) const {
-        container.reserve(iterable.size());
+        container.reserve(lz::eager_size(iterable));
         REQUIRE(container.vec().empty());
         lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
     }

@@ -1,4 +1,5 @@
 #include <Lz/lz.hpp>
+#include <Lz/stream.hpp>
 #include <algorithm>
 #include <array>
 #include <catch2/catch.hpp>
