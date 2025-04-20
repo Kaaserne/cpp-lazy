@@ -9,8 +9,6 @@
 
 namespace lz {
 namespace detail {
-// TODO add single argument for std::find usage
-
 template<class ValueType>
 struct split_adaptor {
     using adaptor = split_adaptor<ValueType>;
