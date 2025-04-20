@@ -42,7 +42,7 @@ struct trim_fn {
 struct lines_adaptor {
 private:
     template<class CharT, class Iterable>
-    using lines_iterable = split_iterable<basic_string_view<CharT>, Iterable, c_string_iterable<const CharT>>;
+    using lines_iterable = split_iterable<false, basic_string_view<CharT>, Iterable, CharT>;
 
 public:
     using adaptor = lines_adaptor;
@@ -66,7 +66,7 @@ public:
     template<LZ_CONCEPT_ITERABLE String>
     LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref<String>> operator()(String&& string) const {
         using char_type = val_iterable_t<String>;
-        return lz::sv_split(std::forward<String>(string), static_cast<const char_type*>("\n"));
+        return lz::sv_split(std::forward<String>(string), static_cast<char_type>('\n'));
     }
     /**
      * @brief Returns a split_iterable, that splits the string on `'\n'` using `lz::sv_split`. Returns string_views to its
@@ -83,7 +83,7 @@ public:
      */
     template<class CharT>
     LZ_NODISCARD constexpr lines_iterable<CharT, c_string_iterable<const CharT>> operator()(const CharT* string) const {
-        return lz::sv_split(lz::c_string(string), static_cast<const CharT*>("\n"));
+        return lz::sv_split(lz::c_string(string), static_cast<CharT>('\n'));
     }
 };
 
