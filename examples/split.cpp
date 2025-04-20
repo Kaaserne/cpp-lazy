@@ -139,4 +139,6 @@ int main() {
     // Output: Hello world
     std::cout << '\n';
 #endif
+
+// TODO add examples for one element splitters
 }

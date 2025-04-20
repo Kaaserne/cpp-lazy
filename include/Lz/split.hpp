@@ -16,17 +16,22 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 /**
  * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
  * iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor must meet
- * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(Iterator, std::size_t)`. The distance between
- * the iterators are calculated using std::distance, if the second constructor is used. Example:
+ * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(<decltype(std::adressof(Iterator))>,
+ * std::size_t)`. The distance between the iterators are calculated using std::distance, if the second constructor is used.
+ * Example:
  * ```cpp
  * std::string to_split = "H d";
- * auto splitter = to_split | lz::t_split<std::vector<char>>(" "); // { vector{'H'}, vector{'d'} }
+ * auto splitter = to_split | lz::t_split<std::vector<char>>{}(" "); // { vector{'H'}, vector{'d'} }
  * // or
- * auto splitter = lz::t_split<std::vector<char>>(to_split, " "); // { vector{'H'}, vector{'d'} }
+ * auto splitter = lz::t_split<std::vector<char>>{}(to_split, " "); // { vector{'H'}, vector{'d'} }
+ *
+ * // or
+ * auto splitter = lz::t_split<std::vector<char>>{}(to_split, ' '); // { vector{'H'}, vector{'d'} }
+ * // or
+ * auto splitter = to_split | lz::t_split<std::vector<char>>{}(' '); // { vector{'H'}, vector{'d'} }
  * ```
  * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
  */
-// TODO docs
 template<class ValueType>
 using t_split = detail::split_adaptor<ValueType>;
 
@@ -42,6 +47,11 @@ using t_split = detail::split_adaptor<ValueType>;
  * // or
  * auto splitted = arr | lz::split(split_valiues); // {{1}, {4}}
  * // auto splitted = arr | lz::split({1, 2}); // Dangling reference, do not do this
+ *
+ * // or
+ * auto splitted = lz::split(arr, 2); // {{1}, {3, 4}}
+ * // or
+ * auto splitted = arr | lz::split(2); // {{1}, {3, 4}}
  * ```
  */
 constexpr detail::split_adaptor<void> split{};
@@ -56,6 +66,12 @@ constexpr detail::split_adaptor<void> split{};
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is std::string
  * // auto splitted = str | lz::s_split(lz::string_view(", ")); // Dangling reference, do not do this
+ *
+ * // or
+ * auto splitted = lz::s_split(str, ','); // {"Hello", " World!"} where value_type is std::string
+ *
+ * // or
+ * auto splitted = str | lz::s_split(',') // {"Hello", " World!"} where value_type is std::string
  * ```
  */
 constexpr detail::split_adaptor<std::string> s_split{};
@@ -70,6 +86,12 @@ constexpr detail::split_adaptor<std::string> s_split{};
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is a string_view
  * // auto splitted = str | lz::sv_split(lz::string_view(", ")); // Dangling reference, do not do this
+ *
+ * // or
+ * auto splitted = lz::sv_split(str, ','); // {"Hello", " World!"} where value_type is string_view
+ *
+ * // or
+ * auto splitted = str | lz::sv_split(',') // {"Hello", " World!"} where value_type is string_view
  * ```
  */
 constexpr detail::split_adaptor<lz::string_view> sv_split{};
@@ -79,13 +101,19 @@ constexpr detail::split_adaptor<lz::string_view> sv_split{};
 /**
  * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
  * iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor must meet
- * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(Iterator, std::size_t)`. The distance between
- * the iterators are calculated using std::distance, if the second constructor is used. Example:
+ * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(<decltype(std::adressof(Iterator))>,
+ * std::size_t)`. The distance between the iterators are calculated using std::distance, if the second constructor is used.
+ * Example:
  * ```cpp
  * std::string to_split = "H d";
  * auto splitter = to_split | lz::t_split<std::vector<char>>(" "); // { vector{'H'}, vector{'d'} }
  * // or
  * auto splitter = lz::t_split<std::vector<char>>(to_split, " "); // { vector{'H'}, vector{'d'} }
+ *
+ * // or
+ * auto splitter = lz::t_split<std::vector<char>>(to_split, ' '); // { vector{'H'}, vector{'d'} }
+ * // or
+ * auto splitter = to_split | lz::t_split<std::vector<char>>(' '); // { vector{'H'}, vector{'d'} }
  * ```
  * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
  */
@@ -104,6 +132,11 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<ValueType> t_split{};
  * // or
  * auto splitted = arr | lz::split(split_valiues); // {{1}, {4}}
  * // auto splitted = arr | lz::split({1, 2}); // Dangling reference, do not do this
+ *
+ * // or
+ * auto splitted = lz::split(arr, 2); // {{1}, {3, 4}}
+ * // or
+ * auto splitted = arr | lz::split(2); // {{1}, {3, 4}}
  * ```
  */
 LZ_INLINE_VAR constexpr detail::split_adaptor<void> split{};
@@ -117,10 +150,13 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<void> split{};
  * // auto splitted = lz::s_split(str, std::string(", ")); // Dangling reference, do not do this
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is std::string
- * // auto splitted = str | lz::s_split(std::string(", ")); // Dangling reference, do not do this
- * // auto splitted = lz::s_split(lz::string_view("Hello, World!"), ", "); // Dangling reference, do not do this, instead do:
+ * // auto splitted = str | lz::s_split(lz::string_view(", ")); // Dangling reference, do not do this
+ *
  * // or
- * auto splitted = lz::s_split("Hello, World!", ", "); // slower alternative (not random access), uses lz::c_string internally
+ * auto splitted = lz::s_split(str, ','); // {"Hello", " World!"} where value_type is std::string
+ *
+ * // or
+ * auto splitted = str | lz::s_split(',') // {"Hello", " World!"} where value_type is std::string
  * ```
  */
 LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
@@ -133,11 +169,14 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
  * auto splitted = lz::sv_split(str, ", "); // {"Hello", "World!"} where value_type is a string_view
  * // auto splitted = lz::sv_split(str, std::string(", ")); // Dangling reference, do not do this
  * // or
- * auto splitted = str | lz::sv_split(", "); // {"Hello", "World!"} where value_type is a string_view
- * // auto splitted = str | lz::sv_split(std::string(", ")); // Dangling reference, do not do this
- * // auto splitted = lz::sv_split(lz::string_view("Hello, World!"), ", "); // Dangling reference, do not do this
+ * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is a string_view
+ * // auto splitted = str | lz::sv_split(lz::string_view(", ")); // Dangling reference, do not do this
+ *
  * // or
- * auto splitted = lz::s_split("Hello, World!", ", "); // slower alternative (not random access), uses lz::c_string internally
+ * auto splitted = lz::sv_split(str, ','); // {"Hello", " World!"} where value_type is string_view
+ *
+ * // or
+ * auto splitted = str | lz::sv_split(',') // {"Hello", " World!"} where value_type is string_view
  * ```
  */
 LZ_INLINE_VAR constexpr detail::split_adaptor<lz::string_view> sv_split{};
