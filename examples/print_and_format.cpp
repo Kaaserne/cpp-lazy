@@ -5,18 +5,6 @@
 int main() {
     std::vector<int> v = { 1, 2, 3, 4, 5 };
 
-    lz::print(v); // 1, 2, 3, 4, 5
-    std::cout << '\n';
-
-    lz::print(v, " "); // 1 2 3 4 5
-    std::cout << '\n';
-
-    v | lz::print; // 1, 2, 3, 4, 5
-    std::cout << '\n';
-
-    v | lz::print(" "); // 1 2 3 4 5
-    std::cout << '\n';
-
     std::string output = lz::format(v); // 1, 2, 3, 4, 5
     std::cout << output << '\n';
 
@@ -43,12 +31,6 @@ int main() {
 
     // If you're using fmt or have std::format
 #if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
-    lz::print(v, ", ", "{:02d}"); // 01, 02, 03, 04, 05
-    std::cout << '\n';
-
-    v | lz::print(", ", "{:02d}"); // 01, 02, 03, 04, 05
-    std::cout << '\n';
-
     output = lz::format(v, ", ", "{:02d}"); // 01, 02, 03, 04, 05
     std::cout << output << '\n';
 

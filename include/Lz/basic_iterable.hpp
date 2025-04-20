@@ -14,22 +14,6 @@
 #include <array>
 #include <iostream>
 
-#if !defined(LZ_STANDALONE)
-
-#include <fmt/format.h>
-
-#elif defined(LZ_HAS_FORMAT)
-
-#include <cstdio>
-#include <format>
-
-#else
-
-#include <iostream>
-#include <sstream>
-
-#endif
-
 namespace lz {
 namespace detail {
 template<class I, class S = I>

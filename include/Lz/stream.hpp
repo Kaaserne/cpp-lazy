@@ -10,6 +10,21 @@
 #include <Lz/detail/traits.hpp>
 #include <string>
 
+#if !defined(LZ_STANDALONE)
+
+#include <fmt/format.h>
+
+#elif defined(LZ_HAS_FORMAT)
+
+#include <format>
+
+#else
+
+#include <iostream>
+#include <sstream>
+
+#endif
+
 namespace lz {
 namespace detail {
 
@@ -18,6 +33,23 @@ struct iterable_formatter {
 
 #if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
 
+    /**
+     * @brief Function that can be used to format an iterable to an output stream. Only defined if c++ 20 or if using `{fmt}`.
+     * Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * lz::format(vec, std::cout, ", ", "{}"); // prints: 2, 4
+     * lz::format(vec, std::cout, ","); // prints: 2,4
+     * std::stringstream oss;
+     * lz::format(vec, oss); // oss contains: 2, 4
+     * ```
+     *
+     * @param iterable Any iterable. May be a container or another iterable.
+     * @param stream The output stream to write to
+     * @param separator The separator to use between elements. Default is ", "
+     * @param format The format to use for each element. Default is "{}"
+     * @return The stream object
+     */
     template<LZ_CONCEPT_ITERABLE Iterable>
     std::ostream&
     operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
@@ -26,6 +58,17 @@ struct iterable_formatter {
 
 #else
 
+    /**
+     * @brief Function that can be used to format an iterable to an output stream. Only defined if c++ 20
+     * is not defined or not using `{fmt}`. Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * lz::format(vec, std::cout, ", "); // prints: 2, 4
+     * lz::format(vec, std::cout, ","); // prints: 2,4
+     *
+     * @param separator The separator to use between elements. Default is ", "
+     * @return The stream object
+     */
     template<LZ_CONCEPT_ITERABLE Iterable>
     std::ostream& operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
         auto begin = std::begin(iterable);
@@ -45,11 +88,32 @@ struct iterable_formatter {
 
 #if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
 
+    /**
+     * @brief Function that can be used with the pipe operator. This overload can be used with C++20's std::format or {fmt}.
+     *
+     * @param separator The separator to use between elements. Default is ", "
+     * @param format The format to use for each element. Default is "{}"
+     * @return A function object that can be used with the pipe operator
+     */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*, const char*>
     operator()(const char* separator = ", ", const char* format = "{}") const {
         return { separator, format };
     }
 
+    /**
+     * @brief Function that can be used with the pipe operator. This overload can be used with C++20's std::format or {fmt}.
+     * Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * std::string output = vec | lz::format(std::cout, ", ", "{}"); // prints: 2, 4
+     * std::string output = vec | lz::format(std::cout, ","); // prints: 2,4
+     * std::string output = vec | lz::format(std::cout); // prints: 2, 4
+     * ```
+     *
+     * @param stream The output stream to write to
+     * @param separator The separator to use between elements. Default is ", "
+     * @return A function object that can be used with the pipe operator
+     */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::ostream&, const char*, const char*>
     operator()(std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
         return { stream, separator, format };
@@ -57,10 +121,35 @@ struct iterable_formatter {
 
 #else
 
+    /**
+     * @brief Function that can be used with the pipe operator. It takes a separator. Only defined if c++ 20
+     * is not defined or not using `{fmt}`. Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * std::string output = vec | lz::format(", "); // prints: 2, 4
+     * std::string output = vec | lz::format; // prints: 2, 4
+     * ```
+     *
+     * @param separator The separator to use between elements. Default is ", "
+     * @return A function object that can be used with the pipe operator
+     */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*> operator()(const char* separator = ", ") const {
         return { separator };
     }
 
+    /**
+     * @brief Function that can be used with the pipe operator. It takes an output stream and a separator. Only defined if c++ 20
+     * is not defined or not using `{fmt}`. Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * std::string output = vec | lz::format(std::cout, ", "); // prints: 2, 4
+     * std::string output = vec | lz::format(std::cout); // prints: 2, 4
+     * ```
+     *
+     * @param stream The output stream to write to
+     * @param separator The separator to use between elements. Default is ", "
+     * @return A function object that can be used with the pipe operator
+     */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::ostream&, const char*>
     operator()(std::ostream& stream, const char* separator = ", ") const {
         return { stream, separator };
@@ -70,6 +159,21 @@ struct iterable_formatter {
 
 #if !defined(LZ_STANDALONE)
 
+    /**
+     * @brief Converts an iterable to a string, using the given separator and format. This overload can be used with C++20's
+     * std::format or {fmt}. Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * std::string output = lz::format(vec, ", ", "{}"); // 2, 4
+     * std::string output = lz::format(vec, ","); // 2,4
+     * std::string output = lz::format(vec); // 2, 4
+     * ```
+     *
+     * @param iterable Any iterable. May be a container or another iterable.
+     * @param separator The separator to use between elements. Default is ", "
+     * @param format The format to use for each element. Default is "{}"
+     * @return The string representation of the iterable, with the given separator and format.
+     */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
 #if FMT_VERSION >= 80000
@@ -85,6 +189,21 @@ struct iterable_formatter {
 
 #elif defined(LZ_HAS_FORMAT)
 
+    /**
+     * @brief Converts an iterable to a string, using the given separator and format. This overload can be used with C++20's
+     * std::format or {fmt}. Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * std::string output = lz::format(vec, ", ", "{}"); // 2, 4
+     * std::string output = lz::format(vec, ","); // 2,4
+     * std::string output = lz::format(vec); // 2, 4
+     * ```
+     *
+     * @param iterable Any iterable. May be a container or another iterable.
+     * @param separator The separator to use between elements. Default is ", "
+     * @param format The format to use for each element. Default is "{}"
+     * @return The string representation of the iterable, with the given separator and format.
+     */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
         auto begin = std::begin(iterable);
@@ -113,6 +232,19 @@ struct iterable_formatter {
 
 #else
 
+    /**
+     * @brief Converts an iterable to a string, using the given separator, using std::stringstream if c++ 20 is not defined or not
+     * using `{fmt}`. Example:
+     * ```cpp
+     * std::vector<int> vec = { 2, 4 };
+     * std::string output = lz::format(vec, ","); // 2,4
+     * std::string output = lz::format(vec); // 2, 4
+     * ```
+     *
+     * @param iterable Any iterable. May be a container or another iterable.
+     * @param separator The separator to use between elements. Default is ", "
+     * @return The string representation of the iterable, with the given separator.
+     */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ") const {
         std::ostringstream oss;
@@ -122,75 +254,84 @@ struct iterable_formatter {
 
 #endif
 };
-
-struct iterable_printer {
-    using adaptor = iterable_printer;
-
-#if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*, const char*>
-    operator()(const char* separator = ", ", const char* format = "{}") const {
-        return { separator, format };
-    }
-
-#else
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, const char*> operator()(const char* separator = ", ") const {
-        return { separator };
-    }
-
-#endif
-
-#if !defined(LZ_STANDALONE)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-#if FMT_VERSION >= 80000
-
-        fmt::print(fmt::runtime(format), fmt::join(iterable, separator));
-
-#else
-
-        fmt::print(format, fmt::join(iterable, separator));
-
-#endif
-    }
-
-#elif defined(LZ_HAS_FORMAT)
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-        constexpr iterable_formatter iter_formatter{};
-        std::string result = iter_formatter(iterable, separator, format);
-        std::fputs(result.c_str(), stdout);
-    }
-
-#else
-
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD void operator()(const Iterable& iterable, const char* separator = ", ") const {
-        constexpr iterable_formatter formatter{};
-        formatter(iterable, std::cout, separator);
-    }
-
-#endif
-};
 } // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-// TODO docs
-
 #ifdef LZ_HAS_CXX_11
 
-constexpr detail::iterable_printer print{};
-
+/**
+ * @brief Streams any iterable to an output stream. For printing, `std::cout << <lz_iterable>` can also be used. Example:
+ * ```cpp
+ * std::vector<int> vec = { 2, 4 };
+ *
+ * // Requires C++20 or {fmt}. If using {fmt}, LZ_STANDALONE must *not* be defined.
+ * lz::format(vec, std::cout, ", ", "{}"); // prints: 2, 4
+ * lz::format(vec, std::cout, ","); // prints: 2,4
+ * lz::format(vec, std::cout); // prints: 2, 4
+ *
+ * std::string output = lz::format(vec, ", ", "{}"); // 2, 4
+ * std::string output = lz::format(vec, ","); // 2,4
+ * std::string output = lz::format(vec); // 2, 4
+ *
+ * vec | lz::format(std::cout, ", ", "{}"); // prints: 2, 4
+ * vec | lz::format(std::cout, ","); // prints: 2,4
+ * vec | lz::format(std::cout); // prints: 2, 4
+ * std::string output = vec | lz::format(", ", "{}"); // 2, 4
+ * std::string output = vec | lz::format; // 2, 4
+ * std::string output = vec | lz::format(","); // 2,4
+ *
+ * // Otherwise, if not using {fmt} or C++20, use the following:
+ * lz::format(vec, std::cout, ", "); // prints: 2, 4
+ * lz::format(vec, std::cout); // prints: 2, 4
+ * std::string output = lz::format(vec, ", "); // 2, 4
+ * std::string output = lz::format(vec); // 2,4
+ *
+ * // Or use the pipe operator:
+ * vec | lz::format(std::cout, ", "); // prints: 2, 4
+ * vec | lz::format(std::cout); // prints: 2, 4
+ * std::string output = vec | lz::format(","); // 2,4
+ * std::string output = vec | lz::format; // 2, 4
+ * ```
+ */
 constexpr detail::iterable_formatter format{};
 
 #else
 
-LZ_INLINE_VAR constexpr detail::iterable_printer print{};
-
+/**
+ * @brief Streams any iterable to an output stream. For printing, `std::cout << <lz_iterable>` can also be used. Example:
+ * ```cpp
+ * std::vector<int> vec = { 2, 4 };
+ *
+ * // Requires C++20 or {fmt}. If using {fmt}, LZ_STANDALONE must *not* be defined.
+ * lz::format(vec, std::cout, ", ", "{}"); // prints: 2, 4
+ * lz::format(vec, std::cout, ","); // prints: 2,4
+ * lz::format(vec, std::cout); // prints: 2, 4
+ *
+ * std::string output = lz::format(vec, ", ", "{}"); // 2, 4
+ * std::string output = lz::format(vec, ","); // 2,4
+ * std::string output = lz::format(vec); // 2, 4
+ *
+ * vec | lz::format(std::cout, ", ", "{}"); // prints: 2, 4
+ * vec | lz::format(std::cout, ","); // prints: 2,4
+ * vec | lz::format(std::cout); // prints: 2, 4
+ * std::string output = vec | lz::format(", ", "{}"); // 2, 4
+ * std::string output = vec | lz::format; // 2, 4
+ * std::string output = vec | lz::format(","); // 2,4
+ *
+ * // Otherwise, if not using {fmt} or C++20, use the following:
+ * lz::format(vec, std::cout, ", "); // prints: 2, 4
+ * lz::format(vec, std::cout); // prints: 2, 4
+ * std::string output = lz::format(vec, ", "); // 2, 4
+ * std::string output = lz::format(vec); // 2,4
+ *
+ * // Or use the pipe operator:
+ * vec | lz::format(std::cout, ", "); // prints: 2, 4
+ * vec | lz::format(std::cout); // prints: 2, 4
+ * std::string output = vec | lz::format(","); // 2,4
+ * std::string output = vec | lz::format; // 2, 4
+ * ```
+ */
 LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
 
 #endif
