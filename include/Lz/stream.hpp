@@ -13,6 +13,7 @@
 #if !defined(LZ_STANDALONE)
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #elif defined(LZ_HAS_FORMAT)
 
@@ -23,7 +24,7 @@
 #include <iostream>
 #include <sstream>
 
-#endif
+#endif // !defined(LZ_STANDALONE)
 
 namespace lz {
 namespace detail {
@@ -53,7 +54,41 @@ struct iterable_formatter {
     template<LZ_CONCEPT_ITERABLE Iterable>
     std::ostream&
     operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
-        return stream << (*this)(iterable, separator, format);
+        auto it = std::begin(iterable);
+        auto end = std::end(iterable);
+        if (it == end) {
+            return stream;
+        }
+
+#ifndef LZ_STANDALONE
+
+#if FMT_VERSION >= 80000
+
+        fmt::print(stream, fmt::runtime(format), *it);
+
+#else
+
+        fmt::print(stream, format, *it);
+
+#endif // FMT_VERSION >= 80000
+
+        for (++it; it != end; ++it) {
+            stream << separator;
+            fmt::print(stream, format, *it);
+        }
+
+#else
+
+        std::format_to(std::ostream_iterator<char>(stream), format, *it);
+
+        for (++it; it != end; ++it) {
+            stream << separator;
+            std::format_to(std::ostream_iterator<char>(stream), format, *it);
+        }
+
+#endif // !LZ_STANDALONE
+
+        return stream;
     }
 
 #else
@@ -84,7 +119,7 @@ struct iterable_formatter {
         return stream;
     }
 
-#endif
+#endif // !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
 
 #if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
 
@@ -155,7 +190,7 @@ struct iterable_formatter {
         return { stream, separator };
     }
 
-#endif
+#endif // !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
 
 #if !defined(LZ_STANDALONE)
 
@@ -184,7 +219,7 @@ struct iterable_formatter {
 
         return fmt::format(format, fmt::join(iterable, separator));
 
-#endif
+#endif // FMT_VERSION >= 80000
     }
 
 #elif defined(LZ_HAS_FORMAT)
@@ -252,7 +287,7 @@ struct iterable_formatter {
         return oss.str();
     }
 
-#endif
+#endif // !defined(LZ_STANDALONE)
 };
 } // namespace detail
 
