@@ -111,3 +111,57 @@ TEST_CASE("repeat_iterable to containers") {
         REQUIRE(actual == expected);
     }
 }
+
+TEST_CASE("repeat_iterable infinite") {
+    int to_repeat = 20;
+    auto repeater = lz::repeat(to_repeat);
+
+    SECTION("Should be infinite") {
+        std::size_t counter = 0;
+        lz::for_each_while(repeater, [&counter](int i) {
+            REQUIRE(i == 20);
+            ++counter;
+            if (counter == 100) {
+                return false;
+            }
+            return true;
+        });
+        REQUIRE(counter == 100);
+    }
+
+    SECTION("Should not be by reference") {
+        auto start = repeater.begin();
+        REQUIRE(&(*start) != &to_repeat);
+    }
+}
+
+TEST_CASE("repeat_iterable infinite binary operations") {
+    auto repeater = lz::repeat(20);
+    auto begin = repeater.begin();
+
+    SECTION("Operator++") {
+        ++begin;
+        REQUIRE(*begin == 20);
+    }
+
+    SECTION("Not empty, has many, not has one") {
+        REQUIRE(!lz::empty(repeater));
+        REQUIRE(lz::has_many(repeater));
+        REQUIRE(!lz::has_one(repeater));
+    }
+
+    SECTION("Operator== & Operator!=") {
+        REQUIRE(begin != repeater.end());
+        std::size_t counter = 0;
+        while (begin != repeater.end()) {
+            ++begin;
+            ++counter;
+            if (counter == 100) {
+                break;
+            }
+        }
+        REQUIRE(counter == 100);
+        REQUIRE(begin != repeater.end());
+        REQUIRE(begin != begin);
+    }
+}
