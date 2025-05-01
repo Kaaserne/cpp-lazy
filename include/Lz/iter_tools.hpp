@@ -53,12 +53,11 @@ constexpr detail::lines_adaptor lines{};
  * Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto floats = lz::as<float>(vec); // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * auto floats = lz::as<float>{}(vec); // { 1.f, 2.f, 3.f, 4.f, 5.f }
  * // or
- * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
+ * auto floats = vec | lz::as<float>{}; // { 1.f, 2.f, 3.f, 4.f, 5.f }
  * ```
  */
-// TODO make docs correct
 template<class T>
 using as = detail::as_adaptor<T>;
 
@@ -66,13 +65,12 @@ using as = detail::as_adaptor<T>;
  * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * auto iterable = lz::pairwise_n<2>{}(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
  * // or
- * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+ * auto iterable = vec | lz::pairwise_n<2>{}; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
  * ```
  * @tparam N The amount of adjacent elements to return.
  */
-// TODO make docs correct
 template<std::size_t N>
 using pairwise_n = detail::pairwise_n_adaptor<N>;
 
@@ -91,13 +89,12 @@ static constexpr detail::pairwise_n_adaptor<2> pairwise{};
  * @brief Gets the nth element from a tuple-like container, using `std::get` and `lz::map`. Example:
  * ```cpp
  * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
- * auto actual = lz::get_nth<2>(three_tuple_vec); // {3, 6, 9}
+ * auto actual = lz::get_nth<2>{}(three_tuple_vec); // {3, 6, 9}
  * // or
- * auto actual = three_tuple_vec | lz::get_nth<2>; // {3, 6, 9}
+ * auto actual = three_tuple_vec | lz::get_nth<2>{}; // {3, 6, 9}
  * ```
  * @tparam I The index to get from the tuple-like container.
  */
-// TODO docs
 template<std::size_t I>
 using get_nth = detail::get_n_adaptor<I>;
 
