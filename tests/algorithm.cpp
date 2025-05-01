@@ -4,6 +4,7 @@
 #include <catch2/catch.hpp>
 #include <deque>
 #include <forward_list>
+#include <iostream>
 #include <list>
 #include <queue>
 #include <set>
