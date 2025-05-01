@@ -22,18 +22,15 @@ public:
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
-    template<std::size_t... Is>
-    std::tuple<decltype(Is, std::ptrdiff_t{})...> sizes(index_sequence<Is...>) const {
-        return { static_cast<std::ptrdiff_t>(lz::eager_size(std::get<Is>(_iterables)))... };
+    template<std::size_t... Is, class Diff = typename iterator::difference_type>
+    std::tuple<decltype(Is, Diff{})...> sizes(index_sequence<Is...>) const {
+        return { static_cast<Diff>(lz::eager_size(std::get<Is>(_iterables)))... };
     }
 
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
         return std::max({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
     }
-
-private:
-    static_assert(sizeof...(Iterables) > 1, "Cannot create zip longest object with 1 iterator");
 
 public:
     constexpr zip_longest_iterable() = default;
@@ -49,7 +46,8 @@ public:
 
     template<bool sized_and_bidi = bidi>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized_and_bidi, iterator> begin() const& {
-        return { begin_tuple(_iterables), end_tuple(_iterables), zeroes(make_index_sequence<sizeof...(Iterables)>{}) };
+        using diff = typename iterator::difference_type;
+        return { begin_tuple(_iterables), end_tuple(_iterables), zeroes<diff>(make_index_sequence<sizeof...(Iterables)>{}) };
     }
 
     template<bool sized_and_bidi = bidi>
