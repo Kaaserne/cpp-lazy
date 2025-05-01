@@ -12,7 +12,6 @@
 #include <Lz/detail/traits.hpp>
 #include <Lz/string_view.hpp>
 #include <array>
-#include <iostream>
 
 namespace lz {
 namespace detail {
@@ -283,8 +282,7 @@ LZ_CONSTEXPR_CXX_20
     using ref = ref_iterable_t<Iterable>;
     prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     auto it = container.before_begin();
-    // TODO maybe remove ref for std move?
-    lz::for_each(iterable, [&container, &it](ref value) { it = container.insert_after(it, value); });
+    lz::for_each(iterable, [&container, it](ref value) mutable { it = container.insert_after(it, value); });
 }
 
 // Container only has:
