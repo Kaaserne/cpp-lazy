@@ -56,6 +56,11 @@ public:
         find_next();
     }
 
+    LZ_CONSTEXPR_CXX_14 except_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -69,7 +74,7 @@ public:
         find_next();
     }
 
-    constexpr bool eq(const except_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const except_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
@@ -127,6 +132,11 @@ public:
         find_next();
     }
 
+    LZ_CONSTEXPR_CXX_14 except_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -140,8 +150,10 @@ public:
         find_next();
     }
 
-    constexpr bool eq(const except_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
+    LZ_CONSTEXPR_CXX_14 bool eq(const except_iterator& b) const {
+        LZ_ASSERT(_end == b._end && _to_except.begin() == b._to_except.begin() && _to_except.end() == b._to_except.end() &&
+                      _size == b._size,
+                  "Incompatible iterators");
         return _iterator == b._iterator;
     }
 

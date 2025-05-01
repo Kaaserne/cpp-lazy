@@ -74,6 +74,11 @@ public:
 
     constexpr zip_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SentinelTuple& end) {
+        _iterators = end;
+        return *this;
+    }
+
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }

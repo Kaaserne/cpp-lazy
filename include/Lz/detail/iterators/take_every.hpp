@@ -5,6 +5,7 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/iterator_base.hpp>
 
@@ -40,6 +41,11 @@ public:
 
     constexpr take_every_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -54,7 +60,7 @@ public:
         }
     }
 
-    constexpr bool eq(const take_every_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
         LZ_ASSERT(_end == b._end && _offset == b._offset, "Incompatible iterators");
         return _iterator == b._iterator;
     }
@@ -93,6 +99,11 @@ public:
 
     constexpr take_every_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -117,7 +128,7 @@ public:
         }
     }
 
-    constexpr bool eq(const take_every_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
         LZ_ASSERT(_end == b._end && _offset == b._offset, "Incompatible iterators");
         return _iterator == b._iterator;
     }
@@ -155,6 +166,11 @@ public:
     }
 
     constexpr take_every_iterator() = default;
+
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
 
     constexpr reference dereference() const {
         return *_iterator;
@@ -218,7 +234,7 @@ public:
         return lldiv.rem == 0 ? lldiv.quot : lldiv.quot + (remaining < 0 ? -1 : 1);
     }
 
-    constexpr bool eq(const take_every_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
         LZ_ASSERT(_end == b._end && _offset == b._offset && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }

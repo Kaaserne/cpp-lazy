@@ -25,12 +25,17 @@ public:
 
     constexpr c_string_iterator() = default;
 
-    constexpr reference dereference() const noexcept {
+    LZ_CONSTEXPR_CXX_14 c_string_iterator& operator=(default_sentinel) noexcept {
+        _it = nullptr;
+        return *this;
+    }
+
+    LZ_CONSTEXPR_CXX_14 reference dereference() const noexcept {
         LZ_ASSERT(_it != nullptr, "Cannot dereference a nullptr");
         return *_it;
     }
 
-    constexpr pointer arrow() const noexcept {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const noexcept {
         LZ_ASSERT(_it != nullptr, "Cannot dereference a nullptr");
         return _it;
     }
@@ -51,7 +56,7 @@ public:
     }
 
     constexpr bool eq(default_sentinel) const noexcept {
-        return _it != nullptr && *_it == '\0';
+        return _it == nullptr || *_it == '\0';
     }
 
     constexpr explicit operator bool() const noexcept {

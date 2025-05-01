@@ -33,6 +33,12 @@ public:
 
     constexpr enumerate_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(const S& end) {
+        _iterator = end;
+        _index = 0;
+        return *this;
+    }
+
     LZ_CONSTEXPR_CXX_14 enumerate_iterator& increment() {
         ++_index;
         ++_iterator;

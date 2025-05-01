@@ -64,6 +64,10 @@ public:
         advance();
     }
 
+    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
+        _sub_range_begin = _end;
+    }
+
     constexpr reference dereference() const {
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
@@ -77,7 +81,7 @@ public:
         advance();
     }
 
-    constexpr bool eq(const group_by_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& rhs) const {
         LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }
@@ -138,6 +142,10 @@ public:
         advance();
     }
 
+    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
+        _sub_range_begin = _end;
+    }
+
     constexpr reference dereference() const {
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
@@ -167,7 +175,7 @@ public:
         _sub_range_begin = std::move(prev);
     }
 
-    constexpr bool eq(const group_by_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& rhs) const {
         LZ_ASSERT(_end == rhs._end && _begin == rhs._begin, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }

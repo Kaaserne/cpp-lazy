@@ -3,6 +3,7 @@
 #ifndef LZ_UNIQUE_ITERATOR_HPP
 #define LZ_UNIQUE_ITERATOR_HPP
 
+#include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
@@ -38,6 +39,11 @@ public:
 
     constexpr unique_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -54,7 +60,7 @@ public:
         }
     }
 
-    constexpr bool eq(const unique_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const unique_iterator& b) const {
         LZ_ASSERT(_end == b._end, "unique_iterators are not compatible");
         return _iterator == b._iterator;
     }
@@ -91,6 +97,11 @@ public:
 
     constexpr unique_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -108,18 +119,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        if (_iterator == _begin) {
-            return;
-        }
-
         --_iterator;
         if (_iterator == _begin) {
             return;
         }
-        auto next = _iterator;
-        --next;
 
-        for (; next != _begin; --next, --_iterator) {
+        auto next = _iterator;
+        for (--next; next != _begin; --next, --_iterator) {
             if (_predicate(*_iterator, *next)) {
                 return;
             }
@@ -127,7 +133,7 @@ public:
         _iterator = std::move(next);
     }
 
-    constexpr bool eq(const unique_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const unique_iterator& b) const {
         LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }

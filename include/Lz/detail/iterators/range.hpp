@@ -8,6 +8,7 @@
 #include <Lz/detail/traits.hpp>
 #include <Lz/iterator_base.hpp>
 #include <iterator>
+#include <limits>
 
 namespace lz {
 namespace detail {
@@ -31,6 +32,11 @@ public:
 
     constexpr range_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel) noexcept {
+        _iterator = _step < 0 ? std::numeric_limits<Arithmetic>::min() : std::numeric_limits<Arithmetic>::max();
+        return *this;
+    }
+
     constexpr value_type dereference() const noexcept {
         return _iterator;
     }
@@ -47,7 +53,7 @@ public:
         _iterator -= _step;
     }
 
-    std::ptrdiff_t constexpr difference(const range_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const range_iterator& b) const {
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
         return static_cast<difference_type>((_iterator - b._iterator) / _step);
     }
@@ -56,7 +62,7 @@ public:
         _iterator += static_cast<Arithmetic>(value) * _step;
     }
 
-    constexpr bool eq(const range_iterator& b) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& b) const noexcept {
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
         return _step < 0 ? _iterator <= b._iterator : _iterator >= b._iterator;
     }

@@ -11,8 +11,6 @@
 namespace lz {
 namespace detail {
 
-// TODO add static assertions for all iterables... als use enable ifs for all functions
-
 template<class Tuple>
 using first_it = tup_element<0, Tuple>;
 
@@ -134,6 +132,7 @@ private:
 
     template<std::size_t I>
     constexpr enable_if<I == std::tuple_size<IterTuple>::value> plus_plus() const noexcept {
+        return;
     }
 
     template<std::size_t I>
@@ -158,6 +157,11 @@ public:
     }
 
     constexpr concatenate_iterator() = default;
+
+    LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
+        _iterators = _end;
+        return *this;
+    }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return deref<0>();

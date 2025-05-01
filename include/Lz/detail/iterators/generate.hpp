@@ -33,6 +33,10 @@ public:
         _current{ amount } {
     }
 
+    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
+        _current = 0;
+    }
+
     constexpr reference dereference() const {
         return _func();
     }

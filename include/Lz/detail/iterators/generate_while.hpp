@@ -33,6 +33,11 @@ public:
         _last_returned{ std::forward<fn_return_type>(last_returned) } {
     }
 
+    LZ_CONSTEXPR_CXX_14 generate_while_iterator& operator=(default_sentinel) noexcept {
+        std::get<0>(_last_returned).second = false;
+        return *this;
+    }
+
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return std::get<1>(_last_returned);
     }

@@ -29,6 +29,11 @@ public:
     constexpr take_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 
+    LZ_CONSTEXPR_CXX_14 take_iterator& operator=(const S& end) {
+        _iterator = end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
