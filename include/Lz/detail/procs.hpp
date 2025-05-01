@@ -7,8 +7,6 @@
 #include <Lz/detail/traits.hpp>
 #include <cstddef>
 #include <iterator>
-#include <limits>
-#include <tuple>
 
 #ifndef NDEBUG
 #include <exception>
@@ -17,8 +15,6 @@
 #if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
 #include <stacktrace>
 #endif
-
-#include <exception>
 
 namespace lz {
 namespace detail {
@@ -68,7 +64,7 @@ constexpr void decompose(const Ts&...) noexcept {
 }
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance_impl(Iterator begin, S end, std::forward_iterator_tag) {
+LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     diff_type<Iterator> dist = 0;
     for (; begin != end; ++begin, ++dist) {
     }
@@ -76,7 +72,7 @@ LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance_impl(Iterator begin, S end, std
 }
 
 template<class Iterator, class S>
-constexpr diff_type<Iterator> distance_impl(Iterator begin, S end, std::random_access_iterator_tag) {
+constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     return end - begin;
 }
 } // namespace detail
@@ -92,7 +88,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  */
 template<class Iterator, class S>
 constexpr diff_type<Iterator> distance(Iterator begin, S end) {
-    return detail::distance_impl(std::move(begin), std::move(end), iter_cat_t<Iterator>{});
+    return detail::distance_impl(std::move(begin), std::move(end));
 }
 
 #ifdef LZ_HAS_CXX_17
