@@ -48,8 +48,6 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
-// TODO faster implementation for compiler times
-
 template<bool Value, class T, class... Rest>
 struct conjunction_impl {
     using type = T;
