@@ -316,9 +316,9 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel) {
-        _outer_iter = {};
-        _inner_iter = {};
+    LZ_CONSTEXPR_CXX_14 flatten_iterator operator=(default_sentinel) {
+        _inner_iter = default_sentinel{};
+        _outer_iter = default_sentinel{};
         return *this;
     }
 
