@@ -35,6 +35,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
         _current = 0;
+        return *this;
     }
 
     constexpr reference dereference() const {
@@ -74,6 +75,10 @@ public:
     constexpr generate_iterator() = default;
 
     constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
+        return *this;
     }
 
     constexpr reference dereference() const {

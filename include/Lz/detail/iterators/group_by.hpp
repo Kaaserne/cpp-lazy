@@ -66,6 +66,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
         _sub_range_begin = _end;
+        return *this;
     }
 
     constexpr reference dereference() const {
