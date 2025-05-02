@@ -24,7 +24,7 @@ public:
     constexpr loop_iterable() = default;
 
     template<class I>
-    constexpr loop_iterable(I&& iterable, std::size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
+    constexpr loop_iterable(I&& iterable, const std::size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
     }
 
     template<class I = Iterable>
@@ -33,10 +33,11 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        auto first = detail::begin(std::move(_iterable));
-        auto last = detail::end(std::move(_iterable));
-        if (first == last || _amount == 0) {
-            return { last, first, last, 0 };
+        auto first = detail::begin(_iterable);
+        auto last = detail::end(_iterable);
+        if (_amount == 0) {
+            first = last;
+            return { first, first, last, _amount };
         }
         return { first, first, last, _amount - 1 };
     }
@@ -45,15 +46,21 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         auto first = detail::begin(std::move(_iterable));
         auto last = detail::end(std::move(_iterable));
-        if (first == last || _amount == 0) {
-            return { last, first, last, 0 };
+        if (_amount == 0) {
+            first = last;
+            return { first, first, last, _amount };
         }
         return { first, first, last, _amount - 1 };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), 0 };
+        auto first = detail::begin(_iterable);
+        auto last = detail::end(_iterable);
+        if (_amount == 0) {
+            first = last;
+        }
+        return { last, first, last, 0 };
     }
 
     template<class I = typename iterator::iterator_category>
