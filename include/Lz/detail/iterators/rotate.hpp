@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <limits>
 #ifndef LZ_ROTATE_ITERATOR_HPP
 #define LZ_ROTATE_ITERATOR_HPP
 
@@ -41,6 +43,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const Iterator& end) {
         _iterator = end;
+        _offset = std::numeric_limits<std::size_t>::max();
         return *this;
     }
 
