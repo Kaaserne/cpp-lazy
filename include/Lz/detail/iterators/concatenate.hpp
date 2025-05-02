@@ -135,16 +135,14 @@ private:
         return;
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<IterTuple>::value - 1, bool>
-    iter_equal_to(const SentinelTuple& end) const {
+    template<std::size_t I, class EndIter>
+    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<IterTuple>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         const auto has_value = std::get<I>(_iterators) == std::get<I>(end);
         return has_value ? iter_equal_to<I + 1>(end) : has_value;
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<IterTuple>::value - 1, bool>
-    iter_equal_to(const SentinelTuple& end) const {
+    template<std::size_t I, class EndIter>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<IterTuple>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         return std::get<I>(_iterators) == std::get<I>(end);
     }
 
@@ -194,7 +192,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& b) const {
-        // static_assert(tuple_size > 1, "Cannot concat one iterable");
         LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return iter_equal_to<0>(b._iterators);
     }
