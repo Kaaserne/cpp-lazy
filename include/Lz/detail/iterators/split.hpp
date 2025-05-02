@@ -171,7 +171,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 bool eq(const split_single_iterator& rhs) const {
         LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
-        return _sub_range_begin == rhs._sub_range_begin && _sub_range_end.first == rhs._sub_range_end.first &&
+        return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _ends_with_trailing == rhs._ends_with_trailing;
     }
 
