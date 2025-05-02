@@ -17,6 +17,13 @@ TEST_CASE("Take with sentinels") {
     REQUIRE(lz::equal(take, expected));
     auto vec = take | lz::to<std::vector<char>>();
     REQUIRE(lz::equal(vec, expected));
+
+    SECTION("Operator=") {
+        auto it = take.begin();
+        REQUIRE(it == take.begin());
+        it = take.end();
+        REQUIRE(it == take.end());
+    }
 }
 
 TEST_CASE("Take changing and creating elements") {

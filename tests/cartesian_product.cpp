@@ -61,6 +61,12 @@ TEST_CASE("Is sentinel") {
     SECTION("Should make permutation") {
         REQUIRE(*cart.begin() == std::make_tuple('H', ' '));
     }
+
+    SECTION("Operator=") {
+        auto begin = cart.begin();
+        begin = cart.end();
+        REQUIRE(begin == cart.end());
+    }
 }
 
 TEST_CASE("Empty or one element cartesian product") {

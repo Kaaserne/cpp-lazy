@@ -17,6 +17,11 @@ TEST_CASE("Concatenate with sentinels") {
                                    'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
     auto actual = concat | lz::to<std::vector<char>>();
     REQUIRE(lz::equal(actual, expected));
+
+    auto it = concat.begin();
+    REQUIRE(it == concat.begin());
+    it = concat.end();
+    REQUIRE(it == concat.end());
 }
 
 TEST_CASE("Concat changing and creating elements") {

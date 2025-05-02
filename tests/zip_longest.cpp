@@ -78,6 +78,13 @@ TEST_CASE("Zip longest with sentinels") {
     REQUIRE(!ref1);
     REQUIRE(!ref2);
     REQUIRE(!ref3);
+
+    SECTION("Operator=") {
+        auto it = longest.begin();
+        REQUIRE(it == longest.begin());
+        it = longest.end();
+        REQUIRE(it == longest.end());
+    }
 }
 
 TEST_CASE("zip_longest_iterable changing and creating elements") {

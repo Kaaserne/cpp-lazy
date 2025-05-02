@@ -42,6 +42,13 @@ TEST_CASE("repeat_iterable binary operations") {
         }
         REQUIRE(begin == repeater.end());
     }
+
+    SECTION("Operator=") {
+        begin = repeater.begin();
+        REQUIRE(begin == repeater.begin());
+        begin = repeater.end();
+        REQUIRE(begin == repeater.end());
+    }
 }
 
 TEST_CASE("Empty or one element repeat") {

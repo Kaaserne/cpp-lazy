@@ -18,6 +18,13 @@ TEST_CASE("Group by with sentinels") {
     REQUIRE(lz::equal(it->second, lz::c_string("d")));
     ++it;
     REQUIRE(it == grouper.end());
+
+    SECTION("Operator=") {
+        it = grouper.begin();
+        REQUIRE(it == grouper.begin());
+        it = grouper.end();
+        REQUIRE(it == grouper.end());
+    }
 }
 
 TEST_CASE("Empty or one element group by") {
@@ -192,3 +199,4 @@ TEST_CASE("group_by binary operations") {
         REQUIRE(it == grouper.end());
     }
 }
+// TODO to containers

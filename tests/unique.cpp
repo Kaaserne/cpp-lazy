@@ -12,6 +12,13 @@ TEST_CASE("Unique using sentinels") {
     static_assert(!std::is_same<decltype(unique.begin()), decltype(unique.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("abcdefghj");
     REQUIRE(lz::equal(unique, expected));
+
+    SECTION("Operator=") {
+        auto it = unique.begin();
+        REQUIRE(it == unique.begin());
+        it = unique.end();
+        REQUIRE(it == unique.end());
+    }
 }
 
 TEST_CASE("Unique changing and creating elements") {

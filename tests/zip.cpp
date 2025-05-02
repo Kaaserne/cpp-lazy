@@ -16,6 +16,13 @@ TEST_CASE("Zip with sentinels") {
                                                      std::make_tuple('o', 'd') };
     REQUIRE(lz::equal(zip, expected));
     static_assert(!std::is_same<decltype(zip.begin()), decltype(zip.end())>::value, "Should be sentinel-like");
+
+    SECTION("Operator=") {
+        auto it = zip.begin();
+        REQUIRE(it == zip.begin());
+        it = std::make_tuple(cstr.end(), cstr2.end());
+        REQUIRE(it == zip.end());
+    }
 }
 
 TEST_CASE("zip_iterable changing and creating elements") {

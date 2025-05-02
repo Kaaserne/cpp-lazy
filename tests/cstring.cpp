@@ -52,6 +52,13 @@ TEST_CASE("CString binary operations") {
         auto tmp = lz::c_string("");
         REQUIRE(!tmp.begin());
     }
+
+    SECTION("Operator=") {
+        auto beg = c_string.begin();
+        REQUIRE(beg == c_string.begin());
+        beg = c_string.end();
+        REQUIRE(beg == c_string.end());
+    }
 }
 
 TEST_CASE("CString to containers") {

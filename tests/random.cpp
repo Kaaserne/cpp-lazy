@@ -27,6 +27,14 @@ TEST_CASE("random_iterable should be random") {
             lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
         REQUIRE(random_array != randomArray2);
     }
+
+    SECTION("Operator=") {
+        auto random = lz::random(0., 1., size);
+        auto it = random.begin();
+        REQUIRE(it != random.end());
+        it = random.end();
+        REQUIRE(it == random.end());
+    }
 }
 
 TEST_CASE("random_iterable with custom distro's and custom engine") {

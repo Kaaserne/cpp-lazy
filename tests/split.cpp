@@ -28,6 +28,11 @@ TEST_CASE("Splitter permutations") {
 
         std::vector<lz::string_view> expected = { "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting with one delimiter ending with none") {
@@ -35,6 +40,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::s_split(to_split, " ");
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting with two delimiters ending with none") {
@@ -42,6 +52,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Ending with one delimiter starting with none") {
@@ -49,6 +64,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Ending with two delimiters starting with none") {
@@ -56,6 +76,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = to_split | lz::sv_split(" ");
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "", "" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting and ending with one delimiter") {
@@ -65,6 +90,11 @@ TEST_CASE("Splitter permutations") {
                         lz::to<std::vector>();
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123", "" };
         REQUIRE(splitter == expected);
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting and ending with two delimiters") {
@@ -72,6 +102,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123", "", "" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("No delimiters at all") {
@@ -79,6 +114,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Multiple delimiters in the middle") {
@@ -86,6 +126,11 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "Hello", "", "world", "", "test", "", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 }
 
@@ -243,6 +288,11 @@ TEST_CASE("One element splitter permutations") {
 
         std::vector<lz::string_view> expected = { "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting with one delimiter ending with none") {
@@ -250,6 +300,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = lz::s_split(to_split, ' ');
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting with two delimiters ending with none") {
@@ -257,6 +312,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = lz::sv_split(to_split, ' ');
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Ending with one delimiter starting with none") {
@@ -264,6 +324,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = lz::sv_split(to_split, ' ');
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Ending with two delimiters starting with none") {
@@ -271,6 +336,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = to_split | lz::sv_split(' ');
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "", "" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting and ending with one delimiter") {
@@ -280,6 +350,11 @@ TEST_CASE("One element splitter permutations") {
                         lz::to<std::vector>();
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123", "" };
         REQUIRE(splitter == expected);
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Starting and ending with two delimiters") {
@@ -287,6 +362,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = lz::sv_split(to_split, ' ');
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123", "", "" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("No delimiters at all") {
@@ -294,6 +374,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = lz::sv_split(to_split, ' ');
         std::vector<std::string> expected = { "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 
     SECTION("Multiple delimiters in the middle") {
@@ -301,6 +386,11 @@ TEST_CASE("One element splitter permutations") {
         auto splitter = lz::sv_split(to_split, ' ');
         std::vector<std::string> expected = { "Hello", "", "world", "", "test", "", "123" };
         REQUIRE(lz::equal(splitter, expected));
+
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = splitter.end();
+        REQUIRE(it == splitter.end());
     }
 }
 

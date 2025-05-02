@@ -30,6 +30,13 @@ TEST_CASE("Generate while changing and creating elements") {
         REQUIRE(expected == actual);
         i = 0;
     }
+
+    SECTION("Operator=") {
+        auto begin = gen_with_ref.begin();
+        REQUIRE(begin == gen_with_ref.end());
+        begin = gen_with_ref.end();
+        REQUIRE(begin == gen_with_ref.end());
+    }
 }
 
 TEST_CASE("Empty or one element generate while") {

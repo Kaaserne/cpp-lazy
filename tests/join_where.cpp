@@ -30,6 +30,13 @@ TEST_CASE("Join where with sentinels") {
     };
     auto vec = joined | lz::to<std::vector>();
     REQUIRE(vec == expected);
+
+    SECTION("Operator=") {
+        auto begin = joined.begin();
+        REQUIRE(begin == joined.begin());
+        begin = joined.end();
+        REQUIRE(begin == joined.end());
+    }
 }
 
 TEST_CASE("Join changing and creating elements") {

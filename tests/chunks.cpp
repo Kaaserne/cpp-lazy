@@ -19,6 +19,11 @@ TEST_CASE("Chunks changing and creating elements") {
     REQUIRE(lz::equal(*it, expected));
     ++it;
     REQUIRE(it == chunked.end());
+
+    it = chunked.begin();
+    REQUIRE(it != chunked.end());
+    it = chunked.end();
+    REQUIRE(it == chunked.end());
 }
 
 TEST_CASE("empty or one element chunks") {

@@ -14,6 +14,13 @@ TEST_CASE("take_every_iterable with sentinels") {
     static_assert(!std::is_same<decltype(take_every.begin()), decltype(take_every.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("Hlo");
     REQUIRE(lz::equal(take_every, expected));
+
+    SECTION("Operator=") {
+        auto begin = take_every.begin();
+        REQUIRE(begin == take_every.begin());
+        begin = take_every.end();
+        REQUIRE(begin == take_every.end());
+    }
 }
 
 TEST_CASE("take_every_iterable changing and creating elements") {

@@ -2,7 +2,6 @@
 #include <Lz/map.hpp>
 #include <catch2/catch.hpp>
 #include <forward_list>
-#include <iostream>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -18,6 +17,13 @@ TEST_CASE("Map with sentinels") {
     static_assert(!std::is_same<decltype(map.end()), decltype(map.begin())>::value, "Should be sentinels");
     auto c_str_expected = lz::c_string("HELLO, WORLD!");
     REQUIRE(lz::equal(map, c_str_expected));
+
+    SECTION("Operator=") {
+        auto begin = map.begin();
+        REQUIRE(begin == map.begin());
+        begin = map.end();
+        REQUIRE(begin == map.end());
+    }
 }
 
 TEST_CASE("forward iterator with std move non empty") {

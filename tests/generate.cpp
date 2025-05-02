@@ -19,6 +19,13 @@ TEST_CASE("Generate infinite") {
     REQUIRE(*begin == 0);
     REQUIRE(begin != generator.end());
     REQUIRE(begin != generator.begin());
+
+    SECTION("Operator=") {
+        REQUIRE(begin != generator.end());
+        begin = generator.end();
+        // Inf never reaches end
+        REQUIRE(begin != generator.end());
+    }
 }
 
 TEST_CASE("Generate changing and creating elements") {
@@ -37,6 +44,13 @@ TEST_CASE("Generate changing and creating elements") {
             REQUIRE(i == expected);
             ++expected;
         });
+    }
+
+    SECTION("Operator=") {
+        auto begin = generator.begin();
+        REQUIRE(begin != generator.end());
+        begin = generator.end();
+        REQUIRE(begin == generator.end());
     }
 }
 
