@@ -38,11 +38,6 @@ private:
     IterTuple _iterators;
     STuple _end;
 
-    LZ_CONSTEXPR_CXX_14 cartesian_product_iterator& operator=(default_sentinel) {
-        _iterators = _end;
-        return *this;
-    }
-
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> next() {
         ++std::get<I>(_iterators);
@@ -126,6 +121,11 @@ public:
         _iterators{ std::move(iterators) },
         _end{ std::move(end) } {
         static_assert(tup_size > 1, "Cannot cartesian product one/zero iterables");
+    }
+
+    LZ_CONSTEXPR_CXX_14 cartesian_product_iterator& operator=(default_sentinel) {
+        _iterators = _end;
+        return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
