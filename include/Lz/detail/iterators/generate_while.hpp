@@ -34,7 +34,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 generate_while_iterator& operator=(default_sentinel) noexcept {
-        std::get<0>(_last_returned).second = false;
+        std::get<0>(_last_returned) = false;
         return *this;
     }
 
