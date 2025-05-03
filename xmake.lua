@@ -21,6 +21,10 @@ target("cpp-lazy")
     end
     add_headerfiles("include/(Lz/*.hpp)")
     add_headerfiles("include/(Lz/detail/*.hpp)")
+    add_headerfiles("include/(Lz/detail/adaptors/*.hpp)")
+    add_headerfiles("include/(Lz/detail/iterables/*.hpp)")
+    add_headerfiles("include/(Lz/detail/iterators/*.hpp)")
+    add_headerfiles("include/(Lz/detail/iterators/any_iterable/*.hpp)")
 target_end()
 
 if has_config("tests") then
