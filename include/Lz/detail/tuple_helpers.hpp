@@ -13,6 +13,55 @@
 namespace lz {
 namespace detail {
 
+template<class T, std::size_t... Is>
+std::tuple<decltype(Is, T{})...> tuple_of_n(index_sequence<Is...>) {
+    return std::make_tuple(decltype(Is, T{})(0)...);
+}
+
+template<class>
+struct iter_tuple_diff_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_diff_type_helper<std::tuple<Iterators...>> {
+    using type = common_type<diff_type<Iterators>...>;
+};
+
+template<class>
+struct iter_tuple_iter_cat_helper;
+
+template<class... Iterators>
+struct iter_tuple_iter_cat_helper<std::tuple<Iterators...>> {
+    using type = common_type<iter_cat_t<Iterators>...>;
+};
+
+template<class>
+struct iter_tuple_value_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_value_type_helper<std::tuple<Iterators...>> {
+    using type = std::tuple<val_t<Iterators>...>;
+};
+
+template<class>
+struct iter_tuple_ref_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_ref_type_helper<std::tuple<Iterators...>> {
+    using type = std::tuple<ref_t<Iterators>...>;
+};
+
+template<class IterTuple>
+using iter_tuple_diff_type_t = typename iter_tuple_diff_type_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_iter_cat_t = typename iter_tuple_iter_cat_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
+
 template<class Fn>
 struct tuple_expand {
 private:
@@ -55,6 +104,12 @@ public:
 template<class Fn>
 constexpr tuple_expand<decay_t<Fn>> make_expand_fn(Fn&& fn) {
     return { std::forward<Fn>(fn) };
+}
+
+template<class T, class IterableTuple, std::size_t... Is>
+LZ_CONSTEXPR_CXX_14 std::tuple<decltype(Is, T{})...>
+iterable_tuple_eager_size_as(IterableTuple&& iterables, index_sequence<Is...>) {
+    return { static_cast<T>(lz::eager_size(std::get<Is>(std::forward<IterableTuple>(iterables))))... };
 }
 
 template<class Iterable, class... Ts>

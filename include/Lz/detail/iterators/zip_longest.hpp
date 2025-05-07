@@ -1,12 +1,12 @@
 #pragma once
 
-#include <cstddef>
 #ifndef LZ_ZIP_LONGEST_ITERATOR_HPP
 #define LZ_ZIP_LONGEST_ITERATOR_HPP
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/traits.hpp>
+#include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/iterator_base.hpp>
 #include <Lz/optional.hpp>
 
@@ -106,7 +106,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
         return std::min({ std::get<I>(_iterators) == std::get<I>(other._iterators)... });
     }
 
@@ -151,11 +151,6 @@ public:
     }
 };
 
-template<class T, std::size_t... Is>
-std::tuple<decltype(Is, T{})...> zeroes(index_sequence<Is...>) {
-    return std::make_tuple(decltype(Is, T{})(0)...);
-}
-
 template<class IterTuple, class SentinelTuple>
 class zip_longest_iterator<true /* bidi */, IterTuple, SentinelTuple>
     : public iterator<zip_longest_iterator<true, IterTuple, IterTuple>, optional_iter_tuple_ref_type<IterTuple>,
@@ -172,7 +167,7 @@ public:
 
 private:
     using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
-    using difference_tuple = decltype(zeroes<difference_type>(make_idx_sequence_for_this()));
+    using difference_tuple = decltype(tuple_of_n<difference_type>(make_idx_sequence_for_this()));
 
     IterTuple _iterators;
     SentinelTuple _end;
@@ -188,7 +183,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
         return reference{ deref_one<I>()... };
     }
 
@@ -222,7 +217,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void decrement(index_sequence<I...>) {
+    LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
         decompose((decrement_one<I>(longest), 0)...);
     }
@@ -250,7 +245,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_longest_iterator& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_longest_iterator& other, index_sequence<I...>) const {
         const auto min_max = std::minmax({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
         return min_max.second <= 0 ? min_max.first : min_max.second;
     }
@@ -274,7 +269,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 void min_is(index_sequence<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void min_is(index_sequence<I...>, const difference_type offset) {
         const auto longest = std::max({ std::get<I>(_distances)... });
         decompose((min_is_one<I>(longest, offset), 0)...);
     }
@@ -285,13 +280,13 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
         return std::min({ (std::get<I>(_iterators) == std::get<I>(other._iterators))... });
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool lt(const zip_longest_iterator& other, index_sequence<I...>) const {
-        return std::min({ static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other._iterators))... }) < 0;
+    LZ_CONSTEXPR_CXX_14 bool lt(const zip_longest_iterator& other, index_sequence<I...>) const {
+        return std::min({ static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other._iterators))... });
     }
 
 public:

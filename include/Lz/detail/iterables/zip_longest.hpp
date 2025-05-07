@@ -22,11 +22,6 @@ public:
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
-    template<std::size_t... Is, class Diff = typename iterator::difference_type>
-    std::tuple<decltype(Is, Diff{})...> sizes(index_sequence<Is...>) const {
-        return { static_cast<Diff>(lz::eager_size(std::get<Is>(_iterables)))... };
-    }
-
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
         return std::max({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
@@ -44,29 +39,31 @@ public:
         return size(make_index_sequence<sizeof...(Iterables)>{});
     }
 
-    template<bool sized_and_bidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized_and_bidi, iterator> begin() const& {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> begin() const& {
         using diff = typename iterator::difference_type;
-        return { begin_tuple(_iterables), end_tuple(_iterables), zeroes<diff>(make_index_sequence<sizeof...(Iterables)>{}) };
+        return { begin_tuple(_iterables), end_tuple(_iterables), tuple_of_n<diff>(make_index_sequence<sizeof...(Iterables)>{}) };
     }
 
-    template<bool sized_and_bidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!sized_and_bidi, iterator> begin() const& {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() const& {
         return { begin_tuple(_iterables), end_tuple(_iterables) };
     }
 
-    template<bool sized_and_bidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!sized_and_bidi, iterator> begin() && {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() && {
         return { begin_tuple(std::move(_iterables)), end_tuple(std::move(_iterables)) };
     }
 
-    template<bool sized_and_bidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized_and_bidi, iterator> end() const {
-        return { end_tuple(_iterables), end_tuple(_iterables), sizes(make_index_sequence<sizeof...(Iterables)>{}) };
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> end() const {
+        using diff = typename iterator::difference_type;
+        return { end_tuple(_iterables), end_tuple(_iterables),
+                 iterable_tuple_eager_size_as<diff>(_iterables, make_index_sequence<sizeof...(Iterables)>{}) };
     }
 
-    template<bool sized_and_bidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!sized_and_bidi, default_sentinel> end() const noexcept {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, default_sentinel> end() const noexcept {
         return {};
     }
 
