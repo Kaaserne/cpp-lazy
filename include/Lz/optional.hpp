@@ -4,6 +4,7 @@
 #define LZ_OPTIONAL_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
+#include <cstdint>
 #include <type_traits>
 
 #ifdef __cpp_lib_optional
