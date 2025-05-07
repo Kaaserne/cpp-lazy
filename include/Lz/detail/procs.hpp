@@ -59,6 +59,36 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
     return std::end(c);
 }
 
+// clang-format off
+
+// next_fast: check whether it's faster to go forward or backward when incrementing n steps
+// Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
+// for random access iterators this is O(1) anyway. For forward iterators this is not O(1),
+// but we can't go any other way than forward. Random access iterators will use the same
+// implementation as the forward non-sized iterables so we can skip that if statement.
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+enable_if<sized<I>::value && std::is_same<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>::value, iter_t<I>>
+next_fast(I&& iterable, const diff_iterable_t<I> n) {
+    using diff_type = diff_iterable_t<I>;
+    const auto size = static_cast<diff_type>(lz::size(iterable));
+    if (n > size / 2) {
+        return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+    }
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
+}
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+enable_if<!sized<I>::value || !std::is_same<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>::value, iter_t<I>>
+next_fast(I&& iterable, diff_iterable_t<I> n) {
+    using diff_type = diff_iterable_t<I>;
+    return std::next(detail::begin(std::forward<I>(iterable)), static_cast<diff_type>(n));
+}
+
+// clang-format on
+
 template<class... Ts>
 constexpr void decompose(const Ts&...) noexcept {
 }

@@ -11,39 +11,44 @@ namespace lz {
 namespace detail {
 template<class Iterable>
 class drop_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
-    diff_iterable_t<Iterable> _n;
-
 public:
     using iterator = iter_t<Iterable>;
     using sentinel = sentinel_t<Iterable>;
     using const_iterator = iterator;
     using value_type = val_iterable_t<Iterable>;
 
+private:
+    static constexpr bool is_sized = sized<Iterable>::value;
+    using diff_type = typename iterator::difference_type;
+
+    ref_or_view<Iterable> _iterable;
+    std::size_t _n;
+
+public:
     constexpr drop_iterable() = default;
 
     template<class I>
-    constexpr drop_iterable(I&& iterable, diff_iterable_t<Iterable> n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
+    constexpr drop_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, std::size_t> size() const {
+    template<bool Sized = is_sized>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
         return static_cast<std::size_t>(lz::size(_iterable) - static_cast<std::size_t>(_n));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return std::next(detail::begin(std::move(_iterable)), _n);
+        return next_fast(std::move(_iterable), static_cast<diff_type>(_n));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return std::next(std::begin(_iterable), _n);
+        return next_fast(_iterable, static_cast<diff_type>(_n));
     }
 
     LZ_NODISCARD constexpr sentinel end() const& {
         return std::end(_iterable);
     }
 
-    LZ_NODISCARD constexpr sentinel end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
         return detail::end(std::move(_iterable));
     }
 };
