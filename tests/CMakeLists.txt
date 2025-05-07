@@ -48,6 +48,7 @@ add_executable(cpp-lazy-tests
 	group_by.cpp
 	inclusive_scan.cpp
 	init.cpp
+	interleave.cpp
 	intersection.cpp
 	iter_tools.cpp
 	join_where.cpp

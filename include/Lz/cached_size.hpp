@@ -14,11 +14,12 @@ namespace lz {
  * bidirectional or less and is not sized, the entire iterable will be traversed. This can be handy if you want to
  * cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
  * (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind that this is
- * only useful for non sized iterables and iterables that are exactly bidirectional (so forward excluded). The following iterables
- * require the size/distance of an iterable:
+ * only useful for non sized iterables and iterables that are exactly bidirectional (so forward/random access excluded). The
+ * following iterables require the size/distance of an iterable:
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
+ * - `lz::interleaved`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
@@ -35,17 +36,18 @@ namespace lz {
  * // iterable = { {0, {0, 2, 4}}, {1, {6, 8}} }
  * ```
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times
  */
 constexpr detail::cached_size_adaptor cache_size{};
 
@@ -56,11 +58,12 @@ constexpr detail::cached_size_adaptor cache_size{};
  * bidirectional or less and is not sized, the entire iterable will be traversed. This can be handy if you want to
  * cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
  * (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind that this is
- * only useful for non sized iterables and iterables that are exactly bidirectional (so forward excluded). The following iterables
- * require the size/distance of an iterable:
+ * only useful for non sized iterables and iterables that are exactly bidirectional (so forward/random access excluded). The
+ * following iterables require the size/distance of an iterable:
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
+ * - `lz::interleaved`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
@@ -77,17 +80,18 @@ constexpr detail::cached_size_adaptor cache_size{};
  * // iterable = { {0, {0, 2, 4}}, {1, {6, 8}} }
  * ```
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times
  */
 LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
 
