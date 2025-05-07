@@ -217,6 +217,34 @@ struct has_push_back<Container,
                      void_t<decltype(0, std::declval<Container>().push_back(std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
+/**
+ * @brief Converts an iterable to a container, given template parameter `Container`. Can be specialized for custom containers.
+ * Example:
+ * ```cpp
+ * template<class T>
+ * class my_container {
+ *     void my_inserter(T t) { ... }
+ * };
+ *
+ * template<class T>
+ * lz::custom_copier_for<my_container<T>> {
+ *     template<class Iterable>
+ *     void copy(Iterable&& iterable, my_container<T>& container) {
+ *         // Copy the iterable to the container, for example:
+ *         Container is not reserved if it contains a reserve member
+ *         for (auto&& i : iterable) {
+ *             container.my_inserter(i);
+ *         }
+ *     }
+ * };
+ *
+ * // or you can use enable if
+ * template<class T>
+ * lz::custom_copier_for<my_container<T>, std::enable_if_t<...>> {
+ *     // Same as above
+ * };
+ * ```
+ */
 template<class Container, class = void>
 struct custom_copier_for;
 
@@ -342,8 +370,7 @@ struct template_combiner {
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args,
              class Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>>
     LZ_NODISCARD constexpr Cont operator()(Iterable&& iterable, Args&&... args) const {
-        constexpr to_adaptor<Cont> to_adaptor{};
-        return to_adaptor(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+        return to_adaptor<Cont>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
     }
 };
 } // namespace detail
