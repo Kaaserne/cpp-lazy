@@ -20,17 +20,18 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may
  * be worth your while to use `lz::cache_size`. So, all in all: use
  * lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times. Example:
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times. Example:
  * ```cpp
  * auto vec = std::vector<int>{1, 2, 3, 4, 5};
  * auto res = lz::take(vec, 2); // res = {1, 2}
@@ -54,17 +55,18 @@ constexpr detail::take_adaptor take{};
  * sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may
  * be worth your while to use `lz::cache_size`. So, all in all: use
  * lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times. Example:
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times. Example:
  * ```cpp
  * auto vec = std::vector<int>{1, 2, 3, 4, 5};
  * auto res = lz::take(vec, 2); // res = {1, 2}

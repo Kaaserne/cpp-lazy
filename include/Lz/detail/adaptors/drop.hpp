@@ -24,8 +24,7 @@ struct drop_adaptor {
      * @param n The amount of elements to drop
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>>
-    operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
+    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, const std::size_t n) const {
         return { iterable, n };
     }
 
@@ -39,8 +38,7 @@ struct drop_adaptor {
      * ```
      * @param n The amount of elements to drop
      */
-    template<class DiffT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t n) const {
         return { n };
     }
 };

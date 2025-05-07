@@ -31,17 +31,18 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * auto enumerated = list | lz::enumerate(5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
  * ```
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times
  */
 constexpr detail::enumerate_adaptor enumerate{};
 
@@ -66,17 +67,18 @@ constexpr detail::enumerate_adaptor enumerate{};
  * auto enumerated = list | lz::enumerate(5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
  * ```
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times
  */
 LZ_INLINE_VAR constexpr detail::enumerate_adaptor enumerate{};
 

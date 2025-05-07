@@ -1,6 +1,5 @@
 #pragma once
 
-// TODO interleaved inmplementation?
 
 #ifndef LZ_INTERSECTION_HPP
 #define LZ_INTERSECTION_HPP

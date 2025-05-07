@@ -18,17 +18,18 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * the input iterable. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
  * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times
  * Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -48,17 +49,18 @@ constexpr detail::exclude_adaptor exclude{};
  * the input iterable. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
  * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward excluded)
+ * - Your iterable is exactly bidirectional (so forward/random access excluded)
  * - Your iterable is not sized
  * - You use multiple/a combination of the following iterables:
- *   - lz::chunks
- *   - lz::enumerate
- *   - lz::exclude
- *   - lz::take
- *   - lz::take_every
- *   - lz::zip_longest
- *   - lz::zip
- * Are planning to call begin() or end() multiple times
+ * - `lz::chunks`
+ * - `lz::enumerate`
+ * - `lz::exclude`
+ * - `lz::interleaved`
+ * - `lz::take`
+ * - `lz::take_every`
+ * - `lz::zip_longest`
+ * - `lz::zip`
+ * - Are planning to call begin() or end() multiple times
  * Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
