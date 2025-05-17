@@ -1,4 +1,3 @@
-// TODO
 #include <Lz/algorithm.hpp>
 #include <iostream>
 #include <Lz/c_string.hpp>
@@ -16,6 +15,9 @@ int main() {
     // But this for example, will call std::find again
     // auto common = lz::common(c_str);
     // std::cout << (*lz::find(common, 'w')) << '\n'; // Will call std::find
+
+    // In short: if the iterable returns a sentinel, then std::* variants cannot be used.
+    // If you want to use std::* variants, you must use lz::common first.
     std::cout << std::boolalpha;
 
     {

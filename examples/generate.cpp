@@ -1,6 +1,4 @@
-#include <Lz/Generate.hpp>
-#include <vector>
-#include <functional>
+#include <Lz/generate.hpp>
 #include <iostream>
 
 int main() {

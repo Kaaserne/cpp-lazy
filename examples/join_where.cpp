@@ -1,6 +1,7 @@
 #include <Lz/join_where.hpp>
-#include <vector>
 #include <algorithm>
+#include <iostream>
+#include <vector>
 
 struct customer {
     int id;

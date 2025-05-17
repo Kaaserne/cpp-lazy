@@ -67,7 +67,7 @@ public:
         _iterator = find(std::move(_iterator), _end);
     }
 
-    constexpr bool eq(const filter_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const filter_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }

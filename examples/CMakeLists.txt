@@ -30,10 +30,12 @@ set(examples
     generate
     group_by
     inclusive_scan
+    interleave
     intersection
     join_where
     loop
     map
+    pipe
     print_and_format
     random
     range

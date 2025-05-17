@@ -73,17 +73,18 @@ struct iterable_formatter {
 #endif // FMT_VERSION >= 80000
 
         for (++it; it != end; ++it) {
-            stream << separator;
+            fmt::print(stream, "{}", separator);
             fmt::print(stream, format, *it);
         }
 
 #else
 
-        std::format_to(std::ostream_iterator<char>(stream), format, *it);
+        std::ostream_iterator<char> out_it(stream);
+        std::format_to(out_it, format, *it);
 
         for (++it; it != end; ++it) {
-            stream << separator;
-            std::format_to(std::ostream_iterator<char>(stream), format, *it);
+            std::format_to(out_it, "{}", separator);
+            std::format_to(out_it, format, *it);
         }
 
 #endif // !LZ_STANDALONE
@@ -111,8 +112,8 @@ struct iterable_formatter {
         if (begin == end) {
             return stream;
         }
-        stream << *begin++;
-        for (; begin != end; ++begin) {
+        stream << *begin;
+        for (++begin; begin != end; ++begin) {
             stream << separator << *begin;
         }
 
@@ -256,9 +257,8 @@ struct iterable_formatter {
         std::string_view fmt{ format };
         std::string_view sep{ separator };
 
-        const auto empty_fmt_args = std::make_format_args();
         for (; begin != end; ++begin) {
-            std::vformat_to(back_inserter, sep, empty_fmt_args);
+            std::vformat_to(back_inserter, "{}", sep);
             std::vformat_to(back_inserter, fmt, std::make_format_args(*begin));
         }
 

@@ -35,7 +35,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator& operator=(default_sentinel) {
-        // TODO write tests for operator=
         _iterator = _end;
         return *this;
     }

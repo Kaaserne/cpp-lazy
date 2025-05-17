@@ -1,4 +1,6 @@
 #include <Lz/generate_while.hpp>
+#include <iostream>
+
 
 int main() {
     int i = 0;

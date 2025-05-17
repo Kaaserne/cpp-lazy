@@ -172,6 +172,8 @@ TEST_CASE("Empty or one element flatten") {
     }
 }
 
+namespace {
+
 template<class Vector, class ExpectedIterable>
 void test_flatten_operators_mm_and_pp(const Vector& vec, const ExpectedIterable& expected) {
     auto flattened = lz::flatten(vec);
@@ -238,6 +240,8 @@ void test_operator_min(const Vector& vec) {
         REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
     }
 }
+
+} // namespace
 
 TEST_CASE("Should flatten permutations") {
     SECTION("Flatten 1D") {

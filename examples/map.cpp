@@ -1,4 +1,4 @@
-#include <Lz/Map.hpp>
+#include <Lz/map.hpp>
 #include <vector>
 #include <iostream>
 

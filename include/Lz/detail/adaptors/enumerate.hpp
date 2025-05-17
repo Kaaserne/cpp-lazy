@@ -26,18 +26,19 @@ struct enumerate_adaptor {
      * auto enumerated = lz::enumerate(list, 5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
      * ```
      * So, all in all: use lz::cache_size if:
-     * - Your iterable is exactly bidirectional (so forward/random access excluded)
-     * - Your iterable is not sized
-     * - You use multiple/a combination of the following iterables:
+     * - Your iterable is exactly bidirectional (so forward/random access excluded) and
+     * - Your iterable is not sized and
+     * - You either use multiple/a combination of the following iterables OR (see last point):
      * - `lz::chunks`
      * - `lz::enumerate`
      * - `lz::exclude`
-     * - `lz::interleaved`
+     * - `lz::interleave`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`
      * - `lz::zip`
-     * - Are planning to call begin() or end() multiple times
+     * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+     * combinations)
      * @param iterable The iterable to enumerate
      * @param start The start index of the enumeration
      */
@@ -61,18 +62,19 @@ struct enumerate_adaptor {
      * auto enumerated = list | lz::enumerate(5); // enumerated = { {5, 1}, {6, 2}, {7, 3}, {8, 4}, {9, 5} }
      * ```
      * So, all in all: use lz::cache_size if:
-     * - Your iterable is exactly bidirectional (so forward/random access excluded)
-     * - Your iterable is not sized
-     * - You use multiple/a combination of the following iterables:
+     * - Your iterable is exactly bidirectional (so forward/random access excluded) and
+     * - Your iterable is not sized and
+     * - You either use multiple/a combination of the following iterables OR (see last point):
      * - `lz::chunks`
      * - `lz::enumerate`
      * - `lz::exclude`
-     * - `lz::interleaved`
+     * - `lz::interleave`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`
      * - `lz::zip`
-     * - Are planning to call begin() or end() multiple times
+     * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+     * combinations)
      * @param start The start index of the enumeration
      */
     template<class IntType = int>

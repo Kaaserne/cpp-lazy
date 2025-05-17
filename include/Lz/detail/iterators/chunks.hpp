@@ -206,10 +206,10 @@ public:
         const auto offset = remaining % _chunk_size;
 
         if (offset == 0) {
-            _sub_range_begin -= _chunk_size;
+            _sub_range_begin -= static_cast<difference_type>(_chunk_size);
         }
         else {
-            _sub_range_begin -= offset;
+            _sub_range_begin -= static_cast<difference_type>(offset);
         }
     }
 

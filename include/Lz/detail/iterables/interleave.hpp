@@ -5,7 +5,6 @@
 
 #include <Lz/detail/iterators/interleave.hpp>
 #include <Lz/detail/ref_or_view.hpp>
-#include <tuple>
 
 namespace lz {
 namespace detail {
@@ -14,6 +13,7 @@ template<class... Iterables>
 class interleave_iterable {
     std::tuple<ref_or_view<Iterables>...> _iterables;
 
+    using iter_tuple = std::tuple<iter_t<Iterables>...>;
     using sentinel_tuple = std::tuple<sentinel_t<Iterables>...>;
 
     template<std::size_t... I>
@@ -21,23 +21,16 @@ class interleave_iterable {
         return std::min({ static_cast<std::size_t>(std::get<I>(_iterables).size())... }) * sizeof...(Iterables);
     }
 
-    template<std::size_t... I>
-    constexpr bool all_not_at_end(index_sequence<I...>) const {
-        return std::min({ std::begin(std::get<I>(_iterables)) != std::end(std::get<I>(_iterables))... });
-    }
-
     using index_sequence_for_this = make_index_sequence<sizeof...(Iterables)>;
 
 public:
-    using iterator = interleave_iterator<std::tuple<iter_t<Iterables>...>, sentinel_tuple>;
+    using iterator = interleave_iterator<iter_tuple, sentinel_tuple>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
     template<class I, class... Is>
     constexpr interleave_iterable(I&& iterable, Is&&... iterables) :
         _iterables{ std::forward<I>(iterable), std::forward<Is>(iterables)... } {
-        static_assert(conjunction<std::is_same<ref_iterable_t<I>, ref_iterable_t<Is>>...>::value,
-                      "all iterables must contain the same reference type");
     }
 
     template<class T = conjunction<sized<Iterables>...>>
@@ -45,29 +38,22 @@ public:
         return size(index_sequence_for_this{});
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const {
-        using diff_type = typename iterator::difference_type;
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+        return { begin_tuple(_iterables) };
+    }
 
-        tuple_of_bools<sizeof...(Iterables)> iterator_turns{};
-        std::get<0>(iterator_turns) = all_not_at_end(index_sequence_for_this{});
-        const tuple_of_distances<sizeof...(Iterables), diff_type> sizes{};
-
-        return { begin_tuple(_iterables), iterator_turns, sizes };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
+        return { begin_tuple(std::move(_iterables)) };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const {
-        tuple_of_bools<sizeof...(Iterables)> iterator_turns{};
-        std::get<0>(iterator_turns) = all_not_at_end(index_sequence_for_this{});
-        return { begin_tuple(_iterables), iterator_turns };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
+        return { smallest_end_tuple(_iterables, index_sequence_for_this{}) };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        using diff_type = typename iterator::difference_type;
-        return { end_tuple(_iterables), tuple_of_bools<sizeof...(Iterables)>{},
-                 iterable_tuple_eager_size_as<diff_type>(_iterables, index_sequence_for_this{}) };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
+        return { smallest_end_tuple(std::move(_iterables), index_sequence_for_this{}) };
     }
 
     template<class I = typename iterator::iterator_category>

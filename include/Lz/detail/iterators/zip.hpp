@@ -37,17 +37,17 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
-        decompose((++std::get<I>(_iterators), 0)...);
+        decompose(++std::get<I>(_iterators)...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
-        decompose((--std::get<I>(_iterators), 0)...);
+        decompose(--std::get<I>(_iterators)...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence<I...>, const difference_type offset) {
-        decompose(((std::get<I>(_iterators) += offset), 0)...);
+        decompose(std::get<I>(_iterators) += offset...);
     }
 
     template<std::size_t... I>

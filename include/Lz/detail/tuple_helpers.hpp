@@ -8,8 +8,6 @@
 #include <Lz/detail/traits.hpp>
 #include <tuple>
 
-// TODO add lz::decay_to iterable
-
 namespace lz {
 namespace detail {
 
@@ -104,6 +102,32 @@ public:
 template<class Fn>
 constexpr tuple_expand<decay_t<Fn>> make_expand_fn(Fn&& fn) {
     return { std::forward<Fn>(fn) };
+}
+
+template<class Iterable>
+LZ_CONSTEXPR_CXX_14 iter_t<Iterable>
+increment_or_decrement_iterator(Iterable&& iterable, std::size_t this_size, std::size_t min) {
+    using diff_type = diff_iterable_t<Iterable>;
+    // Check whether we can better use decrement or increment. For random access iterators, we can
+    // use either, but for bidirectional iterators, we need to be "careful" about the direction.
+    // We want to use the iterator that requires the least amount of increments/decrements.
+    const auto to_decrement = static_cast<diff_type>(this_size - min);
+    const auto to_increment = static_cast<diff_type>(min);
+    if (to_increment > to_decrement) {
+        return std::prev(detail::end(std::forward<Iterable>(iterable)), to_decrement);
+    }
+    return std::next(detail::begin(std::forward<Iterable>(iterable)), to_increment);
+}
+
+template<std::size_t... Is, class Iterable>
+LZ_CONSTEXPR_CXX_14 auto
+smallest_end_tuple(Iterable&& iterable_tuple,
+                   index_sequence<Is...>) -> std::tuple<decltype(std::begin(std::get<Is>(iterable_tuple)))...> {
+    const std::size_t sizes[] = { static_cast<std::size_t>(lz::eager_size(std::get<Is>(iterable_tuple)))... };
+    const auto min = std::min({ sizes[Is]... });
+
+    return std::make_tuple(
+        increment_or_decrement_iterator(std::get<Is>(std::forward<Iterable>(iterable_tuple)), sizes[Is], min)...);
 }
 
 template<class T, class IterableTuple, std::size_t... Is>

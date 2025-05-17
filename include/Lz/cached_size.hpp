@@ -11,7 +11,7 @@ namespace lz {
 
 /**
  * @brief Creates an iterable with a size. Gets the size eagerly (using `lz::eager_size`), so if the input iterable is
- * bidirectional or less and is not sized, the entire iterable will be traversed. This can be handy if you want to
+ * bidirectional not sized, the entire iterable will be traversed. This can be handy if you want to
  * cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
  * (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind that this is
  * only useful for non sized iterables and iterables that are exactly bidirectional (so forward/random access excluded). The
@@ -19,7 +19,7 @@ namespace lz {
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
- * - `lz::interleaved`
+ * - `lz::interleave`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
@@ -36,18 +36,19 @@ namespace lz {
  * // iterable = { {0, {0, 2, 4}}, {1, {6, 8}} }
  * ```
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward/random access excluded)
- * - Your iterable is not sized
- * - You use multiple/a combination of the following iterables:
+ * - Your iterable is exactly bidirectional (so forward/random access excluded) and
+ * - Your iterable is not sized and
+ * - You either use multiple/a combination of the following iterables OR (see last point):
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
- * - `lz::interleaved`
+ * - `lz::interleave`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
- * - Are planning to call begin() or end() multiple times
+ * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+ * combinations)
  */
 constexpr detail::cached_size_adaptor cache_size{};
 
@@ -55,15 +56,15 @@ constexpr detail::cached_size_adaptor cache_size{};
 
 /**
  * @brief Creates an iterable with a size. Gets the size eagerly (using `lz::eager_size`), so if the input iterable is
- * bidirectional or less and is not sized, the entire iterable will be traversed. This can be handy if you want to
- * cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
+ * bidirectional and not sized (like lz::filter for example), the entire iterable will be traversed. This can be handy if you want
+ * to cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
  * (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind that this is
  * only useful for non sized iterables and iterables that are exactly bidirectional (so forward/random access excluded). The
  * following iterables require the size/distance of an iterable:
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
- * - `lz::interleaved`
+ * - `lz::interleave`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
@@ -80,18 +81,19 @@ constexpr detail::cached_size_adaptor cache_size{};
  * // iterable = { {0, {0, 2, 4}}, {1, {6, 8}} }
  * ```
  * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward/random access excluded)
- * - Your iterable is not sized
- * - You use multiple/a combination of the following iterables:
+ * - Your iterable is exactly bidirectional (so forward/random access excluded) and
+ * - Your iterable is not sized and
+ * - You either use multiple/a combination of the following iterables OR (see last point):
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
- * - `lz::interleaved`
+ * - `lz::interleave`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
- * - Are planning to call begin() or end() multiple times
+ * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+ * combinations)
  */
 LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
 
