@@ -37,8 +37,6 @@ class interleave_iterator
 
     using traits = std::iterator_traits<first_iter<IterTuple>>;
 
-    static_assert(all_same_reference<IterTuple>::value, "All iterators must have the same reference type");
-
 public:
     using value_type = typename traits::value_type;
     using difference_type = iter_tuple_diff_type_t<IterTuple>;
@@ -126,6 +124,7 @@ private:
 public:
     LZ_CONSTEXPR_CXX_14 interleave_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
         static_assert(tuple_size > 1, "interleaved_iterator must have at least two iterators");
+        static_assert(all_same_reference<IterTuple>::value, "All iterators must have the same reference type");
     }
 
     constexpr interleave_iterator() = default;
