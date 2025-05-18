@@ -76,7 +76,7 @@ public:
         const auto iter_length = _end - _begin;
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
-        _rotations_left -= offset / iter_length;
+        _rotations_left -= static_cast<std::size_t>(offset / iter_length);
         if (_iterator == _begin && static_cast<difference_type>(_rotations_left) == -1) {
             // We are exactly at end (rotations left is unsigned)
             _iterator = _end;

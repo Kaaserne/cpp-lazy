@@ -71,7 +71,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         LZ_ASSERT((n < 0 ? -n : n) <= (_end - _begin), "Cannot increment/decrement after fake iterator end/begin");
-        _offset += n;
+        _offset += static_cast<std::size_t>(n);
         if (n < 0) {
             n = -n;
             if (n > _iterator - _begin) {

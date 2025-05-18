@@ -40,7 +40,7 @@ TEST_CASE("Dimensions & sized") {
     auto filter = lz::filter(v, [](int) { return true; });
     static_assert(!lz::detail::all_sized<decltype(filter)>::value, "Filter should not be sized");
 
-    std::array<std::array<decltype(lz::c_string("")), 1>, 1> arr_of_arr_of_cstr = { { lz::c_string("") } };
+    std::array<std::array<decltype(lz::c_string("")), 1>, 1> arr_of_arr_of_cstr = { { { lz::c_string("") } } };
     static_assert(!lz::detail::all_sized<decltype(arr_of_arr_of_cstr)>::value, "Array of array of c_string should be sized");
 }
 
@@ -228,16 +228,18 @@ void test_operator_min(const Vector& vec) {
 
     for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(flattened)); ++i) {
         INFO("With i = " << i);
-        REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
-        REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
-        REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
-        REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - i));
+        REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(flattened)) - i);
+        REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened)) - i);
+        REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(flattened)) - i));
+        REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(flattened)) - i));
     }
 
     for (std::size_t i = 0; i < lz::size(flattened); ++i) {
         INFO("With i = " << i);
-        REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
-        REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
+        REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                static_cast<std::ptrdiff_t>(lz::size(flattened)) - 2 * static_cast<std::ptrdiff_t>(i));
+        REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                -(static_cast<std::ptrdiff_t>(lz::size(flattened)) - 2 * static_cast<std::ptrdiff_t>(i)));
     }
 }
 
@@ -353,7 +355,7 @@ TEST_CASE("Should flatten permutations") {
         test_flatten_operators_mm_and_pp(vec, expected);
         test_operator_min(vec);
 
-        vec = { { { { 1 } }, { { { 4 } }, { { 5 } }, { { 6 } }, { { 7 } }, { { 8 } }, { { 9 } } } } };
+        vec = { { { { 1 } }, { { 4 }, { 5 }, { 6 }, { 7 }, { 8 }, { 9 } } } };
         test_operator_plus_is(vec, expected);
         test_operator_min(vec);
         test_flatten_operators_mm_and_pp(vec, expected);

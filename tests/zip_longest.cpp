@@ -243,7 +243,7 @@ TEST_CASE("zip_longest_iterable binary operations") {
             INFO("With i = " << i);
             REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(end - lz::size(zipper) == zipper.begin());
+        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.begin());
 
         std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(zipper)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(zipper)));
@@ -268,16 +268,18 @@ TEST_CASE("zip_longest_iterable binary operations") {
         auto end = zipper.end();
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(zipper)); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(zipper) - i));
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(zipper) - i));
-            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(zipper) - i));
-            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(zipper) - i));
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(zipper)) - i);
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(zipper)) - i);
+            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(zipper)) - i));
+            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(zipper)) - i));
         }
 
         for (std::size_t i = 0; i < lz::size(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(zipper) - 2 * i));
-            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(zipper) - 2 * i));
+            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                    static_cast<std::ptrdiff_t>(lz::size(zipper)) - 2 * static_cast<std::ptrdiff_t>(i));
+            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                     -(static_cast<std::ptrdiff_t>(lz::size(zipper)) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }

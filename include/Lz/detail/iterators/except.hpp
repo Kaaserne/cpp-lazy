@@ -36,7 +36,8 @@ private:
         using std::find_if;
 
         _iterator = find_if(std::move(_iterator), _end, [this](ref_t<Iterator> value) {
-            const auto it = sized_lower_bound(_to_except.begin(), value, _predicate, lz::size(_to_except));
+            const auto it =
+                sized_lower_bound(_to_except.begin(), value, _predicate, static_cast<difference_type>(lz::size(_to_except)));
             return it == _to_except.end() || _predicate(value, *it);
         });
     }

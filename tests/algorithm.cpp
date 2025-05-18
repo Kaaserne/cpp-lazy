@@ -336,9 +336,9 @@ TEST_CASE("To container") {
 
     SECTION("To custom container same iterator pair") {
         const auto c_str = lz::c_string("Hello");
-        auto container = lz::to<custom_container<int>>(c_str, 0);
+        auto container = lz::to<custom_container<int>>(c_str, std::size_t{ 0 });
         REQUIRE(lz::equal(container.vec(), c_str));
-        container = c_str | lz::to<custom_container<int>>(0);
+        container = c_str | lz::to<custom_container<int>>(std::size_t{ 0 });
         REQUIRE(lz::equal(container.vec(), c_str));
     }
 }

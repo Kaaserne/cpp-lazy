@@ -18,8 +18,7 @@ TEST_CASE("Enumerate with sentinels") {
 
     using ref_taken = lz::ref_iterable_t<decltype(taken)>;
     using ref_expected = lz::ref_iterable_t<decltype(expected)>;
-    REQUIRE(lz::equal(taken, expected,
-                      [](const ref_taken& a, const ref_expected& b) { return a.first == b.first && a.second == b.second; }));
+    REQUIRE(lz::equal(taken, expected, [](ref_taken a, ref_expected b) { return a.first == b.first && a.second == b.second; }));
 
     SECTION("Operator=") {
         auto it = enumerated.begin();
@@ -143,15 +142,17 @@ TEST_CASE("Enumerate binary operations") {
             REQUIRE((*(end - static_cast<std::ptrdiff_t>(i))).second ==
                     (*(expected.end() - static_cast<std::ptrdiff_t>(i))).second);
         }
-        REQUIRE(end - lz::size(enumerate) == enumerate.begin());
+        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(enumerate)) == enumerate.begin());
 
         std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(enumerate)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(enumerate)));
 
         for (std::size_t i = 1; i <= lz::size(enumerate); ++i) {
             INFO("With i = " << i);
-            REQUIRE((*(begin - i)).first == (*(expected.end() - i)).first);
-            REQUIRE((*(begin - i)).second == (*(expected.end() - i)).second);
+            REQUIRE((*(begin - static_cast<std::ptrdiff_t>(i))).first ==
+                    (*(expected.end() - static_cast<std::ptrdiff_t>(i))).first);
+            REQUIRE((*(begin - static_cast<std::ptrdiff_t>(i))).second ==
+                    (*(expected.end() - static_cast<std::ptrdiff_t>(i))).second);
         }
         REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(enumerate)) == enumerate.end());
         for (std::size_t i = 0; i < lz::size(enumerate) - 1; ++i) {
@@ -169,22 +170,18 @@ TEST_CASE("Enumerate binary operations") {
         auto end = enumerate.end();
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(enumerate)); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - begin ==
-                    static_cast<std::ptrdiff_t>(lz::size(enumerate) - static_cast<std::ptrdiff_t>(i)));
-            REQUIRE(end - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(enumerate) - static_cast<std::ptrdiff_t>(i)));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - end ==
-                    -static_cast<std::ptrdiff_t>(lz::size(enumerate) - static_cast<std::ptrdiff_t>(i)));
-            REQUIRE(begin - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(enumerate) - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - begin == static_cast<std::ptrdiff_t>(lz::size(enumerate)) - i);
+            REQUIRE(end - (begin + static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(lz::size(enumerate)) - i);
+            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - end == -(static_cast<std::ptrdiff_t>(lz::size(enumerate)) - i));
+            REQUIRE(begin - (end - static_cast<std::ptrdiff_t>(i)) == -(static_cast<std::ptrdiff_t>(lz::size(enumerate)) - i));
         }
 
         for (std::size_t i = 0; i < lz::size(enumerate); ++i) {
             INFO("With i = " << i);
             REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(enumerate) - 2 * static_cast<std::ptrdiff_t>(i)));
+                    static_cast<std::ptrdiff_t>(lz::size(enumerate)) - 2 * static_cast<std::ptrdiff_t>(i));
             REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(enumerate) - 2 * static_cast<std::ptrdiff_t>(i)));
+                    -static_cast<std::ptrdiff_t>(lz::size(enumerate)) - 2 * static_cast<std::ptrdiff_t>(i));
         }
     }
 }
@@ -262,6 +259,7 @@ TEST_CASE("Enumerate to containers") {
         std::array<std::pair<int, int>, 3> expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
         using ref_enumerated = lz::ref_iterable_t<decltype(enumerated)>;    
         using ref_expected = lz::ref_iterable_t<decltype(expected)>;
-        REQUIRE(lz::equal(enumerated, expected, [](const ref_enumerated& a, const ref_expected& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(enumerated, expected,
+                          [](ref_enumerated a, ref_expected b) { return a.first == b.first && a.second == b.second; }));
     }
 }

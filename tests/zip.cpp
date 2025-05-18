@@ -224,14 +224,14 @@ TEST_CASE("zip_iterable binary operations") {
         auto beg = zip.begin();
         auto e = zip.end();
 
-        for (std::ptrdiff_t i = zip.size(); i > 0; i--) {
+        for (std::ptrdiff_t i = static_cast<std::ptrdiff_t>(zip.size()); i > 0; i--) {
             REQUIRE((e - beg) == i);
             REQUIRE((beg - e) == -i);
             --e;
         }
 
         e = zip.end();
-        for (std::ptrdiff_t i = zip.size(); i > 0; i--) {
+        for (std::ptrdiff_t i = static_cast<std::ptrdiff_t>(zip.size()); i > 0; i--) {
             REQUIRE((beg - e) == -i);
             REQUIRE((e - beg) == i);
             ++beg;
@@ -241,8 +241,10 @@ TEST_CASE("zip_iterable binary operations") {
 
         for (std::size_t i = 0; i < lz::size(zip); ++i) {
             INFO("With i = " << i);
-            REQUIRE((e - i) - (beg + i) == static_cast<std::ptrdiff_t>(lz::size(zip) - 2 * i));
-            REQUIRE((beg + i) - (e - i) == -static_cast<std::ptrdiff_t>(lz::size(zip) - 2 * i));
+            REQUIRE((e - static_cast<std::ptrdiff_t>(i)) - (beg + static_cast<std::ptrdiff_t>(i)) ==
+                    static_cast<std::ptrdiff_t>(lz::size(zip)) - 2 * static_cast<std::ptrdiff_t>(i));
+            REQUIRE((beg + static_cast<std::ptrdiff_t>(i)) - (e - static_cast<std::ptrdiff_t>(i)) ==
+                    -(static_cast<std::ptrdiff_t>(lz::size(zip)) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }

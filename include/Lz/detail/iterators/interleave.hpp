@@ -166,7 +166,10 @@ public:
         if (n > 0) {
             const auto u_n = static_cast<unsigned_diff>(n);
             plus_is(n_plus_index / static_cast<difference_type>(tuple_size), index_sequence_for_this{});
-            _index = u_tup_size * (u_n / tuple_size) == u_n ? 0 : static_cast<std::uint_least8_t>(n_plus_index % u_tup_size);
+            // clang-format off
+            _index = u_tup_size * (u_n / tuple_size) == u_n
+                         ? 0 : static_cast<std::uint_least8_t>(static_cast<std::size_t>(n_plus_index) % u_tup_size);
+            // clang-format on
             return;
         }
 

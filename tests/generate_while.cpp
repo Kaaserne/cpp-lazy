@@ -10,7 +10,10 @@ TEST_CASE("Generate while changing and creating elements") {
     static_cast<void>(compile_test1);
 
     const int i2 = 0;
-    const auto compile_test2 = lz::generate_while([&i2]() { return std::make_pair(false, false); });
+    const auto compile_test2 = lz::generate_while([&i2]() {
+        static_cast<void>(i2);
+        return std::make_pair(false, false);
+    });
     static_cast<void>(compile_test2);
     static_assert(!std::is_same<decltype(compile_test1.begin()), decltype(compile_test1.end())>::value, "Should be sentinel");
 

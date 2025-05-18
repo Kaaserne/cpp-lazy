@@ -133,18 +133,18 @@ TEST_CASE("Map binary operations") {
         auto end = map.end();
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(map)); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(map) - i));
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(map) - i));
-            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(map) - i));
-            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(map) - i));
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(map)) - i);
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(map)) - i);
+            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(map)) - i));
+            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(map)) - i));
         }
 
         for (std::size_t i = 0; i < lz::size(map) ; ++i) {
             INFO("With i = " << i);
             REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(map) - 2 * static_cast<std::ptrdiff_t>(i)));
+                    static_cast<std::ptrdiff_t>(lz::size(map)) - 2 * static_cast<std::ptrdiff_t>(i));
             REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(map) - 2 * static_cast<std::ptrdiff_t>(i)));
+                    -(static_cast<std::ptrdiff_t>(lz::size(map)) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }

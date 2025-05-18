@@ -142,14 +142,14 @@ TEST_CASE("Range binary operations") {
 
         for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + i) == *(expected.begin() + i));
+            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
         REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
         for (std::size_t i = 1; i <= lz::size(range); ++i) {
             INFO("With i = " << i);
             REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin - lz::size(range) == range.begin());
+        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
     }
 
     SECTION("Operator-") {
@@ -157,10 +157,10 @@ TEST_CASE("Range binary operations") {
         auto end = range.end();
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(range)); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(range) - i));
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(range) - i));
-            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(range) - i));
-            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(range) - i));
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(range)) - i);
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(range)) - i);
+            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(range)) - i));
+            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(range)) - i));
         }
 
         for (std::size_t i = 0; i < lz::size(range) ; ++i) {
@@ -168,7 +168,7 @@ TEST_CASE("Range binary operations") {
             REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
                     static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
             REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(range) - 2 * static_cast<std::ptrdiff_t>(i)));
+                    -(static_cast<std::ptrdiff_t>(lz::size(range)) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }

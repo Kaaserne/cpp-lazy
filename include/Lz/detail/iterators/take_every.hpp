@@ -181,18 +181,18 @@ public:
             _iterator = _end;
         }
         else {
-            _iterator += _offset;
+            _iterator += static_cast<difference_type>(_offset);
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         const auto remaining = static_cast<std::size_t>(_iterator - _begin);
-        const auto lldiv = std::lldiv(remaining, _offset);
-        if (lldiv.rem == 0) {
-            _iterator -= _offset;
+        const auto rem = remaining % _offset;
+        if (rem == 0) {
+            _iterator -= static_cast<difference_type>(_offset);
         }
         else {
-            _iterator -= lldiv.rem;
+            _iterator -= static_cast<difference_type>(rem);
         }
     }
 

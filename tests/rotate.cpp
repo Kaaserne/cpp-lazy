@@ -185,16 +185,18 @@ TEST_CASE("rotate_iterable binary operations") {
 
             for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(iterable)); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
-                REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
-                REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
-                REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(iterable) - i));
+                REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(iterable)) - i);
+                REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable)) - i);
+                REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(iterable)) - i));
+                REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(iterable)) - i));
             }
 
             for (std::size_t i = 0; i < lz::size(iterable); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable) - 2 * i));
-                REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(iterable) - 2 * i));
+                REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                        static_cast<std::ptrdiff_t>(lz::size(iterable)) - 2 * static_cast<std::ptrdiff_t>(i));
+                REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                        -(static_cast<std::ptrdiff_t>(lz::size(iterable)) - 2 * static_cast<std::ptrdiff_t>(i)));
             }
         };
 

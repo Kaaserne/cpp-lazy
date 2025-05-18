@@ -94,16 +94,18 @@ TEST_CASE("Take binary operations where n is smaller than size") {
         auto end = take.end();
         for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(take) - i));
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take) - i));
-            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
-            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - i));
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
+            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
+            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
         }
 
         for (std::size_t i = 0; i < lz::size(take); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
-            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
+            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                    static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
+            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                    -(static_cast<std::ptrdiff_t>(lz::size(take)) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }

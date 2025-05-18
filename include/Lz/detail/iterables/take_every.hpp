@@ -52,6 +52,12 @@ template<class Iterable>
 class take_every_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
 
+public:
+    using iterator = take_every_iterator<inner_iter, sentinel_t<Iterable>>;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+private:
     ref_or_view<Iterable> _iterable;
     std::size_t _offset;
     std::size_t _start;
@@ -61,15 +67,9 @@ class take_every_iterable : public lazy_view {
         if (_start >= static_cast<std::size_t>(std::end(_iterable) - std::begin(_iterable))) {
             return std::end(_iterable);
         }
-        return std::begin(_iterable) + _start;
+        return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
     }
 
-public:
-    using iterator = take_every_iterator<inner_iter, sentinel_t<Iterable>>;
-    using const_iterator = iterator;
-    using value_type = typename iterator::value_type;
-
-private:
     using diff_type = typename iterator::difference_type;
 
 public:
@@ -114,7 +114,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator> begin() const& {
-        auto begin = next_fast_safe(_iterable, _start);
+        auto begin = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { begin, std::end(_iterable), _offset, _start };
     }
 

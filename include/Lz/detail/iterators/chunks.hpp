@@ -194,7 +194,8 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT(_sub_range_begin != _end, "Out of bounds");
-        _sub_range_begin += std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin));
+        using s = typename std::make_signed<std::size_t>::type;
+        _sub_range_begin += static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin)));
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {

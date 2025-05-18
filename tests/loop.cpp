@@ -141,17 +141,17 @@ TEST_CASE("Loop with non while true argument") {
 
             for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(l)); ++i) {
                 INFO("With i = " << i);
-                CHECK((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(l) - i));
-                CHECK(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(l) - i));
-                CHECK((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(l) - i));
-                CHECK(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(l) - i));
+                CHECK((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(l)) - i);
+                CHECK(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(l)) - i);
+                CHECK((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(l)) - i);
+                CHECK(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(l)) - i);
             }
             for (std::size_t i = 0; i < lz::size(l); ++i) {
                 INFO("With i = " << i);
                 CHECK((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                      static_cast<std::ptrdiff_t>(lz::size(l) - 2 * static_cast<std::ptrdiff_t>(i)));
+                      static_cast<std::ptrdiff_t>(lz::size(l)) - 2 * static_cast<std::ptrdiff_t>(i));
                 CHECK((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                      -static_cast<std::ptrdiff_t>(lz::size(l) - 2 * static_cast<std::ptrdiff_t>(i)));
+                      -(static_cast<std::ptrdiff_t>(lz::size(l)) - 2 * static_cast<std::ptrdiff_t>(i)));
             }
         };
         auto looper = lz::loop(vec, 2);
