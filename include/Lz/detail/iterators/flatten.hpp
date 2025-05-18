@@ -287,7 +287,6 @@ private:
         if (_inner_iter.has_next()) {
             return;
         }
-        _inner_iter = this_inner();
     }
 
     LZ_CONSTEXPR_CXX_14 void previous_outer() {
@@ -347,7 +346,7 @@ public:
     }
 
     constexpr bool eq(const flatten_iterator& b) const {
-        return _outer_iter == b._outer_iter && _inner_iter == b._inner_iter;
+        return _outer_iter == b._outer_iter;
     }
 
     constexpr bool eq(default_sentinel) const {

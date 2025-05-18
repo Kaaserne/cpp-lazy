@@ -1,7 +1,9 @@
 #include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
+#include <Lz/generate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <forward_list>
@@ -426,4 +428,15 @@ TEST_CASE("Flatten to container") {
 
         REQUIRE(expected == actual);
     }
+}
+
+TEST_CASE("Stack allocated flatten") {
+    static constexpr std::size_t N = 32;
+    std::array<std::array<int, N / 4>, N / 8> a =
+        lz::generate([]() { return lz::range(static_cast<int>(32 / 4)) | lz::to<std::array<int, N / 4>>(); }, N / 8) |
+        lz::to<std::array<std::array<int, N / 4>, N / 8>>();
+
+    auto f = lz::flatten(a);
+    const auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7 };
+    REQUIRE(lz::equal(f, expected));
 }
