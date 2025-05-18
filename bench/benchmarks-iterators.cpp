@@ -134,8 +134,7 @@ void exclude(benchmark::State& state) {
     std::array<int, size_policy> a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
-        for (auto _ : state) {
-#ifdef LZ_HAS_CXX_17
+        #ifdef LZ_HAS_CXX_17
             for (int i : lz::exclude(a, 5, 10)) {
                 benchmark::DoNotOptimize(i);
             }
@@ -143,8 +142,7 @@ void exclude(benchmark::State& state) {
             auto exclude = lz::exclude(a, 5, 10);
             exclude.for_each([](int i) { benchmark::DoNotOptimize(i); });
 #endif
-        }
-    }
+            }
 }
 
 void exclusive_scan(benchmark::State& state) {
