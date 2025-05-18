@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Lz/detail/compiler_checks.hpp"
 #ifndef LZ_DETAIL_ALGORITHM_HPP
 #define LZ_DETAIL_ALGORITHM_HPP
 
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
 
-#if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
+#if defined(LZ_HAS_CXX_17)
 #include <functional> // std::not_fn
 #endif
 
