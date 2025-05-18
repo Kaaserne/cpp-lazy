@@ -3,7 +3,7 @@
 #ifndef LZ_COMPILER_CHECK_HPP
 #define LZ_COMPILER_CHECK_HPP
 
-#define LZ_VERSION 90000
+#define LZ_VERSION 900000
 #define LZ_VERSION_MAJOR 9
 #define LZ_VERSION_MINOR 0
 #define LZ_VERSION_PATCH 0
@@ -20,10 +20,6 @@
 #else
 #define LZ_HAS_ATTRIBUTE(ATTR) 0
 #endif // __has_cpp_attribute
-
-#if (defined(__GNUC__)) && !(defined(__clang__))
-#define LZ_GCC_VERSION __GNUC__
-#endif // GNU/clang
 
 #if defined(_MSVC_LANG)
 #define LZ_MSVC _MSVC_LANG
