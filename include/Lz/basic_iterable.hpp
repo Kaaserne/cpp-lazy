@@ -175,7 +175,7 @@ LZ_MODULE_EXPORT_SCOPE_END
 namespace detail {
 template<LZ_CONCEPT_ITERABLE Iterable, class Container, class = void>
 struct prealloc_container {
-    constexpr void try_reserve(const Iterable&, const Container&) const noexcept {
+    LZ_CONSTEXPR_CXX_14 void try_reserve(const Iterable&, const Container&) const noexcept {
     }
 };
 
