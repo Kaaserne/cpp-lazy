@@ -36,7 +36,7 @@ int main() {
     // With std::string[_view]
     auto chunked_sv = s | lz::sv_chunk_if([](const char c) { return c == ';'; });
     for (auto chunk : chunked_sv) {
-        std::cout.write(chunk.data(), chunk.size());
+        std::cout.write(chunk.data(), static_cast<std::streamsize>(chunk.size()));
         std::cout << '\n';
     }
     // Output:
