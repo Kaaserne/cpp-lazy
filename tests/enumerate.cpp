@@ -181,7 +181,7 @@ TEST_CASE("Enumerate binary operations") {
             REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
                     static_cast<std::ptrdiff_t>(lz::size(enumerate)) - 2 * static_cast<std::ptrdiff_t>(i));
             REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(enumerate)) - 2 * static_cast<std::ptrdiff_t>(i));
+                    -(static_cast<std::ptrdiff_t>(lz::size(enumerate)) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }
