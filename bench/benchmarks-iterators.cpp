@@ -134,15 +134,15 @@ void exclude(benchmark::State& state) {
     std::array<int, size_policy> a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
-        #ifdef LZ_HAS_CXX_17
-            for (int i : lz::exclude(a, 5, 10)) {
-                benchmark::DoNotOptimize(i);
-            }
+#ifdef LZ_HAS_CXX_17
+        for (int i : lz::exclude(a, 5, 10)) {
+            benchmark::DoNotOptimize(i);
+        }
 #else
-            auto exclude = lz::exclude(a, 5, 10);
-            exclude.for_each([](int i) { benchmark::DoNotOptimize(i); });
+        auto exclude = lz::exclude(a, 5, 10);
+        exclude.for_each([](int i) { benchmark::DoNotOptimize(i); });
 #endif
-            }
+    }
 }
 
 void exclusive_scan(benchmark::State& state) {
@@ -171,9 +171,12 @@ void filter(benchmark::State& state) {
 }
 
 void flatten(benchmark::State& state) {
-    std::array<std::array<int, size_policy / 4>, size_policy / 8> arr;
+    std::array<std::array<int, size_policy / 4>, size_policy / 8> arr =
+        lz::generate([]() { return lz::range(static_cast<int>(size_policy / 4)) | lz::to<std::array<int, size_policy / 4>>(); },
+                     size_policy / 8) | lz::to<std::array<std::array<int, size_policy / 4>, size_policy / 8>>();
+
     for (auto _ : state) {
-        for (auto&& val : lz::flatten(arr)) {
+        for (int val : lz::flatten(arr)) {
             benchmark::DoNotOptimize(val);
         }
     }
