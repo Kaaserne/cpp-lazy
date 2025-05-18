@@ -24,6 +24,7 @@
 #include <Lz/generate_while.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/inclusive_scan.hpp>
+#include <Lz/interleave.hpp>
 #include <Lz/intersection.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/iterator_base.hpp>
