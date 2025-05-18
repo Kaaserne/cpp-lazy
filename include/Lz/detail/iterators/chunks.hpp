@@ -182,8 +182,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        auto sub_range_end = _sub_range_begin + static_cast<std::ptrdiff_t>(
-                                                    std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin)));
+        using s = typename std::make_signed<std::size_t>::type;
+        auto sub_range_end =
+            _sub_range_begin + static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin)));
         return { _sub_range_begin, sub_range_end };
     }
 
