@@ -297,12 +297,12 @@ TEST_CASE("To container") {
         auto queue = lz::to<std::queue<char>>(c_str);
         std::size_t i = 0;
         for (; !queue.empty(); queue.pop(), ++i) {
-            REQUIRE(queue.front() == *std::next(c_str.begin(), i));
+            REQUIRE(queue.front() == *std::next(c_str.begin(), static_cast<std::ptrdiff_t>(i)));
         }
         queue = c_str | lz::to<std::queue<char>>();
         i = 0;
         for (; !queue.empty(); queue.pop(), ++i) {
-            REQUIRE(queue.front() == *std::next(c_str.begin(), i));
+            REQUIRE(queue.front() == *std::next(c_str.begin(), static_cast<std::ptrdiff_t>(i)));
         }
     }
 
