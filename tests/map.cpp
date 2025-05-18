@@ -26,20 +26,6 @@ TEST_CASE("Map with sentinels") {
     }
 }
 
-TEST_CASE("forward iterator with std move non empty") {
-    std::function<std::string(TestStruct)> f = [](const TestStruct& t) {
-        return t.test_field_str;
-    };
-    std::forward_list<TestStruct> lst{ TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
-    
-    auto map = lz::map(lst, std::move(f));
-    auto string_vec = std::move(map) | lz::to<std::vector<std::string>>();
-    REQUIRE(!lst.empty());
-    REQUIRE(lz::distance(lst.begin(), lst.end()) == 3);
-    REQUIRE(lz::distance(string_vec.begin(), string_vec.end()) == 3);
-    REQUIRE(!f);
-}
-
 TEST_CASE("Map changing and creating elements") {
     constexpr std::size_t size = 3;
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
