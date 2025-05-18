@@ -106,8 +106,9 @@ private:
     }
 
     template<std::size_t... Is>
-    LZ_CONSTEXPR_CXX_14 difference_type difference(const interleave_iterator& other, index_sequence<Is...>) const {
-        const auto distances = { static_cast<difference_type>(std::get<Is>(_iterators) - std::get<Is>(other._iterators))... };
+    LZ_CONSTEXPR_CXX_20 difference_type difference(const interleave_iterator& other, index_sequence<Is...>) const {
+        const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterators) -
+                                                                           std::get<Is>(other._iterators))... };
         const auto sum =
             std::accumulate(std::begin(distances), std::end(distances), difference_type{ 0 }, std::plus<difference_type>{});
         return sum + (static_cast<difference_type>(_index) - static_cast<difference_type>(other._index));
