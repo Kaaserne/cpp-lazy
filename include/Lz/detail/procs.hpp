@@ -10,7 +10,7 @@
 
 #ifndef NDEBUG
 #include <exception>
-#endif // NDEBUG
+#endif
 
 #if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
 #include <stacktrace>
@@ -19,21 +19,33 @@
 namespace lz {
 namespace detail {
 
+#ifndef NDEBUG
+
 [[noreturn]] inline void
 assertion_fail(const char* file, const int line, const char* func, const char* message, const char* expr) {
 #if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
+    
     auto st = std::stacktrace::current();
     auto str = std::to_string(st);
     std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line,
                  expr, func, message, str.c_str());
+    
 #else
+
     std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\n", file, line, expr, func, message);
+
 #endif
+    
     std::terminate();
 }
 
 #define LZ_ASSERT(CONDITION, MSG)                                                                                                \
     ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
+#else
+
+#define LZ_ASSERT(CONDITION, MSG)
+
+#endif
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
@@ -90,7 +102,7 @@ next_fast(I&& iterable, diff_iterable_t<I> n) {
 // clang-format on
 
 template<class... Ts>
-constexpr void decompose(const Ts&...) noexcept {
+LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
 }
 
 template<class Iterator, class S>
