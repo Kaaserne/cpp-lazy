@@ -24,8 +24,6 @@ public:
         _end{ std::move(end) } {
     }
 
-    constexpr regex_split_iterable() = default;
-
     LZ_NODISCARD constexpr iterator begin() const {
         return { _begin, _end };
     }

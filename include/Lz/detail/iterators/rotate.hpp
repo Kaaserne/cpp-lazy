@@ -32,8 +32,6 @@ private:
     std::size_t _offset{};
 
 public:
-    constexpr rotate_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 rotate_iterator(Iterator begin, S end, Iterator start, const std::size_t offset) :
         _iterator{ std::move(start) },
         _begin{ std::move(begin) },

@@ -31,8 +31,6 @@ private:
     RegexTokenIter _current;
 
 public:
-    constexpr regex_split_iterator() = default;
-
     regex_split_iterator(RegexTokenIter first, RegexTokenSentinel last) : _current{ std::move(first) } {
         while (_current != last && _current->length() == 0) {
             ++_current;

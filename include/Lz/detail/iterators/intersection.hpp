@@ -56,8 +56,6 @@ public:
     using reference = typename iter_traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr intersection_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 intersection_iterator(Iterator it, S end, Iterator2 iterator2, S2 end2, BinaryPredicate compare) :
         _iterator{ std::move(it) },
         _iterator2{ std::move(iterator2) },
@@ -137,8 +135,6 @@ public:
     using difference_type = typename iter_traits::difference_type;
     using reference = typename iter_traits::reference;
     using pointer = fake_ptr_proxy<reference>;
-
-    constexpr intersection_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 
     intersection_iterator(Iterator it, Iterator begin, S end, Iterator2 iterator2, Iterator2 begin2, S2 end2, BinaryPredicate compare) :

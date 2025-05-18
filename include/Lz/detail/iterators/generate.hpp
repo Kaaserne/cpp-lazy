@@ -26,8 +26,6 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr generate_iterator() = default;
-
     constexpr generate_iterator(GeneratorFunc generator_func, const std::size_t amount) :
         _func{ std::move(generator_func) },
         _current{ amount } {
@@ -71,8 +69,6 @@ public:
     using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
-
-    constexpr generate_iterator() = default;
 
     constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
     }

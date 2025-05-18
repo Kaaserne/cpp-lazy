@@ -23,8 +23,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr join_where_iterable() = default;
-
     template<class I, class I2>
     constexpr join_where_iterable(I&& iterable, I2&& iterable2, SelectorA a, SelectorB b, ResultSelector result_selector) :
         _iterable_a{ std::forward<I>(iterable) },

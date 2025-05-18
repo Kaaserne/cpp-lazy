@@ -66,8 +66,6 @@ public:
         static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
-    constexpr zip_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SentinelTuple& end) {
         _iterators = end;
         return *this;

@@ -28,8 +28,6 @@ public:
     }
 
 public:
-    constexpr zip_longest_iterable() = default;
-
     template<class... I>
     LZ_CONSTEXPR_CXX_14 zip_longest_iterable(I&&... iterables) : _iterables{ std::forward<I>(iterables)... } {
     }

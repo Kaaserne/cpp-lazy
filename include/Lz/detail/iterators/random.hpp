@@ -34,8 +34,6 @@ public:
         _current{ current } {
     }
 
-    constexpr random_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 random_iterator& operator=(default_sentinel) noexcept {
         _current = 0;
         return *this;

@@ -25,8 +25,6 @@ public:
         _delimiter{ std::forward<I2>(delimiter) } {
     }
 
-    constexpr split_iterable() = default;
-
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { std::begin(_iterable), std::end(_iterable), std::begin(_delimiter), std::end(_delimiter) };
     }
@@ -51,8 +49,6 @@ public:
         _iterable{ std::forward<I>(iterable) },
         _delimiter{ std::move(delimiter) } {
     }
-
-    constexpr split_iterable() = default;
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _delimiter };

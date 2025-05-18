@@ -51,8 +51,6 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;
 
-    constexpr group_by_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator begin, S end, BinaryPredicate binary_predicate) :
         _sub_range_end{ begin },
         _sub_range_begin{ std::move(begin) },
@@ -128,8 +126,6 @@ public:
     using reference = std::pair<ref_type, basic_iterable<Iterator>>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;
-
-    constexpr group_by_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator it, Iterator begin, S end, BinaryPredicate binary_predicate) :
         _begin{ std::move(begin) },

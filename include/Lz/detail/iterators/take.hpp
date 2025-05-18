@@ -24,8 +24,6 @@ private:
     Iterator _iterator;
 
 public:
-    constexpr take_iterator() = default;
-
     constexpr take_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 

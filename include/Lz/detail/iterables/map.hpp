@@ -26,8 +26,6 @@ public:
         _unary_op{ std::move(unary_op) } {
     }
 
-    constexpr map_iterable() = default;
-
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept {
         return static_cast<std::size_t>(lz::size(_iterable));

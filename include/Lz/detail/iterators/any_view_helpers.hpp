@@ -25,8 +25,6 @@ public:
     using difference_type = DiffType;
     using iterator_category = IterCat;
 
-    constexpr iterator_wrapper() = default;
-
     iterator_wrapper(const detail::unique_ptr<any_iter_base>& ptr) : _implementation{ ptr->clone() } {
     }
 

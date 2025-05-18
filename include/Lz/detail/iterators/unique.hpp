@@ -37,8 +37,6 @@ public:
         _predicate{ std::move(binary_predicate) } {
     }
 
-    constexpr unique_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel) {
         _iterator = _end;
         return *this;
@@ -94,8 +92,6 @@ public:
         _end{ std::move(end) },
         _predicate{ std::move(compare) } {
     }
-
-    constexpr unique_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel) {
         _iterator = _end;

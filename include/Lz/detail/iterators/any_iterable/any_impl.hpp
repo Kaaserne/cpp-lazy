@@ -28,8 +28,6 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
-    constexpr any_iterator_impl() = default;
-
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
@@ -81,8 +79,6 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
-    constexpr any_iterator_impl() = default;
-
     constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
 
@@ -125,8 +121,6 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = DiffType;
     using iterator_category = std::bidirectional_iterator_tag;
-
-    constexpr any_iterator_impl() = default;
 
     constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
@@ -174,8 +168,6 @@ public:
     using pointer = fake_ptr_proxy<Reference>;
     using difference_type = DiffType;
     using iterator_category = std::random_access_iterator_tag;
-
-    constexpr any_iterator_impl() = default;
 
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }

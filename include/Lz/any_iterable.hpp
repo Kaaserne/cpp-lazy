@@ -45,8 +45,6 @@ private:
     it _end;
 
 public:
-    any_iterable() = default;
-
     /**
      * @brief Construct a new any_iterable object
      *

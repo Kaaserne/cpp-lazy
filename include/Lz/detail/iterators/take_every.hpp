@@ -39,8 +39,6 @@ public:
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
 
-    constexpr take_every_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
         _iterator = _end;
         return *this;
@@ -96,8 +94,6 @@ public:
         _distance{ distance } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
-
-    constexpr take_every_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
         _iterator = _end;
@@ -164,8 +160,6 @@ public:
         _offset{ offset } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
-
-    constexpr take_every_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
         _iterator = _end;

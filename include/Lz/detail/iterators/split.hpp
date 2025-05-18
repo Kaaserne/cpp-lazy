@@ -28,8 +28,6 @@ public:
     using difference_type = diff_type<Iterator>;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr split_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 split_iterator(Iterator begin, S end, Iterator2 begin2, S2 end2) :
         _sub_range_end{ begin, begin },
         _sub_range_begin{ std::move(begin) },
@@ -112,8 +110,6 @@ public:
     using reference = value_type;
     using difference_type = diff_type<Iterator>;
     using pointer = fake_ptr_proxy<reference>;
-
-    constexpr split_single_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 split_single_iterator(Iterator begin, S end, T delimiter) :
         _sub_range_begin{ std::move(begin) },

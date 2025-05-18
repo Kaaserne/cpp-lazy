@@ -25,8 +25,6 @@ public:
     constexpr repeat_iterable(T value, const std::size_t amount) : _value{ std::move(value) }, _amount{ amount } {
     }
 
-    constexpr repeat_iterable() = default;
-
     LZ_NODISCARD constexpr std::size_t size() const noexcept {
         return _amount;
     }
@@ -55,8 +53,6 @@ public:
 
     constexpr repeat_iterable(T value) : _value{ std::move(value) } {
     }
-
-    constexpr repeat_iterable() = default;
 
     LZ_NODISCARD constexpr iterator begin() const& {
         return { _value };

@@ -25,8 +25,6 @@ private:
     std::size_t _n;
 
 public:
-    constexpr drop_iterable() = default;
-
     template<class I>
     constexpr drop_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }

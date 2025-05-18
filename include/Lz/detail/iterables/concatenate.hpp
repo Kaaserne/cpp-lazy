@@ -29,8 +29,6 @@ public:
     LZ_CONSTEXPR_CXX_14 concatenate_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }
 
-    constexpr concatenate_iterable() = default;
-
     template<class T = conjunction<sized<Iterables>...>>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
         return size(make_index_sequence<sizeof...(Iterables)>{});

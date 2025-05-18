@@ -31,8 +31,6 @@ public:
         _n{ n } {
     }
 
-    constexpr take_iterable() = default;
-
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
         return size_impl();

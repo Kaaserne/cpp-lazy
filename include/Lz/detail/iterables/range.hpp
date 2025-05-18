@@ -21,8 +21,6 @@ public:
     using reverse_iterator = std::reverse_iterator<iterator>;
     using value_type = typename iterator::value_type;
 
-    constexpr range_iterable() = default;
-
     constexpr range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
         _start{ start },
         _end{ end },

@@ -24,8 +24,6 @@ public:
     using sentinel = typename iterator::sentinel;
     using value_type = typename iterator::value_type;
 
-    constexpr enumerate_iterable() = default;
-
     template<class I>
     constexpr enumerate_iterable(I&& iterable, const IntType start = 0) : _iterable{ iterable }, _start{ start } {
     }

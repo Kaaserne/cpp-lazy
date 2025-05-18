@@ -26,8 +26,6 @@ public:
         _predicate{ std::move(predicate) } {
     }
 
-    constexpr chunk_if_iterable() = default;
-
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         auto begin = detail::begin(std::move(_iterable));
         auto end = detail::end(std::move(_iterable));

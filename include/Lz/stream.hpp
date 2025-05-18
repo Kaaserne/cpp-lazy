@@ -65,19 +65,22 @@ struct iterable_formatter {
 #if FMT_VERSION >= 80000
 
         fmt::print(stream, fmt::runtime(format), *it);
+        for (++it; it != end; ++it) {
+            fmt::print(stream, "{}", separator);
+            fmt::print(stream, fmt::runtime(format), *it);
+        }
 
 #else
 
         fmt::print(stream, format, *it);
-
-#endif // FMT_VERSION >= 80000
-
         for (++it; it != end; ++it) {
             fmt::print(stream, "{}", separator);
             fmt::print(stream, format, *it);
         }
 
-#else
+#endif // FMT_VERSION >= 80000
+
+#else // ^^ LZ_STANDALONE - vv !LZ_STANDALONE
 
         std::ostream_iterator<char> out_it(stream);
         std::format_to(out_it, format, *it);

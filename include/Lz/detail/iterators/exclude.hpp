@@ -42,8 +42,6 @@ public:
         }
     }
 
-    constexpr exclude_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 exclude_iterator& operator=(const S& end) {
         _iterator = end;
         return *this;

@@ -71,8 +71,6 @@ public:
         find_next();
     }
 
-    constexpr join_where_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel) {
         _iter_a = _end_a;
         return *this;

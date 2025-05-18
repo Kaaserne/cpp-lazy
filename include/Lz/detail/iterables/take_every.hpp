@@ -73,8 +73,6 @@ private:
     using diff_type = typename iterator::difference_type;
 
 public:
-    constexpr take_every_iterable() = default;
-
     template<class I>
     constexpr take_every_iterable(I&& iterable, const std::size_t offset, const std::size_t start) :
         _iterable{ std::forward<I>(iterable) },

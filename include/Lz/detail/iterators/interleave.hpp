@@ -127,8 +127,6 @@ public:
         static_assert(all_same_reference<IterTuple>::value, "All iterators must have the same reference type");
     }
 
-    constexpr interleave_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const SentinelTuple& end) {
         _iterators = end;
         _index = 0;

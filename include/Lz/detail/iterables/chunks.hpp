@@ -19,8 +19,6 @@ public:
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
 
-    constexpr chunks_iterable() = default;
-
     template<class I>
     constexpr chunks_iterable(I&& iterable, const std::size_t chunk_size) :
         _iterable{ std::forward<I>(iterable) },

@@ -38,8 +38,6 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr take_while_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator it, S end, UnaryPredicate unary_predicate) :
         _iterator{ std::move(it) },
         _end{ std::move(end) },
@@ -98,8 +96,6 @@ public:
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
-
-    constexpr take_while_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator it, Iterator begin, Iterator end, UnaryPredicate unary_predicate) :
         _begin{ std::move(begin) },

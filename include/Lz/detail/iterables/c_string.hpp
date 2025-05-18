@@ -20,8 +20,6 @@ public:
     constexpr c_string_iterable(C* begin) noexcept : _begin{ begin } {
     }
 
-    constexpr c_string_iterable() = default;
-
     LZ_NODISCARD constexpr iterator begin() const noexcept {
         return { _begin };
     }

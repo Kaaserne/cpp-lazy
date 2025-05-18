@@ -19,8 +19,6 @@ public:
     using iterator = exclusive_scan_iterator<iter_t<Iterable>, sentinel_t<Iterable>, T, BinaryOp>;
     using const_iterator = iterator;
 
-    constexpr exclusive_scan_iterable() = default;
-
     template<class I>
     constexpr exclusive_scan_iterable(I&& iterable, T init, BinaryOp binary_op) :
         _iterable{ std::forward<I>(iterable) },

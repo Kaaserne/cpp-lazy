@@ -20,10 +20,10 @@ public:
     using pointer = C*;
     using reference = C&;
 
+    constexpr c_string_iterator() noexcept = default;
+
     constexpr c_string_iterator(C* it) noexcept : _it{ it } {
     }
-
-    constexpr c_string_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 c_string_iterator& operator=(default_sentinel) noexcept {
         _it = nullptr;

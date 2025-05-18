@@ -42,8 +42,6 @@ private:
     }
 
 public:
-    constexpr except_iterator() = default;
-
     template<class I>
     LZ_CONSTEXPR_CXX_14 except_iterator(Iterator begin, S end, I&& to_except, BinaryPredicate compare) :
         _iterator{ std::move(begin) },
@@ -117,8 +115,6 @@ private:
     }
 
 public:
-    constexpr except_iterator() = default;
-
     template<class I>
     LZ_CONSTEXPR_CXX_14 except_iterator(Iterator begin, S end, I&& to_except, BinaryPredicate predicate) :
         _iterator{ std::move(begin) },

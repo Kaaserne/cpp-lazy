@@ -26,8 +26,6 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr generate_while_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 generate_while_iterator(GeneratorFunc generator_func, fn_return_type last_returned) :
         _func{ std::move(generator_func) },
         _last_returned{ std::forward<fn_return_type>(last_returned) } {

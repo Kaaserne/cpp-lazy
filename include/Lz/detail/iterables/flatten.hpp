@@ -61,8 +61,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename flatten_iterator<inner_iter, inner_sentinel, 0>::value_type;
 
-    constexpr flatten_iterable() = default;
-
     template<class I>
     LZ_CONSTEXPR_CXX_14 flatten_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }

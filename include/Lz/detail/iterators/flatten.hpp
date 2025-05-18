@@ -79,13 +79,13 @@ public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
 
-    constexpr flatten_wrapper() = default;
-
     constexpr flatten_wrapper(Iterator current, Iterator begin, S end) :
         _begin{ std::move(begin) },
         _iterator{ std::move(current) },
         _end{ std::move(end) } {
     }
+
+    constexpr flatten_wrapper() = default;
 
     LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
         _iterator = _end;
@@ -182,12 +182,12 @@ public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
 
-    constexpr flatten_wrapper() = default;
-
     constexpr flatten_wrapper(Iterator /* iterator */, Iterator begin, S end) :
         _iterator{ std::move(begin) },
         _end{ std::move(end) } {
     }
+
+    constexpr flatten_wrapper() = default;
 
     LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
         _iterator = _end;
@@ -306,8 +306,6 @@ private:
     this_inner _inner_iter;
 
 public:
-    constexpr flatten_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 flatten_iterator(Iterator it, Iterator begin, S end) :
         _outer_iter{ std::move(it), std::move(begin), std::move(end) } {
         if (_outer_iter.has_next()) {
@@ -315,6 +313,8 @@ public:
             this->advance();
         }
     }
+
+    constexpr flatten_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 flatten_iterator operator=(default_sentinel) {
         _inner_iter = default_sentinel{};

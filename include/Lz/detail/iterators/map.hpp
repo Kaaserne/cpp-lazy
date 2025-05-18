@@ -38,8 +38,6 @@ public:
         return *this;
     }
 
-    constexpr map_iterator() = default;
-
     constexpr reference dereference() const {
         return _unary_op(*_iterator);
     }

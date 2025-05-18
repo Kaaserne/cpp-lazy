@@ -297,8 +297,6 @@ public:
         static_assert(tuple_size > 1, "Cannot zip one/zero iterables");
     }
 
-    constexpr zip_longest_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel) {
         _iterators = _end;
         return *this;

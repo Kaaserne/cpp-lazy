@@ -34,8 +34,6 @@ public:
         return *this;
     }
 
-    constexpr repeat_iterator() = default;
-
     constexpr reference dereference() const noexcept {
         return _to_repeat;
     }
@@ -75,8 +73,6 @@ public:
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel) {
         return *this;
     }
-
-    constexpr repeat_iterator() = default;
 
     constexpr reference dereference() const noexcept {
         return _to_repeat;

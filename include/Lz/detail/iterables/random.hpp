@@ -18,8 +18,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr random_iterable() = default;
-
     constexpr random_iterable(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :
         _distribution{ distribution },
         _generator{ &generator },

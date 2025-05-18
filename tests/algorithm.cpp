@@ -17,8 +17,6 @@ class custom_container {
     std::size_t _expected_capacity{};
 
 public:
-    custom_container() = default;
-
     std::size_t expected_capacity() const {
         return _expected_capacity;
     }

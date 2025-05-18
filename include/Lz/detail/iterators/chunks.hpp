@@ -46,8 +46,6 @@ public:
         next_chunk();
     }
 
-    constexpr chunks_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel) {
         _sub_range_begin = _end;
     }
@@ -114,8 +112,6 @@ public:
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel) {
         _sub_range_begin = _end;
     }
-
-    constexpr chunks_iterator() = default;
 
     constexpr reference dereference() const {
         return { _sub_range_begin, _sub_range_end };
@@ -184,8 +180,6 @@ public:
         _sub_range_begin = _end;
         return *this;
     }
-
-    constexpr chunks_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         auto sub_range_end = _sub_range_begin + std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin));

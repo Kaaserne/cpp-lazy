@@ -17,8 +17,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr reverse_iterable() = default;
-
     template<class I>
     constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }

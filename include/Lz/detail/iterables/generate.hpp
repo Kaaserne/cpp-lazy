@@ -21,8 +21,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr generate_iterable() = default;
-
     constexpr generate_iterable(GeneratorFunc func, const std::size_t amount) : _func{ std::move(func) }, _amount{ amount } {
     }
 
@@ -51,9 +49,7 @@ public:
     using iterator = generate_iterator<func_container<GeneratorFunc>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
-
-    constexpr generate_iterable() = default;
-
+    
     constexpr generate_iterable(GeneratorFunc func) : _func{ std::move(func) } {
     }
 

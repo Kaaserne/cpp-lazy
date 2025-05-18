@@ -25,8 +25,6 @@ public:
     using const_iterator = iterator;
     using value_type = val_iterable_t<Iterable>;
 
-    constexpr drop_while_iterable() = default;
-
     template<class I>
     constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _iterable{ iterable },
@@ -62,8 +60,6 @@ public:
     using sentinel = sentinel_t<Iterable>;
     using const_iterator = iterator;
     using value_type = val_iterable_t<Iterable>;
-
-    constexpr drop_while_iterable() = default;
 
     template<class I>
     LZ_CONSTEXPR_CXX_14 drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :

@@ -21,8 +21,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr loop_iterable() = default;
-
     template<class I>
     constexpr loop_iterable(I&& iterable, const std::size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
     }
@@ -77,8 +75,6 @@ public:
     using iterator = loop_iterator<iter_t<Iterable>, sentinel_t<Iterable>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
-
-    constexpr loop_iterable() = default;
 
     template<class I>
     constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {

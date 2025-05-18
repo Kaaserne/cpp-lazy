@@ -23,8 +23,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr except_iterable() = default;
-
     template<class I1, class I2>
     constexpr except_iterable(I1&& iterable1, I2&& iterable2, BinaryPredicate binary_predicate) :
         _iterable1{ iterable1 },

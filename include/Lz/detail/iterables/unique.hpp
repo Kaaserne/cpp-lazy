@@ -20,8 +20,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr unique_iterable() = default;
-
     template<class I>
     constexpr unique_iterable(I&& iterable, BinaryPredicate compare) :
         _iterable{ std::forward<I>(iterable) },

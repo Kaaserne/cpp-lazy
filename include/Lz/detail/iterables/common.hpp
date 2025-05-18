@@ -18,8 +18,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr common_iterable() = default;
-
     template<class I>
     constexpr common_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }

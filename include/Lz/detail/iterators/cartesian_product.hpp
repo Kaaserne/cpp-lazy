@@ -114,8 +114,6 @@ private:
     using index_sequence_for_this = make_index_sequence<tup_size>;
 
 public:
-    constexpr cartesian_product_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14
     cartesian_product_iterator(IterTuple iterators, IterTuple begin, STuple end) :
         _begin{ std::move(begin) },

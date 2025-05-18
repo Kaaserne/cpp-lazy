@@ -17,8 +17,6 @@ public:
     using const_iterator = iterator;
     using sentinel = sentinel_t<Iterable>;
 
-    constexpr cached_size_iterable() = default;
-
     template<class I>
     constexpr cached_size_iterable(I&& iterable) :
         _iterable{ std::forward<I>(iterable) },

@@ -25,8 +25,6 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
-    constexpr exclusive_scan_iterator() = default;
-
     constexpr exclusive_scan_iterator(Iterator it, S end, T init, BinaryOp binary_op) :
         _iterator{ std::move(it) },
         _reducer{ std::move(init) },

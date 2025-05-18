@@ -155,8 +155,6 @@ public:
         static_assert(tuple_size > 1, "Cannot concat one/zero iterables");
     }
 
-    constexpr concatenate_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
         _iterators = _end;
         return *this;

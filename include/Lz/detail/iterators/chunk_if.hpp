@@ -35,8 +35,6 @@ private:
     }
 
 public:
-    constexpr chunk_if_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 chunk_if_iterator(Iterator begin, S end, UnaryPredicate predicate, bool is_empty) :
         _sub_range_begin{ std::move(begin) },
         _sub_range_end{ _sub_range_begin },

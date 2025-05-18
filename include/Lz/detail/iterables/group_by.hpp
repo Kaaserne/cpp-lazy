@@ -20,8 +20,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr group_by_iterable() = default;
-
     template<class I>
     LZ_CONSTEXPR_CXX_14 group_by_iterable(I&& iterable, BinaryPredicate binary_predicate) :
         _iterable{ std::forward<I>(iterable) },

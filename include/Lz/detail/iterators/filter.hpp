@@ -47,8 +47,6 @@ public:
         }
     }
 
-    constexpr filter_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel) {
         _iterator = _end;
         return *this;
@@ -112,8 +110,6 @@ public:
             _iterator = find(std::move(_iterator), _end);
         }
     }
-
-    constexpr filter_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel) {
         _iterator = _end;

@@ -18,8 +18,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr generate_while_iterable() = default;
-
     LZ_CONSTEXPR_CXX_14 generate_while_iterable(GeneratorFunc func) : _func{ std::move(func) }, _init{ _func() } {
     }
 

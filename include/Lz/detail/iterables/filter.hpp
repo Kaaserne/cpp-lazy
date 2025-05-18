@@ -21,8 +21,6 @@ public:
     using sentinel = typename iterator::sentinel;
     using value_type = typename iterator::value_type;
 
-    constexpr filter_iterable() = default;
-
     template<class I>
     constexpr filter_iterable(I&& iterable, UnaryPredicate predicate) :
         _iterable{ std::forward<I>(iterable) },

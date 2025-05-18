@@ -25,8 +25,6 @@ public:
     using difference_type = typename traits::difference_type;
     using iterator_category = std::forward_iterator_tag;
 
-    constexpr inclusive_scan_iterator() = default;
-
     constexpr inclusive_scan_iterator(Iterator it, S end, T init, BinaryOp bin_op) :
         _iterator{ std::move(it) },
         _reducer{ std::move(init) },

@@ -35,8 +35,6 @@ private:
     using seq = make_index_sequence<sizeof...(Iterables)>;
 
 public:
-    constexpr zip_iterable() = default;
-
     template<class... Is>
     LZ_CONSTEXPR_CXX_14 zip_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }

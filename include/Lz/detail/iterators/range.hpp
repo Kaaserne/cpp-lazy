@@ -30,8 +30,6 @@ public:
         _step{ step } {
     }
 
-    constexpr range_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel) noexcept {
         _iterator = _step < 0 ? std::numeric_limits<Arithmetic>::min() : std::numeric_limits<Arithmetic>::max();
         return *this;

@@ -21,8 +21,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr intersection_iterable() = default;
-
     template<class I, class I2>
     constexpr intersection_iterable(I&& iterable, I2&& iterable2, BinaryPredicate compare) :
         _iterable{ std::forward<I>(iterable) },

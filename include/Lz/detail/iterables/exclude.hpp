@@ -20,8 +20,6 @@ public:
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
 
-    constexpr exclude_iterable() = default;
-
     template<class I>
     constexpr exclude_iterable(I&& iterable, const diff_iterable_t<Iterable> from, const diff_iterable_t<Iterable> to) :
         _iterable{ std::forward<I>(iterable) },

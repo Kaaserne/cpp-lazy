@@ -17,8 +17,6 @@ class ref_or_view_helper<Iterable, false> : public lazy_view {
     pointer _iterable_ref_ptr{};
 
 public:
-    constexpr ref_or_view_helper() = default;
-
     template<class I>
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
         static_assert(std::is_lvalue_reference<I>::value, "Cannot only bind to lvalues");
@@ -78,8 +76,6 @@ class ref_or_view_helper<Iterable, true> : public lazy_view {
     friend class ref_or_view_helper;
 
 public:
-    constexpr ref_or_view_helper() = default;
-
     constexpr ref_or_view_helper(it&& iterable) : _iterable_value{ std::move(iterable) } {
     }
 

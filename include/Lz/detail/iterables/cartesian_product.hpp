@@ -45,8 +45,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr cartesian_product_iterable() = default;
-
     template<class I, class... Is>
     LZ_CONSTEXPR_CXX_14 cartesian_product_iterable(I&& first, Is&&... rest) :
         _first_iterable{ std::forward<I>(first) },

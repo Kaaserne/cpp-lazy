@@ -22,8 +22,6 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr inclusive_scan_iterable() = default;
-
     template<class I>
     constexpr inclusive_scan_iterable(I&& iterable, T init, BinaryOp binary_op) :
         _iterable{ std::forward<I>(iterable) },

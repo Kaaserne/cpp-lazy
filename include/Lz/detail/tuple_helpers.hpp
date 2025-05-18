@@ -66,8 +66,6 @@ private:
     Fn _fn;
 
 public:
-    constexpr tuple_expand() = default;
-
     template<class F>
     constexpr tuple_expand(F&& fn) : _fn(std::forward<F>(fn)) {
     }

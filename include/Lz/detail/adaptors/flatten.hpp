@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #ifndef LZ_FLATTEN_ADAPTOR_HPP
 #define LZ_FLATTEN_ADAPTOR_HPP
 
@@ -47,8 +48,7 @@ struct flatten_adaptor {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     flatten_iterable<remove_ref<Iterable>, dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>
     operator()(Iterable&& iterable) const {
-        static_assert(std::is_move_assignable<iter_t<Iterable>>::value || std::is_copy_assignable<iter_t<Iterable>>::value,
-                      "underlying iterator needs to be copy or move assignable");
+        static_assert(std::is_default_constructible<iter_t<Iterable>>::value, "underlying iterator needs to be default constructible");
         return { std::forward<Iterable>(iterable) };
     }
 
