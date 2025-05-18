@@ -112,7 +112,7 @@ TEST_CASE("random_iterable binary operations") {
             REQUIRE(*(begin + i) >= 0.);
             REQUIRE(*(begin + i) <= 1.);
         }
-        REQUIRE(begin + lz::size(random) == random.end());
+        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(random)) == random.end());
         for (std::size_t i = 1; i <= lz::size(random); ++i) {
             INFO("With i = " << i);
             REQUIRE(*(end - i) >= 0.);
@@ -120,7 +120,7 @@ TEST_CASE("random_iterable binary operations") {
         }
         REQUIRE(end - lz::size(random) == random.begin());
 
-        std::advance(begin, lz::size(random));
+        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(random)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(random)));
 
         for (std::size_t i = 0; i < lz::size(random) - 1; ++i) {
@@ -128,13 +128,13 @@ TEST_CASE("random_iterable binary operations") {
             REQUIRE(*(end + i) >= 0.);
             REQUIRE(*(end + i) <= 1.);
         }
-        REQUIRE(end + lz::size(random) == random.end());
+        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(random)) == random.end());
         for (std::size_t i = 1; i <= lz::size(random); ++i) {
             INFO("With i = " << i);
             REQUIRE(*(begin - i) >= 0.);
             REQUIRE(*(begin - i) <= 1.);
         }
-        REQUIRE(begin - lz::size(random) == random.begin());
+        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(random)) == random.begin());
     }
 
     SECTION("Operator-") {
@@ -150,8 +150,10 @@ TEST_CASE("random_iterable binary operations") {
 
         for (std::size_t i = 0; i < lz::size(random); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(random) - 2 * i));
-            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(random) - 2 * i));
+            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                    static_cast<std::ptrdiff_t>(lz::size(random) - 2 * static_cast<std::ptrdiff_t>(i)));
+            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                    -static_cast<std::ptrdiff_t>(lz::size(random) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }

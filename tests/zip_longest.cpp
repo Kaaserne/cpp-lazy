@@ -236,30 +236,30 @@ TEST_CASE("zip_longest_iterable binary operations") {
 
         for (std::size_t i = 0; i < lz::size(zipper) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
+            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin + lz::size(zipper) == zipper.end());
+        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.end());
         for (std::size_t i = 1; i <= lz::size(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - i) == *(expected.end() - i));
+            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
         REQUIRE(end - lz::size(zipper) == zipper.begin());
 
-        std::advance(begin, lz::size(zipper));
+        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(zipper)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(zipper)));
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
         for (std::size_t i = 0; i < lz::size(zipper) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + i) == *(expected.begin() + i));
+            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(end + lz::size(zipper) == zipper.end());
+        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.end());
         for (std::size_t i = 1; i <= lz::size(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - i) == *(expected.end() - i));
+            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin - lz::size(zipper) == zipper.begin());
+        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.begin());
     }
 
 

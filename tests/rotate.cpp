@@ -134,30 +134,30 @@ TEST_CASE("rotate_iterable binary operations") {
 
             for (std::size_t i = 0; i < lz::size(rotator) - 1; ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(begin + i) == *(expected.begin() + i));
+                REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(begin + lz::size(rotator) == rotator.end());
+            REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(rotator)) == rotator.end());
             for (std::size_t i = 1; i <= lz::size(rotator); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(rotator.end() - i));
+                REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(rotator.end() - static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(end - lz::size(rotator) == rotator.begin());
+            REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(rotator)) == rotator.begin());
 
-            std::advance(begin, lz::size(rotator));
+            std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(rotator)));
             std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(rotator)));
             REQUIRE(begin + 0 == begin);
             REQUIRE(end + 0 == end);
 
             for (std::size_t i = 0; i < lz::size(rotator) - 1; ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(rotator.begin() + i));
+                REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(rotator.begin() + static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(end + lz::size(rotator) == rotator.end());
+            REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(rotator)) == rotator.end());
             for (std::size_t i = 1; i <= lz::size(rotator); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(begin - i) == *(rotator.end() - i));
+                REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(rotator.end() - static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(begin - lz::size(rotator) == rotator.begin());
+            REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(rotator)) == rotator.begin());
         };
 
         INFO("lz::rotate(container, 3)");

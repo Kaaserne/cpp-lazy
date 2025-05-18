@@ -68,25 +68,25 @@ TEST_CASE("Take binary operations where n is smaller than size") {
 
         std::vector<int> expected = { 1, 2, 3, 4 };
         for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
+            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin + lz::size(take) == take.end());
+        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
         for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(end - i) == *(expected.end() - i));
+            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(end - lz::size(take) == take.begin());
+        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
 
-        std::advance(begin, lz::size(take));
+        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(take)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
 
         for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(end + i) == *(expected.begin() + i));
+            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(end + lz::size(take) == take.end());
+        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
         for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(begin - i) == *(expected.end() - i));
+            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin - lz::size(take) == take.begin());
+        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
     }
 
     SECTION("Operator-") {
@@ -139,25 +139,25 @@ TEST_CASE("Take binary operations where n is larger than size") {
 
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
+            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin + lz::size(take) == take.end());
+        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
         for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(end - i) == *(expected.end() - i));
+            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(end - lz::size(take) == take.begin());
+        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
 
-        std::advance(begin, lz::size(take));
+        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(take)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
 
         for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(end + i) == *(expected.begin() + i));
+            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(end + lz::size(take) == take.end());
+        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
         for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(begin - i) == *(expected.end() - i));
+            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin - lz::size(take) == take.begin());
+        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
     }
 }
 

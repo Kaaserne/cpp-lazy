@@ -93,18 +93,18 @@ TEST_CASE("Loop with non while true argument") {
 
             for (std::size_t i = 0; i < lz::size(l) - 1; ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(begin + i) == *(expected.begin() + i));
+                REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(begin + lz::size(l) == l.end());
+            REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(l)) == l.end());
 
             REQUIRE(end - 0 == end);
             for (std::size_t i = 1; i <= lz::size(l); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(expected.end() - i));
+                REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(end - lz::size(l) == l.begin());
+            REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(l)) == l.begin());
 
-            std::advance(begin, lz::size(l));
+            std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(l)));
             std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(l)));
 
             REQUIRE(begin + 0 == begin);
@@ -112,14 +112,14 @@ TEST_CASE("Loop with non while true argument") {
 
             for (std::size_t i = 0; i < lz::size(l) - 1; ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(expected.begin() + i));
+                REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(end + lz::size(l) == l.end());
+            REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(l)) == l.end());
             for (std::size_t i = 1; i <= lz::size(l); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(begin - i) == *(expected.end() - i));
+                REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
             }
-            REQUIRE(begin - lz::size(l) == l.begin());
+            REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(l)) == l.begin());
         };
 
         auto looper = lz::loop(vec, 2);
@@ -148,8 +148,10 @@ TEST_CASE("Loop with non while true argument") {
             }
             for (std::size_t i = 0; i < lz::size(l); ++i) {
                 INFO("With i = " << i);
-                CHECK((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(l) - 2 * i));
-                CHECK((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(l) - 2 * i));
+                CHECK((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                      static_cast<std::ptrdiff_t>(lz::size(l) - 2 * static_cast<std::ptrdiff_t>(i)));
+                CHECK((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                      -static_cast<std::ptrdiff_t>(lz::size(l) - 2 * static_cast<std::ptrdiff_t>(i)));
             }
         };
         auto looper = lz::loop(vec, 2);

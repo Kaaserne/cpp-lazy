@@ -193,30 +193,30 @@ void test_operator_plus_is(const Vector& vec, const ExpectedIterable& expected) 
 
     for (std::size_t i = 0; i < lz::size(flattened) - 1; ++i) {
         INFO("With i = " << i);
-        REQUIRE(*(begin + i) == *(expected.begin() + i));
+        REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
     }
-    REQUIRE(begin + lz::size(flattened) == flattened.end());
+    REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.end());
     for (std::size_t i = 1; i <= lz::size(flattened); ++i) {
         INFO("With i = " << i);
-        REQUIRE(*(end - i) == *(expected.end() - i));
+        REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
     }
-    REQUIRE(end - lz::size(flattened) == flattened.begin());
+    REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.begin());
 
-    std::advance(begin, lz::size(flattened));
+    std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(flattened)));
     std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(flattened)));
     REQUIRE(begin + 0 == begin);
     REQUIRE(end + 0 == end);
 
     for (std::size_t i = 0; i < lz::size(flattened) - 1; ++i) {
         INFO("With i = " << i);
-        REQUIRE(*(end + i) == *(expected.begin() + i));
+        REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
     }
-    REQUIRE(end + lz::size(flattened) == flattened.end());
+    REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.end());
     for (std::size_t i = 1; i <= lz::size(flattened); ++i) {
         INFO("With i = " << i);
-        REQUIRE(*(begin - i) == *(expected.end() - i));
+        REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
     }
-    REQUIRE(begin - lz::size(flattened) == flattened.begin());
+    REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.begin());
 }
 
 template<class Vector>

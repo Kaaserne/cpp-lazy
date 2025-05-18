@@ -4,6 +4,7 @@
 #include <Lz/take_every.hpp>
 #include <array>
 #include <catch2/catch.hpp>
+#include <cstddef>
 #include <forward_list>
 #include <list>
 #include <map>
@@ -241,32 +242,32 @@ TEST_CASE("take_every_iterable binary operations") {
 
             for (std::size_t i = 0; i < lz::size(input); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(it + i) == *(expected.begin() + i));
+                REQUIRE(*(it + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
             }
 
-            REQUIRE(it + lz::size(input) == end);
-            std::advance(it, lz::size(input));
+            REQUIRE(it + static_cast<std::ptrdiff_t>(lz::size(input)) == end);
+            std::advance(it, static_cast<std::ptrdiff_t>(lz::size(input)));
             REQUIRE(it == end);
             REQUIRE(it + 0 == it);
 
             for (std::size_t i = 1; i <= lz::size(input); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(it - i) == *(expected.end() - i));
+                REQUIRE(*(it - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
             }
 
             for (std::size_t i = 1; i <= lz::size(input); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(expected.end() - i));
+                REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
             }
 
-            REQUIRE(end - lz::size(input) == input.begin());
+            REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(input)) == input.begin());
             std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(input)));
             REQUIRE(end == input.begin());
             REQUIRE(end + 0 == end);
 
             for (std::size_t i = 0; i < lz::size(input); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(expected.begin() + i));
+                REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
             }
         };
 

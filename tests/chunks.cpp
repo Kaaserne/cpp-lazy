@@ -196,16 +196,16 @@ TEST_CASE("Chunks binary operations random access") {
 
                 REQUIRE(lz::equal(*(iterator + i), expected.at(i)));
             }
-            REQUIRE(iterator + lz::size(chunked) == chunked.end());
+            REQUIRE(iterator + static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.end());
             for (std::size_t i = 1; i <= lz::size(chunked); ++i) {
                 INFO("With i = " << i << "; iterator = [" << lz::format(*end_iterator) << "]; expected = ["
                                  << lz::format(expected.at(expected.size() - i)) << ']');
 
-                REQUIRE(lz::equal(*(end_iterator - i), expected.at(expected.size() - i)));
+                REQUIRE(lz::equal(*(end_iterator - static_cast<std::ptrdiff_t>(i)), expected.at(expected.size() - i)));
             }
-            REQUIRE(end_iterator - lz::size(chunked) == chunked.begin());
+            REQUIRE(end_iterator - static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.begin());
 
-            std::advance(iterator, lz::size(chunked));
+            std::advance(iterator, static_cast<std::ptrdiff_t>(lz::size(chunked)));
             std::advance(end_iterator, -static_cast<std::ptrdiff_t>(lz::size(chunked)));
 
             REQUIRE(iterator + 0 == iterator);
@@ -215,14 +215,14 @@ TEST_CASE("Chunks binary operations random access") {
                 INFO("With i = " << i << "; iterator = [" << lz::format(*end_iterator) << "]; expected = ["
                                  << lz::format(expected.at(i)) << ']');
 
-                REQUIRE(lz::equal(*(end_iterator + i), expected.at(i)));
+                REQUIRE(lz::equal(*(end_iterator + static_cast<std::ptrdiff_t>(i)), expected.at(i)));
             }
-            REQUIRE(end_iterator + lz::size(chunked) == chunked.end());
+            REQUIRE(end_iterator + static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.end());
             for (std::size_t i = 1; i <= lz::size(chunked); ++i) {
                 INFO("With i = " << i << " ;iterator = [" << lz::format(*iterator) << "]; expected = ["
                                  << lz::format(expected.at(expected.size() - i)) << ']');
 
-                REQUIRE(lz::equal(*(iterator - i), expected.at(expected.size() - i)));
+                REQUIRE(lz::equal(*(iterator - static_cast<std::ptrdiff_t>(i)), expected.at(expected.size() - i)));
             }
             REQUIRE(iterator - lz::size(chunked) == chunked.begin());
         };

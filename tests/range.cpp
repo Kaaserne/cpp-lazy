@@ -2,6 +2,7 @@
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <catch2/catch.hpp>
+#include <cstddef>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -125,16 +126,16 @@ TEST_CASE("Range binary operations") {
         std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
+            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
         }
-        REQUIRE(begin + lz::size(range) == range.end());
+        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
         for (std::size_t i = 1; i <= lz::size(range); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - i) == *(expected.end() - i));
+            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
         REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
 
-        std::advance(begin, lz::size(range));
+        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(range)));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(range)));
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
@@ -143,10 +144,10 @@ TEST_CASE("Range binary operations") {
             INFO("With i = " << i);
             REQUIRE(*(end + i) == *(expected.begin() + i));
         }
-        REQUIRE(end + lz::size(range) == range.end());
+        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
         for (std::size_t i = 1; i <= lz::size(range); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - i) == *(expected.end() - i));
+            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
         }
         REQUIRE(begin - lz::size(range) == range.begin());
     }
@@ -164,8 +165,10 @@ TEST_CASE("Range binary operations") {
 
         for (std::size_t i = 0; i < lz::size(range) ; ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
-            REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
+            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                    static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
+            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                    -static_cast<std::ptrdiff_t>(lz::size(range) - 2 * static_cast<std::ptrdiff_t>(i)));
         }
     }
 }
