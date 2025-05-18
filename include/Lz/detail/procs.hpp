@@ -9,6 +9,7 @@
 #include <iterator>
 
 #ifndef NDEBUG
+#include <cstdio>
 #include <exception>
 #endif
 
