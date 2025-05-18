@@ -27,6 +27,18 @@ public:
         return std::max({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
     }
 
+    template<class Iterable2, std::size_t... Is>
+    static zip_longest_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, zip_longest_iterable<Iterables...>&& zipper, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(zipper._iterables))... };
+    }
+
+    template<class Iterable2, std::size_t... Is>
+    static zip_longest_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, const zip_longest_iterable<Iterables...>& zipper, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(zipper._iterables)... };
+    }
+
 public:
     template<class... I>
     LZ_CONSTEXPR_CXX_14 zip_longest_iterable(I&&... iterables) : _iterables{ std::forward<I>(iterables)... } {
@@ -56,8 +68,7 @@ public:
     template<bool IsBidi = bidi>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> end() const {
         using diff = typename iterator::difference_type;
-        return { end_tuple(_iterables), end_tuple(_iterables),
-                 iterable_tuple_eager_size_as<diff>(_iterables, make_index_sequence<sizeof...(Iterables)>{}) };
+        return { end_tuple(_iterables), end_tuple(_iterables), iterable_tuple_eager_size_as<diff>(_iterables, is{}) };
     }
 
     template<bool IsBidi = bidi>
@@ -68,13 +79,13 @@ public:
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, zip_longest_iterable<Iterables...>&& zipper) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(zipper._iterables));
+        return concat_iterables(std::forward<Iterable>(iterable), std::move(zipper._iterables), is{});
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const zip_longest_iterable<Iterables...>& zipper) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), zipper._iterables);
+        return concat_iterables(std::forward<Iterable>(iterable), zipper._iterables, is{});
     }
 };
 } // namespace detail

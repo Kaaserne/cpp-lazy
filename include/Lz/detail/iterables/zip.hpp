@@ -26,6 +26,18 @@ class zip_iterable : public lazy_view {
         return std::min({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
     }
 
+    template<class Iterable2, std::size_t... Is>
+    static zip_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, zip_iterable<Iterables...>&& zipper, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(zipper._iterables))... };
+    }
+
+    template<class Iterable2, std::size_t... Is>
+    static zip_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, const zip_iterable<Iterables...>& zipper, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(zipper._iterables)... };
+    }
+
 public:
     using iterator = zip_iterator<std::tuple<iter_t<Iterables>...>, sentinel_tuple>;
     using const_iterator = iterator;
@@ -75,13 +87,13 @@ public:
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, zip_iterable<Iterables...>&& zipper) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(zipper._iterables));
+        return concat_iterables(std::forward<Iterable>(iterable), std::move(zipper), seq{});
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const zip_iterable<Iterables...>& zipper) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), zipper._iterables);
+        return concat_iterables(std::forward<Iterable>(iterable), zipper, seq{});
     }
 };
 } // namespace detail

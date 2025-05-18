@@ -134,19 +134,6 @@ iterable_tuple_eager_size_as(IterableTuple&& iterables, index_sequence<Is...>) {
     return { static_cast<T>(lz::eager_size(std::get<Is>(std::forward<IterableTuple>(iterables))))... };
 }
 
-template<class Iterable, class... Ts>
-LZ_CONSTEXPR_CXX_14 std::tuple<ref_or_view<remove_ref<Iterable>>, Ts...>
-iterable_tuple_cat(Iterable&& iterable, const std::tuple<Ts...>& iterables) {
-    return { std::tuple_cat(std::make_tuple(ref_or_view<remove_ref<Iterable>>(std::forward<Iterable>(iterable))), iterables) };
-}
-
-template<class Iterable, class... Ts>
-LZ_CONSTEXPR_CXX_14 std::tuple<ref_or_view<remove_ref<Iterable>>, Ts...>
-iterable_tuple_cat(Iterable&& iterable, std::tuple<Ts...>&& iterables) {
-    return { std::tuple_cat(std::make_tuple(ref_or_view<remove_ref<Iterable>>(std::forward<Iterable>(iterable))),
-                            std::move(iterables)) };
-}
-
 template<class IterableTuple, std::size_t... I>
 LZ_CONSTEXPR_CXX_14 auto begin_tuple_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
     -> decltype(std::make_tuple(detail::begin(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))...)) {

@@ -23,6 +23,18 @@ class interleave_iterable {
 
     using index_sequence_for_this = make_index_sequence<sizeof...(Iterables)>;
 
+    template<class Iterable2, std::size_t... Is>
+    static interleave_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, interleave_iterable<Iterables...>&& interleaved, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(interleaved._iterables))... };
+    }
+
+    template<class Iterable2, std::size_t... Is>
+    static interleave_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, const interleave_iterable<Iterables...>& interleaved, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(interleaved._iterables)... };
+    }
+
 public:
     using iterator = interleave_iterator<iter_tuple, sentinel_tuple>;
     using const_iterator = iterator;
@@ -64,13 +76,13 @@ public:
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, interleave_iterable<Iterables...>&& interleaved) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), std::move(interleaved._iterables));
+        return concat_iterables(std::forward<Iterable>(iterable), std::move(interleaved), index_sequence_for_this{});
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const interleave_iterable<Iterables...>& interleaved) {
-        return iterable_tuple_cat(std::forward<Iterable>(iterable), interleaved._iterables);
+        return concat_iterables(std::forward<Iterable>(iterable), interleaved, index_sequence_for_this{});
     }
 };
 

@@ -38,6 +38,21 @@ class cartesian_product_iterable : public lazy_view {
     LZ_CONSTEXPR_CXX_14 enable_if<(I < 0)> init_iterators(Iterator&, const std::tuple<Iterators...>&, bool&) const noexcept {
     }
 
+    template<class Iterable2, std::size_t... Is>
+    static cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
+    concat_iterables(Iterable2&& iterable2, cartesian_product_iterable<Iterable, Iterables...>&& cartesian,
+                     index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::move(cartesian._first_iterable),
+                 std::move(std::get<Is>(cartesian._rest_iterables))... };
+    }
+
+    template<class Iterable2, std::size_t... Is>
+    static cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
+    concat_iterables(Iterable2&& iterable2, const cartesian_product_iterable<Iterable, Iterables...>& cartesian,
+                     index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), cartesian._first_iterable, std::get<Is>(cartesian._rest_iterables)... };
+    }
+
 public:
     using iterator = cartesian_product_iterator<std::tuple<iter_t<Iterable>, iter_t<Iterables>...>,
                                                 std::tuple<sentinel_t<Iterable>, sentinel_t<Iterables>...>>;
@@ -105,15 +120,14 @@ public:
     template<class Iterable2>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
     operator|(Iterable2&& iterable2, cartesian_product_iterable<Iterable, Iterables...>&& cartesian) {
-        return { std::forward<Iterable2>(iterable2),
-                 std::tuple_cat(std::make_tuple(std::move(cartesian._first_iterable)), std::move(cartesian._rest_iterables)) };
+        return concat_iterables(std::forward<Iterable2>(iterable2), std::move(cartesian),
+                                make_index_sequence<sizeof...(Iterables)>());
     }
 
     template<class Iterable2>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
     operator|(Iterable2&& iterable2, const cartesian_product_iterable<Iterable, Iterables...>& cartesian) {
-        return { std::forward<Iterable2>(iterable2),
-                 std::tuple_cat(std::make_tuple(cartesian._first_iterable), cartesian._rest_iterables) };
+        return concat_iterables(std::forward<Iterable2>(iterable2), cartesian, make_index_sequence<sizeof...(Iterables)>());
     }
 };
 
