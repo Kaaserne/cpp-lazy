@@ -1,10 +1,6 @@
-#include <Lz/interleave.hpp>
-#include <Lz/intersection.hpp>
 #include <Lz/lz.hpp>
 #include <array>
 #include <benchmark/benchmark.h>
-#include <sstream>
-#include <utility>
 
 namespace {
 constexpr std::size_t size_policy = 32;
@@ -256,9 +252,9 @@ void inclusive_scan(benchmark::State& state) {
 
 void interleave(benchmark::State& state) {
     std::array<int, size_policy / 2> arr_a =
-        lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy / 2>>();
+        lz::range(static_cast<int>(size_policy) / 2) | lz::to<std::array<int, size_policy / 2>>();
     std::array<int, size_policy / 2> arr_b =
-        lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy / 2>>();
+        lz::range(static_cast<int>(size_policy) / 2) | lz::to<std::array<int, size_policy / 2>>();
 
     for (auto _ : state) {
         for (auto i : lz::interleave(arr_a, arr_b)) {
@@ -267,26 +263,25 @@ void interleave(benchmark::State& state) {
     }
 }
 
-// TODO
-// void intersection(benchmark::State& state) {
-//     std::array<int, size_policy> arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
-//     std::array<int, size_policy> arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+void intersection(benchmark::State& state) {
+    std::array<int, size_policy> arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    std::array<int, size_policy> arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
-//     for (auto _ : state) {
-// #ifdef LZ_HAS_CXX_17
+    for (auto _ : state) {
+#ifdef LZ_HAS_CXX_17
 
-//         for (auto val : lz::intersection(arr_a, arr_b)) {
-//             benchmark::DoNotOptimize(val);
-//         }
+        for (auto val : lz::intersection(arr_a, arr_b)) {
+            benchmark::DoNotOptimize(val);
+        }
 
-// #else
-//         auto intersection = lz::intersection(arr_a, arr_b);
-//         using ref = lz::ref_iterable_t<decltype(intersection)>;
-//         intersection.for_each([](ref val) { benchmark::DoNotOptimize(val); });
+#else
+        auto intersection = lz::intersection(arr_a, arr_b);
+        using ref = lz::ref_iterable_t<decltype(intersection)>;
+        intersection.for_each([](ref val) { benchmark::DoNotOptimize(val); });
 
-// #endif
-//     }
-// }
+#endif
+    }
+}
 
 void join_where(benchmark::State& state) {
     std::vector<int> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
@@ -316,7 +311,8 @@ void join_where(benchmark::State& state) {
 }
 
 void loop(benchmark::State& state) {
-    std::array<int, size_policy / 2> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy / 2>>();
+    std::array<int, size_policy / 2> arr =
+        lz::range(static_cast<int>(size_policy) / 2) | lz::to<std::array<int, size_policy / 2>>();
 
     for (auto _ : state) {
         for (int i : lz::loop(arr, 2)) {
@@ -326,7 +322,7 @@ void loop(benchmark::State& state) {
 }
 
 void map(benchmark::State& state) {
-    std::array<int, size_policy> arr;
+    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int mapped : lz::map(arr, [](const int i) noexcept { return i == 0 ? 10 : 5; })) {
@@ -348,6 +344,19 @@ void random(benchmark::State& state) {
     }
 }
 
+void common_random(benchmark::State& state) {
+    for (auto _ : state) {
+#ifdef LZ_HAS_CXX_17
+        for (int i : lz::common_random(0, 32, size_policy)) {
+            benchmark::DoNotOptimize(i);
+        }
+#else
+        auto random = lz::common_random(0, 32, size_policy);
+        random.for_each([](int i) { benchmark::DoNotOptimize(i); });
+#endif
+    }
+}
+
 void range(benchmark::State& state) {
     for (auto _ : state) {
         for (int i : lz::range(static_cast<int>(size_policy))) {
@@ -356,7 +365,7 @@ void range(benchmark::State& state) {
     }
 }
 
-void ragex_split(benchmark::State& state) {
+void std_regex_split(benchmark::State& state) {
     std::string to_split = "hello hello hello hello hello he";
     std::regex r(" ");
 
@@ -571,13 +580,14 @@ BENCHMARK(generate);
 BENCHMARK(groupy_by);
 BENCHMARK(inclusive_scan);
 BENCHMARK(interleave);
-// BENCHMARK(intersection);
+BENCHMARK(intersection);
 BENCHMARK(join_where);
 BENCHMARK(loop);
 BENCHMARK(map);
 BENCHMARK(random);
+BENCHMARK(common_random);
 BENCHMARK(range);
-BENCHMARK(ragex_split);
+BENCHMARK(std_regex_split);
 BENCHMARK(repeat);
 BENCHMARK(rotate);
 BENCHMARK(slice);

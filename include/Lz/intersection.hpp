@@ -67,4 +67,4 @@ LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 
-#endif
+#endif // LZ_INTERSECTION_HPP

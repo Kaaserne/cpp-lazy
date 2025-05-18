@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef LZ_INTERSECTION_HPP
-#define LZ_INTERSECTION_HPP
+#ifndef LZ_INTERLEAVE_HPP
+#define LZ_INTERLEAVE_HPP
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/interleave.hpp>
@@ -82,4 +82,4 @@ LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 
-#endif
+#endif // LZ_INTERLEAVE_HPP
