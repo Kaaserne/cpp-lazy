@@ -134,5 +134,7 @@ int main() {
     // hello world
     //  this is a message
 
+#endif // LZ_HAS_CXX_11
+
 #endif
 }
