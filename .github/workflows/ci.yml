@@ -86,6 +86,9 @@ jobs:
 
       - name: Install Clang ${{ matrix.version }}
         run: sudo apt-get install -y clang-${{ matrix.version }}
+      
+      - name: Install libc++ Clang ${{ matrix.version }}
+        run: sudo apt-get install -y libc++-${{ matrix.version }}-dev libc++abi-${{ matrix.version }}-dev
 
       - name: Configure (install)
         env:
@@ -95,6 +98,7 @@ jobs:
           cmake -S . -B build/install -G Ninja \
             -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }} \
+            -D CMAKE_CXX_FLAGS="-stdlib=libc++" \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
             -D CMAKE_CXX_COMPILER=clang++ \
