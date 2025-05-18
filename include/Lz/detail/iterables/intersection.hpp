@@ -35,9 +35,8 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { detail::begin(std::forward<Iterable>(_iterable)), detail::end(std::forward<Iterable>(_iterable)),
-                 detail::begin(std::forward<Iterable2>(_iterable2)), detail::end(std::forward<Iterable2>(_iterable2)),
-                 std::move(_compare) };
+        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), detail::begin(std::move(_iterable2)),
+                 detail::end(std::move(_iterable2)), std::move(_compare) };
     }
 
     template<class I = typename iterator::iterator_category>
