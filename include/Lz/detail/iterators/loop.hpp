@@ -148,9 +148,18 @@ public:
         return eq(default_sentinel{});
     }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4717) // Recursive type
+#endif
+
     constexpr bool eq(default_sentinel) const {
         return _begin == _end;
     }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 };
 } // namespace detail
 } // namespace lz
