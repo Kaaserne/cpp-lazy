@@ -13,16 +13,23 @@ TEST_CASE("rotate_iterable with sentinels") {
     auto rotated = lz::rotate(c_str, 7);
     static_assert(!std::is_same<decltype(rotated.begin()), decltype(rotated.end())>::value, "Should be sentinel");
     REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
+
+    SECTION("Operator=") {
+        auto begin = rotated.begin();
+        REQUIRE(begin == rotated.begin());
+        begin = rotated.end();
+        REQUIRE(begin == rotated.end());
+    }
 }
 
 TEST_CASE("rotate_iterable basic functionality") {
-    std::array<int, 5> vec = { 1, 2, 3, 4, 5 };
-    auto rotate = lz::rotate(vec, 2);
-    REQUIRE(rotate.size() == vec.size());
+    std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+    auto rotate = lz::rotate(arr, 2);
+    REQUIRE(rotate.size() == arr.size());
 
     SECTION("Should be correct length") {
         auto beg = rotate.begin();
-        REQUIRE(std::distance(beg, rotate.end()) == static_cast<std::ptrdiff_t>(vec.size()));
+        REQUIRE(std::distance(beg, rotate.end()) == static_cast<std::ptrdiff_t>(arr.size()));
         ++beg, ++beg;
         REQUIRE(std::distance(beg, rotate.end()) == 3);
         ++beg;
@@ -34,6 +41,19 @@ TEST_CASE("rotate_iterable basic functionality") {
         auto rotator = lz::rotate(lst, 2);
         REQUIRE(std::distance(rotator.begin(), rotator.end()) == static_cast<std::ptrdiff_t>(lst.size()));
         REQUIRE(rotator.size() == lst.size());
+    }
+
+    SECTION("Rotate where n is larger than size / 2 (random access & sized)") {
+        rotate = lz::rotate(arr, 3);
+        REQUIRE(rotate.size() == arr.size());
+        REQUIRE((rotate | lz::to<std::vector>()) == std::vector<int>{ 4, 5, 1, 2, 3 });
+    }
+
+    SECTION("Rotate where n is larger than size / 2 (forward, not sized)") {
+        auto str = lz::c_string("Hello, World!");
+        auto rotator = lz::rotate(str, 7);
+        auto expected = lz::c_string("World!Hello, ");
+        REQUIRE(lz::equal(rotator, expected));
     }
 }
 

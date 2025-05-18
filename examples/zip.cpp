@@ -1,4 +1,4 @@
-#include <Lz/Zip.hpp>
+#include <Lz/zip.hpp>
 #include <vector>
 #include <iostream>
 

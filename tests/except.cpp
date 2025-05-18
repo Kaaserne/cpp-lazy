@@ -18,6 +18,13 @@ TEST_CASE("Except tests with sentinels") {
     auto except = lz::except(c_str, c_str_to_except);
     static_assert(!std::is_same<decltype(except.begin()), decltype(except.end())>::value, "Must be sentinel");
     REQUIRE((except | lz::to<std::string>()) == "Hll, Wrld!");
+
+    SECTION("Operator=") {
+        auto it = except.begin();
+        REQUIRE(it == except.begin());
+        it = except.end();
+        REQUIRE(it == except.end());
+    }
 }
 
 TEST_CASE("Empty or one element except") {

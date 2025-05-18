@@ -44,6 +44,11 @@ public:
 
     constexpr exclude_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 exclude_iterator& operator=(const S& end) {
+        _iterator = end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -98,7 +103,7 @@ public:
         _index += is_positive_offset ? to_skip : -to_skip;
     }
 
-    constexpr bool eq(const exclude_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const exclude_iterator& b) const {
         LZ_ASSERT(_from == b._from && _to == b._to, "Incompatible iterators");
         return _iterator == b._iterator;
     }

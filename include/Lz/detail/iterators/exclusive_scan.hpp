@@ -14,7 +14,7 @@ class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator
     Iterator _iterator;
     mutable T _reducer;
     S _end;
-    bool _reached_end{};
+    bool _reached_end{true};
     mutable BinaryOp _binary_op;
 
     using traits = std::iterator_traits<Iterator>;
@@ -35,6 +35,12 @@ public:
         _binary_op{ std::move(binary_op) } {
     }
 
+    LZ_CONSTEXPR_CXX_14 exclusive_scan_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        _reached_end = true;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return _reducer;
     }
@@ -52,7 +58,7 @@ public:
         ++_iterator;
     }
 
-    constexpr bool eq(const exclusive_scan_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const exclusive_scan_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator && _reached_end == b._reached_end;
     }

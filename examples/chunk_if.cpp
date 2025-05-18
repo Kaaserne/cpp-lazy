@@ -1,4 +1,5 @@
 #include <Lz/chunk_if.hpp>
+#include <iostream>
 #include <vector>
 
 // TODO lz::t_chunk_if cxx 11
@@ -87,7 +88,7 @@ int main() {
 
     // With lz::string[_view]
     lz::for_each(s | lz::sv_chunk_if([](const char c) { return c == ';'; }), [](const lz::string_view chunk) {
-        std::cout.write(chunk.data(), chunk.size());
+        std::cout.write(chunk.data(), static_cast<std::streamsize>(chunk.size()));
         std::cout << '\n';
     });
     // Output:
@@ -101,6 +102,24 @@ int main() {
     // Output:
     // hello world
     //  this is a message
+
+#ifdef LZ_HAS_CXX_11
+
+    // with custom types
+    lz::for_each(s | lz::t_chunk_if<std::vector<char>>{}([](const char c) { return c == ';'; }),
+                 [](const std::vector<char>& vec_chunk) {
+                     for (char c : vec_chunk) {
+                         std::cout << c;
+                         // or use fmt::print("{}", c);
+                     }
+                     std::cout << '\n';
+                 });
+    // Output:
+    // hello world
+    //  this is a message
+
+#else
+
 
     // with custom types
     lz::for_each(s | lz::t_chunk_if<std::vector<char>>([](const char c) { return c == ';'; }),

@@ -5,13 +5,12 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/traits.hpp>
+#include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/iterator_base.hpp>
 #include <numeric>
 
 namespace lz {
 namespace detail {
-
-// TODO add static assertions for all iterables... als use enable ifs for all functions
 
 template<class Tuple>
 using first_it = tup_element<0, Tuple>;
@@ -134,18 +133,17 @@ private:
 
     template<std::size_t I>
     constexpr enable_if<I == std::tuple_size<IterTuple>::value> plus_plus() const noexcept {
+        return;
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<IterTuple>::value - 1, bool>
-    iter_equal_to(const SentinelTuple& end) const {
+    template<std::size_t I, class EndIter>
+    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<IterTuple>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         const auto has_value = std::get<I>(_iterators) == std::get<I>(end);
         return has_value ? iter_equal_to<I + 1>(end) : has_value;
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<IterTuple>::value - 1, bool>
-    iter_equal_to(const SentinelTuple& end) const {
+    template<std::size_t I, class EndIter>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<IterTuple>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         return std::get<I>(_iterators) == std::get<I>(end);
     }
 
@@ -158,6 +156,11 @@ public:
     }
 
     constexpr concatenate_iterator() = default;
+
+    LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
+        _iterators = _end;
+        return *this;
+    }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return deref<0>();
@@ -190,7 +193,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& b) const {
-        // static_assert(tuple_size > 1, "Cannot concat one iterable");
         LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return iter_equal_to<0>(b._iterators);
     }

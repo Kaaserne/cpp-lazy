@@ -2,10 +2,8 @@
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <catch2/catch.hpp>
-#include <iostream>
 #include <list>
 #include <map>
-#include <numeric>
 #include <unordered_map>
 
 TEST_CASE("Exclusive scan with sentinels") {
@@ -14,6 +12,13 @@ TEST_CASE("Exclusive scan with sentinels") {
     auto scan = lz::exclusive_scan(generator, 0);
     std::vector<int> expected = { 0, 0, 1, 3, 6, 10 };
     REQUIRE(lz::equal(scan, expected));
+
+    SECTION("Operator=") {
+        auto it = scan.begin();
+        REQUIRE(it == scan.begin());
+        it = scan.end();
+        REQUIRE(it == scan.end());
+    }
 }
 
 TEST_CASE("exclusive_scan basic functionality") {

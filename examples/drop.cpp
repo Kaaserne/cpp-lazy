@@ -1,4 +1,5 @@
 #include <Lz/drop.hpp>
+#include <iostream>
 #include <vector>
 
 int main() {

@@ -154,7 +154,7 @@ public:
 };
 
 // If you want to create your own iterable, you can use the following code:
-// It is important you inherit from lz::lazy_view
+// It is important you inherit from lz::lazy_view if you use lz::ref_or_view as a member variable.
 
 template<class Iterable>
 class custom_iterable : public lz::lazy_view {
@@ -163,8 +163,15 @@ class custom_iterable : public lz::lazy_view {
     lz::ref_or_view<Iterable> _iterable;
 
 public:
+    custom_iterable(Iterable& iterable) : _iterable(iterable) {
+    }
+
     custom_iterable(const Iterable& iterable) : _iterable(iterable) {
     }
+
+    // or (and remove the above two constructors):
+    // template<class I>
+    // custom_iterable(I&& iterable) : _iterable(std::forward<I>(iterable)) {}
 
     // The begin function
     auto begin() const {

@@ -25,7 +25,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD constexpr bool empty(Iterable&& iterable) {
-    return std::begin(iterable) == std::end(iterable);
+    return detail::empty(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
 }
 
 /**
@@ -35,8 +35,7 @@ LZ_NODISCARD constexpr bool empty(Iterable&& iterable) {
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_one(Iterable&& iterable) {
-    auto it = std::begin(iterable);
-    return !lz::empty(iterable) && ++it == std::end(iterable);
+    return detail::has_one(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
 }
 
 /**
@@ -46,7 +45,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_one(Iterable&& iterable) {
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
-    return lz::empty(iterable) ? false : !has_one(iterable);
+    return detail::has_many(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
 }
 
 /**
@@ -106,14 +105,17 @@ LZ_NODISCARD constexpr val_iterable_t<Iterable> back_or(Iterable&& iterable, T&&
 template<class Iterable, class T, class BinaryOp = MAKE_BIN_PRED(plus)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T accumulate(Iterable&& iterable, T&& init, BinaryOp&& binary_op = {}) {
 #ifdef LZ_HAS_CXX_20
+
     using detail::accumulate;
     using std::accumulate;
     return accumulate(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                       std::forward<T>(init), std::forward<BinaryOp>(binary_op));
 #else
+
     // CXX20 uses std::move, but everything below 20 does not.
     return detail::accumulate(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                               std::forward<T>(init), std::forward<BinaryOp>(binary_op));
+
 #endif // LZ_HAS_CXX_20
 }
 
@@ -548,11 +550,7 @@ LZ_CONSTEXPR_CXX_14 void transform(Iterable&& iterable, OutputIterator output, U
  */
 template<class IterableA, class IterableB, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool equal(IterableA&& a, IterableB&& b, BinaryPredicate&& binary_predicate = {}) {
-    using detail::equal;
-    using std::equal;
-    return equal(detail::begin(std::forward<IterableA>(a)), detail::end(std::forward<IterableA>(a)),
-                 detail::begin(std::forward<IterableB>(b)), detail::end(std::forward<IterableB>(b)),
-                 std::forward<BinaryPredicate>(binary_predicate));
+    return detail::equal(std::forward<IterableA>(a), std::forward<IterableB>(b), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**

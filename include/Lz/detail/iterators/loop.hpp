@@ -39,6 +39,11 @@ public:
         _rotations_left{ amount } {
     }
 
+    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel) {
+        _rotations_left = 0;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -68,7 +73,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
-        // {1, 2, 3, 4}(1, 2, 3, 4)
         const auto iter_length = _end - _begin;
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
@@ -90,7 +94,7 @@ public:
         return (_iterator - other._iterator) + rotations_left_diff * (_end - _begin);
     }
 
-    constexpr bool eq(const loop_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const loop_iterator& other) const {
         LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
         return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
@@ -119,6 +123,10 @@ public:
     using iterator_category = typename traits::iterator_category;
 
     constexpr loop_iterator(Iterator begin, S end) : _iterator{ begin }, _begin{ std::move(begin) }, _end{ std::move(end) } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel) noexcept {
+        return *this;
     }
 
     constexpr reference dereference() const {

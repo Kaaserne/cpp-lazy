@@ -39,6 +39,11 @@ public:
         }
     }
 
+    LZ_CONSTEXPR_CXX_14 regex_split_iterator& operator=(const RegexTokenSentinel& end) {
+        _current = end;
+        return *this;
+    }
+
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_current;
     }

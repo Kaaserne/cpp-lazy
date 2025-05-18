@@ -42,6 +42,32 @@ TEST_CASE("Range changing and creating elements") {
             expected_counter -= 2;
         }
     }
+
+    SECTION("Operator=") {
+        auto float_range = lz::range(0., 10.5, 0.5);
+        auto it = float_range.begin();
+        REQUIRE(it != float_range.end());
+        it = float_range.end();
+        REQUIRE(it == float_range.end());
+
+        auto int_range = lz::range(0, 10, 1);
+        auto it2 = int_range.begin();
+        REQUIRE(it2 != int_range.end());
+        it2 = int_range.end();
+        REQUIRE(it2 == int_range.end());
+
+        float_range = lz::range(10.5, 0., -0.5);
+        it = float_range.begin();
+        REQUIRE(it != float_range.end());
+        it = float_range.end();
+        REQUIRE(it == float_range.end());
+
+        int_range = lz::range(10, 0, -1);
+        it2 = int_range.begin();
+        REQUIRE(it2 != int_range.end());
+        it2 = int_range.end();
+        REQUIRE(it2 == int_range.end());
+    }
 }
 
 TEST_CASE("Empty or one element range") {
@@ -106,7 +132,7 @@ TEST_CASE("Range binary operations") {
             INFO("With i = " << i);
             REQUIRE(*(end - i) == *(expected.end() - i));
         }
-        REQUIRE(end - lz::size(range) == range.begin());
+        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
 
         std::advance(begin, lz::size(range));
         std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(range)));

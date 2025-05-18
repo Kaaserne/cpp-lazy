@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <limits>
 #ifndef LZ_ROTATE_ITERATOR_HPP
 #define LZ_ROTATE_ITERATOR_HPP
 
@@ -37,6 +39,12 @@ public:
         _begin{ std::move(begin) },
         _end{ std::move(end) },
         _offset{ offset } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const Iterator& end) {
+        _iterator = end;
+        _offset = std::numeric_limits<std::size_t>::max();
+        return *this;
     }
 
     constexpr reference dereference() const {
@@ -89,7 +97,7 @@ public:
         return static_cast<difference_type>(_offset - other._offset);
     }
 
-    constexpr bool eq(const rotate_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& b) const {
         LZ_ASSERT(_begin == b._begin && _end == b._end, "Incompatible iterators");
         return _offset == b._offset;
     }

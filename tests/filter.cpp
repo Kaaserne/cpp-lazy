@@ -13,6 +13,13 @@ TEST_CASE("Filter with sentinels") {
     static_assert(!std::is_same<decltype(filter.begin()), decltype(filter.end())>::value, "Must be sentinel");
     std::vector<char> expected = { 'H', 'e', 'l', 'l', ',', ' ', 'W', 'r', 'l', 'd', '!' };
     REQUIRE((filter | lz::to<std::vector>()) == expected);
+
+    SECTION("Operator=") {
+        auto it = filter.begin();
+        REQUIRE(it == filter.begin());
+        it = filter.end();
+        REQUIRE(it == filter.end());
+    }
 }
 
 TEST_CASE("Empty or one element filter") {

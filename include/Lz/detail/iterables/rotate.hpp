@@ -29,7 +29,7 @@ public:
     template<class I>
     constexpr rotate_iterable(I&& iterable, const diff_iterable_t<Iterable> start) :
         _iterable{ std::forward<I>(iterable) },
-        _start{ std::next(std::begin(_iterable), start) } {
+        _start{ next_fast(_iterable, start) } {
     }
 
     template<class I = Iterable>

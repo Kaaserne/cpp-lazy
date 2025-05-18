@@ -42,6 +42,38 @@ TEST_CASE("Exclude changing and creating elements") {
         *excluded2.begin() = 0;
         REQUIRE(arr[2] == 0);
     }
+
+    SECTION("Operator=") {
+        auto it = excluded1.begin();
+        REQUIRE(it == excluded1.begin());
+        it = excluded1.end();
+        REQUIRE(it == excluded1.end());
+
+        it = excluded2.begin();
+        REQUIRE(it == excluded2.begin());
+        it = excluded2.end();
+        REQUIRE(it == excluded2.end());
+
+        it = excluded3.begin();
+        REQUIRE(it == excluded3.begin());
+        it = excluded3.end();
+        REQUIRE(it == excluded3.end());
+
+        auto it2 = excluded_expected1.begin();
+        REQUIRE(it2 == excluded_expected1.begin());
+        it2 = excluded_expected1.end();
+        REQUIRE(it2 == excluded_expected1.end());
+
+        it2 = excluded_expected2.begin();
+        REQUIRE(it2 == excluded_expected2.begin());
+        it2 = excluded_expected2.end();
+        REQUIRE(it2 == excluded_expected2.end());
+
+        it2 = excluded_expected3.begin();
+        REQUIRE(it2 == excluded_expected3.begin());
+        it2 = excluded_expected3.end();
+        REQUIRE(it2 == excluded_expected3.end());
+    }
 }
 
 TEST_CASE("Exclude binary operations") {

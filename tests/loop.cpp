@@ -18,6 +18,21 @@ TEST_CASE("loop_iterable tests with sentinels") {
             c_str_it = cstr.begin();
         }
     }
+
+    SECTION("Operator=") {
+        looper_it = looper.begin();
+        // inf never stops
+        REQUIRE(looper_it != looper.begin());
+        looper_it = looper.end();
+        // inf never stops
+        REQUIRE(looper_it != looper.end());
+
+        auto looper_2 = lz::loop(cstr, 3);
+        auto begin = looper_2.begin();
+        REQUIRE(begin != looper_2.end());
+        begin = looper_2.end();
+        REQUIRE(begin != looper_2.end());
+    }
 }
 
 TEST_CASE("Empty loop iterable") {

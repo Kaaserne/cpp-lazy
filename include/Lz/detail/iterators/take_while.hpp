@@ -20,7 +20,7 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<is_sentinel<Ite
     : public iterator<take_while_iterator<Iterator, S, UnaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                       diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
 
-    common_iterator<Iterator, S> _iterator;
+    Iterator _iterator;
     S _end;
     mutable UnaryPredicate _unary_predicate;
 
@@ -47,6 +47,11 @@ public:
         incremented_check();
     }
 
+    LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         incremented_check();
@@ -60,7 +65,7 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    constexpr bool eq(const take_while_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_while_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }

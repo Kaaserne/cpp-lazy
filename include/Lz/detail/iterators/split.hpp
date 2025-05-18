@@ -3,6 +3,7 @@
 #ifndef LZ_SPLIT_ITERATOR_HPP
 #define LZ_SPLIT_ITERATOR_HPP
 
+#include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
@@ -43,6 +44,12 @@ public:
         }
     }
 
+    LZ_CONSTEXPR_CXX_14 split_iterator& operator=(default_sentinel) {
+        _sub_range_begin = _end;
+        _ends_with_trailing = false;
+        return *this;
+    }
+
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         return { _sub_range_begin, _sub_range_end.first };
@@ -78,7 +85,7 @@ public:
         }
     }
 
-    constexpr bool eq(const split_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const split_iterator& rhs) const {
         LZ_ASSERT(_end == rhs._end && _to_search_end == rhs._to_search_end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end.first == rhs._sub_range_end.first &&
                _ends_with_trailing == rhs._ends_with_trailing;
@@ -121,6 +128,12 @@ public:
         }
     }
 
+    LZ_CONSTEXPR_CXX_14 split_single_iterator& operator=(default_sentinel) {
+        _sub_range_begin = _end;
+        _ends_with_trailing = false;
+        return *this;
+    }
+
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         return { _sub_range_begin, _sub_range_end };
@@ -156,9 +169,9 @@ public:
         _sub_range_end = detail::find(_sub_range_begin, _end, _delimiter);
     }
 
-    constexpr bool eq(const split_single_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const split_single_iterator& rhs) const {
         LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
-        return _sub_range_begin == rhs._sub_range_begin && _sub_range_end.first == rhs._sub_range_end.first &&
+        return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _ends_with_trailing == rhs._ends_with_trailing;
     }
 

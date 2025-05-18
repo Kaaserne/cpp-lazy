@@ -51,15 +51,36 @@ TEST_CASE("Flatten with sentinels") {
     auto flattened = lz::flatten(lst);
     static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
 
+    SECTION("Operator= 2D forward") {
+        auto it = flattened.begin();
+        REQUIRE(it == flattened.begin());
+        it = flattened.end();
+        REQUIRE(it == flattened.end());
+    }
+
     auto str = flattened | lz::to<std::string>();
     REQUIRE(str == "Hello, World!");
 
     auto flatten_one = lz::flatten(lz::c_string("hello, world"));
     REQUIRE((flatten_one | lz::to<std::string>()) == "hello, world");
 
+    SECTION("Operator= 1D") {
+        auto it = flatten_one.begin();
+        REQUIRE(it == flatten_one.begin());
+        it = flatten_one.end();
+        REQUIRE(it == flatten_one.end());
+    }
+
     c_string arr[] = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
     auto flattened_array = lz::flatten(arr);
     static_assert(lz::detail::is_fwd<decltype(flattened_array.begin())>::value, "Flattened should be fwd");
+
+    SECTION("Operator= 2D random access") {
+        auto it = flattened_array.begin();
+        REQUIRE(it == flattened_array.begin());
+        it = flattened_array.end();
+        REQUIRE(it == flattened_array.end());
+    }
 
     REQUIRE((flattened_array | lz::to<std::string>()) == "Hello, World!");
 
@@ -68,6 +89,13 @@ TEST_CASE("Flatten with sentinels") {
     static_assert(lz::detail::is_fwd<decltype(flattened_lst.begin())>::value, "Flattened should be fwd");
     auto expected = std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 };
     REQUIRE(lz::equal(flattened_lst, expected));
+
+    SECTION("Operator= 2D fwd with std vector") {
+        auto it = flattened_lst.begin();
+        REQUIRE(it == flattened_lst.begin());
+        it = flattened_lst.end();
+        REQUIRE(it == flattened_array.end());
+    }
 }
 
 TEST_CASE("Empty or one element flatten") {
@@ -144,6 +172,8 @@ TEST_CASE("Empty or one element flatten") {
     }
 }
 
+namespace {
+
 template<class Vector, class ExpectedIterable>
 void test_flatten_operators_mm_and_pp(const Vector& vec, const ExpectedIterable& expected) {
     auto flattened = lz::flatten(vec);
@@ -210,6 +240,8 @@ void test_operator_min(const Vector& vec) {
         REQUIRE((begin + i) - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(flattened) - 2 * i));
     }
 }
+
+} // namespace
 
 TEST_CASE("Should flatten permutations") {
     SECTION("Flatten 1D") {

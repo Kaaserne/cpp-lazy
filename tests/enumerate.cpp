@@ -1,7 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
-#include <Lz/take.hpp>
 #include <Lz/map.hpp>
+#include <Lz/take.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -18,7 +18,15 @@ TEST_CASE("Enumerate with sentinels") {
 
     using ref_taken = lz::ref_iterable_t<decltype(taken)>;
     using ref_expected = lz::ref_iterable_t<decltype(expected)>;
-    REQUIRE(lz::equal(taken, expected, [](const ref_taken& a, const ref_expected& b) { return a.first == b.first && a.second == b.second; }));
+    REQUIRE(lz::equal(taken, expected,
+                      [](const ref_taken& a, const ref_expected& b) { return a.first == b.first && a.second == b.second; }));
+
+    SECTION("Operator=") {
+        auto it = enumerated.begin();
+        REQUIRE(it == enumerated.begin());
+        it = enumerated.end();
+        REQUIRE(it == enumerated.end());
+    }
 }
 
 TEST_CASE("Enumerate correct size()") {

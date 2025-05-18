@@ -17,6 +17,13 @@ TEST_CASE("Inclusive scan with sentinels") {
         REQUIRE(*begin == i);
         ++begin;
     }
+
+    SECTION("Operator=") {
+        begin = scan.begin();
+        REQUIRE(begin == scan.begin());
+        begin = scan.end();
+        REQUIRE(begin == scan.end());
+    }
 }
 
 TEST_CASE("Empty or one element inclusive scan") {

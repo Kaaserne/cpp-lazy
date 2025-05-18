@@ -1,4 +1,4 @@
-#include <Lz/Except.hpp>
+#include <Lz/except.hpp>
 #include <vector>
 #include <iostream>
 

@@ -3,7 +3,6 @@
 #include <Lz/chunk_if.hpp>
 #include <Lz/iter_tools.hpp>
 #include <catch2/catch.hpp>
-#include <iostream>
 #include <list>
 
 TEST_CASE("Chunk if custom value type") {
@@ -35,6 +34,11 @@ TEST_CASE("Chunk if with sentinels") {
         ++it;
     }
     REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
+    REQUIRE(it == chunked.end());
+
+    it = chunked.begin();
+    REQUIRE(it == chunked.begin());
+    it = chunked.end();
     REQUIRE(it == chunked.end());
 }
 

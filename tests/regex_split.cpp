@@ -2,6 +2,7 @@
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <list>
+#include <regex>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {
     std::regex r1(R"(\s+)");
@@ -36,6 +37,15 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         auto actual = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
         REQUIRE(std::equal(actual.begin(), actual.end(), expected.begin()));
+    }
+
+    SECTION("Operator=") {
+        std::string s = "Hello, world! How are you?";
+        auto splitter = lz::regex_split(s, r1);
+        auto it = splitter.begin();
+        REQUIRE(it == splitter.begin());
+        it = std::regex_token_iterator<std::string::const_iterator>{};
+        REQUIRE(it == splitter.end());
     }
 }
 

@@ -2,6 +2,8 @@
 #include <Lz/filter.hpp>
 #include <Lz/take_every.hpp>
 #include <Lz/zip.hpp>
+#include <iostream>
+#include <vector>
 
 int main() {
     /**
@@ -9,26 +11,27 @@ int main() {
      * - `lz::chunks`
      * - `lz::enumerate`
      * - `lz::exclude`
+     * - `lz::interleave`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`
      * - `lz::zip`
-     * If your iterable is exactly bidirectional (so forward excluded) and not sized (like `lz::filter` for example, if the input
-     * iterable is also bidirectional / random access), you may cache the size of the iterable. If you use multiple of these, it
-     * can be handy to cache the size. The size will be calculated when calling begin()/end() on the iterable. So if you call
-     * begin() multiple times, the size will be calculated multiple times.
+     * If Your iterable is exactly bidirectional (so forward/random access excluded) and and not sized (like `lz::filter` for
+     * example, if the input iterable is also bidirectional / random access), you may cache the size of the iterable. If you use
+     * multiple of these, it can be handy to cache the size. The size will be calculated when calling begin()/end() on the
+     * iterable. So if you call begin() multiple times, the size will be calculated multiple times.
      */
     std::vector<int> to_filter = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     // filter isn't sized; it does not contain size method
     auto filtered = lz::filter(to_filter, [](int i) { return i % 2 == 0; }); // {0, 2, 4, 6, 8}
-    // ERROR filtered.size() does not compile
+    // const auto size = filtered.size(); // ERROR filtered.size() does not compile, since it is not sized
 
     // Here, filtered is traversed only once O(n) to get the size, which is 5, then cached
     auto filtered_cached_size = filtered | lz::cache_size; // filtered_cached_size now contains a size method
     // Therefore, calling size() is O(1)
     std::cout << "Size of filtered (O(1)): " << filtered_cached_size.size() << '\n'; // 5, cheap operation
 
-    // lz::zip also requires a size, so it will use the cached size, instead of traversion the filtered iterable again
+    // lz::zip also requires a size, so it will use the cached size, instead of traversing the filtered iterable again
     auto zipped = lz::zip(filtered_cached_size, filtered_cached_size); // O(1) operation when calling end()
     auto zipped_slow = lz::zip(filtered, filtered);                    // O(n) operation when calling end()
 
@@ -47,16 +50,27 @@ int main() {
     std::cout << "Size of take_every_slow (O(n)): " << lz::eager_size(take_every_slow) << '\n'; // 5, O(n) operation
 
     /** So, all in all: use lz::cache_size if:
-     * - Your iterable is exactly bidirectional (so forward excluded)
-     * - Your iterable is not sized
-     * - You use multiple/a combination of the following iterables:
+     * - Your iterable is exactly bidirectional (so forward and random access excluded) and;
+     * - Your iterable is not sized and (like lz::filter) either OR
+     * - You use *multiple* / a combination of the following iterables:
      *   - lz::chunks
      *   - lz::enumerate
      *   - lz::exclude
+     *   - lz::interleave
      *   - lz::take
      *   - lz::take_every
      *   - lz::zip_longest
      *   - lz::zip
-     * Are planning to call begin() or end() multiple times
+     * - OR Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+     * combinations)
      */
+    // So, by calling .end() on the same instance, each time .end() is called, the size is calculated again
+    auto zipped_non_cached = lz::zip(to_filter, to_filter);
+    auto end = zipped_non_cached.end(); // O(n) operation, since to_filter is not sized and bidirectional
+
+    static_cast<void>(end); // to avoid unused variable warning
+
+    end = zipped_non_cached.end(); // another O(n) operation, since to_filter is not sized and bidirectional
+
+    static_cast<void>(end); // to avoid unused variable warning
 }

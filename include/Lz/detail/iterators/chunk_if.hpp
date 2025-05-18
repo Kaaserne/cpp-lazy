@@ -50,6 +50,12 @@ public:
         }
     }
 
+    LZ_CONSTEXPR_CXX_14 chunk_if_iterator& operator=(default_sentinel) {
+        _sub_range_begin = _end;
+        _ends_with_trailing = false;
+        return *this;
+    }
+
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         return { _sub_range_begin, _sub_range_end };
@@ -87,7 +93,7 @@ public:
         }
     }
 
-    constexpr bool eq(const chunk_if_iterator& rhs) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const chunk_if_iterator& rhs) const {
         LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _ends_with_trailing == rhs._ends_with_trailing;

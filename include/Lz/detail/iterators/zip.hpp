@@ -5,6 +5,7 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/traits.hpp>
+#include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/iterator_base.hpp>
 #include <algorithm>
 
@@ -36,34 +37,27 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
-        decompose((++std::get<I>(_iterators), 0)...);
+        decompose(++std::get<I>(_iterators)...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
-        decompose((--std::get<I>(_iterators), 0)...);
+        decompose(--std::get<I>(_iterators)...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence<I...>, const difference_type offset) {
-        decompose(((std::get<I>(_iterators) += offset), 0)...);
+        decompose(std::get<I>(_iterators) += offset...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
-        const difference_type expand[] = { static_cast<difference_type>(
-            (std::get<I>(_iterators) - std::get<I>(other._iterators)))... };
-        const auto min_max = std::minmax_element(std::begin(expand), std::end(expand));
-        return *min_max.second < 0 ? *min_max.second : *min_max.first;
+        const auto min_max = std::minmax({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        return min_max.second < 0 ? min_max.second : min_max.first;
     }
 
-    template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other, index_sequence<I...>) const {
-        return eq(other._iterators, index_sequence<I...>{});
-    }
-
-    template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other, index_sequence<I...>) const {
+    template<std::size_t... I, class EndIter>
+    LZ_CONSTEXPR_CXX_20 bool eq(const EndIter& other, index_sequence<I...>) const {
         return std::max({ (std::get<I>(_iterators) == std::get<I>(other))... });
     }
 
@@ -73,6 +67,11 @@ public:
     }
 
     constexpr zip_iterator() = default;
+
+    LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SentinelTuple& end) {
+        _iterators = end;
+        return *this;
+    }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
@@ -98,12 +97,12 @@ public:
         return minus(other, make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& b) const {
-        return eq(b, make_idx_sequence_for_this());
+    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other) const {
+        return eq(other._iterators, make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& b) const {
-        return eq(b, make_idx_sequence_for_this());
+    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other) const {
+        return eq(other, make_idx_sequence_for_this());
     }
 };
 } // namespace detail

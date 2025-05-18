@@ -17,6 +17,13 @@ TEST_CASE("Take with sentinels") {
     REQUIRE(lz::equal(take, expected));
     auto vec = take | lz::to<std::vector<char>>();
     REQUIRE(lz::equal(vec, expected));
+
+    SECTION("Operator=") {
+        auto it = take.begin();
+        REQUIRE(it == take.begin());
+        it = take.end();
+        REQUIRE(it == take.end());
+    }
 }
 
 TEST_CASE("Take changing and creating elements") {
@@ -221,8 +228,30 @@ TEST_CASE("Drop & slice") {
         auto drop = vec | lz::drop(4);
         REQUIRE(drop.size() == 4);
         std::vector<int> expected = { 5, 6, 7, 8 };
-        auto result = lz::to<std::vector<int>>(drop, std::allocator<int>());
-        REQUIRE(std::equal(result.begin(), result.end(), expected.begin()));
+        REQUIRE(lz::equal(drop, expected));
+    }
+
+    SECTION("Drop where n is larger than size / 2, sized & random access") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        auto drop = vec | lz::drop(6);
+        REQUIRE(drop.size() == 2);
+        std::vector<int> expected = { 7, 8 };
+        REQUIRE(lz::equal(drop, expected));
+    }
+
+    SECTION("Drop where n is larger than size / 2, sized & bidirectional") {
+        std::list<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        auto drop = vec | lz::drop(6);
+        REQUIRE(drop.size() == 2);
+        std::vector<int> expected = { 7, 8 };
+        REQUIRE(lz::equal(drop, expected));
+    }
+
+    SECTION("Drop where n is larger than size / 2, not sized & forward") {
+        auto cstr = lz::c_string("Hello, world!");
+        auto drop = cstr | lz::drop(7);
+        std::vector<char> expected = { 'w', 'o', 'r', 'l', 'd', '!' };
+        REQUIRE(lz::equal(drop, expected));
     }
 
     SECTION("Slice iterable") {

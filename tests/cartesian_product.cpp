@@ -1,9 +1,10 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/cartesian_product.hpp>
-#include <Lz/reverse.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
+#include <cstddef>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -60,6 +61,12 @@ TEST_CASE("Is sentinel") {
     SECTION("Should make permutation") {
         REQUIRE(*cart.begin() == std::make_tuple('H', ' '));
     }
+
+    SECTION("Operator=") {
+        auto begin = cart.begin();
+        begin = cart.end();
+        REQUIRE(begin == cart.end());
+    }
 }
 
 TEST_CASE("Empty or one element cartesian product") {
@@ -69,6 +76,7 @@ TEST_CASE("Empty or one element cartesian product") {
         REQUIRE(lz::empty(cart));
         REQUIRE(!lz::has_one(cart));
         REQUIRE(!lz::has_many(cart));
+        REQUIRE(cart.size() == 0);
     }
 
     SECTION("One element") {
@@ -76,6 +84,37 @@ TEST_CASE("Empty or one element cartesian product") {
         auto cart = lz::cartesian_product(vec, vec);
         REQUIRE(!lz::empty(cart));
         REQUIRE(lz::has_one(cart));
+        REQUIRE(!lz::has_many(cart));
+        REQUIRE(cart.size() == 1);
+    }
+
+    SECTION("One element and zero elements combined") {
+        std::vector<int> vec = { 1 };
+        std::vector<int> vec2;
+        auto cart = lz::cartesian_product(vec, vec2);
+        REQUIRE(lz::empty(cart));
+        REQUIRE(!lz::has_one(cart));
+        REQUIRE(!lz::has_many(cart));
+        REQUIRE(cart.size() == 0);
+
+        cart = lz::cartesian_product(vec2, vec);
+        REQUIRE(lz::empty(cart));
+        REQUIRE(!lz::has_one(cart));
+        REQUIRE(!lz::has_many(cart));
+        REQUIRE(cart.size() == 0);
+    }
+
+    SECTION("One element and zero elements combined with sentinels") {
+        auto cstr = lz::c_string("H");
+        auto cstr2 = lz::c_string("");
+        auto cart = lz::cartesian_product(cstr, cstr2);
+        REQUIRE(lz::empty(cart));
+        REQUIRE(!lz::has_one(cart));
+        REQUIRE(!lz::has_many(cart));
+
+        cart = lz::cartesian_product(cstr2, cstr);
+        REQUIRE(lz::empty(cart));
+        REQUIRE(!lz::has_one(cart));
         REQUIRE(!lz::has_many(cart));
     }
 }
@@ -89,20 +128,6 @@ TEST_CASE("Cartesian product changing and creating elements") {
 
     SECTION("Should not be sentinel") {
         static_assert(std::is_same<decltype(cartesian.begin()), decltype(cartesian.end())>::value, "Should be the same");
-    }
-
-    SECTION("Distances") {
-        auto iter = cartesian.begin();
-        REQUIRE(std::distance(iter, iter) == 0);
-        REQUIRE(std::distance(iter, iter + 1) == 1);
-        REQUIRE(std::distance(iter, iter + 2) == 2);
-        REQUIRE(std::distance(iter, iter + 3) == 3);
-        REQUIRE(std::distance(iter, iter + 4) == 4);
-        REQUIRE(std::distance(iter, iter + 5) == 5);
-        REQUIRE(std::distance(iter, iter + 6) == 6);
-        REQUIRE(std::distance(iter, iter + 7) == 7);
-        REQUIRE(std::distance(iter, iter + 8) == 8);
-        REQUIRE(std::distance(iter, iter + 9) == 9);
     }
 
     SECTION("Should be by reference") {
@@ -147,48 +172,90 @@ TEST_CASE("Cartesian product binary operations") {
     std::vector<char> chars = { 'a', 'b', 'c' };
     std::vector<char> chars2 = { 'a', 'b' };
     auto cartesian = lz::cartesian_product(vec, chars, chars2);
+    std::vector<std::tuple<int, char, char>> expected = {
+        std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'), std::make_tuple(1, 'b', 'b'),
+        std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'c', 'b'), std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'),
+        std::make_tuple(2, 'b', 'a'), std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b')
+    };
+    REQUIRE(cartesian.size() == expected.size());
 
     SECTION("Operator++") {
         auto iter = cartesian.begin();
-        REQUIRE(*iter == std::make_tuple(1, 'a', 'a'));
-        REQUIRE(*(++iter) == std::make_tuple(1, 'a', 'b'));
-        REQUIRE(*(++iter) == std::make_tuple(1, 'b', 'a'));
-        REQUIRE(*(++iter) == std::make_tuple(1, 'b', 'b'));
-        REQUIRE(*(++iter) == std::make_tuple(1, 'c', 'a'));
-        REQUIRE(*(++iter) == std::make_tuple(1, 'c', 'b'));
-        REQUIRE(*(++iter) == std::make_tuple(2, 'a', 'a'));
-        REQUIRE(*(++iter) == std::make_tuple(2, 'a', 'b'));
-        REQUIRE(*(++iter) == std::make_tuple(2, 'b', 'a'));
-        REQUIRE(*(++iter) == std::make_tuple(2, 'b', 'b'));
-        REQUIRE(*(++iter) == std::make_tuple(2, 'c', 'a'));
-        REQUIRE(*(++iter) == std::make_tuple(2, 'c', 'b'));
-        REQUIRE(++iter == cartesian.end());
+        std::ptrdiff_t count = 0;
+        auto end = cartesian.end();
+        while (iter != end) {
+            INFO("With count = " << count);
+            REQUIRE(*iter == *(expected.begin() + count));
+            ++iter;
+            ++count;
+        }
+        REQUIRE(static_cast<std::size_t>(count) == lz::size(cartesian));
     }
 
     SECTION("Operator--") {
-        auto iter = cartesian.end();
-        REQUIRE(*(--iter) == std::make_tuple(2, 'c', 'b'));
-        REQUIRE(*(--iter) == std::make_tuple(2, 'c', 'a'));
-        REQUIRE(*(--iter) == std::make_tuple(2, 'b', 'b'));
-        REQUIRE(*(--iter) == std::make_tuple(2, 'b', 'a'));
-        REQUIRE(*(--iter) == std::make_tuple(2, 'a', 'b'));
-        REQUIRE(*(--iter) == std::make_tuple(2, 'a', 'a'));
-        REQUIRE(*(--iter) == std::make_tuple(1, 'c', 'b'));
-        REQUIRE(*(--iter) == std::make_tuple(1, 'c', 'a'));
-        REQUIRE(*(--iter) == std::make_tuple(1, 'b', 'b'));
-        REQUIRE(*(--iter) == std::make_tuple(1, 'b', 'a'));
-        REQUIRE(*(--iter) == std::make_tuple(1, 'a', 'b'));
-        REQUIRE(*(--iter) == std::make_tuple(1, 'a', 'a'));
-        REQUIRE(iter == cartesian.begin());
-        ++iter;
-        REQUIRE(*iter == std::make_tuple(1, 'a', 'b'));
+        auto iter = cartesian.begin();
+        auto end = cartesian.end();
+        std::ptrdiff_t count = 0;
+        while (iter != end) {
+            --end;
+            ++count;
+            INFO("With count = " << count);
+            REQUIRE(*end == *(expected.end() - count));
+        }
+        REQUIRE(static_cast<std::size_t>(count) == lz::size(cartesian));
     }
 
     SECTION("Operator+") {
-        // TODO
+        auto begin = cartesian.begin();
+        auto end = cartesian.end();
+
+        for (std::size_t i = 0; i < lz::size(cartesian) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+        }
+        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.end());
+        for (std::size_t i = 1; i <= lz::size(cartesian); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+        }
+        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.begin());
+
+        std::advance(begin, lz::size(cartesian));
+        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(cartesian)));
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
+
+        for (std::size_t i = 0; i < lz::size(cartesian) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+        }
+        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.end());
+        for (std::size_t i = 1; i <= lz::size(cartesian); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+        }
+        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.begin());
     }
 
     SECTION("Operator-") {
+        auto begin = cartesian.begin();
+        auto end = cartesian.end();
+
+        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(cartesian)); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
+            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
+            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
+            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
+        }
+
+        for (std::size_t i = 0; i < lz::size(cartesian); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                    static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
+            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                    -static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
+        }
     }
 }
 
@@ -206,7 +273,7 @@ TEST_CASE("CartesianProduct to containers") {
             std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'), std::make_tuple(2, 'b', 'a'),
             std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b'),
             std::make_tuple(3, 'a', 'a'), std::make_tuple(3, 'a', 'b'), std::make_tuple(3, 'b', 'a'),
-            std::make_tuple(3, 'b', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'c', 'b'),
+            std::make_tuple(3, 'b', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'c', 'b')
         };
         REQUIRE(actual == expected);
     }
@@ -219,7 +286,7 @@ TEST_CASE("CartesianProduct to containers") {
             std::make_tuple(2, 'c', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'b', 'b'),
             std::make_tuple(2, 'b', 'a'), std::make_tuple(2, 'a', 'b'), std::make_tuple(2, 'a', 'a'),
             std::make_tuple(1, 'c', 'b'), std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'b', 'b'),
-            std::make_tuple(1, 'b', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'a', 'a'),
+            std::make_tuple(1, 'b', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'a', 'a')
         };
         REQUIRE(actual == expected);
     }

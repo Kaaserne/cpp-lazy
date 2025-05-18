@@ -49,6 +49,11 @@ public:
 
     constexpr filter_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -62,7 +67,7 @@ public:
         _iterator = find(std::move(_iterator), _end);
     }
 
-    constexpr bool eq(const filter_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const filter_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
@@ -110,6 +115,11 @@ public:
 
     constexpr filter_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return *_iterator;
     }
@@ -129,7 +139,7 @@ public:
         } while (!_predicate(*_iterator) && _iterator != _begin);
     }
 
-    constexpr bool eq(const filter_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const filter_iterator& b) const {
         LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }

@@ -34,6 +34,11 @@ public:
         _binary_op{ std::move(bin_op) } {
     }
 
+    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator& operator=(default_sentinel) {
+        _iterator = _end;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return _reducer;
     }

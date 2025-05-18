@@ -48,8 +48,6 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
-// TODO faster implementation for compiler times
-
 template<bool Value, class T, class... Rest>
 struct conjunction_impl {
     using type = T;
@@ -380,50 +378,6 @@ using func_ret_type_iters = decltype(std::declval<Function>()(*(std::declval<Ite
 
 template<class... Ts>
 using common_type = typename std::common_type<Ts...>::type;
-
-template<class>
-struct iter_tuple_diff_type_helper;
-
-template<class... Iterators>
-struct iter_tuple_diff_type_helper<std::tuple<Iterators...>> {
-    using type = common_type<diff_type<Iterators>...>;
-};
-
-template<class>
-struct iter_tuple_iter_cat_helper;
-
-template<class... Iterators>
-struct iter_tuple_iter_cat_helper<std::tuple<Iterators...>> {
-    using type = common_type<iter_cat_t<Iterators>...>;
-};
-
-template<class>
-struct iter_tuple_value_type_helper;
-
-template<class... Iterators>
-struct iter_tuple_value_type_helper<std::tuple<Iterators...>> {
-    using type = std::tuple<val_t<Iterators>...>;
-};
-
-template<class>
-struct iter_tuple_ref_type_helper;
-
-template<class... Iterators>
-struct iter_tuple_ref_type_helper<std::tuple<Iterators...>> {
-    using type = std::tuple<ref_t<Iterators>...>;
-};
-
-template<class IterTuple>
-using iter_tuple_diff_type_t = typename iter_tuple_diff_type_helper<IterTuple>::type;
-
-template<class IterTuple>
-using iter_tuple_iter_cat_t = typename iter_tuple_iter_cat_helper<IterTuple>::type;
-
-template<class IterTuple>
-using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>::type;
-
-template<class IterTuple>
-using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
 
 template<class IterTag>
 using is_bidi_tag = std::is_convertible<IterTag, std::bidirectional_iterator_tag>;

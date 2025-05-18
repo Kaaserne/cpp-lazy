@@ -14,6 +14,13 @@ TEST_CASE("Take while with sentinels") {
     static_assert(!std::is_same<decltype(take_while.begin()), decltype(take_while.end())>::value, "Should be sentinel");
     auto c_str_expected = lz::c_string("Hello, ");
     REQUIRE(lz::equal(take_while, c_str_expected));
+
+    SECTION("Operator=") {
+        auto it = take_while.begin();
+        REQUIRE(it == take_while.begin());
+        it = take_while.end();
+        REQUIRE(it == take_while.end());
+    }
 }
 
 TEST_CASE("take_while_iterable takes elements and is by reference") {

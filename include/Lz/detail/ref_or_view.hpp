@@ -8,7 +8,7 @@
 namespace lz {
 namespace detail {
 template<class Iterable, bool /* is base of lazy_view && !is c array */>
-struct ref_or_view_helper;
+class ref_or_view_helper;
 
 template<class Iterable>
 class ref_or_view_helper<Iterable, false> : public lazy_view {
@@ -68,7 +68,6 @@ public:
     }
 };
 
-// TODO add test with const array
 // Class that contains a c-array or a view to a ref_or_view<Iterable, true>
 template<class Iterable>
 class ref_or_view_helper<Iterable, true> : public lazy_view {
@@ -136,8 +135,7 @@ public:
 };
 
 template<class Iterable>
-using ref_or_view = ref_or_view_helper<Iterable, std::is_base_of<lazy_view, typename std::remove_cv<Iterable>::type>::value &&
-                                                     !std::is_array<Iterable>::value>;
+using ref_or_view = ref_or_view_helper<Iterable, std::is_base_of<lazy_view, typename std::remove_cv<Iterable>::type>::value>;
 } // namespace detail
 
 /**

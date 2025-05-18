@@ -23,13 +23,12 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * // Both return an iterable of std::vector<int>
- * auto chunked = lz::t_chunk_if<std::vector<int>>(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
+ * auto chunked = lz::t_chunk_if<std::vector<int>>{}(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
  * // or
- * auto chunked = vec | lz::t_chunk_if<std::vector<int>>([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
+ * auto chunked = vec | lz::t_chunk_if<std::vector<int>>{}([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
  * ```
  * @tparam ValueType The value type of the chunked iterable.
  */
-// TODO
 template<class ValueType>
 using t_chunk_if = detail::chunk_if_adaptor<ValueType>;
 
@@ -155,8 +154,6 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<lz::string_view> sv_chunk_if{};
 LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 #endif
-
-using detail::chunk_if_adaptor;
 
 using detail::chunk_if_iterable;
 

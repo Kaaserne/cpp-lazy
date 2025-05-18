@@ -7,8 +7,6 @@
 #include <Lz/detail/traits.hpp>
 #include <cstddef>
 #include <iterator>
-#include <limits>
-#include <tuple>
 
 #ifndef NDEBUG
 #include <exception>
@@ -17,8 +15,6 @@
 #if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
 #include <stacktrace>
 #endif
-
-#include <exception>
 
 namespace lz {
 namespace detail {
@@ -37,7 +33,7 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
 }
 
 #define LZ_ASSERT(CONDITION, MSG)                                                                                                \
-    ((CONDITION) ? ((void)0) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
+    ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
@@ -63,12 +59,42 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
     return std::end(c);
 }
 
+// clang-format off
+
+// next_fast: check whether it's faster to go forward or backward when incrementing n steps
+// Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
+// for random access iterators this is O(1) anyway. For forward iterators this is not O(1),
+// but we can't go any other way than forward. Random access iterators will use the same
+// implementation as the forward non-sized iterables so we can skip that if statement.
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+enable_if<sized<I>::value && std::is_same<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>::value, iter_t<I>>
+next_fast(I&& iterable, const diff_iterable_t<I> n) {
+    using diff_type = diff_iterable_t<I>;
+    const auto size = static_cast<diff_type>(lz::size(iterable));
+    if (n > size / 2) {
+        return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+    }
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
+}
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+enable_if<!sized<I>::value || !std::is_same<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>::value, iter_t<I>>
+next_fast(I&& iterable, diff_iterable_t<I> n) {
+    using diff_type = diff_iterable_t<I>;
+    return std::next(detail::begin(std::forward<I>(iterable)), static_cast<diff_type>(n));
+}
+
+// clang-format on
+
 template<class... Ts>
 constexpr void decompose(const Ts&...) noexcept {
 }
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance_impl(Iterator begin, S end, std::forward_iterator_tag) {
+LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     diff_type<Iterator> dist = 0;
     for (; begin != end; ++begin, ++dist) {
     }
@@ -76,7 +102,7 @@ LZ_CONSTEXPR_CXX_14 diff_type<Iterator> distance_impl(Iterator begin, S end, std
 }
 
 template<class Iterator, class S>
-constexpr diff_type<Iterator> distance_impl(Iterator begin, S end, std::random_access_iterator_tag) {
+constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     return end - begin;
 }
 } // namespace detail
@@ -92,7 +118,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  */
 template<class Iterator, class S>
 constexpr diff_type<Iterator> distance(Iterator begin, S end) {
-    return detail::distance_impl(std::move(begin), std::move(end), iter_cat_t<Iterator>{});
+    return detail::distance_impl(std::move(begin), std::move(end));
 }
 
 #ifdef LZ_HAS_CXX_17

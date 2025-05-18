@@ -33,6 +33,11 @@ public:
         _unary_op{ std::move(unary_op) } {
     }
 
+    LZ_CONSTEXPR_CXX_14 map_iterator& operator=(const S& s) {
+        _iterator = s;
+        return *this;
+    }
+
     constexpr map_iterator() = default;
 
     constexpr reference dereference() const {

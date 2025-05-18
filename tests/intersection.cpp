@@ -16,6 +16,13 @@ TEST_CASE("Intersection tests with sentinels") {
     std::swap(str, str2);
     intersect = lz::intersection(str, str2, MAKE_BIN_PRED(less){});
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
+
+    SECTION("Operator=") {
+        auto begin = intersect.begin();
+        REQUIRE(begin == intersect.begin());
+        begin = intersect.end();
+        REQUIRE(begin == intersect.end());
+    }
 }
 
 TEST_CASE("Empty or one element intersection") {

@@ -12,14 +12,15 @@ struct cached_size_adaptor {
 
     /**
      * @brief Creates an iterable with a size. Gets the size eagerly (using `lz::eager_size`), so if the input iterable is
-     * bidirectional or less and is not sized, the entire iterable will be traversed. This can be handy if you want to
-     * cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
-     * (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind that this is
-     * only useful for non sized iterables and iterables that are bidirectional (so forward excluded). The following iterables
-     * require a (eagerly)sized iterable:
+     * bidirectional and not sized (like lz::filter for example), the entire iterable will be traversed. This can be handy if you
+     * want to cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables
+     * require an (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind
+     * that this is only useful for non sized iterables and iterables that are bidirectional (so forward/random access excluded).
+     * The following iterables require a (eagerly)sized iterable:
      * - `lz::chunks`
      * - `lz::enumerate`
      * - `lz::exclude`
+     * - `lz::interleave`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`

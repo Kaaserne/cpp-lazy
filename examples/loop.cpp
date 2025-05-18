@@ -1,4 +1,5 @@
 #include <Lz/loop.hpp>
+#include <iostream>
 #include <vector>
 
 int main() {

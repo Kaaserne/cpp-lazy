@@ -73,6 +73,11 @@ public:
 
     constexpr join_where_iterator() = default;
 
+    LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel) {
+        _iter_a = _end_a;
+        return *this;
+    }
+
     constexpr reference dereference() const {
         return _result_selector(*_iter_a, *_iterable.begin());
     }
@@ -86,7 +91,7 @@ public:
         find_next();
     }
 
-    constexpr bool eq(const join_where_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const join_where_iterator& b) const {
         LZ_ASSERT(_end_a == b._end_a, "Incompatible iterators");
         return _iter_a == b._iter_a;
     }

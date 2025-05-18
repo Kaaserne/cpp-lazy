@@ -1,6 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
+#include <iostream>
 
 int main() {
     auto iterable_with_end_sentinel = lz::c_string("hello world");

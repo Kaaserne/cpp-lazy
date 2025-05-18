@@ -1,4 +1,5 @@
 #include <Lz/c_string.hpp>
+#include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/take_every.hpp>
 #include <array>
@@ -14,6 +15,13 @@ TEST_CASE("take_every_iterable with sentinels") {
     static_assert(!std::is_same<decltype(take_every.begin()), decltype(take_every.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("Hlo");
     REQUIRE(lz::equal(take_every, expected));
+
+    SECTION("Operator=") {
+        auto begin = take_every.begin();
+        REQUIRE(begin == take_every.begin());
+        begin = take_every.end();
+        REQUIRE(begin == take_every.end());
+    }
 }
 
 TEST_CASE("take_every_iterable changing and creating elements") {
@@ -348,23 +356,44 @@ TEST_CASE("take_every_iterable to containers") {
 }
 
 TEST_CASE("Take every with start offset") {
-    std::array<int, 7> arr = { 1, 2, 3, 4, 5, 6, 7 };
-    auto take_every = arr | lz::take_every(2, 3);
-    REQUIRE(take_every.size() == 2);
-    REQUIRE(*take_every.begin() == 4);
-    REQUIRE(*(take_every.begin() + 1) == 6);
-    REQUIRE((take_every.begin() + 2) == take_every.end());
+    SECTION("Start offset 1") {
+        std::array<int, 7> arr = { 1, 2, 3, 4, 5, 6, 7 };
+        auto take_every = arr | lz::take_every(2, 3);
+        REQUIRE(take_every.size() == 2);
+        REQUIRE(*take_every.begin() == 4);
+        REQUIRE(*(take_every.begin() + 1) == 6);
+        REQUIRE((take_every.begin() + 2) == take_every.end());
+    }
 
-    std::list<int> lst = { 1, 2, 3 };
-    auto take_every2 = lst | lz::take_every(2, 1);
-    REQUIRE(take_every2.size() == 1);
-    REQUIRE(*take_every2.begin() == 2);
-    REQUIRE(std::next(take_every2.begin()) == take_every2.end());
+    SECTION("Start offset 2") {
+        std::list<int> lst = { 1, 2, 3 };
+        auto take_every2 = lst | lz::take_every(2, 1);
+        REQUIRE(take_every2.size() == 1);
+        REQUIRE(*take_every2.begin() == 2);
+        REQUIRE(std::next(take_every2.begin()) == take_every2.end());
+    }
 
-    std::array<int, 6> arr2 = { 1, 2, 3, 4, 5, 6 };
-    auto take_every3 = arr2 | lz::take_every(2, 3);
-    REQUIRE(take_every3.size() == 2);
-    REQUIRE(*take_every3.begin() == 4);
-    REQUIRE(*(take_every3.begin() + 1) == 6);
-    REQUIRE((take_every3.begin() + 2) == take_every3.end());
+    SECTION("Start offset 3") {
+        std::array<int, 6> arr2 = { 1, 2, 3, 4, 5, 6 };
+        auto take_every3 = arr2 | lz::take_every(2, 3);
+        REQUIRE(take_every3.size() == 2);
+        REQUIRE(*take_every3.begin() == 4);
+        REQUIRE(*(take_every3.begin() + 1) == 6);
+        REQUIRE((take_every3.begin() + 2) == take_every3.end());
+    }
+
+    SECTION("Start offset with bidirectional sized iterable where start > size / 2") {
+        std::list<int> lst2 = { 1, 2, 3, 4, 5, 6 };
+        auto take_every4 = lst2 | lz::take_every(2, 4);
+        REQUIRE(take_every4.size() == 1);
+        REQUIRE(*take_every4.begin() == 5);
+        REQUIRE(std::next(take_every4.begin()) == take_every4.end());
+    }
+
+    SECTION("Start offset with bidirectional non sized iterable") {
+        std::list<int> lst2 = { 1, 2, 3, 4, 5, 6 };
+        auto take_every4 = lst2 | lz::filter([](int) { return true; }) | lz::take_every(2, 4);
+        REQUIRE(*take_every4.begin() == 5);
+        REQUIRE(std::next(take_every4.begin()) == take_every4.end());
+    }
 }
