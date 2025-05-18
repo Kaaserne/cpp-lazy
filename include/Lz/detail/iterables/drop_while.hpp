@@ -39,12 +39,12 @@ public:
         return lz::find_if_not(_iterable, _unary_predicate);
     }
 
-    template<class I = typename iterator::iterator_category>
+    template<class I = iter_cat_t<iterator>>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const {
         return std::end(_iterable);
     }
 
-    template<class I = typename iterator::iterator_category>
+    template<class I = iter_cat_t<iterator>>
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }

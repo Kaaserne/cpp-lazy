@@ -19,7 +19,7 @@ public:
 
 private:
     static constexpr bool is_sized = sized<Iterable>::value;
-    using diff_type = typename iterator::difference_type;
+    using diff_type = diff_type<iterator>;
 
     ref_or_view<Iterable> _iterable;
     std::size_t _n;
