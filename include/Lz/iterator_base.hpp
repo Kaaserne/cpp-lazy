@@ -16,6 +16,18 @@ struct default_sentinel {
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
 struct iterator;
 
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+constexpr bool
+operator==(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
+    return it.operator==(default_sentinel{});
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+constexpr bool
+operator!=(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
+    return it.operator!=(default_sentinel{});   
+}
+
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
 public:
@@ -61,26 +73,20 @@ public:
         return !(*this == b);
     }
 
-    LZ_NODISCARD constexpr bool operator==(const Derived& b) const {
-        return static_cast<const Derived&>(*this).eq(b);
+    friend constexpr bool operator==(const Derived& a, const Derived& b) {
+        return a.eq(b);
+    }
+    friend constexpr bool operator!=(const Derived& a, const Derived& b) {
+        return !(a == b);
     }
 
-    LZ_NODISCARD constexpr bool operator!=(const Derived& b) const {
+    constexpr bool operator==(const sentinel& b) const {
+        return static_cast<const Derived&>(*this).eq(b);
+    }
+    constexpr bool operator!=(const sentinel& b) const {
         return !(*this == b);
     }
 };
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S>
-LZ_NODISCARD constexpr detail::enable_if<!std::is_same<S, Derived>::value, bool>
-operator==(const S& a, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, S>& b) {
-    return b == a;
-}
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S>
-LZ_NODISCARD constexpr detail::enable_if<!std::is_same<S, Derived>::value, bool>
-operator!=(const S& a, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, S>& b) {
-    return !(a == b);
-}
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S>
