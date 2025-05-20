@@ -17,6 +17,8 @@ class ref_or_view_helper<Iterable, false> : public lazy_view {
     pointer _iterable_ref_ptr{};
 
 public:
+    static constexpr bool holds_reference = true;
+
     template<class I>
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
         static_assert(std::is_lvalue_reference<I>::value, "Cannot only bind to lvalues");
@@ -76,6 +78,8 @@ class ref_or_view_helper<Iterable, true> : public lazy_view {
     friend class ref_or_view_helper;
 
 public:
+    static constexpr bool holds_reference = false;
+
     constexpr ref_or_view_helper(it&& iterable) : _iterable_value{ std::move(iterable) } {
     }
 
@@ -113,6 +117,14 @@ public:
         return static_cast<std::size_t>(lz::size(_iterable_value));
     }
 
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() & {
+        return std::begin(_iterable_value);
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() & {
+        return std::end(_iterable_value);
+    }
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
         return std::begin(_iterable_value);
     }
@@ -141,9 +153,62 @@ using ref_or_view = ref_or_view_helper<Iterable, std::is_base_of<lazy_view, type
  * rather than the container itself. This class is used in various places in the library to store a reference or a copy of an
  * iterable, depending on the type of the iterable.
  * @tparam Iterable The type of the iterable to store a reference or copy of.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec{ 1, 2, 3 };
+ * lz::ref_or_view<std::vector<int>> ref_or_view{ vec }; // will store a reference to the vector
+ *
+ * auto filter = vec | lz::filter([](int i) { return i > 1; });
+ * lz::ref_or_view<decltype(filter)> ref_or_view_filter{ filter }; // will store a copy of the filter
+ * ```
  */
 using detail::ref_or_view;
 
+/**
+ * @brief This class can be useful for iterables that are not inherited from `lz::lazy_view`, but are still easy to copy. For
+ * instance, you can also use `lz::copied_iterable<boost::iterator_range<int*>>` to hold a copy of the underlying range.
+ * Internally, this will only copy the pointers to the data, not the data itself.
+ *
+ * But, for instance, `lz::copied_iterable<std::vector<int>>` will hold a copy of the underlying vector. This of course will in
+ * turn be slow because it needs to copy all the vector data into the owned iterable.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec{ 1, 2, 3 };
+ * lz::copied_iterable<std::vector<int>> copied_iterable{ vec }; // will store a copy of the vector
+ *
+ * boost::iterator_range<int*> range{ vec.data(), vec.data() + vec.size() }); // Holds a copy to vector data
+ * // lz::filter(range, [](int i) { return i > 1; }); // *CAREFUL* this will hold a reference because it is not a lazy view
+ * // Instead, use:
+ * lz::copied_iterable<boost::iterator_range<int*>> copied_iterable{ range }; // will store a copy of the range
+ * ```
+ */
+template<class Iterable>
+using copied_iterable = detail::ref_or_view_helper<Iterable, true>;
+
+/**
+ * @brief This helper function can be useful for iterables that are not inherited from `lz::lazy_view`, but are still easy to
+ * copy. For instance, you can use `lz::copied_iterable<boost::iterator_range<int*>>` to hold a copy of the underlying range,
+ * instead of a reference (default behaviour, as it is not inherited from lazy_view). Internally, this will only copy the pointers
+ * to the data, not the data itself.
+ *
+ * But, for instance, `lz::copied_iterable<std::vector<int>>` will also hold a copy of the underlying vector. This of course will
+ * in turn be slow because it needs to copy all the vector data into the owned iterable. Example:
+ * ```cpp
+ * std::vector<int> vec{ 1, 2, 3 };
+ * auto owned_vec = lz::as_copied_iterable(vec); // will store a copy of the vector, slow
+ * auto owned_vec = lz::as_copied_iterable(std::move(vec)); // will store a copy of the vector, fast with std::move
+ *
+ * boost::iterator_range<int*> range{ vec.data(), vec.data() + vec.size() });
+ * // lz::filter(range, [](int i) { return i > 1; }); // *CAREFUL* this will hold a reference to `range` because range is *NOT*
+ * inherited
+ * // from `lazy_view`. Instead, use:
+ * auto owned_range = lz::as_copied_iterable(range); // will store a copy of the range, cheap
+ * ```
+ */
+template<class Iterable>
+copied_iterable<detail::remove_ref<Iterable>> as_copied_iterable(Iterable&& iterable) {
+    return { std::forward<Iterable>(iterable) };
+}
 } // namespace lz
 
 #endif // LZ_REF_OR_VIEW_HPP

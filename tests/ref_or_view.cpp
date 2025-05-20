@@ -1,8 +1,8 @@
 #include <Lz/detail/ref_or_view.hpp>
+#include <Lz/filter.hpp>
 #include <Lz/repeat.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
-
 
 TEST_CASE("ref_or_view basic tests") {
     SECTION("STD container") {
@@ -52,5 +52,41 @@ TEST_CASE("ref_or_view basic tests") {
         lz::ref_or_view<decltype(iterable)> ref_or_view{ iterable };
         REQUIRE(&(*iterable.begin()) != &(*ref_or_view.begin()));
         REQUIRE(ref_or_view.size() == iterable.size());
+    }
+}
+
+struct iterable {
+    int* _begin;
+    int* _end;
+
+    int* begin() {
+        return _begin;
+    }
+
+    int* end() {
+        return _end;
+    }
+};
+
+// TODO add test for lz::copied_iterable
+TEST_CASE("lz::copied_iterable") {
+    SECTION("Iterable that is inherited by lz::lazy_view") {
+        std::vector<int> vec{ 1, 2, 3 };
+        auto filter = lz::filter(vec, [](int i) { return i > 1; });
+        auto copied = lz::as_copied_iterable(filter);
+        REQUIRE(&(*filter.begin()) == &(*copied.begin()));
+    }
+
+    SECTION("Iterable that is not inherited by lz::lazy_view") {
+        std::vector<int> vec{ 1, 2, 3 };
+        auto copied = lz::as_copied_iterable(vec);
+        REQUIRE(&(*vec.begin()) != &(*copied.begin()));
+    }
+
+    SECTION("Custom iterable") {
+        int arr[] = { 1, 2, 3 };
+        iterable it{ arr, arr + lz::size(arr) };
+        auto copied = lz::as_copied_iterable(it);
+        REQUIRE(&(*it.begin()) == &(*copied.begin()));
     }
 }
