@@ -15,7 +15,6 @@ on:
     - cron: '0 8 * * 1'
 
 env:
-  CMAKE_CONFIG_TYPE: Release
   CTEST_OUTPUT_ON_FAILURE: 1
   CATCH_VERSION: '2.13.10'
 
