@@ -93,14 +93,14 @@ private:
     using diff_type = typename iterator::difference_type;
 
 public:
-    template<class Cat = typename decayed_iterator::iterator_category, enable_if<is_ra_tag<Cat>::value, int> = 0>
+    template<class Cat = typename iterator::iterator_category, enable_if<is_ra_tag<Cat>::value, int> = 0>
     constexpr sized_iterable_impl(decayed_iterator begin, S end) :
         _begin{ begin },
         _end{ end },
         _size{ static_cast<std::size_t>(end - begin) } {
     }
 
-    template<class Cat = typename decayed_iterator::iterator_category, enable_if<!is_ra_tag<Cat>::value, int> = 0>
+    template<class Cat = typename iterator::iterator_category, enable_if<!is_ra_tag<Cat>::value, int> = 0>
     constexpr sized_iterable_impl(decayed_iterator begin,
                                   decayed_sentinel end) = delete; // Iterator must be random access to get size
 
