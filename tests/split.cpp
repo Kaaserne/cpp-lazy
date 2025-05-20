@@ -2,7 +2,6 @@
 #include <Lz/map.hpp>
 #include <Lz/split.hpp>
 #include <catch2/catch.hpp>
-#include <fmt/format.h>
 #include <list>
 #include <map>
 #include <unordered_map>
