@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  CATCH_VERSION: '2.13.10'
+
 jobs:
   analyze:
     name: Analyze
@@ -19,6 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'cpp' ]
+        standard: [ '11', '20' ]
 
     steps:
     - name: Checkout repository
@@ -29,8 +33,17 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
+    - name: Configure tests
+      run: cmake -S tests -B build/tests -G Ninja
+        -D CMAKE_BUILD_TYPE:STRING=Release
+        -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }}
+        -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON
+        -D TEST_INSTALLED_VERSION:BOOL=YES
+        -D CMAKE_INSTALL_PREFIX=build/prefix
+        -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+
+    - name: Build tests
+      run: cmake --build build/tests -j $(nproc)
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
