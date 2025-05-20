@@ -7,6 +7,7 @@ int main() {
     const float min = 0;
     const float max = 1;
     const size_t amount = 4;
+    // Both use std::std::mt19937 as default random engine
     const auto rng = lz::random(min, max, amount); // return sentinel pair
     const auto rng_common = lz::common_random(min, max, amount); // return common iterator
 

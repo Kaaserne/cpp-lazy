@@ -23,15 +23,14 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
 
-
-# What is lazy and why would I use it?
+# What is lazy?
 Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this
 library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could 
 write a for loop:
 
 ```cpp
 std::random_device rd;
-std::mt19937 gen(rd());
+std::std::mt19937 gen(rd());
 std::uniform_int_distribution dist(0, 32);
 
 for (int i = 0; i < n; i++) {
@@ -39,7 +38,7 @@ for (int i = 0; i < n; i++) {
 }
 ```
 
-This is actually exactly the same as:
+This is actually exactly almost identical as:
 ```cpp
 // If standalone:
 std::cout << lz::random(0, 32, n);
@@ -53,7 +52,7 @@ Now what if you wanted to do eager evaluation? Well then you could do this:
 
 ```cpp
 std::random_device rd;
-std::mt19937 gen(rd());
+std::std::mt19937 gen(rd());
 std::uniform_int_distribution dist(0, 32);
 std::vector<int> randomNumbers;
 std::generate(randomNumbers.begin(), randomNumbers.end(), [&dist, &gen]{ return dist(gen); });
@@ -62,20 +61,38 @@ std::generate(randomNumbers.begin(), randomNumbers.end(), [&dist, &gen]{ return 
 
 That is pretty verbose. Instead, try this for change:
 ```cpp
-std::vector<int> randomNumbers = lz::random(0, 32, n).to_vector();
+std::vector<int> randomNumbers = lz::random(0, 32, n) | lz::to<std::vector>();
 ```
 > I want to search if the sequence of random numbers contain 6. 
 
 In 'regular' C++ code that would be:
 ```cpp
 std::random_device rd;
-std::mt19937 gen(rd());
+std::std::mt19937 gen(rd());
 std::uniform_int_distribution dist(0, 32);
 
 for (int i = 0; i < n; i++) {
  if (gen(dist) == 6) {
   // do something
  }
+}
+```
+
+With `cpp-lazy` you can do this:
+```cpp
+auto random = lz::random(0, 32, n);
+if (lz::find(random, 6) != random.end()) {
+ // do something
+}
+
+// or
+auto common = lz::common_random(0, 32, n);
+if (lz::find(common, 6) != common.end()) {
+ // do something
+}
+// or (exactly the same as above)
+if (std::find(common.begin(), common.end(), 6) != common.end()) {
+ // do something
 }
 ```
 

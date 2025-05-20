@@ -113,7 +113,7 @@ public:
 
 template class seed_sequence<8>;
 
-using prng_engine = std::minstd_rand;
+using prng_engine = std::mt19937;
 
 inline prng_engine create_engine() {
     std::random_device rd;
@@ -150,11 +150,11 @@ struct random_adaptor {
      * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
      * ```cpp
      * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a std::minstd_rand engine.
+     * // std::random_device) and a std::mt19937 engine.
      * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
      * // (inclusive)
      * // with integers. Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a std::minstd_rand engine.
+     * // std::random_device) and a std::mt19937 engine.
      * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
      * ```
      * @param min The minimum value of the random numbers (inclusive).
@@ -176,10 +176,10 @@ struct random_adaptor {
      * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
      * ```cpp
      * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a std::minstd_rand engine.
+     * // std::random_device) and a std::std::mt19937 engine.
      * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
      * // (inclusive). Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a std::minstd_rand engine.
+     * // std::random_device) and a std::std::mt19937 engine.
      * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
      * ```
      * @param min The minimum value of the random numbers (inclusive).
