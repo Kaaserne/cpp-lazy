@@ -25,10 +25,10 @@ public:
 private:
     mutable Distribution _distribution;
     Generator* _generator{ nullptr };
-    std::ptrdiff_t _current{};
+    std::size_t _current{};
 
 public:
-    constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :
+    constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::size_t current) :
         _distribution{ distribution },
         _generator{ &generator },
         _current{ current } {
@@ -41,10 +41,6 @@ public:
 
     LZ_CONSTEXPR_CXX_14 value_type dereference() const {
         return _distribution(*_generator);
-    }
-
-    LZ_CONSTEXPR_CXX_14 value_type operator()() const {
-        return dereference();
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
@@ -72,7 +68,7 @@ public:
     }
 
     constexpr difference_type difference(const random_iterator& b) const noexcept {
-        return b._current - _current;
+        return static_cast<difference_type>(b._current) - static_cast<difference_type>(_current);
     }
 
     constexpr bool eq(const random_iterator& b) const noexcept {

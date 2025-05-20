@@ -113,10 +113,12 @@ public:
 
 template class seed_sequence<8>;
 
-inline std::mt19937 create_mt_engine() {
+using prng_engine = std::minstd_rand;
+
+inline prng_engine create_engine() {
     std::random_device rd;
     seed_sequence<8> seed_seq(rd);
-    return std::mt19937(seed_seq);
+    return prng_engine(seed_seq);
 }
 
 template<bool UseSentinel>
@@ -148,11 +150,11 @@ struct random_adaptor {
      * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
      * ```cpp
      * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a mt19937 engine.
+     * // std::random_device) and a std::minstd_rand engine.
      * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
      * // (inclusive)
      * // with integers. Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a mt19937 engine.
+     * // std::random_device) and a std::minstd_rand engine.
      * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
      * ```
      * @param min The minimum value of the random numbers (inclusive).
@@ -161,9 +163,9 @@ struct random_adaptor {
      */
     template<class Integral>
     LZ_NODISCARD
-    enable_if<std::is_integral<Integral>::value, random_iterable<Integral, std::uniform_int_distribution<Integral>, std::mt19937, UseSentinel>>
+    enable_if<std::is_integral<Integral>::value, random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
     operator()(const Integral min, const Integral max, const std::size_t amount) const {
-        static std::mt19937 gen = create_mt_engine();
+        static auto gen = create_engine();
         std::uniform_int_distribution<Integral> dist(min, max);
         return (*this)(dist, gen, amount);
     }
@@ -174,11 +176,10 @@ struct random_adaptor {
      * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
      * ```cpp
      * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a mt19937 engine.
+     * // std::random_device) and a std::minstd_rand engine.
      * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
-     * // (inclusive)
-     * // with integers. Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
-     * // std::random_device) and a mt19937 engine.
+     * // (inclusive). Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a std::minstd_rand engine.
      * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
      * ```
      * @param min The minimum value of the random numbers (inclusive).
@@ -187,9 +188,9 @@ struct random_adaptor {
      */
     template<class Floating>
     LZ_NODISCARD
-    enable_if<std::is_floating_point<Floating>::value, random_iterable<Floating, std::uniform_real_distribution<Floating>, std::mt19937, UseSentinel>>
+    enable_if<std::is_floating_point<Floating>::value, random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
     operator()(const Floating min, const Floating max, const std::size_t amount) const {
-        static std::mt19937 gen = create_mt_engine();
+        static auto gen = create_engine();
         std::uniform_real_distribution<Floating> dist(min, max);
         return (*this)(dist, gen, amount);
     }

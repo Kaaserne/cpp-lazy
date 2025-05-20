@@ -11,14 +11,14 @@ template<class Arithmetic, class Distribution, class Generator, bool UseSentinel
 class random_iterable : public lazy_view {
     Distribution _distribution;
     Generator* _generator{ nullptr };
-    std::ptrdiff_t _current;
+    std::size_t _current;
 
 public:
     using iterator = random_iterator<Arithmetic, Distribution, Generator, UseSentinel>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    constexpr random_iterable(const Distribution& distribution, Generator& generator, const std::ptrdiff_t current) :
+    constexpr random_iterable(const Distribution& distribution, Generator& generator, const std::size_t current) :
         _distribution{ distribution },
         _generator{ &generator },
         _current{ current } {
