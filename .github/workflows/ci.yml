@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [9, 10, 11]
+        version: [9, 10, 11, 13]
         standard: [11, 20]
 
     runs-on: ubuntu-latest
@@ -37,8 +37,10 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Install GCC ${{ matrix.version }}
-        run: sudo apt-get install -y
-          gcc-${{ matrix.version }} g++-${{ matrix.version }}
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo apt update
+          sudo apt-get install -y gcc-${{ matrix.version }} g++-${{ matrix.version }}
 
       - name: Configure (install)
         env:
