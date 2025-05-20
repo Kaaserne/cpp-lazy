@@ -111,8 +111,6 @@ public:
     }
 };
 
-template class seed_sequence<8>;
-
 using prng_engine = std::mt19937;
 
 inline prng_engine create_engine() {

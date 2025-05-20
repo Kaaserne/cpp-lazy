@@ -43,11 +43,7 @@ struct c_string_adaptor {
     LZ_NODISCARD constexpr c_string_iterable<const C> operator()(const C* str) const noexcept {
         return { str };
     }
-
 };
-
-template class c_string_iterable<const char>;
-
 } // namespace detail
 } // namespace lz
 
