@@ -7,10 +7,17 @@ int main() {
     const float min = 0;
     const float max = 1;
     const size_t amount = 4;
-    const auto rng = lz::random(min, max, amount);
+    const auto rng = lz::random(min, max, amount); // return sentinel pair
+    const auto rng_common = lz::common_random(min, max, amount); // return common iterator
 
 #ifdef LZ_HAS_CXX_17
     for (float i : rng) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    }
+    // Output: random number between [0, 1] random number between [0, 1] random number between [0, 1] random number between [0, 1]
+
+    for (float i : rng_common) {
         std::cout << i << ' ';
         // Or use fmt::print("{} ", i);
     }
@@ -34,6 +41,12 @@ int main() {
         // Or use fmt::print("{} ", i);
     });
     // Output: random number between [0, 1] random number between [0, 1] random number between [0, 1] random number between [0, 1]
+
+    lz::for_each(rng_common, [](float i) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    });
+
 
     std::cout << '\n';
 
