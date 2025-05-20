@@ -33,3 +33,4 @@ target_link_libraries(Benchmark
         benchmark::benchmark
 )
 
+# Run as: ./Benchmark --benchmark_out=benchmark-iterators.json --benchmark_out_format=json
