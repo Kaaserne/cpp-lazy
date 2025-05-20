@@ -8,19 +8,23 @@
 #include <cstddef>
 #include <iterator>
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) || defined(LZ_DEBUG_ASSERTIONS)
+#define LZ_USE_DEBUG_ASSERTIONS
+#endif
+
+#if defined(LZ_USE_DEBUG_ASSERTIONS)
 #include <cstdio>
 #include <exception>
 #endif
 
-#if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
+#if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>) && defined(LZ_USE_DEBUG_ASSERTIONS)
 #include <stacktrace>
 #endif
 
 namespace lz {
 namespace detail {
 
-#ifndef NDEBUG
+#if defined(LZ_USE_DEBUG_ASSERTIONS)
 
 [[noreturn]] inline void
 assertion_fail(const char* file, const int line, const char* func, const char* message, const char* expr) {
@@ -31,22 +35,23 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
     std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line,
                  expr, func, message, str.c_str());
     
-#else
+#else // ^^ defined(__cpp_lib_stacktrace) vv !defined(__cpp_lib_stacktrace)
 
     std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\n", file, line, expr, func, message);
 
-#endif
+#endif // __cpp_lib_stacktrace
     
     std::terminate();
 }
 
 #define LZ_ASSERT(CONDITION, MSG)                                                                                                \
     ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
-#else
+
+#else // ^^ defined(LZ_USE_DEBUG_ASSERTIONS) vv !defined(LZ_USE_DEBUG_ASSERTIONS)
 
 #define LZ_ASSERT(CONDITION, MSG)
 
-#endif
+#endif // defined(LZ_USE_DEBUG_ASSERTIONS)
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))

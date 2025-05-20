@@ -112,6 +112,7 @@ bugs. While this library does all the looping for you and is thoroughly tested u
 equivalent is quite trivial to write yourself, but you may want to look at `lz::concat`.
 
 # Installation
+- `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions in other build configurations than debug (debug is always enabled). Default is `FALSE`.
 ## With xmake
 Everything higher than version 7.0.2 is supported.
 ```xmake

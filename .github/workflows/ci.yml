@@ -11,6 +11,9 @@ on:
 
   workflow_dispatch: ~
 
+  schedule:
+    - cron: '0 8 * * 1'
+
 env:
   CMAKE_CONFIG_TYPE: Release
   CTEST_OUTPUT_ON_FAILURE: 1
@@ -29,6 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: seanmiddleditch/gha-setup-ninja@master
+
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
@@ -58,6 +62,7 @@ jobs:
           -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
           -D CMAKE_BUILD_TYPE:STRING=Release
           -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }}
+          -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
@@ -128,6 +133,7 @@ jobs:
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
             -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }} \
+            -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON \
             -D TEST_INSTALLED_VERSION:BOOL=YES \
             -D CMAKE_CXX_COMPILER=clang++ \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
@@ -177,7 +183,8 @@ jobs:
       - name: Configure tests
         run: cmake -S tests -B build/tests
           -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
-          -D CPP-LAZY_CATCH_VERSION:STRING=$env:CATCH_VERSION
+          -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }}
+          -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}

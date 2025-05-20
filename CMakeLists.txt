@@ -17,7 +17,10 @@ endif()
 include(GNUInstallDirs)
 set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installation directory of the include files")
 
+option(CPP-LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
+option(CPP-LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
 option(CPP-LAZY_USE_MODULES "Enable C++20's modules, experimental" NO)
+option(CPP-LAZY_DEBUG_ASSERTIONS "Debug assertions (always enabled in debug mode)" NO)
 
 if (CPP-LAZY_USE_MODULES)
 	set(CPP-LAZY_SOURCE_FILES "src/lz.cppm")
@@ -34,16 +37,14 @@ else()
 endif()
 
 # ---- Import {fmt} ----
-option(CPP-LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
-option(CPP-LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
-
 if (CPP-LAZY_USE_STANDALONE)
-	message(STATUS "Using cpp-lazy standalone version")
+	message(STATUS "cpp-lazy: using standalone version")
 else()
-	message(STATUS "Using cpp-lazy with {fmt} library")
 	if (CPP-LAZY_USE_INSTALLED_FMT)
+		message(STATUS "cpp-lazy: using external {fmt} library")
 		find_package(fmt REQUIRED CONFIG)
 	else()
+		message(STATUS "cpp-lazy: using bundled {fmt} library")
 		set(FMT_OS YES CACHE INTERNAL "")
 		set(FMT_INSTALL YES CACHE INTERNAL "" FORCE)
 		include(FetchContent)
@@ -56,6 +57,9 @@ else()
 	endif()
 endif()
 
+message(STATUS "cpp-lazy: standalone version: ${CPP-LAZY_USE_STANDALONE}.")
+message(STATUS "cpp-lazy: Debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
+
 # ---- Declare library ----
 add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
 add_library(cpp-lazy::cpp-lazy ALIAS cpp-lazy)
@@ -67,6 +71,7 @@ target_link_libraries(cpp-lazy
 target_compile_definitions(cpp-lazy 
 	${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}
 		$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
+		$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
 if (CPP-LAZY_USE_MODULES)
 	set(FMT_MODULE "ON" CACHE STRING "")
