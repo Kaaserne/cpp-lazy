@@ -560,8 +560,6 @@ void zip_longest2(benchmark::State& state) {
 }
 } // namespace
 
-// TODO add lz::any_iterable, and other iterators
-
 BENCHMARK(any_iterable);
 BENCHMARK(c_string);
 BENCHMARK(cartesian_product);
