@@ -334,11 +334,11 @@ void map(benchmark::State& state) {
 void random(benchmark::State& state) {
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
-        for (int i : lz::random(0, 32, size_policy)) {
+        for (int i : lz::random(0u, 32u, size_policy)) {
             benchmark::DoNotOptimize(i);
         }
 #else
-        auto random = lz::random(0, 32, size_policy);
+        auto random = lz::random(0u, 32u, size_policy);
         random.for_each([](int i) { benchmark::DoNotOptimize(i); });
 #endif
     }
@@ -347,11 +347,11 @@ void random(benchmark::State& state) {
 void common_random(benchmark::State& state) {
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
-        for (int i : lz::common_random(0, 32, size_policy)) {
+        for (int i : lz::common_random(0u, 32u, size_policy)) {
             benchmark::DoNotOptimize(i);
         }
 #else
-        auto random = lz::common_random(0, 32, size_policy);
+        auto random = lz::common_random(0u, 32u, size_policy);
         random.for_each([](int i) { benchmark::DoNotOptimize(i); });
 #endif
     }
