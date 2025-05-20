@@ -58,7 +58,6 @@ std::vector<int> randomNumbers;
 std::generate(randomNumbers.begin(), randomNumbers.end(), [&dist, &gen]{ return dist(gen); });
 ```
 
-
 That is pretty verbose. Instead, try this for change:
 ```cpp
 std::vector<int> randomNumbers = lz::random(0, 32, n) | lz::to<std::vector>();
@@ -130,10 +129,25 @@ int main() {
 ```
 
 ## Ownership
-`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::ref_or_view`.
+`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::ref_or_view`. This can be altered using `lz::copied_iterable` or `lz::as_copied_iterable`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
 
 ```cpp
 #include <Lz/lz.hpp>
+
+struct non_lz_iterable {
+  int* _begin{};
+  int* _end{};
+
+  non_lz_iterable(int* begin, int* end) : _begin{ begin }, _end{ end } {
+  }
+
+  int* begin() {
+    return _begin;
+  }
+  int* end() {
+    return _end;
+  }
+};
 
 int main() {
   std::vector<int> vec = {1, 2, 3, 4};
@@ -146,11 +160,18 @@ int main() {
   auto str = lz::map(random, [](int i) { return std::to_string(i); });
   // str will *not* hold a reference to random, because random is a lazy iterable and is trivial to copy
 
-  // In short:
   lz::ref_or_view<std::vector<int>> ref(vec); // Holds a reference to vec
 
   using random_iterable = decltype(random);
   lz::ref_or_view<random_iterable> ref2(random); // Does NOT hold a reference to random
+
+  non_lz_iterable non_lz(vec.data(), vec.data() + vec.size());
+  lz::ref_or_view<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
+
+  // Instead, if you don't want this behaviour, you can use lz::copied_iterable:
+  lz::copied_iterable<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
+  // Or use the helper function:
+  copied = lz::as_copied_iterable(non_lz); // Holds a copy of non_lz = cheap to copy
 }
 ```
 
@@ -191,6 +212,8 @@ int main() {
 ```
 
 ## Formatting
+Formatting is done using `{fmt}` or `<format>`. If neither is available, it will use `std::cout`/`std::ostringstream`:
+
 ```cpp
 #include <Lz/stream.hpp>
 #include <Lz/filter.hpp>
