@@ -39,6 +39,7 @@ set(examples
     print_and_format
     random
     range
+    ref_or_view
     regex_split
     repeat
     rotate
