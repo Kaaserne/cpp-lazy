@@ -2,7 +2,6 @@
 #include <iostream>
 #include <vector>
 
-// TODO lz::t_chunk_if cxx 11
 
 int main() {
 	std::string s = "hello world; this is a message;";
