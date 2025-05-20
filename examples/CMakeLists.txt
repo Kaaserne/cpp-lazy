@@ -57,5 +57,4 @@ set(examples
 foreach(name IN LISTS examples)
     add_executable(example_${name} ${name}.cpp)
     target_link_libraries(example_${name} PRIVATE cpp-lazy::cpp-lazy)
-    target_compile_features(example_${name} PRIVATE cxx_std_14)
 endforeach()
