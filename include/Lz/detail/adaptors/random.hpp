@@ -141,7 +141,7 @@ struct random_adaptor {
     template<class Distribution, class Generator>
     LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator, UseSentinel>
     operator()(const Distribution& distribution, Generator& generator, const std::size_t amount) const {
-        return { distribution, generator, static_cast<std::ptrdiff_t>(amount) };
+        return { distribution, generator, amount };
     }
 
     /**

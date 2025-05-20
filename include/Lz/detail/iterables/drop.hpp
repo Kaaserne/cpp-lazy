@@ -19,7 +19,7 @@ public:
 
 private:
     static constexpr bool is_sized = sized<Iterable>::value;
-    using diff_type = diff_type<iterator>;
+    using diff = diff_type<iterator>;
 
     ref_or_view<Iterable> _iterable;
     std::size_t _n;
@@ -31,15 +31,15 @@ public:
 
     template<bool Sized = is_sized>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable) - static_cast<std::size_t>(_n));
+        return static_cast<std::size_t>(lz::size(_iterable) - _n);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return next_fast(std::move(_iterable), static_cast<diff_type>(_n));
+        return next_fast(std::move(_iterable), static_cast<diff>(_n));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return next_fast(_iterable, static_cast<diff_type>(_n));
+        return next_fast(_iterable, static_cast<diff>(_n));
     }
 
     LZ_NODISCARD constexpr sentinel end() const& {
