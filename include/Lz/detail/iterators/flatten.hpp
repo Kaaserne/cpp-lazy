@@ -68,9 +68,9 @@ class flatten_wrapper<Iterator, S, enable_if<is_bidi<Iterator>::value>>
     : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
                       iter_cat_t<Iterator>, flatten_wrapper<Iterator, S>> {
 
-    Iterator _begin;
-    Iterator _iterator;
-    S _end;
+    Iterator _begin{};
+    Iterator _iterator{};
+    S _end{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -172,8 +172,8 @@ class flatten_wrapper<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
     : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
                       iter_cat_t<Iterator>, default_sentinel> {
 
-    Iterator _iterator;
-    S _end;
+    Iterator _iterator{};
+    S _end{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -347,7 +347,7 @@ public:
     }
 
     constexpr bool eq(const flatten_iterator& b) const {
-        return _outer_iter == b._outer_iter;
+        return _outer_iter == b._outer_iter && _inner_iter == b._inner_iter;
     }
 
     constexpr bool eq(default_sentinel) const {
