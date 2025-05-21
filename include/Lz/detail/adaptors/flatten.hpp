@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 #ifndef LZ_FLATTEN_ADAPTOR_HPP
 #define LZ_FLATTEN_ADAPTOR_HPP
 
