@@ -121,16 +121,16 @@ public:
         return std::begin(_iterable_value);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() & {
-        return std::end(_iterable_value);
-    }
-
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
         return std::begin(_iterable_value);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
         return detail::begin(std::move(_iterable_value));
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() & {
+        return std::end(_iterable_value);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
