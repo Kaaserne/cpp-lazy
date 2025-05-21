@@ -29,14 +29,14 @@ struct count_dims_helper<false> {
 
 template<>
 struct count_dims_helper<true> {
-template<class T>
+    template<class T>
     using iterable_type = decltype(*std::begin(std::declval<T>()));
 
 #ifdef LZ_HAS_CXX_11
 
     template<class T>
     using type = std::integral_constant<
-std::size_t, 1 + count_dims_helper<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
+        std::size_t, 1 + count_dims_helper<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
 
 #else
 
@@ -216,6 +216,10 @@ public:
         _iterator = std::move(c);
     }
 
+    LZ_CONSTEXPR_CXX_14 void initialize_last() {
+        _iterator = _end;
+    }
+
     constexpr S end() const {
         return _end;
     }
@@ -261,6 +265,11 @@ class flatten_iterator
             _inner_iter = this_inner(std::begin(inner), std::begin(inner), std::end(inner));
             return _inner_iter.has_next();
         }));
+
+        if (_inner_iter.has_next()) {
+            return;
+        }
+        _inner_iter = this_inner{};
     }
 
     LZ_CONSTEXPR_CXX_14 void find_prev_non_empty_inner() {
@@ -285,9 +294,6 @@ private:
         }
 
         find_next_non_empty_inner();
-        if (_inner_iter.has_next()) {
-            return;
-        }
     }
 
     LZ_CONSTEXPR_CXX_14 void previous_outer() {
