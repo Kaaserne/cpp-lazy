@@ -76,6 +76,7 @@ public:
     friend constexpr bool operator==(const Derived& a, const Derived& b) {
         return a.eq(b);
     }
+
     friend constexpr bool operator!=(const Derived& a, const Derived& b) {
         return !(a == b);
     }
