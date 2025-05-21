@@ -184,11 +184,12 @@ void test_flatten_operators_mm_and_pp(const Vector& vec, const ExpectedIterable&
     REQUIRE(lz::equal(lz::reverse(flattened), lz::reverse(expected)));
 }
 
-template<class Vector, class ExpectedIterable>
-void test_operator_plus_is(const Vector& vec, const ExpectedIterable& expected) {
-    auto flattened = lz::flatten(vec);
+template<class RaIterable, class ExpectedIterable>
+void test_operator_plus_is(const RaIterable& it, const ExpectedIterable& expected) {
+    auto flattened = lz::flatten(it);
     auto begin = flattened.begin();
     auto end = flattened.end();
+    REQUIRE(flattened.size() == lz::size(expected));
 
     REQUIRE(begin + 0 == begin);
     REQUIRE(end + 0 == end);
@@ -431,12 +432,17 @@ TEST_CASE("Flatten to container") {
 }
 
 TEST_CASE("Stack allocated flatten") {
-    static constexpr std::size_t N = 32;
-    std::array<std::array<int, N / 4>, N / 8> a =
-        lz::generate([]() { return lz::range(static_cast<int>(32 / 4)) | lz::to<std::array<int, N / 4>>(); }, N / 8) |
-        lz::to<std::array<std::array<int, N / 4>, N / 8>>();
+    std::array<std::array<int, 8>, 4> a{};
+    int n = 0;
+    std::generate(a.begin(), a.end(), [&n]() mutable {
+        std::array<int, 8> arr{};
+        std::generate(arr.begin(), arr.end(), [&n]() mutable { return n++; });
+        return arr;
+    });
 
-    auto f = lz::flatten(a);
-    const auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7 };
-    REQUIRE(lz::equal(f, expected));
+    const auto expected = { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
+                            16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+    test_operator_plus_is(a, expected);
+    test_operator_min(a);
+    test_flatten_operators_mm_and_pp(a, expected);
 }
