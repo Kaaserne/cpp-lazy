@@ -154,7 +154,7 @@ private:
     std::size_t _size;
 };
 
-#ifdef LZ_HAS_CXX_11
+#if !defined(LZ_HAS_CXX_17)
 
 template<class CharT>
 constexpr std::size_t basic_string_view<CharT>::npos;
