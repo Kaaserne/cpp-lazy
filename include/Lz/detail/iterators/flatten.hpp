@@ -29,19 +29,20 @@ struct count_dims_helper<false> {
 
 template<>
 struct count_dims_helper<true> {
+template<class T>
+    using iterable_type = decltype(*std::begin(std::declval<T>()));
+
 #ifdef LZ_HAS_CXX_11
 
     template<class T>
-    using type =
-        std::integral_constant<std::size_t, 1 + count_dims_helper<is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::
-                                                    template type<decltype(*std::begin(std::declval<T>()))>::value>;
+    using type = std::integral_constant<
+std::size_t, 1 + count_dims_helper<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
 
 #else
 
     template<class T>
     static constexpr std::size_t value =
-        1 + count_dims_helper<is_iterable<decltype(*std::begin(std::declval<T>()))>::value>::template value<decltype(*std::begin(
-                std::declval<T>()))>;
+        1 + count_dims_helper<is_iterable<iterable_type<T>>::value>::template value<iterable_type<T>>;
 
 #endif
 };
