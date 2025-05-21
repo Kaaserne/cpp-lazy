@@ -23,6 +23,7 @@ class basic_iterable_impl : public lazy_view {
     decayed_iterator _begin;
     decayed_sentinel _end;
 
+    using traits = std::iterator_traits<decayed_iterator>;
 public:
     using iterator = decayed_iterator;
     using const_iterator = decayed_iterator;
@@ -39,8 +40,8 @@ public:
         _end{ std::move(end) } {
     }
 
-    template<class It = decayed_iterator>
-    LZ_NODISCARD constexpr enable_if<is_ra<It>::value, std::size_t> size() const noexcept {
+    template<class Tag = typename traits::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<Tag>::value, std::size_t> size() const noexcept {
         const auto result = _end - _begin;
         return result < 0 ? static_cast<std::size_t>(-result) : static_cast<std::size_t>(result);
     }
@@ -65,11 +66,11 @@ public:
         return _end;
     }
 
-    LZ_NODISCARD constexpr decayed_iterator begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 decayed_iterator begin() && {
         return std::move(_begin);
     }
 
-    LZ_NODISCARD constexpr decayed_sentinel end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 decayed_sentinel end() && {
         return std::move(_end);
     }
 };
