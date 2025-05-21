@@ -52,7 +52,7 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    constexpr bool eq(const inclusive_scan_iterator& b) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const inclusive_scan_iterator& b) const {
         LZ_ASSERT(_end == b._end, "inclusive_scan_iterators are not compatible");
         return _iterator == b._iterator;
     }

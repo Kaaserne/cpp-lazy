@@ -28,7 +28,7 @@ struct slice_adaptor {
      * @param to The end index of the slice
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr slice_iterable<remove_ref<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 slice_iterable<remove_ref<Iterable>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> from, const diff_iterable_t<Iterable> to) const {
         LZ_ASSERT(to > from, "`to` must be greater than `from`");
         return { lz::drop(std::forward<Iterable>(iterable), static_cast<std::size_t>(from)), to - from };
