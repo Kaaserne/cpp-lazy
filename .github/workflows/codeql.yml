@@ -23,6 +23,7 @@ jobs:
       matrix:
         language: [ 'cpp' ]
         standard: [ '11', '20' ]
+        version: [ '11' ]
 
     steps:
     - name: Checkout repository
@@ -32,6 +33,23 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
+
+    - name: Configure (install)
+      env:
+        CC: gcc-${{ matrix.version }}
+        CXX: g++-${{ matrix.version }}
+      run: cmake -S . -B build/install -G Ninja
+        -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+        -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+        -D CMAKE_BUILD_TYPE:STRING=Release
+        -D CMAKE_INSTALL_PREFIX=build/prefix
+        -D "CMAKE_PROJECT_FMT_INCLUDE_BEFORE=$(pwd)/cmake/fmtPICFix.cmake"
+
+    - name: Build (install)
+      run: cmake --build build/install -j $(nproc)
+
+    - name: Install
+      run: cmake --install build/install
 
     - name: Configure tests
       run: cmake -S tests -B build/tests -G Ninja
