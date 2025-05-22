@@ -34,6 +34,9 @@ jobs:
       with:
         languages: ${{ matrix.language }}
 
+    - name: Install ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+
     - name: Install GCC ${{ matrix.version }}
       run: sudo apt-get install -y gcc-${{ matrix.version }} g++-${{ matrix.version }}
 
