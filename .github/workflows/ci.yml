@@ -29,9 +29,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout repo
+        uses: actions/checkout@v1
 
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Install ccache
         uses: hendrikmuhs/ccache-action@v1.2
