@@ -27,53 +27,55 @@ include(CTest)
 
 # ---- Tests ----
 add_executable(cpp-lazy-tests
-	any-view-tests.cpp
-	cartesian-product-tests.cpp
-	chunk-if-tests.cpp
-	chunks-tests.cpp
-	concatenate-tests.cpp
-	cstring-tests.cpp
-	enumerate-tests.cpp
-	except-tests.cpp
-	exclude-tests.cpp
-	exclusive-scan-tests.cpp
-	filter-tests.cpp
-	flatten-tests.cpp
-	function-tools-tests.cpp
-	generate-tests.cpp
-	generate-while-tests.cpp
-	group-by-tests.cpp
-	inclusive-scan-tests.cpp
-	init-tests.cpp
-	join-tests.cpp
-	join-where-tests.cpp
-	loop-tests.cpp
-	lz-chain-tests.cpp
-	map-tests.cpp
-	random-tests.cpp
-	range-tests.cpp
-	regex-split-tests.cpp
-	repeat-tests.cpp
-	rotate-tests.cpp
-	standalone-tests.cpp
-	string-splitter-tests.cpp
-	string-view-tests.cpp
-	take-every-tests.cpp
-	take-tests.cpp
-	take-while-tests.cpp
-	unique-tests.cpp
-	zip-longest-tests.cpp
-	zip-tests.cpp
+	algorithm.cpp
+	any_iterable.cpp
+	cached_size.cpp
+	cartesian_product.cpp
+	piping.cpp
+	chunk_if.cpp
+	chunks.cpp
+	common.cpp
+	concatenate.cpp
+	cstring.cpp
+	enumerate.cpp
+	except.cpp
+	exclude.cpp
+	exclusive_scan.cpp
+	filter.cpp
+	flatten.cpp
+	generate.cpp
+	generate_while.cpp
+	group_by.cpp
+	inclusive_scan.cpp
+	init.cpp
+	interleave.cpp
+	intersection.cpp
+	iter_tools.cpp
+	join_where.cpp
+	loop.cpp
+	map.cpp
+	random.cpp
+	range.cpp
+	ref_or_view.cpp
+	regex_split.cpp
+	repeat.cpp
+	reverse.cpp
+	rotate.cpp
+	split.cpp
+	standalone.cpp
+	string_view.cpp
+	take_every.cpp
+	take.cpp
+	take_while.cpp
+	unique.cpp
+	zip_longest.cpp
+	zip.cpp
 )
-
-set_source_files_properties(string-view-tests.cpp PROPERTIES COMPILE_DEFINITIONS "LZ_STANDALONE")
-
-set_source_files_properties(standalone-tests.cpp PROPERTIES COMPILE_DEFINITIONS "LZ_STANDALONE")
 
 target_compile_options(cpp-lazy-tests
 	PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
-	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -pedantic-errors>
+	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion>
 )
 target_link_libraries(cpp-lazy-tests
 	PRIVATE

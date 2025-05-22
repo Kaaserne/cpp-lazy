@@ -7,43 +7,54 @@ FetchContent_Declare(cpp-lazy SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 FetchContent_MakeAvailable(cpp-lazy)
 
 set(examples
-    AnyView
-    CartesianProduct
-    Chain
-    ChunkIf
-    Chunks
-    Concatenate
-    CString
-    CustomIterator
-    Enumerate
-    Except
-    Exclude
-    ExclusiveScan
-    Filter
-    Flatten
-    FunctionTools
-    Generate
-    GroupBy
-    InclusiveScan
-    Join
-    JoinWhere
-    Map
-    Random
-    Range
-    RegexSplit
-    Repeat
-    StringSplitter
-    Take
-    TakeEvery
-    TakeWhile
-    ToContainer
-    Unique
-    Zip
-    ZipLongest
+    algorithm
+    any_iterable
+    basic_iterable
+    c_string
+    cached_size
+    cartesian_product
+    chunk_if
+    chunks
+    common
+    concatenate
+    custom_iterator
+    drop_while
+    drop
+    enumerate
+    except
+    exclude
+    exclusive_scan
+    filter
+    flatten
+    generate_while
+    generate
+    group_by
+    inclusive_scan
+    interleave
+    intersection
+    join_where
+    loop
+    map
+    pipe
+    print_and_format
+    random
+    range
+    ref_or_view
+    regex_split
+    repeat
+    rotate
+    slice
+    split
+    take_every
+    take_while
+    take
+    to_container
+    unique
+    zip_longest
+    zip
 )
 
 foreach(name IN LISTS examples)
-    add_executable(IteratorExample${name} ${name}.cpp)
-    target_link_libraries(IteratorExample${name} PRIVATE cpp-lazy::cpp-lazy)
-    target_compile_features(IteratorExample${name} PRIVATE cxx_std_14)
+    add_executable(example_${name} ${name}.cpp)
+    target_link_libraries(example_${name} PRIVATE cpp-lazy::cpp-lazy)
 endforeach()

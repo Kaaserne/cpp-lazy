@@ -1,0 +1,54 @@
+#pragma once
+
+#ifndef LZ_JOIN_WHERE_ITERABLE_HPP
+#define LZ_JOIN_WHERE_ITERABLE_HPP
+
+#include <Lz/detail/func_container.hpp>
+#include <Lz/detail/iterators/join_where.hpp>
+#include <Lz/detail/ref_or_view.hpp>
+
+namespace lz {
+namespace detail {
+template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
+class join_where_iterable : public lazy_view {
+    ref_or_view<IterableA> _iterable_a;
+    ref_or_view<IterableB> _iterable_b;
+    func_container<SelectorA> _a;
+    func_container<SelectorB> _b;
+    func_container<ResultSelector> _result_selector;
+
+public:
+    using iterator = join_where_iterator<iter_t<IterableA>, sentinel_t<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,
+                                         func_container<SelectorA>, func_container<SelectorB>, func_container<ResultSelector>>;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+    template<class I, class I2>
+    constexpr join_where_iterable(I&& iterable, I2&& iterable2, SelectorA a, SelectorB b, ResultSelector result_selector) :
+        _iterable_a{ std::forward<I>(iterable) },
+        _iterable_b{ std::forward<I2>(iterable2) },
+        _a{ std::move(a) },
+        _b{ std::move(b) },
+        _result_selector{ std::move(result_selector) } {
+    }
+
+    constexpr iterator begin() const& {
+        return { std::begin(_iterable_a), std::end(_iterable_a), std::begin(_iterable_b), std::end(_iterable_b), _a, _b,
+                 _result_selector };
+    }
+
+    constexpr iterator begin() && {
+        // clang-format off
+        return { detail::begin(std::move(_iterable_a)), detail::end(std::move(_iterable_a)), detail::begin(std::move(_iterable_b)),
+                 detail::end(std::move(_iterable_b)), std::move(_a), std::move(_b), std::move(_result_selector) };
+        // clang-format on
+    }
+
+    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+        return {};
+    }
+};
+} // namespace detail
+} // namespace lz
+
+#endif // LZ_JOIN_WHERE_ITERABLE_HPP

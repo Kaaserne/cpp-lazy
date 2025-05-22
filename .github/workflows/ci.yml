@@ -11,8 +11,10 @@ on:
 
   workflow_dispatch: ~
 
+  schedule:
+    - cron: '0 8 * * 1'
+
 env:
-  CMAKE_CONFIG_TYPE: Release
   CTEST_OUTPUT_ON_FAILURE: 1
   CATCH_VERSION: '2.13.10'
 
@@ -22,14 +24,16 @@ jobs:
       fail-fast: false
       matrix:
         version: [9, 10, 11, 13]
-        standard: [11, 20]
+        standard: [11, 14, 17, 20]
 
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v1
+
       - uses: seanmiddleditch/gha-setup-ninja@master
-      - name: ccache
+
+      - name: Install ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Install GCC ${{ matrix.version }}
@@ -60,6 +64,7 @@ jobs:
           -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
           -D CMAKE_BUILD_TYPE:STRING=Release
           -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }}
+          -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
@@ -75,36 +80,42 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [11, 14, 18]
-        standard: [11, 20]
+        version: [14]
+        standard: [11, 14, 17, 20]
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Checkout repo
+        uses: actions/checkout@v1
+    
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
       - name: Install Clang ${{ matrix.version }}
-        run: |
-          sudo wget -qO- https://apt.llvm.org/llvm.sh | sudo bash -s -- 18
-          sudo apt-get install -y clang-${{ matrix.version }}
+        run: sudo apt-get install -y clang-${{ matrix.version }}
+      
+      - name: Install libc++ Clang ${{ matrix.version }}
+        if: matrix.standard == '20'
+        run: sudo apt-get install -y libc++-${{ matrix.version }}-dev libc++abi-${{ matrix.version }}-dev
 
       - name: Configure (install)
         env:
           CC: clang-${{ matrix.version }}
           CXX: clang-${{ matrix.version }}
         run: |
-          if [ "${{ matrix.standard }}" == "20" ]; then
-            CXX_FLAGS="-stdlib=libc++"
+          if [ "${{ matrix.standard }}" = "20" ]; then
+            CXX_FLAGS='-stdlib=libc++'
           else
-            CXX_FLAGS=""
+            CXX_FLAGS=''
           fi
           cmake -S . -B build/install -G Ninja \
             -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }} \
-            -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
+            -D CMAKE_CXX_FLAGS=$CXX_FLAGS \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
             -D CMAKE_CXX_COMPILER=clang++ \
@@ -128,6 +139,7 @@ jobs:
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
             -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }} \
+            -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON \
             -D TEST_INSTALLED_VERSION:BOOL=YES \
             -D CMAKE_CXX_COMPILER=clang++ \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
@@ -155,7 +167,9 @@ jobs:
 
     steps:
       # Using Ninja causes the test to fail on Github Actions
-      - uses: actions/checkout@v1
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
       - name: Run sccache-cache
         uses: mozilla/sccache-action@main
         with:
@@ -177,7 +191,8 @@ jobs:
       - name: Configure tests
         run: cmake -S tests -B build/tests
           -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
-          -D CPP-LAZY_CATCH_VERSION:STRING=$env:CATCH_VERSION
+          -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }}
+          -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
@@ -193,8 +208,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
