@@ -30,6 +30,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+
       - uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Install ccache
@@ -85,8 +86,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Checkout repo
+        uses: actions/checkout@v1
+    
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
@@ -162,7 +167,9 @@ jobs:
 
     steps:
       # Using Ninja causes the test to fail on Github Actions
-      - uses: actions/checkout@v1
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
       - name: Run sccache-cache
         uses: mozilla/sccache-action@main
         with:
@@ -201,8 +208,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
 
