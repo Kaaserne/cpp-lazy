@@ -1,9 +1,12 @@
 #pragma once
 
+#include <cstdint>
+#include <type_traits>
 #ifndef LZ_DETAIL_VARIANT_HPP
 #define LZ_DETAIL_VARIANT_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/traits.hpp>
 
 #if defined(__cpp_lib_variant) && defined(LZ_HAS_CXX_17)
 
@@ -20,8 +23,6 @@ using variant = std::variant<T, T2>;
 
 #else
 
-#include <stdexcept>
-
 namespace lz {
 namespace detail {
 
@@ -29,10 +30,10 @@ template<class T, class T2>
 class variant {
     static_assert(!std::is_same<T, T2>::value, "T and T2 must be different types");
 
-    enum class state {
-        none,
-        t,
-        t2,
+    enum class state : std::uint_least8_t {
+        none = static_cast<std::uint_least8_t>(-1),
+        t = 0,
+        t2 = 1,
     } _state;
 
     union types {
@@ -91,7 +92,7 @@ public:
         construct(other._variant._t, other._variant._t2);
     }
 
-   LZ_CONSTEXPR_CXX_14  variant(variant&& other) noexcept : _state{ other._state } {
+    LZ_CONSTEXPR_CXX_14 variant(variant&& other) noexcept : _state{ other._state } {
         other._state = state::none;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
     }
@@ -130,36 +131,33 @@ public:
         other._state = state::none;
         return *this;
     }
-    
-    template<class U>
-    LZ_CONSTEXPR_CXX_14 const U* get_if() const {
-        constexpr auto is_t = std::is_same<T, U>::value;
-        if (_state == state::t && is_t) {
-            return reinterpret_cast<const U*>(std::addressof(_variant._t));
-        }
-        constexpr auto is_t2 = std::is_same<T2, U>::value;
-        if (_state == state::t2 && is_t2) {
-            return reinterpret_cast<const U*>(std::addressof(_variant._t2));
-        }
-        return nullptr;
+
+    template<std::size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, const T&> get() const noexcept {
+        LZ_ASSERT(_state == state::t, "Invalid variant access");
+        return _variant._t;
     }
 
-    template<class U>
-    LZ_CONSTEXPR_CXX_14 U* get_if() {
-        return const_cast<U*>(static_cast<const variant&>(*this).get_if<U>());
+    template<std::size_t I>
+    LZ_CONSTEXPR_CXX_14 const enable_if<I == 1, const T2&> get() const noexcept {
+        LZ_ASSERT(_state == state::t2, "Invalid variant access");
+        return _variant._t2;
     }
 
-    template<class U>
-    LZ_CONSTEXPR_CXX_14 const U& get() const {
-        if (const auto* u = get_if<U>()) {
-            return *u;
-        }
-        throw std::runtime_error("Bad variant access");
+    template<std::size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, T&> get() noexcept {
+        LZ_ASSERT(_state == state::t, "Invalid variant access");
+        return _variant._t;
     }
 
-    template<class U>
-    LZ_CONSTEXPR_CXX_14 U& get() {
-        return const_cast<U&>(static_cast<const variant&>(*this).get<U>());
+    template<std::size_t I>
+    LZ_CONSTEXPR_CXX_14 const enable_if<I == 1, T2&> get() noexcept {
+        LZ_ASSERT(_state == state::t2, "Invalid variant access");
+        return _variant._t2;
+    }
+
+    LZ_CONSTEXPR_CXX_14 std::int_least8_t index() const noexcept {
+        return static_cast<std::int_least8_t>(_state);
     }
 
     ~variant() {
@@ -177,24 +175,14 @@ public:
     }
 };
 
-template<class T, class U, class V>
-LZ_CONSTEXPR_CXX_14 const T& get(const variant<U, V>& t) {
-    return t.template get<T>();
+template<std::size_t I, class T, class T2>
+LZ_CONSTEXPR_CXX_14 auto get(const variant<T, T2>& v) -> decltype(v.template get<I>()) {
+    return v.template get<I>();
 }
 
-template<class T, class U, class V>
-LZ_CONSTEXPR_CXX_14 T& get(variant<U, V>& t) {
-    return t.template get<T>();
-}
-
-template<class T, class U, class V>
-LZ_CONSTEXPR_CXX_14 const T* get_if(const variant<U, V>* t) {
-    return t->template get_if<T>();
-}
-
-template<class T, class U, class V>
-LZ_CONSTEXPR_CXX_14 T* get_if(variant<U, V>* t) {
-    return t->template get_if<T>();
+template<std::size_t I, class T, class T2>
+LZ_CONSTEXPR_CXX_14 auto get(variant<T, T2>& v) -> decltype(v.template get<I>()) {
+    return v.template get<I>();
 }
 
 } // namespace detail
