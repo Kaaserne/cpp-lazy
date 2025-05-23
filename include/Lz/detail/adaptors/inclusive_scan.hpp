@@ -43,7 +43,7 @@ struct inclusive_scan_adaptor {
      * @param init The initial value to start the inclusive scan with.
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr 
     enable_if<is_invocable<BinaryOp, decay_t<T>, decay_t<T>>::value, inclusive_scan_iterable<remove_ref<Iterable>, decay_t<T>, BinaryOp>>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const {
