@@ -6,9 +6,14 @@
 #include <Lz/c_string.hpp>
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/split.hpp>
+#include <Lz/string_view.hpp>
 
 namespace lz {
 namespace detail {
+
+template<class CharT>
+using copied_sv = lz::copied_iterable<lz::basic_string_view<CharT>>;
+
 template<class ValueType>
 struct split_adaptor {
     using adaptor = split_adaptor<ValueType>;
@@ -48,9 +53,9 @@ struct split_adaptor {
      * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
      */
     template<class Iterable, class CharT>
-    constexpr split_iterable<true, ValueType, remove_ref<Iterable>, c_string_iterable<const CharT>>
+    constexpr split_iterable<true, ValueType, remove_ref<Iterable>, copied_sv<CharT>>
     operator()(Iterable&& iterable, const CharT* delimiter) const {
-        return (*this)(std::forward<Iterable>(iterable), c_string(delimiter));
+        return (*this)(std::forward<Iterable>(iterable), copied_sv<CharT>(delimiter));
     }
 
     // clang-format off
@@ -123,9 +128,8 @@ struct split_adaptor {
      * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
      */
     template<class CharT>
-    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, c_string_iterable<const CharT>>
-    operator()(const CharT* delimiter) const {
-        return (*this)(c_string(delimiter));
+    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_sv<CharT>> operator()(const CharT* delimiter) const {
+        return (*this)(copied_sv<CharT>(delimiter));
     }
 };
 
@@ -171,9 +175,9 @@ struct split_adaptor<void> {
      * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
      */
     template<class Iterable, class CharT>
-    LZ_NODISCARD constexpr splitter_iterable<Iterable, c_string_iterable<const CharT>>
+    LZ_NODISCARD constexpr splitter_iterable<Iterable, copied_sv<CharT>>
     operator()(Iterable&& iterable, const CharT* delimiter) const {
-        return (*this)(std::forward<Iterable>(iterable), c_string(delimiter));
+        return (*this)(std::forward<Iterable>(iterable), copied_sv<CharT>(delimiter));
     }
 
     /**
@@ -244,9 +248,8 @@ struct split_adaptor<void> {
      * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
      */
     template<class Iterable, class CharT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, c_string_iterable<const CharT>>
-    operator()(const CharT* delimiter) const {
-        return (*this)(c_string(delimiter));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_sv<CharT>> operator()(const CharT* delimiter) const {
+        return (*this)(copied_sv<CharT>(delimiter));
     }
 };
 
