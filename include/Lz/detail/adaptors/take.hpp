@@ -66,9 +66,9 @@ struct take_adaptor {
      * @param n The amount of elements to take.
      */
     template<class Iterator>
-    LZ_NODISCARD constexpr enable_if<!is_iterable<Iterator>::value, take_iterable<Iterator>>
-    operator()(Iterator iterator, const diff_type<Iterator> n) const {
-        return { std::move(iterator), n };
+    LZ_NODISCARD constexpr enable_if<!is_iterable<Iterator>::value, take_iterable<remove_cvref<Iterator>>>
+    operator()(Iterator&& iterator, const diff_type<Iterator> n) const {
+        return { std::forward<Iterator>(iterator), n };
     }
 
     /**
