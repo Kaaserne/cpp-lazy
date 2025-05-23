@@ -7,10 +7,72 @@
 
 namespace lz {
 namespace detail {
+template<class Iterator>
+class n_take_iterator : public iterator<n_take_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
+                                        diff_type<Iterator>, iter_cat_t<Iterator>,
+                                        sentinel_selector<iter_cat_t<Iterator>, n_take_iterator<Iterator>, default_sentinel>> {
+
+    using traits = std::iterator_traits<Iterator>;
+
+public:
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+    using reference = typename traits::reference;
+    using pointer = fake_ptr_proxy<reference>;
+
+private:
+    Iterator _iterator;
+    difference_type _n{};
+
+public:
+    constexpr n_take_iterator(Iterator it, const difference_type n) : _iterator{ std::move(it) }, _n{ n } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(default_sentinel) {
+        _n = 0;
+        return *this;
+    }
+
+    constexpr reference dereference() const {
+        return *_iterator;
+    }
+
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
+
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_iterator;
+        --_n;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void decrement() {
+        --_iterator;
+        ++_n;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
+        _iterator += offset;
+        _n -= offset;
+    }
+
+    constexpr difference_type difference(const n_take_iterator& b) const {
+        return b._n - _n;
+    }
+
+    constexpr bool eq(const n_take_iterator& b) const {
+        return _n == b._n;
+    }
+
+    constexpr bool eq(default_sentinel) const {
+        return _n == 0;
+    }
+};
+
 template<class Iterator, class S>
-class take_iterator
-    : public iterator<take_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, take_iterator<Iterator, S>, S>> {
+class bounded_take_iterator
+    : public iterator<bounded_take_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
+                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, bounded_take_iterator<Iterator, S>, S>> {
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -24,10 +86,10 @@ private:
     Iterator _iterator;
 
 public:
-    constexpr take_iterator(Iterator it) : _iterator{ std::move(it) } {
+    constexpr bounded_take_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 take_iterator& operator=(const S& end) {
+    LZ_CONSTEXPR_CXX_14 bounded_take_iterator& operator=(const S& end) {
         _iterator = end;
         return *this;
     }
@@ -52,11 +114,11 @@ public:
         _iterator += offset;
     }
 
-    constexpr difference_type difference(const take_iterator& b) const {
+    constexpr difference_type difference(const bounded_take_iterator& b) const {
         return _iterator - b._iterator;
     }
 
-    constexpr bool eq(const take_iterator& b) const {
+    constexpr bool eq(const bounded_take_iterator& b) const {
         return _iterator == b._iterator;
     }
 

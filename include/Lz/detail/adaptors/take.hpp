@@ -46,10 +46,29 @@ struct take_adaptor {
      * @param iterable The iterable to take the first n elements from.
      * @param n The amount of elements to take.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr take_iterable<remove_ref<Iterable>>
+    template<class Iterable>
+    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, take_iterable<remove_ref<Iterable>>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
         return { std::forward<Iterable>(iterable), n };
+    }
+
+    /**
+     * @brief This adaptor is used to take the first n elements of an iterator. The iterator category is the same as the input
+     * iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. Has a .size()
+     * method that essentially returns `n`. If `n` is larger than the amount of elements in the iterator then it is undefined
+     * behaviour.
+     * ```cpp
+     * auto vec = std::vector<int>{1, 2, 3, 4, 5};
+     * auto result = lz::take(vec.begin(), 2); // result = {1, 2}
+     * // auto result = lz::take(vec.begin(), 20); // out of bounds
+     * ```
+     * @param iterator The iterator to take the first n elements from.
+     * @param n The amount of elements to take.
+     */
+    template<class Iterator>
+    LZ_NODISCARD constexpr enable_if<!is_iterable<Iterator>::value, take_iterable<Iterator>>
+    operator()(Iterator iterator, const diff_type<Iterator> n) const {
+        return { std::move(iterator), n };
     }
 
     /**

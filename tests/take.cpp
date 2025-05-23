@@ -1,12 +1,71 @@
 #include <Lz/c_string.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
+
+namespace {
+template<class TakeIterable>
+void test_operator_minus(const TakeIterable& take) {
+    auto begin = take.begin();
+    auto end = take.end();
+
+    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
+        INFO("With i = " << i);
+        REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
+        REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
+        REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
+        REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
+    }
+
+    for (std::size_t i = 0; i < lz::size(take); ++i) {
+        INFO("With i = " << i);
+        REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
+                static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
+        REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
+                -(static_cast<std::ptrdiff_t>(lz::size(take)) - 2 * static_cast<std::ptrdiff_t>(i)));
+    }
+}
+
+template<class TakeIterable, class ExpectedIterable>
+void test_operator_plus(const TakeIterable& take, const ExpectedIterable& expected) {
+    auto begin = take.begin();
+    auto end = take.end();
+
+    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(begin + i) == *(expected.begin() + i));
+        REQUIRE(*(end - (i + 1)) == *(expected.end() - (i + 1)));
+    }
+
+    for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
+        REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+    }
+    REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
+    for (std::size_t i = 1; i <= lz::size(take); ++i) {
+        REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+    }
+    REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+
+    std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(take)));
+    std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
+
+    for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
+        REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+    }
+    REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
+    for (std::size_t i = 1; i <= lz::size(take); ++i) {
+        REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+    }
+    REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+}
+
+} // namespace
 
 TEST_CASE("Take with sentinels") {
     const char* str = "Hello, world!";
@@ -23,6 +82,14 @@ TEST_CASE("Take with sentinels") {
         REQUIRE(it == take.begin());
         it = take.end();
         REQUIRE(it == take.end());
+    }
+
+    SECTION("Operator= for with iterator") {
+        auto t = lz::take(c_string.begin(), 5);
+        auto it = t.begin();
+        REQUIRE(it == t.begin());
+        it = t.end();
+        REQUIRE(it == t.end());
     }
 }
 
@@ -43,15 +110,13 @@ TEST_CASE("Take binary operations where n is smaller than size") {
     REQUIRE(take.size() == 4);
 
     SECTION("Operator++") {
-        auto begin = take.begin();
-        ++begin;
-        REQUIRE(*begin == 2);
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(take, expected));
     }
 
     SECTION("Operator--") {
-        auto end = take.end();
-        --end;
-        REQUIRE(*end == 4);
+        auto expected = { 4, 3, 2, 1 };
+        REQUIRE(lz::equal(take | lz::reverse, expected));
     }
 
     SECTION("Operator== & Operator!=") {
@@ -63,50 +128,14 @@ TEST_CASE("Take binary operations where n is smaller than size") {
     }
 
     SECTION("Operator+") {
-        auto begin = take.begin();
-        auto end = take.end();
-
+        INFO("Operator+")
         std::vector<int> expected = { 1, 2, 3, 4 };
-        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
-        for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
-
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(take)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
-
-        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
-        for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+        test_operator_plus(take, expected);
     }
 
     SECTION("Operator-") {
-        auto begin = take.begin();
-        auto end = take.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
-            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
-            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
-        }
-
-        for (std::size_t i = 0; i < lz::size(take); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -(static_cast<std::ptrdiff_t>(lz::size(take)) - 2 * static_cast<std::ptrdiff_t>(i)));
-        }
+        INFO("Operator-");
+        test_operator_minus(take);
     }
 }
 
@@ -136,30 +165,14 @@ TEST_CASE("Take binary operations where n is larger than size") {
     }
 
     SECTION("Operator+") {
-        auto begin = take.begin();
-        auto end = take.end();
-
+        INFO("Operator+");
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
-        for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+        test_operator_plus(take, expected);
+    }
 
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(take)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
-
-        for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
-        for (std::size_t i = 1; i <= lz::size(take); ++i) {
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+    SECTION("Operator-") {
+        INFO("Operator-");
+        test_operator_minus(take);
     }
 }
 
@@ -181,6 +194,33 @@ TEST_CASE("Empty or one element take") {
         REQUIRE(lz::has_one(take));
         REQUIRE(!lz::has_many(take));
     }
+
+    SECTION("Empty iterator") {
+        std::vector<int> vec;
+        auto take = lz::take(vec.begin(), 0);
+        REQUIRE(take.size() == 0);
+        REQUIRE(lz::empty(take));
+        REQUIRE(!lz::has_one(take));
+        REQUIRE(!lz::has_many(take));
+    }
+
+    SECTION("One element iterator") {
+        std::vector<int> vec = { 1 };
+        auto take = lz::take(vec.begin(), 1);
+        REQUIRE(take.size() == 1);
+        REQUIRE(!lz::empty(take));
+        REQUIRE(lz::has_one(take));
+        REQUIRE(!lz::has_many(take));
+    }
+}
+
+TEST_CASE("Take with bidirectional iterators") {
+    std::list<int> lst = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    auto take = lz::take(lst, 6);
+    REQUIRE(take.size() == 6);
+    auto expected = { 1, 2, 3, 4, 5, 6 };
+    REQUIRE(lz::equal(take, expected));
+    REQUIRE(lz::equal(take | lz::reverse, expected | lz::reverse));
 }
 
 TEST_CASE("Take to containers") {
@@ -191,21 +231,17 @@ TEST_CASE("Take to containers") {
 
     SECTION("To array") {
         auto arr = take | lz::to<std::array<int, 4>>();
-        REQUIRE(arr.size() == 4);
-        REQUIRE(arr[0] == 1);
-        REQUIRE(arr[1] == 2);
-        REQUIRE(arr[2] == 3);
-        REQUIRE(arr[3] == 4);
+        REQUIRE(lz::equal(arr, take));
     }
 
     SECTION("To vector") {
         auto vec = take | lz::to<std::vector>(std::allocator<int>());
-        REQUIRE(std::equal(vec.begin(), vec.end(), take.begin()));
+        REQUIRE(lz::equal(vec, take));
     }
 
     SECTION("To other container using to<>()") {
         auto lst = take | lz::to<std::list<int>>(std::allocator<int>());
-        REQUIRE(std::equal(lst.begin(), lst.end(), take.begin()));
+        REQUIRE(lz::equal(lst, take));
     }
 
     SECTION("To map") {
@@ -263,5 +299,32 @@ TEST_CASE("Drop & slice") {
         std::vector<int> expected = { 3, 4, 5, 6 };
         auto result = lz::to<std::vector>(slice, std::allocator<int>());
         REQUIRE(std::equal(slice.begin(), slice.end(), expected.begin()));
+    }
+}
+
+TEST_CASE("Take with iterator only") {
+    std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    auto take = lz::take(vec.begin(), 4);
+    REQUIRE(take.size() == 4);
+
+    SECTION("Operator++") {
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(take, expected));
+    }
+
+    SECTION("Operator--") {
+        auto expected = { 4, 3, 2, 1 };
+        REQUIRE(lz::equal(take | lz::reverse, expected));
+    }
+
+    SECTION("Operator+") {
+        INFO("Operator+");
+        auto expected = { 1, 2, 3, 4 };
+        test_operator_plus(take, expected);
+    }
+
+    SECTION("Operator-") {
+        INFO("Operator-");
+        test_operator_minus(take);
     }
 }
