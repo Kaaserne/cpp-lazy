@@ -76,7 +76,7 @@ LZ_INLINE_VAR constexpr detail::interleave_adaptor interleave{};
 
 #endif
 
-using detail::interleave_iterator;
+using detail::interleave_iterable;
 
 LZ_MODULE_EXPORT_SCOPE_END
 
