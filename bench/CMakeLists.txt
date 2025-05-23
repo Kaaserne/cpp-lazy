@@ -33,4 +33,7 @@ target_link_libraries(Benchmark
         benchmark::benchmark
 )
 
+math(EXPR CXX_STANDARD_INT "${CMAKE_CXX_STANDARD}")
+target_compile_definitions(Benchmark PRIVATE CMAKE_CXX_STANDARD=${CXX_STANDARD_INT})
+
 # Run as: ./Benchmark --benchmark_out=benchmark-iterators.json --benchmark_out_format=json

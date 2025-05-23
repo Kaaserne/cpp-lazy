@@ -13,7 +13,6 @@ class reverse_iterable : public lazy_view {
 
 public:
     using iterator = std::reverse_iterator<iter_t<Iterable>>;
-    using sentinel = std::reverse_iterator<sentinel_t<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -30,16 +29,16 @@ public:
         return iterator(std::end(_iterable));
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 sentinel end() const& {
-        return sentinel(std::begin(_iterable));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iterator end() const& {
+        return iterator(std::begin(_iterable));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iterator begin() && {
         return iterator(detail::end(std::move(_iterable)));
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 sentinel end() && {
-        return sentinel(detail::begin(std::move(_iterable)));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iterator end() && {
+        return iterator(detail::begin(std::move(_iterable)));
     }
 };
 } // namespace detail

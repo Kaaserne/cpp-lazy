@@ -68,7 +68,6 @@ struct iterable {
     }
 };
 
-// TODO add test for lz::copied_iterable
 TEST_CASE("lz::copied_iterable") {
     SECTION("Iterable that is inherited by lz::lazy_view") {
         std::vector<int> vec{ 1, 2, 3 };

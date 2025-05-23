@@ -19,5 +19,14 @@ int main() {
         std::cout << i << ' ';
         // Or use fmt::print("{} ", i);
     }
+
     // Output: 1 2 3
+
+    auto taken_iter = lz::take(seq.begin(), 3);
+    for (int& i : taken_iter) {
+        std::cout << i << ' ';
+        // Or use fmt::print("{} ", i);
+    }
+    // Output: 1 2 3
+    std::cout << '\n';
 }

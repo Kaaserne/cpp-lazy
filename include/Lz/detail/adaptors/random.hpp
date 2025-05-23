@@ -193,9 +193,6 @@ struct random_adaptor {
         return (*this)(dist, gen, amount);
     }
 };
-
-template struct random_adaptor<true>;
-template struct random_adaptor<false>;
 } // namespace detail
 } // namespace lz
 

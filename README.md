@@ -54,13 +54,13 @@ Now what if you wanted to do eager evaluation? Well then you could do this:
 std::random_device rd;
 std::std::mt19937 gen(rd());
 std::uniform_int_distribution dist(0, 32);
-std::vector<int> randomNumbers;
-std::generate(randomNumbers.begin(), randomNumbers.end(), [&dist, &gen]{ return dist(gen); });
+std::vector<int> random_numbers;
+std::generate(random_numbers.begin(), random_numbers.end(), [&dist, &gen]{ return dist(gen); });
 ```
 
 That is pretty verbose. Instead, try this for change:
 ```cpp
-std::vector<int> randomNumbers = lz::random(0, 32, n) | lz::to<std::vector>();
+std::vector<int> random_numbers = lz::random(0, 32, n) | lz::to<std::vector>();
 ```
 > I want to search if the sequence of random numbers contain 6. 
 
@@ -102,9 +102,11 @@ if (std::find(common.begin(), common.end(), 6) != common.end()) {
 
 int main() {
   std::array<int, 4> arr = {1, 2, 3, 4};
-  std::string result = lz::map(arr, [](int i) { return i + 1; }) | lz::to<std::vector>(); // == {2, 3, 4, 5}
+  auto result = lz::map(arr, [](int i) { return i + 1; }) 
+                       | lz::to<std::vector>(); // == {2, 3, 4, 5}
   // or
-  std::string result = arr | lz::map([](int i) { return i + 1; }) | lz::to<std::vector>(); // == {2, 3, 4, 5}
+  auto result = arr | lz::map([](int i) { return i + 1; })
+                    | lz::to<std::vector>(); // == {2, 3, 4, 5}
 
   // Some iterables will return sentinels, for instance (specific rules about when sentinels are returned can be found in the documentation):
   std::vector<int> vec = {1, 2, 3, 4};
@@ -115,8 +117,9 @@ int main() {
   // Some iterables are sized, if the input iterable is also sized:
   auto sized = lz::map(vec, [](int i) { return i + 1; });
   auto size = sized.size(); // == 4
+  // forward.size(); // error: forward is not sized, instead use (O(n) time): lz::eager_size(forward)
 
-  // Some iterables require sized iterables. If the input iterable is not sized,
+  // Some iterables require the size of iterables. If the input iterable is not sized,
   // the sequence will be traversed to get the size using lz::eager_size. The iterable will be documented
   // appropriately if this requires a sized iterable. Example:
   auto zipper1 = lz::zip(lz::c_string("ab"), lz::c_string("cd")); // Calling .end() will take O(n) time
@@ -151,14 +154,14 @@ struct non_lz_iterable {
 
 int main() {
   std::vector<int> vec = {1, 2, 3, 4};
-  auto mapped = lz::map(vec, [](int i) { return i + 1; });
   // mapped will hold a reference to vec
-  auto filtered = lz::filter(mapped, [](int i) { return i % 2 == 0; });
+  auto mapped = lz::map(vec, [](int i) { return i + 1; });
   // filtered does NOT hold a reference to mapped, but mapped still holds a reference to vec
+  auto filtered = lz::filter(mapped, [](int i) { return i % 2 == 0; });
 
   auto random = lz::random(0, 32, 4);
-  auto str = lz::map(random, [](int i) { return std::to_string(i); });
   // str will *not* hold a reference to random, because random is a lazy iterable and is trivial to copy
+  auto str = lz::map(random, [](int i) { return std::to_string(i); });
 
   lz::ref_or_view<std::vector<int>> ref(vec); // Holds a reference to vec
 
@@ -287,7 +290,7 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ## With xmake
 Everything higher than version 7.0.2 is supported. Please note that version 9.0.0 has drastic changes in the API (PascalCase/camelCase -> snake_case).
 ```xmake
-add_requires("cpp-lazy >=7.0.2")
+add_requires("cpp-lazy >=9.0.0")
 
 target("test")
     add_packages("cpp-lazy")
@@ -308,9 +311,9 @@ target("test")
 
 int main() {
   std::array<int, 4> arr = {1, 2, 3, 4};
-  std::string result = lz::map(arr, [](int i) { return i + 1; }) | lz::to<std::vector>(); // == {2, 3, 4, 5}
+  auto result = lz::map(arr, [](int i) { return i + 1; }) | lz::to<std::vector>(); // == {2, 3, 4, 5}
   // or
-  std::string result = lz::to<std::vector>(arr | lz::map([](int i) { return i + 1; })); // == {2, 3, 4, 5}
+  auto result = lz::to<std::vector>(arr | lz::map([](int i) { return i + 1; })); // == {2, 3, 4, 5}
 }
 ```
 
@@ -328,9 +331,9 @@ int main() {
 
 int main() {
   std::array<int, 4> arr = {1, 2, 3, 4};
-  std::string result = lz::map(arr, [](int i) { return i + 1; }) | lz::to<std::vector>(); // == {2, 3, 4, 5}
+  auto result = lz::map(arr, [](int i) { return i + 1; }) | lz::to<std::vector>(); // == {2, 3, 4, 5}
   // or
-  std::string result = lz::to<std::vector>(arr | lz::map([](int i) { return i + 1; })); // == {2, 3, 4, 5}
+  auto result = lz::to<std::vector>(arr | lz::map([](int i) { return i + 1; })); // == {2, 3, 4, 5}
 }
 ```
 

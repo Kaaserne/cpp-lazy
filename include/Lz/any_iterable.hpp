@@ -79,11 +79,6 @@ public:
 };
 
 /**
- * @addtogroup ItFns
- * @{
- */
-
-/**
  * Creates an any_iterable object from an iterable. This is useful when you cannot use `auto` or when you want to store
  * different types of views in a container.
  *
@@ -96,11 +91,6 @@ make_any_iterable(Iterable&& iterable) {
     return any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>,
                         diff_iterable_t<Iterable>>(std::forward<Iterable>(iterable));
 }
-
-// End of group
-/**
- * @}
- */
 
 } // namespace lz
 

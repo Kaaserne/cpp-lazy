@@ -85,7 +85,7 @@ class sized_iterable_impl : public lazy_view {
     std::size_t _size{};
 
 public:
-    using iterator = take_iterator<decayed_iterator, S>;
+    using iterator = bounded_take_iterator<decayed_iterator, S>;
     using const_iterator = decayed_iterator;
     using value_type = val_t<decayed_iterator>;
     using sentinel = S;

@@ -2,7 +2,6 @@
 
 int main() {
     int arr[]{ 3, 2, 4, 5 };
-    int arr2[]{ 3, 2, 5, 5 };
     // the example below doesn't do anything special in particular, but should give an example on how to use chaining
 
 #ifndef LZ_HAS_CXX_11

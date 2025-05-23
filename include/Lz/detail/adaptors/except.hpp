@@ -32,7 +32,7 @@ struct except_adaptor {
      * @param iterable2 The iterable that must be skipped in @p iterable1.
      * @param binary_predicate The binary predicate to use for comparison.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable1, LZ_CONCEPT_ITERABLE Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable1, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr 
     enable_if<is_iterable<Iterable2>::value, except_iterable<remove_ref<Iterable1>, remove_ref<Iterable2>, BinaryPredicate>>
     operator()(Iterable1&& iterable1, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
@@ -58,7 +58,7 @@ struct except_adaptor {
      * @param iterable2 The iterable that must be skipped in @p iterable1.
      * @param binary_predicate The binary predicate to use for comparison.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
     operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {

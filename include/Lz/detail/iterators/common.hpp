@@ -57,98 +57,33 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT(_data.index() == 0, "Dereferencing a sentinel/end");
 #ifdef __cpp_lib_variant
-        using std::get_if;
+        using std::get;
 #endif
-        auto&& iter = get_if<Iterator>(&_data);
-        return **iter;
+        return *get<0>(_data);
     }
 
     LZ_CONSTEXPR_CXX_17 fake_ptr_proxy<reference> arrow() const {
-#ifdef __cpp_lib_variant
-        using std::get_if;
-#endif
-        auto&& iter = get_if<Iterator>(&_data);
-        return fake_ptr_proxy<decltype(**this)>(**iter);
+        return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(_data.index() == 0, "Incrementing a sentinel/past the end");
 #ifdef __cpp_lib_variant
-        using std::get_if;
+        using std::get;
 #endif
-        auto&& iter = get_if<Iterator>(&_data);
-        ++(*iter);
-    }
-
-    LZ_CONSTEXPR_CXX_14 void decrement() {
-#ifdef __cpp_lib_variant
-        using std::get_if;
-#endif
-        auto&& iter = get_if<Iterator>(&_data);
-        --*iter;
+        ++get<0>(_data);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const common_iterator& rhs) const {
 #ifdef __cpp_lib_variant
         using std::get;
-        using std::get_if;
 #endif
-
-        auto&& lhs_iter = get_if<Iterator>(&_data);
-        auto&& rhs_iter = get_if<S>(&rhs._data);
-
-        if (lhs_iter && rhs_iter) {
-            return *lhs_iter == *rhs_iter;
+        if (_data.index() != rhs._data.index()) {
+            return _data.index() == 0 ? get<0>(_data) == get<1>(rhs._data) : get<1>(_data) == get<0>(rhs._data);
         }
-
-        auto&& lhs_iter_inverted = get_if<S>(&_data);
-        auto&& rhs_iter_inverted = get_if<Iterator>(&rhs._data);
-
-        if (lhs_iter_inverted && rhs_iter_inverted) {
-            return *lhs_iter == *rhs_iter;
-        }
-
         return true;
-    }
-
-    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
-#ifdef __cpp_lib_variant
-        using std::get_if;
-#endif
-        auto&& iter = get_if<Iterator>(&_data);
-        if (iter) {
-            *iter += n;
-        }
-        auto&& sent_iter = get_if<S>(&_data);
-        if (sent_iter) {
-            *sent_iter += n;
-        }
-        LZ_ASSERT(iter || sent_iter, "Invalid sentinel/iterator state");
-    }
-
-    LZ_CONSTEXPR_CXX_14 difference_type difference(const common_iterator& rhs) const {
-#ifdef __cpp_lib_variant
-        using std::get;
-        using std::get_if;
-#endif
-
-        auto&& lhs_iter = get_if<Iterator>(&_data);
-        auto&& rhs_iter = get_if<Iterator>(&rhs._data);
-        if (lhs_iter && rhs_iter) {
-            return *lhs_iter - *rhs_iter;
-        }
-        if (lhs_iter) {
-            auto&& rhs_s = get_if<S>(&rhs._data);
-            LZ_ASSERT(rhs_s, "Invalid sentinel/iterator state");
-            return *lhs_iter - *rhs_s;
-        }
-        if (rhs_iter) {
-            auto&& lhs_s = get_if<S>(&_data);
-            LZ_ASSERT(lhs_s, "Invalid sentinel/iterator state");
-            return *lhs_s - *rhs_iter;
-        }
-        LZ_ASSERT(false, "Invalid sentinel/iterator state");
-        return 0;
     }
 };
 } // namespace detail
