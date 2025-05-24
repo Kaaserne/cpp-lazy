@@ -11,6 +11,7 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/split.hpp>
+#include <Lz/string_view.hpp>
 #include <Lz/zip.hpp>
 #include <cctype>
 
@@ -82,8 +83,8 @@ public:
      * @param string The string to split on "\n".
      */
     template<class CharT>
-    LZ_NODISCARD constexpr lines_iterable<CharT, c_string_iterable<const CharT>> operator()(const CharT* string) const {
-        return lz::sv_split(lz::c_string(string), static_cast<CharT>('\n'));
+    LZ_NODISCARD constexpr lines_iterable<CharT, copied_sv<CharT>> operator()(const CharT* string) const {
+        return lz::sv_split(copied_sv<CharT>(string), static_cast<CharT>('\n'));
     }
 };
 
