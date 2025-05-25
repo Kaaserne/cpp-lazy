@@ -142,7 +142,7 @@ constexpr diff_type<Iterator> distance(Iterator begin, S end) {
 #ifdef LZ_HAS_CXX_17
 
 /**
- * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * @brief Gets the unsigned size of a container or iterable if it has a .size() method. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * std::cout << lz::size(vec) << '\n'; // prints 5
@@ -188,6 +188,25 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
 template<class T, size_t N>
 LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
     return N;
+}
+
+#endif
+
+#ifdef LZ_HAS_CXX_20
+
+template<class Iterable>
+LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i))) -> decltype(std::ssize(i)) {
+    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+    return std::ssize(i);
+}
+
+#else
+
+template<class Iterable>
+LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i)))
+    -> detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type> {
+    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+    return std::ssize(i);
 }
 
 #endif
