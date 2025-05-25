@@ -11,8 +11,6 @@
 
 namespace lz {
 namespace detail {
-// TODO take for iterator too, add benchmark too
-
 template<class Iterable, class = void>
 class take_iterable;
 
