@@ -51,14 +51,25 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
-        const auto min_max = std::minmax({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
-        return min_max.second < 0 ? min_max.second : min_max.first;
+    LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
+        const auto max = std::max({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        if (max > 0) {
+            return max;
+        }
+        return std::min({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
     }
 
-    template<std::size_t... I, class EndIter>
-    LZ_CONSTEXPR_CXX_20 bool eq(const EndIter& other, index_sequence<I...>) const {
+    template<class EndIter, std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 bool eq(const EndIter& other, index_sequence<I...>) const {
+#ifdef LZ_HAS_CXX_17
+
+        return ((std::get<I>(_iterators) == std::get<I>(other)) || ...);
+
+#else
+
         return std::max({ (std::get<I>(_iterators) == std::get<I>(other))... });
+
+#endif
     }
 
 public:
