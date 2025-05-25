@@ -11,7 +11,7 @@ TEST_CASE("Split with custom container") {
 #ifdef LZ_HAS_CXX_11
     auto splitter = to_split | lz::t_split<std::vector<char>>{}(" ");
 #else
-    auto splitter = lz::t_split<std::vector<char>>(to_split, " ");
+    auto splitter = to_split | lz::t_split<std::vector<char>>(" ");
 #endif
     std::vector<std::vector<char>> expected = {
         { 'H', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, { 't', 'e', 's', 't' }, { '1', '2', '3' }
@@ -36,7 +36,7 @@ TEST_CASE("Splitter permutations") {
 
     SECTION("Starting with one delimiter ending with none") {
         const std::string to_split = " Hello world test 123";
-        auto splitter = lz::s_split(to_split, " ");
+        auto splitter = to_split | lz::s_split(" ");
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
 
@@ -48,7 +48,7 @@ TEST_CASE("Splitter permutations") {
 
     SECTION("Starting with two delimiters ending with none") {
         const std::string to_split = "  Hello world test 123";
-        auto splitter = lz::sv_split(to_split, " ");
+        auto splitter = to_split | lz::sv_split(" ");
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
 

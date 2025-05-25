@@ -32,7 +32,7 @@ struct split_adaptor {
      * @param delimiter The delimiter to split on. Doesn't have to be a reference
      */
     template<class Iterable, class T>
-    constexpr enable_if<!is_iterable<T>::value, split_iterable<false, ValueType, remove_ref<Iterable>, T>>
+    constexpr enable_if<!is_iterable<T>::value, split_iterable<ValueType, remove_ref<Iterable>, T>>
     operator()(Iterable&& iterable, T delimiter) const {
         return { std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
     }
@@ -53,7 +53,7 @@ struct split_adaptor {
      * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
      */
     template<class Iterable, class CharT>
-    constexpr split_iterable<true, ValueType, remove_ref<Iterable>, copied_sv<CharT>>
+    constexpr split_iterable<ValueType, remove_ref<Iterable>, copied_sv<CharT>>
     operator()(Iterable&& iterable, const CharT* delimiter) const {
         return (*this)(std::forward<Iterable>(iterable), copied_sv<CharT>(delimiter));
     }
@@ -76,7 +76,7 @@ struct split_adaptor {
      */
     template<class Iterable, class Iterable2>
     LZ_NODISCARD constexpr
-    enable_if<is_iterable<Iterable2>::value, split_iterable<true, ValueType, remove_ref<Iterable>, remove_ref<Iterable2>>>
+    enable_if<is_iterable<Iterable2>::value, split_iterable<ValueType, remove_ref<Iterable>, remove_ref<Iterable2>>>
     operator()(Iterable&& iterable, Iterable2&& delimiter) const {
         return { std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter) };
     }
@@ -139,11 +139,10 @@ struct split_adaptor<void> {
 
     template<class Iterable, class Iterble2>
     using splitter_iterable =
-        split_iterable<true, basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>, remove_ref<Iterable>, remove_ref<Iterble2>>;
+        split_iterable<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>, remove_ref<Iterable>, remove_ref<Iterble2>>;
 
     template<class Iterable, class T>
-    using splitter_t_iterable =
-        split_iterable<false, basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>, remove_ref<Iterable>, T>;
+    using splitter_t_iterable = split_iterable<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>, remove_ref<Iterable>, T>;
 
     // clang-format off
 
@@ -232,7 +231,7 @@ struct split_adaptor<void> {
      * ```
      * @param delimiter The iterable to split.
      */
-    template<class Iterable, class T>
+    template<class T>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
         return { std::move(delimiter) };
     }
@@ -247,7 +246,7 @@ struct split_adaptor<void> {
      * ```
      * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
      */
-    template<class Iterable, class CharT>
+    template<class CharT>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_sv<CharT>> operator()(const CharT* delimiter) const {
         return (*this)(copied_sv<CharT>(delimiter));
     }
