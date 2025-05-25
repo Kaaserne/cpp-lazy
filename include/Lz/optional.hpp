@@ -8,9 +8,14 @@
 #include <type_traits>
 
 #ifdef __cpp_lib_optional
+
 #include <optional>
+
 #else // ^^ __cpp_lib_optional vv !__cpp_lib_optional
+
+#include <Lz/detail/procs.hpp>
 #include <stdexcept>
+
 #endif // __cpp_lib_optional
 
 namespace lz {
@@ -63,7 +68,9 @@ public:
     constexpr optional(const T& value) : _value{ value }, _has_value{ true } {
     }
 
-    constexpr optional(T&& value) noexcept : _value{ std::move(value) }, _has_value{ true } {
+    constexpr optional(T&& value) noexcept(std::is_move_constructible<T>::value) :
+        _value{ std::move(value) },
+        _has_value{ true } {
     }
 
     LZ_CONSTEXPR_CXX_14 optional(optional<T>&& that) noexcept(std::is_nothrow_move_constructible<T>::value) {
@@ -176,6 +183,7 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 const T& operator*() const noexcept {
+        LZ_ASSERT(_has_value, "Cannot get uninitialized optional");
         return _value;
     }
 
@@ -198,26 +206,6 @@ constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs) {
 template<class T, class U>
 constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs) {
     return !(lhs == rhs);
-}
-
-template<class T, class U>
-constexpr bool operator<(const optional<T>& lhs, const optional<U>& rhs) {
-    return !rhs ? false : !lhs ? true : *lhs < *rhs;
-}
-
-template<class T, class U>
-constexpr bool operator>(const optional<T>& lhs, const optional<U>& rhs) {
-    return rhs < lhs;
-}
-
-template<class T, class U>
-constexpr bool operator<=(const optional<T>& lhs, const optional<U>& rhs) {
-    return !(rhs < lhs);
-}
-
-template<class T, class U>
-constexpr bool operator>=(const optional<T>& lhs, const optional<U>& rhs) {
-    return !(lhs < rhs);
 }
 
 #endif // __cpp_lib_optional
