@@ -8,6 +8,7 @@ struct some_struct {
     int a;
 };
 
+// TODO bloaty tests
 
 int main() {
     std::vector<some_struct> s = {
