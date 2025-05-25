@@ -48,7 +48,17 @@ LZ_INLINE_VAR constexpr detail::group_by_adaptor group_by{};
 
 #endif // LZ_HAS_CXX_11
 
-using detail::group_by_iterable;
+/**
+ * @brief Helper alias for group by iterable.
+ * @tparam Iterable The type of the iterable to group by.
+ * ```cpp
+ * char str[] = "aaabbccccd";
+ * using group_t = lz::group_by_iterable<decltype(str), std::function<bool(char, char)>>;
+ * group_t grouper = lz::group_by(str, [](char a, char b) { return a == b; });
+ * ```
+ */
+template<class Iterable, class BinaryPredicate>
+using group_by_iterable = detail::group_by_iterable<Iterable, BinaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

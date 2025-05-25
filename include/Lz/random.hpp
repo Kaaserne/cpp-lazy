@@ -94,7 +94,63 @@ LZ_INLINE_VAR constexpr detail::random_adaptor<false> common_random{};
 
 #endif
 
-using detail::random_iterable;
+/**
+ * @brief Common random iterable helper alias.
+ * @tparam Arithmetic The arithmetic type of the random numbers.
+ * @tparam Distribution The distribution type used to generate the random numbers.
+ * @tparam Generator The random number generator type.
+ * ```cpp
+ * std::poisson_distribution<> distribution(0, 1);
+ * std::mt19937 generator;
+ * using iterable = lz::common_random_iterable<int, std::poisson_distribution<>, std::mt19937>;
+ * iterable = lz::common_random(distribution, generator, 10);
+ * ```
+ */
+template<class Arithmetic, class Distribution, class Generator>
+using common_random_iterable = detail::random_iterable<Arithmetic, Distribution, Generator, false>;
+
+/**
+ * @brief Random iterable helper alias.
+ * @tparam Arithmetic The arithmetic type of the random numbers.
+ * @tparam Distribution The distribution type used to generate the random numbers.
+ * @tparam Generator The random number generator type.
+ * ```cpp
+ * std::poisson_distribution<> distribution(0, 1);
+ * std::mt19937 generator;
+ * using iterable = lz::random_iterable<int, std::poisson_distribution<>, std::mt19937>;
+ * iterable = lz::random(distribution, generator, 10);
+ * ```
+ */
+template<class Arithmetic, class Distribution, class Generator>
+using random_iterable = detail::random_iterable<Arithmetic, Distribution, Generator, true>;
+
+/**
+ * @brief The default random iterable helper alias. Uses std::mt19937 as the default generator and std::uniform_*_distribution as
+ * the distribution.
+ *
+ * @tparam Arithmetic The arithmetic type of the random numbers.
+ * ```cpp
+ * lz::default_random_iterable<double> random = lz::random(0., 1., 10);
+ * lz::default_random_iterable<int> random = lz::random(0, 10, 10);
+ * ```
+ */
+template<class Arithmetic>
+using default_random_iterable =
+    decltype(std::declval<detail::random_adaptor<true>>()(std::declval<Arithmetic>(), std::declval<std::size_t>()));
+
+/**
+ * @brief The default common random iterable helper alias. Uses std::mt19937 as the default generator and
+ * std::uniform_*_distribution as the distribution.
+ *
+ * @tparam Arithmetic The arithmetic type of the random numbers.
+ * ```cpp
+ * lz::default_random_iterable<double> random = lz::common_random(0., 1., 10);
+ * lz::default_random_iterable<int> random = lz::common_random(0, 10, 10);
+ * ```
+ */
+template<class Arithmetic>
+using common_default_random_iterable =
+    decltype(std::declval<detail::random_adaptor<false>>()(std::declval<Arithmetic>(), std::declval<std::size_t>()));
 
 LZ_MODULE_EXPORT_SCOPE_END
 

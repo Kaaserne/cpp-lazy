@@ -43,7 +43,15 @@ LZ_INLINE_VAR constexpr detail::range_adaptor range{};
 
 #endif
 
-using detail::range_iterable;
+/**
+ * @brief Range helper alias type.
+ * @tparam Arithmetic The arithmetic type to use for the range.
+ * ```cpp
+ * lz::range_iterable<int> r = lz::range(0, 10, 1);
+ * ```
+ */
+template<class Arithmetic>
+using range_iterable = detail::range_iterable<Arithmetic>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

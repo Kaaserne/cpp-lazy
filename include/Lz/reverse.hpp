@@ -38,7 +38,16 @@ LZ_INLINE_VAR constexpr detail::reverse_adaptor reverse{};
 
 #endif
 
-using detail::reverse_iterable;
+/**
+ * @brief Reverse iterable helper alias.
+ * @tparam Iterable The type of the iterable to reverse.
+ * ```cpp
+ * std::vector<int> v = { 1, 2, 3, 4, 5 };
+ * lz::reverse_iterable<std::vector<int>> reversed = lz::reverse(v);
+ * ```
+ */
+template<class Iterable>
+using reverse_iterable = detail::reverse_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

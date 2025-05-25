@@ -38,7 +38,25 @@ LZ_INLINE_VAR constexpr detail::generate_adaptor generate{};
 
 #endif
 
-using detail::generate_iterable;
+/**
+ * @brief Generate iterable helper alias for infinite generation.
+ * @tparam GeneratorFunc The type of the generator function.
+ * ```cpp
+ * lz::generate_iterable_inf<std::function<int()>> = lz::generate([]() { return 10; });
+ * ```
+ */
+template<class GeneratorFunc>
+using generate_iterable_inf = detail::generate_iterable<GeneratorFunc, true>;
+
+/**
+ * @brief Generate iterable helper alias for finite generation.
+ * @tparam GeneratorFunc The type of the generator function.
+ * ```cpp
+ * lz::generate_iterable<std::function<int()>> = lz::generate([]() { return 10; }, 10);
+ * ```
+ */
+template<class GeneratorFunc>
+using generate_iterable = detail::generate_iterable<GeneratorFunc, true>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

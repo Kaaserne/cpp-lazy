@@ -78,7 +78,16 @@ LZ_INLINE_VAR constexpr detail::chunks_adaptor chunks{};
 
 #endif // LZ_HAS_CXX_11
 
-using detail::chunks_iterable;
+/**
+ * @brief This is the type of the iterable returned by `lz::chunks`.
+ * @tparam Iterable The type of the input iterable.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::chunks_iterable<std::vector<int>> chunked = lz::chunks(vec, 3);
+ * ```
+ */
+template<class Iterable>
+using chunks_iterable = detail::chunks_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

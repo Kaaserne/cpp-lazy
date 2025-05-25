@@ -69,7 +69,18 @@ LZ_INLINE_VAR constexpr detail::inclusive_scan_adaptor inclusive_scan{};
 
 #endif
 
-using detail::inclusive_scan_iterable;
+/**
+ * @brief Inclusive scan helper alias.
+ * @tparam Iterable The input iterable
+ * @tparam The value type of the output (defaults to the value_type of `Iterable`)
+ * @tparam BinaryOp The binary operation to use (defaults to `std::plus`)
+ * ```
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::inclusive_scan_iterable<std::vector<int>> scan = lz::inclusive_scan(vec, 0); // scan = { 1, 3, 6, 10, 15 }
+ * ```
+*/
+template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+using inclusive_scan_iterable = detail::inclusive_scan_iterable<Iterable, T, BinaryOp>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 } // namespace lz

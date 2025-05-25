@@ -64,7 +64,27 @@ LZ_INLINE_VAR constexpr detail::loop_adaptor loop{};
 
 #endif
 
-using detail::loop_iterable;
+/**
+ * @brief Loop infinite helper alias.
+ * @tparam Iterable The iterable type.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * lz::loop_iterable_inf loop = lz::loop(vec);
+ * ```
+ */
+template<class Iterable>
+using loop_iterable_inf = detail::loop_iterable<Iterable, true>;
+
+/**
+ * @brief Loop finite helper alias.
+ * @tparam Iterable The iterable type.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * lz::loop_iterable loop = lz::loop(vec, 2);
+ * ```
+ */
+template<class Iterable>
+using loop_iterable = detail::loop_iterable<Iterable, false>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

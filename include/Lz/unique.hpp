@@ -49,7 +49,18 @@ LZ_INLINE_VAR constexpr detail::unique_adaptor unique{};
 
 #endif
 
-using detail::unique_iterable;
+/**
+ * @brief Unique iterable helper alias
+ * @tparam Iterable Type of the iterable to make unique
+ * @tparam BinaryPredicate Type of the binary predicate to use for uniqueness
+ * ```cpp
+ * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
+ * std::sort(vec.begin(), vec.end());
+ * lz::unique_iterable<std::vector> vec_unique = lz::unique(vec);
+ * ```
+ */
+template<class Iterable, class BinaryPredicate>
+using unique_iterable = detail::unique_iterable<Iterable, BinaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

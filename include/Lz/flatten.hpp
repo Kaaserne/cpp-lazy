@@ -40,7 +40,16 @@ LZ_INLINE_VAR constexpr detail::flatten_adaptor flatten{};
 
 #endif
 
-using detail::flatten_iterable;
+/**
+ * @brief Flatten iterable helper alias.
+ * @tparam Iterable The type of the iterable to flatten.
+ * ```cpp
+ * std::vector<std::vector<int>> vectors = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+ * lz::flatten_iterable<std::vector<std::vector<int>>> flattened = lz::flatten(vectors);
+ * ```
+ */
+template<class Iterable>
+using flatten_iterable = detail::flatten_iterable<Iterable, dimensions<Iterable>::value - !std::is_array<Iterable>::value>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

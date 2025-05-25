@@ -7,6 +7,8 @@
 
 namespace lz {
 
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
 #ifdef LZ_HAS_CXX_11
 
 /**
@@ -97,9 +99,21 @@ constexpr detail::cached_size_adaptor cache_size{};
  */
 LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
 
-using detail::cached_size_iterable;
-
 #endif
+
+/**
+ * @brief Helper alias for the cached_size_iterable.
+ * @tparam T The type of the iterable.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = {1, 2, 3, 4, 5};
+ * lz::cached_size_iterable<std::vector<int>> iterable = lz::cache_size(vec);
+ * ```
+ */
+template<class Iterable>
+using cached_size_iterable = detail::cached_size_iterable<Iterable>;
+
+LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

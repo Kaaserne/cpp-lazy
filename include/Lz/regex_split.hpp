@@ -56,7 +56,19 @@ LZ_INLINE_VAR constexpr detail::regex_split_adaptor regex_split{};
 
 #endif
 
-using detail::regex_split_iterable;
+/**
+ * @brief Regex split iterable helper alias.
+ *
+ * @tparam RegexTokenIter Type of the regex token iterator.
+ * @tparam RegexTokenSentinel Type of the regex token sentinel, defaults to the same type as `RegexTokenIter`.
+ * ```cpp
+ * std::regex r1(R"(\s+)");
+ * std::string s = "    Hello, world! How are you?";
+ * lz::regex_split_iterable<std::sregex_token_iterator> splitter = lz::regex_split(s, r1);
+ * ```
+ */
+template<class RegexTokenIter, class RegexTokenSentinel = RegexTokenIter>
+using regex_split_iterable = detail::regex_split_iterable<RegexTokenIter, RegexTokenSentinel>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

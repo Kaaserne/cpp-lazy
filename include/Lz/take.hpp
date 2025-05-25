@@ -91,8 +91,18 @@ LZ_INLINE_VAR constexpr detail::take_adaptor take{};
 
 #endif
 
-// TODO recheck if this is done for all iterables
-using detail::take_iterable;
+/**
+ * @brief This is a helper alias that takes an iterable or iterator and returns a take_iterable.
+ * @tparam IteratorOrIterable The type of the iterable or iterator. 
+ * ```cpp
+ * auto vec = std::vector<int>{1, 2, 3, 4, 5};
+ * lz::take_iterable<std::vector<int>> res = lz::take(vec, 2); // res = {1, 2}
+ * // or
+ * lz::take_iterable<std::vector<int>::iterator> res = lz::take(vec.begin(), 2); // res = {1, 2}
+ * ```
+ */
+template<class IteratorOrIterable>
+using take_iterable = detail::take_iterable<IteratorOrIterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

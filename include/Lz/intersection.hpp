@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Lz/detail/traits.hpp"
 #ifndef LZ_INTERSECTION_HPP
 #define LZ_INTERSECTION_HPP
 
@@ -61,7 +61,22 @@ LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
 
 #endif
 
-using detail::intersection_iterable;
+/**
+ * @brief Intersection helper alias.
+ *
+ * @tparam Iterable The first iterable type.
+ * @tparam Iterable2 The second iterable type.
+ * @tparam BinaryPredicate The binary predicate type used to compare elements from both iterables. Defaults to `std::less<>`.
+ * ```cpp
+ * std::string a = "aaaabbcccddee";
+ * std::string b = "aabccce";
+ * std::sort(a.begin(), a.end());
+ * std::sort(b.begin(), b.end());
+ * lz::intersection_iterable<std::string, std::string> intersect = lz::intersection(a, b);
+ * ```
+ */
+template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+using intersection_iterable = detail::intersection_iterable<Iterable, Iterable2, BinaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

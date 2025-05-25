@@ -42,7 +42,16 @@ LZ_INLINE_VAR constexpr detail::drop_adaptor drop{};
 
 #endif
 
-using detail::drop_iterable;
+/**
+ * @brief This is a type alias for the `drop` iterable.
+ * @tparam Iterable The iterable to drop elements from.
+ * ```cpp
+ * auto vec = std::vector<int>{1, 2, 3, 4, 5};
+ * lz::drop_iterable<std::vector<int>> res = lz::drop(vec, 2);
+ * ```
+ */
+template<class Iterable>
+using drop_iterable = detail::drop_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

@@ -58,7 +58,16 @@ LZ_INLINE_VAR constexpr detail::common_adaptor common{};
 
 #endif
 
-using detail::common_iterable;
+/**
+ * @brief Helper type alias for the common iterable.
+ * @tparam Iterable The iterable type.
+ * ```cpp
+ * lz::c_string_iterable<char> c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
+ * lz::common_iterable<lz::c_string_iterable<char>> common_view = lz::common(c_str);
+ * ```
+ */
+template<class Iterable>
+using common_iterable = detail::common_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

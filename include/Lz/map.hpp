@@ -41,7 +41,17 @@ LZ_INLINE_VAR constexpr detail::map_adaptor map{};
 
 #endif
 
-using detail::map_iterable;
+/**
+ * @brief Map iterable helper alias.
+ * @tparam Iterable The type of the iterable to map.
+ * @tparam UnaryOp The type of the unary operation to apply to each element.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::map_iterable<std::vector<int>, std::function<int(int)>> map_vec(vec, [](int i) { return i * 2; });
+ * ```
+ */
+template<class Iterable, class UnaryOp>
+using map_iterable = detail::map_iterable<Iterable, UnaryOp>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

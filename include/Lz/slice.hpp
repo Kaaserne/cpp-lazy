@@ -40,7 +40,16 @@ LZ_INLINE_VAR constexpr detail::slice_adaptor slice{};
 
 #endif
 
-using detail::slice_iterable;
+/**
+ * @brief Slice iterable helper alias.
+ * @tparam Iterable The type of the iterable to slice.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+ * lz::slice_iterable<std::vector<int>> slice_vec = lz::slice(vec, 2, 6);
+ * ```
+ */
+template<class Iterable>
+using slice_iterable = detail::slice_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

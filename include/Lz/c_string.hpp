@@ -42,7 +42,16 @@ LZ_INLINE_VAR constexpr detail::c_string_adaptor c_string{};
 
 #endif
 
-using detail::c_string_iterable;
+/**
+ * @brief Helper alias for the c_string_iterable.
+ * @tparam CharT The character type of the string.
+ * Example:
+ * ```cpp
+ * lz::c_string_iterable<char> cstr = lz::c_string("Hello, World!");
+ * ```
+*/
+template<class CharT>
+using c_string_iterable = detail::c_string_iterable<CharT>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

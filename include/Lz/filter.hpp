@@ -44,7 +44,17 @@ LZ_INLINE_VAR constexpr detail::filter_adaptor filter{};
 
 #endif
 
-using detail::filter_iterable;
+/**
+ * @brief Filter iterable helper alias.
+ * @tparam Iterable The type of the iterable to filter.
+ * @tparam UnaryPredicate The type of the predicate function to use for filtering.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::filter_iterable<std::vector<int>, std::function<bool(int)>> filtered = lz::filter(vec, [](int i) { return i % 2 == 0; });
+ * ```
+ */
+template<class Iterable, class UnaryPredicate>
+using filter_iterable = detail::filter_iterable<Iterable, UnaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

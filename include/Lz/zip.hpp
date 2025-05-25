@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Lz/detail/iterables/zip.hpp"
 #ifndef LZ_ZIP_HPP
 #define LZ_ZIP_HPP
 
@@ -88,7 +89,17 @@ LZ_INLINE_VAR constexpr detail::zip_adaptor zip{};
 
 #endif // LZ_HAS_CXX_11
 
-using detail::zip_iterable;
+/**
+ * @brief Zip helper alias.
+ * @tparam Iterables The iterables to zip together.
+ * ```cpp
+ * std::vector<int> a = { 1, 2, 3 };
+ * std::vector<int> b = { 4, 5 };
+ * lz::zip_iterable<std::vector<int>, std::vector<int>> zipped = lz::zip(a, b);
+ * ```
+ */
+template<class... Iterables>
+using zip_iterable = detail::zip_iterable<Iterables...>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

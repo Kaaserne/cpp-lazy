@@ -66,7 +66,19 @@ LZ_INLINE_VAR constexpr detail::exclusive_scan_adaptor exclusive_scan{};
 
 #endif
 
-using detail::exclusive_scan_iterable;
+/**
+ * @brief A type alias for the exclusive scan iterable.
+ * @tparam Iterable The iterable type.
+ * @tparam T The type of the elements in the iterable. Defaults to the value type of the iterable.
+ * @tparam BinaryOp The binary operation used for the scan. Defaults to `std::plus`.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::exclusive_scan<std::vector<int>> scan = lz::exclusive_scan_iterable(vec, 0);
+ * ```
+ */
+template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+using exclusive_scan_iterable = detail::exclusive_scan_iterable<Iterable, T, BinaryOp>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

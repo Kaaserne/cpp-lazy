@@ -86,7 +86,17 @@ LZ_INLINE_VAR constexpr detail::enumerate_adaptor enumerate{};
 
 #endif
 
-using detail::enumerate_iterable;
+/**
+ * @brief This is a type alias for the `enumerate` iterable.
+ * @tparam Iterable The iterable to enumerate.
+ * @tparam IntType The type of the index. Defaults to int.
+ * ```cpp
+ * std::forward_list<int> list = {1, 2, 3, 4, 5};
+ * lz::enumerate_iterable<std::forward_list<int>> res = lz::enumerate(list);
+ * ```
+ */
+template<class Iterable, class IntType = int>
+using enumerate_iterable = detail::enumerate_iterable<Iterable, IntType>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

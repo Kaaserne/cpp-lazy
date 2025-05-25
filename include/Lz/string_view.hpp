@@ -16,7 +16,6 @@
 #else
 
 #include <cstddef>
-#include <ostream>
 
 #endif
 
@@ -109,11 +108,6 @@ constexpr std::size_t basic_string_view<CharT>::npos;
 #endif
 
 using string_view = basic_string_view<char>;
-
-template<typename CharT>
-std::ostream& operator<<(std::ostream& os, const lz::basic_string_view<CharT> view) {
-    return os.write(view.data(), static_cast<std::streamsize>(view.size()));
-}
 
 #endif
 

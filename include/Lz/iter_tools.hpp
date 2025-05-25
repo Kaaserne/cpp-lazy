@@ -10,9 +10,156 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
+/**
+ * @brief Zip with iterable helper alias
+ * @tparam Fn The function to apply on the elements of the zipped iterables.
+ * @tparam Iterables The iterables to zip together.
+ * ```cpp
+ * std::vector<int> a = { 1, 2, 3 };
+ * std::vector<int> b = { 1, 2, 3 };
+ * using zip_t = lz::zip_with_iterable<std::function<int(int, int)>, std::vector<int>, std::vector<int>>;
+ * zip_t zipped = lz::zip_with([](int a, int b) { return a + b; }, a, b);
+ */
 template<class Fn, class... Iterables>
 using zip_with_iterable =
     decltype(lz::map(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...), detail::make_expand_fn(std::declval<Fn>())));
+
+/**
+ * @brief Lines iterable helper alias
+ *
+ * @tparam Iterable The iterable to split into lines.
+ * @tparam CharT The character type of the string to split into lines. Defaults to `char`.
+ * ```cpp
+ * std::string str = "Hello\nWorld\n!";
+ * lz::lines_iterable<std::string> splitted = lz::lines(str);
+ * ```
+ */
+template<class Iterable, class CharT = char>
+using lines_iterable = detail::lines_iterable<CharT, Iterable>;
+
+/**
+ * @brief As iterable helper alias
+ *
+ * @tparam Iterable The iterable to convert the elements of.
+ * @tparam T The type to convert the elements to.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * // c++ 11
+ * lz::as_iterable<std::vector<int>, float> iterable = lz::as<float>{}(vec);
+ * // c++ 14 and later
+ * lz::as_iterable<std::vector<int>, float> iterable = lz::as<float>(vec);
+ */
+template<class Iterable, class T>
+using as_iterable = detail::as_iterable<Iterable, T>;
+
+/**
+ * @brief Pairwise iterable helper alias
+ *
+ * @tparam Iterable The iterable to iterate over.
+ * @tparam N The number of adjacent elements to return in a tuple.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * // c++ 11
+ * lz::pairwise_n_iterable<std::vector<int>, 2> iterable = lz::pairwise_n<2>{}(vec);
+ * // c++ 14 and later
+ * lz::pairwise_n_iterable<std::vector<int>, 2> iterable = lz::pairwise_n<2>(vec);
+ * ```
+ */
+template<class Iterable, std::size_t N>
+using pairwise_n_iterable = detail::pairwise_n_iterable<Iterable, N>;
+
+/**
+ * @brief Pairwise iterable helper alias
+ *
+ * @tparam Iterable The iterable to iterate over.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::pairwise_iterable<std::vector<int>> iterable = lz::pairwise(vec);
+ * ```
+ */
+template<class Iterable, std::size_t N>
+using pairwise_iterable = pairwise_n_iterable<Iterable, 2>;
+
+/**
+ * @brief Keys, values and get_nth iterable helper alias
+ *
+ * @tparam Iterable The iterable to get the nth element from.
+ * @tparam N The index of the element to get from the iterable. 0 for keys, 1 for values, and any other index for the nth element.
+ * ```cpp
+ * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * lz::get_nth_iterable<std::vector<std::tuple<int, int, int>>, 2> iterable = lz::get_nth<2>(three_tuple_vec);
+ * lz::get_nth_iterable<std::vector<std::tuple<int, int, int>>, 0> keys_iterable = lz::keys(three_tuple_vec);
+ * ```
+ */
+template<class Iterable, std::size_t N>
+using get_nth_iterable = detail::get_nth_iterable<Iterable, N>;
+
+/**
+ * @brief Filter map iterable helper alias
+ *
+ * @tparam Iterable The iterable to filter and map.
+ * @tparam UnaryFilterPredicate The predicate to filter the elements with.
+ * @tparam UnaryMapOp The function to map the filtered elements with.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * using filter_map_iterable = lz::filter_map_iterable<std::vector<int>, std::function<bool(int)>, std::function<int(int)>>;
+ * filter_map_iterable fm_iterable = lz::filter_map(vec, [](int i) { return i % 2 == 0; }, [](int i) { return i * 2; });
+ * ```
+ */
+template<class Iterable, class UnaryFilterPredicate, class UnaryMapOp>
+using filter_map_iterable = detail::filter_map_iterable<Iterable, UnaryFilterPredicate, UnaryMapOp>;
+
+/**
+ * @brief Select iterable helper alias
+ * @tparam Iterable The iterable to select elements from.
+ * @tparam SelectorIterable The iterable that contains the selection criteria (true/false).
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::vector<bool> selector = { true, false, true, false, true };
+ * using select_iterable = lz::select_iterable<std::vector<int>, std::vector<bool>>;
+ * select_iterable selected = lz::select(vec, selector);
+ * ```
+ */
+template<class Iterable, class SelectorIterable>
+using select_iterable = detail::select_iterable<Iterable, SelectorIterable>;
+
+/**
+ * @brief Drop back iterable helper alias
+ * @tparam Iterable The iterable to drop elements from the back.
+ * @tparam UnaryPredicate The predicate to determine which elements to drop from the back.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * using drop_back_iterable = lz::drop_back_iterable<std::vector<int>, std::function<bool(int)>>;
+ * drop_back_iterable dropped = lz::drop_back_while(vec, [](int i) { return i > 3; });
+ * ```
+ */
+template<class Iterable, class UnaryPredicate>
+using drop_back_iterable = detail::drop_back_iterable<Iterable, UnaryPredicate>;
+
+/**
+ * @brief Trim iterable helper alias
+ * @tparam Iterable The iterable to trim.
+ * @tparam UnaryPredicateFirst The predicate to determine which elements to drop from the front.
+ * @tparam UnaryPredicateLast The predicate to determine which elements to drop from the back.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * using trim_iterable = lz::trim_iterable<std::vector<int>, std::function<bool(int)>, std::function<bool(int)>>;
+ * trim_iterable trimmed = lz::trim(vec, [](int i) { return i < 3; }, [](int i) { return i > 4; });
+ * ```
+ */
+template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
+using trim_iterable = detail::trim_iterable<Iterable, UnaryPredicateFirst, UnaryPredicateLast>;
+
+/**
+ * @brief Trim string helper alias
+ * @tparam String The string type to trim, for example `std::string` or `std::wstring`.
+ * ```cpp
+ * std::string str = "  hello  ";
+ * lz::trim_string_iterable<std::string> trimmed = lz::trim(str); // "hello"
+ * ```
+ */
+template<class String>
+using trim_string_iterable = trim_iterable<String, detail::trim_fn, detail::trim_fn>;
 
 /**
  * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`. Cannot

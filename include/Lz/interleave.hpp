@@ -76,7 +76,16 @@ LZ_INLINE_VAR constexpr detail::interleave_adaptor interleave{};
 
 #endif
 
-using detail::interleave_iterable;
+/**
+ * @brief Interleave alias helper.
+ * @tparam Iterables The iterables to interleave.
+ * ```
+ * std::vector<int> vec1 = { 1, 2, 3 }, vec2 = { 4, 5, 6, 7 };
+ * lz::interleave_iterable<std::vector<int>, std::vector<int>> interleaved = lz::interleave(vec1, vec2);
+ * ```
+*/
+template<class... Iterables>
+using interleave_iterable = detail::interleave_iterable<Iterables...>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

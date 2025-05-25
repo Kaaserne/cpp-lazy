@@ -44,7 +44,17 @@ LZ_INLINE_VAR constexpr detail::concatenate_adaptor concat{};
 
 #endif
 
-using detail::concatenate_iterable;
+/**
+ * @brief Helper alias for the concatenate iterable.
+ * @tparam Iterables The iterables to concatenate.
+ * ```cpp
+ * std::vector<int> a = {1, 2};
+ * std::vector<int> b = {3, 4};
+ * lz::concatenate_iterable<std::vector<int>, std::vector<int>> concatenated = lz::concat(a, b);
+ * ```
+ */
+template<class... Iterables>
+using concatenate_iterable = detail::concatenate_iterable<Iterables...>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

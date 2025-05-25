@@ -82,7 +82,16 @@ LZ_INLINE_VAR constexpr detail::take_every_adaptor take_every{};
 
 #endif // LZ_HAS_CXX_11
 
-using detail::take_every_iterable;
+/**
+ * @brief Take every iterable helper alias
+ * @tparam Iterable Type of the iterable to take every element from
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4 };
+ * lz::take_every_iterable<std::vector<int>> take_every = lz::take_every(vec, 2); // 1, 3
+ * ```
+ */
+template<class Iterable>
+using take_every_iterable = detail::take_every_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

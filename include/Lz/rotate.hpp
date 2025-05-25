@@ -70,7 +70,16 @@ LZ_INLINE_VAR constexpr detail::rotate_adaptor rotate{};
 
 #endif
 
-using detail::rotate_iterable;
+/**
+ * @brief Rotate iterable helper alias.
+ * @tparam Iterable Type of the iterable to rotate.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * lz::rotate_iterable<std::vector<int>> rotated = lz::rotate(vec, 2);
+ * ```
+ */
+template<class Iterable>
+using rotate_iterable = detail::rotate_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

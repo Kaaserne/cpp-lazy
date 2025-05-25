@@ -35,17 +35,15 @@ struct get_fn {
 
 struct trim_fn {
     template<class CharT>
-    LZ_NODISCARD constexpr bool operator()(CharT c) const {
+    LZ_NODISCARD constexpr bool operator()(const CharT c) const noexcept {
         return static_cast<bool>(std::isspace(static_cast<unsigned char>(c)));
     }
 };
 
-struct lines_adaptor {
-private:
-    template<class CharT, class Iterable>
-    using lines_iterable = split_iterable<false, basic_string_view<CharT>, Iterable, CharT>;
+template<class CharT, class Iterable>
+using lines_iterable = split_iterable<basic_string_view<CharT>, Iterable, CharT>;
 
-public:
+struct lines_adaptor {
     using adaptor = lines_adaptor;
 
     /**
@@ -88,6 +86,9 @@ public:
     }
 };
 
+template<class Iterable, class T>
+using as_iterable = map_iterable<Iterable, convert_fn<T>>;
+
 template<class T>
 struct as_adaptor {
     using adaptor = as_adaptor;
@@ -104,7 +105,7 @@ struct as_adaptor {
      * ```
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr map_iterable<remove_ref<Iterable>, convert_fn<T>> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr as_iterable<remove_ref<Iterable>, T> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), convert_fn<T>{});
     }
 };
@@ -118,8 +119,7 @@ private:
     using pairwise_n_object = zip_iterable<drop_iterable<remove_ref<decltype(N, std::declval<Iterable>())>>...>;
 
     template<class Iterable, std::size_t... N>
-    LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...>
-    pairwise_n_construct(Iterable&& iterable, index_sequence<N...>) const {
+    LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence<N...>) const {
         return lz::zip(lz::drop(std::forward<Iterable>(iterable), N)...);
     }
 
@@ -140,18 +140,25 @@ public:
      * @param iterable The iterable to iterate over.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr auto operator()(Iterable&& iterable) const
-        -> decltype(pairwise_n_construct(std::forward<Iterable>(iterable), make_index_sequence<Neighbours>())) {
+    LZ_NODISCARD constexpr auto
+    operator()(Iterable&& iterable) const -> decltype(pairwise_n_construct(std::forward<Iterable>(iterable),
+                                                                           make_index_sequence<Neighbours>())) {
         return pairwise_n_construct(std::forward<Iterable>(iterable), make_index_sequence<Neighbours>());
     }
 };
+
+template<class Iterable, std::size_t N>
+using pairwise_n_iterable = decltype(std::declval<pairwise_n_adaptor<N>>()(std::declval<Iterable>()));
+
+template<class Iterable, std::size_t N>
+using get_nth_iterable = map_iterable<Iterable, get_fn<N>>;
 
 template<std::size_t N>
 struct get_n_adaptor {
     using adaptor = get_n_adaptor<N>;
 
     template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 map_iterable<remove_ref<Iterable>, get_fn<N>> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 get_nth_iterable<remove_ref<Iterable>, N> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), get_fn<N>{});
     }
 };
@@ -217,7 +224,7 @@ using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable, UnaryPred
 
 struct trim_adaptor {
     using adaptor = trim_adaptor;
-    
+
     // clang-format off
 
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
@@ -237,9 +244,9 @@ struct trim_adaptor {
     }
 
     template<class CharT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 drop_back_iterable<drop_while_iterable<lz::basic_string_view<CharT>, trim_fn>, trim_fn>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 trim_iterable<copied_sv<CharT>, trim_fn, trim_fn>
     operator()(lz::basic_string_view<CharT> iterable) const {
-        return (*this)(iterable, trim_fn{}, trim_fn{});
+        return (*this)(copied_sv<CharT>(iterable), trim_fn{}, trim_fn{});
     }
 
     template<class UnaryPredicateFirst, class UnaryPredicateLast>

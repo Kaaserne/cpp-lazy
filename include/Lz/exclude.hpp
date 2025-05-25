@@ -74,7 +74,16 @@ LZ_INLINE_VAR constexpr detail::exclude_adaptor exclude{};
 
 #endif
 
-using detail::exclude_iterable;
+/**
+ * @brief Helper alias for the exclude iterable.
+ * @tparam Iterable The type of the iterable to exclude elements from.
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+ * lz::exclude_iterable<std::vector<int>> excluded = lz::exclude(vec, 3, 6);
+ * ```
+ */
+template<class Iterable>
+using exclude_iterable = detail::exclude_iterable<Iterable>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

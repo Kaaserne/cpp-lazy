@@ -155,7 +155,20 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<std::string> s_chunk_if{};
 
 #endif
 
-using detail::chunk_if_iterable;
+/**
+ * @brief Helper alias for the chunk_if_iterable.
+ * @tparam ValueType The value type of the chunked iterable which is returned by this iterator operator*.
+ * @tparam Iterable The type of the input iterable.
+ * @tparam UnaryPredicate The type of the predicate function.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * using chunked_t = lz::chunk_if_iterable<std::vector<int>, std::vector<int>, std::function<bool(int)>>;
+ * chunked_t chunked = lz::chunk_if(vec, [](int i) { return i % 2 == 0; });
+ * ```
+ */
+template<class ValueType, class Iterable, class UnaryPredicate>
+using chunk_if_iterable = detail::chunk_if_iterable<ValueType, Iterable, UnaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

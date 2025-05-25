@@ -86,7 +86,17 @@ LZ_INLINE_VAR constexpr detail::zip_longest_adaptor zip_longest{};
 
 #endif
 
-using detail::zip_longest_iterable;
+/**
+ * @brief Zip longest helper alias.
+ * @tparam Iterables The iterables to zip together.
+ * ```cpp
+ * std::vector<int> a = { 1, 2, 3 };
+ * std::vector<int> b = { 4, 5 };
+ * lz::zip_longest_iterable<std::vector<int>, std::vector<int>> zipped = lz::zip_longest(a, b);
+ * ```
+ */
+template<class... Iterables>
+using zip_longest_iterable = detail::zip_longest_iterable<Iterables...>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

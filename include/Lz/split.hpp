@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Lz/detail/traits.hpp"
 #ifndef LZ_STRING_SPLITTER_HPP
 #define LZ_STRING_SPLITTER_HPP
 
@@ -183,7 +184,70 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<lz::string_view> sv_split{};
 
 #endif
 
-using detail::split_iterable;
+/**
+ * @brief Split iterable helper alias.
+ *
+ * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
+ * @tparam Iterable The input iterable type to split.
+ * @tparam Delimiter The delimiter type to split on. For instance char or a string_view.
+ * ```cpp
+ * std::string to_split = "H d";
+ * using split_char_iterable = lz::split_iterable<std::vector<char>, std::string, char>;
+ * using split_sv_iterable = lz::split_iterable<std::vector<char>, std::string, lz::string_view>;
+ *
+ * split_char_iterable splitter = lz::t_split<std::vector<char>>(to_split, ' ');
+ * split_sv_iterable splitter_sv = lz::t_split<std::vector<char>>(to_split, " ");
+ * ```
+ */
+template<class ValueType, class Iterable, class Delimiter>
+using split_iterable = detail::split_iterable<ValueType, Iterable, Delimiter>;
+
+/**
+ * @brief Split iterable helper alias for single character delimiter. Returns std::basic_string as value type.
+ * @tparam Iterable The input iterable type to split.
+ * ```cpp
+ * std::string to_split = "H d";
+ * lz::s_single_split_iterable<std::string> splitter = lz::split(to_split, ' ');
+ * ```
+ */
+template<class Iterable>
+using s_single_split_iterable = split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable, val_iterable_t<Iterable>>;
+
+/**
+ * @brief Split iterable helper alias for string_view delimiter. Returns std::basic_string as value type.
+ * @tparam Iterable The input iterable type to split.
+ * ```cpp
+ * std::string to_split = "H d";
+ * lz::s_multiple_split_iterable<std::string> splitter = lz::split(to_split, " ");
+ * ```
+ */
+template<class Iterable>
+using s_multiple_split_iterable =
+    split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable, lz::basic_string_view<val_iterable_t<Iterable>>>;
+
+/**
+ * @brief Split iterable helper alias for single character delimiter. Returns lz::basic_string_view as value type.
+ * @tparam Iterable The input iterable type to split.
+ * ```cpp
+ * std::string to_split = "H d";
+ * lz::sv_single_split_iterable<std::string> splitter = lz::split(to_split, ' ');
+ * ```
+ */
+template<class Iterable>
+using sv_single_split_iterable =
+    split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable, val_iterable_t<Iterable>>;
+
+/**
+ * @brief Split iterable helper alias for string_view delimiter. Returns lz::basic_string_view as value type.
+ * @tparam Iterable The input iterable type to split.
+ * ```cpp
+ * std::string to_split = "H d";
+ * lz::sv_multiple_split_iterable<std::string> splitter = lz::split(to_split, " ");
+ * ```
+ */
+template<class Iterable>
+using sv_multiple_split_iterable =
+    split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable, lz::basic_string_view<val_iterable_t<Iterable>>>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 
