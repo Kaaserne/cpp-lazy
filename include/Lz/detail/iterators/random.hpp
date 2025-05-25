@@ -30,7 +30,7 @@ private:
 public:
     constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::size_t current) :
         _distribution{ distribution },
-        _generator{ &generator },
+        _generator{ std::addressof(generator) },
         _current{ current } {
     }
 
