@@ -26,8 +26,8 @@ public:
     }
 
     template<class I = Iterable>
-    LZ_NODISCARD enable_if<sized<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(std::ceil(static_cast<double>(lz::size(_iterable)) / static_cast<double>(_chunk_size)));
+    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(lz::size(_iterable) + (_chunk_size - 1)) / _chunk_size;
     }
 
     template<class I = typename iterator::iterator_category>
