@@ -228,7 +228,7 @@ struct has_push_back<Container,
  *     template<class Iterable>
  *     void copy(Iterable&& iterable, my_container<T>& container) {
  *         // Copy the iterable to the container, for example:
- *         Container is not reserved if it contains a reserve member
+ *         // Container is not reserved if it contains a reserve member
  *         for (auto&& i : iterable) {
  *             container.my_inserter(i);
  *         }
@@ -560,7 +560,7 @@ LZ_NODISCARD constexpr Cont to(Iterable&& iterable, Args&&... args) {
  *     template<class Iterable>
  *     void copy(Iterable&& iterable, my_container<T>& container) {
  *         // Copy the iterable to the container, for example:
- *         Container is not reserved if it contains a reserve member
+ *         // Container is not reserved if it contains a reserve member
  *         for (auto&& i : iterable) {
  *             container.my_inserter(i);
  *         }
