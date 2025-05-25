@@ -48,7 +48,7 @@ struct take_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, take_iterable<remove_ref<Iterable>>>
-    operator()(Iterable&& iterable, const diff_iterable_t<Iterable> n) const {
+    operator()(Iterable&& iterable, const std::size_t n) const {
         return { std::forward<Iterable>(iterable), n };
     }
 
@@ -67,7 +67,7 @@ struct take_adaptor {
      */
     template<class Iterator>
     LZ_NODISCARD constexpr enable_if<!is_iterable<Iterator>::value, take_iterable<remove_cvref<Iterator>>>
-    operator()(Iterator&& iterator, const diff_type<Iterator> n) const {
+    operator()(Iterator&& iterator, const std::size_t n) const {
         return { std::forward<Iterator>(iterator), n };
     }
 
@@ -104,8 +104,7 @@ struct take_adaptor {
      * ```
      * @param n The amount of elements to take.
      */
-    template<class DiffT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, DiffT> operator()(const DiffT n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t n) const {
         return { n };
     }
 };

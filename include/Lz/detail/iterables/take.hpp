@@ -12,7 +12,6 @@
 namespace lz {
 namespace detail {
 // TODO take for iterator too, add benchmark too
-// TODO also add next_fast for implementations
 
 template<class Iterable, class = void>
 class take_iterable;
@@ -25,17 +24,15 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    using diff = typename iterator::difference_type;
-
     Iterator _iterator;
-    diff _n;
+    std::size_t _n;
 
 public:
-    constexpr take_iterable(Iterator it, const diff n) : _iterator{ std::move(it) }, _n{ n } {
+    constexpr take_iterable(Iterator it, const std::size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
     LZ_NODISCARD constexpr std::size_t size() const {
-        return static_cast<std::size_t>(_n);
+        return _n;
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
@@ -61,13 +58,13 @@ public:
 template<class Iterable>
 class take_iterable<Iterable, enable_if<is_iterable<Iterable>::value>> : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    diff_iterable_t<Iterable> _n;
+    std::size_t _n;
 
     using inner_iter = iter_t<Iterable>;
     using inner_sentinel = sentinel_t<Iterable>;
 
     constexpr std::size_t size_impl() const {
-        return std::min(static_cast<std::size_t>(_n), static_cast<std::size_t>(lz::eager_size(_iterable)));
+        return std::min(_n, static_cast<std::size_t>(lz::eager_size(_iterable)));
     }
 
 public:
@@ -76,9 +73,7 @@ public:
     using value_type = typename iterator::value_type;
 
     template<class I>
-    constexpr take_iterable(I&& iterable, typename iterator::difference_type n) :
-        _iterable{ std::forward<I>(iterable) },
-        _n{ n } {
+    constexpr take_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
     template<class I = Iterable>

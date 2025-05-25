@@ -29,9 +29,9 @@ struct slice_adaptor {
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 slice_iterable<remove_ref<Iterable>>
-    operator()(Iterable&& iterable, const diff_iterable_t<Iterable> from, const diff_iterable_t<Iterable> to) const {
+    operator()(Iterable&& iterable, const std::size_t from, const std::size_t to) const {
         LZ_ASSERT(to > from, "`to` must be greater than `from`");
-        return { lz::drop(std::forward<Iterable>(iterable), static_cast<std::size_t>(from)), to - from };
+        return { lz::drop(std::forward<Iterable>(iterable), from), to - from };
     }
 
     /**
@@ -45,9 +45,8 @@ struct slice_adaptor {
      * @param from The start index of the slice
      * @param to The end index of the slice
      */
-    template<class DiffT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, DiffT, DiffT>
-    operator()(const DiffT from, const DiffT to) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, std::size_t, std::size_t>
+    operator()(const std::size_t from, const std::size_t to) const {
         return { from, to };
     }
 };

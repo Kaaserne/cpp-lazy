@@ -22,10 +22,10 @@ public:
 
 private:
     Iterator _iterator;
-    difference_type _n{};
+    std::size_t _n{};
 
 public:
-    constexpr n_take_iterator(Iterator it, const difference_type n) : _iterator{ std::move(it) }, _n{ n } {
+    constexpr n_take_iterator(Iterator it, const std::size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
     LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(default_sentinel) {
@@ -57,7 +57,7 @@ public:
     }
 
     constexpr difference_type difference(const n_take_iterator& b) const {
-        return b._n - _n;
+        return static_cast<difference_type>(b._n) - static_cast<difference_type>(_n);
     }
 
     constexpr bool eq(const n_take_iterator& b) const {
