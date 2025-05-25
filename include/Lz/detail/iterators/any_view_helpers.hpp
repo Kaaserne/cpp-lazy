@@ -6,7 +6,6 @@
 #include <Lz/detail/iterators/any_iterable/iterator_base.hpp>
 #include <Lz/iterator_base.hpp>
 #include <Lz/detail/unique_ptr.hpp>
-#include <iterator>
 
 namespace lz {
 namespace detail {

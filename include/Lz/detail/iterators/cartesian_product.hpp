@@ -3,8 +3,6 @@
 #ifndef LZ_CARTESIAN_PRODUCT_ITERATOR_HPP
 #define LZ_CARTESIAN_PRODUCT_ITERATOR_HPP
 
-#include "Lz/detail/compiler_checks.hpp"
-
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/detail/tuple_helpers.hpp>

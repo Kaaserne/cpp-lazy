@@ -6,8 +6,6 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/unique_ptr.hpp>
 #include <iterator>
-#include <type_traits>
-
 
 namespace lz {
 namespace detail {
