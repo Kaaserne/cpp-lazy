@@ -4,7 +4,6 @@
 #include <Lz/iter_tools.hpp>
 #include <Lz/take.hpp>
 #include <catch2/catch.hpp>
-#include <iostream>
 #include <list>
 
 TEST_CASE("Any iterable with sentinels") {
