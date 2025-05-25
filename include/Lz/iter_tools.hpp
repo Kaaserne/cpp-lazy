@@ -300,9 +300,9 @@ constexpr detail::select_adaptor select{};
  * turning the predicate into a not fn, using `lz::reverse`, `lz::drop_back_while` followed by another `lz::reverse`. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto trimmed = lz::drop_back_while(vec, [](int i) { return i > 3; }); // {1, 2, 3}
+ * auto trimmed = lz::drop_back_while(vec, [](int i) { return i >= 3; }); // {1, 2}
  * // or
- * auto trimmed = vec | lz::drop_back_while([](int i) { return i > 3; }); // {1, 2, 3}
+ * auto trimmed = vec | lz::drop_back_while([](int i) { return i >= 3; }); // {1, 2}
  * ```
  */
 constexpr detail::drop_back_while_adaptor drop_back_while{};
