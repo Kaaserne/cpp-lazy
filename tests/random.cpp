@@ -108,34 +108,36 @@ TEST_CASE("random_iterable binary operations") {
         auto begin = random.begin();
         auto end = random.end();
 
-        for (std::size_t i = 0; i < lz::size(random) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(random) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) >= 0.);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) <= 1.);
+            REQUIRE(*(begin + i) <= 1.);
+            REQUIRE(*(begin + i) >= 0.);
         }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(random)) == random.end());
-        for (std::size_t i = 1; i <= lz::size(random); ++i) {
+        REQUIRE(begin + lz::ssize(random) == random.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(random); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) >= 0.);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) <= 1.);
+            REQUIRE(*(end - i) <= 1.);
+            REQUIRE(*(end - i) >= 0.);
         }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(random)) == random.begin());
+        REQUIRE(end - lz::ssize(random) == random.begin());
 
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(random)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(random)));
+        std::advance(begin, lz::ssize(random));
+        std::advance(end, -lz::ssize(random));
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
 
-        for (std::size_t i = 0; i < lz::size(random) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(random) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) >= 0.);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) <= 1.);
+            REQUIRE(*(end + i) >= 0.);
+            REQUIRE(*(end + i) <= 1.);
         }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(random)) == random.end());
-        for (std::size_t i = 1; i <= lz::size(random); ++i) {
+        REQUIRE(end + lz::ssize(random) == random.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(random); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) >= 0.);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) <= 1.);
+            REQUIRE(*(begin - i) >= 0.);
+            REQUIRE(*(begin - i) <= 1.);
         }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(random)) == random.begin());
+        REQUIRE(begin - lz::ssize(random) == random.begin());
     }
 
     SECTION("Operator-") {
@@ -182,7 +184,8 @@ TEST_CASE("random_iterable to containers") {
     }
 
     SECTION("To unordered map") {
-        auto actual = range | lz::map([](const double i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<double, double>>();
+        auto actual =
+            range | lz::map([](const double i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<double, double>>();
         REQUIRE(actual.size() == size);
     }
 }

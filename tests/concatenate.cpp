@@ -1,6 +1,8 @@
+#include "Lz/string_view.hpp"
 #include <Lz/c_string.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -102,40 +104,15 @@ TEST_CASE("Empty or one element concatenate") {
 TEST_CASE("Concat binary operations") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);
-    REQUIRE(concat.size() == a.size() + b.size());
 
     SECTION("Operator++") {
-        auto begin = concat.begin();
-        REQUIRE(*begin == 'h');
-        ++begin;
-        REQUIRE(*begin == 'e');
+        lz::string_view expected = "hello world";
+        REQUIRE(lz::equal(concat, expected));
     }
 
     SECTION("Operator--") {
-        auto end = concat.end();
-        --end;
-        REQUIRE(*end == 'd');
-        --end;
-        REQUIRE(*end == 'l');
-        --end;
-        REQUIRE(*end == 'r');
-        --end;
-        REQUIRE(*end == 'o');
-        --end;
-        REQUIRE(*end == 'w');
-        --end;
-        REQUIRE(*end == ' ');
-        --end;
-        REQUIRE(*end == 'o');
-        --end;
-        REQUIRE(*end == 'l');
-        --end;
-        REQUIRE(*end == 'l');
-        --end;
-        REQUIRE(*end == 'e');
-        --end;
-        REQUIRE(*end == 'h');
-        REQUIRE(end == concat.begin());
+        lz::string_view expected = "hello world";
+        REQUIRE(lz::equal(lz::reverse(concat), lz::reverse(expected)));
     }
 
     SECTION("Operator== & operator!=") {
@@ -152,50 +129,49 @@ TEST_CASE("Concat binary operations") {
         REQUIRE(end + 0 == end);
 
         auto expected = std::string("hello world");
-        for (std::size_t i = 0; i < lz::size(concat) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(concat) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(concat)) == concat.end());
-        for (std::size_t i = 1; i <= lz::size(concat); ++i) {
+        REQUIRE(begin + lz::ssize(concat) == concat.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(concat); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end - i) == *(expected.end() - i));
         }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(concat)) == concat.begin());
+        REQUIRE(end - lz::ssize(concat) == concat.begin());
 
-        std::advance(begin, lz::size(concat));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(concat)));
+        std::advance(begin, lz::ssize(concat));
+        std::advance(end, -lz::ssize(concat));
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        for (std::size_t i = 0; i < lz::size(concat) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(concat) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end + i) == *(expected.begin() + i));
         }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(concat)) == concat.end());
-        for (std::size_t i = 1; i <= lz::size(concat); ++i) {
+        REQUIRE(end + lz::ssize(concat) == concat.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(concat); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin - i) == *(expected.end() - i));
         }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(concat)) == concat.begin());
+        REQUIRE(begin - lz::ssize(concat) == concat.begin());
     }
 
     SECTION("Operator-") {
         auto begin = concat.begin();
         auto end = concat.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(concat)); ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(concat); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - begin == static_cast<std::ptrdiff_t>(lz::size(concat)) - i);
-            REQUIRE(end - (begin + static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(lz::size(concat)) - i);
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - end == -(static_cast<std::ptrdiff_t>(lz::size(concat)) - i));
-            REQUIRE(begin - (end - static_cast<std::ptrdiff_t>(i)) == -(static_cast<std::ptrdiff_t>(lz::size(concat)) - i));
+            REQUIRE((end - i) - begin == lz::ssize(concat) - i);
+            REQUIRE(end - (begin + i) == lz::ssize(concat) - i);
+            REQUIRE((begin + i) - end == -(lz::ssize(concat) - i));
+            REQUIRE(begin - (end - i) == -(lz::ssize(concat) - i));
         }
-        for (std::size_t i = 0; i < lz::size(concat); ++i) {
+
+        for (std::ptrdiff_t i = 0; i < lz::ssize(concat); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(concat) - 2 * i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(concat) - 2 * i));
+            REQUIRE((end - i) - (begin + i) == lz::ssize(concat) - 2 * i);
+            REQUIRE((begin + i) - (end - i) == -(lz::ssize(concat) - 2 * i));
         }
     }
 }

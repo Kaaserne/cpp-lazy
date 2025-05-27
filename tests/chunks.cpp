@@ -185,46 +185,35 @@ TEST_CASE("Chunks binary operations random access") {
     SECTION("Operator+") {
         auto test_iterator = [](const std::vector<std::vector<int>>& expected,
                                 lz::detail::chunks_iterable<std::vector<int>> chunked) {
-            auto iterator = chunked.begin();
-            auto end_iterator = chunked.end();
-            REQUIRE(iterator + 0 == iterator);
-            REQUIRE(end_iterator + 0 == end_iterator);
+            auto begin = chunked.begin();
+            auto end = chunked.end();
 
-            for (std::size_t i = 0; i < lz::size(chunked); ++i) {
-                INFO("With i = " << i << "; iterator = [" << lz::format(*iterator) << "]; expected = ["
-                                 << lz::format(expected.at(i)) << ']');
-
-                REQUIRE(lz::equal(*(iterator + static_cast<std::ptrdiff_t>(i)), expected.at(i)));
+            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(lz::equal(*(begin + i), *(expected.begin() + i)));
             }
-            REQUIRE(iterator + static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.end());
-            for (std::size_t i = 1; i <= lz::size(chunked); ++i) {
-                INFO("With i = " << i << "; iterator = [" << lz::format(*end_iterator) << "]; expected = ["
-                                 << lz::format(expected.at(expected.size() - i)) << ']');
-
-                REQUIRE(lz::equal(*(end_iterator - static_cast<std::ptrdiff_t>(i)), expected.at(expected.size() - i)));
+            REQUIRE(begin + lz::ssize(chunked) == chunked.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(chunked); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(lz::equal(*(end - i), *(expected.end() - i)));
             }
-            REQUIRE(end_iterator - static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.begin());
+            REQUIRE(end - lz::ssize(chunked) == chunked.begin());
 
-            std::advance(iterator, static_cast<std::ptrdiff_t>(lz::size(chunked)));
-            std::advance(end_iterator, -static_cast<std::ptrdiff_t>(lz::size(chunked)));
+            std::advance(begin, lz::ssize(chunked));
+            std::advance(end, -lz::ssize(chunked));
+            REQUIRE(begin + 0 == begin);
+            REQUIRE(end + 0 == end);
 
-            REQUIRE(iterator + 0 == iterator);
-            REQUIRE(end_iterator + 0 == end_iterator);
-
-            for (std::size_t i = 0; i < lz::size(chunked); ++i) {
-                INFO("With i = " << i << "; iterator = [" << lz::format(*end_iterator) << "]; expected = ["
-                                 << lz::format(expected.at(i)) << ']');
-
-                REQUIRE(lz::equal(*(end_iterator + static_cast<std::ptrdiff_t>(i)), expected.at(i)));
+            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(lz::equal(*(end + i), *(expected.begin() + i)));
             }
-            REQUIRE(end_iterator + static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.end());
-            for (std::size_t i = 1; i <= lz::size(chunked); ++i) {
-                INFO("With i = " << i << " ;iterator = [" << lz::format(*iterator) << "]; expected = ["
-                                 << lz::format(expected.at(expected.size() - i)) << ']');
-
-                REQUIRE(lz::equal(*(iterator - static_cast<std::ptrdiff_t>(i)), expected.at(expected.size() - i)));
+            REQUIRE(end + lz::ssize(chunked) == chunked.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(chunked); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(lz::equal(*(begin - i), *(expected.end() - i)));
             }
-            REQUIRE(iterator - static_cast<std::ptrdiff_t>(lz::size(chunked)) == chunked.begin());
+            REQUIRE(begin - lz::ssize(chunked) == chunked.begin());
         };
 
         std::vector<std::vector<int>> expected;
@@ -241,51 +230,36 @@ TEST_CASE("Chunks binary operations random access") {
     }
 
     SECTION("Operator-") {
-        auto test_operator_minus = [](decltype(it) iterator, decltype(it_end) end_iterator, std::size_t size) {
-            auto s_size = static_cast<std::ptrdiff_t>(size);
+        auto test_operator_minus = [](decltype(uneven_chunksize_even_size) chunked) {
+            auto begin = chunked.begin();
+            auto end = chunked.end();
 
-            for (std::ptrdiff_t i = 0; i < s_size; ++i) {
-                INFO("With i = " << i << " and size = " << s_size << " and i - size = " << (i - s_size));
-                REQUIRE((end_iterator - i) - iterator == s_size - i);
-                REQUIRE(end_iterator - (iterator + i) == s_size - i);
-                REQUIRE((iterator + i) - end_iterator == (i - s_size));
-                REQUIRE(iterator - (end_iterator - i) == (i - s_size));
-            }
-        };
-
-        auto test_operator_minus2 = [](decltype(it) iterator, decltype(it_end) end_iterator, std::size_t size) {
-            auto s_size = static_cast<std::ptrdiff_t>(size);
-
-            for (std::ptrdiff_t i = 0; i < s_size; ++i) {
+            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end_iterator - i) - (iterator + i) == (s_size - 2 * i));
-                REQUIRE((iterator + i) - (end_iterator - i) == -(s_size - 2 * i));
+                REQUIRE((end - i) - begin == lz::ssize(chunked) - i);
+                REQUIRE(end - (begin + i) == lz::ssize(chunked) - i);
+                REQUIRE((begin + i) - end == -(lz::ssize(chunked) - i));
+                REQUIRE(begin - (end - i) == -(lz::ssize(chunked) - i));
+            }
+
+            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - (begin + i) == lz::ssize(chunked) - 2 * i);
+                REQUIRE((begin + i) - (end - i) == -(lz::ssize(chunked) - 2 * i));
             }
         };
 
         INFO("test_operator_minus(it, it_end, lz::size(uneven_chunksize_even_size))")
-        test_operator_minus(it, it_end, lz::size(uneven_chunksize_even_size));
+        test_operator_minus(uneven_chunksize_even_size);
 
         INFO("test_operator_minus(it2, it_end2, lz::size(even_chunksize_even_size))")
-        test_operator_minus(it2, it_end2, lz::size(even_chunksize_even_size));
+        test_operator_minus(even_chunksize_even_size);
 
         INFO("test_operator_minus(it3, it_end3, lz::size(uneven_chunksize_uneven_size))")
-        test_operator_minus(it3, it_end3, lz::size(uneven_chunksize_uneven_size));
+        test_operator_minus(uneven_chunksize_uneven_size);
 
         INFO("test_operator_minus(it4, it_end4, lz::size(even_chunksize_uneven_size))")
-        test_operator_minus(it4, it_end4, lz::size(even_chunksize_uneven_size));
-
-        INFO("test_operator_minus2(it, it_end, lz::size(uneven_chunksize_even_size))")
-        test_operator_minus2(it, it_end, lz::size(uneven_chunksize_even_size));
-
-        INFO("test_operator_minus2(it2, it_end2, lz::size(even_chunksize_even_size))")
-        test_operator_minus2(it2, it_end2, lz::size(even_chunksize_even_size));
-
-        INFO("test_operator_minus2(it3, it_end3, lz::size(uneven_chunksize_uneven_size))")
-        test_operator_minus2(it3, it_end3, lz::size(uneven_chunksize_uneven_size));
-
-        INFO("test_operator_minus2(it4, it_end4, lz::size(even_chunksize_uneven_size))")
-        test_operator_minus2(it4, it_end4, lz::size(even_chunksize_uneven_size));
+        test_operator_minus(even_chunksize_uneven_size);
     }
 }
 

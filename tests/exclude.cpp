@@ -91,145 +91,93 @@ TEST_CASE("Exclude binary operations") {
     auto exEnd3 = excluded3.end();
 
     SECTION("Operator++") {
-        REQUIRE(*exBeg1 == 1);
-        ++exBeg1, ++exBeg1, ++exBeg1;
-        REQUIRE(*exBeg1 == 6);
-        REQUIRE(*++exBeg1 == 7);
+        std::vector<int> expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
+        REQUIRE(lz::equal(excluded1, expected));
 
-        REQUIRE(*exBeg2 == 3);
-        REQUIRE(++*exBeg2 == 4);
+        expected = { 3, 4, 5, 6, 7, 8, 9, 10 };
+        REQUIRE(lz::equal(excluded2, expected));
 
-        REQUIRE(*exBeg3 == 1);
-        ++exBeg3, ++exBeg3, ++exBeg3, ++exBeg3, ++exBeg3, ++exBeg3, ++exBeg3;
-        REQUIRE(exBeg3 == excluded3.end());
+        expected = { 1, 2, 3, 4, 5, 6, 7 };
+        REQUIRE(lz::equal(excluded3, expected));
     }
 
     SECTION("Operator--") {
-        auto vec = lz::reverse(excluded1) | lz::to<std::vector>();
         std::vector<int> expected = { 10, 9, 8, 7, 6, 3, 2, 1 };
-        REQUIRE(lz::equal(vec, expected));
+        REQUIRE(lz::equal(lz::reverse(excluded1), expected));
 
-        vec = lz::reverse(excluded2) | lz::to<std::vector>();
         expected = { 10, 9, 8, 7, 6, 5, 4, 3 };
-        REQUIRE(lz::equal(vec, expected));
+        REQUIRE(lz::equal(lz::reverse(excluded2), expected));
 
-        vec = lz::reverse(excluded3) | lz::to<std::vector>();
         expected = { 7, 6, 5, 4, 3, 2, 1 };
-        REQUIRE(lz::equal(vec, expected));
+        REQUIRE(lz::equal(lz::reverse(excluded3), expected));
     }
 
     SECTION("Operator+") {
-        std::vector<int> expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
-        for (std::size_t i = 0; i < lz::size(excluded1); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exBeg1 + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        for (std::size_t i = 1; i <= lz::size(excluded1); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exEnd1 - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
+        const auto test_operator_plus = [](decltype(excluded1) excluded, const std::vector<int>& expected) {
+            auto begin = excluded.begin();
+            auto end = excluded.end();
 
-        std::advance(exBeg1, static_cast<std::ptrdiff_t>(lz::size(excluded1)));
-        std::advance(exEnd1, -static_cast<std::ptrdiff_t>(lz::size(excluded1)));
-        for (std::size_t i = 1; i <= lz::size(excluded1); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exBeg1 - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        for (std::size_t i = 0; i < lz::size(excluded1); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exEnd1 + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
+            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin + i) == *(expected.begin() + i));
+            }
+            REQUIRE(begin + lz::ssize(excluded) == excluded.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(excluded); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end - i) == *(expected.end() - i));
+            }
+            REQUIRE(end - lz::ssize(excluded) == excluded.begin());
+
+            std::advance(begin, lz::ssize(excluded));
+            std::advance(end, -lz::ssize(excluded));
+            REQUIRE(begin + 0 == begin);
+            REQUIRE(end + 0 == end);
+
+            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end + i) == *(expected.begin() + i));
+            }
+            REQUIRE(end + lz::ssize(excluded) == excluded.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(excluded); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin - i) == *(expected.end() - i));
+            }
+            REQUIRE(begin - lz::ssize(excluded) == excluded.begin());
+        };
+
+        std::vector<int> expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
+        test_operator_plus(excluded1, expected);
 
         expected = { 3, 4, 5, 6, 7, 8, 9, 10 };
-        for (std::size_t i = 0; i < lz::size(excluded2); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exBeg2 + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        for (std::size_t i = 1; i <= lz::size(excluded2); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exEnd2 - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-
-        std::advance(exBeg2, static_cast<std::ptrdiff_t>(lz::size(excluded2)));
-        std::advance(exEnd2, -static_cast<std::ptrdiff_t>(lz::size(excluded2)));
-        for (std::size_t i = 1; i <= lz::size(excluded2); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exBeg2 - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        for (std::size_t i = 0; i < lz::size(excluded2); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exEnd2 + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
+        test_operator_plus(excluded2, expected);
 
         expected = { 1, 2, 3, 4, 5, 6, 7 };
-        for (std::size_t i = 0; i < lz::size(excluded3); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exBeg3 + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        for (std::size_t i = 1; i <= lz::size(excluded3); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exEnd3 - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-
-        std::advance(exBeg3, static_cast<std::ptrdiff_t>(lz::size(excluded3)));
-        std::advance(exEnd3, -static_cast<std::ptrdiff_t>(lz::size(excluded3)));
-
-        for (std::size_t i = 1; i <= lz::size(excluded3); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exBeg3 - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        for (std::size_t i = 0; i < lz::size(excluded3); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(exEnd3 + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
+        test_operator_plus(excluded3, expected);
     }
 
     SECTION("Operator-") {
-        for (std::size_t i = 0; i < lz::size(excluded1); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((exBeg1 + static_cast<std::ptrdiff_t>(i)) - exEnd1 == -static_cast<std::ptrdiff_t>(lz::size(excluded1) - i));
-            REQUIRE((exEnd1 - static_cast<std::ptrdiff_t>(i)) - exBeg1 == static_cast<std::ptrdiff_t>(lz::size(excluded1) - i));
-            REQUIRE(exEnd1 - (exBeg1 + static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(lz::size(excluded1) - i));
-            REQUIRE(exBeg1 - (exEnd1 - static_cast<std::ptrdiff_t>(i)) == -static_cast<std::ptrdiff_t>(lz::size(excluded1) - i));
-        }
+        const auto test_operator_minus = [](decltype(excluded1) excluded) {
+            auto begin = excluded.begin();
+            auto end = excluded.end();
 
-        for (std::size_t i = 0; i < lz::size(excluded2); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((exBeg2 + static_cast<std::ptrdiff_t>(i)) - exEnd2 == -static_cast<std::ptrdiff_t>(lz::size(excluded2) - i));
-            REQUIRE((exEnd2 - static_cast<std::ptrdiff_t>(i)) - exBeg2 == static_cast<std::ptrdiff_t>(lz::size(excluded2) - i));
-            REQUIRE(exEnd2 - (exBeg2 + static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(lz::size(excluded2) - i));
-            REQUIRE(exBeg2 - (exEnd2 - static_cast<std::ptrdiff_t>(i)) == -static_cast<std::ptrdiff_t>(lz::size(excluded2) - i));
-        }
+            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - begin == lz::ssize(excluded) - i);
+                REQUIRE(end - (begin + i) == lz::ssize(excluded) - i);
+                REQUIRE((begin + i) - end == -(lz::ssize(excluded) - i));
+                REQUIRE(begin - (end - i) == -(lz::ssize(excluded) - i));
+            }
 
-        for (std::size_t i = 0; i < lz::size(excluded3); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((exBeg3 + static_cast<std::ptrdiff_t>(i)) - exEnd3 == -static_cast<std::ptrdiff_t>(lz::size(excluded3) - i));
-            REQUIRE((exEnd3 - static_cast<std::ptrdiff_t>(i)) - exBeg3 == static_cast<std::ptrdiff_t>(lz::size(excluded3) - i));
-            REQUIRE(exEnd3 - (exBeg3 + static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(lz::size(excluded3) - i));
-            REQUIRE(exBeg3 - (exEnd3 - static_cast<std::ptrdiff_t>(i)) == -static_cast<std::ptrdiff_t>(lz::size(excluded3) - i));
-        }
+            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded); ++i) {
+                INFO("With i = " << i);
+                REQUIRE((end - i) - (begin + i) == lz::ssize(excluded) - 2 * i);
+                REQUIRE((begin + i) - (end - i) == -(lz::ssize(excluded) - 2 * i));
+            }
+        };
 
-        for (std::size_t i = 0; i < lz::size(excluded1); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((exEnd1 - static_cast<std::ptrdiff_t>(i)) - (exBeg1 + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(excluded1) - 2 * i));
-            REQUIRE((exBeg1 + static_cast<std::ptrdiff_t>(i)) - (exEnd1 - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(excluded1) - 2 * i));
-        }
-        for (std::size_t i = 0; i < lz::size(excluded2); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((exEnd2 - static_cast<std::ptrdiff_t>(i)) - (exBeg2 + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(excluded2) - 2 * i));
-            REQUIRE((exBeg2 + static_cast<std::ptrdiff_t>(i)) - (exEnd2 - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(excluded2) - 2 * i));
-        }
-        for (std::size_t i = 0; i < lz::size(excluded3); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((exEnd3 - static_cast<std::ptrdiff_t>(i)) - (exBeg3 + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(excluded3) - 2 * i));
-            REQUIRE((exBeg3 + static_cast<std::ptrdiff_t>(i)) - (exEnd3 - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(excluded3) - 2 * i));
-        }
+        test_operator_minus(excluded1);
+        test_operator_minus(excluded2);
+        test_operator_minus(excluded3);
     }
 
     SECTION("Operator== & operator!=") {

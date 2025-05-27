@@ -15,20 +15,18 @@ void test_operator_minus(const TakeIterable& take) {
     auto begin = take.begin();
     auto end = take.end();
 
-    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(take); ++i) {
         INFO("With i = " << i);
-        REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
-        REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(take)) - i);
-        REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
-        REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(take)) - i));
+        REQUIRE((end - i) - begin == lz::ssize(take) - i);
+        REQUIRE(end - (begin + i) == lz::ssize(take) - i);
+        REQUIRE((begin + i) - end == -(lz::ssize(take) - i));
+        REQUIRE(begin - (end - i) == -(lz::ssize(take) - i));
     }
 
-    for (std::size_t i = 0; i < lz::size(take); ++i) {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(take); ++i) {
         INFO("With i = " << i);
-        REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                static_cast<std::ptrdiff_t>(lz::size(take) - 2 * i));
-        REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                -(static_cast<std::ptrdiff_t>(lz::size(take)) - 2 * static_cast<std::ptrdiff_t>(i)));
+        REQUIRE((end - i) - (begin + i) == lz::ssize(take) - 2 * i);
+        REQUIRE((begin + i) - (end - i) == -(lz::ssize(take) - 2 * i));
     }
 }
 
@@ -37,32 +35,32 @@ void test_operator_plus(const TakeIterable& take, const ExpectedIterable& expect
     auto begin = take.begin();
     auto end = take.end();
 
-    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(take)); ++i) {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(take) - 1; ++i) {
         INFO("With i = " << i);
         REQUIRE(*(begin + i) == *(expected.begin() + i));
-        REQUIRE(*(end - (i + 1)) == *(expected.end() - (i + 1)));
     }
+    REQUIRE(begin + lz::ssize(take) == take.end());
+    for (std::ptrdiff_t i = 1; i <= lz::ssize(take); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(end - i) == *(expected.end() - i));
+    }
+    REQUIRE(end - lz::ssize(take) == take.begin());
 
-    for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-        REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-    }
-    REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
-    for (std::size_t i = 1; i <= lz::size(take); ++i) {
-        REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-    }
-    REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+    std::advance(begin, lz::ssize(take));
+    std::advance(end, -lz::ssize(take));
+    REQUIRE(begin + 0 == begin);
+    REQUIRE(end + 0 == end);
 
-    std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(take)));
-    std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(take)));
-
-    for (std::size_t i = 0; i < lz::size(take) - 1; ++i) {
-        REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+    for (std::ptrdiff_t i = 0; i < lz::ssize(take) - 1; ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(end + i) == *(expected.begin() + i));
     }
-    REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(take)) == take.end());
-    for (std::size_t i = 1; i <= lz::size(take); ++i) {
-        REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+    REQUIRE(end + lz::ssize(take) == take.end());
+    for (std::ptrdiff_t i = 1; i <= lz::ssize(take); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(begin - i) == *(expected.end() - i));
     }
-    REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(take)) == take.begin());
+    REQUIRE(begin - lz::ssize(take) == take.begin());
 }
 
 } // namespace

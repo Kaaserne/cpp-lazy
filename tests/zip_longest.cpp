@@ -2,6 +2,7 @@
 #include <Lz/concatenate.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
 #include <catch2/catch.hpp>
 #include <list>
@@ -174,46 +175,19 @@ TEST_CASE("zip_longest_iterable binary operations") {
     std::array<short, 2> c = { 1, 2 };
     auto zipper = a | lz::zip_longest(b, c);
 
+    using tuple = std::tuple<lz::optional<int>, lz::optional<float>, lz::optional<short>>;
+    auto expected = std::vector<tuple>{ { 1, 1.f, short{ 1 } },
+                                        { 2, 2.f, short{ 2 } },
+                                        { 3, 3.f, lz::nullopt },
+                                        { 4, 4.f, lz::nullopt },
+                                        { lz::nullopt, 5.f, lz::nullopt } };
+
     SECTION("Operator++") {
-        auto begin = zipper.begin();
-
-        REQUIRE(*std::get<0>(*begin) == 1);
-        REQUIRE(*std::get<1>(*begin) == 1.f);
-        REQUIRE(*std::get<2>(*begin) == 1);
-
-        ++begin;
-        REQUIRE(*std::get<0>(*begin) == 2);
-        REQUIRE(*std::get<1>(*begin) == 2.f);
-        REQUIRE(*std::get<2>(*begin) == 2);
-        ++begin;
-        REQUIRE(*std::get<0>(*begin) == 3);
-        REQUIRE(*std::get<1>(*begin) == 3.f);
-        REQUIRE(!std::get<2>(*begin));
+        REQUIRE(lz::equal(zipper, expected));
     }
 
     SECTION("Operator--") {
-        auto end = zipper.end();
-        --end;
-        REQUIRE(!std::get<0>(*end).has_value());
-        REQUIRE(std::get<1>(*end).value() == 5.f);
-        REQUIRE(!std::get<2>(*end).has_value());
-        --end;
-        REQUIRE(std::get<0>(*end).value() == 4);
-        REQUIRE(std::get<1>(*end).value() == 4.f);
-        REQUIRE(!std::get<2>(*end).has_value());
-        --end;
-        REQUIRE(std::get<0>(*end).value() == 3);
-        REQUIRE(std::get<1>(*end).value() == 3.f);
-        REQUIRE(!std::get<2>(*end).has_value());
-        --end;
-        REQUIRE(std::get<0>(*end).value() == 2);
-        REQUIRE(std::get<1>(*end).value() == 2.f);
-        REQUIRE(std::get<2>(*end).value() == 2);
-        --end;
-        REQUIRE(std::get<0>(*end).value() == 1);
-        REQUIRE(std::get<1>(*end).value() == 1.f);
-        REQUIRE(std::get<2>(*end).value() == 1);
-        REQUIRE(end == zipper.begin());
+        REQUIRE(lz::equal(zipper | lz::reverse, expected | lz::reverse));
     }
 
     SECTION("Operator== & Operator!=") {
@@ -224,62 +198,52 @@ TEST_CASE("zip_longest_iterable binary operations") {
     }
 
     SECTION("Operator+") {
-        std::vector<std::tuple<lz::optional<int>, lz::optional<float>, lz::optional<short>>> expected = {
-            { 1, 1.f, short{ 1 } }, { 2, 2.f, short{ 2 } }, { 3, 3.f, lz::nullopt }, { 4, 4.f, lz::nullopt }, { lz::nullopt, 5.f, lz::nullopt }
-        };
-
         auto begin = zipper.begin();
         auto end = zipper.end();
 
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
+        }
+        REQUIRE(begin + lz::ssize(zipper) == zipper.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(zipper); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::ssize(zipper) == zipper.begin());
+
+        std::advance(begin, lz::ssize(zipper));
+        std::advance(end, -lz::ssize(zipper));
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        for (std::size_t i = 0; i < lz::size(zipper) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end + i) == *(expected.begin() + i));
         }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.end());
-        for (std::size_t i = 1; i <= lz::size(zipper); ++i) {
+        REQUIRE(end + lz::ssize(zipper) == zipper.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin - i) == *(expected.end() - i));
         }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.begin());
-
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(zipper)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(zipper)));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::size_t i = 0; i < lz::size(zipper) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.end());
-        for (std::size_t i = 1; i <= lz::size(zipper); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(zipper)) == zipper.begin());
+        REQUIRE(begin - lz::ssize(zipper) == zipper.begin());
     }
-
 
     SECTION("Operator-(Iterator)") {
         auto begin = zipper.begin();
         auto end = zipper.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(zipper)); ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(zipper)) - i);
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(zipper)) - i);
-            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(zipper)) - i));
-            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(zipper)) - i));
+            REQUIRE((end - i) - begin == lz::ssize(zipper) - i);
+            REQUIRE(end - (begin + i) == lz::ssize(zipper) - i);
+            REQUIRE((begin + i) - end == -(lz::ssize(zipper) - i));
+            REQUIRE(begin - (end - i) == -(lz::ssize(zipper) - i));
         }
 
-        for (std::size_t i = 0; i < lz::size(zipper); ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(zipper)) - 2 * static_cast<std::ptrdiff_t>(i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                     -(static_cast<std::ptrdiff_t>(lz::size(zipper)) - 2 * static_cast<std::ptrdiff_t>(i)));
+            REQUIRE((end - i) - (begin + i) == lz::ssize(zipper) - 2 * i);
+            REQUIRE((begin + i) - (end - i) == -(lz::ssize(zipper) - 2 * i));
         }
     }
 }

@@ -1,6 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <cstddef>
 #include <list>
@@ -98,17 +99,21 @@ TEST_CASE("Range binary operations") {
     REQUIRE(*f_it == 0.);
 
     SECTION("Operator++") {
-        ++it;
-        REQUIRE(*it == 1);
-        ++f_it;
-        REQUIRE(*f_it == 0.5);
+        auto expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        REQUIRE(lz::equal(range, expected));
+        auto f_expected = { Approx(0.0), Approx(0.5), Approx(1.0), Approx(1.5), Approx(2.0), Approx(2.5), Approx(3.0),
+                            Approx(3.5), Approx(4.0), Approx(4.5), Approx(5.0), Approx(5.5), Approx(6.0), Approx(6.5),
+                            Approx(7.0), Approx(7.5), Approx(8.0), Approx(8.5), Approx(9.0), Approx(9.5), Approx(10.0) };
+        REQUIRE(lz::equal(f_range, f_expected));
     }
 
     SECTION("Operator--") {
-        ++it, --it;
-        REQUIRE(*it == 0);
-        ++f_it, --f_it;
-        REQUIRE(*f_it == 0);
+        auto expected = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+        REQUIRE(lz::equal(range | lz::reverse, expected));
+        auto f_expected = { Approx(10.), Approx(9.5), Approx(9.0), Approx(8.5), Approx(8.0), Approx(7.5), Approx(7.0),
+                            Approx(6.5), Approx(6.0), Approx(5.5), Approx(5.0), Approx(4.5), Approx(4.0), Approx(3.5),
+                            Approx(3.0), Approx(2.5), Approx(2.0), Approx(1.5), Approx(1.0), Approx(0.5), Approx(0.0) };
+        REQUIRE(lz::equal(f_range | lz::reverse, f_expected));
     }
 
     SECTION("Operator== & Operator!=") {
@@ -124,51 +129,49 @@ TEST_CASE("Range binary operations") {
         REQUIRE(end + 0 == end);
 
         std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(range) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
-        for (std::size_t i = 1; i <= lz::size(range); ++i) {
+        REQUIRE(begin + lz::ssize(range) == range.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(range); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end - i) == *(expected.end() - i));
         }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
+        REQUIRE(end - lz::ssize(range) == range.begin());
 
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(range)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(range)));
+        std::advance(begin, lz::ssize(range));
+        std::advance(end, -lz::ssize(range));
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(range) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end + i) == *(expected.begin() + i));
         }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
-        for (std::size_t i = 1; i <= lz::size(range); ++i) {
+        REQUIRE(end + lz::ssize(range) == range.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(range); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin - i) == *(expected.end() - i));
         }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
+        REQUIRE(begin - lz::ssize(range) == range.begin());
     }
 
     SECTION("Operator-") {
         auto begin = range.begin();
         auto end = range.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(range)); ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(range); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(range)) - i);
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(range)) - i);
-            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(range)) - i));
-            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(range)) - i));
+            REQUIRE((end - i) - begin == lz::ssize(range) - i);
+            REQUIRE(end - (begin + i) == lz::ssize(range) - i);
+            REQUIRE((begin + i) - end == -(lz::ssize(range) - i));
+            REQUIRE(begin - (end - i) == -(lz::ssize(range) - i));
         }
 
-        for (std::size_t i = 0; i < lz::size(range) ; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(range); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -(static_cast<std::ptrdiff_t>(lz::size(range)) - 2 * static_cast<std::ptrdiff_t>(i)));
+            REQUIRE((end - i) - (begin + i) == lz::ssize(range) - 2 * i);
+            REQUIRE((begin + i) - (end - i) == -(lz::ssize(range) - 2 * i));
         }
     }
 }
