@@ -75,44 +75,45 @@ private:
     IterTuple _iterators;
     SentinelTuple _end;
 
-    template<std::size_t I, class It = remove_ref<decltype(std::get<I>(_iterators))>, class Ref = ref_t<It>,
-             class Val = val_t<It>>
-    LZ_CONSTEXPR_CXX_14 optional<reference_or_value_type<Ref, Val>> deref_one() const {
-        const auto& it = std::get<I>(_iterators);
-        const auto& end = std::get<I>(_end);
-
-        return it == end ? optional<reference_or_value_type<Ref, Val>>{} : optional<reference_or_value_type<Ref, Val>>(*it);
-    }
-
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_20 reference dereference(index_sequence<I...>) const {
-        return reference{ deref_one<I>()... };
-    }
-
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 void increment_one() {
-        auto& it = std::get<I>(_iterators);
-        const auto& end = std::get<I>(_end);
-
-        if (it == end) {
-            return;
-        }
-        ++it;
+    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
+        return reference{ std::get<I>(_iterators) == std::get<I>(_end)
+                              ? lz::nullopt
+                              : optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
+                                                                 val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>>(
+                                    *std::get<I>(_iterators))... };
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
-        decompose((increment_one<I>(), 0)...);
+        decompose(
+            (std::get<I>(_iterators) != std::get<I>(_end) ? static_cast<void>(++std::get<I>(_iterators)) : (void)(0), 0)...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
+#ifdef LZ_HAS_CXX_17
+
+        return ((std::get<I>(_iterators) == std::get<I>(other._iterators)) && ...);
+
+#else
+
         return std::min({ std::get<I>(_iterators) == std::get<I>(other._iterators)... });
+
+#endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
+#ifdef LZ_HAS_CXX_17
+
+        return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
+
+#else
+
         return std::min({ std::get<I>(_iterators) == std::get<I>(_end)... });
+
+#endif
     }
 
 public:
@@ -173,53 +174,29 @@ private:
     SentinelTuple _end;
     difference_tuple _distances;
 
-    template<std::size_t I, class It = remove_ref<decltype(std::get<I>(_iterators))>, class Ref = ref_t<It>,
-             class Val = val_t<It>>
-    LZ_CONSTEXPR_CXX_14 optional<reference_or_value_type<Ref, Val>> deref_one() const {
-        const auto& it = std::get<I>(_iterators);
-        const auto& end = std::get<I>(_end);
-
-        return it == end ? optional<reference_or_value_type<Ref, Val>>{} : optional<reference_or_value_type<Ref, Val>>(*it);
-    }
-
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
-        return reference{ deref_one<I>()... };
-    }
-
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 void increment_one() {
-        auto& it = std::get<I>(_iterators);
-        const auto& end = std::get<I>(_end);
-        auto& distance = std::get<I>(_distances);
-
-        if (it == end) {
-            return;
-        }
-        ++it;
-        ++distance;
+        return reference{ std::get<I>(_iterators) == std::get<I>(_end)
+                              ? lz::nullopt
+                              : optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
+                                                                 val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>>(
+                                    *std::get<I>(_iterators))... };
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
-        decompose((increment_one<I>(), 0)...);
-    }
-
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 void decrement_one(const difference_type longest) {
-        auto& it = std::get<I>(_iterators);
-        auto& this_iter_length = std::get<I>(_distances);
-
-        if (this_iter_length == longest) {
-            --it;
-            --this_iter_length;
-        }
+        decompose((std::get<I>(_iterators) != std::get<I>(_end)
+                       ? static_cast<void>(++std::get<I>(_iterators), ++std::get<I>(_distances))
+                       : (void)(0),
+                   0)...);
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
-        decompose((decrement_one<I>(longest), 0)...);
+        decompose((std::get<I>(_distances) == longest ? static_cast<void>(--std::get<I>(_iterators), --std::get<I>(_distances))
+                                                      : (void)(0),
+                   0)...);
     }
 
     template<std::size_t I>
@@ -246,8 +223,12 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_longest_iterator& other, index_sequence<I...>) const {
-        const auto min_max = std::minmax({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
-        return min_max.second <= 0 ? min_max.first : min_max.second;
+        // Find the longest distance between the iterators
+        const auto max = std::max({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        if (max > 0) {
+            return max;
+        }
+        return std::min({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
     }
 
     template<std::size_t I>
@@ -276,17 +257,28 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
+#ifdef LZ_HAS_CXX_17
+
+        return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
+
+#else
+
         return std::min({ std::get<I>(_iterators) == std::get<I>(_end)... });
+
+#endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
-        return std::min({ (std::get<I>(_iterators) == std::get<I>(other._iterators))... });
-    }
+#ifdef LZ_HAS_CXX_17
 
-    template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 bool lt(const zip_longest_iterator& other, index_sequence<I...>) const {
-        return std::min({ static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        return ((std::get<I>(_iterators) == std::get<I>(other._iterators)) && ...);
+
+#else
+
+        return std::min({ (std::get<I>(_iterators) == std::get<I>(other._iterators))... });
+
+#endif
     }
 
 public:
