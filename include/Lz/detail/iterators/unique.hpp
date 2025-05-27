@@ -23,7 +23,7 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>
 
     Iterator _iterator;
     S _end;
-    mutable BinaryPredicate _predicate;
+    BinaryPredicate _predicate;
 
 public:
     using value_type = typename traits::value_type;
@@ -51,7 +51,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        _iterator = detail::adjacent_find(std::move(_iterator), _end, _predicate);
+        using std::adjacent_find;
+        _iterator = adjacent_find(std::move(_iterator), _end, _predicate);
 
         if (_iterator != _end) {
             ++_iterator;
@@ -78,7 +79,7 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator>:
     Iterator _begin{};
     Iterator _iterator{};
     Iterator _end{};
-    mutable BinaryPredicate _predicate{};
+    BinaryPredicate _predicate{};
 
 public:
     using value_type = typename traits::value_type;
@@ -107,7 +108,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 void increment() {
-        _iterator = detail::adjacent_find(std::move(_iterator), _end, _predicate);
+        using std::adjacent_find;
+        _iterator = adjacent_find(std::move(_iterator), _end, _predicate);
 
         if (_iterator != _end) {
             ++_iterator;
@@ -122,7 +124,7 @@ public:
 
         auto next = _iterator;
         for (--next; next != _begin; --next, --_iterator) {
-            if (_predicate(*_iterator, *next)) {
+            if (!_predicate(*next, *_iterator)) {
                 return;
             }
         }
