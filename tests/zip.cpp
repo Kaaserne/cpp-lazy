@@ -196,7 +196,7 @@ TEST_CASE("zip_iterable to containers") {
     }
 
     SECTION("To map") {
-        auto actual = lz::zip(a, b, c) | lz::map([](const tup& tup) { return std::make_pair(std::get<0>(tup), tup); }) |
+        auto actual = lz::zip(a, b, c) | lz::map([](const tup& t) { return std::make_pair(std::get<0>(t), t); }) |
                       lz::to<std::map<int, tup>>();
 
         std::map<int, tup> expected = { std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
@@ -208,7 +208,7 @@ TEST_CASE("zip_iterable to containers") {
     }
 
     SECTION("To map") {
-        auto actual = lz::zip(a, b, c) | lz::map([](const tup& tup) { return std::make_pair(std::get<0>(tup), tup); }) |
+        auto actual = lz::zip(a, b, c) | lz::map([](const tup& t) { return std::make_pair(std::get<0>(t), t); }) |
                       lz::to<std::unordered_map<int, tup>>();
 
         std::unordered_map<int, tup> expected = { std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
