@@ -177,84 +177,63 @@ TEST_CASE("Cartesian product binary operations") {
         std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'c', 'b'), std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'),
         std::make_tuple(2, 'b', 'a'), std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b')
     };
-    REQUIRE(cartesian.size() == expected.size());
 
     SECTION("Operator++") {
-        auto iter = cartesian.begin();
-        std::ptrdiff_t count = 0;
-        auto end = cartesian.end();
-        while (iter != end) {
-            INFO("With count = " << count);
-            REQUIRE(*iter == *(expected.begin() + count));
-            ++iter;
-            ++count;
-        }
-        REQUIRE(static_cast<std::size_t>(count) == lz::size(cartesian));
+        REQUIRE(lz::equal(cartesian, expected));
     }
 
     SECTION("Operator--") {
-        auto iter = cartesian.begin();
-        auto end = cartesian.end();
-        std::ptrdiff_t count = 0;
-        while (iter != end) {
-            --end;
-            ++count;
-            INFO("With count = " << count);
-            REQUIRE(*end == *(expected.end() - count));
-        }
-        REQUIRE(static_cast<std::size_t>(count) == lz::size(cartesian));
+        REQUIRE(lz::equal(lz::reverse(cartesian), lz::reverse(expected)));
     }
 
     SECTION("Operator+") {
         auto begin = cartesian.begin();
         auto end = cartesian.end();
 
-        for (std::size_t i = 0; i < lz::size(cartesian) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.end());
-        for (std::size_t i = 1; i <= lz::size(cartesian); ++i) {
+        REQUIRE(begin + lz::ssize(cartesian) == cartesian.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(cartesian); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end - i) == *(expected.end() - i));
         }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.begin());
+        REQUIRE(end - lz::ssize(cartesian) == cartesian.begin());
 
-        std::advance(begin, lz::size(cartesian));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(cartesian)));
+        std::advance(begin, lz::ssize(cartesian));
+        std::advance(end, -lz::ssize(cartesian));
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        for (std::size_t i = 0; i < lz::size(cartesian) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end + i) == *(expected.begin() + i));
         }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.end());
-        for (std::size_t i = 1; i <= lz::size(cartesian); ++i) {
+        REQUIRE(end + lz::ssize(cartesian) == cartesian.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(cartesian); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin - i) == *(expected.end() - i));
         }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(cartesian)) == cartesian.begin());
+        REQUIRE(begin - lz::ssize(cartesian) == cartesian.begin());
     }
 
     SECTION("Operator-") {
         auto begin = cartesian.begin();
         auto end = cartesian.end();
 
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(cartesian)); ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
-            REQUIRE((begin + i) - end == -static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
-            REQUIRE(begin - (end - i) == -static_cast<std::ptrdiff_t>(lz::size(cartesian) - static_cast<std::size_t>(i)));
+            REQUIRE((end - i) - begin == lz::ssize(cartesian) - i);
+            REQUIRE(end - (begin + i) == lz::ssize(cartesian) - i);
+            REQUIRE((begin + i) - end == -(lz::ssize(cartesian) - i));
+            REQUIRE(begin - (end - i) == -(lz::ssize(cartesian) - i));
         }
 
-        for (std::size_t i = 0; i < lz::size(cartesian); ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -static_cast<std::ptrdiff_t>(lz::size(cartesian) - 2 * i));
+            REQUIRE((end - i) - (begin + i) == lz::ssize(cartesian) - 2 * i);
+            REQUIRE((begin + i) - (end - i) == -(lz::ssize(cartesian) - 2 * i));
         }
     }
 }
