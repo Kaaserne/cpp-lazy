@@ -66,8 +66,8 @@ TEST_CASE("Generate binary operations") {
     auto begin = generator.begin();
 
     SECTION("Operator++") {
-        ++begin;
-        REQUIRE(lz::distance(begin, generator.end()) == amount - 1);
+        auto expected = { 0, 1, 2, 3 };
+        REQUIRE(lz::equal(generator, expected));
     }
 
     SECTION("Operator== & Operator!=") {
