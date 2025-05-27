@@ -5,6 +5,7 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/procs.hpp>
 #include <Lz/iterator_base.hpp>
 
 namespace lz {
@@ -64,7 +65,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) noexcept {
-        _current -= n;
+        _current -= static_cast<std::size_t>(n);
     }
 
     constexpr difference_type difference(const random_iterator& b) const noexcept {
@@ -72,6 +73,7 @@ public:
     }
 
     constexpr bool eq(const random_iterator& b) const noexcept {
+        LZ_ASSERT(_generator == b._generator, "Incompatible iterators");
         return _current == b._current;
     }
 
