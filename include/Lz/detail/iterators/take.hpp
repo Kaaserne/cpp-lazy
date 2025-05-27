@@ -53,7 +53,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         _iterator += offset;
-        _n -= static_cast<std::size_t>(offset);
+        _n -= offset;
     }
 
     constexpr difference_type difference(const n_take_iterator& b) const {
