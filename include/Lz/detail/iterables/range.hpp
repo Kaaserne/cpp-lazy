@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Lz/detail/compiler_checks.hpp"
+
+#include <type_traits>
 #ifndef LZ_RANGE_ITERABLE_HPP
 #define LZ_RANGE_ITERABLE_HPP
 
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterators/range.hpp>
-#include <cmath>
 
 namespace lz {
 namespace detail {
@@ -27,11 +29,19 @@ public:
         _step{ step } {
     }
 
-    LZ_NODISCARD std::size_t size() const noexcept {
-        if (_step == 0) {
-            return 0;
-        }
-        return static_cast<std::size_t>(std::ceil((_end - _start) / _step));
+    template<class A = Arithmetic>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, std::size_t> size() const noexcept {
+        LZ_ASSERT(_step != 0, "Division by zero in range size calculation");
+        const auto x = (_end - _start) / _step;
+        const auto int_part = static_cast<std::size_t>(x);
+        return (x > static_cast<A>(int_part)) ? int_part + 1 : int_part;
+    }
+
+    template<class A = Arithmetic>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, std::size_t> size() const noexcept {
+        LZ_ASSERT(_step != 0, "Division by zero in range size calculation");
+        const auto diff = _end - _start;
+        return static_cast<std::size_t>((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step);
     }
 
     LZ_NODISCARD constexpr iterator begin() const noexcept {

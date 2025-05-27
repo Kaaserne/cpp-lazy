@@ -9,41 +9,46 @@
 #include <unordered_map>
 
 TEST_CASE("Range changing and creating elements") {
-    SECTION("Looping upwards") {
-        int expected_counter = 0;
-
-        for (int i : lz::range(5)) {
-            REQUIRE(expected_counter == i);
-            expected_counter++;
-        }
+    SECTION("Looping upwards int") {
+        auto expected = { 0, 1, 2, 3, 4 };
+        REQUIRE(lz::equal(lz::range(5), expected));
     }
 
-    SECTION("Looping backwards") {
-        int expected_counter = 5;
-
-        for (int i : lz::range(5, 0, -1)) {
-            REQUIRE(expected_counter == i);
-            expected_counter--;
-        }
+    SECTION("Looping backwards int") {
+        auto expected = { 5, 4, 3, 2, 1 };
+        REQUIRE(lz::equal(lz::range(5, 0, -1), expected));
     }
 
-    SECTION("Looping upwards with step") {
-        int expected_counter = 0;
-
-        for (int i : lz::range(0, 5, 2)) {
-            REQUIRE(expected_counter == i);
-            expected_counter += 2;
-        }
+    SECTION("Looping upwards with step int") {
+        auto expected = { 0, 2, 4 };
+        REQUIRE(lz::equal(lz::range(0, 5, 2), expected));
     }
 
-    SECTION("Looping backwards with step") {
-        int expected_counter = 5;
-
-        for (int i : lz::range(5, 0, -2)) {
-            REQUIRE(expected_counter == i);
-            expected_counter -= 2;
-        }
+    SECTION("Looping backwards with step int") {
+        auto expected = { 5, 3, 1 };
+        REQUIRE(lz::equal(lz::range(5, 0, -2), expected));
     }
+
+    SECTION("Looping upwards float") {
+        auto expected = { Approx(0.0), Approx(0.5), Approx(1.0), Approx(1.5), Approx(2.0) };
+        REQUIRE(lz::equal(lz::range(0., 2.5, 0.5), expected));
+    }
+
+    SECTION("Looping backwards float") {
+        auto expected = { Approx(2.5), Approx(2.0), Approx(1.5), Approx(1.0), Approx(0.5) };
+        REQUIRE(lz::equal(lz::range(2.5, 0., -0.5), expected));
+    }
+
+    SECTION("Looping upwards with step float") {
+        auto expected = { Approx(0.0), Approx(1.0), Approx(2.0) };
+        REQUIRE(lz::equal(lz::range(0., 2.5, 1.), expected));
+    }
+
+    SECTION("Looping backwards with step float") {
+        auto expected = { Approx(2.5), Approx(1.5), Approx(0.5) };
+        REQUIRE(lz::equal(lz::range(2.5, 0., -1.), expected));
+    }
+
 
     SECTION("Operator=") {
         auto float_range = lz::range(0., 10.5, 0.5);

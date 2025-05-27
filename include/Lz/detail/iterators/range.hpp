@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Lz/detail/compiler_checks.hpp"
+
+#include <type_traits>
 #ifndef LZ_RANGE_ITERATOR_HPP
 #define LZ_RANGE_ITERATOR_HPP
 
@@ -12,6 +15,7 @@
 
 namespace lz {
 namespace detail {
+
 template<class Arithmetic>
 class range_iterator : public iterator<range_iterator<Arithmetic>, Arithmetic, fake_ptr_proxy<Arithmetic>, std::ptrdiff_t,
                                        std::random_access_iterator_tag> {
@@ -25,9 +29,7 @@ public:
     using pointer = fake_ptr_proxy<Arithmetic>;
     using reference = Arithmetic;
 
-    constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept :
-        _iterator{ it },
-        _step{ step } {
+    constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept : _iterator{ it }, _step{ step } {
     }
 
     LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel) noexcept {
@@ -51,9 +53,25 @@ public:
         _iterator -= _step;
     }
 
-    LZ_CONSTEXPR_CXX_14 difference_type difference(const range_iterator& b) const {
+    template<class A = Arithmetic>
+    LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
+    difference(const range_iterator& b) const noexcept {
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
-        return static_cast<difference_type>((_iterator - b._iterator) / _step);
+        LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
+
+        const auto x = (_iterator - b._iterator) / _step;
+        const auto int_part = static_cast<difference_type>(x);
+        return (x > static_cast<A>(int_part)) ? int_part + 1 : int_part;
+    }
+
+    template<class A = Arithmetic>
+    LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, difference_type>
+    difference(const range_iterator& b) const noexcept {
+        LZ_ASSERT(_step == b._step, "Incompatible iterators");
+        LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
+
+        const auto diff = _iterator - b._iterator;
+        return static_cast<difference_type>((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
@@ -62,7 +80,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& b) const noexcept {
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
-        return _step < 0 ? _iterator <= b._iterator : _iterator >= b._iterator;
+        return *this - b == 0;
     }
 };
 } // namespace detail
