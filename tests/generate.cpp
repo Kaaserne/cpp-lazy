@@ -66,7 +66,7 @@ TEST_CASE("Generate binary operations") {
     auto begin = generator.begin();
 
     SECTION("Operator++") {
-        auto expected = { 0, 1, 2, 3 };
+        std::size_t expected[] = { 0, 1, 2, 3 };
         REQUIRE(lz::equal(generator, expected));
     }
 

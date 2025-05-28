@@ -1,6 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -84,9 +85,8 @@ TEST_CASE("Filter binary operations") {
     auto it = filter.begin();
 
     SECTION("Operator++") {
-        REQUIRE(*it == array[0]);
-        ++it;
-        REQUIRE(*it == array[1]);
+        auto expected = { 1, 2 };
+        REQUIRE(lz::equal(filter, expected));
     }
 
     SECTION("Operator== & operator!=") {
@@ -96,18 +96,8 @@ TEST_CASE("Filter binary operations") {
     }
 
     SECTION("Operator--") {
-        auto rev_it = filter.end();
-        REQUIRE(rev_it != filter.begin());
-        --rev_it;
-        REQUIRE(*rev_it == array[1]);
-        REQUIRE(rev_it != filter.begin());
-        ++rev_it;
-        REQUIRE(rev_it == filter.end());
-        --rev_it;
-        REQUIRE(*rev_it == array[1]);
-        --rev_it;
-        REQUIRE(*rev_it == array[0]);
-        REQUIRE(rev_it == filter.begin());
+        auto expected = { 2, 1 };
+        REQUIRE(lz::equal(filter | lz::reverse, expected));
     }
 }
 
@@ -118,29 +108,20 @@ TEST_CASE("Filter to container") {
     SECTION("To array") {
         constexpr std::size_t filter_size = 2;
         auto filtered = lz::filter(array, [](int i) { return i != 3; }) | lz::to<std::array<int, filter_size>>();
-
-        REQUIRE(filtered[0] == array[0]);
-        REQUIRE(filtered[1] == array[1]);
+        std::array<int, filter_size> expected = { 1, 2 };
+        REQUIRE(filtered == expected);
     }
 
     SECTION("To vector") {
         auto filtered_vec = lz::filter(array, [](int i) { return i != 3; }) | lz::to<std::vector>();
-
-        REQUIRE(filtered_vec.size() == 2);
-        REQUIRE(filtered_vec[0] == array[0]);
-        REQUIRE(filtered_vec[1] == array[1]);
+        std::vector<int> expected = { 1, 2 };
+        REQUIRE(filtered_vec == expected);
     }
 
     SECTION("To other container using to<>()") {
         auto filtered_list = lz::filter(array, [](int i) { return i != 3; }) | lz::to<std::list<int>>();
-
-        REQUIRE(filtered_list.size() == 2);
-        auto counter = array.begin();
-
-        for (int element : filtered_list) {
-            REQUIRE(element == *counter);
-            ++counter;
-        }
+        std::list<int> expected = { 1, 2 };
+        REQUIRE(filtered_list == expected);
     }
 
     SECTION("To map") {

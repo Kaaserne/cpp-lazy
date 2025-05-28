@@ -68,12 +68,8 @@ TEST_CASE("Inclusive scan splitter binary operations") {
     auto scan = lz::inclusive_scan(arr);
 
     SECTION("Operator++") {
-        auto it = scan.begin();
-        REQUIRE(*it == 1);
-        ++it;
-        REQUIRE(*it == 1 + 2);
-        ++it;
-        REQUIRE(*it == 1 + 2 + 3);
+        auto expected = { 1, 3, 6, 10, 15 };
+        REQUIRE(lz::equal(scan, expected));
     }
 
     SECTION("Operator== & operator!=") {

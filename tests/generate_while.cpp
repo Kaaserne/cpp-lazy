@@ -73,10 +73,8 @@ TEST_CASE("Generate while binary operations") {
             auto copy = i++;
             return std::make_pair(copy != 4, copy);
         });
-        auto begin = generator.begin();
-        REQUIRE(*begin == 0);
-        ++begin;
-        REQUIRE(*begin == 1);
+        auto expected = std::vector<int>{ 0, 1, 2, 3 };
+        REQUIRE(lz::equal(generator, expected));
     }
 
     SECTION("Operator== & Operator!=") {

@@ -1,6 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/intersection.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -78,82 +79,26 @@ TEST_CASE("Intersection binary operations") {
 
     SECTION("Operator++ 1") {
         auto intersect = lz::intersection(a, b);
-        auto it = intersect.begin();
-        REQUIRE(*it == 'a');
-        ++it;
-        REQUIRE(*it == 'a');
-        ++it;
-        REQUIRE(*it == 'b');
-        ++it;
-        REQUIRE(*it == 'c');
-        ++it;
-        REQUIRE(*it == 'c');
-        ++it;
-        REQUIRE(*it == 'c');
-        ++it;
-        REQUIRE(*it == 'e');
-        ++it;
-        REQUIRE(it == intersect.end());
+        auto excpected = lz::c_string("aabccce");
+        REQUIRE(lz::equal(intersect, excpected));
     }
 
     SECTION("Operator-- 1") {
         auto intersect = lz::intersection(a, b);
-        auto it = intersect.end();
-        --it;
-        REQUIRE(*it == 'e');
-        --it;
-        REQUIRE(*it == 'c');
-        --it;
-        REQUIRE(*it == 'c');
-        --it;
-        REQUIRE(*it == 'c');
-        --it;
-        REQUIRE(*it == 'b');
-        --it;
-        REQUIRE(*it == 'a');
-        --it;
-        REQUIRE(*it == 'a');
-        REQUIRE(it == intersect.begin());
+        auto expected = lz::c_string("ecccbaa");
+        REQUIRE(lz::equal(intersect | lz::reverse, expected));
     }
 
     SECTION("Operator++ 2") {
         auto intersect = lz::intersection(b, a);
-        auto it = intersect.begin();
-        REQUIRE(*it == 'a');
-        ++it;
-        REQUIRE(*it == 'a');
-        ++it;
-        REQUIRE(*it == 'b');
-        ++it;
-        REQUIRE(*it == 'c');
-        ++it;
-        REQUIRE(*it == 'c');
-        ++it;
-        REQUIRE(*it == 'c');
-        ++it;
-        REQUIRE(*it == 'e');
-        ++it;
-        REQUIRE(it == intersect.end());
+        auto expected = lz::c_string("aabccce");
+        REQUIRE(lz::equal(intersect, expected));
     }
 
     SECTION("Operator-- 2") {
         auto intersect = lz::intersection(b, a);
-        auto it = intersect.end();
-        --it;
-        REQUIRE(*it == 'e');
-        --it;
-        REQUIRE(*it == 'c');
-        --it;
-        REQUIRE(*it == 'c');
-        --it;
-        REQUIRE(*it == 'c');
-        --it;
-        REQUIRE(*it == 'b');
-        --it;
-        REQUIRE(*it == 'a');
-        --it;
-        REQUIRE(*it == 'a');
-        REQUIRE(it == intersect.begin());
+        auto expected = lz::c_string("ecccbaa");
+        REQUIRE(lz::equal(intersect | lz::reverse, expected));
     }
 
     SECTION("Operator=") {
