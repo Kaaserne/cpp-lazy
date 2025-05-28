@@ -31,7 +31,8 @@ public:
 
     template<bool Sized = is_sized>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable) - _n);
+        const auto size = lz::size(_iterable);
+        return size > _n ? size - _n : 0;
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
