@@ -87,14 +87,6 @@ public:
         return _size == 0;
     }
 
-    std::basic_string<CharT> to_std_string() const {
-        return { _data, _size };
-    }
-
-    explicit operator std::basic_string<CharT>() const {
-        return to_std_string();
-    }
-
 private:
     const CharT* _data{};
     std::size_t _size{};

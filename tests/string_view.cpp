@@ -33,14 +33,6 @@ TEST_CASE("String view basic functionality") {
         REQUIRE(view.end() == str.data() + str.size());
     }
 
-    SECTION("Should convert to string") {
-        REQUIRE(view.to_std_string() == str);
-    }
-
-    SECTION("Use static_cast") {
-        REQUIRE(static_cast<std::string>(view) == str);
-    }
-
     SECTION("Empty") {
         lz::string_view empty_view;
         REQUIRE(empty_view.empty());

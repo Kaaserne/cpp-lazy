@@ -28,6 +28,11 @@ TEST_CASE("CString binary operations") {
     auto c_string = string | lz::c_string;
 
     SECTION("Operator++") {
+        lz::string_view expected1 = "123 456 789";
+        REQUIRE(lz::equal(c_string, expected1));
+
+        char expected2[] = "123 456 789";
+        REQUIRE(lz::equal(c_string, expected2));
         lz::string_view expected2 = "123 456 789";
         REQUIRE(lz::equal(c_string, expected2));
     }

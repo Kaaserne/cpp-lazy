@@ -87,10 +87,10 @@ TEST_CASE("zip_iterable binary operations") {
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
-    std::vector<std::tuple<int, Approx, short>> expected = { std::make_tuple(1, Approx{ 1.f }, 1),
-                                                             std::make_tuple(2, Approx{ 2.f }, 2),
-                                                             std::make_tuple(3, Approx{ 3.f }, 3),
-                                                             std::make_tuple(4, Approx{ 4.f }, 4) };
+    std::vector<std::tuple<int, Approx, short>> expected = { std::make_tuple(1, Approx{ 1.f }, short(1)),
+                                                             std::make_tuple(2, Approx{ 2.f }, short(2)),
+                                                             std::make_tuple(3, Approx{ 3.f }, short(3)),
+                                                             std::make_tuple(4, Approx{ 4.f }, short(4)) };
 
     auto zipper = lz::zip(a, b, c);
     auto begin = zipper.begin();

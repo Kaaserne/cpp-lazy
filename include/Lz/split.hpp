@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Lz/detail/traits.hpp"
 #ifndef LZ_STRING_SPLITTER_HPP
 #define LZ_STRING_SPLITTER_HPP
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/split.hpp>
 #include <Lz/string_view.hpp>
+#include <string>
 
 namespace lz {
 
