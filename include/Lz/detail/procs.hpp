@@ -186,7 +186,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T c (&)[N]) noexcept {
+LZ_NODISCARD constexpr std::size_t size(const T (&c)[N]) noexcept {
     static_cast<void>(c);
     return N;
 }
@@ -224,10 +224,12 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssiz
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i)))
+LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(
+    static_cast<detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>>(lz::size(i))))
     -> detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type> {
     static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
-    return std::ssize(i);
+    using T = detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>;
+    return static_cast<T>(lz::size(i));
 }
 
 /**
@@ -241,7 +243,7 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssiz
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::ptrdiff_t size(const T c (&)[N]) noexcept {
+LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&c)[N]) noexcept {
     static_cast<void>(c);
     return static_cast<std::ptrdiff_t>(N);
 }

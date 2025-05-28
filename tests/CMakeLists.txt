@@ -38,6 +38,7 @@ add_executable(cpp-lazy-tests
 	common.cpp
 	concatenate.cpp
 	cstring.cpp
+	duplicates.cpp
 	enumerate.cpp
 	except.cpp
 	exclude.cpp
