@@ -38,6 +38,18 @@ template<class Iterable, class CharT = char>
 using lines_iterable = detail::lines_iterable<CharT, Iterable>;
 
 /**
+ * @brief Lines iterable helper alias for string_views. string_views are not held by reference, but copied.
+ *
+ * @tparam Iterable The iterable to split into lines.
+ * @tparam CharT The character type of the string to split into lines. Defaults to `char`.
+ * ```cpp
+ * lz::lines_iterable_sv<> actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
+ * ```
+ */
+template<class CharT = char>
+using lines_iterable_sv = lines_iterable<lz::copied_iterable<lz::basic_string_view<CharT>>, CharT>;
+
+/**
  * @brief As iterable helper alias
  *
  * @tparam Iterable The iterable to convert the elements of.
@@ -181,7 +193,7 @@ zip_with(Fn fn, Iterables&&... iterables) {
     return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
 }
 
-// TODO unzip_with
+// TODO unzip_with (and unzip?)
 
 #ifdef LZ_HAS_CXX_11
 
@@ -278,6 +290,10 @@ LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
  * ```cpp
  * std::string str = "Hello\nWorld\n!";
  * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
+ * lz::string_view str_view = "Hello\nWorld\n!";
+ *
+ * // splitted_view, does not hold a reference to the original string
+ * auto splitted_view = lz::lines(str_view); // {"Hello", "World", "!"},
  * // or
  * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
  * // or
