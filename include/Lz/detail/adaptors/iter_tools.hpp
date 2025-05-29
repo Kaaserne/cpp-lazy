@@ -1,7 +1,7 @@
+#pragma once
+
 #ifndef LZ_ITER_TOOLS_ADAPTORS_HPP
 #define LZ_ITER_TOOLS_ADAPTORS_HPP
-
-#pragma once
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
@@ -67,22 +67,20 @@ struct lines_adaptor {
         using char_type = val_iterable_t<String>;
         return lz::sv_split(std::forward<String>(string), static_cast<char_type>('\n'));
     }
+
     /**
      * @brief Returns a split_iterable, that splits the string on `'\n'` using `lz::sv_split`. Returns string_views to its
      * substrings. Example:
      * ```cpp
-     * std::string str = "Hello\nWorld\n!";
-     * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
-     * // or
-     * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
-     * // or, little bit slower since lz::c_string is used here, which is not random access
-     * auto splitted = lz::lines("Hello\nWorld\n!"); // {"Hello", "World", "!"}
+     * lz::basic_string str = "Hello\nWorld\n!";
+     * auto splitted = lz::lines(str); // {"Hello", "World", "!"}. `str` will not be by reference, because string_view is easy to
+     * // copy
      * ```
-     * @param string The string to split on "\n".
+     * @param string The string to split on '\n'.
      */
     template<class CharT>
-    LZ_NODISCARD constexpr lines_iterable<CharT, copied_sv<CharT>> operator()(const CharT* string) const {
-        return lz::sv_split(copied_sv<CharT>(string), static_cast<CharT>('\n'));
+    LZ_NODISCARD constexpr lines_iterable<CharT, copied_basic_sv<CharT>> operator()(const basic_string_view<CharT> string) const {
+        return lz::sv_split(copied_basic_sv<CharT>(string), static_cast<CharT>('\n'));
     }
 };
 
@@ -244,9 +242,9 @@ struct trim_adaptor {
     }
 
     template<class CharT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 trim_iterable<copied_sv<CharT>, trim_fn, trim_fn>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 trim_iterable<copied_basic_sv<CharT>, trim_fn, trim_fn>
     operator()(lz::basic_string_view<CharT> iterable) const {
-        return (*this)(copied_sv<CharT>(iterable), trim_fn{}, trim_fn{});
+        return (*this)(copied_basic_sv<CharT>(iterable), trim_fn{}, trim_fn{});
     }
 
     template<class UnaryPredicateFirst, class UnaryPredicateLast>
