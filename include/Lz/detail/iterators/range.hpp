@@ -31,6 +31,7 @@ public:
     }
 
     // Operator= default_sentinel not necessary, as it never returns as default_sentinel
+    LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel) = delete;
 
     constexpr value_type dereference() const noexcept {
         return _index;
@@ -54,9 +55,9 @@ public:
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
         LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
 
-        const auto x = (_index - b._index) / _step;
-        const auto int_part = static_cast<difference_type>(x);
-        return (x > static_cast<A>(int_part)) ? int_part + 1 : int_part;
+        const auto current_size = (_index - b._index) / _step;
+        const auto int_part = static_cast<difference_type>(current_size);
+        return (current_size > static_cast<A>(int_part)) ? int_part + 1 : int_part;
     }
 
     template<class A = Arithmetic>
@@ -70,6 +71,8 @@ public:
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
         _index += static_cast<Arithmetic>(value) * _step;
     }
+
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept = delete; // Cannot compare with default_sentinel
 
     LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& other) const noexcept {
         LZ_ASSERT(_step == other._step, "Incompatible iterators");
