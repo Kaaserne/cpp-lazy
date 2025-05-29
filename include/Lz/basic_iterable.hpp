@@ -85,7 +85,7 @@ class sized_iterable_impl : public lazy_view {
     std::size_t _size{};
 
 public:
-    using iterator = take_iterator<decayed_iterator, S>;
+    using iterator = bounded_take_iterator<decayed_iterator, S>;
     using const_iterator = decayed_iterator;
     using value_type = val_t<decayed_iterator>;
     using sentinel = S;
@@ -228,7 +228,7 @@ struct has_push_back<Container,
  *     template<class Iterable>
  *     void copy(Iterable&& iterable, my_container<T>& container) {
  *         // Copy the iterable to the container, for example:
- *         Container is not reserved if it contains a reserve member
+ *         // Container is not reserved if it contains a reserve member
  *         for (auto&& i : iterable) {
  *             container.my_inserter(i);
  *         }
@@ -364,15 +364,18 @@ template<template<class...> class Container>
 struct template_combiner {
     using adaptor = template_combiner<Container>;
 
-    template<LZ_CONCEPT_ITERABLE Iterable, class... Args,
-             class Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>>
-    LZ_NODISCARD constexpr Cont operator()(Iterable&& iterable, Args&&... args) const {
-        return to_adaptor<Cont>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+    template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
+    LZ_NODISCARD constexpr Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>
+    operator()(Iterable&& iterable, Args&&... args) const {
+        using C = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>;
+        return to_adaptor<C>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
     }
 };
 } // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+// clang-format off
 
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be used in a pipe expression.
@@ -394,9 +397,12 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @param args Args passed directly to the constructor of Container, except begin and end
  * @return The `Container`
  */
-template<class Container, class... Args, class = detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value>,
-         class Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
+template<class Container, class... Args>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value,
+    detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>>
+to(Args&&... args) {
+    using Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>;
     return Closure{ std::forward<Args>(args)... };
 }
 
@@ -420,10 +426,12 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  * @param args Args passed directly to the constructor of Container, except begin and end
  * @return The `Container`
  */
-template<template<class...> class Container, class... Args,
-         class = detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value>,
-         class Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
+template<template<class...> class Container, class... Args>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value, 
+    detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>> 
+to(Args&&... args) {
+    using Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>;
     return Closure{ std::forward<Args>(args)... };
 }
 
@@ -480,9 +488,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Closure to(Args&&... args) {
  * @param args Args passed directly to the constructor of Container, except begin and end
  * @return The `Container`
  */
-template<class Container, class... Args, LZ_CONCEPT_ITERABLE Iterable,
-         class = detail::enable_if<detail::is_iterable<Iterable>::value>>
-LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
+template<class Container, class... Args, LZ_CONCEPT_ITERABLE Iterable>
+LZ_NODISCARD constexpr detail::enable_if<detail::is_iterable<Iterable>::value, Container>
+to(Iterable&& iterable, Args&&... args) {
     return detail::to_adaptor<Container>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
 
@@ -539,12 +547,14 @@ LZ_NODISCARD constexpr Container to(Iterable&& iterable, Args&&... args) {
  * @param args Args passed directly to the constructor of Container, except begin and end
  * @return The `Container`
  */
-template<template<class...> class Container, class... Args, LZ_CONCEPT_ITERABLE Iterable,
-         class = detail::enable_if<detail::is_iterable<Iterable>::value>,
-         class Cont = Container<val_iterable_t<Iterable>, Args...>>
-LZ_NODISCARD constexpr Cont to(Iterable&& iterable, Args&&... args) {
+template<template<class...> class Container, class... Args, LZ_CONCEPT_ITERABLE Iterable>
+LZ_NODISCARD constexpr detail::enable_if<detail::is_iterable<Iterable>::value, Container<val_iterable_t<Iterable>, Args...>>
+to(Iterable&& iterable, Args&&... args) {
+    using Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>;
     return to<Cont>(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
+
+// clang-format on
 
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be specialized for custom containers.
@@ -560,7 +570,7 @@ LZ_NODISCARD constexpr Cont to(Iterable&& iterable, Args&&... args) {
  *     template<class Iterable>
  *     void copy(Iterable&& iterable, my_container<T>& container) {
  *         // Copy the iterable to the container, for example:
- *         Container is not reserved if it contains a reserve member
+ *         // Container is not reserved if it contains a reserve member
  *         for (auto&& i : iterable) {
  *             container.my_inserter(i);
  *         }

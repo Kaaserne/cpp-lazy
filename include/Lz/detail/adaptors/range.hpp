@@ -16,7 +16,8 @@ struct range_adaptor {
      * ```
      * auto range = lz::range(0.0, 1.0, 0.1); // {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9} (T = double)
      * auto range = lz::range(0.0, 1.0, 0.2); // {0.0, 0.2, 0.4, 0.6, 0.8} (T = double)
-     * auto rane = lz::range(0, 10); // {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} (T = int)
+     * auto range = lz::range(0, 10); // {0, 1, 2, 3, 4, 5, 6, 7, 8, 9} (T = int)
+     * auto range = lz::range(0, 10, 2) | lz::reverse; // {8, 6, 4, 2, 0} (T = int)
      * ```
      * @param start The start of the range
      * @param end The end of the range (exclusive)

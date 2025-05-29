@@ -32,6 +32,7 @@ set(examples
     inclusive_scan
     interleave
     intersection
+    iter_tools
     join_where
     loop
     map

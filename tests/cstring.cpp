@@ -28,10 +28,8 @@ TEST_CASE("CString binary operations") {
     auto c_string = string | lz::c_string;
 
     SECTION("Operator++") {
-        auto begin = c_string.begin();
-        REQUIRE(*begin == '1');
-        ++begin;
-        REQUIRE(*begin == '2');
+        lz::string_view expected1 = "123 456 789";
+        REQUIRE(lz::equal(c_string, expected1));
     }
 
     SECTION("Operator== & Operator!=") {

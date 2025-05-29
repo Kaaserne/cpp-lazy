@@ -40,7 +40,7 @@ struct take_every_adaptor {
      * @param offset The offset to take every element from
      * @param start The start offset
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, take_every_iterable<remove_ref<Iterable>>>
     operator()(Iterable&& iterable, const std::size_t offset, const std::size_t start = 0) const {
         return { std::forward<Iterable>(iterable), offset, start };

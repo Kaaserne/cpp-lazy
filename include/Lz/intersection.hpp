@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "Lz/detail/traits.hpp"
 #ifndef LZ_INTERSECTION_HPP
 #define LZ_INTERSECTION_HPP
 
@@ -8,34 +8,6 @@
 #include <Lz/detail/adaptors/intersection.hpp>
 
 namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-#ifdef LZ_HAS_CXX_11
-
-/**
- * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that are in
- * both iterables. Both iterables must be sorted first. Returns a bidirectional iterable if the input iterables are at least
- * bidirectional, otherwise forward. Returns a sentinel if it is a forward iterable. Does not contain a .size() method. Example:
- * ```cpp
- * std::string a = "aaaabbcccddee";
- * std::string b = "aabccce";
- *
- * std::sort(a.begin(), a.end());
- * std::sort(b.begin(), b.end());
- *
- * auto intersect = lz::intersection(a, b); // { 'a', 'a', 'b', 'c', 'c', 'c', 'e' }
- * // or
- * auto intersect = lz::intersection(a, b, std::less<>{}); // { 'a', 'a', 'b', 'c', 'c', 'c', 'e' }
- * // or
- * auto intersect = a | lz::intersection(b); // { 'a', 'a', 'b', 'c', 'c', 'c', 'e' }
- * // or
- * auto intersect = a | lz::intersection(b, std::less<>{}); // { 'a', 'a', 'b', 'c', 'c', 'c', 'e' }
- * ```
- */
-constexpr detail::intersection_adaptor intersection{};
-
-#else
 
 /**
  * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that are in
@@ -59,9 +31,22 @@ constexpr detail::intersection_adaptor intersection{};
  */
 LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
 
-#endif
-
-using detail::intersection_iterable;
+/**
+ * @brief Intersection helper alias.
+ *
+ * @tparam Iterable The first iterable type.
+ * @tparam Iterable2 The second iterable type.
+ * @tparam BinaryPredicate The binary predicate type used to compare elements from both iterables. Defaults to `std::less<>`.
+ * ```cpp
+ * std::string a = "aaaabbcccddee";
+ * std::string b = "aabccce";
+ * std::sort(a.begin(), a.end());
+ * std::sort(b.begin(), b.end());
+ * lz::intersection_iterable<std::string, std::string> intersect = lz::intersection(a, b);
+ * ```
+ */
+template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+using intersection_iterable = detail::intersection_iterable<Iterable, Iterable2, BinaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

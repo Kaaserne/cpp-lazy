@@ -88,38 +88,33 @@ TEST_CASE("Loop with non while true argument") {
         auto test_looper = [](const decltype(lz::loop(vec, 0))& l, std::vector<int> expected) {
             auto begin = l.begin();
             auto end = l.end();
+
+            for (std::ptrdiff_t i = 0; i < lz::ssize(l) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin + i) == *(expected.begin() + i));
+            }
+            REQUIRE(begin + lz::ssize(l) == l.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(l); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end - i) == *(expected.end() - i));
+            }
+            REQUIRE(end - lz::ssize(l) == l.begin());
+
+            std::advance(begin, lz::ssize(l));
+            std::advance(end, -lz::ssize(l));
             REQUIRE(begin + 0 == begin);
             REQUIRE(end + 0 == end);
 
-            for (std::size_t i = 0; i < lz::size(l) - 1; ++i) {
+            for (std::ptrdiff_t i = 0; i < lz::ssize(l) - 1; ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+                REQUIRE(*(end + i) == *(expected.begin() + i));
             }
-            REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(l)) == l.end());
-
-            REQUIRE(end - 0 == end);
-            for (std::size_t i = 1; i <= lz::size(l); ++i) {
+            REQUIRE(end + lz::ssize(l) == l.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(l); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+                REQUIRE(*(begin - i) == *(expected.end() - i));
             }
-            REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(l)) == l.begin());
-
-            std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(l)));
-            std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(l)));
-
-            REQUIRE(begin + 0 == begin);
-            REQUIRE(end + 0 == end);
-
-            for (std::size_t i = 0; i < lz::size(l) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-            }
-            REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(l)) == l.end());
-            for (std::size_t i = 1; i <= lz::size(l); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-            }
-            REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(l)) == l.begin());
+            REQUIRE(begin - lz::ssize(l) == l.begin());
         };
 
         auto looper = lz::loop(vec, 2);
@@ -139,19 +134,18 @@ TEST_CASE("Loop with non while true argument") {
             auto begin = l.begin();
             auto end = l.end();
 
-            for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(l)); ++i) {
+            for (std::ptrdiff_t i = 0; i < lz::ssize(l); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(l)) - i);
-                REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(l)) - i);
-                REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(l)) - i));
-                REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(l)) - i));
+                REQUIRE((end - i) - begin == lz::ssize(l) - i);
+                REQUIRE(end - (begin + i) == lz::ssize(l) - i);
+                REQUIRE((begin + i) - end == -(lz::ssize(l) - i));
+                REQUIRE(begin - (end - i) == -(lz::ssize(l) - i));
             }
-            for (std::size_t i = 0; i < lz::size(l); ++i) {
+
+            for (std::ptrdiff_t i = 0; i < lz::ssize(l); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                        static_cast<std::ptrdiff_t>(lz::size(l)) - 2 * static_cast<std::ptrdiff_t>(i));
-                REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                        -(static_cast<std::ptrdiff_t>(lz::size(l)) - 2 * static_cast<std::ptrdiff_t>(i)));
+                REQUIRE((end - i) - (begin + i) == lz::ssize(l) - 2 * i);
+                REQUIRE((begin + i) - (end - i) == -(lz::ssize(l) - 2 * i));
             }
         };
         auto looper = lz::loop(vec, 2);

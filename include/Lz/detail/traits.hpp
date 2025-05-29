@@ -416,6 +416,7 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
  */
 using detail::sized;
 
+// TODO improve sentinel_selector?
 /**
  * @brief Selects @p S if @p Tag is not at least bidirectional, otherwise selects @p Iterator.
  *

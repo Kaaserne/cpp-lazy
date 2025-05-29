@@ -1,0 +1,57 @@
+#ifndef LZ_DUPLICATES_ITERABLE_HPP
+#define LZ_DUPLICATES_ITERABLE_HPP
+
+#include <Lz/detail/func_container.hpp>
+#include <Lz/detail/iterators/duplicates.hpp>
+#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/traits.hpp>
+
+namespace lz {
+namespace detail {
+template<class Iterable, class BinaryPredicate>
+class duplicates_iterable : public lz::lazy_view {
+public:
+    using iterator = duplicates_iterator<iter_t<Iterable>, sentinel_t<Iterable>, func_container<BinaryPredicate>>;
+    using const_iterator = iterator;
+    using value_type = typename iterator::value_type;
+
+private:
+    ref_or_view<Iterable> _iterable;
+    func_container<BinaryPredicate> _compare;
+
+public:
+    template<class I>
+    constexpr duplicates_iterable(I&& iterable, BinaryPredicate compare) :
+        _iterable{ std::forward<I>(iterable) },
+        _compare{ std::move(compare) } {
+    }
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
+        return { detail::begin(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+    }
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
+        return { detail::begin(_iterable), detail::end(_iterable), _compare };
+    }
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_compare) };
+    }
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
+        return { detail::end(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+    }
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
+        return {};
+    }
+};
+} // namespace detail
+} // namespace lz
+
+#endif

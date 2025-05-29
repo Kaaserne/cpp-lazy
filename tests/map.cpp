@@ -1,5 +1,6 @@
 #include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <forward_list>
 #include <list>
@@ -67,14 +68,13 @@ TEST_CASE("Map binary operations") {
     auto it = map.begin();
 
     SECTION("Operator++") {
-        ++it;
-        REQUIRE(*it == array[1].test_field_str);
+        auto expected = std::vector<std::string>{ "FieldA", "FieldB", "FieldC" };
+        REQUIRE(lz::equal(map, expected));
     }
 
     SECTION("Operator--") {
-        ++it;
-        --it;
-        REQUIRE(*it == array[0].test_field_str);
+        auto expecetd = std::vector<std::string>{ "FieldC", "FieldB", "FieldA" };
+        REQUIRE(lz::equal(lz::reverse(map), expecetd));
     }
 
     SECTION("Operator== & operator!=") {
@@ -84,53 +84,54 @@ TEST_CASE("Map binary operations") {
     }
 
     SECTION("Operator+") {
+        auto expected = std::vector<std::string>{ "FieldA", "FieldB", "FieldC" };
         auto begin = map.begin();
         auto end = map.end();
 
-        std::vector<std::string> expected = { "FieldA", "FieldB", "FieldC" };
-        for (std::size_t i = 0; i < lz::size(map) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(map) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(map)) == map.end());
-        for (std::size_t i = 1; i <= lz::size(map); ++i) {
+        REQUIRE(begin + lz::ssize(map) == map.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(map); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end - i) == *(expected.end() - i));
         }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(map)) == map.begin());
+        REQUIRE(end - lz::ssize(map) == map.begin());
 
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(map)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(map)));
+        std::advance(begin, lz::ssize(map));
+        std::advance(end, -lz::ssize(map));
+        REQUIRE(begin + 0 == begin);
+        REQUIRE(end + 0 == end);
 
-        for (std::size_t i = 0; i < lz::size(map) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(map) - 1; ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(end + i) == *(expected.begin() + i));
         }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(map)) == map.end());
-        for (std::size_t i = 1; i <= lz::size(map); ++i) {
+        REQUIRE(end + lz::ssize(map) == map.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(map); ++i) {
             INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+            REQUIRE(*(begin - i) == *(expected.end() - i));
         }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(map)) == map.begin());
+        REQUIRE(begin - lz::ssize(map) == map.begin());
     }
 
     SECTION("Operator-") {
         auto begin = map.begin();
         auto end = map.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(map)); ++i) {
+
+        for (std::ptrdiff_t i = 0; i < lz::ssize(map); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(map)) - i);
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(map)) - i);
-            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(map)) - i));
-            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(map)) - i));
+            REQUIRE((end - i) - begin == lz::ssize(map) - i);
+            REQUIRE(end - (begin + i) == lz::ssize(map) - i);
+            REQUIRE((begin + i) - end == -(lz::ssize(map) - i));
+            REQUIRE(begin - (end - i) == -(lz::ssize(map) - i));
         }
 
-        for (std::size_t i = 0; i < lz::size(map) ; ++i) {
+        for (std::ptrdiff_t i = 0; i < lz::ssize(map); ++i) {
             INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(map)) - 2 * static_cast<std::ptrdiff_t>(i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -(static_cast<std::ptrdiff_t>(lz::size(map)) - 2 * static_cast<std::ptrdiff_t>(i)));
+            REQUIRE((end - i) - (begin + i) == lz::ssize(map) - 2 * i);
+            REQUIRE((begin + i) - (end - i) == -(lz::ssize(map) - 2 * i));
         }
     }
 }

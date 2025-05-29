@@ -63,12 +63,10 @@ public:
         return static_cast<const Derived&>(*this).arrow();
     }
 
-    template<class D = Derived, class = detail::enable_if<!std::is_same<D, sentinel>::value>>
     LZ_NODISCARD constexpr bool operator==(const sentinel& b) const {
         return static_cast<const Derived&>(*this).eq(b);
     }
 
-    template<class D = Derived, class = detail::enable_if<!std::is_same<D, sentinel>::value>>
     LZ_NODISCARD constexpr bool operator!=(const sentinel& b) const {
         return !(*this == b);
     }
@@ -79,13 +77,6 @@ public:
 
     friend constexpr bool operator!=(const Derived& a, const Derived& b) {
         return !(a == b);
-    }
-
-    constexpr bool operator==(const sentinel& b) const {
-        return static_cast<const Derived&>(*this).eq(b);
-    }
-    constexpr bool operator!=(const sentinel& b) const {
-        return !(*this == b);
     }
 };
 

@@ -8,7 +8,6 @@ struct some_struct {
     int a;
 };
 
-
 int main() {
     std::vector<some_struct> s = {
         some_struct{"Hello"},

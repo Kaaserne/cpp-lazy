@@ -42,7 +42,7 @@ struct enumerate_adaptor {
      * @param iterable The iterable to enumerate
      * @param start The start index of the enumeration
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class IntType = int>
+    template<class Iterable, class IntType = int>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, enumerate_iterable<remove_ref<Iterable>, IntType>>
     operator()(Iterable&& iterable, const IntType start = 0) const {
         return { std::forward<Iterable>(iterable), start };

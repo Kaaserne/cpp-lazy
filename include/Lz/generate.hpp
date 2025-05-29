@@ -10,21 +10,6 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-#ifdef LZ_HAS_CXX_11
-
-/**
- * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
- * returns a sentinel. Example:
- * ```cpp
- * lz::generate([]() { return 10; }, 5); // Generates 5 times the number 10
- * // or
- * lz::generate([]() { return 10; }); // Generates infinite times the number 10
- * ```
- */
-constexpr detail::generate_adaptor generate{};
-
-#else
-
 /**
  * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
  * returns a sentinel. Example:
@@ -36,9 +21,27 @@ constexpr detail::generate_adaptor generate{};
  */
 LZ_INLINE_VAR constexpr detail::generate_adaptor generate{};
 
-#endif
+// TODO add tests for typedefs
 
-using detail::generate_iterable;
+/**
+ * @brief Generate iterable helper alias for infinite generation.
+ * @tparam GeneratorFunc The type of the generator function.
+ * ```cpp
+ * lz::generate_iterable_inf<std::function<int()>> = lz::generate([]() { return 10; });
+ * ```
+ */
+template<class GeneratorFunc>
+using generate_iterable_inf = detail::generate_iterable<GeneratorFunc, true>;
+
+/**
+ * @brief Generate iterable helper alias for finite generation.
+ * @tparam GeneratorFunc The type of the generator function.
+ * ```cpp
+ * lz::generate_iterable<std::function<int()>> = lz::generate([]() { return 10; }, 10);
+ * ```
+ */
+template<class GeneratorFunc>
+using generate_iterable = detail::generate_iterable<GeneratorFunc, false>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

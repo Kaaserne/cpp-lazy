@@ -61,7 +61,6 @@ jobs:
       run: cmake -S tests -B build/tests -G Ninja
         -D CMAKE_BUILD_TYPE:STRING=Release
         -D CPP-LAZY_CATCH_VERSION:STRING=${{ env.CATCH_VERSION }}
-        -D CPP-LAZY_DEBUG_ASSERTIONS:BOOL=ON
         -D TEST_INSTALLED_VERSION:BOOL=YES
         -D CMAKE_INSTALL_PREFIX=build/prefix
         -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}

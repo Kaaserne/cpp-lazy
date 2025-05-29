@@ -296,46 +296,6 @@ struct iterable_formatter {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-#ifdef LZ_HAS_CXX_11
-
-/**
- * @brief Streams any iterable to an output stream. For printing, `std::cout << <lz_iterable>` can also be used. Example:
- * ```cpp
- * std::vector<int> vec = { 2, 4 };
- *
- * // Requires C++20 or {fmt}. If using {fmt}, LZ_STANDALONE must *not* be defined.
- * lz::format(vec, std::cout, ", ", "{}"); // prints: 2, 4
- * lz::format(vec, std::cout, ","); // prints: 2,4
- * lz::format(vec, std::cout); // prints: 2, 4
- *
- * std::string output = lz::format(vec, ", ", "{}"); // 2, 4
- * std::string output = lz::format(vec, ","); // 2,4
- * std::string output = lz::format(vec); // 2, 4
- *
- * vec | lz::format(std::cout, ", ", "{}"); // prints: 2, 4
- * vec | lz::format(std::cout, ","); // prints: 2,4
- * vec | lz::format(std::cout); // prints: 2, 4
- * std::string output = vec | lz::format(", ", "{}"); // 2, 4
- * std::string output = vec | lz::format; // 2, 4
- * std::string output = vec | lz::format(","); // 2,4
- *
- * // Otherwise, if not using {fmt} or C++20, use the following:
- * lz::format(vec, std::cout, ", "); // prints: 2, 4
- * lz::format(vec, std::cout); // prints: 2, 4
- * std::string output = lz::format(vec, ", "); // 2, 4
- * std::string output = lz::format(vec); // 2,4
- *
- * // Or use the pipe operator:
- * vec | lz::format(std::cout, ", "); // prints: 2, 4
- * vec | lz::format(std::cout); // prints: 2, 4
- * std::string output = vec | lz::format(","); // 2,4
- * std::string output = vec | lz::format; // 2, 4
- * ```
- */
-constexpr detail::iterable_formatter format{};
-
-#else
-
 /**
  * @brief Streams any iterable to an output stream. For printing, `std::cout << <lz_iterable>` can also be used. Example:
  * ```cpp
@@ -371,8 +331,6 @@ constexpr detail::iterable_formatter format{};
  * ```
  */
 LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
-
-#endif
 
 LZ_MODULE_EXPORT_SCOPE_END
 

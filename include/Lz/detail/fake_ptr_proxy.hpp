@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #ifndef LZ_FAKE_POINTER_PROXY_HPP
 #define LZ_FAKE_POINTER_PROXY_HPP
 
@@ -17,7 +18,7 @@ class fake_ptr_proxy {
     using ptr = decltype(std::addressof(_t));
 
 public:
-    constexpr explicit fake_ptr_proxy(const T& t) : _t(t) {
+    constexpr explicit fake_ptr_proxy(const T& t) noexcept(std::is_copy_constructible<T>::value) : _t{ t } {
     }
 
     LZ_CONSTEXPR_CXX_17 ptr operator->() const noexcept {

@@ -144,6 +144,48 @@ TEST_CASE("Formatting") {
     }
 }
 
+TEST_CASE("Size") {
+    SECTION("lz::size") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        static_assert(std::is_unsigned<decltype(lz::size(vec))>::value, "lz::size should return an unsigned type");
+        REQUIRE(lz::size(vec) == 5);
+
+        int arr[] = { 1, 2, 3, 4, 5 };
+        static_assert(std::is_unsigned<decltype(lz::size(arr))>::value, "lz::size should return an unsigned type");
+        REQUIRE(lz::size(arr) == 5);
+    }
+
+    SECTION("lz::ssize") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        static_assert(std::is_signed<decltype(lz::ssize(vec))>::value, "lz::ssize should return a signed type");
+        REQUIRE(lz::ssize(vec) == 5);
+
+        int arr[] = { 1, 2, 3, 4, 5 };
+        static_assert(std::is_signed<decltype(lz::ssize(arr))>::value, "lz::ssize should return a signed type");
+        REQUIRE(lz::ssize(arr) == 5);
+    }
+
+    SECTION("Eager size random access") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::eager_size(vec) == 5);
+    }
+
+    SECTION("Eager size bidirectional") {
+        std::list<int> lst = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::eager_size(lst) == 5);
+    }
+
+    SECTION("Eager size forward") {
+        std::forward_list<int> flst = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::eager_size(flst) == 5);
+    }
+
+    SECTION("Eager size sentinel") {
+        auto c_str = lz::c_string("Hello");
+        REQUIRE(lz::eager_size(c_str) == 5);
+    }
+}
+
 TEST_CASE("To iterable") {
     SECTION("To iterable random access") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };

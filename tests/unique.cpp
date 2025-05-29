@@ -1,5 +1,6 @@
 #include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/unique.hpp>
 #include <catch2/catch.hpp>
 #include <list>
@@ -45,39 +46,23 @@ TEST_CASE("Unique changing and creating elements") {
 }
 
 TEST_CASE("Unique binary operations") {
+    std::array<int, 5> arr = { 1, 2, 2, 3, 3 };
+    auto expected = { 1, 2, 3 };
+
     SECTION("Operator++") {
-        std::array<int, 4> arr = { 3, 2, 3, 1 };
-        std::sort(arr.begin(), arr.end());
-        auto unique = lz::unique(arr);
-        auto beg = unique.begin();
-        ++beg;
-        REQUIRE(*beg == 2);
+        REQUIRE(lz::equal(lz::unique(arr), expected));
+    }
+
+    SECTION("Operator--") {
+        REQUIRE(lz::equal(arr | lz::unique | lz::reverse, expected | lz::reverse));
     }
 
     SECTION("Operator==, operator!=") {
-        std::array<int, 4> arr = { 3, 2, 3, 1 };
-        std::sort(arr.begin(), arr.end());
         auto unique = lz::unique(arr);
         auto beg = unique.begin();
         REQUIRE(beg != unique.end());
         beg = unique.end();
         REQUIRE(beg == unique.end());
-    }
-
-    SECTION("Operator--") {
-        // 3, 3, 3, 2, 2, 1
-        std::array<int, 6> arr = { 3, 2, 3, 1, 3, 2 };
-        std::sort(arr.begin(), arr.end(), std::greater<int>());
-        auto unique = lz::unique(arr);
-        auto iter = unique.end();
-        --iter;
-        REQUIRE(*iter == 1);
-        --iter;
-        REQUIRE(*iter == 2);
-        REQUIRE(&*iter == &arr[3]);
-        --iter;
-        REQUIRE(*iter == 3);
-        REQUIRE(iter == unique.begin());
     }
 }
 

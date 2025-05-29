@@ -1,222 +1,163 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/map.hpp>
 #include <Lz/range.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <cstddef>
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
-TEST_CASE("Range changing and creating elements") {
-    SECTION("Looping upwards") {
-        int expected_counter = 0;
-
-        for (int i : lz::range(5)) {
-            REQUIRE(expected_counter == i);
-            expected_counter++;
-        }
-    }
-
-    SECTION("Looping backwards") {
-        int expected_counter = 5;
-
-        for (int i : lz::range(5, 0, -1)) {
-            REQUIRE(expected_counter == i);
-            expected_counter--;
-        }
-    }
-
-    SECTION("Looping upwards with step") {
-        int expected_counter = 0;
-
-        for (int i : lz::range(0, 5, 2)) {
-            REQUIRE(expected_counter == i);
-            expected_counter += 2;
-        }
-    }
-
-    SECTION("Looping backwards with step") {
-        int expected_counter = 5;
-
-        for (int i : lz::range(5, 0, -2)) {
-            REQUIRE(expected_counter == i);
-            expected_counter -= 2;
-        }
-    }
-
-    SECTION("Operator=") {
-        auto float_range = lz::range(0., 10.5, 0.5);
-        auto it = float_range.begin();
-        REQUIRE(it != float_range.end());
-        it = float_range.end();
-        REQUIRE(it == float_range.end());
-
-        auto int_range = lz::range(0, 10, 1);
-        auto it2 = int_range.begin();
-        REQUIRE(it2 != int_range.end());
-        it2 = int_range.end();
-        REQUIRE(it2 == int_range.end());
-
-        float_range = lz::range(10.5, 0., -0.5);
-        it = float_range.begin();
-        REQUIRE(it != float_range.end());
-        it = float_range.end();
-        REQUIRE(it == float_range.end());
-
-        int_range = lz::range(10, 0, -1);
-        it2 = int_range.begin();
-        REQUIRE(it2 != int_range.end());
-        it2 = int_range.end();
-        REQUIRE(it2 == int_range.end());
-    }
-}
-
-TEST_CASE("Empty or one element range") {
-    SECTION("Empty") {
-        auto range = lz::range(0);
-        REQUIRE(lz::empty(range));
-        REQUIRE(!lz::has_many(range));
-        REQUIRE(!lz::has_one(range));
-    }
-
-    SECTION("One element") {
-        auto range = lz::range(1);
-        REQUIRE(!lz::empty(range));
-        REQUIRE(!lz::has_many(range));
-        REQUIRE(lz::has_one(range));
-    }
-}
-
-TEST_CASE("Range binary operations") {
-    constexpr int size = 10;
-    auto range = lz::range(size);
-    auto f_range = lz::range(0., 10.5, 0.5);
-    auto it = range.begin();
-    auto f_it = f_range.begin();
-
-    REQUIRE(*it == 0);
-    REQUIRE(*f_it == 0.);
-
-    SECTION("Operator++") {
-        ++it;
-        REQUIRE(*it == 1);
-        ++f_it;
-        REQUIRE(*f_it == 0.5);
-    }
-
-    SECTION("Operator--") {
-        ++it, --it;
-        REQUIRE(*it == 0);
-        ++f_it, --f_it;
-        REQUIRE(*f_it == 0);
-    }
-
-    SECTION("Operator== & Operator!=") {
-        REQUIRE(it != range.end());
-        it = range.end();
-        REQUIRE(it == range.end());
-    }
-
-    SECTION("Operator+") {
-        auto begin = range.begin();
-        auto end = range.end();
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
+TEST_CASE("Range permutations") {
+    SECTION("1 step, int") {
+        auto range = lz::range(10);
         std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
-        for (std::size_t i = 1; i <= lz::size(range); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
 
-        std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(range)));
-        std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(range)));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::size_t i = 0; i < lz::size(range) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(range)) == range.end());
-        for (std::size_t i = 1; i <= lz::size(range); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-        }
-        REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(range)) == range.begin());
+        range = lz::range(9, -1, -1);
+        expected = { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
 
-    SECTION("Operator-") {
-        auto begin = range.begin();
-        auto end = range.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(range)); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(range)) - i);
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(range)) - i);
-            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(range)) - i));
-            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(range)) - i));
-        }
+    SECTION("2 steps, int") {
+        auto range = lz::range(0, 10, 2);
+        std::vector<int> expected = { 0, 2, 4, 6, 8 };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
 
-        for (std::size_t i = 0; i < lz::size(range) ; ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(range) - 2 * i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -(static_cast<std::ptrdiff_t>(lz::size(range)) - 2 * static_cast<std::ptrdiff_t>(i)));
-        }
+        range = lz::range(8, -2, -2);
+        expected = { 8, 6, 4, 2, 0 };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+    }
+
+    SECTION("3 steps, int") {
+        auto range = lz::range(0, 10, 3);
+        std::vector<int> expected = { 0, 3, 6, 9 };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+
+        range = lz::range(9, -3, -3);
+        expected = { 9, 6, 3, 0 };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+    }
+
+    SECTION("1 step float") {
+        auto range = lz::range(10.f);
+        std::vector<float> expected = { 0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+
+        range = lz::range(9.f, -1.f, -1.f);
+        expected = { 9.f, 8.f, 7.f, 6.f, 5.f, 4.f, 3.f, 2.f, 1.f, 0.f };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+    }
+
+    SECTION("0.5 step float") {
+        auto range = lz::range(0.f, 5.5f, 0.5f);
+        std::vector<float> expected = { 0.f, 0.5f, 1.f, 1.5f, 2.f, 2.5f, 3.f, 3.5f, 4.f, 4.5f, 5.f };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+
+        range = lz::range(5.f, -0.5f, -0.5f);
+        expected = { 5.f, 4.5f, 4.f, 3.5f, 3.f, 2.5f, 2.f, 1.5f, 1.f, 0.5f, 0.f };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
 }
 
-TEST_CASE("Range to containers") {
-    constexpr int size = 10;
-    auto range = lz::range(size);
+namespace {
+template<class T>
+void test_operator_plus(lz::range_iterable<T> range, const std::vector<T>& expected) {
+    auto begin = range.begin();
+    auto end = range.end();
 
-    SECTION("To array") {
-        std::array<int, static_cast<std::size_t>(size)> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        auto actual = range | lz::to<std::array<int, static_cast<std::size_t>(size)>>();
+    for (std::ptrdiff_t i = 0; i < lz::ssize(range) - 1; ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(begin + i) == *(expected.begin() + i));
+    }
+    REQUIRE(begin + lz::ssize(range) == range.end());
+    for (std::ptrdiff_t i = 1; i <= lz::ssize(range); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(end - i) == *(expected.end() - i));
+    }
+    REQUIRE(end - lz::ssize(range) == range.begin());
 
-        REQUIRE(expected == actual);
+    std::advance(begin, lz::ssize(range));
+    std::advance(end, -lz::ssize(range));
+    REQUIRE(begin + 0 == begin);
+    REQUIRE(end + 0 == end);
+
+    for (std::ptrdiff_t i = 0; i < lz::ssize(range) - 1; ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(end + i) == *(expected.begin() + i));
+    }
+    REQUIRE(end + lz::ssize(range) == range.end());
+    for (std::ptrdiff_t i = 1; i <= lz::ssize(range); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(begin - i) == *(expected.end() - i));
+    }
+    REQUIRE(begin - lz::ssize(range) == range.begin());
+}
+
+template<class T>
+void test_operator_minus(lz::range_iterable<T> range) {
+    auto begin = range.begin();
+    auto end = range.end();
+
+    for (std::ptrdiff_t i = 0; i < lz::ssize(range); ++i) {
+        INFO("With i = " << i);
+        REQUIRE((end - i) - begin == lz::ssize(range) - i);
+        REQUIRE(end - (begin + i) == lz::ssize(range) - i);
+        REQUIRE((begin + i) - end == -(lz::ssize(range) - i));
+        REQUIRE(begin - (end - i) == -(lz::ssize(range) - i));
     }
 
-    SECTION("To vector") {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(range); ++i) {
+        INFO("With i = " << i);
+        REQUIRE((end - i) - (begin + i) == lz::ssize(range) - 2 * i);
+        REQUIRE((begin + i) - (end - i) == -(lz::ssize(range) - 2 * i));
+    }
+};
+} // namespace
+
+TEST_CASE("Binary operations") {
+    SECTION("With step, int uneven") {
+        auto range = lz::range(0, 10, 3);
+        std::vector<int> expected = { 0, 3, 6, 9 };
+        test_operator_plus(range, expected);
+        test_operator_minus(range);
+    }
+
+    SECTION("With step, int even") {
+        auto range = lz::range(0, 10, 2);
+        std::vector<int> expected = { 0, 2, 4, 6, 8 };
+        test_operator_plus(range, expected);
+        test_operator_minus(range);
+    }
+
+    SECTION("With step, float") {
+        auto range = lz::range(0.f, 5.5f, 0.5f);
+        std::vector<float> expected = { 0.f, 0.5f, 1.f, 1.5f, 2.f, 2.5f, 3.f, 3.5f, 4.f, 4.5f, 5.f };
+        test_operator_plus(range, expected);
+        test_operator_minus(range);
+    }
+
+    SECTION("Without step, int") {
+        auto range = lz::range(10);
         std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        auto actual = range | lz::to<std::vector>();
-
-        REQUIRE(expected == actual);
+        test_operator_plus(range, expected);
+        test_operator_minus(range);
     }
 
-    SECTION("To other container using to<>()") {
-        std::list<int> expected = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        auto actual = range | lz::to<std::list>();
-
-        REQUIRE(expected == actual);
-    }
-
-    SECTION("To map") {
-        auto expected = range | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
-        std::map<int, int> actual;
-
-        for (int i : lz::range(size)) {
-            actual.insert(std::make_pair(i, i));
-        }
-
-        REQUIRE(expected == actual);
-    }
-
-    SECTION("To unordered map") {
-        auto expected = range | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
-        std::unordered_map<int, int> actual;
-
-        for (int i : lz::range(size)) {
-            actual.insert(std::make_pair(i, i));
-        }
-
-        REQUIRE(expected == actual);
+    SECTION("Without step, float") {
+        auto range = lz::range(10.f);
+        std::vector<float> expected = { 0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f };
+        test_operator_plus(range, expected);
+        test_operator_minus(range);
     }
 }

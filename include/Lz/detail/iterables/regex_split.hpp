@@ -5,7 +5,6 @@
 
 #include <Lz/detail/iterators/regex_split.hpp>
 #include <Lz/detail/ref_or_view.hpp>
-#include <regex>
 
 namespace lz {
 namespace detail {

@@ -28,91 +28,18 @@ TEST_CASE("Zip with sentinels") {
 TEST_CASE("zip_iterable changing and creating elements") {
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
-    std::array<short, 4> c = { 1, 2, 3, 4 };
 
     SECTION("Unequal lengths") {
         std::vector<int> ints = { 1, 2, 3, 4, 5 };
         std::vector<double> floats = { 1.2, 3.3 };
 
         auto zipper = ints | lz::zip(floats);
-        auto end = zipper.end();
-
-        REQUIRE(*--end == std::make_tuple(2, 3.3));
-        REQUIRE(*--end == std::make_tuple(1, 1.2));
-        REQUIRE(end == zipper.begin());
-        REQUIRE(std::distance(zipper.begin(), zipper.end()) == 2);
-        REQUIRE(floats.size() == zipper.size());
-
+        static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, double&>>::value,
+                      "should be tuple ref");
         std::array<std::tuple<int, Approx>, 2> expected = { std::make_tuple(2, Approx{ 3.3f }),
                                                             std::make_tuple(1, Approx{ 1.2f }) };
-        auto reversed = lz::reverse(zipper);
-        REQUIRE(lz::equal(reversed, expected));
-
-        auto begin = zipper.begin();
-        REQUIRE(*begin == std::make_tuple(1, 1.2));
-        REQUIRE(*(begin + 1) == std::make_tuple(2, 3.3));
-        REQUIRE(begin + 2 == zipper.end());
-
-        end = zipper.end();
-        REQUIRE(*(end - 1) == std::make_tuple(2, 3.3));
-        REQUIRE(*(end - 2) == std::make_tuple(1, 1.2));
-        REQUIRE(end - 2 == zipper.begin());
-
-        REQUIRE(end - begin == 2);
-        REQUIRE((end - 1) - begin == 1);
-        REQUIRE((end - 2) - begin == 0);
-
-        REQUIRE(end - (begin + 1) == 1);
-        REQUIRE(end - (begin + 2) == 0);
-
-        REQUIRE(begin - end == -2);
-        REQUIRE((begin + 1) - end == -1);
-        REQUIRE((begin + 2) - end == 0);
-
-        REQUIRE(begin - (end - 1) == -1);
-        REQUIRE(begin - (end - 2) == 0);
-    }
-
-    SECTION("Should compile") {
-        std::vector<int> v = {1, 2, 3, 4, 5};
-        std::list<int> v2 = {1, 2, 3};
-        auto zipper = lz::zip(v, v2);
-        REQUIRE(std::distance(zipper.begin(), zipper.end()) == 3);
-    }
-
-    SECTION("Should zip") {
-        std::size_t i = 0;
-        for (const auto& tup : lz::zip(a, b, c)) {
-            REQUIRE(tup == std::make_tuple(a[i], Approx(b[i]), c[i]));
-            ++i;
-        }
-    }
-
-    SECTION("Should stop at smallest container") {
-        std::vector<int> smallest = { 1, 2 };
-        std::size_t counter = 0;
-
-        for (const auto& tup : lz::zip(a, b, smallest)) {
-            (void)tup;
-            counter++;
-        }
-
-        REQUIRE(counter == smallest.size());
-    }
-
-    SECTION("Should be by ref") {
-        std::size_t i = 0;
-        for (auto tup : lz::zip(a, b, c)) {
-            auto& a_element = std::get<0>(tup);
-            auto& b_element = std::get<1>(tup);
-            auto& c_element = std::get<2>(tup);
-
-            REQUIRE(&a_element == &a[i]);
-            REQUIRE(&b_element == &b[i]);
-            REQUIRE(&c_element == &c[i]);
-
-            ++i;
-        }
+        REQUIRE(lz::equal(lz::reverse(zipper), expected));
+        REQUIRE(lz::equal(zipper, expected | lz::reverse));
     }
 }
 
@@ -160,91 +87,75 @@ TEST_CASE("zip_iterable binary operations") {
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
+    std::vector<std::tuple<int, Approx, short>> expected = { std::make_tuple(1, Approx{ 1.f }, short(1)),
+                                                             std::make_tuple(2, Approx{ 2.f }, short(2)),
+                                                             std::make_tuple(3, Approx{ 3.f }, short(3)),
+                                                             std::make_tuple(4, Approx{ 4.f }, short(4)) };
+
     auto zipper = lz::zip(a, b, c);
     auto begin = zipper.begin();
 
     SECTION("Operator++") {
-        REQUIRE(begin == zipper.begin());
-        ++begin;
-        REQUIRE(*begin == std::make_tuple(*std::next(a.begin()), Approx{ *std::next(b.begin()) }, *std::next(c.begin())));
-        REQUIRE(begin == std::next(zipper.begin()));
+        REQUIRE(lz::equal(zipper, expected));
     }
 
     SECTION("Operator--") {
-        ++begin;
-        --begin;
-        REQUIRE(*begin == std::make_tuple(*a.begin(), Approx(*b.begin()), *c.begin()));
-        REQUIRE(begin == zipper.begin());
+        REQUIRE(lz::equal(zipper | lz::reverse, expected | lz::reverse));
     }
 
     SECTION("Operator== & Operator!=") {
         REQUIRE(begin != zipper.end());
+        REQUIRE(zipper.end() != begin);
         begin = zipper.end();
         REQUIRE(begin == zipper.end());
+        REQUIRE(zipper.end() == begin);
     }
 
     SECTION("Operator+(int)") {
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(zipper.end() + 0 == zipper.end());
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
-            REQUIRE(*(begin + i) ==
-                    std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
-        }
-
         auto end = zipper.end();
-        for (std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
-            REQUIRE(*(end - i) == std::make_tuple(*std::prev(a.end(), i), *std::prev(b.end(), i), *std::prev(c.end(), i)));
-        }
 
-        while (begin != end) {
-            ++begin;
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin + i) == *(expected.begin() + i));
         }
+        REQUIRE(begin + lz::ssize(zipper) == zipper.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(zipper); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end - i) == *(expected.end() - i));
+        }
+        REQUIRE(end - lz::ssize(zipper) == zipper.begin());
+
+        std::advance(begin, lz::ssize(zipper));
+        std::advance(end, -lz::ssize(zipper));
         REQUIRE(begin + 0 == begin);
-
-        for (std::ptrdiff_t i = 1; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
-            REQUIRE(*(begin - i) == std::make_tuple(*std::prev(a.end(), i), *std::prev(b.end(), i), *std::prev(c.end(), i)));
-        }
-
-        begin = zipper.begin();
-        while (end != begin) {
-            --end;
-        }
         REQUIRE(end + 0 == end);
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(zipper.size()); i++) {
-            REQUIRE(*(end + i) == std::make_tuple(*std::next(a.begin(), i), *std::next(b.begin(), i), *std::next(c.begin(), i)));
+
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper) - 1; ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(end + i) == *(expected.begin() + i));
         }
+        REQUIRE(end + lz::ssize(zipper) == zipper.end());
+        for (std::ptrdiff_t i = 1; i <= lz::ssize(zipper); ++i) {
+            INFO("With i = " << i);
+            REQUIRE(*(begin - i) == *(expected.end() - i));
+        }
+        REQUIRE(begin - lz::ssize(zipper) == zipper.begin());
     }
 
     SECTION("Operator-(Iterator)") {
-        REQUIRE((zipper.end() - zipper.begin()) == 4);
-        REQUIRE(zipper.begin() - zipper.end() == -4);
-
-        std::array<short, 3> shortest = { 1, 2, 3 };
-        auto zip = lz::zip(c, shortest);
-        auto beg = zip.begin();
-        auto e = zip.end();
-
-        for (std::ptrdiff_t i = static_cast<std::ptrdiff_t>(zip.size()); i > 0; i--) {
-            REQUIRE((e - beg) == i);
-            REQUIRE((beg - e) == -i);
-            --e;
-        }
-
-        e = zip.end();
-        for (std::ptrdiff_t i = static_cast<std::ptrdiff_t>(zip.size()); i > 0; i--) {
-            REQUIRE((beg - e) == -i);
-            REQUIRE((e - beg) == i);
-            ++beg;
-        }
-
-        beg = zip.begin();
-
-        for (std::size_t i = 0; i < lz::size(zip); ++i) {
+        auto end = zipper.end();
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper); ++i) {
             INFO("With i = " << i);
-            REQUIRE((e - static_cast<std::ptrdiff_t>(i)) - (beg + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(zip)) - 2 * static_cast<std::ptrdiff_t>(i));
-            REQUIRE((beg + static_cast<std::ptrdiff_t>(i)) - (e - static_cast<std::ptrdiff_t>(i)) ==
-                    -(static_cast<std::ptrdiff_t>(lz::size(zip)) - 2 * static_cast<std::ptrdiff_t>(i)));
+            REQUIRE((end - i) - begin == lz::ssize(zipper) - i);
+            REQUIRE(end - (begin + i) == lz::ssize(zipper) - i);
+            REQUIRE((begin + i) - end == -(lz::ssize(zipper) - i));
+            REQUIRE(begin - (end - i) == -(lz::ssize(zipper) - i));
+        }
+
+        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper); ++i) {
+            INFO("With i = " << i);
+            REQUIRE((end - i) - (begin + i) == lz::ssize(zipper) - 2 * i);
+            REQUIRE((begin + i) - (end - i) == -(lz::ssize(zipper) - 2 * i));
         }
     }
 }
@@ -255,75 +166,55 @@ TEST_CASE("zip_iterable to containers") {
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
+    using tup = std::tuple<int, float, short>;
+
     SECTION("To array") {
-        auto array = lz::zip(a, b, c) | lz::to<std::array<std::tuple<int, float, short>, size>>();
-
-        for (std::size_t i = 0; i < array.size(); i++) {
-            auto& a_element = std::get<0>(array[i]);
-            auto& b_element = std::get<1>(array[i]);
-            auto& c_element = std::get<2>(array[i]);
-
-            REQUIRE(a_element == a[i]);
-            REQUIRE(b_element == b[i]);
-            REQUIRE(c_element == c[i]);
-        }
+        auto array = lz::zip(a, b, c) | lz::to<std::array<tup, size>>();
+        std::array<tup, size> expected = { std::make_tuple(1, 1.f, static_cast<short>(1)),
+                                           std::make_tuple(2, 2.f, static_cast<short>(2)),
+                                           std::make_tuple(3, 3.f, static_cast<short>(3)),
+                                           std::make_tuple(4, 4.f, static_cast<short>(4)) };
+        REQUIRE(array == expected);
     }
 
     SECTION("To vector") {
         auto vector = lz::zip(a, b, c) | lz::to<std::vector>();
-
-        for (std::size_t i = 0; i < vector.size(); i++) {
-            auto& a_element = std::get<0>(vector[i]);
-            auto& b_element = std::get<1>(vector[i]);
-            auto& c_element = std::get<2>(vector[i]);
-
-            REQUIRE(a_element == a[i]);
-            REQUIRE(b_element == b[i]);
-            REQUIRE(c_element == c[i]);
-        }
+        std::vector<tup> expected = { std::make_tuple(1, 1.f, static_cast<short>(1)),
+                                      std::make_tuple(2, 2.f, static_cast<short>(2)),
+                                      std::make_tuple(3, 3.f, static_cast<short>(3)),
+                                      std::make_tuple(4, 4.f, static_cast<short>(4)) };
+        REQUIRE(vector == expected);
     }
 
     SECTION("To other container using to<>()") {
-        auto list = lz::zip(a, b, c) | lz::to<std::list<std::tuple<int, float, short>>>();
-        auto list_iter = list.begin();
-
-        for (std::size_t i = 0; i < list.size(); i++) {
-            auto& a_element = std::get<0>(*list_iter);
-            auto& b_element = std::get<1>(*list_iter);
-            auto& c_element = std::get<2>(*list_iter);
-
-            REQUIRE(a_element == a[i]);
-            REQUIRE(b_element == b[i]);
-            REQUIRE(c_element == c[i]);
-
-            ++list_iter;
-        }
+        auto list = lz::zip(a, b, c) | lz::to<std::list<tup>>();
+        std::list<tup> expected = { std::make_tuple(1, 1.f, static_cast<short>(1)),
+                                    std::make_tuple(2, 2.f, static_cast<short>(2)),
+                                    std::make_tuple(3, 3.f, static_cast<short>(3)),
+                                    std::make_tuple(4, 4.f, static_cast<short>(4)) };
+        REQUIRE(list == expected);
     }
 
     SECTION("To map") {
-        using Tuple = std::tuple<int, float, short>;
-        auto actual = lz::zip(a, b, c) | lz::map([](const Tuple& tup) { return std::make_pair(std::get<0>(tup), tup); }) |
-                      lz::to<std::map<int, Tuple>>();
-        std::map<int, std::tuple<int, float, short>> expected = {
-            std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
-            std::make_pair(2, std::make_tuple(2, 2.f, static_cast<short>(2))),
-            std::make_pair(3, std::make_tuple(3, 3.f, static_cast<short>(3))),
-            std::make_pair(4, std::make_tuple(4, 4.f, static_cast<short>(4)))
-        };
+        auto actual = lz::zip(a, b, c) | lz::map([](const tup& t) { return std::make_pair(std::get<0>(t), t); }) |
+                      lz::to<std::map<int, tup>>();
+
+        std::map<int, tup> expected = { std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
+                                        std::make_pair(2, std::make_tuple(2, 2.f, static_cast<short>(2))),
+                                        std::make_pair(3, std::make_tuple(3, 3.f, static_cast<short>(3))),
+                                        std::make_pair(4, std::make_tuple(4, 4.f, static_cast<short>(4))) };
 
         REQUIRE(actual == expected);
     }
 
     SECTION("To map") {
-        using Tuple = std::tuple<int, float, short>;
-        auto actual = lz::zip(a, b, c) | lz::map([](const Tuple& tup) { return std::make_pair(std::get<0>(tup), tup); }) |
-                      lz::to<std::unordered_map<int, Tuple>>();
+        auto actual = lz::zip(a, b, c) | lz::map([](const tup& t) { return std::make_pair(std::get<0>(t), t); }) |
+                      lz::to<std::unordered_map<int, tup>>();
 
-        std::unordered_map<int, std::tuple<int, float, short>> expected = {
-            std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
-            std::make_pair(2, std::make_tuple(2, 2.f, static_cast<short>(2))),
-            std::make_pair(3, std::make_tuple(3, 3.f, static_cast<short>(3))),
-            std::make_pair(4, std::make_tuple(4, 4.f, static_cast<short>(4)))
+        std::unordered_map<int, tup> expected = { std::make_pair(1, std::make_tuple(1, 1.f, static_cast<short>(1))),
+                                                  std::make_pair(2, std::make_tuple(2, 2.f, static_cast<short>(2))),
+                                                  std::make_pair(3, std::make_tuple(3, 3.f, static_cast<short>(3))),
+                                                  std::make_pair(4, std::make_tuple(4, 4.f, static_cast<short>(4)))
 
         };
 

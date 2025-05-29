@@ -121,13 +121,19 @@ TEST_CASE("Left join binary operations") {
     auto it = joined.begin();
 
     SECTION("Operator++") {
-        REQUIRE(lz::distance(joined.begin(), joined.end()) == 4);
-        ++it;
-        customer customer = std::get<0>(*it);
-        payment_bill payment_bill = std::get<1>(*it);
-        REQUIRE(customer.id == 25);
-        REQUIRE(payment_bill.customer_id == 25);
-        REQUIRE(payment_bill.id == 2);
+        auto expected = std::vector<std::tuple<customer, payment_bill>>{ std::make_tuple(customer{ 25 }, payment_bill{ 25, 0 }),
+                                                                         std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
+                                                                         std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
+                                                                         std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
+
+        REQUIRE(lz::equal(joined, expected,
+                          [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
+                              auto& a_fst = std::get<0>(a);
+                              auto& a_snd = std::get<1>(a);
+                              auto& b_fst = std::get<0>(b);
+                              auto& b_snd = std::get<1>(b);
+                              return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
+                          }));
     }
 
     SECTION("Operator== & operator!=") {

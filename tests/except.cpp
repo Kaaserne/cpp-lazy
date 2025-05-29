@@ -123,8 +123,8 @@ TEST_CASE("Except binary operations") {
     REQUIRE(*it == 1);
 
     SECTION("Operator++") {
-        ++it;
-        REQUIRE(*it == 4);
+        auto expected = { 1, 4 };
+        REQUIRE(lz::equal(except, expected));
     }
 
     SECTION("Operator== & operator!=") {

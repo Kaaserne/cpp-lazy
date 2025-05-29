@@ -1,6 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/take_every.hpp>
 #include <array>
 #include <catch2/catch.hpp>
@@ -130,33 +131,15 @@ void operator_pp_test(const Container1& even_sized, const Container2& uneven_siz
     auto uneven_sized_even_take = lz::take_every(uneven_sized, 2);
     auto uneven_sized_odd_take = lz::take_every(uneven_sized, 3);
 
-    auto it = even_sized_even_take.begin();
-    auto it2 = even_sized_odd_take.begin();
-    auto it3 = uneven_sized_even_take.begin();
-    auto it4 = uneven_sized_odd_take.begin();
+    auto expected1 = { 1, 3 };
+    auto expected2 = { 1, 4 };
+    auto expected3 = { 1, 3, 5 };
+    auto expected4 = { 1, 4 };
 
-    REQUIRE(*it == 1);
-    REQUIRE(*it2 == 1);
-    REQUIRE(*it3 == 1);
-    REQUIRE(*it4 == 1);
-    ++it;
-    ++it2;
-    ++it3;
-    ++it4;
-    REQUIRE(*it == 3);
-    REQUIRE(*it2 == 4);
-    REQUIRE(*it3 == 3);
-    REQUIRE(*it4 == 4);
-    ++it;
-    ++it2;
-    ++it3;
-    ++it4;
-    REQUIRE(it == even_sized_even_take.end());
-    REQUIRE(it2 == even_sized_odd_take.end());
-    REQUIRE(*it3 == 5);
-    REQUIRE(it4 == uneven_sized_odd_take.end());
-    ++it3;
-    REQUIRE(it3 == uneven_sized_even_take.end());
+    REQUIRE(lz::equal(even_sized_even_take, expected1));
+    REQUIRE(lz::equal(even_sized_odd_take, expected2));
+    REQUIRE(lz::equal(uneven_sized_even_take, expected3));
+    REQUIRE(lz::equal(uneven_sized_odd_take, expected4));
 }
 
 template<class Container1, class Container2>
@@ -167,38 +150,20 @@ void operator_mm_test(const Container1 even_sized, const Container2& uneven_size
 
     // even sized = { 1, 2, 3, 4 }
     // uneven sized = { 1, 2, 3, 4, 5 }
-    auto even_sized_even_take = lz::take_every(even_sized, 2);
-    auto even_sized_odd_take = lz::take_every(even_sized, 3);
-    auto uneven_sized_even_take = lz::take_every(uneven_sized, 2);
-    auto uneven_sized_odd_take = lz::take_every(uneven_sized, 3);
+    auto even_sized_even_take = lz::take_every(even_sized, 2);     // {3, 1}
+    auto even_sized_odd_take = lz::take_every(even_sized, 3);      // {4, 1}
+    auto uneven_sized_even_take = lz::take_every(uneven_sized, 2); // {5, 3, 1}
+    auto uneven_sized_odd_take = lz::take_every(uneven_sized, 3);  // {4, 1}
 
-    auto it = even_sized_even_take.end();    // {3, 1}
-    auto it2 = even_sized_odd_take.end();    // {4, 1}
-    auto it3 = uneven_sized_even_take.end(); // {5, 3, 1}
-    auto it4 = uneven_sized_odd_take.end();  // {4, 1}
+    auto expected1 = { 3, 1 };
+    auto expected2 = { 4, 1 };
+    auto expected3 = { 5, 3, 1 };
+    auto expected4 = { 4, 1 };
 
-    --it;
-    --it2;
-    --it3;
-    --it4;
-    REQUIRE(*it == 3);
-    REQUIRE(*it2 == 4);
-    REQUIRE(*it3 == 5);
-    REQUIRE(*it4 == 4);
-    --it;
-    --it2;
-    --it3;
-    --it4;
-    REQUIRE(*it == 1);
-    REQUIRE(*it2 == 1);
-    REQUIRE(*it3 == 3);
-    REQUIRE(*it4 == 1);
-    REQUIRE(it == even_sized_even_take.begin());
-    REQUIRE(it2 == even_sized_odd_take.begin());
-    REQUIRE(it4 == uneven_sized_odd_take.begin());
-    --it3;
-    REQUIRE(*it3 == 1);
-    REQUIRE(it3 == uneven_sized_even_take.begin());
+    REQUIRE(lz::equal(lz::reverse(even_sized_even_take), expected1));
+    REQUIRE(lz::equal(lz::reverse(even_sized_odd_take), expected2));
+    REQUIRE(lz::equal(lz::reverse(uneven_sized_even_take), expected3));
+    REQUIRE(lz::equal(lz::reverse(uneven_sized_odd_take), expected4));
 }
 
 TEST_CASE("take_every_iterable binary operations") {
@@ -235,40 +200,35 @@ TEST_CASE("take_every_iterable binary operations") {
         auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
         auto test_operator_plus = [](std::vector<int> expected, decltype(even_sized_even_take) input) {
-            auto it = input.begin();
+            auto begin = input.begin();
             auto end = input.end();
-            REQUIRE(it + 0 == it);
+
+            for (std::ptrdiff_t i = 0; i < lz::ssize(input) - 1; ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(begin + i) == *(expected.begin() + i));
+            }
+            REQUIRE(begin + lz::ssize(input) == input.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(input); ++i) {
+                INFO("With i = " << i);
+                REQUIRE(*(end - i) == *(expected.end() - i));
+            }
+            REQUIRE(end - lz::ssize(input) == input.begin());
+
+            std::advance(begin, lz::ssize(input));
+            std::advance(end, -lz::ssize(input));
+            REQUIRE(begin + 0 == begin);
             REQUIRE(end + 0 == end);
 
-            for (std::size_t i = 0; i < lz::size(input); ++i) {
+            for (std::ptrdiff_t i = 0; i < lz::ssize(input) - 1; ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(it + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+                REQUIRE(*(end + i) == *(expected.begin() + i));
             }
-
-            REQUIRE(it + static_cast<std::ptrdiff_t>(lz::size(input)) == end);
-            std::advance(it, static_cast<std::ptrdiff_t>(lz::size(input)));
-            REQUIRE(it == end);
-            REQUIRE(it + 0 == it);
-
-            for (std::size_t i = 1; i <= lz::size(input); ++i) {
+            REQUIRE(end + lz::ssize(input) == input.end());
+            for (std::ptrdiff_t i = 1; i <= lz::ssize(input); ++i) {
                 INFO("With i = " << i);
-                REQUIRE(*(it - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+                REQUIRE(*(begin - i) == *(expected.end() - i));
             }
-
-            for (std::size_t i = 1; i <= lz::size(input); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-            }
-
-            REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(input)) == input.begin());
-            std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(input)));
-            REQUIRE(end == input.begin());
-            REQUIRE(end + 0 == end);
-
-            for (std::size_t i = 0; i < lz::size(input); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-            }
+            REQUIRE(begin - lz::ssize(input) == input.begin());
         };
 
         std::vector<int> expected = { 1, 3 };
@@ -294,20 +254,18 @@ TEST_CASE("take_every_iterable binary operations") {
             auto begin = iterable.begin();
             auto end = iterable.end();
 
-            for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(iterable)); ++i) {
+            for (std::ptrdiff_t i = 0; i < lz::ssize(iterable); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(iterable)) - i);
-                REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(iterable)) - i);
-                REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(iterable)) - i));
-                REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(iterable)) - i));
+                REQUIRE((end - i) - begin == lz::ssize(iterable) - i);
+                REQUIRE(end - (begin + i) == lz::ssize(iterable) - i);
+                REQUIRE((begin + i) - end == -(lz::ssize(iterable) - i));
+                REQUIRE(begin - (end - i) == -(lz::ssize(iterable) - i));
             }
 
-            for (std::size_t i = 0; i < lz::size(iterable); ++i) {
+            for (std::ptrdiff_t i = 0; i < lz::ssize(iterable); ++i) {
                 INFO("With i = " << i);
-                REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                        static_cast<std::ptrdiff_t>(lz::size(iterable)) - 2 * static_cast<std::ptrdiff_t>(i));
-                REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                        -(static_cast<std::ptrdiff_t>(lz::size(iterable)) - 2 * static_cast<std::ptrdiff_t>(i)));
+                REQUIRE((end - i) - (begin + i) == lz::ssize(iterable) - 2 * i);
+                REQUIRE((begin + i) - (end - i) == -(lz::ssize(iterable) - 2 * i));
             }
         };
 

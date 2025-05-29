@@ -33,7 +33,7 @@ struct intersection_adaptor {
      * @param iterable2 The second iterable
      * @param compare The comparison function. std::less<> by default
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr
     enable_if<is_iterable<Iterable2>::value, intersection_iterable<remove_ref<Iterable>, remove_ref<Iterable2>, BinaryPredicate>>
     operator()(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate compare = {}) const {
@@ -60,7 +60,7 @@ struct intersection_adaptor {
      * @param iterable2 The second iterable
      * @param compare The comparison function. std::less<> by default
      */
-    template<LZ_CONCEPT_ITERABLE Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
     operator()(Iterable2&& iterable2, BinaryPredicate compare = {}) const {
         return { std::forward<Iterable2>(iterable2), std::move(compare) };

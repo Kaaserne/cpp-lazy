@@ -66,13 +66,8 @@ TEST_CASE("Exclusive scan binary operations") {
     REQUIRE(*scan.begin() == 0);
 
     SECTION("Operator++") {
-        auto begin = scan.begin();
-        ++begin;
-        REQUIRE(*begin == 0 + 3);
-        ++begin;
-        REQUIRE(*begin == 0 + 3 + 1);
-        ++begin;
-        REQUIRE(*begin == 0 + 3 + 1 + 4);
+        auto expected = { 0, 3, 4, 8, 9, 14, 23, 25 };
+        REQUIRE(lz::equal(scan, expected));
     }
 
     SECTION("Operator== & operator!=") {

@@ -13,10 +13,10 @@ struct regex_split_adaptor {
     using adaptor = regex_split_adaptor;
 
     template<class String>
-    using const_iter = typename String::const_iterator;
+    using iter = decltype(std::begin(std::declval<const String>()));
 
     template<class String>
-    using regex_it = std::regex_token_iterator<const_iter<String>>;
+    using regex_it = std::regex_token_iterator<iter<String>>;
 
     /**
      * @brief Splits a string based on a regex. The regex must be by reference. The `begin()` and `end()` types are different, but
@@ -34,7 +34,7 @@ struct regex_split_adaptor {
     template<class String>
     LZ_NODISCARD regex_split_iterable<regex_it<String>, regex_it<String>>
     operator()(const String& s, const std::basic_regex<typename String::value_type>& regex) const {
-        using token_iter = std::regex_token_iterator<const_iter<String>>;
+        using token_iter = std::regex_token_iterator<iter<String>>;
         token_iter first(s.begin(), s.end(), regex, -1);
         return (*this)(std::move(first), token_iter{});
     }

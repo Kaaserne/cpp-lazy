@@ -8,8 +8,11 @@
 
 namespace lz {
 namespace detail {
-template<bool IsIterable, class ValueType, class Iterable, class Iterable2>
-class split_iterable : public lazy_view {
+template<class ValueType, class Iterable, class Iterable2, class = void>
+class split_iterable;
+
+template<class ValueType, class Iterable, class Iterable2>
+class split_iterable<ValueType, Iterable, Iterable2, enable_if<is_iterable<Iterable2>::value>> : public lazy_view {
     ref_or_view<Iterable> _iterable;
     ref_or_view<Iterable2> _delimiter;
 
@@ -35,7 +38,7 @@ public:
 };
 
 template<class ValueType, class Iterable, class T>
-class split_iterable<false, ValueType, Iterable, T> : public lazy_view {
+class split_iterable<ValueType, Iterable, T, enable_if<!is_iterable<T>::value>> : public lazy_view {
     ref_or_view<Iterable> _iterable;
     T _delimiter;
 

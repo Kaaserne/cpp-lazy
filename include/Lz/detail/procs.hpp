@@ -142,14 +142,14 @@ constexpr diff_type<Iterator> distance(Iterator begin, S end) {
 #ifdef LZ_HAS_CXX_17
 
 /**
- * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * @brief Gets the unsigned size of a iterable or iterable if it has a .size() method. Example:
  * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * std::cout << lz::size(vec) << '\n'; // prints 5
+ * int arr[] = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::size(arr) << '\n'; // prints 5
  * ```
  *
- * @param i The container to get the size from.
- * @return The size of the container.
+ * @param i The iterable to get the size from.
+ * @return The size of the iterable.
  */
 template<class Iterable>
 LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i)) {
@@ -160,14 +160,14 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(
 #else
 
 /**
- * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * @brief Gets the unsigned size of a iterable or iterable if it has a .size() method. Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * std::cout << lz::size(vec) << '\n'; // prints 5
  * ```
  *
- * @param c The container to get the size from.
- * @return The size of the container.
+ * @param i The iterable to get the size from.
+ * @return The size of the iterable.
  */
 template<class Iterable>
 LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size())) -> decltype(i.size()) {
@@ -176,7 +176,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
 }
 
 /**
- * @brief Gets the size of a container or iterable if it has a .size() method. Example:
+ * @brief Gets the unsigned size of a container or iterable if it has a .size() method. Example:
  * ```cpp
  * int arr[] = { 1, 2, 3, 4, 5 };
  * std::cout << lz::size(arr) << '\n'; // prints 5
@@ -186,8 +186,66 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
+LZ_NODISCARD constexpr std::size_t size(const T (&c)[N]) noexcept {
+    static_cast<void>(c);
     return N;
+}
+
+#endif
+
+#ifdef LZ_HAS_CXX_20
+
+/**
+ * @brief Gets the signed size of a container or iterable if it has a .size() method. Example:
+ * ```cpp
+ * int arr[] = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::ssize(arr) << '\n'; // prints 5
+ * ```
+ *
+ * @param i The container to get the size from.
+ * @return The size of the container.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i))) -> decltype(std::ssize(i)) {
+    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+    return std::ssize(i);
+}
+
+#else
+
+/**
+ * @brief Gets the signed size of a container or iterable if it has a .size() method. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::ssize(vec) << '\n'; // prints 5
+ * ```
+ *
+ * @param i The container to get the size from.
+ * @return The size of the container.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(
+    static_cast<detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>>(lz::size(i))))
+    -> detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type> {
+    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+    using T = detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>;
+    return static_cast<T>(lz::size(i));
+}
+
+/**
+ * @brief Gets the signed size of a container or iterable if it has a .size() method. Example:
+ * ```cpp
+ * int arr[] = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::ssize(arr) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The container to get the size from.
+ * @return The size of the container.
+ */
+template<class T, size_t N>
+LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&c)[N]) noexcept {
+    static_cast<void>(c);
+    return static_cast<std::ptrdiff_t>(N);
 }
 
 #endif

@@ -10,6 +10,7 @@ FetchContent_Declare(Catch2
 )
 FetchContent_MakeAvailable(Catch2)
 
+set(CPP-LAZY_DEBUG_ASSERTIONS ON CACHE BOOL "Enable debug assertions in cpp-lazy" FORCE)
 
 # ---- Import root project ----
 option(TEST_INSTALLED_VERSION "Import the library using find_package" OFF)
@@ -37,6 +38,7 @@ add_executable(cpp-lazy-tests
 	common.cpp
 	concatenate.cpp
 	cstring.cpp
+	duplicates.cpp
 	enumerate.cpp
 	except.cpp
 	exclude.cpp

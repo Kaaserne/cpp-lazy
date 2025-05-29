@@ -10,6 +10,8 @@ TEST_CASE("Basic common_iterable test") {
     const char* s = "hello, world!";
     auto cstr = lz::c_string(s);
     auto common = lz::common(cstr);
+    REQUIRE(common.begin() != common.end());
+    REQUIRE(common.end() != common.begin());
     REQUIRE(std::find(common.begin(), common.end(), 'h') == common.begin());
     REQUIRE(std::equal(common.begin(), common.end(), cstr.begin()));
 }

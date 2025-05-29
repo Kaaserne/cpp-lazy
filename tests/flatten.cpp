@@ -191,35 +191,32 @@ void test_operator_plus_is(const RaIterable& it, const ExpectedIterable& expecte
     auto end = flattened.end();
     REQUIRE(flattened.size() == lz::size(expected));
 
+    for (std::ptrdiff_t i = 0; i < lz::ssize(flattened) - 1; ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(begin + i) == *(expected.begin() + i));
+    }
+    REQUIRE(begin + lz::ssize(flattened) == flattened.end());
+    for (std::ptrdiff_t i = 1; i <= lz::ssize(flattened); ++i) {
+        INFO("With i = " << i);
+        REQUIRE(*(end - i) == *(expected.end() - i));
+    }
+    REQUIRE(end - lz::ssize(flattened) == flattened.begin());
+
+    std::advance(begin, lz::ssize(flattened));
+    std::advance(end, -lz::ssize(flattened));
     REQUIRE(begin + 0 == begin);
     REQUIRE(end + 0 == end);
 
-    for (std::size_t i = 0; i < lz::size(flattened) - 1; ++i) {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(flattened) - 1; ++i) {
         INFO("With i = " << i);
-        REQUIRE(*(begin + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
+        REQUIRE(*(end + i) == *(expected.begin() + i));
     }
-    REQUIRE(begin + static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.end());
-    for (std::size_t i = 1; i <= lz::size(flattened); ++i) {
+    REQUIRE(end + lz::ssize(flattened) == flattened.end());
+    for (std::ptrdiff_t i = 1; i <= lz::ssize(flattened); ++i) {
         INFO("With i = " << i);
-        REQUIRE(*(end - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
+        REQUIRE(*(begin - i) == *(expected.end() - i));
     }
-    REQUIRE(end - static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.begin());
-
-    std::advance(begin, static_cast<std::ptrdiff_t>(lz::size(flattened)));
-    std::advance(end, -static_cast<std::ptrdiff_t>(lz::size(flattened)));
-    REQUIRE(begin + 0 == begin);
-    REQUIRE(end + 0 == end);
-
-    for (std::size_t i = 0; i < lz::size(flattened) - 1; ++i) {
-        INFO("With i = " << i);
-        REQUIRE(*(end + static_cast<std::ptrdiff_t>(i)) == *(expected.begin() + static_cast<std::ptrdiff_t>(i)));
-    }
-    REQUIRE(end + static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.end());
-    for (std::size_t i = 1; i <= lz::size(flattened); ++i) {
-        INFO("With i = " << i);
-        REQUIRE(*(begin - static_cast<std::ptrdiff_t>(i)) == *(expected.end() - static_cast<std::ptrdiff_t>(i)));
-    }
-    REQUIRE(begin - static_cast<std::ptrdiff_t>(lz::size(flattened)) == flattened.begin());
+    REQUIRE(begin - lz::ssize(flattened) == flattened.begin());
 }
 
 template<class Vector>
@@ -229,20 +226,18 @@ void test_operator_min(const Vector& vec) {
     auto begin = flattened.begin();
     auto end = flattened.end();
 
-    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(flattened)); ++i) {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(flattened); ++i) {
         INFO("With i = " << i);
-        REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(flattened)) - i);
-        REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(flattened)) - i);
-        REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(flattened)) - i));
-        REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(flattened)) - i));
+        REQUIRE((end - i) - begin == lz::ssize(flattened) - i);
+        REQUIRE(end - (begin + i) == lz::ssize(flattened) - i);
+        REQUIRE((begin + i) - end == -(lz::ssize(flattened) - i));
+        REQUIRE(begin - (end - i) == -(lz::ssize(flattened) - i));
     }
 
-    for (std::size_t i = 0; i < lz::size(flattened); ++i) {
+    for (std::ptrdiff_t i = 0; i < lz::ssize(flattened); ++i) {
         INFO("With i = " << i);
-        REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                static_cast<std::ptrdiff_t>(lz::size(flattened)) - 2 * static_cast<std::ptrdiff_t>(i));
-        REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                -(static_cast<std::ptrdiff_t>(lz::size(flattened)) - 2 * static_cast<std::ptrdiff_t>(i)));
+        REQUIRE((end - i) - (begin + i) == lz::ssize(flattened) - 2 * i);
+        REQUIRE((begin + i) - (end - i) == -(lz::ssize(flattened) - 2 * i));
     }
 }
 
