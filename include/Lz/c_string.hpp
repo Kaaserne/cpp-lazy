@@ -28,7 +28,7 @@ LZ_INLINE_VAR constexpr detail::c_string_adaptor c_string{};
  * @tparam CharT The character type of the string.
  * Example:
  * ```cpp
- * lz::c_string_iterable<char> cstr = lz::c_string("Hello, World!");
+ * lz::c_string_iterable<const char> cstr = lz::c_string("Hello, World!");
  * ```
 */
 template<class CharT>
