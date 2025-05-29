@@ -5,6 +5,8 @@
 
 #include <Lz/detail/ref_or_view.hpp>
 
+// TODO add more efficient reverse iterator implementation
+
 namespace lz {
 namespace detail {
 template<class Iterable>
