@@ -58,7 +58,11 @@ TEST_CASE("Zip with") {
         const std::vector<int> v2 = { 6, 7, 8, 9, 10 };
         const std::vector<int> v3 = { 11, 12, 13, 14, 15 };
         constexpr int expected[] = { 1 + 6 + 11, 2 + 7 + 12, 3 + 8 + 13, 4 + 9 + 14, 5 + 10 + 15 };
-        auto actual = lz::zip_with([](int a, int b, int c) { return a + b + c; }, v1, v2, v3);
+        using v = const std::vector<int>;
+        std::function<int(int, int, int)> fn = [](int a, int b, int c) {
+            return a + b + c;
+        };
+        lz::zip_with_iterable<decltype(fn), v, v, v> actual = lz::zip_with(std::move(fn), v1, v2, v3);
         REQUIRE(lz::equal(actual, expected));
     }
 
@@ -70,6 +74,17 @@ TEST_CASE("Zip with") {
         auto actual = lz::zip_with([](int a, int b, int c) { return a + b + c; }, v1, v2, v3);
         REQUIRE(lz::equal(actual, expected));
     }
+}
+
+TEST_CASE("Unzip with") {
+    const std::vector<std::tuple<int, int>> zipped = { std::make_tuple(1, 6), std::make_tuple(2, 7), std::make_tuple(3, 8),
+                                                       std::make_tuple(4, 9), std::make_tuple(5, 10) };
+    std::function<int(int, int)> unzip_fn = [](int a, int b) {
+        return a + b;
+    };
+    lz::unzip_with_iterable<decltype(zipped), std::function<int(int, int)>> actual = zipped | lz::unzip_with(std::move(unzip_fn));
+    const std::vector<int> expected = { 7, 9, 11, 13, 15 };
+    REQUIRE(lz::equal(actual, expected));
 }
 
 TEST_CASE("Pairwise") {
@@ -143,28 +158,45 @@ TEST_CASE("Keys & values") {
     std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
     const std::vector<int> expected_keys = { 1, 2, 3 };
     const std::vector<std::string> expected_values = { "hello", "world", "!" };
-    auto keys = lz::keys(m);
-    auto values = lz::values(m);
-    REQUIRE(lz::equal(keys, expected_keys));
-    REQUIRE(lz::equal(values, expected_values));
-    keys = m | lz::keys;
-    values = m | lz::values;
-    REQUIRE(lz::equal(keys, expected_keys));
-    REQUIRE(lz::equal(values, expected_values));
 
-    const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-    const std::vector<int> expected = { 3, 6, 9 };
+    SECTION("Key & value") {
+        // TODO add typedef
+        auto keys = lz::keys(m);
+        auto values = lz::values(m);
+        REQUIRE(lz::equal(keys, expected_keys));
+        REQUIRE(lz::equal(values, expected_values));
+        keys = m | lz::keys;
+        values = m | lz::values;
+        REQUIRE(lz::equal(keys, expected_keys));
+        REQUIRE(lz::equal(values, expected_values));
+    }
+
+    SECTION("Get nth") {
+        const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+        const std::vector<int> expected = { 3, 6, 9 };
 #ifdef LZ_HAS_CXX_11
-    auto actual = lz::get_nth<2>{}(three_tuple_vec);
-    REQUIRE(lz::equal(actual, expected));
-    actual = three_tuple_vec | lz::get_nth<2>{};
-    REQUIRE(lz::equal(actual, expected));
+        lz::get_nth_iterable<decltype(three_tuple_vec), 2> actual = lz::get_nth<2>{}(three_tuple_vec);
+        REQUIRE(lz::equal(actual, expected));
+        actual = three_tuple_vec | lz::get_nth<2>{};
+        REQUIRE(lz::equal(actual, expected));
 #else
-    auto actual = lz::get_nth<2>(three_tuple_vec);
-    REQUIRE(lz::equal(actual, expected));
-    actual = three_tuple_vec | lz::get_nth<2>;
-    REQUIRE(lz::equal(actual, expected));
+        lz::get_nth_iterable<decltype(three_tuple_vec), 2> actual = lz::get_nth<2>(three_tuple_vec);
+        REQUIRE(lz::equal(actual, expected));
+        actual = three_tuple_vec | lz::get_nth<2>;
+        REQUIRE(lz::equal(actual, expected));
 #endif
+    }
+
+    SECTION("Get nths") {
+        const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+        const std::vector<std::tuple<int, int>> expected = { { 1, 3 }, { 4, 6 }, { 7, 9 } };
+#ifdef LZ_HAS_CXX_11
+        lz::get_nths_iterable<decltype(three_tuple_vec), 0, 2> actual = lz::get_nths<0, 2>{}(three_tuple_vec);
+#else
+        lz::get_nths_iterable<decltype(three_tuple_vec), 0, 2> actual = lz::get_nths<0, 2>(three_tuple_vec);
+#endif
+        REQUIRE(lz::equal(actual, expected));
+    }
 }
 
 TEST_CASE("Filtermap") {
