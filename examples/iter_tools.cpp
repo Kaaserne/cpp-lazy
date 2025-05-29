@@ -4,6 +4,7 @@
 #include <vector>
 
 int main() {
+#ifdef LZ_HAS_CXX_17
     // Lines
     std::string text = "Hello\nWorld\n!";
     auto lines = lz::lines(text); // or: `text | lz::lines;`
@@ -15,6 +16,46 @@ int main() {
     // "World"
     // "!"
     std::cout << '\n';
+
+    lz::string_view text2 = "Hello\nWorld\n!";
+    auto lines2 =
+        lz::lines(text2); // or: `text | lz::lines;` Does not hold a reference to the original string, since it is a string_view
+    for (const auto& line : lines2) {
+        std::cout.write(line.data(), static_cast<std::streamsize>(line.size()));
+        std::cout << '\n';
+    }
+    // "Hello"
+    // "World"
+    // "!"
+    std::cout << '\n';
+
+#else
+
+    // Lines
+    std::string text = "Hello\nWorld\n!";
+    auto lines = lz::lines(text); // or: `text | lz::lines;`
+    lz::for_each(lines, [](const lz::string_view& line) {
+        std::cout.write(line.data(), static_cast<std::streamsize>(line.size()));
+        std::cout << '\n';
+    });
+    // "Hello"
+    // "World"
+    // "!"
+    std::cout << '\n';
+
+    lz::string_view text2 = "Hello\nWorld\n!";
+    auto lines2 =
+        lz::lines(text2); // or: `text | lz::lines;` Does not hold a reference to the original string, since it is a string_view
+    lz::for_each(lines2, [](const lz::string_view& line) {
+        std::cout.write(line.data(), static_cast<std::streamsize>(line.size()));
+        std::cout << '\n';
+    });
+    // "Hello"
+    // "World"
+    // "!"
+    std::cout << '\n';
+
+#endif
 
     // As
     std::vector<int> numbers = { 1, 2, 3, 4, 5 };
