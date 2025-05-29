@@ -6,6 +6,9 @@
 
 int main() {
     // With split you can split an iterable on a delimiter or an iterable delimiter (multiple delimiters)
+    // The starting point is: if the delimiter is a single value (so no iterable) a string_view or a const char* (any char) type
+    // then the delimiter does not have to be by reference.
+    // If the delimiter is a non-lz iterable (like a std::string or a std::vector) then it has to be by reference.
 #ifdef LZ_HAS_CXX_17
     std::string to_split = "Hello world ";
     std::string delim = " ";
