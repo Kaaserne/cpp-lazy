@@ -10,7 +10,7 @@
 
 TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");
-    auto excluded = lz::exclude(cstr, 3, 5);
+    lz::exclude_iterable<decltype(cstr)> excluded = lz::exclude(cstr, 3, 5);
     REQUIRE((excluded | lz::to<std::string>()) == "a sing to exclude");
     static_assert(std::is_same<decltype(excluded.end()), lz::default_sentinel>::value, "Should be default sentinel");
 }

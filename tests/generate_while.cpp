@@ -44,7 +44,10 @@ TEST_CASE("Generate while changing and creating elements") {
 
 TEST_CASE("Empty or one element generate while") {
     SECTION("Empty") {
-        auto generator = lz::generate_while([]() { return std::make_pair(false, 0); });
+        std::function<std::pair<bool, int>()> func = []() {
+            return std::make_pair(false, 0);
+        };
+        lz::generate_while_iterable<decltype(func)> generator = lz::generate_while(std::move(func));
         REQUIRE(lz::empty(generator));
         REQUIRE(!lz::has_one(generator));
         REQUIRE(!lz::has_many(generator));

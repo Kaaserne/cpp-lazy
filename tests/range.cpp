@@ -3,9 +3,6 @@
 #include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <cstddef>
-#include <list>
-#include <map>
-#include <unordered_map>
 #include <vector>
 
 TEST_CASE("Range permutations") {
@@ -68,6 +65,18 @@ TEST_CASE("Range permutations") {
         REQUIRE(lz::equal(range, expected));
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
+
+    SECTION("2.5 step float") {
+        auto range = lz::range(0.f, 5.5f, 2.5f);
+        std::vector<float> expected = { 0.f, 2.5f, 5.f };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+
+        range = lz::range(2.5f, -7.5f, -2.5f);
+        expected = { 2.5f, 0.f, -2.5f, -5.f };
+        REQUIRE(lz::equal(range, expected));
+        REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+    }
 }
 
 namespace {
@@ -127,7 +136,7 @@ void test_operator_minus(lz::range_iterable<T> range) {
 
 TEST_CASE("Binary operations") {
     SECTION("With step, int uneven") {
-        auto range = lz::range(0, 10, 3);
+        lz::range_iterable<int> range = lz::range(0, 10, 3);
         std::vector<int> expected = { 0, 3, 6, 9 };
         test_operator_plus(range, expected);
         test_operator_minus(range);

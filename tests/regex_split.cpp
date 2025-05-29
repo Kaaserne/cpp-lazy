@@ -1,6 +1,5 @@
 #include <Lz/regex_split.hpp>
 #include <catch2/catch.hpp>
-#include <iostream>
 #include <list>
 #include <regex>
 
@@ -9,7 +8,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
 
     SECTION("Empty string") {
         std::string s = "";
-        auto splitter = lz::regex_split(s, r1);
+        lz::regex_split_iterable<std::sregex_token_iterator> splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = {};
         REQUIRE(std::equal(actual.begin(), actual.end(), expected.begin()));

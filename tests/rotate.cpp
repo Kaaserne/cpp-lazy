@@ -10,7 +10,7 @@
 
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");
-    auto rotated = lz::rotate(c_str, 7);
+    lz::rotate_iterable<decltype(c_str)> rotated = lz::rotate(c_str, 7);
     static_assert(!std::is_same<decltype(rotated.begin()), decltype(rotated.end())>::value, "Should be sentinel");
     REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
 

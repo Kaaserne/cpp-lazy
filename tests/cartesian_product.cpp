@@ -72,7 +72,7 @@ TEST_CASE("Is sentinel") {
 TEST_CASE("Empty or one element cartesian product") {
     SECTION("Empty") {
         std::vector<int> vec;
-        auto cart = lz::cartesian_product(vec, vec);
+        lz::cartesian_product_iterable<std::vector<int>, std::vector<int>> cart = lz::cartesian_product(vec, vec);
         REQUIRE(lz::empty(cart));
         REQUIRE(!lz::has_one(cart));
         REQUIRE(!lz::has_many(cart));

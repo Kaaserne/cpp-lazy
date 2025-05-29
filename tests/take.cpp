@@ -68,7 +68,7 @@ void test_operator_plus(const TakeIterable& take, const ExpectedIterable& expect
 TEST_CASE("Take with sentinels") {
     const char* str = "Hello, world!";
     auto c_string = lz::c_string(str);
-    auto take = c_string | lz::take(5);
+    lz::take_iterable<decltype(c_string)> take = c_string | lz::take(5);
     static_assert(!std::is_same<decltype(take.begin()), decltype(take.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("Hello");
     REQUIRE(lz::equal(take, expected));

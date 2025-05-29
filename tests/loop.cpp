@@ -5,7 +5,7 @@
 
 TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");
-    auto looper = lz::loop(cstr);
+    lz::loop_iterable_inf<decltype(cstr)> looper = lz::loop(cstr);
     static_assert(!std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should be sentinel");
     REQUIRE(*looper.begin() == 'H');
     auto looper_it = looper.begin();
@@ -61,7 +61,7 @@ TEST_CASE("Loop with non while true argument") {
     std::vector<int> vec = { 1, 2, 3, 4 };
 
     SECTION("Empty") {
-        auto looper = lz::loop(vec, 0);
+        lz::loop_iterable<std::vector<int>> looper = lz::loop(vec, 0);
         static_assert(std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should not be sentinel");
         REQUIRE(looper.size() == 0);
         REQUIRE(lz::empty(looper));

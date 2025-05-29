@@ -10,7 +10,7 @@
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
-    auto actual = lz::lines("hello world\nthis is a message\ntesting");
+    lz::lines_iterable_sv<> actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
     REQUIRE(lz::equal(actual, expected));
 
     auto actual2 = lz::lines(lz::c_string("hello world\nthis is a message\ntesting"));
@@ -18,8 +18,8 @@ TEST_CASE("Lines") {
     actual2 = lz::c_string("hello world\nthis is a message\ntesting") | lz::lines;
     REQUIRE(lz::equal(actual2, expected));
 
-    lz::string_view to_split = "hello world\nthis is a message\ntesting";
-    auto actual3 = lz::lines(to_split);
+    std::string to_split = "hello world\nthis is a message\ntesting";
+    lz::lines_iterable<std::string> actual3 = lz::lines(to_split);
     REQUIRE(lz::equal(actual3, expected));
     actual3 = to_split | lz::lines;
     REQUIRE(lz::equal(actual3, expected));

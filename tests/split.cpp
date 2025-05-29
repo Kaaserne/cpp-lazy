@@ -22,7 +22,7 @@ TEST_CASE("Split with custom container") {
 TEST_CASE("Splitter permutations") {
     SECTION("No delimiters at end and begin") {
         const std::string to_split = "Hello world test 123";
-        auto splitter = lz::sv_split(to_split, " ");
+        lz::sv_multiple_split_iterable<const std::string> splitter = lz::sv_split(to_split, " ");
         auto vec = splitter | lz::to<std::vector>();
 
         std::vector<lz::string_view> expected = { "Hello", "world", "test", "123" };
@@ -157,7 +157,10 @@ TEST_CASE("Splitter changing and creating elements") {
 TEST_CASE("Empty or one element string splitter") {
     SECTION("Empty") {
         std::string to_split;
-        auto splitter = lz::split(to_split, " ");
+        using it = std::string::iterator;
+        using iterable = lz::split_iterable<lz::basic_iterable<it>, std::string, lz::copied_sv>;
+        iterable splitter = lz::split(to_split, " ");
+
         REQUIRE(lz::empty(splitter));
         REQUIRE(!lz::has_many(splitter));
         REQUIRE(!lz::has_one(splitter));
@@ -182,7 +185,7 @@ TEST_CASE("Empty or one element string splitter") {
 
 TEST_CASE("Splitter binary operations") {
     std::string to_split = " Hello world test 123 ";
-    auto splitter = to_split | lz::sv_split(" ");
+    lz::sv_multiple_split_iterable<std::string> splitter = to_split | lz::sv_split(" ");
     auto it = splitter.begin();
 
     REQUIRE(*it == "");
@@ -269,9 +272,9 @@ TEST_CASE("Splitter to containers") {
 TEST_CASE("One element splitter with custom container") {
     std::string to_split = "Hello world test 123";
 #ifdef LZ_HAS_CXX_11
-    auto splitter = to_split | lz::t_split<std::vector<char>>{}(' ');
+    lz::split_iterable<std::vector<char>, std::string, char> splitter = to_split | lz::t_split<std::vector<char>>{}(' ');
 #else
-    auto splitter = lz::t_split<std::vector<char>>(to_split, ' ');
+    lz::split_iterable<std::vector<char>, std::string, char> splitter = lz::t_split<std::vector<char>>(to_split, ' ');
 #endif
     std::vector<std::vector<char>> expected = {
         { 'H', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, { 't', 'e', 's', 't' }, { '1', '2', '3' }
@@ -282,7 +285,7 @@ TEST_CASE("One element splitter with custom container") {
 TEST_CASE("One element splitter permutations") {
     SECTION("No delimiters at end and begin") {
         const std::string to_split = "Hello world test 123";
-        auto splitter = lz::sv_split(to_split, ' ');
+        lz::sv_single_split_iterable<const std::string> splitter = lz::sv_split(to_split, ' ');
         auto vec = splitter | lz::to<std::vector>();
 
         std::vector<lz::string_view> expected = { "Hello", "world", "test", "123" };
@@ -296,7 +299,7 @@ TEST_CASE("One element splitter permutations") {
 
     SECTION("Starting with one delimiter ending with none") {
         const std::string to_split = " Hello world test 123";
-        auto splitter = lz::s_split(to_split, ' ');
+        lz::s_single_split_iterable<const std::string> splitter = lz::s_split(to_split, ' ');
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
 

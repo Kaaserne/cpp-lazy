@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <list>
 #include <map>
+#include <random>
 #include <unordered_map>
 
 TEST_CASE("random_iterable should be random") {
@@ -42,7 +43,7 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
     static std::random_device rd;
     std::mt19937_64 gen(rd());
     std::poisson_distribution<> d(500000);
-    auto r = lz::random(d, gen, 3);
+    lz::random_iterable<int, std::poisson_distribution<>, std::mt19937_64> r = lz::random(d, gen, 3);
     static_assert(!std::is_same<decltype(r.begin()), decltype(r.end())>::value, "Should not be the same");
     REQUIRE(lz::distance(r.begin(), r.end()) == 3);
 
@@ -56,7 +57,7 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
 
 TEST_CASE("Empty or one element random") {
     SECTION("Empty random") {
-        auto r = lz::random(0, 0, 0);
+        lz::random_iterable<int, std::uniform_int_distribution<>, std::mt19937> r = lz::random(0, 0, 0);
         REQUIRE(lz::empty(r));
     }
 
@@ -70,7 +71,7 @@ TEST_CASE("Empty or one element random") {
 
 TEST_CASE("random_iterable binary operations") {
     constexpr std::ptrdiff_t size = 5;
-    auto random = lz::common_random(0., 1., size);
+    lz::common_random_iterable<double, std::uniform_real_distribution<>, std::mt19937> random = lz::common_random(0., 1., size);
     static_assert(std::is_same<decltype(random.begin()), decltype(random.end())>::value, "Should be the same");
 
     SECTION("Operator++") {
@@ -163,7 +164,7 @@ TEST_CASE("random_iterable binary operations") {
 
 TEST_CASE("random_iterable to containers") {
     constexpr std::size_t size = 10;
-    auto range = lz::random(0., 1., size);
+    lz::default_random_iterable<double> range = lz::random(0., 1., size);
 
     SECTION("To array") {
         REQUIRE((range | lz::to<std::array<double, size>>()).size() == size);

@@ -10,7 +10,7 @@
 TEST_CASE("Zip with sentinels") {
     auto cstr = lz::c_string("Hello");
     auto cstr2 = lz::c_string("World!!");
-    auto zip = lz::zip(cstr, cstr2);
+    lz::zip_iterable<decltype(cstr), decltype(cstr2)> zip = lz::zip(cstr, cstr2);
     std::vector<std::tuple<char, char>> expected = { std::make_tuple('H', 'W'), std::make_tuple('e', 'o'),
                                                      std::make_tuple('l', 'r'), std::make_tuple('l', 'l'),
                                                      std::make_tuple('o', 'd') };

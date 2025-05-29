@@ -50,7 +50,7 @@ TEST_CASE("Flatten with sentinels") {
     using c_string = decltype(lz::c_string(""));
 
     std::forward_list<c_string> lst = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
-    auto flattened = lz::flatten(lst);
+    lz::flatten_iterable<decltype(lst)> flattened = lz::flatten(lst);
     static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
 
     SECTION("Operator= 2D forward") {

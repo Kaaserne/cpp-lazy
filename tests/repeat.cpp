@@ -8,7 +8,7 @@
 
 TEST_CASE("repeat_iterable changing and creating elements") {
     int to_repeat = 20;
-    auto repeater = lz::repeat(to_repeat, 5);
+    lz::repeat_iterable<int> repeater = lz::repeat(to_repeat, 5);
 
     SECTION("Should be 5 times 20") {
         std::size_t counter = 0;
@@ -121,7 +121,7 @@ TEST_CASE("repeat_iterable to containers") {
 
 TEST_CASE("repeat_iterable infinite") {
     int to_repeat = 20;
-    auto repeater = lz::repeat(to_repeat);
+    lz::repeat_iterable_inf<int> repeater = lz::repeat(to_repeat);
 
     SECTION("Should be infinite") {
         std::size_t counter = 0;

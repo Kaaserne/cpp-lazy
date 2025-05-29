@@ -49,7 +49,7 @@ TEST_CASE("Map changing and creating elements") {
             REQUIRE(&t == &array[count++]);
             return t.test_field_str;
         };
-        auto map = array | lz::map(std::move(f));
+        lz::map_iterable<decltype(array), decltype(f)> map = array | lz::map(std::move(f));
 
         for (auto&& _ : map) {
             static_cast<void>(_);

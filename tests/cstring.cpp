@@ -25,7 +25,7 @@ TEST_CASE("Empty or one element c_string") {
 
 TEST_CASE("CString binary operations") {
     const char string[] = "123 456 789";
-    auto c_string = string | lz::c_string;
+    lz::c_string_iterable<const char> c_string = string | lz::c_string;
 
     SECTION("Operator++") {
         lz::string_view expected1 = "123 456 789";

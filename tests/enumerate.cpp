@@ -11,7 +11,7 @@
 TEST_CASE("Enumerate with sentinels") {
     const char* str = "Hello";
     auto c_string = lz::c_string(str);
-    auto enumerated = lz::enumerate(c_string);
+    lz::enumerate_iterable<decltype(c_string)> enumerated = lz::enumerate(c_string);
     static_assert(!std::is_same<decltype(enumerated.begin()), decltype(enumerated.end())>::value,
                   "Begin and end should not be the same type");
     auto taken = lz::take(enumerated, 3);

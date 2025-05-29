@@ -10,7 +10,7 @@ TEST_CASE("Interleaved with sentinels permutations") {
     auto str5 = lz::c_string("hijkl");
 
     SECTION("Operator=") {
-        auto interleaved_3_4 = lz::interleave(str3, str4);
+        lz::interleave_iterable<decltype(str3), decltype(str4)> interleaved_3_4 = lz::interleave(str3, str4);
         auto it_3_4 = interleaved_3_4.begin();
         REQUIRE(it_3_4 == interleaved_3_4.begin());
         it_3_4 = interleaved_3_4.end();

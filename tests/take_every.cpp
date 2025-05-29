@@ -13,7 +13,7 @@
 
 TEST_CASE("take_every_iterable with sentinels") {
     auto cstr = lz::c_string("Hello");
-    auto take_every = lz::take_every(cstr, 2);
+    lz::take_every_iterable<decltype(cstr)> take_every = lz::take_every(cstr, 2);
     static_assert(!std::is_same<decltype(take_every.begin()), decltype(take_every.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("Hlo");
     REQUIRE(lz::equal(take_every, expected));

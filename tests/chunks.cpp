@@ -4,10 +4,11 @@
 #include <Lz/stream.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <vector>
 
 TEST_CASE("Chunks changing and creating elements") {
     std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7 };
-    auto chunked = lz::chunks(v, 3);
+    lz::chunks_iterable<std::vector<int>> chunked = lz::chunks(v, 3);
     auto it = chunked.begin();
     std::vector<int> expected = { 1, 2, 3 };
     REQUIRE(lz::equal(*it, expected));
