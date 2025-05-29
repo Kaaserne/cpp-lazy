@@ -61,8 +61,7 @@ template<class IterTuple>
 using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
 
 template<class Fn>
-struct tuple_expand {
-private:
+class tuple_expand {
     Fn _fn;
 
 public:
