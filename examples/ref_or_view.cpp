@@ -22,9 +22,9 @@ int main() {
     // If the iterable is inherited from lazy_view, it will store a copy of the iterable. In all other cases, it will store a
     // reference to the iterable.
 
-    std::vector<int> vec{ 1, 2, 3 };
+    const std::vector<int> vec{ 1, 2, 3 };
     // will store a reference to the vector because it is not inherited from lazy_view
-    lz::ref_or_view<std::vector<int>> ref_or_view{ vec };
+    lz::ref_or_view<const std::vector<int>> ref_or_view{ vec };
     std::cout << "vec.begin() == ref_or_view.begin()? " << std::boolalpha << (&(*vec.begin()) == &(*ref_or_view.begin()))
               << '\n'; // true
     static_assert(lz::ref_or_view<std::vector<int>>::holds_reference, "Iterable should hold a reference");
