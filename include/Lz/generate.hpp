@@ -10,21 +10,6 @@ namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-#ifdef LZ_HAS_CXX_11
-
-/**
- * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
- * returns a sentinel. Example:
- * ```cpp
- * lz::generate([]() { return 10; }, 5); // Generates 5 times the number 10
- * // or
- * lz::generate([]() { return 10; }); // Generates infinite times the number 10
- * ```
- */
-constexpr detail::generate_adaptor generate{};
-
-#else
-
 /**
  * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
  * returns a sentinel. Example:
@@ -36,7 +21,7 @@ constexpr detail::generate_adaptor generate{};
  */
 LZ_INLINE_VAR constexpr detail::generate_adaptor generate{};
 
-#endif
+// TODO add tests for typedefs
 
 /**
  * @brief Generate iterable helper alias for infinite generation.
@@ -56,7 +41,7 @@ using generate_iterable_inf = detail::generate_iterable<GeneratorFunc, true>;
  * ```
  */
 template<class GeneratorFunc>
-using generate_iterable = detail::generate_iterable<GeneratorFunc, true>;
+using generate_iterable = detail::generate_iterable<GeneratorFunc, false>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

@@ -36,67 +36,6 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 template<class ValueType>
 using t_split = detail::split_adaptor<ValueType>;
 
-/**
- * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
- * iterable does not contain a .size() method. Example:
- * ```cpp
- * // Careful: split_values must be passed by reference, because it holds a reference to the values.
- * std::array<int, 4> arr = { 1, 2, 3, 4 };
- * auto split_values = {1, 2};
- * auto splitted = lz::split(arr, split_values); // {{1}, {4}}
- * // auto splitted = lz::split(arr, {1, 2}); // Dangling reference, do not do this
- * // or
- * auto splitted = arr | lz::split(split_valiues); // {{1}, {4}}
- * // auto splitted = arr | lz::split({1, 2}); // Dangling reference, do not do this
- *
- * // or
- * auto splitted = lz::split(arr, 2); // {{1}, {3, 4}}
- * // or
- * auto splitted = arr | lz::split(2); // {{1}, {3, 4}}
- * ```
- */
-constexpr detail::split_adaptor<void> split{};
-
-/**
- * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
- * iterable does not contain a .size() method. Returns a std::string to its substrings. Example:
- * ```cpp
- * std::string str = "Hello, World!";
- * auto splitted = lz::s_split(str, ", "); // {"Hello", "World!"} where value_type is std::string
- * // auto splitted = lz::s_split(str, std::string(", ")); // Dangling reference, do not do this
- * // or
- * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is std::string
- * // auto splitted = str | lz::s_split(lz::string_view(", ")); // Dangling reference, do not do this
- *
- * // or
- * auto splitted = lz::s_split(str, ','); // {"Hello", " World!"} where value_type is std::string
- *
- * // or
- * auto splitted = str | lz::s_split(',') // {"Hello", " World!"} where value_type is std::string
- * ```
- */
-constexpr detail::split_adaptor<std::string> s_split{};
-
-/**
- * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
- * iterable does not contain a .size() method. Returns a string_view to its substrings. Example:
- * ```cpp
- * std::string str = "Hello, World!";
- * auto splitted = lz::sv_split(str, ", "); // {"Hello", "World!"} where value_type is a string_view
- * // auto splitted = lz::sv_split(str, std::string(", ")); // Dangling reference, do not do this
- * // or
- * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is a string_view
- * // auto splitted = str | lz::sv_split(lz::string_view(", ")); // Dangling reference, do not do this
- *
- * // or
- * auto splitted = lz::sv_split(str, ','); // {"Hello", " World!"} where value_type is string_view
- *
- * // or
- * auto splitted = str | lz::sv_split(',') // {"Hello", " World!"} where value_type is string_view
- * ```
- */
-constexpr detail::split_adaptor<lz::string_view> sv_split{};
-
 #else
 
 /**
@@ -120,6 +59,8 @@ constexpr detail::split_adaptor<lz::string_view> sv_split{};
  */
 template<class ValueType>
 LZ_INLINE_VAR constexpr detail::split_adaptor<ValueType> t_split{};
+
+#endif
 
 /**
  * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
@@ -181,8 +122,6 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
  * ```
  */
 LZ_INLINE_VAR constexpr detail::split_adaptor<lz::string_view> sv_split{};
-
-#endif
 
 /**
  * @brief Split iterable helper alias.
