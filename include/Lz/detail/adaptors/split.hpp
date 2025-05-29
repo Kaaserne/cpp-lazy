@@ -9,10 +9,22 @@
 #include <Lz/string_view.hpp>
 
 namespace lz {
-namespace detail {
 
+/**
+ * @brief Wrapper for lz::copied_iterable<lz::basic_string_view<CharT>>.
+ *
+ * @tparam CharT The character type of the string view.
+ */
 template<class CharT>
-using copied_sv = lz::copied_iterable<lz::basic_string_view<CharT>>;
+using copied_basic_sv = lz::copied_iterable<lz::basic_string_view<CharT>>;
+
+/**
+ * @brief Wrapper for lz::copied_iterable<lz::string_view>.
+ */
+using copied_sv = copied_basic_sv<char>;
+
+namespace detail {
+// TODO add @return everywhere
 
 template<class ValueType>
 struct split_adaptor {
@@ -50,12 +62,30 @@ struct split_adaptor {
      * auto splitted = lz::t_split<std::string>(arr, "ll"); // {"he", "o"} where value_type = std::string
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
+     * @param delimiter The delimiter to split on for c-strings
      */
     template<class Iterable, class CharT>
-    constexpr split_iterable<ValueType, remove_ref<Iterable>, copied_sv<CharT>>
+    constexpr split_iterable<ValueType, remove_ref<Iterable>, copied_basic_sv<CharT>>
     operator()(Iterable&& iterable, const CharT* delimiter) const {
-        return (*this)(std::forward<Iterable>(iterable), copied_sv<CharT>(delimiter));
+        return (*this)(std::forward<Iterable>(iterable), lz::string_view(delimiter));
+    }
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel
+     * and the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
+     * ```cpp
+     * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
+     * using iterable = lz::basic_iterable<decltype(arr.begin)>;
+     * auto splitted = lz::t_split<iterable>(arr, lz::string_view("ll")); // {{'h', 'e'}, {'o'}} where value_type =
+     * // lz::basic_iterable<decltype(arr.begin)>
+     * ```
+     * @param iterable The iterable to split. Must be an actual reference.
+     * @param delimiter The string_view delimiter, it's copied and therefore does not have to be a reference.
+     */
+    template<class Iterable, class CharT>
+    constexpr split_iterable<ValueType, remove_ref<Iterable>, copied_basic_sv<CharT>>
+    operator()(Iterable&& iterable, const basic_string_view<CharT> delimiter) const {
+        return (*this)(std::forward<Iterable>(iterable), copied_basic_sv<CharT>(delimiter));
     }
 
     // clang-format off
@@ -123,13 +153,28 @@ struct split_adaptor {
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
-     * auto splitted = arr | lz::split("ll"); // {{'h', 'e'}, {'o'}}
+     * auto splitted = arr | lz::t_split<std::vector<char>>("ll"); // {{'h', 'e'}, {'o'}}
      * ```
-     * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
+     * @param delimiter The delimiter to split on, for c-strings.
      */
     template<class CharT>
-    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_sv<CharT>> operator()(const CharT* delimiter) const {
-        return (*this)(copied_sv<CharT>(delimiter));
+    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>> operator()(const CharT* delimiter) const {
+        return (*this)(lz::string_view(delimiter));
+    }
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel
+     * and the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
+     * ```cpp
+     * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
+     * auto splitted = arr | lz::t_split<std::vector<char>>(lz::string_view("ll")); // {{'h', 'e'}, {'o'}}
+     * ```
+     * @param delimiter The string_view delimiter, it's copied and therefore does not have to be a reference.
+     */
+    template<class CharT>
+    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>>
+    operator()(const basic_string_view<CharT> delimiter) const {
+        return (*this)(copied_basic_sv<CharT>(delimiter));
     }
 };
 
@@ -171,12 +216,30 @@ struct split_adaptor<void> {
      * auto splitted = lz::split(arr, "ll"); // {{'h', 'e'}, {'o'}} where value_type = lz::basic_iterable<decltype(arr.begin)>
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
+     * @param delimiter The delimiter to split on, for c-strings.
      */
     template<class Iterable, class CharT>
-    LZ_NODISCARD constexpr splitter_iterable<Iterable, copied_sv<CharT>>
+    LZ_NODISCARD constexpr splitter_iterable<Iterable, copied_basic_sv<CharT>>
     operator()(Iterable&& iterable, const CharT* delimiter) const {
-        return (*this)(std::forward<Iterable>(iterable), copied_sv<CharT>(delimiter));
+        return (*this)(std::forward<Iterable>(iterable), lz::string_view(delimiter));
+    }
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
+     * Example:
+     * ```cpp
+     * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
+     * auto splitted = lz::split(arr, lz::string_view("ll")); // {{'h', 'e'}, {'o'}} 
+     * // where value_type = lz::basic_iterable<decltype(arr.begin)>
+     * ```
+     * @param iterable The iterable to split. Must be an actual reference.
+     * @param delimiter The string_view delimiter, it's copied and therefore does not have to be a reference.
+     */
+    template<class Iterable, class CharT>
+    LZ_NODISCARD constexpr splitter_iterable<Iterable, copied_basic_sv<CharT>>
+    operator()(Iterable&& iterable, const basic_string_view<CharT> delimiter) const {
+        return (*this)(std::forward<Iterable>(iterable), copied_basic_sv<CharT>(delimiter));
     }
 
     /**
@@ -244,17 +307,32 @@ struct split_adaptor<void> {
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
      * auto splitted = arr | lz::split("ll"); // {{'h', 'e'}, {'o'}} where value_type = lz::basic_iterable<decltype(arr.begin)>
      * ```
-     * @param delimiter The delimiter to split on. Must be an actual reference, such as a raw c string `","`
+     * @param delimiter The delimiter to split on, for c-strings.
      */
     template<class CharT>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_sv<CharT>> operator()(const CharT* delimiter) const {
-        return (*this)(copied_sv<CharT>(delimiter));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>> operator()(const CharT* delimiter) const {
+        return (*this)(lz::string_view(delimiter));
+    }
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
+     * Example:
+     * ```cpp
+     * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
+     * auto splitted = arr | lz::split(lz::basic_string_view("ll")); // {{'h', 'e'}, {'o'}} where value_type =
+     * lz::basic_iterable<decltype(arr.begin)>
+     * ```
+     * @param delimiter The delimiter to split on. Doesn't have to be a reference.
+     */
+    template<class CharT>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>>
+    operator()(const basic_string_view<CharT> delimiter) const {
+        return (*this)(copied_basic_sv<CharT>(delimiter));
     }
 };
 
 } // namespace detail
-
-using detail::split_adaptor;
 } // namespace lz
 
 #endif
