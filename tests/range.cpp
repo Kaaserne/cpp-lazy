@@ -126,9 +126,16 @@ void test_operator_minus(lz::range_iterable<T> range) {
 } // namespace
 
 TEST_CASE("Binary operations") {
-    SECTION("With step, int") {
+    SECTION("With step, int uneven") {
         auto range = lz::range(0, 10, 3);
         std::vector<int> expected = { 0, 3, 6, 9 };
+        test_operator_plus(range, expected);
+        test_operator_minus(range);
+    }
+
+    SECTION("With step, int even") {
+        auto range = lz::range(0, 10, 2);
+        std::vector<int> expected = { 0, 2, 4, 6, 8 };
         test_operator_plus(range, expected);
         test_operator_minus(range);
     }
