@@ -6,7 +6,7 @@
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
-#include <iterator>
+#include <utility>
 
 namespace lz {
 namespace detail {
@@ -15,55 +15,49 @@ class duplicates_iterator;
 
 template<class Iterator, class S, class BinaryPredicate>
 class duplicates_iterator<Iterator, S, BinaryPredicate, enable_if<is_ra<Iterator>::value>>
-    : public lz::iterator<duplicates_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                          diff_type<Iterator>, std::bidirectional_iterator_tag,
-                          duplicates_iterator<Iterator, S, BinaryPredicate>> {
+    : public lz::iterator<duplicates_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, std::size_t>,
+                          fake_ptr_proxy<std::pair<ref_t<Iterator>, std::size_t>>, diff_type<Iterator>,
+                          std::bidirectional_iterator_tag, duplicates_iterator<Iterator, S, BinaryPredicate>> {
+
     using traits = std::iterator_traits<Iterator>;
 
 public:
-    using value_type = typename traits::value_type;
-    using reference = typename traits::reference;
+    using value_type = std::pair<typename traits::value_type, std::size_t>;
+    using reference = std::pair<typename traits::reference, std::size_t>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
 private:
     Iterator _begin;
-    Iterator _iterator;
+    Iterator _last;
+    Iterator _first;
     S _end;
     BinaryPredicate _compare;
 
     LZ_CONSTEXPR_CXX_14 void next() {
-        while (_iterator != _end) {
-            auto next_it = std::next(_iterator);
-            if (next_it != _end && !_compare(*_iterator, *next_it)) {
-                break;
-            }
-            if (_iterator != _begin) {
-                auto prev_it = std::prev(_iterator);
-                if (!_compare(*prev_it, *_iterator)) {
-                    break;
-                }
-            }
-            _iterator = std::move(next_it);
-        }
+        using detail::find_if;
+        using std::find_if;
+
+        _last = find_if(_first, _end, [this](typename traits::reference val) { return _compare(*_first, val); });
     }
 
 public:
     LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator it, Iterator begin, S end, BinaryPredicate compare) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(it) },
+        _last{ std::move(it) },
+        _first{ std::move(_last) },
         _end{ std::move(end) },
         _compare{ std::move(compare) } {
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
-        _iterator = _end;
+        _first = _end;
         return *this;
     }
 
     constexpr reference dereference() const {
-        return *_iterator;
+        return { *_first, static_cast<std::size_t>(_last - _first) };
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -71,87 +65,85 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        ++_iterator;
+        _first = std::move(_last);
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        --_iterator;
-        while (_iterator != _begin) {
-            auto prev_it = std::prev(_iterator);
-            if (!_compare(*prev_it, *_iterator)) {
-                break;
+        _last = _first;
+
+        while (_first != _begin) {
+            --_first;
+            auto prev = std::prev(_first);
+            if (_compare(*prev, *_first)) {
+                return;
             }
-            auto next_it = std::next(_iterator);
-            if (next_it != _end && !_compare(*_iterator, *next_it)) {
-                break;
-            }
-            --_iterator;
         }
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
         LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
-        return _iterator == other._iterator;
+        return _first == other._first;
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
-        return _iterator == _end;
+        return _first == _end;
     }
 };
 
 template<class Iterator, class S, class BinaryPredicate>
 class duplicates_iterator<Iterator, S, BinaryPredicate, enable_if<!is_ra<Iterator>::value && is_bidi<Iterator>::value>>
-    : public lz::iterator<duplicates_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                          diff_type<Iterator>, std::bidirectional_iterator_tag,
-                          duplicates_iterator<Iterator, S, BinaryPredicate>> {
+    : public lz::iterator<duplicates_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, std::size_t>,
+                          fake_ptr_proxy<std::pair<ref_t<Iterator>, std::size_t>>, diff_type<Iterator>,
+                          std::bidirectional_iterator_tag, duplicates_iterator<Iterator, S, BinaryPredicate>> {
+
     using traits = std::iterator_traits<Iterator>;
 
 public:
-    using value_type = typename traits::value_type;
-    using reference = typename traits::reference;
+    using value_type = std::pair<typename traits::value_type, std::size_t>;
+    using reference = std::pair<typename traits::reference, std::size_t>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
 private:
     Iterator _begin;
-    Iterator _iterator;
-    Iterator _neighbour;
+    Iterator _last;
+    Iterator _first;
+    std::size_t _last_distance;
     S _end;
     BinaryPredicate _compare;
 
     LZ_CONSTEXPR_CXX_14 void next() {
-        while (_iterator != _end) {
-            auto next_it = std::next(_iterator);
-            if (next_it != _end && !_compare(*_iterator, *next_it)) {
-                break;
+        using detail::find_if;
+        using std::find_if;
+
+        _last_distance = 0;
+        _last = find_if(_first, _end, [this](typename traits::reference val) {
+            const auto condition = _compare(*_first, val);
+            if (!condition) {
+                ++_last_distance;
             }
-            if (_neighbour != _end && !_compare(*_neighbour, *_iterator)) {
-                break;
-            }
-            _neighbour = _iterator;
-            _iterator = std::move(next_it);
-        }
+            return condition;
+        });
     }
 
 public:
     LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator it, Iterator begin, S end, BinaryPredicate compare) :
         _begin{ std::move(begin) },
-        _iterator{ std::move(it) },
-        _neighbour{ _iterator },
+        _last{ std::move(it) },
+        _first{ std::move(_last) },
         _end{ std::move(end) },
         _compare{ std::move(compare) } {
-        _neighbour = _end;
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
-        _iterator = _end;
+        _first = _end;
         return *this;
     }
 
     constexpr reference dereference() const {
-        return *_iterator;
+        return { *_first, _last_distance };
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -159,84 +151,85 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        _neighbour = _iterator++;
+        _first = std::move(_last);
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        _neighbour = _iterator--;
-        while (_iterator != _begin) {
-            auto prev_it = std::prev(_iterator);
-            if (!_compare(*prev_it, *_iterator)) {
-                break;
+        _last_distance = 0;
+        _last = _first;
+
+        while (_first != _begin) {
+            --_first;
+            auto prev = std::prev(_first);
+            ++_last_distance;
+            if (_compare(*prev, *_first)) {
+                return;
             }
-            if (_neighbour != _end && !_compare(*_iterator, *_neighbour)) {
-                break;
-            }
-            _neighbour = _iterator;
-            --_iterator;
         }
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
         LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
-        return _iterator == other._iterator;
+        return _first == other._first;
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
-        return _iterator == _end;
+        return _first == _end;
     }
 };
 
 template<class Iterator, class S, class BinaryPredicate>
 class duplicates_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>::value>>
-    : public lz::iterator<duplicates_iterator<Iterator, S, BinaryPredicate>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                          diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+    : public lz::iterator<duplicates_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, std::size_t>,
+                          fake_ptr_proxy<std::pair<ref_t<Iterator>, std::size_t>>, diff_type<Iterator>, iter_cat_t<Iterator>,
+                          default_sentinel> {
+
     using traits = std::iterator_traits<Iterator>;
 
 public:
-    using value_type = typename traits::value_type;
-    using reference = typename traits::reference;
+    using value_type = std::pair<typename traits::value_type, std::size_t>;
+    using reference = std::pair<typename traits::reference, std::size_t>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
 private:
-    Iterator _iterator;
-    Iterator _prev_it;
+    Iterator _last;
+    Iterator _first;
+    std::size_t _last_distance;
     S _end;
     BinaryPredicate _compare;
 
     LZ_CONSTEXPR_CXX_14 void next() {
-        while (_iterator != _end) {
-            auto next_it = std::next(_iterator);
-            if (next_it != _end && !_compare(*_iterator, *next_it)) {
-                break;
+        using detail::find_if;
+        using std::find_if;
+
+        _last_distance = 0;
+        _last = find_if(_first, _end, [this](typename traits::reference val) {
+            const auto condition = _compare(*_first, val);
+            if (!condition) {
+                ++_last_distance;
             }
-            if (_prev_it != _end && !_compare(*_prev_it, *_iterator)) {
-                break;
-            }
-            _prev_it = _iterator;
-            _iterator = std::move(next_it);
-        }
+            return condition;
+        });
     }
 
 public:
-    LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator it, S end, BinaryPredicate compare) :
-        _iterator{ std::move(it) },
-        _prev_it{ _iterator },
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator begin, S end, BinaryPredicate compare) :
+        _last{ std::move(begin) },
+        _first{ std::move(_last) },
         _end{ std::move(end) },
         _compare{ std::move(compare) } {
-        _prev_it = _end;
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
-        _iterator = _end;
+        _first = _end;
         return *this;
     }
 
     constexpr reference dereference() const {
-        return *_iterator;
+        return { *_first, static_cast<std::size_t>(_last_distance) };
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
@@ -244,17 +237,17 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        _prev_it = _iterator++;
+        _first = std::move(_last);
         next();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
         LZ_ASSERT(_end == other._end, "Incompatible iterators");
-        return _iterator == other._iterator;
+        return _first == other._first;
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
-        return _iterator == _end;
+        return _first == _end;
     }
 };
 } // namespace detail
