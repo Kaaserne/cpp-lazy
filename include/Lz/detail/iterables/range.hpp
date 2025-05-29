@@ -23,7 +23,7 @@ public:
     using reverse_iterator = std::reverse_iterator<iterator>;
     using value_type = typename iterator::value_type;
 
-    constexpr range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
+    LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
         _start{ start },
         _end{ end },
         _step{ step } {
@@ -32,16 +32,16 @@ public:
     template<class A = Arithmetic>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, std::size_t> size() const noexcept {
         LZ_ASSERT(_step != 0, "Division by zero in range size calculation");
-        const auto x = (_end - _start) / _step;
-        const auto int_part = static_cast<std::size_t>(x);
-        return (x > static_cast<A>(int_part)) ? int_part + 1 : int_part;
+        const auto total_length = (_end - _start) / static_cast<Arithmetic>(_step);
+        const auto int_part = static_cast<std::size_t>(total_length);
+        return (total_length > static_cast<A>(int_part)) ? int_part + 1 : int_part;
     }
 
     template<class A = Arithmetic>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, std::size_t> size() const noexcept {
         LZ_ASSERT(_step != 0, "Division by zero in range size calculation");
         const auto diff = _end - _start;
-        return static_cast<std::size_t>((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step);
+        return static_cast<std::size_t>(std::abs((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step));
     }
 
     LZ_NODISCARD constexpr iterator begin() const noexcept {
@@ -49,7 +49,7 @@ public:
     }
 
     LZ_NODISCARD constexpr iterator end() const noexcept {
-        return { _end, _step };
+        return { _start + static_cast<Arithmetic>(size()) * _step, _step };
     }
 };
 } // namespace detail

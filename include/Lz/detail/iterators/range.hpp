@@ -10,8 +10,6 @@
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/iterator_base.hpp>
-#include <iterator>
-#include <limits>
 
 namespace lz {
 namespace detail {
@@ -19,7 +17,7 @@ namespace detail {
 template<class Arithmetic>
 class range_iterator : public iterator<range_iterator<Arithmetic>, Arithmetic, fake_ptr_proxy<Arithmetic>, std::ptrdiff_t,
                                        std::random_access_iterator_tag> {
-    Arithmetic _iterator{};
+    Arithmetic _index{};
     Arithmetic _step{};
 
 public:
@@ -29,16 +27,13 @@ public:
     using pointer = fake_ptr_proxy<Arithmetic>;
     using reference = Arithmetic;
 
-    constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept : _iterator{ it }, _step{ step } {
+    constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept : _index{ it }, _step{ step } {
     }
 
-    LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel) noexcept {
-        _iterator = _step < 0 ? std::numeric_limits<Arithmetic>::min() : std::numeric_limits<Arithmetic>::max();
-        return *this;
-    }
+    // Operator= default_sentinel not necessary, as it never returns as default_sentinel
 
     constexpr value_type dereference() const noexcept {
-        return _iterator;
+        return _index;
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const noexcept {
@@ -46,11 +41,11 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
-        _iterator += _step;
+        _index += _step;
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() noexcept {
-        _iterator -= _step;
+        _index -= _step;
     }
 
     template<class A = Arithmetic>
@@ -59,7 +54,7 @@ public:
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
         LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
 
-        const auto x = (_iterator - b._iterator) / _step;
+        const auto x = (_index - b._index) / _step;
         const auto int_part = static_cast<difference_type>(x);
         return (x > static_cast<A>(int_part)) ? int_part + 1 : int_part;
     }
@@ -70,17 +65,16 @@ public:
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
         LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
 
-        const auto diff = _iterator - b._iterator;
-        return static_cast<difference_type>((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step);
+        return static_cast<difference_type>(_index - b._index) / static_cast<difference_type>(_step);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
-        _iterator += static_cast<Arithmetic>(value) * _step;
+        _index += static_cast<Arithmetic>(value) * _step;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& b) const noexcept {
-        LZ_ASSERT(_step == b._step, "Incompatible iterators");
-        return *this - b == 0;
+    LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& other) const noexcept {
+        LZ_ASSERT(_step == other._step, "Incompatible iterators");
+        return _index == other._index;
     }
 };
 } // namespace detail
