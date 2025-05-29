@@ -64,7 +64,6 @@ public:
     difference(const range_iterator& b) const noexcept {
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
         LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
-
         return static_cast<difference_type>(_index - b._index) / static_cast<difference_type>(_step);
     }
 
