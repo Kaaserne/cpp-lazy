@@ -18,7 +18,6 @@ public:
     using value_type = val_iterable_t<Iterable>;
 
 private:
-    static constexpr bool is_sized = sized<Iterable>::value;
     using diff = diff_type<iterator>;
 
     ref_or_view<Iterable> _iterable;
@@ -29,7 +28,7 @@ public:
     constexpr drop_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
-    template<bool Sized = is_sized>
+    template<bool Sized = sized<Iterable>::value>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
         const auto size = lz::size(_iterable);
         return size > _n ? size - _n : 0;
