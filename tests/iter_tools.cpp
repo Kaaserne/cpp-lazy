@@ -160,9 +160,8 @@ TEST_CASE("Keys & values") {
     const std::vector<std::string> expected_values = { "hello", "world", "!" };
 
     SECTION("Key & value") {
-        // TODO add typedef
-        auto keys = lz::keys(m);
-        auto values = lz::values(m);
+        lz::keys_iterable<decltype(m)> keys = lz::keys(m);
+        lz::values_iterable<decltype(m)> values = lz::values(m);
         REQUIRE(lz::equal(keys, expected_keys));
         REQUIRE(lz::equal(values, expected_values));
         keys = m | lz::keys;
@@ -210,7 +209,8 @@ TEST_CASE("Filtermap") {
 
         const auto actual = lz::c_string("hello world");
         const auto expected = lz::c_string("eoo");
-        auto actual_filter_map = lz::filter_map(actual, filter_fun, map_fun);
+        lz::filter_map_iterable<decltype(actual), decltype(filter_fun), decltype(map_fun)> actual_filter_map =
+            lz::filter_map(actual, filter_fun, map_fun);
         REQUIRE(lz::equal(actual_filter_map, expected));
         actual_filter_map = actual | lz::filter_map(std::move(filter_fun), std::move(map_fun));
         REQUIRE(lz::equal(actual_filter_map, expected));
@@ -237,7 +237,7 @@ TEST_CASE("Select") {
     std::array<int, 6> to_select = { 1, 2, 3, 4, 5, 6 };
     std::array<bool, to_select.size()> selector = { true, false, true, false, true, false };
     const std::vector<int> expected = { 1, 3, 5 };
-    auto actual = lz::select(to_select, selector);
+    lz::select_iterable<decltype(to_select), decltype(selector)> actual = lz::select(to_select, selector);
     REQUIRE(lz::equal(actual, expected));
     actual = to_select | lz::select(selector);
     REQUIRE(lz::equal(actual, expected));
@@ -250,7 +250,7 @@ TEST_CASE("Trim variants") {
         };
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<int> expected = { 1, 2, 3 };
-        auto actual_trim_back = lz::drop_back_while(actual, pred);
+        lz::drop_back_iterable<decltype(actual), decltype(pred)> actual_trim_back = lz::drop_back_while(actual, pred);
         REQUIRE(lz::equal(actual_trim_back, expected));
         actual_trim_back = actual | lz::drop_back_while(std::move(pred));
         REQUIRE(lz::equal(actual_trim_back, expected));
@@ -259,14 +259,21 @@ TEST_CASE("Trim variants") {
     SECTION("Trim vec") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<int> expected = { 3, 4 };
-        auto actual_trim = lz::trim(actual, [](int i) { return i < 3; }, [](int i) { return i > 4; });
+        std::function<bool(int)> first_pred = [](int i) {
+            return i < 3;
+        };
+        std::function<bool(int)> last_pred = [](int i) {
+            return i > 4;
+        };
+        lz::trim_iterable<decltype(actual), decltype(first_pred), decltype(last_pred)> actual_trim =
+            lz::trim(actual, std::move(first_pred), std::move(last_pred));
         REQUIRE(lz::equal(actual_trim, expected));
     }
 
     SECTION("Trim string") {
         const std::string actual = "   hello world   ";
         const std::string expected = "hello world";
-        auto actual_trim = lz::trim(actual);
+        lz::trim_string_iterable<const std::string> actual_trim = lz::trim(actual);
         REQUIRE(lz::equal(actual_trim, expected));
         actual_trim = actual | lz::trim;
         REQUIRE(lz::equal(actual_trim, expected));

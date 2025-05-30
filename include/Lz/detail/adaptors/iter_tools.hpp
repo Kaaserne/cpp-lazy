@@ -371,8 +371,6 @@ using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable, UnaryPred
 struct trim_adaptor {
     using adaptor = trim_adaptor;
 
-    // clang-format off
-
     /**
      * @brief Trims the front and back of the iterable using the provided predicates. The first predicate is used to drop elements
      * from the front, and the second predicate is used to drop elements from the back. Example:
@@ -386,14 +384,11 @@ struct trim_adaptor {
      * @return A trim_iterable that can be iterated over, containing the trimmed elements.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    trim_iterable<remove_ref<Iterable>, UnaryPredicateFirst, UnaryPredicateLast>
-        operator()(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 trim_iterable<remove_ref<Iterable>, UnaryPredicateFirst, UnaryPredicateLast>
+    operator()(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) const {
         auto taken_first = lz::drop_while(std::forward<Iterable>(iterable), std::move(first));
         return drop_back_while_adaptor{}(std::move(taken_first), std::move(last));
     }
-
-    // clang-format on
 
     /**
      * @brief Trims whitespaces on the front and back of the given string.

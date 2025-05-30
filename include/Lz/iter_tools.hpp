@@ -120,6 +120,30 @@ template<class Iterable, std::size_t N>
 using get_nth_iterable = detail::get_nth_iterable<Iterable, N>;
 
 /**
+ * @brief Keys iterable helper alias
+ *
+ * @tparam Iterable A std::get-able iterable, such as a vector of tuples or map
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * lz::keys_iterable<decltype(m)> iterable = lz::keys(m);
+ * ```
+ */
+template<class Iterable>
+using keys_iterable = get_nth_iterable<Iterable, 0>;
+
+/**
+ * @brief Values iterable helper alias
+ *
+ * @tparam Iterable A std::get-able iterable, such as a vector of tuples or map
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * lz::values_iterable<decltype(m)> iterable = lz::values(m);
+ * ```
+ */
+template<class Iterable>
+using values_iterable = get_nth_iterable<Iterable, 1>;
+
+/**
  * @brief get nths iterable helper alias
  *
  * @tparam Iterable A std::get-able iterable, such as a vector of tuples.
