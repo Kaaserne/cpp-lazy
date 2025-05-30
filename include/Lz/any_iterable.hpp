@@ -34,7 +34,7 @@ template<class T, class Reference = T&, class IterCat = std::forward_iterator_ta
 class any_iterable : public lazy_view {
 private:
     using it = detail::iterator_wrapper<T, Reference, IterCat, DiffType>;
-    // TODO maybe add any_iterable that can hold a container instead of an iterator
+
     template<class Iterable>
     using any_iter_impl = detail::any_iterator_impl<iter_t<Iterable>, sentinel_t<Iterable>, T, Reference, IterCat, DiffType>;
 
