@@ -4,12 +4,9 @@
 #define LZ_ANY_VIEW_HPP
 
 #include <Lz/basic_iterable.hpp>
-#include <Lz/detail/iterators/any_view_helpers.hpp>
 #include <Lz/detail/iterators/any_iterable/any_impl.hpp>
+#include <Lz/detail/iterators/any_view_helpers.hpp>
 #include <Lz/detail/procs.hpp>
-#include <iterator>
-#include <memory>
-
 
 namespace lz {
 /**
