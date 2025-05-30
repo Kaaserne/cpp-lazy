@@ -4,7 +4,15 @@
 #define LZ_UNIQUE_PTR_HPP
 
 #ifdef LZ_HAS_CXX_14
+
 #include <memory>
+
+#endif
+
+#ifdef LZ_HAS_CXX_11
+
+#include <utility>
+
 #endif
 
 namespace lz {
