@@ -10,7 +10,26 @@
 #include <type_traits>
 
 namespace lz {
-struct default_sentinel;
+struct default_sentinel {
+    friend constexpr bool operator==(default_sentinel, default_sentinel) noexcept {
+        return true;
+    }
+};
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
+struct iterator;
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+constexpr bool
+operator==(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
+    return it.operator==(default_sentinel{});
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+constexpr bool
+operator!=(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
+    return it.operator!=(default_sentinel{});
+}
 
 struct lazy_view {};
 

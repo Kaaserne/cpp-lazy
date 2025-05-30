@@ -26,6 +26,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * - `lz::enumerate`
  * - `lz::exclude`
  * - `lz::interleave`
+ * - `lz::rotate`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`

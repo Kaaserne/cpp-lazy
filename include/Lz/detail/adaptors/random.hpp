@@ -143,6 +143,43 @@ struct random_adaptor {
         return { distribution, generator, amount };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    /**
+     * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
+     * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
+     * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
+     * ```cpp
+     * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a std::mt19937 engine.
+     * auto random = lz::common_random(0., 1., 5); // random = { 0.1, 0.2, 0.3, 0.4, 0.5 } 5 random double numbers between 0 and 1
+     * // (inclusive)
+     * // with integers. Uses std::uniform_int_distribution<int> as distribution, a seed length of 8 random numbers (using
+     * // std::random_device) and a std::mt19937 engine.
+     * auto random = lz::common_random(0, 10, 5); // random = { 1, 2, 3, 4, 5 } 5 random integers between 0 and 10 (inclusive)
+     * ```
+     * @param min The minimum value of the random numbers (inclusive).
+     * @param max The maximum value of the random numbers (inclusive).
+     * @param amount The amount of random numbers to generate.
+     */
+    template<class T>
+    [[nodiscard]] auto operator()(const T min, const T max, const std::size_t amount) const {
+        static auto gen = create_engine();
+        if constexpr (std::is_integral_v<T>) {
+            std::uniform_int_distribution<T> dist(min, max);
+            return (*this)(dist, gen, amount);
+        }
+        else if constexpr (std::is_floating_point_v<T>) {
+            std::uniform_real_distribution<T> dist(min, max);
+            return (*this)(dist, gen, amount);
+        }
+        else {
+            static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>,
+                          "Type must be either integral or floating point for random generation.");
+        }
+    }
+#else
+
     /**
      * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
      * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
@@ -193,6 +230,8 @@ struct random_adaptor {
         std::uniform_real_distribution<Floating> dist(min, max);
         return (*this)(dist, gen, amount);
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

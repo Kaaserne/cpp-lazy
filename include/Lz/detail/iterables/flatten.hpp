@@ -36,6 +36,23 @@ struct all_sized_helper<true> {
 template<class Iterable>
 using all_sized = typename all_sized_helper<sized<Iterable>::value && is_iterable<Iterable>::value>::template type<Iterable>;
 
+#ifdef LZ_HAS_CXX_17
+
+template<std::size_t I, class Iterable>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size_all(Iterable&& iterable) {
+    if constexpr (I == 1) {
+        return static_cast<std::size_t>(lz::size(iterable));
+    }
+    else {
+        using lz::detail::accumulate;
+        using std::accumulate;
+        return accumulate(std::begin(iterable), std::end(iterable), std::size_t{ 0 },
+                          [](std::size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
+    }
+}
+
+#else
+
 template<std::size_t I, class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<I == 1, std::size_t> size_all(Iterable&& iterable) {
     return static_cast<std::size_t>(lz::size(iterable));
@@ -48,6 +65,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<(I > 1), std::size_t> size_all(Iterab
     return accumulate(std::begin(iterable), std::end(iterable), std::size_t{ 0 },
                       [](std::size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
 }
+
+#endif
 
 template<class Iterable, std::size_t Dims>
 class flatten_iterable : public lazy_view {
@@ -79,6 +98,19 @@ public:
         return { std::begin(_iterable), std::begin(_iterable), detail::end(std::move(_iterable)) };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::end(_iterable), std::begin(_iterable), std::end(_iterable) };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable) };
@@ -88,6 +120,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
         return {};
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

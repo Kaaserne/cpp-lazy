@@ -30,6 +30,40 @@ template<class ValueType>
 struct split_adaptor {
     using adaptor = split_adaptor<ValueType>;
 
+#ifdef LZ_HAS_CXX_17
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
+     * ```cpp
+     * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+     * using iterable = lz::basic_iterable<decltype(arr.begin)>;
+     * auto splitted = lz::t_split<iterable>(arr, 2); // { { 1 }, { 3, 4, 5 } } where value_type =
+     * // lz::basic_iterable<decltype(arr.begin)>
+     * // which is equal to lz::split(arr, 2)
+     * auto to_split_on = {1, 2};
+     * auto splitted2 = lz::t_split<iterable>(arr, to_split_on); // {{3, 4, 5}} where value_type =
+     * // lz::basic_iterable<decltype(arr.begin)>. to_split_on must be a reference in this case
+     * ```
+     * @param iterable The iterable to split. Must be an actual reference.
+     * @param delimiter The delimiter to split on. Must be a reference if
+     */
+    template<class Iterable, class T>
+    constexpr auto operator()(Iterable&& iterable, T&& delimiter) const {
+        using T2 = std::remove_cv_t<remove_ref<T>>;
+
+        if constexpr (is_iterable<T2>::value) {
+            using splitter = split_iterable<ValueType, remove_ref<Iterable>, remove_ref<T>>;
+            return splitter{ std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
+        }
+        else {
+            using splitter = split_iterable<ValueType, remove_ref<Iterable>, T2>;
+            return splitter{ std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
+        }
+    }
+
+#else
+
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
@@ -48,6 +82,33 @@ struct split_adaptor {
     operator()(Iterable&& iterable, T delimiter) const {
         return { std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
     }
+
+    // clang-format off
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
+     * ```cpp
+     * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+     * std::vector<int> to_split = { 3, 4 }; // must be by reference
+     * using iterable = lz::basic_iterable<decltype(arr.begin)>;
+     * auto splitted = lz::t_split<iterable>(arr, to_split); // {{1, 2}, {5}} where value_type =
+     * // lz::basic_iterable<decltype(arr.begin)>
+     * // which is equal to lz::split(arr, to_split)
+     * ```
+     * @param iterable The iterable to split. Must be an actual reference.
+     * @param delimiter The delimiter to split on. Must be an actual reference
+     */
+    template<class Iterable, class Iterable2>
+    LZ_NODISCARD constexpr
+    enable_if<is_iterable<Iterable2>::value, split_iterable<ValueType, remove_ref<Iterable>, remove_ref<Iterable2>>>
+    operator()(Iterable&& iterable, Iterable2&& delimiter) const {
+        return { std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter) };
+    }
+
+    // clang-format on
+
+#endif
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel
@@ -88,7 +149,7 @@ struct split_adaptor {
         return (*this)(std::forward<Iterable>(iterable), copied_basic_sv<CharT>(delimiter));
     }
 
-    // clang-format off
+#ifdef LZ_HAS_CXX_17
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
@@ -97,21 +158,28 @@ struct split_adaptor {
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
      * std::vector<int> to_split = { 3, 4 }; // must be by reference
      * using iterable = lz::basic_iterable<decltype(arr.begin)>;
-     * auto splitted = lz::t_split<iterable>(arr, to_split); // {{1, 2}, {5}} where value_type =
+     * auto splitted = arr | lz::t_split<iterable>(to_split); // {{1, 2}, {5}} where value_type =
      * // lz::basic_iterable<decltype(arr.begin)>
-     * // which is equal to lz::split(arr, to_split)
+     * // which is equal to arr | lz::split(to_split)
+     * auto to_split_on = {1, 2};
+     * auto splitted2 = arr | lz::t_split<iterable>(to_split_on); // {{3, 4, 5}} where value_type =
+     * // lz::basic_iterable<decltype(arr.begin)>. to_split_on must be a reference in this case
      * ```
-     * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be an actual reference
+     * @param delimiter The iterable to split. Must be an actual reference.
      */
-    template<class Iterable, class Iterable2>
-    LZ_NODISCARD constexpr
-    enable_if<is_iterable<Iterable2>::value, split_iterable<ValueType, remove_ref<Iterable>, remove_ref<Iterable2>>>
-    operator()(Iterable&& iterable, Iterable2&& delimiter) const {
-        return { std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter) };
+    template<class T>
+    LZ_CONSTEXPR_CXX_14 auto operator()(T&& delimiter) const {
+        using T2 = std::remove_cv_t<remove_ref<T>>;
+
+        if constexpr (is_iterable<T2>::value) {
+            return fn_args_holder<adaptor, T>{ std::forward<T>(delimiter) };
+        }
+        else {
+            return fn_args_holder<adaptor, T2>{ std::forward<T>(delimiter) };
+        }
     }
 
-    // clang-format on
+#else
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
@@ -147,6 +215,8 @@ struct split_adaptor {
     LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
         return { std::move(delimiter) };
     }
+
+#endif
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
@@ -189,7 +259,37 @@ struct split_adaptor<void> {
     template<class Iterable, class T>
     using splitter_t_iterable = split_iterable<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>, remove_ref<Iterable>, T>;
 
-    // clang-format off
+#ifdef LZ_HAS_CXX_17
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
+     * ```cpp
+     * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+     * auto splitted = lz::split(arr, 2); // { { 1 }, { 3, 4, 5 } } where value_type = lz::basic_iterable<decltype(arr.begin)>
+     *
+     * std::vector<int> to_split = { 3, 4 }; // must be by reference
+     * auto splitted2 = lz::split(arr, to_split); // {{1, 2}, {5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
+     * // to_split must be a reference in this case
+     * ```
+     * @param iterable The iterable to split. Must be an actual reference.
+     * @param delimiter The delimiter to split on. Doesn't have to be a reference
+     */
+    template<class Iterable, class T>
+    LZ_NODISCARD constexpr auto operator()(Iterable&& iterable, T&& delimiter) const {
+        using T2 = std::remove_cv_t<remove_ref<T>>;
+
+        if constexpr (is_iterable<T2>::value) {
+            using a = split_adaptor<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>;
+            return a{}(std::forward<Iterable>(iterable), std::forward<T>(delimiter));
+        }
+        else {
+            using splitter = splitter_t_iterable<Iterable, T2>;
+            return splitter{ std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
+        }
+    }
+
+#else
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
@@ -206,6 +306,27 @@ struct split_adaptor<void> {
     operator()(Iterable&& iterable, T delimiter) const {
         return { std::forward<Iterable>(iterable), std::move(delimiter) };
     }
+
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
+     * Example:
+     * ```cpp
+     * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
+     * std::vector<int> to_split = { 3, 4 }; // must be by reference
+     * auto splitted = lz::split(arr, to_split); // {{1, 2}, {5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
+     * ```
+     * @param iterable The iterable to split. Must be an actual reference.
+     * @param delimiter The delimiter to split on. Must be an actual reference
+     */
+    template<class Iterable, class Iterable2>
+    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable2>::value, splitter_iterable<Iterable, Iterable2>>
+    operator()(Iterable&& iterable, Iterable2&& delimiter) const {
+        using a = split_adaptor<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>;
+        return a{}(std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter));
+    }
+
+#endif
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
@@ -230,7 +351,7 @@ struct split_adaptor<void> {
      * Example:
      * ```cpp
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
-     * auto splitted = lz::split(arr, lz::string_view("ll")); // {{'h', 'e'}, {'o'}} 
+     * auto splitted = lz::split(arr, lz::string_view("ll")); // {{'h', 'e'}, {'o'}}
      * // where value_type = lz::basic_iterable<decltype(arr.begin)>
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
@@ -242,6 +363,8 @@ struct split_adaptor<void> {
         return (*this)(std::forward<Iterable>(iterable), copied_basic_sv<CharT>(delimiter));
     }
 
+#ifdef LZ_HAS_CXX_17
+
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
@@ -249,20 +372,24 @@ struct split_adaptor<void> {
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
      * std::vector<int> to_split = { 3, 4 }; // must be by reference
-     * auto splitted = lz::split(arr, to_split); // {{1, 2}, {5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
+     * auto splitted = arr | lz::split(to_split); // {{1, 2}, {5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
+     * auto splitted2 = arr | lz::split(2); // {{1}, {3, 4, 5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
+     * // splitted2's delimiter does not have to be a reference
      * ```
-     * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be an actual reference
+     * @param delimiter The iterable to split. Must be an actual reference.
      */
-    template<class Iterable, class Iterable2>
-    LZ_NODISCARD constexpr
-    enable_if<is_iterable<Iterable2>::value, splitter_iterable<Iterable, Iterable2>>
-    operator()(Iterable&& iterable, Iterable2&& delimiter) const {
-        using a = split_adaptor<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>;
-        return a{}(std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter));
+    template<class T>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(T&& delimiter) const {
+        if constexpr (is_iterable<T>::value) {
+            return fn_args_holder<adaptor, T>{ std::forward<T>(delimiter) };
+        }
+        else {
+            using T2 = std::remove_cv_t<remove_ref<T>>;
+            return fn_args_holder<adaptor, T2>{ std::forward<T>(delimiter) };
+        }
     }
 
-    // clang-format on
+#else
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
@@ -278,8 +405,7 @@ struct split_adaptor<void> {
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_iterable<Iterable>::value, fn_args_holder<adaptor, Iterable>>
     operator()(Iterable&& delimiter) const {
-        using a = split_adaptor<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>;
-        return a{}(std::forward<Iterable>(delimiter));
+        return { std::forward<Iterable>(delimiter) };
     }
 
     /**
@@ -298,6 +424,8 @@ struct split_adaptor<void> {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
         return { std::move(delimiter) };
     }
+
+#endif
 
     /**
      * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and

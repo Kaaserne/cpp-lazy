@@ -48,6 +48,20 @@ public:
         return *this;
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    constexpr reference dereference() const {
+        if constexpr (std::is_constructible_v<ValueType, Iterator, Iterator>) {
+            return { _sub_range_begin, _sub_range_end.first };
+        }
+        else {
+            return { std::addressof(*_sub_range_begin),
+                     static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
+        }
+    }
+
+#else
+
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         return { _sub_range_begin, _sub_range_end.first };
@@ -59,6 +73,8 @@ public:
         return { std::addressof(*_sub_range_begin),
                  static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
     }
+
+#endif
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);

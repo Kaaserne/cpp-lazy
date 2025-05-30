@@ -37,6 +37,58 @@ private:
     IterTuple _iterators;
     STuple _end;
 
+#ifdef LZ_HAS_CXX_17
+
+    template<std::size_t I>
+    constexpr void next() {
+        ++std::get<I>(_iterators);
+        if constexpr (I > 0) {
+            if (std::get<I>(_iterators) == std::get<I>(_end)) {
+                std::get<I>(_iterators) = std::get<I>(_begin);
+                next<I - 1>();
+            }
+        }
+    }
+
+    template<std::size_t I>
+    constexpr void previous() {
+        if constexpr (I > 0) {
+            if (std::get<I>(_iterators) == std::get<I>(_begin)) {
+                std::get<I>(_iterators) = std::get<I>(_end);
+                previous<I - 1>();
+            }
+        }
+        --std::get<I>(_iterators);
+    }
+
+    template<std::size_t I>
+    constexpr void operator_plus_impl(const difference_type offset) {
+        if constexpr (I == 0) {
+            std::get<0>(_iterators) += offset;
+        }
+        else {
+            if (offset == 0) {
+                return;
+            }
+
+            const auto size = static_cast<difference_type>(std::get<I>(_end) - std::get<I>(_begin));
+            const auto iterator_offset = static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(_begin));
+            const auto to_add_this = (iterator_offset + offset) % size;
+            const auto to_add_next = (iterator_offset + offset) / size;
+
+            if (to_add_this < 0) {
+                std::get<I>(_iterators) = std::get<I>(_begin) + static_cast<difference_type>(to_add_this + size);
+                operator_plus_impl<I - 1>(to_add_next - 1);
+                return;
+            }
+
+            std::get<I>(_iterators) = std::get<I>(_begin) + static_cast<difference_type>(to_add_this);
+            operator_plus_impl<I - 1>(to_add_next);
+        }
+    }
+
+#else
+
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> next() {
         ++std::get<I>(_iterators);
@@ -91,10 +143,29 @@ private:
         operator_plus_impl<I - 1>(to_add_next);
     }
 
+#endif // LZ_HAS_CXX_17
+
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<Is...>) const {
         return reference{ *std::get<Is>(_iterators)... };
     }
+
+#ifdef LZ_HAS_CXX_17
+
+    template<std::size_t I>
+    constexpr difference_type distance_impl(const cartesian_product_iterator& other) const {
+        if constexpr (I > 0) {
+            const auto distance = std::get<I>(_iterators) - std::get<I>(other._iterators);
+            const auto size = std::get<I>(_end) - std::get<I>(_begin);
+            const auto result = size * distance_impl<I - 1>(other) + distance;
+            return result;
+        }
+        else {
+            return std::get<0>(_iterators) - std::get<0>(other._iterators);
+        }
+    }
+
+#else
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I > 0), difference_type> distance_impl(const cartesian_product_iterator& other) const {
@@ -108,6 +179,8 @@ private:
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0, difference_type> distance_impl(const cartesian_product_iterator& other) const {
         return std::get<0>(_iterators) - std::get<0>(other._iterators);
     }
+
+#endif
 
     using index_sequence_for_this = make_index_sequence<tup_size>;
 

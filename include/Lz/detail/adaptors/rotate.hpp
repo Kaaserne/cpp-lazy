@@ -13,24 +13,16 @@ struct rotate_adaptor {
 
     /**
      * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
-     * Its iterator category is the same as the input iterable if it has a .size() method. If the input iterable does not have a
-     * .size() method, it will return the end type of its input iterable, rather than a rotate_iterator. Example:
+     * Its iterator category is the same as the input iterable. If the input iterable is forward, it
+     * will return the end type of its input iterable, rather than a rotate_iterator/default_sentinel. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * auto rotated = lz::rotate(vec, 2); // rotated = { 3, 4, 5, 1, 2 }
      *
-     * // or, in case input iterable does not have .size() method:
+     * // or, in case input iterable is not forward:
      * auto str = lz::c_string("Hello, World!");
      * auto rotated = lz::rotate(str, 7); // rotated = "World!Hello, "
-     * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str does not have a .size() method
-     *
-     * // Invalid: filter decays into a forward iterator because it doesn't have a .size() method
-     * // auto rotated =
-     *         vec | lz::filter([](int i) { return i % 2 == 0; }) | lz::rotate(2) | lz::reverse; // Error, rotated is forward
-     *
-     * // Instead, do (first rotate, then filter, instead of filter then rotate):
-     * auto rotated = vec | lz::rotate(2) | lz::filter([](int i) { return i % 2 == 0; }) | lz::reverse | lz::to<std::vector>();
-     * // rotated = { 2, 4 }
+     * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str is forward
      * ```
      * @param iterable The input iterable to rotate.
      * @param start The amount of elements to rotate the input iterable by.
@@ -43,24 +35,16 @@ struct rotate_adaptor {
 
     /**
      * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
-     * Its iterator category is the same as the input iterable if it has a .size() method. If the input iterable does not have a
-     * .size() method, it will return the end type of its input iterable, rather than a rotate_iterator. Example:
+     * Its iterator category is the same as the input iterable. If the input iterable is forward, it
+     * will return the end type of its input iterable, rather than a rotate_iterator/default_sentinel. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
-     * auto rotated = vec | lz::rotate(2); // rotated = { 3, 4, 5, 1, 2 }
-     * // or, in case input iterable does not have .size() method:
+     * auto rotated = lz::rotate(vec, 2); // rotated = { 3, 4, 5, 1, 2 }
      *
+     * // or, in case input iterable is not forward:
      * auto str = lz::c_string("Hello, World!");
-     * auto rotated = lz::rotate(str, 7); // rotated = "World!Hello, "
-     * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str does not have a .size() method
-     *
-     * // Invalid: filter decays into a forward iterator because it doesn't have a .size() method
-     * // auto rotated =
-     *         vec | lz::filter([](int i) { return i % 2 == 0; }) | lz::rotate(2) | lz::reverse; // Error, rotated is forward
-     *
-     * // Instead, do (first rotate, then filter, instead of filter then rotate):
-     * auto rotated = vec | lz::rotate(2) | lz::filter([](int i) { return i % 2 == 0; }) | lz::reverse | lz::to<std::vector>();
-     * // rotated = { 2, 4 }
+     * auto rotated = str | lz::rotate(7); // rotated = "World!Hello, "
+     * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str is forward
      * ```
      * @param start The amount of elements to rotate the input iterable by.
      */

@@ -26,6 +26,19 @@ public:
         _compare{ std::move(compare) } {
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr iterator begin() const& {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return { detail::begin(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+        }
+        else {
+            return { detail::begin(_iterable), detail::end(_iterable), _compare };
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
         return { detail::begin(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
@@ -36,10 +49,25 @@ public:
         return { detail::begin(_iterable), detail::end(_iterable), _compare };
     }
 
+#endif // LZ_HAS_CXX_17
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_compare) };
     }
+
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ detail::end(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
@@ -50,6 +78,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
+
+#endif // LZ_HAS_CXX_17
 };
 } // namespace detail
 } // namespace lz

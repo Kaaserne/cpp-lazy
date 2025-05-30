@@ -53,7 +53,7 @@ public:
 
     template<class T = conjunction<sized<Iterables>...>>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
-        return size(make_index_sequence<sizeof...(Iterables)>{});
+        return size(seq{});
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
@@ -64,14 +64,31 @@ public:
         return { begin_tuple(std::move(_iterables)) };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const& {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ smallest_end_tuple(_iterables, seq{}) };
+        }
+        else {
+            return typename iterator::sentinel{ end_tuple(_iterables) };
+        }
+    }
+
+    [[nodiscard]] constexpr auto end() && {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ smallest_end_tuple(std::move(_iterables), seq{}) };
+        }
+        else {
+            return typename iterator::sentinel{ end_tuple(std::move(_iterables)) };
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
         return { smallest_end_tuple(_iterables, seq{}) };
-    }
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
-        return { smallest_end_tuple(std::move(_iterables), seq{}) };
     }
 
     template<class I = typename iterator::iterator_category>
@@ -80,9 +97,16 @@ public:
     }
 
     template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
+        return { smallest_end_tuple(std::move(_iterables), seq{}) };
+    }
+
+    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, typename iterator::sentinel> end() && {
         return { end_tuple(std::move(_iterables)) };
     }
+
+#endif
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_iterable<remove_ref<Iterable>, Iterables...>

@@ -49,6 +49,24 @@ public:
         _index -= _step;
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    constexpr difference_type difference(const range_iterator& b) const noexcept {
+        LZ_ASSERT(_step == b._step, "Incompatible iterators");
+        LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
+
+        if constexpr (std::is_floating_point_v<Arithmetic>) {
+            const auto current_size = (_index - b._index) / _step;
+            const auto int_part = static_cast<difference_type>(current_size);
+            return (current_size > static_cast<Arithmetic>(int_part)) ? int_part + 1 : int_part;
+        }
+        else {
+            return static_cast<difference_type>(_index - b._index) / static_cast<difference_type>(_step);
+        }
+    }
+
+#else
+
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& b) const noexcept {
@@ -67,6 +85,8 @@ public:
         LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
         return static_cast<difference_type>(_index - b._index) / static_cast<difference_type>(_step);
     }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
         _index += static_cast<Arithmetic>(value) * _step;

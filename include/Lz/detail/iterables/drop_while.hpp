@@ -39,6 +39,19 @@ public:
         return lz::find_if_not(_iterable, _unary_predicate);
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<iter_cat_t<iterator>>::value) {
+            return std::end(_iterable);
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<class I = iter_cat_t<iterator>>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const {
         return std::end(_iterable);
@@ -48,6 +61,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
+
+#endif
 };
 
 template<class Iterable, class UnaryPredicate>

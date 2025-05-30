@@ -32,6 +32,19 @@ public:
         return { _distribution, *_generator, _current };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (!UseSentinel) {
+            return iterator{ _distribution, *_generator, 0 };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<bool B = UseSentinel>
     LZ_NODISCARD constexpr enable_if<!B, iterator> end() const {
         return { _distribution, *_generator, 0 };
@@ -41,6 +54,8 @@ public:
     LZ_NODISCARD constexpr enable_if<B, default_sentinel> end() const {
         return {};
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

@@ -24,8 +24,7 @@ struct loop_adaptor {
      * @param iterable The iterable to loop over
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr enable_if<!std::is_integral<Iterable>::value, loop_iterable<remove_ref<Iterable>, true>>
-    operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
 

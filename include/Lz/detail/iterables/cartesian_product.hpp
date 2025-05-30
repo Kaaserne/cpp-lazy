@@ -23,6 +23,22 @@ class cartesian_product_iterable : public lazy_view {
         return std::accumulate(std::begin(sizes), std::end(sizes), std::size_t{ 1 }, std::multiplies<std::size_t>{});
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    template<std::ptrdiff_t I, class Iterator, class... Iterators>
+    constexpr void init_iterators(Iterator& first_it, const std::tuple<Iterators...>& rest_it, bool& first_at_end) const {
+        if constexpr (I >= 0) {
+            const bool this_at_end = std::get<I>(rest_it) == std::end(std::get<I>(_rest_iterables));
+            if (this_at_end && !first_at_end) {
+                first_it = std::end(_first_iterable);
+                first_at_end = true;
+            }
+            init_iterators<I - 1>(first_it, rest_it, first_at_end);
+        }
+    }
+
+#else
+
     template<std::ptrdiff_t I, class Iterator, class... Iterators>
     LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)>
     init_iterators(Iterator& first_it, const std::tuple<Iterators...>& rest_it, bool& first_at_end) const {
@@ -37,6 +53,8 @@ class cartesian_product_iterable : public lazy_view {
     template<std::ptrdiff_t I, class Iterator, class... Iterators>
     LZ_CONSTEXPR_CXX_14 enable_if<(I < 0)> init_iterators(Iterator&, const std::tuple<Iterators...>&, bool&) const noexcept {
     }
+
+#endif
 
     template<class Iterable2, std::size_t... Is>
     static cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
@@ -77,7 +95,7 @@ public:
 
         auto rest_it = begin_tuple(_rest_iterables);
         auto end = end_tuple(_rest_iterables);
-        bool first_at_end = first_it == first_end;
+        auto first_at_end = first_it == first_end;
 
         init_iterators<static_cast<std::ptrdiff_t>(sizeof...(Iterables) - 1)>(first_it, rest_it, first_at_end);
 
@@ -87,18 +105,39 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        auto first_it = std::begin(_first_iterable);
-        auto first_end = std::end(_first_iterable);
+        auto first_it = detail::begin(std::move(_first_iterable));
+        auto first_end = detail::end(std::move(_first_iterable));
 
-        auto rest_it = begin_tuple(_rest_iterables);
-        auto end = end_tuple(_rest_iterables);
-        bool first_at_end = first_it == first_end;
+        auto rest_it = begin_tuple(std::move(_rest_iterables));
+        auto end = end_tuple(std::move(_rest_iterables));
+        auto first_at_end = first_it == first_end;
 
         init_iterators<static_cast<std::ptrdiff_t>(sizeof...(Iterables) - 1)>(first_it, rest_it, first_at_end);
 
         return { std::tuple_cat(std::make_tuple(first_it), rest_it), std::tuple_cat(std::make_tuple(first_it), rest_it),
                  std::tuple_cat(std::make_tuple(first_end), end) };
     }
+
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            auto first_it = std::end(_first_iterable);
+            auto first_end = std::end(_first_iterable);
+
+            auto rest_it = begin_tuple(_rest_iterables);
+            auto end = end_tuple(_rest_iterables);
+            // clang-format off
+            return iterator{ std::tuple_cat(std::make_tuple(first_it), rest_it), std::tuple_cat(std::make_tuple(first_it), rest_it),
+                             std::tuple_cat(std::make_tuple(first_end), end) };
+            // clang-format on
+        }
+        else {
+            return sentinel{};
+        }
+    }
+
+#else
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
@@ -116,6 +155,8 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const noexcept {
         return {};
     }
+
+#endif
 
     template<class Iterable2>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>

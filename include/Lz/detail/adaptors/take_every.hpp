@@ -25,6 +25,7 @@ struct take_every_adaptor {
      * - `lz::enumerate`
      * - `lz::exclude`
      * - `lz::interleave`
+     * - `lz::rotate`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`
@@ -59,6 +60,7 @@ struct take_every_adaptor {
      * - `lz::enumerate`
      * - `lz::exclude`
      * - `lz::interleave`
+     * - `lz::rotate`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`

@@ -14,20 +14,18 @@ class rotate_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
 
     ref_or_view<Iterable> _iterable;
-    inner_iter _start;
-
-    static constexpr bool is_sized = sized<Iterable>::value;
+    inner_iter _start_iter;
 
 public:
-    using iterator = rotate_iterator<iter_t<Iterable>, sentinel_t<Iterable>, is_sized>;
+    using iterator = rotate_iterator<inner_iter, sentinel_t<Iterable>>;
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
     template<class I>
-    constexpr rotate_iterable(I&& iterable, const diff_iterable_t<Iterable> start) :
+    constexpr rotate_iterable(I&& iterable, const diff_type<inner_iter> start) :
         _iterable{ std::forward<I>(iterable) },
-        _start{ next_fast(_iterable, start) } {
+        _start_iter{ next_fast(_iterable, start) } {
     }
 
     template<class I = Iterable>
@@ -36,28 +34,38 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), std::end(_iterable), _start, 0 };
+        return { std::begin(_iterable), std::end(_iterable), _start_iter, 0 };
     }
 
-    template<bool Sized = is_sized>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, iterator> begin() && {
-        return static_cast<const rotate_iterable&>(*this).begin();
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), _start_iter, 0 };
     }
 
-    template<bool Sized = is_sized>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!Sized, iterator> begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_start), 0 };
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::begin(_iterable), std::end(_iterable), _start_iter, lz::eager_size(_iterable) };
+        }
+        else {
+            return _start_iter;
+        }
     }
 
-    template<bool Sized = is_sized>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, iterator> end() const {
-        return { std::begin(_iterable), std::end(_iterable), _start, size() };
+#else
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
+        return { std::begin(_iterable), std::end(_iterable), _start_iter, lz::eager_size(_iterable) };
     }
 
-    template<bool Sized = is_sized>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!Sized, inner_iter> end() const {
-        return _start;
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, inner_iter> end() const {
+        return _start_iter;
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

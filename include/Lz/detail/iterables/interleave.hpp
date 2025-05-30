@@ -58,19 +58,34 @@ public:
         return { begin_tuple(std::move(_iterables)) };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const& {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ smallest_end_tuple(_iterables, index_sequence_for_this{}) };
+        }
+        else {
+            return end_tuple(_iterables);
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
         return { smallest_end_tuple(_iterables, index_sequence_for_this{}) };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
-        return { smallest_end_tuple(std::move(_iterables), index_sequence_for_this{}) };
-    }
-
-    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel_tuple> end() const& {
         return end_tuple(_iterables);
+    }
+
+#endif
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
+        return { smallest_end_tuple(std::move(_iterables), index_sequence_for_this{}) };
     }
 
     template<class Iterable>

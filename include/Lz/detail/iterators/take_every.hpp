@@ -108,8 +108,7 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    template<class I = Iterator>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<I>::value> increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT(_iterator != _end, "Out of bounds");
         for (std::size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count, ++_distance) {
         }

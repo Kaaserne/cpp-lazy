@@ -409,6 +409,34 @@ starts_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary
                                std::forward<BinaryPredicate>(binary_predicate));
 }
 
+#ifdef LZ_HAS_CXX_17
+
+/**
+ * @brief Checks if the range [begin(iterable), end(iterable)) ends with the bidirectional range [begin(iterable2),
+ * end(iterable2)). Needs to know the size of the range if its input iterables aren't bidirectional
+ * so it may be worth your while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and going
+ * to use this function multiple times.
+ *
+ * @param iterable The iterable to check
+ * @param iterable2 The bidirectional iterable to check for
+ * @param binary_predicate The binary binary_predicate to check the values with
+ * @return `true` if the value is found, `false` otherwise
+ */
+template<class Iterable, class Iterable2, class BinaryPredicate = std::equal_to<>>
+[[nodiscard]] constexpr bool ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+    if constexpr (detail::is_bidi<iter_t<Iterable>>::value) {
+        return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
+                                 std::begin(iterable2), std::end(iterable2), std::forward<BinaryPredicate>(binary_predicate));
+    }
+    else {
+        return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
+                                 std::begin(iterable2), std::end(iterable2), std::forward<BinaryPredicate>(binary_predicate),
+                                 lz::eager_size(iterable), lz::eager_size(iterable2));
+    }
+}
+
+#else
+
 /**
  * @brief Checks if the range [begin(iterable), end(iterable)) ends with the bidirectional range [begin(iterable2),
  * end(iterable2))
@@ -427,9 +455,9 @@ ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_p
 
 /**
  * @brief Checks if the range [begin(iterable), end(iterable)) ends with the forward iterable range [begin(iterable2),
- * end(iterable2)). Needs to know the size of the range [begin(iterable), end(iterable)) and [begin(iterable2), end(iterable2)),
- * so it may be worth your while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 isn't sized and going
- * to use this function multiple times.
+ * end(iterable2)). Needs to know the size of the range if its input iterables aren't bidirectional so it may be worth your while
+ * to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and going to use this function multiple
+ * times.
  *
  * @param iterable The iterable to check
  * @param iterable2 The forward iterable to check for
@@ -443,6 +471,8 @@ ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_p
                              std::begin(iterable2), std::end(iterable2), std::forward<BinaryPredicate>(binary_predicate),
                              lz::eager_size(iterable), lz::eager_size(iterable2));
 }
+
+#endif // LZ_HAS_CXX_17
 
 /**
  * @brief Reorders the elements in the range [begin(iterable), end(iterable)) in such a way that all elements for which the

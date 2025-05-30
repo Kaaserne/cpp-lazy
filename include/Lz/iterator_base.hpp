@@ -7,30 +7,9 @@
 #include <iterator>
 
 namespace lz {
-struct default_sentinel {
-    friend constexpr bool operator==(default_sentinel, default_sentinel) noexcept {
-        return true;
-    }
-};
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
-struct iterator;
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
-constexpr bool
-operator==(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
-    return it.operator==(default_sentinel{});
-}
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
-constexpr bool
-operator!=(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
-    return it.operator!=(default_sentinel{});   
-}
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
-public:
     using iterator_category = std::forward_iterator_tag;
     using sentinel = S;
 
@@ -49,6 +28,19 @@ public:
         return static_cast<const Derived&>(*this).dereference();
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    LZ_NODISCARD constexpr decltype(auto) operator*() {
+        if constexpr (std::is_lvalue_reference<Reference>::value) {
+            return const_cast<detail::decay_t<Reference>&>(static_cast<const iterator&>(*this).operator*());
+        }
+        else {
+            return static_cast<const iterator&>(*this).operator*();
+        }
+    }
+
+#else
+
     template<class T = Reference>
     LZ_NODISCARD constexpr detail::enable_if<std::is_lvalue_reference<T>::value, detail::decay_t<T>&> operator*() {
         return const_cast<detail::decay_t<T>&>(static_cast<const iterator&>(*this).operator*());
@@ -58,6 +50,8 @@ public:
     LZ_NODISCARD constexpr detail::enable_if<!std::is_lvalue_reference<T>::value, T> operator*() {
         return static_cast<const iterator&>(*this).operator*();
     }
+
+#endif
 
     LZ_NODISCARD constexpr Pointer operator->() const {
         return static_cast<const Derived&>(*this).arrow();
