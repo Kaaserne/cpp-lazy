@@ -17,8 +17,8 @@ using first_it = tup_element<0, Tuple>;
 
 template<class IterTuple, class SentinelTuple>
 class concatenate_iterator
-    : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, ref_t<first_it<IterTuple>>,
-                      fake_ptr_proxy<ref_t<first_it<IterTuple>>>, iter_tuple_diff_type_t<IterTuple>,
+    : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, iter_tuple_relaxed_single_ref_type_t<IterTuple>,
+                      fake_ptr_proxy<iter_tuple_relaxed_single_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
                       iter_tuple_iter_cat_t<IterTuple>,
                       sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
 
@@ -33,7 +33,7 @@ class concatenate_iterator
 public:
     using value_type = typename first_tuple_iterator::value_type;
     using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = typename first_tuple_iterator::reference;
+    using reference = iter_tuple_relaxed_single_ref_type_t<IterTuple>;
     using pointer = fake_ptr_proxy<reference>;
 
 private:
@@ -107,17 +107,16 @@ private:
     }
 
     template<std::size_t I>
-    constexpr decltype(auto) deref() const {
-        using R = decltype(*std::get<I>(_iterators));
+    constexpr reference deref() const {
         if constexpr (I == tuple_size - 1) {
-            return static_cast<R>(*std::get<I>(_iterators));
+            return *std::get<I>(_iterators);
         }
         else {
             if (std::get<I>(_iterators) != std::get<I>(_end)) {
-                return static_cast<R>(*std::get<I>(_iterators));
+                return *std::get<I>(_iterators);
             }
             else {
-                return static_cast<R>(deref<I + 1>());
+                return deref<I + 1>();
             }
         }
     }
@@ -210,12 +209,12 @@ private:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 auto deref() const -> enable_if<I == tuple_size - 1, decltype(*std::get<I>(_iterators))> {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, reference> deref() const {
         return *std::get<I>(_iterators);
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 auto deref() const -> enable_if<I != tuple_size - 1, decltype(*std::get<I>(_iterators))> {
+    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, reference> deref() const {
         if (std::get<I>(_iterators) != std::get<I>(_end)) {
             return *std::get<I>(_iterators);
         }

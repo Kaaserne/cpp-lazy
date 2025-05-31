@@ -1,4 +1,3 @@
-#include "Lz/string_view.hpp"
 #include <Lz/c_string.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
@@ -6,6 +5,7 @@
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Concatenate with sentinels") {
@@ -28,15 +28,15 @@ TEST_CASE("Concatenate with sentinels") {
 
 TEST_CASE("Concat changing and creating elements") {
     std::string a = "hello ";
-    std::string b = "world";
+    const std::string b = "world";
 
     auto concat = a | lz::concat(b);
     REQUIRE(concat.size() == a.size() + b.size());
     static_assert(std::is_same<decltype(concat.begin()), decltype(concat.end())>::value, "Should not be sentinel");
 
-    SECTION("Should be by reference") {
-        *concat.begin() = 'd';
-        REQUIRE(a[0] == 'd');
+    SECTION("Should be by const reference") {
+        using t = decltype(*concat.begin());
+        static_assert(std::is_same<const char&, t>::value, "Should be const");
     }
 
     SECTION("Should concat") {
@@ -123,56 +123,12 @@ TEST_CASE("Concat binary operations") {
     }
 
     SECTION("Operator+") {
-        auto begin = concat.begin();
-        auto end = concat.end();
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        auto expected = std::string("hello world");
-        for (std::ptrdiff_t i = 0; i < lz::ssize(concat) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
-        }
-        REQUIRE(begin + lz::ssize(concat) == concat.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(concat); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end - i) == *(expected.end() - i));
-        }
-        REQUIRE(end - lz::ssize(concat) == concat.begin());
-
-        std::advance(begin, lz::ssize(concat));
-        std::advance(end, -lz::ssize(concat));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(concat) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + i) == *(expected.begin() + i));
-        }
-        REQUIRE(end + lz::ssize(concat) == concat.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(concat); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - i) == *(expected.end() - i));
-        }
-        REQUIRE(begin - lz::ssize(concat) == concat.begin());
+        lz::string_view expected = "hello world";
+        test_procs::test_operator_plus(concat, expected);
     }
 
     SECTION("Operator-") {
-        auto begin = concat.begin();
-        auto end = concat.end();
-        for (std::ptrdiff_t i = 0; i < lz::ssize(concat); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == lz::ssize(concat) - i);
-            REQUIRE(end - (begin + i) == lz::ssize(concat) - i);
-            REQUIRE((begin + i) - end == -(lz::ssize(concat) - i));
-            REQUIRE(begin - (end - i) == -(lz::ssize(concat) - i));
-        }
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(concat); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == lz::ssize(concat) - 2 * i);
-            REQUIRE((begin + i) - (end - i) == -(lz::ssize(concat) - 2 * i));
-        }
+        test_procs::test_operator_minus(concat);
     }
 }
 

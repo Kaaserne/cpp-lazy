@@ -40,6 +40,49 @@ struct iter_tuple_value_type_helper<std::tuple<Iterators...>> {
     using type = std::tuple<val_t<Iterators>...>;
 };
 
+#ifdef LZ_HAS_CXX_17
+
+using std::disjunction;
+
+#else
+
+template<class... Ts>
+struct disjunction : std::false_type {};
+
+template<class T, class... Ts>
+struct disjunction<T, Ts...> : conditional<T::value, std::true_type, disjunction<Ts...>> {};
+
+#endif
+
+template<class>
+struct iter_tuple_relaxed_single_ref_type_helper;
+
+template<class... Iterators>
+struct iter_tuple_relaxed_single_ref_type_helper<std::tuple<Iterators...>> {
+private:
+    using tup = std::tuple<Iterators...>;
+
+    template<class T>
+    using remove_volatile = typename std::remove_volatile<T>::type;
+
+    static constexpr bool are_all_ref = conjunction<std::is_lvalue_reference<ref_t<Iterators>>...>::value;
+    static constexpr bool is_one_const = disjunction<std::is_const<remove_volatile<remove_ref<ref_t<Iterators>>>>...>::value;
+
+    template<class T>
+    using add_lvalue_ref = typename std::add_lvalue_reference<T>::type;
+
+    template<class T>
+    using add_const = typename std::add_const<T>::type;
+
+    using const_ref_type =
+        typename std::tuple_element<0, std::tuple<add_lvalue_ref<add_const<remove_ref<ref_t<Iterators>>>>...>>::type;
+
+    using ref_type = typename std::tuple_element<0, std::tuple<ref_t<Iterators>...>>::type;
+
+public:
+    using type = conditional<is_one_const && are_all_ref, const_ref_type, ref_type>;
+};
+
 template<class>
 struct iter_tuple_ref_type_helper;
 
@@ -59,6 +102,9 @@ using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>
 
 template<class IterTuple>
 using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
+
+template<class IterTuple>
+using iter_tuple_relaxed_single_ref_type_t = typename iter_tuple_relaxed_single_ref_type_helper<IterTuple>::type;
 
 template<class Fn>
 class tuple_expand {
