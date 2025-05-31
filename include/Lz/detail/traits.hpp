@@ -192,22 +192,29 @@ template<class T>
 using remove_cvref = typename std::remove_cv<remove_ref<T>>::type;
 
 #endif // LZ_HAS_CXX_20
-
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())>;
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
+    return std::forward<Iterable>(c).begin();
+}
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
+    return std::forward<Iterable>(c).end();
+}
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))>;
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
+    return std::begin(c);
+}
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))>;
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
+    return std::end(c);
+}
 } // namespace detail
 
 #ifdef LZ_HAS_CXX_17
@@ -368,7 +375,7 @@ template<class, class = void>
 struct is_adaptor : std::false_type {};
 
 template<class T>
-struct is_adaptor<T, void_t<remove_cvref<T>>> : std::true_type {};
+struct is_adaptor<T, void_t<typename T::adaptor>> : std::true_type {};
 
 template<class... Args>
 struct first_arg_helper {};
@@ -435,7 +442,6 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
  */
 using detail::sized;
 
-// TODO improve sentinel_selector?
 /**
  * @brief Selects @p S if @p Tag is not at least bidirectional, otherwise selects @p Iterator.
  *
