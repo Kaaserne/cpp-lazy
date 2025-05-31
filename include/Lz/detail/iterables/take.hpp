@@ -43,7 +43,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ std::next(_iterator, _n), 0 };
+            return iterator{ std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
         }
         else {
             return default_sentinel{};
@@ -54,7 +54,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { std::next(_iterator, _n), 0 };
+        return { std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
     }
 
     template<class I = typename iterator::iterator_category>
