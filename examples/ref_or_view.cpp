@@ -2,16 +2,16 @@
 #include <iostream>
 
 struct non_lz_iterable {
-    int* _begin{};
-    int* _end{};
+    const int* _begin{};
+    const int* _end{};
 
-    non_lz_iterable(int* begin, int* end) : _begin{ begin }, _end{ end } {
+    non_lz_iterable(const int* begin, const int* end) : _begin{ begin }, _end{ end } {
     }
 
-    int* begin() {
+    const int* begin() {
         return _begin;
     }
-    int* end() {
+    const int* end() {
         return _end;
     }
 };
