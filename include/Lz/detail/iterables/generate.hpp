@@ -32,7 +32,7 @@ public:
         return { _func, _amount };
     }
 
-    LZ_NODISCARD constexpr iterator begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return { std::move(_func), _amount };
     }
 
@@ -57,7 +57,7 @@ public:
         return { _func };
     }
 
-    LZ_NODISCARD constexpr iterator begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return { std::move(_func) };
     }
 

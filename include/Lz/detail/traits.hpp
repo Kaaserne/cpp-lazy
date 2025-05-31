@@ -104,15 +104,37 @@ struct plus {
 template<class T>
 using remove_ref = typename std::remove_reference<T>::type;
 
-template<std::size_t...>
-struct index_sequence {};
-
-template<std::size_t N, std::size_t... Is>
-struct make_index_sequence_impl : make_index_sequence_impl<N / 2, Is..., (Is + N / 2)...> {};
-
 template<std::size_t... Is>
-struct make_index_sequence_impl<0, Is...> {
-    using type = index_sequence<Is...>;
+struct index_sequence {
+    using type = index_sequence;
+};
+
+template<std::size_t N>
+struct make_index_sequence_impl {
+private:
+    using left = typename make_index_sequence_impl<N / 2>::type;
+    using right = typename make_index_sequence_impl<N - N / 2>::type;
+
+    template<class L, class R>
+    struct concat;
+
+    template<std::size_t... Ls, std::size_t... Rs>
+    struct concat<index_sequence<Ls...>, index_sequence<Rs...>> {
+        using type = index_sequence<Ls..., (Rs + sizeof...(Ls))...>;
+    };
+
+public:
+    using type = typename concat<left, right>::type;
+};
+
+template<>
+struct make_index_sequence_impl<0> {
+    using type = index_sequence<>;
+};
+
+template<>
+struct make_index_sequence_impl<1> {
+    using type = index_sequence<0>;
 };
 
 template<std::size_t N>

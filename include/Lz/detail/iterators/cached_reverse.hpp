@@ -69,7 +69,7 @@ public:
         }
     }
 
-    constexpr difference_type difference(const cached_reverse_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const cached_reverse_iterator& other) const {
         LZ_ASSERT(other._begin == _begin, "Cannot compare iterators from different ranges");
         return static_cast<difference_type>(other._iterator - _iterator);
     }

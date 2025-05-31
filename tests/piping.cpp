@@ -24,7 +24,7 @@ TEST_CASE("Iterator chaining") {
                                   ++dummy;
                                   return i % 2 == 0;
                               });
-        using chunk_type = decltype(chunk_iterable.begin())::reference;
+        using chunk_type = typename decltype(chunk_iterable.begin())::reference;
         auto mapped_chunk = chunk_iterable | lz::map([](chunk_type chunk) { return lz::format(chunk); }) | lz::take(3);
         std::vector<std::string> expected = { "", "1", "3" };
         REQUIRE(lz::equal(mapped_chunk, expected));

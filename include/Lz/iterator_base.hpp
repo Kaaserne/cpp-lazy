@@ -42,12 +42,12 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
 #else
 
     template<class T = Reference>
-    LZ_NODISCARD constexpr detail::enable_if<std::is_lvalue_reference<T>::value, T> operator*() {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<std::is_lvalue_reference<T>::value, T> operator*() {
         return const_cast<T>(static_cast<const iterator&>(*this).operator*());
     }
 
     template<class T = Reference>
-    LZ_NODISCARD constexpr detail::enable_if<!std::is_lvalue_reference<T>::value, T> operator*() {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<!std::is_lvalue_reference<T>::value, T> operator*() {
         return static_cast<const iterator&>(*this).operator*();
     }
 

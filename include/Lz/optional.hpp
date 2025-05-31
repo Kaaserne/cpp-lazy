@@ -193,7 +193,7 @@ public:
     }
 
     template<class U>
-    LZ_NODISCARD constexpr T value_or(U&& v) && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T value_or(U&& v) && {
         return bool(*this) ? std::move(this->value()) : static_cast<T>(std::forward<U>(v));
     }
 };

@@ -43,7 +43,7 @@ public:
     }
 
     constexpr unique_ptr(const unique_ptr&) = delete;
-    constexpr unique_ptr& operator=(const unique_ptr&) = delete;
+    constexpr unique_ptr& operator=(const unique_ptr&) const = delete;
 
     template<class U>
     unique_ptr(unique_ptr<U>&& other) noexcept {
@@ -89,7 +89,7 @@ public:
         return *_ptr;
     }
 
-    constexpr const T& operator*() const noexcept {
+    const T& operator*() const noexcept {
         check_pointer_compat();
         return *_ptr;
     }
@@ -99,7 +99,7 @@ public:
         return _ptr;
     }
 
-    constexpr const T* operator->() const noexcept {
+    const T* operator->() const noexcept {
         check_pointer_compat();
         return _ptr;
     }

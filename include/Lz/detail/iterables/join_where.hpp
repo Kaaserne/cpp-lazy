@@ -37,7 +37,7 @@ public:
                  _result_selector };
     }
 
-    constexpr iterator begin() && {
+    LZ_CONSTEXPR_CXX_14 iterator begin() && {
         // clang-format off
         return { detail::begin(std::move(_iterable_a)), detail::end(std::move(_iterable_a)), detail::begin(std::move(_iterable_b)),
                  detail::end(std::move(_iterable_b)), std::move(_a), std::move(_b), std::move(_result_selector) };

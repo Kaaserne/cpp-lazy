@@ -200,8 +200,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T (&c)[N]) noexcept {
-    static_cast<void>(c);
+LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
     return N;
 }
 
@@ -257,8 +256,7 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&c)[N]) noexcept {
-    static_cast<void>(c);
+LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
     return static_cast<std::ptrdiff_t>(N);
 }
 
