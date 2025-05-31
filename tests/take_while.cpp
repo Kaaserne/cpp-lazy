@@ -1,12 +1,11 @@
 #include <Lz/drop_while.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/take_while.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
-
 
 TEST_CASE("Take while with sentinels") {
     auto cstr = lz::c_string("Hello, World!");

@@ -26,6 +26,8 @@ endif ()
 
 include(CTest)
 
+add_subdirectory(c_string)
+
 # ---- Tests ----
 add_executable(cpp-lazy-tests
 	algorithm.cpp
@@ -77,12 +79,13 @@ add_executable(cpp-lazy-tests
 target_compile_options(cpp-lazy-tests
 	PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
-	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion>
+	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -ftime-trace>
 )
 target_link_libraries(cpp-lazy-tests
 	PRIVATE
 		cpp-lazy::cpp-lazy
 		Catch2::Catch2
+		c_string_forward_declarations
 )
 target_include_directories(cpp-lazy-tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 add_test(

@@ -1,7 +1,7 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/interleave.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <test_procs.hpp>
 

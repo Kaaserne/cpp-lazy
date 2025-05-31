@@ -1,10 +1,10 @@
-#include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <forward_list>
 #include <list>

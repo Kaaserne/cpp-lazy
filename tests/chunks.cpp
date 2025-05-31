@@ -1,7 +1,7 @@
-#include <Lz/c_string.hpp>
 #include <Lz/chunks.hpp>
 #include <Lz/map.hpp>
 #include <Lz/stream.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <test_procs.hpp>

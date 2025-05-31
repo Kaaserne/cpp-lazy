@@ -1,10 +1,10 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/except.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <array>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>

@@ -1,6 +1,6 @@
-#include <Lz/c_string.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/zip.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 

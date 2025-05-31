@@ -1,8 +1,8 @@
 #include <Lz/any_iterable.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/take.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 

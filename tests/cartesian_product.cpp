@@ -1,8 +1,8 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/cartesian_product.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <cstddef>
 #include <list>
