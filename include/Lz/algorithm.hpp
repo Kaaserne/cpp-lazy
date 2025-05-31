@@ -180,7 +180,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find(Iterable&& iterable, cons
 
 /**
  * @brief Finds the first element in the range [begin(iterable), end(iterable)) that satisfies the value @p value.
- * Note that when @p iterable has a sentinel, the entire range is searched.
+ * Note that when @p iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to
+ * reverse the elements.
  * @param iterable The iterable to find the element in
  * @param value The value to find
  * @return An iterator to the first element that satisfies the unary_predicate or `end(iterable)` if the element is not found
@@ -193,7 +194,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable,
 
 /**
  * @brief Finds the first element in the range [begin(iterable), end(iterable)) that satisfies the unary_predicate @p
- * unary_predicate. Note that when @p iterable has a sentinel, the entire range is searched.
+ * unary_predicate. Note that when @p iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to
+ * reverse the elements.
  * @param iterable The iterable to find the element in
  * @param unary_predicate The unary_predicate to find the element with
  * @return An iterator to the first element that satisfies the unary_predicate or `end(iterable)` if the element is not found
@@ -241,7 +243,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if_not(Iterable&& iterabl
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the unary_predicate @p
- * unary_predicate. Note that when @p iterable has a sentinel, the entire range is searched.
+ * unary_predicate. Note that when @p iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to
+ * reverse the elements.
  *
  * @param iterable The iterable to find the element in
  * @param unary_predicate The unary_predicate to find the element with
@@ -288,7 +291,7 @@ find_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& de
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that satisfies the value @p to_find. If the
  * element is found, it returns the value, otherwise it returns @p default_value. Note that when @p iterable has a sentinel,
- * the entire range is searched.
+ * the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
  * @param iterable The iterable to find the element in
  * @param to_find The value to find
  * @param default_value The value to return when no element matches @p to_find in [begin(iterable), end(iterable))
@@ -305,7 +308,7 @@ find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that satisfies the unary_predicate @p
  * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Note that when @p
- * iterable has a sentinel, the entire range is searched.
+ * iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
  * @param iterable The iterable to search.
  * @param unary_predicate The search unary_predicate in [begin(iterable), end(iterable)). Must return bool.
  * @param default_value The value to return when no element matches unary_predicate @p unary_predicate in [begin(iterable),
@@ -322,7 +325,8 @@ find_last_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the value @p value. If
- * the element is found, it returns the value, otherwise it returns @p default_value
+ * the element is found, it returns the value, otherwise it returns @p default_value. Does not use `lz::cached_reverse` to reverse
+ * the elements.
  * @param iterable The iterable to search in
  * @param value The value to search for
  * @param default_value The value to return when no element matches @p value in [begin(iterable), end(iterable))
@@ -339,7 +343,7 @@ find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value) {
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the unary_predicate @p
  * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Note that when @p
- * iterable has a sentinel, the entire range is searched.
+ * iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
  * @param iterable
  * @param unary_predicate
  * @param default_value
@@ -415,7 +419,7 @@ starts_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary
  * @brief Checks if the range [begin(iterable), end(iterable)) ends with the bidirectional range [begin(iterable2),
  * end(iterable2)). Needs to know the size of the range if its input iterables aren't bidirectional
  * so it may be worth your while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and going
- * to use this function multiple times.
+ * to use this function multiple times. Does not use `lz::cached_reverse` to reverse the elements.
  *
  * @param iterable The iterable to check
  * @param iterable2 The bidirectional iterable to check for

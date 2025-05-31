@@ -325,7 +325,7 @@ struct select_adaptor {
 };
 
 template<class Iterable, class UnaryPredicate>
-using drop_back_iterable = reverse_iterable<drop_while_iterable<reverse_iterable<Iterable>, UnaryPredicate>>;
+using drop_back_iterable = lz::reverse_iterable<drop_while_iterable<lz::reverse_iterable<Iterable>, UnaryPredicate>>;
 
 struct drop_back_while_adaptor {
     using adaptor = drop_back_while_adaptor;
