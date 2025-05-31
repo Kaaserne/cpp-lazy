@@ -7,6 +7,8 @@
 
 namespace lz {
 namespace detail {
+
+template<bool Cached>
 struct reverse_adaptor {
     using adaptor = reverse_adaptor;
 
@@ -17,14 +19,19 @@ struct reverse_adaptor {
      * auto reversed = lz::reverse(v); // { 5, 4, 3, 2, 1 }
      * // or
      * auto reversed = v | lz::reverse; // { 5, 4, 3, 2, 1 }
+     * auto reversed_cached = v | lz::cached_reverse; // { 5, 4, 3, 2, 1 }
+     * // or
+     * auto reversed_cached = lz::cached_reverse(v); // { 5, 4, 3, 2, 1 }
      * ```
-     * @param iterable
+     * @param iterable The iterable to reverse.
+     * @return A (cached_)reverse_iterable object that can be used to iterate over the reversed iterable.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr reverse_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr reverse_iterable<remove_ref<Iterable>, Cached> operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
 };
+
 } // namespace detail
 } // namespace lz
 
