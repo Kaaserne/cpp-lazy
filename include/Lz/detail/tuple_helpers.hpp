@@ -40,19 +40,11 @@ struct iter_tuple_value_type_helper<std::tuple<Iterators...>> {
     using type = std::tuple<val_t<Iterators>...>;
 };
 
-#ifdef LZ_HAS_CXX_17
-
-using std::disjunction;
-
-#else
-
 template<class... Ts>
 struct disjunction : std::false_type {};
 
 template<class T, class... Ts>
 struct disjunction<T, Ts...> : conditional<T::value, std::true_type, disjunction<Ts...>> {};
-
-#endif
 
 template<class>
 struct iter_tuple_relaxed_single_ref_type_helper;

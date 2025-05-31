@@ -67,21 +67,11 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
-template<bool Value, class T, class... Rest>
-struct conjunction_impl {
-    using type = T;
-};
-
-template<class T, class Next, class... Rest>
-struct conjunction_impl<true, T, Next, Rest...> {
-    using type = typename conjunction_impl<static_cast<bool>(Next::value), Next, Rest...>::type;
-};
-
 template<class... Ts>
-struct conjunction : std::false_type {};
+struct conjunction : std::true_type {};
 
-template<class T,  class... Rest>
-struct conjunction<T, Rest...> : conjunction_impl<static_cast<bool>(T::value), T, Rest...>::type {};
+template<class T, class... Ts>
+struct conjunction<T, Ts...> : conditional<T::value, conjunction<Ts...>, std::false_type> {};
 
 #ifdef LZ_HAS_CXX_11
 
@@ -117,16 +107,16 @@ using remove_ref = typename std::remove_reference<T>::type;
 template<std::size_t...>
 struct index_sequence {};
 
-template<std::size_t N, std::size_t... Rest>
-struct index_sequence_helper : public index_sequence_helper<N - 1, N - 1, Rest...> {};
+template<std::size_t N, std::size_t... Is>
+struct make_index_sequence_impl : make_index_sequence_impl<N / 2, Is..., (Is + N / 2)...> {};
 
-template<std::size_t... Next>
-struct index_sequence_helper<0, Next...> {
-    using type = index_sequence<Next...>;
+template<std::size_t... Is>
+struct make_index_sequence_impl<0, Is...> {
+    using type = index_sequence<Is...>;
 };
 
 template<std::size_t N>
-using make_index_sequence = typename index_sequence_helper<N>::type;
+using make_index_sequence = typename make_index_sequence_impl<N>::type;
 
 template<class T>
 using decay_t = typename std::decay<T>::type;
