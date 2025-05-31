@@ -55,7 +55,7 @@ public:
             return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable) };
         }
         else {
-            return iterator{ std::end(_iterable) };
+            return iterator{ std::begin(_iterable) };
         }
     }
 

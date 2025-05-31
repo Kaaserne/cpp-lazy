@@ -32,7 +32,7 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
 
     LZ_NODISCARD constexpr decltype(auto) operator*() {
         if constexpr (std::is_lvalue_reference<Reference>::value) {
-            return const_cast<detail::decay_t<Reference>&>(static_cast<const iterator&>(*this).operator*());
+            return const_cast<Reference>(static_cast<const iterator&>(*this).operator*());
         }
         else {
             return static_cast<const iterator&>(*this).operator*();
@@ -42,8 +42,8 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
 #else
 
     template<class T = Reference>
-    LZ_NODISCARD constexpr detail::enable_if<std::is_lvalue_reference<T>::value, detail::decay_t<T>&> operator*() {
-        return const_cast<detail::decay_t<T>&>(static_cast<const iterator&>(*this).operator*());
+    LZ_NODISCARD constexpr detail::enable_if<std::is_lvalue_reference<T>::value, T> operator*() {
+        return const_cast<T>(static_cast<const iterator&>(*this).operator*());
     }
 
     template<class T = Reference>

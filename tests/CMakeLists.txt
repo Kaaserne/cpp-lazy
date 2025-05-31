@@ -84,6 +84,7 @@ target_link_libraries(cpp-lazy-tests
 		cpp-lazy::cpp-lazy
 		Catch2::Catch2
 )
+target_include_directories(cpp-lazy-tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 add_test(
 	NAME cpp-lazy-tests
 	COMMAND $<TARGET_FILE:cpp-lazy-tests>

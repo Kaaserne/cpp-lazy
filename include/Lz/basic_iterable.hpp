@@ -17,6 +17,7 @@ namespace lz {
 namespace detail {
 template<class I, class S = I>
 class basic_iterable_impl : public lazy_view {
+    // we decay I to decay it to a pointer, if it is an array
     using iterator_type = decay_t<I>;
     using sentinel_type = decay_t<S>;
 
@@ -64,6 +65,7 @@ public:
 
 template<class I, class S = I>
 class sized_iterable_impl : public lazy_view {
+    // we decay I to decay it to a pointer, if it is an array
     using iterator_type = decay_t<I>;
     using sentinel_type = decay_t<S>;
 

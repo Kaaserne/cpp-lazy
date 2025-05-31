@@ -9,6 +9,7 @@
 #include <forward_list>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Dimensions & sized") {
@@ -256,54 +257,56 @@ TEST_CASE("Should flatten permutations") {
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7 };
 
         std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 } };
+        auto f = lz::flatten(vec);
+
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, {}, { 4, 5 }, { 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 }, {} };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { {}, { 1, 2, 3 }, { 4, 5, 6, 7 }, {} };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { {}, {}, {}, { 1, 2, 3, 4, 5, 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3, 4, 5, 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { {}, {}, { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 }, {}, {} };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
     }
 
     SECTION("Flatten 3D") {

@@ -112,7 +112,6 @@ LZ_CONSTEXPR_CXX_14 Iterator find(Iterator begin, S end, const T& value) {
 template<class Iterator, class S, class T>
 constexpr Iterator find_last(Iterator begin, S end, const T& value) {
     if constexpr (std::is_same_v<Iterator, S>) {
-        // TODO if we've written a better reverse iterator, use it here
         std::reverse_iterator<Iterator> rbegin(end);
         std::reverse_iterator<S> rend(begin);
         auto pos = std::find(std::move(rbegin), std::move(rend), value);
@@ -126,7 +125,6 @@ constexpr Iterator find_last(Iterator begin, S end, const T& value) {
 template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_17 Iterator find_last_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
     if constexpr (std::is_same_v<Iterator, S>) {
-        // TODO if we've written a better reverse iterator, use it here
         std::reverse_iterator<S> rbegin(end);
         std::reverse_iterator<Iterator> rend(begin);
         auto pos = std::find_if(std::move(rbegin), std::move(rend), std::move(unary_predicate));

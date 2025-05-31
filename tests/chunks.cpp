@@ -4,6 +4,7 @@
 #include <Lz/stream.hpp>
 #include <catch2/catch.hpp>
 #include <list>
+#include <test_procs.hpp>
 #include <vector>
 
 TEST_CASE("Chunks changing and creating elements") {
@@ -184,83 +185,33 @@ TEST_CASE("Chunks binary operations random access") {
     }
 
     SECTION("Operator+") {
-        auto test_iterator = [](const std::vector<std::vector<int>>& expected,
-                                lz::detail::chunks_iterable<std::vector<int>> chunked) {
-            auto begin = chunked.begin();
-            auto end = chunked.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(lz::equal(*(begin + i), *(expected.begin() + i)));
-            }
-            REQUIRE(begin + lz::ssize(chunked) == chunked.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(chunked); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(lz::equal(*(end - i), *(expected.end() - i)));
-            }
-            REQUIRE(end - lz::ssize(chunked) == chunked.begin());
-
-            std::advance(begin, lz::ssize(chunked));
-            std::advance(end, -lz::ssize(chunked));
-            REQUIRE(begin + 0 == begin);
-            REQUIRE(end + 0 == end);
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(lz::equal(*(end + i), *(expected.begin() + i)));
-            }
-            REQUIRE(end + lz::ssize(chunked) == chunked.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(chunked); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(lz::equal(*(begin - i), *(expected.end() - i)));
-            }
-            REQUIRE(begin - lz::ssize(chunked) == chunked.begin());
-        };
-
         std::vector<std::vector<int>> expected;
 
         expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
-        test_iterator(expected, uneven_chunksize_even_size);
+        using t1 = decltype(*uneven_chunksize_even_size.begin());
+        using t2 = std::vector<int>;
+
+        const auto cmp = [](const t1& a, const t2& b) {
+            return lz::equal(a, b);
+        };
+
+        test_procs::test_operator_plus(uneven_chunksize_even_size, expected, cmp);
+
         expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
-        test_iterator(expected, uneven_chunksize_uneven_size);
+        test_procs::test_operator_plus(uneven_chunksize_uneven_size, expected, cmp);
 
         expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 } };
-        test_iterator(expected, even_chunksize_even_size);
+        test_procs::test_operator_plus(even_chunksize_even_size, expected, cmp);
+
         expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7 } };
-        test_iterator(expected, even_chunksize_uneven_size);
+        test_procs::test_operator_plus(even_chunksize_uneven_size, expected, cmp);
     }
 
     SECTION("Operator-") {
-        auto test_operator_minus = [](decltype(uneven_chunksize_even_size) chunked) {
-            auto begin = chunked.begin();
-            auto end = chunked.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - begin == lz::ssize(chunked) - i);
-                REQUIRE(end - (begin + i) == lz::ssize(chunked) - i);
-                REQUIRE((begin + i) - end == -(lz::ssize(chunked) - i));
-                REQUIRE(begin - (end - i) == -(lz::ssize(chunked) - i));
-            }
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(chunked); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - (begin + i) == lz::ssize(chunked) - 2 * i);
-                REQUIRE((begin + i) - (end - i) == -(lz::ssize(chunked) - 2 * i));
-            }
-        };
-
-        INFO("test_operator_minus(it, it_end, lz::size(uneven_chunksize_even_size))")
-        test_operator_minus(uneven_chunksize_even_size);
-
-        INFO("test_operator_minus(it2, it_end2, lz::size(even_chunksize_even_size))")
-        test_operator_minus(even_chunksize_even_size);
-
-        INFO("test_operator_minus(it3, it_end3, lz::size(uneven_chunksize_uneven_size))")
-        test_operator_minus(uneven_chunksize_uneven_size);
-
-        INFO("test_operator_minus(it4, it_end4, lz::size(even_chunksize_uneven_size))")
-        test_operator_minus(even_chunksize_uneven_size);
+        test_procs::test_operator_minus(uneven_chunksize_even_size);
+        test_procs::test_operator_minus(even_chunksize_even_size);
+        test_procs::test_operator_minus(uneven_chunksize_uneven_size);
+        test_procs::test_operator_minus(even_chunksize_uneven_size);
     }
 }
 

@@ -1,7 +1,7 @@
-#include <Lz/loop.hpp>
 #include <Lz/c_string.hpp>
+#include <Lz/loop.hpp>
 #include <catch2/catch.hpp>
-
+#include <test_procs.hpp>
 
 TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -85,79 +85,24 @@ TEST_CASE("Loop with non while true argument") {
     }
 
     SECTION("Operator+") {
-        auto test_looper = [](const decltype(lz::loop(vec, 0))& l, std::vector<int> expected) {
-            auto begin = l.begin();
-            auto end = l.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(l) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin + i) == *(expected.begin() + i));
-            }
-            REQUIRE(begin + lz::ssize(l) == l.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(l); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(expected.end() - i));
-            }
-            REQUIRE(end - lz::ssize(l) == l.begin());
-
-            std::advance(begin, lz::ssize(l));
-            std::advance(end, -lz::ssize(l));
-            REQUIRE(begin + 0 == begin);
-            REQUIRE(end + 0 == end);
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(l) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(expected.begin() + i));
-            }
-            REQUIRE(end + lz::ssize(l) == l.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(l); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin - i) == *(expected.end() - i));
-            }
-            REQUIRE(begin - lz::ssize(l) == l.begin());
-        };
-
         auto looper = lz::loop(vec, 2);
         std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
-        INFO("lz::loop(vec, 2)");
-        test_looper(looper, std::move(expected));
+        test_procs::test_operator_plus(looper, expected);
 
         looper = lz::loop(vec, 1);
         expected = { 1, 2, 3, 4 };
-        INFO("lz::loop(vec, 1)");
-        test_looper(looper, std::move(expected));
+        test_procs::test_operator_plus(looper, expected);
     }
 
     
     SECTION("Operator-") {
-        auto test_looper = [](const decltype(lz::loop(vec, 2))& l) {
-            auto begin = l.begin();
-            auto end = l.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(l); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - begin == lz::ssize(l) - i);
-                REQUIRE(end - (begin + i) == lz::ssize(l) - i);
-                REQUIRE((begin + i) - end == -(lz::ssize(l) - i));
-                REQUIRE(begin - (end - i) == -(lz::ssize(l) - i));
-            }
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(l); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - (begin + i) == lz::ssize(l) - 2 * i);
-                REQUIRE((begin + i) - (end - i) == -(lz::ssize(l) - 2 * i));
-            }
-        };
         auto looper = lz::loop(vec, 2);
-        INFO("lz::loop(vec, 2)");
-        test_looper(looper);
+        test_procs::test_operator_minus(looper);
 
         looper = lz::loop(vec, 1);
-        INFO("lz::loop(vec, 1)");
-        test_looper(looper);
+        test_procs::test_operator_minus(looper);
 
         looper = lz::loop(vec, 3);
-        INFO("lz::loop(vec, 3)");
-        test_looper(looper);
+        test_procs::test_operator_minus(looper);
     }
 }

@@ -97,7 +97,6 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    // TODO recheck that return types are correct for if constexpr sfinae constructions such as begin
     [[nodiscard]] constexpr auto end() const {
         if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
             return iterator{ std::begin(_iterable) + static_cast<typename iterator::difference_type>(size_impl()) };

@@ -1,10 +1,11 @@
 #include <Lz/c_string.hpp>
-#include <Lz/reverse.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/zip.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Zip with sentinels") {
@@ -112,51 +113,11 @@ TEST_CASE("zip_iterable binary operations") {
     }
 
     SECTION("Operator+(int)") {
-        auto end = zipper.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
-        }
-        REQUIRE(begin + lz::ssize(zipper) == zipper.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(zipper); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end - i) == *(expected.end() - i));
-        }
-        REQUIRE(end - lz::ssize(zipper) == zipper.begin());
-
-        std::advance(begin, lz::ssize(zipper));
-        std::advance(end, -lz::ssize(zipper));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + i) == *(expected.begin() + i));
-        }
-        REQUIRE(end + lz::ssize(zipper) == zipper.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(zipper); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - i) == *(expected.end() - i));
-        }
-        REQUIRE(begin - lz::ssize(zipper) == zipper.begin());
+        test_procs::test_operator_plus(zipper, expected);
     }
 
     SECTION("Operator-(Iterator)") {
-        auto end = zipper.end();
-        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == lz::ssize(zipper) - i);
-            REQUIRE(end - (begin + i) == lz::ssize(zipper) - i);
-            REQUIRE((begin + i) - end == -(lz::ssize(zipper) - i));
-            REQUIRE(begin - (end - i) == -(lz::ssize(zipper) - i));
-        }
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(zipper); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == lz::ssize(zipper) - 2 * i);
-            REQUIRE((begin + i) - (end - i) == -(lz::ssize(zipper) - 2 * i));
-        }
+        test_procs::test_operator_minus(zipper);
     }
 }
 

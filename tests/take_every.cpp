@@ -9,6 +9,7 @@
 #include <forward_list>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("take_every_iterable with sentinels") {
@@ -199,46 +200,17 @@ TEST_CASE("take_every_iterable binary operations") {
         auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
         auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
-        auto test_operator_plus = [](std::vector<int> expected, decltype(even_sized_even_take) input) {
-            auto begin = input.begin();
-            auto end = input.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(input) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin + i) == *(expected.begin() + i));
-            }
-            REQUIRE(begin + lz::ssize(input) == input.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(input); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(expected.end() - i));
-            }
-            REQUIRE(end - lz::ssize(input) == input.begin());
-
-            std::advance(begin, lz::ssize(input));
-            std::advance(end, -lz::ssize(input));
-            REQUIRE(begin + 0 == begin);
-            REQUIRE(end + 0 == end);
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(input) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(expected.begin() + i));
-            }
-            REQUIRE(end + lz::ssize(input) == input.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(input); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin - i) == *(expected.end() - i));
-            }
-            REQUIRE(begin - lz::ssize(input) == input.begin());
-        };
-
         std::vector<int> expected = { 1, 3 };
-        test_operator_plus(std::move(expected), even_sized_even_take);
+        test_procs::test_operator_plus(std::move(expected), even_sized_even_take);
+
         expected = { 1, 4 };
-        test_operator_plus(std::move(expected), even_sized_odd_take);
+        test_procs::test_operator_plus(std::move(expected), even_sized_odd_take);
+
         expected = { 1, 3, 5 };
-        test_operator_plus(std::move(expected), uneven_sized_even_take);
+        test_procs::test_operator_plus(std::move(expected), uneven_sized_even_take);
+
         expected = { 1, 4 };
-        test_operator_plus(std::move(expected), uneven_sized_odd_take);
+        test_procs::test_operator_plus(std::move(expected), uneven_sized_odd_take);
     }
 
     SECTION("Operator-") {
