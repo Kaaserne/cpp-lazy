@@ -79,7 +79,7 @@ add_executable(cpp-lazy-tests
 target_compile_options(cpp-lazy-tests
 	PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
-	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -ftime-trace>
+	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion>
 )
 target_link_libraries(cpp-lazy-tests
 	PRIVATE
