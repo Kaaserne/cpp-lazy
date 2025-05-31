@@ -17,17 +17,19 @@ namespace lz {
 namespace detail {
 template<class I, class S = I>
 class basic_iterable_impl : public lazy_view {
+    using iterator_type = decay_t<I>;
+    using sentinel_type = decay_t<S>;
 
-    I _begin;
-    S _end;
+    iterator_type _begin;
+    sentinel_type _end;
 
-    using traits = std::iterator_traits<I>;
+    using traits = std::iterator_traits<iterator_type>;
 
 public:
-    using iterator = I;
-    using const_iterator = I;
-    using value_type = val_t<I>;
-    using sentinel = S;
+    using iterator = iterator_type;
+    using const_iterator = iterator_type;
+    using value_type = val_t<iterator_type>;
+    using sentinel = sentinel_type;
 
     template<LZ_CONCEPT_ITERABLE Iterable>
     constexpr basic_iterable_impl(Iterable&& iterable) :
@@ -39,66 +41,58 @@ public:
 
     template<class Tag = typename traits::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<Tag>::value, std::size_t> size() const {
-        const auto result = _end - _begin;
-        return result < 0 ? static_cast<std::size_t>(-result) : static_cast<std::size_t>(result);
+        LZ_ASSERT(_end - _begin >= 0, "Incompatible iterator");
+        return static_cast<std::size_t>(_end - _begin);
     }
 
-    LZ_NODISCARD constexpr I begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const& {
         return _begin;
     }
 
-    LZ_NODISCARD constexpr S end() const& {
+    LZ_NODISCARD constexpr sentinel end() const& {
         return _end;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 I begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return std::move(_begin);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 S end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
         return std::move(_end);
     }
 };
 
 template<class I, class S = I>
 class sized_iterable_impl : public lazy_view {
-    using decayed_iterator = decay_t<I>;
-    using decayed_sentinel = decay_t<S>;
+    using iterator_type = decay_t<I>;
+    using sentinel_type = decay_t<S>;
 
     I _begin;
     S _end;
     std::size_t _size{};
 
 public:
-    using iterator = bounded_take_iterator<decayed_iterator, S>;
-    using const_iterator = decayed_iterator;
-    using value_type = val_t<decayed_iterator>;
+    using iterator = bounded_take_iterator<iterator_type, S>;
+    using const_iterator = iterator_type;
+    using value_type = val_t<iterator_type>;
     using sentinel = S;
 
 private:
     using diff_type = typename iterator::difference_type;
 
 public:
-    template<class Cat = typename iterator::iterator_category, enable_if<is_ra_tag<Cat>::value, int> = 0>
-    constexpr sized_iterable_impl(decayed_iterator begin, S end) :
+    constexpr sized_iterable_impl(iterator_type begin, S end) :
         _begin{ begin },
         _end{ end },
         _size{ static_cast<std::size_t>(end - begin) } {
     }
 
-    // Iterator must be random access to get size
-    template<class Cat = typename iterator::iterator_category, enable_if<!is_ra_tag<Cat>::value, int> = 0>
-    constexpr sized_iterable_impl(decayed_iterator begin, decayed_sentinel end) = delete;
-
-    template<class Iterable, enable_if<sized<Iterable>::value, int> = 0>
+    template<class Iterable>
     constexpr sized_iterable_impl(Iterable&& iterable) :
         _begin{ detail::begin(std::forward<Iterable>(iterable)) },
         _end{ detail::end(iterable) },
         _size{ lz::size(iterable) } {
     }
-
-    template<class Iterable, enable_if<!sized<Iterable>::value, int> = 0>
-    constexpr sized_iterable_impl(Iterable&& iterable) = delete; // Iterable must be sized
 
     LZ_NODISCARD constexpr std::size_t size() const noexcept {
         return _size;
@@ -626,7 +620,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<LZ_CONCEPT_ITERABLE Iterable, class Adaptor>
 constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
-    -> lz::detail::enable_if<lz::detail::is_adaptor<Adaptor>::value && lz::detail::is_iterable<Iterable>::value,
+    -> lz::detail::enable_if<lz::detail::is_adaptor<lz::detail::remove_cvref<Adaptor>>::value &&
+                                 lz::detail::is_iterable<Iterable>::value,
                              decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable)))> {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
 }
