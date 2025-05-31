@@ -26,8 +26,6 @@ public:
         _step{ step } {
     }
 
-// TODO re-add if constexpr
-
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr std::size_t size() const noexcept {

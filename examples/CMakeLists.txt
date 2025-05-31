@@ -11,6 +11,7 @@ set(examples
     any_iterable
     basic_iterable
     c_string
+    cached_reverse
     cached_size
     cartesian_product
     chunk_if
