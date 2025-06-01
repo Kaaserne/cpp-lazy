@@ -24,7 +24,6 @@ using copied_basic_sv = lz::copied_iterable<lz::basic_string_view<CharT>>;
 using copied_sv = copied_basic_sv<char>;
 
 namespace detail {
-// TODO add @return everywhere
 
 template<class ValueType>
 struct split_adaptor {
