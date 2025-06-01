@@ -31,9 +31,8 @@ struct all_same_reference<std::tuple<I, Is...>> {
 template<class IterTuple, class SentinelTuple>
 class interleave_iterator
     : public iterator<
-          interleave_iterator<IterTuple, SentinelTuple>, iter_tuple_relaxed_single_ref_type_t<IterTuple>,
-          fake_ptr_proxy<iter_tuple_relaxed_single_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-          iter_tuple_iter_cat_t<IterTuple>,
+          interleave_iterator<IterTuple, SentinelTuple>, iter_tuple_common_ref_t<IterTuple>,
+          fake_ptr_proxy<iter_tuple_common_ref_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
           sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, interleave_iterator<IterTuple, SentinelTuple>, SentinelTuple>> {
 
     using traits = std::iterator_traits<first_iter<IterTuple>>;
@@ -41,7 +40,7 @@ class interleave_iterator
 public:
     using value_type = typename traits::value_type;
     using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = iter_tuple_relaxed_single_ref_type_t<IterTuple>;
+    using reference = iter_tuple_common_ref_t<IterTuple>;
     using pointer = fake_ptr_proxy<reference>;
 
 private:

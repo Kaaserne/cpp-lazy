@@ -1,5 +1,6 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/interleave.hpp>
+#include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
@@ -9,6 +10,17 @@ TEST_CASE("Interleaved with sentinels permutations") {
     auto str3 = lz::c_string("abc");
     auto str4 = lz::c_string("defg");
     const auto str5 = lz::c_string("hijkl");
+
+    SECTION("With iterable that yields by value") {
+        const auto range = lz::range('c');
+        auto interleaved = lz::interleave(str3, str4, range);
+        using t1 = decltype(*interleaved.begin());
+        static_assert(std::is_same<t1, char>::value, "Should be char");
+
+        auto interleaved2 = lz::interleave(str3, range, str4);
+        using t2 = decltype(*interleaved2.begin());
+        static_assert(std::is_same<t2, char>::value, "Should be char");
+    }
 
     SECTION("Operator=") {
         lz::interleave_iterable<decltype(str3), decltype(str4)> interleaved_3_4 = lz::interleave(str3, str4);

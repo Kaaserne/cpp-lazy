@@ -15,11 +15,16 @@ struct interleave_adaptor {
     /**
      * @brief Interleave the elements of the given iterables. This means it returns the element of the first iterable, then the
      * second, etc... and resets when the last iterable is reached. The iterator will stop at the end of the shortest iterable.
-     * The iterator category is the same as its "weakest" input iterable. It returns a sentinel if the input iterable has a
-     * forward iterator. If its input iterables all have a .size() method, then this iterable will also have a .size() method. If
-     * the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence is traversed
-     * to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`. So, all in all: use
-     * lz::cache_size if:
+     * The iterator category is the same as its "weakest" input iterable. The reference type returned by operator* will:
+     * - be by value if one of the iterables yields by value
+     * - be by const reference if one of the iterables yield by const reference.
+     * - be by mutable reference if all iterables yield by mutable reference.
+     * Contains a .size() function if all iterables have a .size() function. The size is the sum of all the sizes of the
+     * iterables. Contains a sentinel if one of the iterables contains a sentinel. Its iterator category is the 'weakest' of the
+     * input iterables. It returns a sentinel if the input iterable has a forward iterator. If its input iterables all have a
+     * .size() method, then this iterable will also have a .size() method. If the input iterable is exactly bidirectional and not
+     * sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it
+     * may be worth your while to use `lz::cache_size`. So, all in all: use lz::cache_size if:
      * - Your iterable is exactly bidirectional (so forward/random access excluded) and
      * - Your iterable is not sized and
      * - You either use multiple/a combination of the following iterables OR (see last point):
@@ -39,6 +44,7 @@ struct interleave_adaptor {
      * auto interleaved = lz::interleave(vec1, vec2, vec3); // interleaved = { 1, 4, 8, 2, 5, 9, 3, 6, 10 }
      * // or
      * auto interleaved = vec1 | lz::interleave(vec2, vec3); // interleaved = { 1, 4, 8, 2, 5, 9, 3, 6, 10 }
+     * auto c = lz::interleave(vec1, lz::range(5, 10)); // yields by value, not by reference
      * ```
      * @param iterable The first iterable to interleave.
      * @param iterables The rest of the iterables to interleave.

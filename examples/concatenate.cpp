@@ -1,5 +1,7 @@
 #include <Lz/concatenate.hpp>
+#include <Lz/range.hpp>
 #include <iostream>
+#include <vector>
 
 
 int main() {
@@ -33,5 +35,15 @@ int main() {
         // or fmt::print("{} ", i);
     }
     // Output: 1 2 3 4 5 6 7 8 17 18 19 20
+    std::cout << '\n';
+
+    // And if one of the iterables yields elements by value, all elements will be yielded by value.
+    std::vector<int> f{ 21, 22, 23, 24 }; // normally yields by reference
+    auto range = lz::range(5);       // range yields by value
+    for (int i : f | lz::concat(range)) { // so, the common reference type is int
+        std::cout << i << ' ';
+        // or fmt::print("{} ", i);
+    }
+    // Output: 21 22 23 24 0 1 2 3 4
     std::cout << '\n';
 }

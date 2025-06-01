@@ -17,8 +17,8 @@ using first_it = tup_element<0, Tuple>;
 
 template<class IterTuple, class SentinelTuple>
 class concatenate_iterator
-    : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, iter_tuple_relaxed_single_ref_type_t<IterTuple>,
-                      fake_ptr_proxy<iter_tuple_relaxed_single_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+    : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, iter_tuple_common_ref_t<IterTuple>,
+                      fake_ptr_proxy<iter_tuple_common_ref_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
                       iter_tuple_iter_cat_t<IterTuple>,
                       sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
 
@@ -33,7 +33,7 @@ class concatenate_iterator
 public:
     using value_type = typename first_tuple_iterator::value_type;
     using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = iter_tuple_relaxed_single_ref_type_t<IterTuple>;
+    using reference = iter_tuple_common_ref_t<IterTuple>;
     using pointer = fake_ptr_proxy<reference>;
 
 private:

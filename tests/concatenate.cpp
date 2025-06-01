@@ -1,5 +1,6 @@
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
@@ -33,6 +34,33 @@ TEST_CASE("Concat changing and creating elements") {
     auto concat = a | lz::concat(b);
     REQUIRE(concat.size() == a.size() + b.size());
     static_assert(std::is_same<decltype(concat.begin()), decltype(concat.end())>::value, "Should not be sentinel");
+
+    SECTION("Should be by value") {
+        auto range = lz::range(0);
+        const std::vector<int> vec = { 1, 2, 3 };
+        std::vector<int> vec2 = { 4, 5, 6 };
+        auto concat2 = lz::concat(range, vec, vec2);
+        using t = decltype(*concat2.begin());
+        static_assert(std::is_same<int, t>::value, "Should be by value");
+
+        auto concat3 = lz::concat(vec, vec2, range);
+        using t2 = decltype(*concat3.begin());
+        static_assert(std::is_same<int, t2>::value, "Should be by value");
+
+        auto concat4 = lz::concat(vec2, vec, range);
+        using t3 = decltype(*concat4.begin());
+        static_assert(std::is_same<int, t3>::value, "Should be by value");
+
+        volatile const int arr[] = { 0 };
+        auto concat5 = lz::concat(range, arr);
+        using t4 = decltype(*concat5.begin());
+        static_assert(std::is_same<int, t4>::value, "Should be by value");
+
+        int arr2[] = { 0 };
+        auto concat6 = lz::concat(arr2, arr);
+        using t5 = decltype(*concat6.begin());
+        static_assert(std::is_same<const volatile int&, t5>::value, "Should be by const volatile reference");
+    }
 
     SECTION("Should be by const reference") {
         using t = decltype(*concat.begin());
