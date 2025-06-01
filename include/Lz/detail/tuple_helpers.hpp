@@ -56,7 +56,7 @@ struct iter_tuple_common_ref_helper;
 
 template<class... Iterators>
 struct iter_tuple_common_ref_helper<std::tuple<Iterators...>> {
-    using type = std::common_referemce_t<ref_t<Iterators>...>;
+    using type = std::common_reference_t<ref_t<Iterators>...>;
 };
 
 #else
