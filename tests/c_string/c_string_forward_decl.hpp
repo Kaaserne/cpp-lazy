@@ -1,7 +1,9 @@
-#include <Lz/c_string.hpp>
+#pragma once
 
 #ifndef LZ_C_STRING_FORWARD_DECL_HPP
 #define LZ_C_STRING_FORWARD_DECL_HPP
+
+#include <Lz/c_string.hpp>
 
 extern template class lz::detail::c_string_iterable<const char>;
 extern template class lz::detail::c_string_iterator<const char>;
