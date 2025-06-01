@@ -205,17 +205,17 @@ LZ_CONSTEXPR_CXX_14 auto end_tuple_impl(IterableTuple&& iterable_tuple, index_se
 template<class IterableTuple>
 LZ_CONSTEXPR_CXX_14 auto begin_tuple(IterableTuple&& iterable_tuple)
     -> decltype(begin_tuple_impl(std::forward<IterableTuple>(iterable_tuple),
-                                 make_index_sequence<std::tuple_size<decay_t<IterableTuple>>::value>{})) {
+                                 make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{})) {
     return begin_tuple_impl(std::forward<IterableTuple>(iterable_tuple),
-                            make_index_sequence<std::tuple_size<decay_t<IterableTuple>>::value>{});
+                            make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{});
 }
 
 template<class IterableTuple>
 LZ_CONSTEXPR_CXX_14 auto end_tuple(IterableTuple&& iterable_tuple)
     -> decltype(end_tuple_impl(std::forward<IterableTuple>(iterable_tuple),
-                               make_index_sequence<std::tuple_size<decay_t<IterableTuple>>::value>{})) {
+                               make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{})) {
     return end_tuple_impl(std::forward<IterableTuple>(iterable_tuple),
-                          make_index_sequence<std::tuple_size<decay_t<IterableTuple>>::value>{});
+                          make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{});
 }
 } // namespace detail
 } // namespace lz
