@@ -107,7 +107,7 @@ public:
         std::copy(_seed.begin(), _seed.end(), output_iter);
     }
 
-    static constexpr std::size_t size() {
+    static constexpr std::size_t size() noexcept {
         return N;
     }
 };

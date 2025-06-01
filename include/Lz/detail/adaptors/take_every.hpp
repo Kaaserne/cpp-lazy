@@ -40,6 +40,7 @@ struct take_every_adaptor {
      * @param iterable The iterable to take every `offset` element from
      * @param offset The offset to take every element from
      * @param start The start offset
+     * @return A take_every_iterable that can be used to iterate over the taken elements.
      */
     template<class Iterable>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, take_every_iterable<remove_ref<Iterable>>>
@@ -74,6 +75,7 @@ struct take_every_adaptor {
      * ```
      * @param offset The offset to take every element from
      * @param start The start offset
+     * @return An adaptor that can be used in pipe expressions
      */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t, std::size_t>
     operator()(const std::size_t offset, const std::size_t start = 0) const {

@@ -26,6 +26,7 @@ struct rotate_adaptor {
      * ```
      * @param iterable The input iterable to rotate.
      * @param start The amount of elements to rotate the input iterable by.
+     * @return A rotate_iterable that can be used to iterate over the rotated elements.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD constexpr rotate_iterable<remove_ref<Iterable>>
@@ -47,6 +48,7 @@ struct rotate_adaptor {
      * // rotated.end() will be a sentinel, rather than an actual iterator, as rotated str is forward
      * ```
      * @param start The amount of elements to rotate the input iterable by.
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class DiffT>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, DiffT> operator()(const DiffT start) const {

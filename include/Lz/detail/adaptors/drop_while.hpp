@@ -23,6 +23,7 @@ struct drop_while_adaptor {
      * ```
      * @param iterable The iterable to drop elements from
      * @param unary_predicate The predicate to drop elements with
+     * @return An iterable that drops elements while the predicate returns true
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr drop_while_iterable<remove_ref<Iterable>, UnaryPredicate>
@@ -40,6 +41,7 @@ struct drop_while_adaptor {
      * auto dropped = vec | lz::drop_while([](int i) { return i < 3; }); // dropped = { 3, 4, 5 }
      * ```
      * @param unary_predicate The predicate to drop elements with
+     * @return An adaptor that can be used in a pipe expression
      */
     template<class UnaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate unary_predicate) const {

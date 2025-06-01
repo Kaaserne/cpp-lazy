@@ -5,7 +5,7 @@
 
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/zip_longest.hpp>
-
+// TODO add zip_longest_cheap, zip_cheap and cartesian_cheap. For all std::tuple like interfaces?
 namespace lz {
 namespace detail {
 struct zip_longest_adaptor {
@@ -43,6 +43,7 @@ struct zip_longest_adaptor {
      * // iterable. For `a` however, `a.size()` is used.
      * ```
      * @param iterables The iterables to zip together
+     * @return A zip_longest_iterable containing the zipped iterables
      **/
     template<LZ_CONCEPT_ITERABLE... Iterables>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_longest_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {

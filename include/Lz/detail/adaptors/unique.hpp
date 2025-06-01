@@ -25,6 +25,7 @@ struct unique_adaptor {
      * ```
      * @param iterable The iterable to make unique. Must be sorted beforehand.
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
+     * @return An iterable that contains only unique elements from the input iterable.
      */
     template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, unique_iterable<remove_ref<Iterable>, BinaryPredicate>>
@@ -45,6 +46,7 @@ struct unique_adaptor {
      * auto unique = vec | lz::unique(std::less<>{});
      * ```
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>

@@ -103,6 +103,7 @@ struct lines_adaptor {
      * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
      * ```
      * @param string The string to split on "\n".
+     * @return A lines_iterable that can be iterated over, containing the substrings.
      */
     template<LZ_CONCEPT_ITERABLE String>
     LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref<String>> operator()(String&& string) const {
@@ -119,6 +120,7 @@ struct lines_adaptor {
      * // copy
      * ```
      * @param string The string to split on '\n'.
+     * @return A lines_iterable that can be iterated over, containing the substrings.
      */
     template<class CharT>
     LZ_NODISCARD constexpr lines_iterable<CharT, copied_basic_sv<CharT>> operator()(const basic_string_view<CharT> string) const {
@@ -143,6 +145,8 @@ struct as_adaptor {
      * // or
      * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
      * ```
+     * @param iterable The iterable to convert.
+     * @return An as_iterable that can be iterated over, containing the converted elements.
      */
     template<class Iterable>
     LZ_NODISCARD constexpr as_iterable<remove_ref<Iterable>, T> operator()(Iterable&& iterable) const {
@@ -178,6 +182,7 @@ public:
      * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
      * ```
      * @param iterable The iterable to iterate over.
+     * @return A pairwise_n_iterable that can be iterated over, containing tuples of adjacent elements.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD constexpr auto
@@ -398,6 +403,8 @@ struct trim_adaptor {
      * auto trimmed = lz::trim(str); // "hello"
      * // or
      * auto trimmed = str | lz::trim; // "hello"
+     * @param iterable The string to trim.
+     * @return A trim_iterable that can be iterated over, containing the trimmed string.
      */
     template<class CharT>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 trim_iterable<const std::basic_string<CharT>, trim_fn, trim_fn>
@@ -413,6 +420,8 @@ struct trim_adaptor {
      * auto trimmed = lz::trim(str); // "hello"
      * // or
      * auto trimmed = str | lz::trim; // "hello"
+     * @param iterable The string to trim.
+     * @return A trim_iterable that can be iterated over, containing the trimmed string.
      */
     template<class CharT>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 trim_iterable<copied_basic_sv<CharT>, trim_fn, trim_fn>

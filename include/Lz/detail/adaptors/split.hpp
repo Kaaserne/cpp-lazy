@@ -46,7 +46,9 @@ struct split_adaptor {
      * // lz::basic_iterable<decltype(arr.begin)>. to_split_on must be a reference in this case
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be a reference if
+     * @param delimiter The delimiter to split on. Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class T>
     constexpr auto operator()(Iterable&& iterable, T&& delimiter) const {
@@ -76,6 +78,7 @@ struct split_adaptor {
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
      * @param delimiter The delimiter to split on. Doesn't have to be a reference
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class T>
     constexpr enable_if<!is_iterable<T>::value, split_iterable<ValueType, remove_ref<Iterable>, T>>
@@ -97,7 +100,9 @@ struct split_adaptor {
      * // which is equal to lz::split(arr, to_split)
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be an actual reference
+     * @param delimiter The delimiter to split on. Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class Iterable2>
     LZ_NODISCARD constexpr
@@ -124,6 +129,7 @@ struct split_adaptor {
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
      * @param delimiter The delimiter to split on for c-strings
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class CharT>
     constexpr split_iterable<ValueType, remove_ref<Iterable>, copied_basic_sv<CharT>>
@@ -142,6 +148,7 @@ struct split_adaptor {
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
      * @param delimiter The string_view delimiter, it's copied and therefore does not have to be a reference.
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class CharT>
     constexpr split_iterable<ValueType, remove_ref<Iterable>, copied_basic_sv<CharT>>
@@ -165,7 +172,9 @@ struct split_adaptor {
      * auto splitted2 = arr | lz::t_split<iterable>(to_split_on); // {{3, 4, 5}} where value_type =
      * // lz::basic_iterable<decltype(arr.begin)>. to_split_on must be a reference in this case
      * ```
-     * @param delimiter The iterable to split. Must be an actual reference.
+     * @param delimiter The iterable to split. Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
     LZ_CONSTEXPR_CXX_14 auto operator()(T&& delimiter) const {
@@ -192,7 +201,9 @@ struct split_adaptor {
      * // lz::basic_iterable<decltype(arr.begin)>
      * // which is equal to arr | lz::split(to_split)
      * ```
-     * @param delimiter The iterable to split. Must be an actual reference.
+     * @param delimiter The iterable to split. Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
     LZ_CONSTEXPR_CXX_14 enable_if<is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T&& delimiter) const {
@@ -210,6 +221,7 @@ struct split_adaptor {
      * // which is equal to arr | lz::split(3)
      * ```
      * @param delimiter The iterable to split.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
     LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
@@ -226,6 +238,7 @@ struct split_adaptor {
      * auto splitted = arr | lz::t_split<std::vector<char>>("ll"); // {{'h', 'e'}, {'o'}}
      * ```
      * @param delimiter The delimiter to split on, for c-strings.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class CharT>
     LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>> operator()(const CharT* delimiter) const {
@@ -240,6 +253,7 @@ struct split_adaptor {
      * auto splitted = arr | lz::t_split<std::vector<char>>(lz::string_view("ll")); // {{'h', 'e'}, {'o'}}
      * ```
      * @param delimiter The string_view delimiter, it's copied and therefore does not have to be a reference.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class CharT>
     LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>>
@@ -273,7 +287,10 @@ struct split_adaptor<void> {
      * // to_split must be a reference in this case
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Doesn't have to be a reference
+     * @param delimiter The delimiter to split on. Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable that splits the iterable on the delimiter.
+
      */
     template<class Iterable, class T>
     LZ_NODISCARD constexpr auto operator()(Iterable&& iterable, T&& delimiter) const {
@@ -300,6 +317,7 @@ struct split_adaptor<void> {
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
      * @param delimiter The delimiter to split on. Doesn't have to be a reference
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class T>
     LZ_NODISCARD constexpr enable_if<!is_iterable<T>::value, splitter_t_iterable<Iterable, T>>
@@ -317,7 +335,9 @@ struct split_adaptor<void> {
      * auto splitted = lz::split(arr, to_split); // {{1, 2}, {5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
-     * @param delimiter The delimiter to split on. Must be an actual reference
+     * @param delimiter The delimiter to split on. Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class Iterable2>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable2>::value, splitter_iterable<Iterable, Iterable2>>
@@ -338,6 +358,7 @@ struct split_adaptor<void> {
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
      * @param delimiter The delimiter to split on, for c-strings.
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class CharT>
     LZ_NODISCARD constexpr splitter_iterable<Iterable, copied_basic_sv<CharT>>
@@ -356,6 +377,7 @@ struct split_adaptor<void> {
      * ```
      * @param iterable The iterable to split. Must be an actual reference.
      * @param delimiter The string_view delimiter, it's copied and therefore does not have to be a reference.
+     * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class CharT>
     LZ_NODISCARD constexpr splitter_iterable<Iterable, copied_basic_sv<CharT>>
@@ -377,6 +399,7 @@ struct split_adaptor<void> {
      * // splitted2's delimiter does not have to be a reference
      * ```
      * @param delimiter The iterable to split. Must be an actual reference.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(T&& delimiter) const {
@@ -400,7 +423,9 @@ struct split_adaptor<void> {
      * std::vector<int> to_split = { 3, 4 }; // must be by reference
      * auto splitted = arr | lz::split(to_split); // {{1, 2}, {5}} where value_type = lz::basic_iterable<decltype(arr.begin)>
      * ```
-     * @param delimiter The iterable to split. Must be an actual reference.
+     * @param delimiter The iterable to split.  Must be a reference if it is an iterable (string_view
+     * or c-strings excluded)
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_iterable<Iterable>::value, fn_args_holder<adaptor, Iterable>>
@@ -419,6 +444,7 @@ struct split_adaptor<void> {
      * // which is equal to arr | lz::split(3)
      * ```
      * @param delimiter The iterable to split.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
@@ -436,6 +462,7 @@ struct split_adaptor<void> {
      * auto splitted = arr | lz::split("ll"); // {{'h', 'e'}, {'o'}} where value_type = lz::basic_iterable<decltype(arr.begin)>
      * ```
      * @param delimiter The delimiter to split on, for c-strings.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class CharT>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>> operator()(const CharT* delimiter) const {
@@ -452,6 +479,7 @@ struct split_adaptor<void> {
      * lz::basic_iterable<decltype(arr.begin)>
      * ```
      * @param delimiter The delimiter to split on. Doesn't have to be a reference.
+     * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class CharT>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, copied_basic_sv<CharT>>

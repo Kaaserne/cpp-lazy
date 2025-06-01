@@ -46,10 +46,12 @@ struct zip_adaptor {
      * auto zipped2 = lz::zip(a, d); // { (1, 10) }
      * ```
      * @param iterables The iterables to zip together
+     * @return A zip_iterable containing the zipped iterables
      */
-    template<LZ_CONCEPT_ITERABLE... Iterables>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {
-        return { std::forward<Iterables>(iterables)... };
+    template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE... Iterables>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_iterable<remove_ref<Iterable>, remove_ref<Iterables>...>
+    operator()(Iterable&& iterable, Iterables&&... iterables) const {
+        return { std::forward<Iterable>(iterable), std::forward<Iterables>(iterables)... };
     }
 };
 } // namespace detail

@@ -40,6 +40,7 @@ struct exclude_adaptor {
      * @param iterable The iterable to exclude elements from.
      * @param from The start index to exclude.
      * @param to The end index to exclude.
+     * @return An iterable that excludes the elements from the specified range.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class DiffType>
     LZ_NODISCARD constexpr exclude_iterable<remove_ref<Iterable>>
@@ -74,6 +75,7 @@ struct exclude_adaptor {
      * ```
      * @param from The start index to exclude.
      * @param to The end index to exclude.
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class DiffType>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, DiffType, DiffType> operator()(DiffType from, DiffType to) const {

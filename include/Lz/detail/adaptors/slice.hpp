@@ -26,6 +26,7 @@ struct slice_adaptor {
      * @param iterable The iterable to slice
      * @param from The start index of the slice
      * @param to The end index of the slice
+     * @return A slice_iterable that can be used to iterate over the sliced elements.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 slice_iterable<remove_ref<Iterable>>
@@ -44,6 +45,7 @@ struct slice_adaptor {
      * ```
      * @param from The start index of the slice
      * @param to The end index of the slice
+     * @return An adaptor that can be used in pipe expressions
      */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, std::size_t, std::size_t>
     operator()(const std::size_t from, const std::size_t to) const {

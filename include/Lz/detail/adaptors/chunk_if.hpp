@@ -34,6 +34,7 @@ struct chunk_if_adaptor {
      * ```
      * @param iterable The iterable to chunk.
      * @param predicate The predicate to chunk on.
+     * @return An iterable of type T, where T is constructible from the begin and end iterators of the input iterable. 
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     constexpr chunk_if_iterable<ValueType, remove_ref<Iterable>, UnaryPredicate>
@@ -60,6 +61,7 @@ struct chunk_if_adaptor {
      * // chunked = { my_container<char>{"hello"}, my_container<char>{"world"}, my_container<char>{""}, my_container<char>{""} }
      * ```
      * @param predicate The predicate to chunk on.
+     * @return An adaptor that can be used with the pipe operator to chunk the iterable.
      */
     template<class UnaryPredicate>
     LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate predicate) const {
@@ -81,6 +83,7 @@ struct chunk_if_adaptor<void> {
      * ```
      * @param iterable The iterable to chunk.
      * @param predicate The predicate to chunk on.
+     * @return An iterable of iterables, where each inner iterable is a chunk based on the predicate.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>, iter_t<Iterable>>, remove_ref<Iterable>, UnaryPredicate>
@@ -97,6 +100,7 @@ struct chunk_if_adaptor<void> {
      * auto chunked = vec | lz::chunk_if([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
      * ```
      * @param predicate The predicate to chunk on.
+     * @return An adaptor that can be used with the pipe operator to chunk the iterable.
      */
     template<class UnaryPredicate>
     constexpr fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate&& predicate) const {

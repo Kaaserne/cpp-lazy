@@ -11,15 +11,44 @@ namespace lz {
 template<class, class = void>
 struct dimensions;
 
+/**
+ * @brief Gets the number of dimensions of an iterable. For instance, a vector of vectors will return 2, a vector of vectors of
+ * vectors will return 3, etc. Example:
+ * ```cpp
+ * std::vector<std::vector<int>> vectors = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+ * auto dim = lz::dimensions<decltype(vectors)>::value; // 2
+ * ```
+ * @tparam Iterable The iterable type to get the dimensions of.
+ */
 template<LZ_CONCEPT_ITERABLE Iterable>
 struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> : detail::count_dims<Iterable> {};
 
+/**
+ * @brief Gets the number of dimensions of an iterable. For instance, a vector of vectors will return 2, a vector of vectors of
+ * vectors will return 3, etc. Example:
+ * ```cpp
+ * int arrs[3][3] = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * auto dim = lz::dimensions<decltype(arrs)>::value; // 2
+ * ```
+ * @tparam Iterable The iterable type to get the dimensions of.
+ */
 template<LZ_CONCEPT_ITERABLE Iterable>
 struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
     : std::integral_constant<std::size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
 
 #ifdef LZ_HAS_CXX_17
 
+/**
+ * @brief Gets the number of dimensions of an iterable. For instance, a vector of vectors will return 2, a vector of vectors of
+ * vectors will return 3, etc. Example:
+ * ```cpp
+ * int arrs[3][3] = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * auto dim = lz::dimensions_v<decltype(arrs)>; // 2
+ * std::vector<std::vector<int>> vectors = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+ * auto dim2 = lz::dimensions_v<decltype(vectors)>; // 2
+ * ```
+ * @tparam Iterable The iterable type to get the dimensions of.
+ */
 template<LZ_CONCEPT_ITERABLE Iterable>
 inline constexpr std::size_t dimensions_v = dimensions<Iterable>::value;
 
@@ -42,6 +71,7 @@ struct flatten_adaptor {
      * auto flattened = vectors | lz::flatten; // { 1, 2, 3, 4, 5, 6, 7 }
      * ```
      * @param iterable The iterable(s) to flatten
+     * @return An iterable that is flattened, with the same type as the input iterable.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14

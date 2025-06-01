@@ -10,7 +10,7 @@ namespace lz {
 namespace detail {
 struct common_adaptor {
     using adaptor = common_adaptor;
-    
+
     /**
      * Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
      * must return a different type than its end() function), otherwise a static assertion will fail.
@@ -30,6 +30,7 @@ struct common_adaptor {
      * Will not result in an iterable where its end() and begin() functions return the same type. This is because
      * the common view is created first and then the take view is created. The take view will return another sentinel.
      * @param iterable The iterable to create a common view from.
+     * @return A common iterable that can be used with algorithms that require a common iterator and sentinel.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD constexpr common_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {

@@ -42,7 +42,9 @@ struct chunks_adaptor {
      * // or
      * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
      * ```
-     * @param iterable The iterable to chunk* @param chunk_size The size of the chunks
+     * @param iterable The iterable to chunk
+     * @param chunk_size The size of the chunks
+     * @return An iterable of iterables, where each inner iterable is a chunk of the original iterable
      **/
     template<LZ_CONCEPT_ITERABLE Iterable>
     constexpr chunks_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, std::size_t chunk_size) const {
@@ -77,6 +79,7 @@ struct chunks_adaptor {
      * auto chunked = vec | lz::chunks(3); // chunked = { {1, 2, 3}, {4, 5} }
      * ```
      * @param chunk_size The size of the chunks
+     * @return An adaptor that can be used to chunk the iterable
      **/
     LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(std::size_t chunk_size) const {
         return { chunk_size };

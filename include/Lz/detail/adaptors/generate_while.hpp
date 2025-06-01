@@ -30,6 +30,7 @@ struct generate_while_adaptor {
      * ```
      * @param generator_func The generator function that returns a std::pair compatible object, where pair::first_type is
      * convertible to bool.
+     * @return An iterable that generates elements while the predicate returns true.
      */
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_while_iterable<GeneratorFunc> operator()(GeneratorFunc generator_func) const {

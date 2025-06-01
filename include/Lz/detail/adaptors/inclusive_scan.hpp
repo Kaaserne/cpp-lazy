@@ -42,6 +42,7 @@ struct inclusive_scan_adaptor {
      * @param iterable The iterable to perform the inclusive scan on.
      * @param init The initial value to start the inclusive scan with.
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
+     * @return An iterable that performs an inclusive scan on the input iterable.
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr 
@@ -74,6 +75,7 @@ struct inclusive_scan_adaptor {
      * ```
      * @param init The initial value to start the inclusive scan with.
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
+     * @return An adaptor that can be used in pipe expressions.
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr 

@@ -7,7 +7,7 @@
 
 namespace lz {
 namespace detail {
-
+// TODO can we get rid of the Cached template parameter?
 template<bool Cached>
 struct reverse_adaptor {
     using adaptor = reverse_adaptor;

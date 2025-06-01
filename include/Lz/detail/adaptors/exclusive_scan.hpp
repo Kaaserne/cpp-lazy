@@ -38,6 +38,7 @@ struct exclusive_scan_adaptor {
      * @param iterable The iterable to perform the exclusive scan on.
      * @param init The initial value to start the scan with.
      * @param binary_op The binary operation to perform on the elements. Plus by default.
+     * @return An iterable that performs the exclusive scan on the specified iterable.
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr enable_if<is_invocable<BinaryOp, ref_iterable_t<Iterable>, decay_t<T>>::value,
@@ -69,6 +70,7 @@ struct exclusive_scan_adaptor {
      * ```
      * @param init The initial value to start the scan with.
      * @param binary_op The binary operation to perform on the elements. Plus by default.
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14

@@ -18,6 +18,7 @@ struct generate_adaptor {
      * ```
      * @param generator_func The generator function that generates the elements
      * @param amount The amount of elements to generate
+     * @return A generate_iterable that generates the elements @p amount times
      */
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_iterable<GeneratorFunc, false>
@@ -32,6 +33,7 @@ struct generate_adaptor {
      * lz::generate([]() { return 10; }); // Generates infinite times the number 10
      * ```
      * @param generator_func The generator function that generates the elements
+     * @return A generate_iterable that infinitely generates the elements
      */
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_iterable<GeneratorFunc, true> operator()(GeneratorFunc generator_func) const {

@@ -21,6 +21,7 @@ struct duplicates_adaptor {
      * ```
      * @param iterable The iterable to check the duplicates of.
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
+     * @return An iterable that returns a pair of each element in the iterable and the number of times it appears in the iterable.
      */
     template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, duplicates_iterable<remove_ref<Iterable>, BinaryPredicate>>
@@ -39,6 +40,7 @@ struct duplicates_adaptor {
      * auto dupes = input | lz::duplicates; // { { 1, 1 }, { 2, 2 }, { 3, 1 }, { 4, 2 }, { 5, 1 } }
      * ```
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>

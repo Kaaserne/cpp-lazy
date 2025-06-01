@@ -23,6 +23,7 @@ struct take_while_adaptor {
      * ```
      * @param iterable The iterable to take elements from.
      * @param unary_predicate The predicate that indicates while to take elements.
+     * @return A take_while_iterable that will yield elements from the input iterable while the predicate returns true.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr take_while_iterable<remove_ref<Iterable>, UnaryPredicate>
@@ -39,6 +40,7 @@ struct take_while_adaptor {
      * auto take_while = vec | lz::take_while([](int i) { return i < 3; }); // {1, 2}
      * ```
      * @param unary_predicate The predicate that indicates while to take elements.
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class UnaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate unary_predicate) const {

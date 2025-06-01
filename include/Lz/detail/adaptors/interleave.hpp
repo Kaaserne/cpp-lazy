@@ -48,6 +48,7 @@ struct interleave_adaptor {
      * ```
      * @param iterable The first iterable to interleave.
      * @param iterables The rest of the iterables to interleave.
+     * @return An iterable that interleaves the elements of the given iterables.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE... Iterables>
     LZ_NODISCARD constexpr interleave_iterable<remove_ref<Iterable>, remove_ref<Iterables>...>

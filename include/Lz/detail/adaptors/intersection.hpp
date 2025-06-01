@@ -32,6 +32,7 @@ struct intersection_adaptor {
      * @param iterable The first iterable
      * @param iterable2 The second iterable
      * @param compare The comparison function. std::less<> by default
+     * @return An iterable that contains the intersection of the two iterables
      */
     template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr
