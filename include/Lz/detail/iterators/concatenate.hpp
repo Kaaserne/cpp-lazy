@@ -123,7 +123,7 @@ private:
 
     template<std::size_t I>
     constexpr void plus_plus() {
-        if constexpr (I != std::tuple_size<IterTuple>::value) {
+        if constexpr (I != tuple_size) {
             if (std::get<I>(_iterators) != std::get<I>(_end)) {
                 ++std::get<I>(_iterators);
             }
@@ -135,7 +135,7 @@ private:
 
     template<std::size_t I, class EndIter>
     constexpr bool iter_equal_to(const EndIter& end) const {
-        if constexpr (I != std::tuple_size<IterTuple>::value - 1) {
+        if constexpr (I != tuple_size - 1) {
             const auto has_value = std::get<I>(_iterators) == std::get<I>(end);
             return has_value ? iter_equal_to<I + 1>(end) : has_value;
         }
@@ -257,7 +257,6 @@ public:
         _begin{ std::move(begin) },
         _end{ std::move(end) } {
         static_assert(tuple_size > 1, "Cannot concat one/zero iterables");
-        // TODO check which iterable is const and return const if so for all parameter pack iterators
     }
 
     LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
