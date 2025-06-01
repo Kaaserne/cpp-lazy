@@ -1,10 +1,10 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/except.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <array>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -15,7 +15,7 @@ TEST_CASE("Except tests with sentinels") {
     const char* to_except = "eo";
     auto c_str = lz::c_string(str);
     auto c_str_to_except = lz::c_string(to_except);
-    auto except = lz::except(c_str, c_str_to_except);
+    lz::except_iterable<decltype(c_str), decltype(c_str_to_except)> except = lz::except(c_str, c_str_to_except);
     static_assert(!std::is_same<decltype(except.begin()), decltype(except.end())>::value, "Must be sentinel");
     REQUIRE((except | lz::to<std::string>()) == "Hll, Wrld!");
 

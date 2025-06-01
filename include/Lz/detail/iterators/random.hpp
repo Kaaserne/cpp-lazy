@@ -72,7 +72,7 @@ public:
         return static_cast<difference_type>(b._current) - static_cast<difference_type>(_current);
     }
 
-    constexpr bool eq(const random_iterator& b) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& b) const noexcept {
         LZ_ASSERT(_generator == b._generator, "Incompatible iterators");
         return _current == b._current;
     }

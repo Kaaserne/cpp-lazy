@@ -11,11 +11,10 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, bool IsSized>
+template<class Iterator, class S>
 class rotate_iterator
-    : public iterator<rotate_iterator<Iterator, S, IsSized>, ref_t<Iterator>, ptr_t<Iterator>, diff_type<Iterator>,
-                      conditional<IsSized, iter_cat_t<Iterator>, std::forward_iterator_tag>,
-                      conditional<IsSized, rotate_iterator<Iterator, S, IsSized>, Iterator>> {
+    : public iterator<rotate_iterator<Iterator, S>, ref_t<Iterator>, ptr_t<Iterator>, diff_type<Iterator>, iter_cat_t<Iterator>,
+                      sentinel_selector<iter_cat_t<Iterator>, rotate_iterator<Iterator, S>, Iterator>> {
 
     using traits = std::iterator_traits<Iterator>;
 

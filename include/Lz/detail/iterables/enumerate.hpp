@@ -9,7 +9,7 @@
 
 namespace lz {
 namespace detail {
-template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_INTEGRAL IntType>
+template<class Iterable, class IntType>
 class enumerate_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     IntType _start;
@@ -41,19 +41,34 @@ public:
         return { detail::begin(std::move(_iterable)), _start };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const& {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::end(_iterable), get_last_index() };
+        }
+        else {
+            return std::end(_iterable);
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const& {
         return { std::end(_iterable), get_last_index() };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() && {
-        return { detail::end(std::move(_iterable)), get_last_index() };
-    }
-
-    template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const& {
         return std::end(_iterable);
+    }
+
+#endif
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() && {
+        return { detail::end(std::move(_iterable)), get_last_index() };
     }
 };
 } // namespace detail

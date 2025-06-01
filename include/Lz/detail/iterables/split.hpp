@@ -3,6 +3,7 @@
 #ifndef LZ_SPLIT_ITERABLE_HPP
 #define LZ_SPLIT_ITERABLE_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/split.hpp>
 #include <Lz/detail/ref_or_view.hpp>
 

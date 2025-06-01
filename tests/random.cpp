@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <list>
 #include <map>
+#include <random>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("random_iterable should be random") {
@@ -42,7 +44,7 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
     static std::random_device rd;
     std::mt19937_64 gen(rd());
     std::poisson_distribution<> d(500000);
-    auto r = lz::random(d, gen, 3);
+    lz::random_iterable<int, std::poisson_distribution<>, std::mt19937_64> r = lz::random(d, gen, 3);
     static_assert(!std::is_same<decltype(r.begin()), decltype(r.end())>::value, "Should not be the same");
     REQUIRE(lz::distance(r.begin(), r.end()) == 3);
 
@@ -56,7 +58,7 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
 
 TEST_CASE("Empty or one element random") {
     SECTION("Empty random") {
-        auto r = lz::random(0, 0, 0);
+        lz::random_iterable<int, std::uniform_int_distribution<>, std::mt19937> r = lz::random(0, 0, 0);
         REQUIRE(lz::empty(r));
     }
 
@@ -70,7 +72,7 @@ TEST_CASE("Empty or one element random") {
 
 TEST_CASE("random_iterable binary operations") {
     constexpr std::ptrdiff_t size = 5;
-    auto random = lz::common_random(0., 1., size);
+    lz::common_random_iterable<double, std::uniform_real_distribution<>, std::mt19937> random = lz::common_random(0., 1., size);
     static_assert(std::is_same<decltype(random.begin()), decltype(random.end())>::value, "Should be the same");
 
     SECTION("Operator++") {
@@ -105,65 +107,18 @@ TEST_CASE("random_iterable binary operations") {
     }
 
     SECTION("Operator+") {
-        auto begin = random.begin();
-        auto end = random.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(random) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin + i) <= 1.);
-            REQUIRE(*(begin + i) >= 0.);
-        }
-        REQUIRE(begin + lz::ssize(random) == random.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(random); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end - i) <= 1.);
-            REQUIRE(*(end - i) >= 0.);
-        }
-        REQUIRE(end - lz::ssize(random) == random.begin());
-
-        std::advance(begin, lz::ssize(random));
-        std::advance(end, -lz::ssize(random));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(random) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + i) >= 0.);
-            REQUIRE(*(end + i) <= 1.);
-        }
-        REQUIRE(end + lz::ssize(random) == random.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(random); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - i) >= 0.);
-            REQUIRE(*(begin - i) <= 1.);
-        }
-        REQUIRE(begin - lz::ssize(random) == random.begin());
+        std::vector<double> dummy = { 1., 1., 1., 1., 1. };
+        test_procs::test_operator_plus(random, dummy, [](double a, double) { return a >= 0. && a <= 1.; });
     }
 
     SECTION("Operator-") {
-        auto begin = random.begin();
-        auto end = random.end();
-        for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(lz::size(random)); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == static_cast<std::ptrdiff_t>(lz::size(random)) - i);
-            REQUIRE(end - (begin + i) == static_cast<std::ptrdiff_t>(lz::size(random)) - i);
-            REQUIRE((begin + i) - end == -(static_cast<std::ptrdiff_t>(lz::size(random)) - i));
-            REQUIRE(begin - (end - i) == -(static_cast<std::ptrdiff_t>(lz::size(random)) - i));
-        }
-
-        for (std::size_t i = 0; i < lz::size(random); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - static_cast<std::ptrdiff_t>(i)) - (begin + static_cast<std::ptrdiff_t>(i)) ==
-                    static_cast<std::ptrdiff_t>(lz::size(random)) - 2 * static_cast<std::ptrdiff_t>(i));
-            REQUIRE((begin + static_cast<std::ptrdiff_t>(i)) - (end - static_cast<std::ptrdiff_t>(i)) ==
-                    -(static_cast<std::ptrdiff_t>(lz::size(random)) - 2 * static_cast<std::ptrdiff_t>(i)));
-        }
+        test_procs::test_operator_minus(random);
     }
 }
 
 TEST_CASE("random_iterable to containers") {
     constexpr std::size_t size = 10;
-    auto range = lz::random(0., 1., size);
+    lz::default_random_iterable<double> range = lz::random(0., 1., size);
 
     SECTION("To array") {
         REQUIRE((range | lz::to<std::array<double, size>>()).size() == size);

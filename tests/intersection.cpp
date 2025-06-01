@@ -1,7 +1,7 @@
-#include <Lz/c_string.hpp>
 #include <Lz/intersection.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -10,7 +10,7 @@
 TEST_CASE("Intersection tests with sentinels") {
     auto str = lz::c_string("aaaabbcccddee");
     auto str2 = lz::c_string("aabccce");
-    auto intersect = lz::intersection(str, str2);
+    lz::intersection_iterable<decltype(str), decltype(str2)> intersect = lz::intersection(str, str2);
     static_assert(!std::is_same<decltype(intersect.begin()), decltype(intersect.end())>::value, "Must be sentinel");
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 

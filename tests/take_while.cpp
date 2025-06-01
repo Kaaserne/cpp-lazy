@@ -1,16 +1,18 @@
 #include <Lz/drop_while.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/take_while.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
 
-
 TEST_CASE("Take while with sentinels") {
     auto cstr = lz::c_string("Hello, World!");
-    auto take_while = lz::take_while(cstr, [](char c) { return c != 'W'; });
+    std::function<bool(char)> condition = [](char c) {
+        return c != 'W';
+    };
+    lz::take_while_iterable<decltype(cstr), decltype(condition)> take_while = lz::take_while(cstr, std::move(condition));
     static_assert(!std::is_same<decltype(take_while.begin()), decltype(take_while.end())>::value, "Should be sentinel");
     auto c_str_expected = lz::c_string("Hello, ");
     REQUIRE(lz::equal(take_while, c_str_expected));

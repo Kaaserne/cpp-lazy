@@ -40,6 +40,60 @@ struct iter_tuple_value_type_helper<std::tuple<Iterators...>> {
     using type = std::tuple<val_t<Iterators>...>;
 };
 
+template<class... Ts>
+struct disjunction : std::false_type {};
+
+template<class T, class... Ts>
+struct disjunction<T, Ts...> : conditional<T::value, std::true_type, disjunction<Ts...>> {};
+
+template<class>
+struct iter_tuple_common_ref_helper;
+
+#ifdef LZ_HAS_CXX_20
+
+template<class>
+struct iter_tuple_common_ref_helper;
+
+template<class... Iterators>
+struct iter_tuple_common_ref_helper<std::tuple<Iterators...>> {
+    using type = std::common_reference_t<ref_t<Iterators>...>;
+};
+
+#else
+
+template<class A, class B>
+using common_ref2 = decltype(true ? std::declval<A>() : std::declval<B>());
+
+template<class... Ts>
+struct common_ref;
+
+template<class T>
+struct common_ref<T> {
+    using type = T;
+};
+
+template<class T1, class T2, class... Ts>
+struct common_ref<T1, T2, Ts...> {
+    using type = typename common_ref<common_ref2<T1, T2>, Ts...>::type;
+};
+
+template<class>
+struct iter_tuple_common_ref_helper;
+
+template<class... Iterators>
+struct iter_tuple_common_ref_helper<std::tuple<Iterators...>> {
+private:
+    static constexpr bool is_one_by_value = disjunction<std::is_same<ref_t<Iterators>, val_t<Iterators>>...>::value;
+    using ref_type = tup_element<0, std::tuple<ref_t<Iterators>...>>;
+    using value_type = tup_element<0, std::tuple<remove_cvref<val_t<Iterators>>...>>;
+    using common_ref_type = typename common_ref<ref_t<Iterators>...>::type;
+
+public:
+    using type = typename std::conditional<is_one_by_value, value_type, common_ref_type>::type;
+};
+
+#endif
+
 template<class>
 struct iter_tuple_ref_type_helper;
 
@@ -60,9 +114,11 @@ using iter_tuple_value_type_t = typename iter_tuple_value_type_helper<IterTuple>
 template<class IterTuple>
 using iter_tuple_ref_type_t = typename iter_tuple_ref_type_helper<IterTuple>::type;
 
+template<class IterTuple>
+using iter_tuple_common_ref_t = typename iter_tuple_common_ref_helper<IterTuple>::type;
+
 template<class Fn>
-struct tuple_expand {
-private:
+class tuple_expand {
     Fn _fn;
 
 public:

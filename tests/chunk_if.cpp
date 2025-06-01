@@ -1,16 +1,21 @@
 #include <Lz/basic_iterable.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/iter_tools.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");
+    std::function<bool(char)> func = [](char c) {
+        return c == ';';
+    };
 #ifdef LZ_HAS_CXX_11
-    auto chunked = str | lz::t_chunk_if<std::vector<char>>{}([](char c) { return c == ';'; });
+    lz::t_chunk_if_iterable<std::vector<char>, decltype(str), decltype(func)> chunked =
+        str | lz::t_chunk_if<std::vector<char>>{}(std::move(func));
 #else
-    auto chunked = str | lz::t_chunk_if<std::vector<char>>([](char c) { return c == ';'; });
+    lz::t_chunk_if_iterable<std::vector<char>, decltype(str), decltype(func)> chunked =
+        str | lz::t_chunk_if<std::vector<char>>(std::move(func));
 #endif
     auto it = chunked.begin();
     REQUIRE(*it == std::vector<char>{});
@@ -26,7 +31,12 @@ TEST_CASE("Chunk if custom value type") {
 
 TEST_CASE("Chunk if with sentinels") {
     auto cstr = lz::c_string("hello world; this is a message;;");
-    auto chunked = lz::chunk_if(cstr, [](char c) { return c == ';'; });
+
+    std::function<bool(char)> predicate = [](char c) {
+        return c == ';';
+    };
+    lz::chunk_if_iterable<decltype(cstr), decltype(predicate)> chunked = lz::chunk_if(cstr, std::move(predicate));
+
     auto it = chunked.begin();
     std::vector<std::string> expected = { "hello world", " this is a message", "", "" };
     for (const auto& str : expected) {

@@ -1,14 +1,15 @@
-#include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <forward_list>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Dimensions & sized") {
@@ -50,7 +51,7 @@ TEST_CASE("Flatten with sentinels") {
     using c_string = decltype(lz::c_string(""));
 
     std::forward_list<c_string> lst = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
-    auto flattened = lz::flatten(lst);
+    lz::flatten_iterable<decltype(lst)> flattened = lz::flatten(lst);
     static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
 
     SECTION("Operator= 2D forward") {
@@ -256,54 +257,56 @@ TEST_CASE("Should flatten permutations") {
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7 };
 
         std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 } };
+        auto f = lz::flatten(vec);
+
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, {}, { 4, 5 }, { 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, { 4, 5 }, {}, { 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 }, {} };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { {}, { 1, 2, 3 }, { 4, 5, 6, 7 }, {} };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { {}, {}, {}, { 1, 2, 3, 4, 5, 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1, 2, 3, 4, 5, 6, 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 }, { 7 } };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
 
         vec = { {}, {}, { 1, 2, 3 }, {}, {}, { 4, 5, 6, 7 }, {}, {} };
         test_flatten_operators_mm_and_pp(vec, expected);
-        test_operator_plus_is(vec, expected);
-        test_operator_min(vec);
+        test_procs::test_operator_plus(f, expected);
+        test_procs::test_operator_minus(f);
     }
 
     SECTION("Flatten 3D") {

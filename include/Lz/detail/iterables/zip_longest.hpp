@@ -46,13 +46,27 @@ public:
 
     template<bool AllSized = conjunction<sized<Iterables>...>::value>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<AllSized, std::size_t> size() const {
-        return size(make_index_sequence<sizeof...(Iterables)>{});
+        return size(is{});
     }
+
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr iterator begin() const& {
+        if constexpr (bidi) {
+            using diff = typename iterator::difference_type;
+            return { begin_tuple(_iterables), end_tuple(_iterables), tuple_of_n<diff>(is{}) };
+        }
+        else {
+            return { begin_tuple(_iterables), end_tuple(_iterables) };
+        }
+    }
+
+#else
 
     template<bool IsBidi = bidi>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> begin() const& {
         using diff = typename iterator::difference_type;
-        return { begin_tuple(_iterables), end_tuple(_iterables), tuple_of_n<diff>(make_index_sequence<sizeof...(Iterables)>{}) };
+        return { begin_tuple(_iterables), end_tuple(_iterables), tuple_of_n<diff>(is{}) };
     }
 
     template<bool IsBidi = bidi>
@@ -60,10 +74,26 @@ public:
         return { begin_tuple(_iterables), end_tuple(_iterables) };
     }
 
+#endif
+
     template<bool IsBidi = bidi>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() && {
         return { begin_tuple(std::move(_iterables)), end_tuple(std::move(_iterables)) };
     }
+
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (bidi) {
+            using diff = typename iterator::difference_type;
+            return iterator{ end_tuple(_iterables), end_tuple(_iterables), iterable_tuple_eager_size_as<diff>(_iterables, is{}) };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
 
     template<bool IsBidi = bidi>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> end() const {
@@ -75,6 +105,8 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, default_sentinel> end() const noexcept {
         return {};
     }
+
+#endif
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>

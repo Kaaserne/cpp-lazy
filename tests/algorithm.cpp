@@ -1,6 +1,6 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/stream.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <deque>
 #include <forward_list>

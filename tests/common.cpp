@@ -1,6 +1,6 @@
-#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -9,7 +9,7 @@
 TEST_CASE("Basic common_iterable test") {
     const char* s = "hello, world!";
     auto cstr = lz::c_string(s);
-    auto common = lz::common(cstr);
+    lz::common_iterable<lz::c_string_iterable<const char>> common = lz::common(cstr);
     REQUIRE(common.begin() != common.end());
     REQUIRE(common.end() != common.begin());
     REQUIRE(std::find(common.begin(), common.end(), 'h') == common.begin());

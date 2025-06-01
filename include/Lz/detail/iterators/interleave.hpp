@@ -31,8 +31,8 @@ struct all_same_reference<std::tuple<I, Is...>> {
 template<class IterTuple, class SentinelTuple>
 class interleave_iterator
     : public iterator<
-          interleave_iterator<IterTuple, SentinelTuple>, ref_t<first_iter<IterTuple>>,
-          fake_ptr_proxy<ref_t<first_iter<IterTuple>>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
+          interleave_iterator<IterTuple, SentinelTuple>, iter_tuple_common_ref_t<IterTuple>,
+          fake_ptr_proxy<iter_tuple_common_ref_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
           sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, interleave_iterator<IterTuple, SentinelTuple>, SentinelTuple>> {
 
     using traits = std::iterator_traits<first_iter<IterTuple>>;
@@ -40,7 +40,7 @@ class interleave_iterator
 public:
     using value_type = typename traits::value_type;
     using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = typename traits::reference;
+    using reference = iter_tuple_common_ref_t<IterTuple>;
     using pointer = fake_ptr_proxy<reference>;
 
 private:
@@ -54,6 +54,29 @@ private:
     std::uint_least8_t _index{};
 
     using index_sequence_for_this = make_index_sequence<tuple_size>;
+
+#ifdef LZ_HAS_CXX_17
+
+    template<std::size_t I>
+    constexpr bool eq(const SentinelTuple& other) const {
+        if constexpr (I != tuple_size - 1) {
+            return std::get<I>(_iterators) == std::get<I>(other) ? _index == 0 : eq<I + 1>(other);
+        }
+        else {
+            return std::get<I>(_iterators) == std::get<I>(other);
+        }
+    }
+
+    template<std::size_t I>
+    constexpr bool eq(const interleave_iterator& other) const {
+        if constexpr (I != tuple_size - 1) {
+            return std::get<I>(_iterators) == std::get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
+        }
+        else {
+            return std::get<I>(_iterators) == std::get<I>(other._iterators) && _index == other._index;
+        }
+    }
+#else
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, bool> eq(const SentinelTuple& other) const {
@@ -75,6 +98,8 @@ private:
         return std::get<I>(_iterators) == std::get<I>(other._iterators) && _index == other._index;
     }
 
+#endif
+
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<Is...>) {
         ++_index;
@@ -94,6 +119,22 @@ private:
         }
         --_index;
     }
+
+#ifdef LZ_HAS_CXX_17
+
+    template<std::size_t I>
+    constexpr reference dereference() const {
+        if constexpr (I != tuple_size - 1) {
+            return _index == I ? *std::get<I>(_iterators) : dereference<I + 1>();
+        }
+        else {
+            LZ_ASSERT(_index == I, "Out of bounds dereference");
+            return *std::get<I>(_iterators);
+        }
+    }
+
+#else
+
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, reference> dereference() const {
         return _index == I ? *std::get<I>(_iterators) : dereference<I + 1>();
@@ -104,6 +145,8 @@ private:
         LZ_ASSERT(_index == I, "Out of bounds dereference");
         return *std::get<I>(_iterators);
     }
+
+#endif
 
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_20 difference_type difference(const interleave_iterator& other, index_sequence<Is...>) const {

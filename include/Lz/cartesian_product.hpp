@@ -36,7 +36,7 @@ LZ_INLINE_VAR constexpr detail::cartesian_product_adaptor cartesian_product{};
  * ```
  */
 template<class... Iterables>
-using cartesian_product_adaptor = detail::cartesian_product_iterable<Iterables...>;
+using cartesian_product_iterable = detail::cartesian_product_iterable<Iterables...>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

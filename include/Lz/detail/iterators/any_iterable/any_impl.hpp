@@ -3,9 +3,9 @@
 #ifndef LZ_ANY_VIEW_ITERATOR_IMPL_HPP
 #define LZ_ANY_VIEW_ITERATOR_IMPL_HPP
 
+#include <Lz/detail/iterators/any_iterable/iterator_base.hpp>
 #include <Lz/detail/iterators/common.hpp>
 #include <Lz/detail/unique_ptr.hpp>
-#include <Lz/iterator_base.hpp>
 #include <iterator>
 
 namespace lz {

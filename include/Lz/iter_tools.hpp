@@ -21,8 +21,20 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * zip_t zipped = lz::zip_with([](int a, int b) { return a + b; }, a, b);
  */
 template<class Fn, class... Iterables>
-using zip_with_iterable =
-    decltype(lz::map(lz::zip(std::forward<Iterables>(std::declval<Iterables>())...), detail::make_expand_fn(std::declval<Fn>())));
+using zip_with_iterable = map_iterable<zip_iterable<Iterables...>, detail::tuple_expand<Fn>>;
+
+/**
+ * @brief Unzip with helper alias
+ * @tparam Iterable The iterable to unzip.
+ * @tparam Predicate The function to apply on the elements of the zipped iterables.
+ * ```cpp
+ * std::vector<std::tuple<int, int>> zipped = { std::make_tuple(1, 6), std::make_tuple(2, 7), std::make_tuple(3, 8) };
+ * using unzip_t = lz::unzip_with_iterable<std::vector<std::tuple<int, int>>, std::function<bool(int, int)>>;
+ * unzip_t unzipped = lz::unzip_with(zipped, [](int a, int b) { return a + b; });
+ * ```
+ */
+template<class Iterable, class Predicate>
+using unzip_with_iterable = map_iterable<Iterable, detail::tuple_expand<Predicate>>;
 
 /**
  * @brief Lines iterable helper alias
@@ -36,6 +48,18 @@ using zip_with_iterable =
  */
 template<class Iterable, class CharT = char>
 using lines_iterable = detail::lines_iterable<CharT, Iterable>;
+
+/**
+ * @brief Lines iterable helper alias for string_views. string_views are not held by reference, but copied.
+ *
+ * @tparam Iterable The iterable to split into lines.
+ * @tparam CharT The character type of the string to split into lines. Defaults to `char`.
+ * ```cpp
+ * lz::lines_iterable_sv<> actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
+ * ```
+ */
+template<class CharT = char>
+using lines_iterable_sv = lines_iterable<lz::copied_iterable<lz::basic_string_view<CharT>>, CharT>;
 
 /**
  * @brief As iterable helper alias
@@ -84,7 +108,8 @@ using pairwise_iterable = pairwise_n_iterable<Iterable, 2>;
  * @brief Keys, values and get_nth iterable helper alias
  *
  * @tparam Iterable The iterable to get the nth element from.
- * @tparam N The index of the element to get from the iterable. 0 for keys, 1 for values, and any other index for the nth element.
+ * @tparam N The index of the element to get from the iterable. 0 for keys, 1 for values, and any other index for the nth
+ * element.
  * ```cpp
  * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
  * lz::get_nth_iterable<std::vector<std::tuple<int, int, int>>, 2> iterable = lz::get_nth<2>(three_tuple_vec);
@@ -93,6 +118,45 @@ using pairwise_iterable = pairwise_n_iterable<Iterable, 2>;
  */
 template<class Iterable, std::size_t N>
 using get_nth_iterable = detail::get_nth_iterable<Iterable, N>;
+
+/**
+ * @brief Keys iterable helper alias
+ *
+ * @tparam Iterable A std::get-able iterable, such as a vector of tuples or map
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * lz::keys_iterable<decltype(m)> iterable = lz::keys(m);
+ * ```
+ */
+template<class Iterable>
+using keys_iterable = get_nth_iterable<Iterable, 0>;
+
+/**
+ * @brief Values iterable helper alias
+ *
+ * @tparam Iterable A std::get-able iterable, such as a vector of tuples or map
+ * ```cpp
+ * std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
+ * lz::values_iterable<decltype(m)> iterable = lz::values(m);
+ * ```
+ */
+template<class Iterable>
+using values_iterable = get_nth_iterable<Iterable, 1>;
+
+/**
+ * @brief get nths iterable helper alias
+ *
+ * @tparam Iterable A std::get-able iterable, such as a vector of tuples.
+ * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
+ * from each tuple in the iterable.
+ * ```cpp
+ * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * lz::get_nths_iterable<std::vector<std::tuple<int, int, int>>, 0, 2> iterable = lz::get_nths<0, 2>(three_tuple_vec);
+ * lz::get_nths_iterable<std::vector<std::tuple<int, int, int>>, 0, 2> iterable = three_tuple_vec | lz::get_nths<0, 2>;
+ * ```
+ */
+template<class Iterable, std::size_t... N>
+using get_nths_iterable = detail::get_nths_iterable<Iterable, N...>;
 
 /**
  * @brief Filter map iterable helper alias
@@ -161,28 +225,6 @@ using trim_iterable = detail::trim_iterable<Iterable, UnaryPredicateFirst, Unary
 template<class String>
 using trim_string_iterable = trim_iterable<String, detail::trim_fn, detail::trim_fn>;
 
-/**
- * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`. Cannot
- * be used in a pipe expression. Example:
- * ```cpp
- * std::vector<int> a = { 1, 2, 3 };
- * std::vector<int> b = { 1, 2, 3 };
- * std::vector<int> c = { 1, 2, 3 };
- * auto zipped = lz::zip_with([](int a, int b, int c) { return a + b + c; }, a, b, c); // {3, 6, 9}
- * ```
- *
- * @param iterables The iterables to zip together.
- * @param fn The function to apply on the elements.
- * @return A map object that can be iterated over.
- */
-template<class Fn, class... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref<Iterables>...>
-zip_with(Fn fn, Iterables&&... iterables) {
-    return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
-}
-
-// TODO unzip_with
-
 #ifdef LZ_HAS_CXX_11
 
 /**
@@ -227,6 +269,20 @@ using pairwise_n = detail::pairwise_n_adaptor<N>;
 template<std::size_t I>
 using get_nth = detail::get_n_adaptor<I>;
 
+/**
+ * @brief Gets nths indexes from a std::get-able container, using `std::get<N>` and `lz::zip`. Example:
+ * ```cpp
+ * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * auto actual = lz::get_nths<0, 2>{}(three_tuple_vec); // { {1, 3}, {4, 6}, {7, 9} }
+ * // or
+ * auto actual = three_tuple_vec | lz::get_nths<0, 2>{}; // { {1, 3}, {4, 6}, {7, 9} }
+ * ```
+ * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
+ * from each tuple in the iterable.
+ */
+template<std::size_t... N>
+using get_nths = detail::get_nths_adaptor<N...>;
+
 #else
 
 /**
@@ -270,7 +326,53 @@ LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
 template<std::size_t I>
 LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
 
+/**
+ * @brief Gets nths indexes from a std::get-able container, using `std::get<N>` and `lz::zip`. Example:
+ * ```cpp
+ * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+ * auto actual = lz::get_nths<0, 2>(three_tuple_vec); // { {1, 3}, {4, 6}, {7, 9} }
+ * // or
+ * auto actual = three_tuple_vec | lz::get_nths<0, 2>; // { {1, 3}, {4, 6}, {7, 9} }
+ * ```
+ * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
+ * from each tuple in the iterable.
+ */
+template<std::size_t... N>
+LZ_INLINE_VAR constexpr detail::get_nths_adaptor<N...> get_nths{};
+
 #endif
+
+/**
+ * @brief Zips the given iterables together and applies the function @p `fn` on the elements using `lz::map` and `lz::zip`.
+ * Cannot be used in a pipe expression. Example:
+ * ```cpp
+ * std::vector<int> a = { 1, 2, 3 };
+ * std::vector<int> b = { 1, 2, 3 };
+ * std::vector<int> c = { 1, 2, 3 };
+ * auto zipped = lz::zip_with([](int a, int b, int c) { return a + b + c; }, a, b, c); // {3, 6, 9}
+ * ```
+ *
+ * @param iterables The iterables to zip together.
+ * @param fn The function to apply on the elements.
+ * @return A map object that can be iterated over.
+ */
+template<class Fn, class... Iterables>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref<Iterables>...>
+zip_with(Fn fn, Iterables&&... iterables) {
+    return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
+}
+
+/**
+ * @brief Unzips an iterable of tuple-like elements using the provided predicate function. The predicate function should take
+ * the same number of arguments as the number of elements in the tuples and return a value. Example:
+ * ```cpp
+ * std::vector<std::tuple<int, int>> zipped = { std::make_tuple(1, 6), std::make_tuple(2, 7), std::make_tuple(3, 8) };
+ * auto unzipped = lz::unzip_with(zipped, [](int a, int b) { return a + b; }); // {7, 9, 11}
+ * or
+ * auto unzipped = zipped | lz::unzip_with([](int a, int b) { return a + b; }); // {7, 9, 11}
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::unzip_with_adaptor unzip_with{};
 
 /**
  * @brief Returns a split_iterable, that splits the string on `'\n'` using lz::split. Returns string_views to its substrings.
@@ -278,6 +380,10 @@ LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
  * ```cpp
  * std::string str = "Hello\nWorld\n!";
  * auto splitted = lz::lines(str); // {"Hello", "World", "!"}
+ * lz::string_view str_view = "Hello\nWorld\n!";
+ *
+ * // splitted_view, does not hold a reference to the original string
+ * auto splitted_view = lz::lines(str_view); // {"Hello", "World", "!"},
  * // or
  * auto splitted = str | lz::lines; // {"Hello", "World", "!"}
  * // or

@@ -8,7 +8,6 @@ int main() {
     // or
     auto interleaved2 = vec1 | lz::interleave(vec2, vec3); // interleaved = { 1, 4, 8, 2, 5, 9, 3, 6, 10 }
 
-#ifdef LZ_HAS_CXX_17
     
     for (const auto& i : interleaved) {
         std::cout << i << " ";
@@ -21,16 +20,4 @@ int main() {
     }
     // output: 1 4 8 2 5 9 3 6 10
     std::cout << std::endl;
-
-#else
-
-    lz::for_each(interleaved, [](int i) { std::cout << i << " "; });
-    // output: 1 4 8 2 5 9 3 6 10
-    std::cout << std::endl;
-
-    lz::for_each(interleaved2, [](int i) { std::cout << i << " "; });
-    // output: 1 4 8 2 5 9 3 6 10
-    std::cout << std::endl;
-
-#endif
 }

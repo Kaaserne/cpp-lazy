@@ -1,6 +1,6 @@
-#include <Lz/c_string.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -18,9 +18,15 @@ struct payment_bill {
 TEST_CASE("Join where with sentinels") {
     auto c_str = lz::c_string("To join on");
     auto sorted_seq = lz::c_string("Toxzzzz");
-    auto joined = lz::join_where(
-        c_str, sorted_seq, [](char c) { return c; }, [](char c) { return c; },
-        [](char c, char c2) { return std::make_tuple(c, c2); });
+
+    using f1 = std::function<char(char)>;
+    using f2 = std::function<char(char)>;
+    using f3 = std::function<std::tuple<char, char>(char, char)>;
+
+    lz::join_where_iterable<decltype(c_str), decltype(sorted_seq), f1, f2, f3> joined =
+        lz::join_where(c_str, sorted_seq, f1([](char c) { return c; }), f2([](char c) { return c; }),
+                       f3([](char c, char c2) { return std::make_tuple(c, c2); }));
+
     static_assert(!std::is_same<decltype(joined.begin()), decltype(joined.end())>::value, "Should be sentinel");
     std::vector<std::tuple<char, char>> expected = {
         std::make_tuple('T', 'T'),

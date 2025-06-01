@@ -57,6 +57,19 @@ public:
         return { begin_tuple(std::move(_iterables)), begin_tuple(std::move(_iterables)), end_tuple(std::move(_iterables)) };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ end_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { end_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
@@ -66,6 +79,8 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
+
+#endif // LZ_HAS_CXX_17
 
     template<class Iterable>
     friend concatenate_iterable<remove_ref<Iterable>, Iterables...>

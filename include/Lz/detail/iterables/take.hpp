@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/traits.hpp"
-#include "Lz/iterator_base.hpp"
 #ifndef LZ_TAKE_ITERABLE_HPP
 #define LZ_TAKE_ITERABLE_HPP
 
@@ -42,15 +39,30 @@ public:
         return { std::move(_iterator), _n };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { std::next(_iterator, _n), 0 };
+        return { std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
+
+#endif
 };
 
 template<class Iterable>
@@ -83,6 +95,19 @@ public:
         return { std::begin(_iterable) };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::begin(_iterable) + static_cast<typename iterator::difference_type>(size_impl()) };
+        }
+        else {
+            return inner_iter{ next_fast(_iterable, static_cast<typename iterator::difference_type>(size_impl())) };
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if<is_ra_tag<I>::value, iterator> end() const {
         return { std::begin(_iterable) + static_cast<typename iterator::difference_type>(size_impl()) };
@@ -92,6 +117,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_ra_tag<I>::value, inner_iter> end() const {
         return { next_fast(_iterable, static_cast<typename iterator::difference_type>(size_impl())) };
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

@@ -35,11 +35,11 @@ public:
         return _iterable.end();
     }
 
-    LZ_NODISCARD constexpr iterator begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return detail::begin(std::move(_iterable));
     }
 
-    LZ_NODISCARD constexpr sentinel end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
         return detail::end(std::move(_iterable));
     }
 };

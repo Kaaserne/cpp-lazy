@@ -53,37 +53,52 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
 
 #endif // defined(LZ_USE_DEBUG_ASSERTIONS)
 
-template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
-    return std::forward<Iterable>(c).begin();
+template<class... Ts>
+LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
 }
-
-template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
-    return std::forward<Iterable>(c).end();
-}
-
-template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
-    return std::begin(c);
-}
-
-template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
-    return std::end(c);
-}
-
-// clang-format off
 
 // next_fast: check whether it's faster to go forward or backward when incrementing n steps
 // Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
 // for random access iterators this is O(1) anyway. For forward iterators this is not O(1),
 // but we can't go any other way than forward. Random access iterators will use the same
 // implementation as the forward non-sized iterables so we can skip that if statement.
+
+#ifdef LZ_HAS_CXX_17
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
+    if constexpr (!sized<I>::value || !std::is_same_v<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>) {
+        using diff_type = diff_iterable_t<I>;
+        return std::next(detail::begin(std::forward<I>(iterable)), static_cast<diff_type>(n));
+    }
+    else {
+        using diff_type = diff_iterable_t<I>;
+        const auto size = static_cast<diff_type>(lz::size(iterable));
+        if (n > size / 2) {
+            return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+        }
+        return std::next(detail::begin(std::forward<I>(iterable)), n);
+    }
+}
+
+// clang-format on
+
+template<class Iterator, class S>
+constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
+    if constexpr (!is_ra<Iterator>::value) {
+        diff_type<Iterator> dist = 0;
+        for (; begin != end; ++begin, ++dist) {
+        }
+        return dist;
+    }
+    else {
+        return end - begin;
+    }
+}
+
+#else
+
+// clang-format off
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
@@ -107,10 +122,6 @@ next_fast(I&& iterable, diff_iterable_t<I> n) {
 
 // clang-format on
 
-template<class... Ts>
-LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
-}
-
 template<class Iterator, class S>
 LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     diff_type<Iterator> dist = 0;
@@ -123,6 +134,9 @@ template<class Iterator, class S>
 constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     return end - begin;
 }
+
+#endif
+
 } // namespace detail
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
@@ -186,8 +200,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T (&c)[N]) noexcept {
-    static_cast<void>(c);
+LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
     return N;
 }
 
@@ -243,12 +256,42 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&c)[N]) noexcept {
-    static_cast<void>(c);
+LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
     return static_cast<std::ptrdiff_t>(N);
 }
 
 #endif
+
+#ifdef LZ_HAS_CXX_17
+
+/**
+ * @brief Gets the size of an iterable. If the iterable is not sized, it will calculate the size by iterating over the iterable,
+ * which is O(n). Example:
+ * ```cpp
+ * // Sized, making it O(1)
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::eager_size(vec) << '\n'; // prints 5
+ *
+ * // Not sized, making it O(n)
+ * auto not_sized = lz::c_string("Hello");
+ * std::cout << lz::eager_size(not_sized) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The iterable to get the size of.
+ * @return The size of the iterable.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr auto eager_size(Iterable&& c) {
+    if constexpr (detail::sized<Iterable>::value) {
+        return lz::size(c);
+    }
+    else {
+        using std::distance;
+        return static_cast<std::size_t>(distance(std::begin(c), std::end(c)));
+    }
+}
+
+#else
 
 /**
  * @brief Gets the size of an iterable. If the iterable is not sized, it will calculate the size by iterating over the iterable,
@@ -292,6 +335,8 @@ LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, std::s
     using std::distance;
     return static_cast<std::size_t>(distance(std::begin(c), std::end(c)));
 }
+
+#endif
 
 LZ_MODULE_EXPORT_SCOPE_END
 

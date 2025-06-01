@@ -11,15 +11,16 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
- * @brief This adaptor is used to take the first n elements of an iterable or iterator. If an iterator is used, then you have to
- * be careful that the iterator yields at least `n` elements. If an iterable is used, then the library will check if the iterable
- * holds at least `n` elements and will yield min(size(), n) elements. The iterator category is the same as the input iterator
- * category. Its end() function will return a sentinel, if the input iterable is a forward iterator. Has a .size() method that
- * essentially returns `n` for iterators or `min(n, lz::eager_size(input_iterable))` for iterables. If the input
- * iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence is traversed to get its
- * end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`. For `lz::take`, this is only relevant
- * for iterables, not for iterators. For iterators, next(iterator, n) is used to get the end. So, all in all: use
- * lz::cache_size if:
+ * @brief This adaptor is used to take the first n elements of an iterable or iterator. The iterator category is the same as
+ * the input iterator category. Its end() function will return a sentinel, if the input iterable has a forward iterator. Has a
+ * .size() method that essentially returns `n`.
+ * If the parameter is an iterable:
+ * - if `n` is larger than `lz::eager_size(input_iterable)` then `lz::eager_size(input_iterable)` is used, thus preventing out
+ * of bounds.
+ * If the input iterable is exactly bidirectional, an iterable and not sized (like `lz::filter` for example), the entire
+ * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
+ * So, all in all:
+ * use lz::cache_size if:
  * - Your iterable is exactly bidirectional (so forward/random access excluded) and
  * - Your iterable is not sized and
  * - You either use multiple/a combination of the following iterables OR (see last point):
@@ -27,12 +28,19 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * - `lz::enumerate`
  * - `lz::exclude`
  * - `lz::interleave`
+ * - `lz::rotate`
  * - `lz::take`
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
  * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
- * combinations). Example:
+ * combinations).
+ *
+ * If the parameter is an iterator:
+ * - if `n` is larger than the actual size if the iterator, this is undefined behaviour.
+ * - `lz::eager_size` is not used, so it is not guaranteed that the iterator will not go out of bounds.
+ *
+ * Example:
  * ```cpp
  * auto vec = std::vector<int>{1, 2, 3, 4, 5};
  * auto res = lz::take(vec, 2); // res = {1, 2}
@@ -43,7 +51,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * // or
  * auto res = vec | lz::take(20); // res = {1, 2, 3, 4, 5}
  * auto res = lz::take(vec.begin(), 2); // res = {1, 2}
- * // auto res = lz::take(vec.begin(), 20); // out of bounds
+ * // auto res = lz::take(vec.begin(), 20); // undefined behaviour, as the iterator will go out of bounds
+ * // vec.begin() | lz::take(2); // Not supported, as piping only works for iterables, not for iterators
  * ```
  */
 LZ_INLINE_VAR constexpr detail::take_adaptor take{};

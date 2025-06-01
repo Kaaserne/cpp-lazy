@@ -8,8 +8,8 @@
 class custom_fwd_iterator
     : public lz::iterator<
           /* Name of 'this' class */ custom_fwd_iterator, /* Reference type returned by operator*. */
-          const int&,
-          /* Pointer type returned by operator->()*/ const int*,
+          int&,
+          /* Pointer type returned by operator->()*/ int*,
           /* Difference type returned by operator-() among others*/ std::ptrdiff_t,
           /* The iterator category. Forward only in this case */ std::forward_iterator_tag,
           /* The sentinel type. Can be custom_fwd_iterator or for e.g. default_sentinel */ custom_fwd_iterator> {
@@ -19,7 +19,6 @@ public:
     using value_type = int;
     using reference = int&;
     using pointer = int*;
-    using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
 
     custom_fwd_iterator(int iter) : _iter(iter) {
@@ -31,13 +30,19 @@ public:
         ++_iter;
     }
 
-    // Add const to the function
     const int& dereference() const {
         return _iter;
     }
 
-    // Add const to the function
+    int& dereference() {
+        return _iter;
+    }
+
     const int* arrow() const {
+        return &_iter;
+    }
+
+    int* arrow() {
         return &_iter;
     }
 
@@ -52,7 +57,7 @@ public:
     }
 };
 
-class custom_bidi_iterator : public lz::iterator<custom_bidi_iterator, const int&, const int*, std::ptrdiff_t,
+class custom_bidi_iterator : public lz::iterator<custom_bidi_iterator, int&, int*, std::ptrdiff_t,
                                                  std::bidirectional_iterator_tag, custom_bidi_iterator> {
     int _iter;
 
@@ -61,7 +66,6 @@ public:
     using reference = int&;
     using pointer = int*;
     using difference_type = std::ptrdiff_t;
-    using iterator_category = std::bidirectional_iterator_tag;
 
     custom_bidi_iterator(int iter) : _iter(iter) {
     }
@@ -77,13 +81,19 @@ public:
         --_iter;
     }
 
-    // Add const to the function
     const int& dereference() const {
         return _iter;
     }
 
-    // Add const to the function
+    int& dereference() {
+        return _iter;
+    }
+
     const int* arrow() const {
+        return &_iter;
+    }
+
+    int* arrow() {
         return &_iter;
     }
 
@@ -98,8 +108,8 @@ public:
     }
 };
 
-class custom_ra_iterator : public lz::iterator<custom_ra_iterator, const int&, const int*, std::ptrdiff_t,
-                                               std::random_access_iterator_tag, custom_ra_iterator> {
+class custom_ra_iterator
+    : public lz::iterator<custom_ra_iterator, int&, int*, std::ptrdiff_t, std::random_access_iterator_tag, custom_ra_iterator> {
     int _iter;
 
 public:
@@ -107,7 +117,6 @@ public:
     using reference = int&;
     using pointer = int*;
     using difference_type = std::ptrdiff_t;
-    using iterator_category = std::random_access_iterator_tag;
 
     custom_ra_iterator(int iter) : _iter(iter) {
     }
@@ -122,13 +131,19 @@ public:
         --_iter;
     }
 
-    // Add const to the function
     const int& dereference() const {
         return _iter;
     }
 
-    // Add const to the function
-    const int* arrow() {
+    int& dereference() {
+        return _iter;
+    }
+
+    const int* arrow() const {
+        return &_iter;
+    }
+
+    int* arrow() {
         return &_iter;
     }
 

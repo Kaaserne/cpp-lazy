@@ -21,8 +21,6 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  */
 LZ_INLINE_VAR constexpr detail::generate_adaptor generate{};
 
-// TODO add tests for typedefs
-
 /**
  * @brief Generate iterable helper alias for infinite generation.
  * @tparam GeneratorFunc The type of the generator function.

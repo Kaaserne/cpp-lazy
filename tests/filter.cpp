@@ -1,7 +1,7 @@
-#include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -10,7 +10,10 @@
 TEST_CASE("Filter with sentinels") {
     const char* str = "Hello, World!";
     auto c_str = lz::c_string(str);
-    auto filter = lz::filter(c_str, [](char c) { return c != 'o'; });
+    std::function<bool(char)> predicate = [](char c) {
+        return c != 'o';
+    };
+    lz::filter_iterable<decltype(c_str), decltype(predicate)> filter = lz::filter(c_str, std::move(predicate));
     static_assert(!std::is_same<decltype(filter.begin()), decltype(filter.end())>::value, "Must be sentinel");
     std::vector<char> expected = { 'H', 'e', 'l', 'l', ',', ' ', 'W', 'r', 'l', 'd', '!' };
     REQUIRE((filter | lz::to<std::vector>()) == expected);

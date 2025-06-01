@@ -28,15 +28,25 @@ public:
         _compare{ std::move(compare) } {
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr iterator begin() const& {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            // clang-format off
+            return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), std::begin(_iterable2),
+                     std::begin(_iterable2), std::end(_iterable2), _compare };
+            // clang-format on
+        }
+        else {
+            return { std::begin(_iterable), std::end(_iterable), std::begin(_iterable2), std::end(_iterable2), _compare };
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), std::begin(_iterable2), std::end(_iterable2), _compare };
-    }
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), detail::begin(std::move(_iterable2)),
-                 detail::end(std::move(_iterable2)), std::move(_compare) };
     }
 
     template<class I = typename iterator::iterator_category>
@@ -46,6 +56,30 @@ public:
                  std::begin(_iterable2), std::end(_iterable2), _compare };
         // clang-format on
     }
+
+#endif
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), detail::begin(std::move(_iterable2)),
+                 detail::end(std::move(_iterable2)), std::move(_compare) };
+    }
+
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            // clang-format off
+            return iterator{ std::end(_iterable), std::begin(_iterable), std::end(_iterable), std::end(_iterable2),
+                             std::begin(_iterable2), std::end(_iterable2), _compare };
+            // clang-format on
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
@@ -58,6 +92,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
+
+#endif
 };
 }
 } // namespace lz

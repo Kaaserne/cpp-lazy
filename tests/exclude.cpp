@@ -1,16 +1,17 @@
-#include <Lz/c_string.hpp>
 #include <Lz/exclude.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");
-    auto excluded = lz::exclude(cstr, 3, 5);
+    lz::exclude_iterable<decltype(cstr)> excluded = lz::exclude(cstr, 3, 5);
     REQUIRE((excluded | lz::to<std::string>()) == "a sing to exclude");
     static_assert(std::is_same<decltype(excluded.end()), lz::default_sentinel>::value, "Should be default sentinel");
 }
@@ -113,71 +114,20 @@ TEST_CASE("Exclude binary operations") {
     }
 
     SECTION("Operator+") {
-        const auto test_operator_plus = [](decltype(excluded1) excluded, const std::vector<int>& expected) {
-            auto begin = excluded.begin();
-            auto end = excluded.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin + i) == *(expected.begin() + i));
-            }
-            REQUIRE(begin + lz::ssize(excluded) == excluded.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(excluded); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(expected.end() - i));
-            }
-            REQUIRE(end - lz::ssize(excluded) == excluded.begin());
-
-            std::advance(begin, lz::ssize(excluded));
-            std::advance(end, -lz::ssize(excluded));
-            REQUIRE(begin + 0 == begin);
-            REQUIRE(end + 0 == end);
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(expected.begin() + i));
-            }
-            REQUIRE(end + lz::ssize(excluded) == excluded.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(excluded); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin - i) == *(expected.end() - i));
-            }
-            REQUIRE(begin - lz::ssize(excluded) == excluded.begin());
-        };
-
         std::vector<int> expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
-        test_operator_plus(excluded1, expected);
+        test_procs::test_operator_plus(excluded1, expected);
 
         expected = { 3, 4, 5, 6, 7, 8, 9, 10 };
-        test_operator_plus(excluded2, expected);
+        test_procs::test_operator_plus(excluded2, expected);
 
         expected = { 1, 2, 3, 4, 5, 6, 7 };
-        test_operator_plus(excluded3, expected);
+        test_procs::test_operator_plus(excluded3, expected);
     }
 
     SECTION("Operator-") {
-        const auto test_operator_minus = [](decltype(excluded1) excluded) {
-            auto begin = excluded.begin();
-            auto end = excluded.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - begin == lz::ssize(excluded) - i);
-                REQUIRE(end - (begin + i) == lz::ssize(excluded) - i);
-                REQUIRE((begin + i) - end == -(lz::ssize(excluded) - i));
-                REQUIRE(begin - (end - i) == -(lz::ssize(excluded) - i));
-            }
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(excluded); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - (begin + i) == lz::ssize(excluded) - 2 * i);
-                REQUIRE((begin + i) - (end - i) == -(lz::ssize(excluded) - 2 * i));
-            }
-        };
-
-        test_operator_minus(excluded1);
-        test_operator_minus(excluded2);
-        test_operator_minus(excluded3);
+        test_procs::test_operator_minus(excluded1);
+        test_procs::test_operator_minus(excluded2);
+        test_procs::test_operator_minus(excluded3);
     }
 
     SECTION("Operator== & operator!=") {

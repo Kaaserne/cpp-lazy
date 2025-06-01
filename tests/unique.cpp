@@ -1,7 +1,7 @@
-#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/unique.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -9,7 +9,7 @@
 
 TEST_CASE("Unique using sentinels") {
     auto str = lz::c_string("aabbcccddefgghhj");
-    auto unique = lz::unique(str);
+    lz::unique_iterable<decltype(str)> unique = lz::unique(str);
     static_assert(!std::is_same<decltype(unique.begin()), decltype(unique.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("abcdefghj");
     REQUIRE(lz::equal(unique, expected));

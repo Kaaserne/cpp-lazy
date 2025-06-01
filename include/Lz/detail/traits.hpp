@@ -10,7 +10,26 @@
 #include <type_traits>
 
 namespace lz {
-struct default_sentinel;
+struct default_sentinel {
+    friend constexpr bool operator==(default_sentinel, default_sentinel) noexcept {
+        return true;
+    }
+};
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
+struct iterator;
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+constexpr bool
+operator==(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
+    return it.operator==(default_sentinel{});
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+constexpr bool
+operator!=(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
+    return it.operator!=(default_sentinel{});
+}
 
 struct lazy_view {};
 
@@ -48,21 +67,11 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
-template<bool Value, class T, class... Rest>
-struct conjunction_impl {
-    using type = T;
-};
-
-template<class T, class Next, class... Rest>
-struct conjunction_impl<true, T, Next, Rest...> {
-    using type = typename conjunction_impl<static_cast<bool>(Next::value), Next, Rest...>::type;
-};
-
 template<class... Ts>
-struct conjunction : std::false_type {};
+struct conjunction : std::true_type {};
 
-template<class T,  class... Rest>
-struct conjunction<T, Rest...> : conjunction_impl<static_cast<bool>(T::value), T, Rest...>::type {};
+template<class T, class... Ts>
+struct conjunction<T, Ts...> : conditional<T::value, conjunction<Ts...>, std::false_type> {};
 
 #ifdef LZ_HAS_CXX_11
 
@@ -95,19 +104,41 @@ struct plus {
 template<class T>
 using remove_ref = typename std::remove_reference<T>::type;
 
-template<std::size_t...>
-struct index_sequence {};
-
-template<std::size_t N, std::size_t... Rest>
-struct index_sequence_helper : public index_sequence_helper<N - 1, N - 1, Rest...> {};
-
-template<std::size_t... Next>
-struct index_sequence_helper<0, Next...> {
-    using type = index_sequence<Next...>;
+template<std::size_t... Is>
+struct index_sequence {
+    using type = index_sequence;
 };
 
 template<std::size_t N>
-using make_index_sequence = typename index_sequence_helper<N>::type;
+struct make_index_sequence_impl {
+private:
+    using left = typename make_index_sequence_impl<N / 2>::type;
+    using right = typename make_index_sequence_impl<N - N / 2>::type;
+
+    template<class L, class R>
+    struct concat;
+
+    template<std::size_t... Ls, std::size_t... Rs>
+    struct concat<index_sequence<Ls...>, index_sequence<Rs...>> {
+        using type = index_sequence<Ls..., (Rs + sizeof...(Ls))...>;
+    };
+
+public:
+    using type = typename concat<left, right>::type;
+};
+
+template<>
+struct make_index_sequence_impl<0> {
+    using type = index_sequence<>;
+};
+
+template<>
+struct make_index_sequence_impl<1> {
+    using type = index_sequence<0>;
+};
+
+template<std::size_t N>
+using make_index_sequence = typename make_index_sequence_impl<N>::type;
 
 template<class T>
 using decay_t = typename std::decay<T>::type;
@@ -173,22 +204,29 @@ template<class T>
 using remove_cvref = typename std::remove_cv<remove_ref<T>>::type;
 
 #endif // LZ_HAS_CXX_20
-
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())>;
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
+    return std::forward<Iterable>(c).begin();
+}
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())>;
+    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
+    return std::forward<Iterable>(c).end();
+}
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))>;
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
+    return std::begin(c);
+}
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))>;
+    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
+    return std::end(c);
+}
 } // namespace detail
 
 #ifdef LZ_HAS_CXX_17
@@ -349,7 +387,7 @@ template<class, class = void>
 struct is_adaptor : std::false_type {};
 
 template<class T>
-struct is_adaptor<T, void_t<remove_cvref<T>>> : std::true_type {};
+struct is_adaptor<T, void_t<typename T::adaptor>> : std::true_type {};
 
 template<class... Args>
 struct first_arg_helper {};
@@ -416,7 +454,6 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
  */
 using detail::sized;
 
-// TODO improve sentinel_selector?
 /**
  * @brief Selects @p S if @p Tag is not at least bidirectional, otherwise selects @p Iterator.
  *

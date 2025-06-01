@@ -1,74 +1,19 @@
-#include <Lz/c_string.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
-
-namespace {
-template<class TakeIterable>
-void test_operator_minus(const TakeIterable& take) {
-    auto begin = take.begin();
-    auto end = take.end();
-
-    for (std::ptrdiff_t i = 0; i < lz::ssize(take); ++i) {
-        INFO("With i = " << i);
-        REQUIRE((end - i) - begin == lz::ssize(take) - i);
-        REQUIRE(end - (begin + i) == lz::ssize(take) - i);
-        REQUIRE((begin + i) - end == -(lz::ssize(take) - i));
-        REQUIRE(begin - (end - i) == -(lz::ssize(take) - i));
-    }
-
-    for (std::ptrdiff_t i = 0; i < lz::ssize(take); ++i) {
-        INFO("With i = " << i);
-        REQUIRE((end - i) - (begin + i) == lz::ssize(take) - 2 * i);
-        REQUIRE((begin + i) - (end - i) == -(lz::ssize(take) - 2 * i));
-    }
-}
-
-template<class TakeIterable, class ExpectedIterable>
-void test_operator_plus(const TakeIterable& take, const ExpectedIterable& expected) {
-    auto begin = take.begin();
-    auto end = take.end();
-
-    for (std::ptrdiff_t i = 0; i < lz::ssize(take) - 1; ++i) {
-        INFO("With i = " << i);
-        REQUIRE(*(begin + i) == *(expected.begin() + i));
-    }
-    REQUIRE(begin + lz::ssize(take) == take.end());
-    for (std::ptrdiff_t i = 1; i <= lz::ssize(take); ++i) {
-        INFO("With i = " << i);
-        REQUIRE(*(end - i) == *(expected.end() - i));
-    }
-    REQUIRE(end - lz::ssize(take) == take.begin());
-
-    std::advance(begin, lz::ssize(take));
-    std::advance(end, -lz::ssize(take));
-    REQUIRE(begin + 0 == begin);
-    REQUIRE(end + 0 == end);
-
-    for (std::ptrdiff_t i = 0; i < lz::ssize(take) - 1; ++i) {
-        INFO("With i = " << i);
-        REQUIRE(*(end + i) == *(expected.begin() + i));
-    }
-    REQUIRE(end + lz::ssize(take) == take.end());
-    for (std::ptrdiff_t i = 1; i <= lz::ssize(take); ++i) {
-        INFO("With i = " << i);
-        REQUIRE(*(begin - i) == *(expected.end() - i));
-    }
-    REQUIRE(begin - lz::ssize(take) == take.begin());
-}
-
-} // namespace
 
 TEST_CASE("Take with sentinels") {
     const char* str = "Hello, world!";
     auto c_string = lz::c_string(str);
-    auto take = c_string | lz::take(5);
+    lz::take_iterable<decltype(c_string)> take = c_string | lz::take(5);
     static_assert(!std::is_same<decltype(take.begin()), decltype(take.end())>::value, "Should be sentinel");
     auto expected = lz::c_string("Hello");
     REQUIRE(lz::equal(take, expected));
@@ -126,14 +71,12 @@ TEST_CASE("Take binary operations where n is smaller than size") {
     }
 
     SECTION("Operator+") {
-        INFO("Operator+")
         std::vector<int> expected = { 1, 2, 3, 4 };
-        test_operator_plus(take, expected);
+        test_procs::test_operator_plus(take, expected);
     }
 
     SECTION("Operator-") {
-        INFO("Operator-");
-        test_operator_minus(take);
+        test_procs::test_operator_minus(take);
     }
 }
 
@@ -165,12 +108,12 @@ TEST_CASE("Take binary operations where n is larger than size") {
     SECTION("Operator+") {
         INFO("Operator+");
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        test_operator_plus(take, expected);
+        test_procs::test_operator_plus(take, expected);
     }
 
     SECTION("Operator-") {
         INFO("Operator-");
-        test_operator_minus(take);
+        test_procs::test_operator_minus(take);
     }
 }
 
@@ -316,13 +259,11 @@ TEST_CASE("Take with iterator only") {
     }
 
     SECTION("Operator+") {
-        INFO("Operator+");
         auto expected = { 1, 2, 3, 4 };
-        test_operator_plus(take, expected);
+        test_procs::test_operator_plus(take, expected);
     }
 
     SECTION("Operator-") {
-        INFO("Operator-");
-        test_operator_minus(take);
+        test_procs::test_operator_minus(take);
     }
 }

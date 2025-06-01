@@ -1,17 +1,18 @@
-#include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Enumerate with sentinels") {
     const char* str = "Hello";
     auto c_string = lz::c_string(str);
-    auto enumerated = lz::enumerate(c_string);
+    lz::enumerate_iterable<decltype(c_string)> enumerated = lz::enumerate(c_string);
     static_assert(!std::is_same<decltype(enumerated.begin()), decltype(enumerated.end())>::value,
                   "Begin and end should not be the same type");
     auto taken = lz::take(enumerated, 3);
@@ -119,59 +120,16 @@ TEST_CASE("Enumerate binary operations") {
     }
 
     SECTION("Operator+") {
-        auto begin = enumerate.begin();
-        auto end = enumerate.end();
-
         std::vector<std::pair<int, int>> expected = { { 0, 1 }, { 1, 2 }, { 2, 3 } };
-        for (std::ptrdiff_t i = 0; i < lz::ssize(enumerate) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE((begin + i)->first == (expected.begin() + i)->first);
-            REQUIRE((begin + i)->second == (expected.begin() + i)->second);
-        }
-        REQUIRE(begin + lz::ssize(enumerate) == enumerate.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(enumerate); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i)->first == (expected.end() - i)->first);
-            REQUIRE((end - i)->second == (expected.end() - i)->second);
-        }
-        REQUIRE(end - lz::ssize(enumerate) == enumerate.begin());
-
-        std::advance(begin, lz::ssize(enumerate));
-        std::advance(end, -lz::ssize(enumerate));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(enumerate) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end + i)->first == (expected.begin() + i)->first);
-            REQUIRE((end + i)->second == (expected.begin() + i)->second);
-        }
-        REQUIRE(end + lz::ssize(enumerate) == enumerate.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(enumerate); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((begin - i)->first == (expected.end() - i)->first);
-            REQUIRE((begin - i)->second == (expected.end() - i)->second);
-        }
-        REQUIRE(begin - lz::ssize(enumerate) == enumerate.begin());
+        const auto cmp = [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+            INFO("Comparing pairs: " << a.first << ", " << a.second << " with " << b.first << ", " << b.second);
+            return a.first == b.first && a.second == b.second;
+        };
+        test_procs::test_operator_plus(enumerate, expected, cmp);
     }
 
     SECTION("Operator-") {
-        auto begin = enumerate.begin();
-        auto end = enumerate.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(enumerate); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == lz::ssize(enumerate) - i);
-            REQUIRE(end - (begin + i) == lz::ssize(enumerate) - i);
-            REQUIRE((begin + i) - end == -(lz::ssize(enumerate) - i));
-            REQUIRE(begin - (end - i) == -(lz::ssize(enumerate) - i));
-        }
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(enumerate); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == lz::ssize(enumerate) - 2 * i);
-            REQUIRE((begin + i) - (end - i) == -(lz::ssize(enumerate) - 2 * i));
-        }
+        test_procs::test_operator_minus(enumerate);
     }
 }
 

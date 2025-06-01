@@ -25,16 +25,28 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 #if defined(LZ_HAS_STRING_VIEW)
 
+/**
+ * @brief String view. Will use fmt, std or custom implementation depending on the build configuration.
+ */
 template<class C>
 using basic_string_view = std::basic_string_view<C>;
 
+/**
+ * @brief String view. Will use fmt, std or custom implementation depending on the build configuration.
+ */
 using string_view = std::string_view;
 
 #elif !defined(LZ_STANDALONE)
 
+/**
+ * @brief String view. Will use fmt, std or custom implementation depending on the build configuration.
+ */
 template<class C>
 using basic_string_view = fmt::basic_string_view<C>;
 
+/**
+ * @brief String view. Will use fmt, std or custom implementation depending on the build configuration.
+ */
 using string_view = fmt::string_view;
 
 #else
@@ -42,8 +54,6 @@ using string_view = fmt::string_view;
 template<class CharT>
 class basic_string_view {
 public:
-    static constexpr std::size_t npos = static_cast<std::size_t>(-1);
-
     using iterator = const CharT*;
     using const_iterator = const CharT*;
     using value_type = CharT;
@@ -92,13 +102,9 @@ private:
     std::size_t _size{};
 };
 
-#if !defined(LZ_HAS_CXX_17)
-
-template<class CharT>
-constexpr std::size_t basic_string_view<CharT>::npos;
-
-#endif
-
+/**
+ * @brief String view. Will use fmt, std or custom implementation depending on the build configuration.
+ */
 using string_view = basic_string_view<char>;
 
 #endif

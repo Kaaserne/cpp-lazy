@@ -36,6 +36,19 @@ public:
         return { std::begin(_iterable), std::begin(_iterable), detail::end(std::move(_iterable)), std::move(_predicate) };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::end(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
@@ -45,6 +58,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
         return {};
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

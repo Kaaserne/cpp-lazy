@@ -6,7 +6,10 @@
 #include <unordered_map>
 
 TEST_CASE("Generate infinite") {
-    auto generator = lz::generate([]() { return 0; });
+    std::function<int()> func = []() {
+        return 0;
+    };
+    lz::generate_iterable_inf<decltype(func)> generator = lz::generate(std::move(func));
     static_assert(!std::is_same<decltype(generator.begin()), decltype(generator.end())>::value, "Should be sentinel");
     REQUIRE(generator.begin() != generator.end());
     REQUIRE(generator.begin() != generator.begin());
@@ -57,12 +60,11 @@ TEST_CASE("Generate changing and creating elements") {
 TEST_CASE("Generate binary operations") {
     constexpr std::size_t amount = 4;
     std::size_t counter = 0;
-    auto generator = lz::generate(
-        [&counter]() {
-            auto tmp{ counter++ };
-            return tmp;
-        },
-        amount);
+    std::function<std::size_t()> func = [&counter]() {
+        auto tmp{ counter++ };
+        return tmp;
+    };
+    lz::generate_iterable<decltype(func)> generator = lz::generate(std::move(func), amount);
     auto begin = generator.begin();
 
     SECTION("Operator++") {

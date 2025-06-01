@@ -92,7 +92,7 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<void> split{};
  * // auto splitted = lz::s_split(str, std::string(", ")); // Dangling reference, do not do this
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is std::string
- * // auto splitted = str | lz::s_split(lz::string_view(", ")); // Dangling reference, do not do this
+ * auto splitted = str | lz::s_split(lz::string_view(", ")); // Ok, string_view is copied
  *
  * // or
  * auto splitted = lz::s_split(str, ','); // {"Hello", " World!"} where value_type is std::string
@@ -112,7 +112,7 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
  * // auto splitted = lz::sv_split(str, std::string(", ")); // Dangling reference, do not do this
  * // or
  * auto splitted = str | lz::s_split(", "); // {"Hello", "World!"} where value_type is a string_view
- * // auto splitted = str | lz::sv_split(lz::string_view(", ")); // Dangling reference, do not do this
+ * auto splitted = str | lz::sv_split(lz::string_view(", ")); // Ok, string_view is copied
  *
  * // or
  * auto splitted = lz::sv_split(str, ','); // {"Hello", " World!"} where value_type is string_view
@@ -161,8 +161,8 @@ using s_single_split_iterable = split_iterable<std::basic_string<val_iterable_t<
  * ```
  */
 template<class Iterable>
-using s_multiple_split_iterable =
-    split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable, lz::basic_string_view<val_iterable_t<Iterable>>>;
+using s_multiple_split_iterable = split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable,
+                                                 lz::copied_iterable<lz::basic_string_view<val_iterable_t<Iterable>>>>;
 
 /**
  * @brief Split iterable helper alias for single character delimiter. Returns lz::basic_string_view as value type.
@@ -185,8 +185,8 @@ using sv_single_split_iterable =
  * ```
  */
 template<class Iterable>
-using sv_multiple_split_iterable =
-    split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable, lz::basic_string_view<val_iterable_t<Iterable>>>;
+using sv_multiple_split_iterable = split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable,
+                                                  lz::copied_iterable<lz::basic_string_view<val_iterable_t<Iterable>>>>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

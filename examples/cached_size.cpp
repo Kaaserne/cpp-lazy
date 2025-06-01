@@ -12,6 +12,7 @@ int main() {
      * - `lz::enumerate`
      * - `lz::exclude`
      * - `lz::interleave`
+     * - `lz::rotate`
      * - `lz::take`
      * - `lz::take_every`
      * - `lz::zip_longest`
@@ -53,14 +54,15 @@ int main() {
      * - Your iterable is exactly bidirectional (so forward and random access excluded) and;
      * - Your iterable is not sized and (like lz::filter) either OR
      * - You use *multiple* / a combination of the following iterables:
-     *   - lz::chunks
-     *   - lz::enumerate
-     *   - lz::exclude
-     *   - lz::interleave
-     *   - lz::take
-     *   - lz::take_every
-     *   - lz::zip_longest
-     *   - lz::zip
+     *   - `lz::chunks`
+     *   - `lz::enumerate`
+     *   - `lz::exclude`
+     *   - `lz::interleave`
+     *   - `lz::rotate`
+     *   - `lz::take`
+     *   - `lz::take_every`
+     *   - `lz::zip_longest`
+     *   - `lz::zip`
      * - OR Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
      * combinations)
      */

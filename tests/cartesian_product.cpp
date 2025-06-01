@@ -1,12 +1,13 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/cartesian_product.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <cstddef>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Reference and compile test with operator|") {
@@ -72,7 +73,7 @@ TEST_CASE("Is sentinel") {
 TEST_CASE("Empty or one element cartesian product") {
     SECTION("Empty") {
         std::vector<int> vec;
-        auto cart = lz::cartesian_product(vec, vec);
+        lz::cartesian_product_iterable<std::vector<int>, std::vector<int>> cart = lz::cartesian_product(vec, vec);
         REQUIRE(lz::empty(cart));
         REQUIRE(!lz::has_one(cart));
         REQUIRE(!lz::has_many(cart));
@@ -187,54 +188,11 @@ TEST_CASE("Cartesian product binary operations") {
     }
 
     SECTION("Operator+") {
-        auto begin = cartesian.begin();
-        auto end = cartesian.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
-        }
-        REQUIRE(begin + lz::ssize(cartesian) == cartesian.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(cartesian); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end - i) == *(expected.end() - i));
-        }
-        REQUIRE(end - lz::ssize(cartesian) == cartesian.begin());
-
-        std::advance(begin, lz::ssize(cartesian));
-        std::advance(end, -lz::ssize(cartesian));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + i) == *(expected.begin() + i));
-        }
-        REQUIRE(end + lz::ssize(cartesian) == cartesian.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(cartesian); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - i) == *(expected.end() - i));
-        }
-        REQUIRE(begin - lz::ssize(cartesian) == cartesian.begin());
+        test_procs::test_operator_plus(cartesian, expected);
     }
 
     SECTION("Operator-") {
-        auto begin = cartesian.begin();
-        auto end = cartesian.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == lz::ssize(cartesian) - i);
-            REQUIRE(end - (begin + i) == lz::ssize(cartesian) - i);
-            REQUIRE((begin + i) - end == -(lz::ssize(cartesian) - i));
-            REQUIRE(begin - (end - i) == -(lz::ssize(cartesian) - i));
-        }
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(cartesian); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == lz::ssize(cartesian) - 2 * i);
-            REQUIRE((begin + i) - (end - i) == -(lz::ssize(cartesian) - 2 * i));
-        }
+        test_procs::test_operator_minus(cartesian);
     }
 }
 

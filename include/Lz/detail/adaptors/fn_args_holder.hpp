@@ -12,10 +12,10 @@ namespace detail {
 
 template<class Adaptor, class... Ts>
 struct fn_args_holder {
-
 private:
     std::tuple<Ts...> data;
 
+public:
     using adaptor = fn_args_holder<Adaptor, Ts...>;
 
 public:

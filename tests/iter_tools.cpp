@@ -1,6 +1,6 @@
-#include <Lz/c_string.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/zip.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 
@@ -10,7 +10,7 @@
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
-    auto actual = lz::lines("hello world\nthis is a message\ntesting");
+    lz::lines_iterable_sv<> actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
     REQUIRE(lz::equal(actual, expected));
 
     auto actual2 = lz::lines(lz::c_string("hello world\nthis is a message\ntesting"));
@@ -18,8 +18,8 @@ TEST_CASE("Lines") {
     actual2 = lz::c_string("hello world\nthis is a message\ntesting") | lz::lines;
     REQUIRE(lz::equal(actual2, expected));
 
-    lz::string_view to_split = "hello world\nthis is a message\ntesting";
-    auto actual3 = lz::lines(to_split);
+    std::string to_split = "hello world\nthis is a message\ntesting";
+    lz::lines_iterable<std::string> actual3 = lz::lines(to_split);
     REQUIRE(lz::equal(actual3, expected));
     actual3 = to_split | lz::lines;
     REQUIRE(lz::equal(actual3, expected));
@@ -58,7 +58,11 @@ TEST_CASE("Zip with") {
         const std::vector<int> v2 = { 6, 7, 8, 9, 10 };
         const std::vector<int> v3 = { 11, 12, 13, 14, 15 };
         constexpr int expected[] = { 1 + 6 + 11, 2 + 7 + 12, 3 + 8 + 13, 4 + 9 + 14, 5 + 10 + 15 };
-        auto actual = lz::zip_with([](int a, int b, int c) { return a + b + c; }, v1, v2, v3);
+        using v = const std::vector<int>;
+        std::function<int(int, int, int)> fn = [](int a, int b, int c) {
+            return a + b + c;
+        };
+        lz::zip_with_iterable<decltype(fn), v, v, v> actual = lz::zip_with(std::move(fn), v1, v2, v3);
         REQUIRE(lz::equal(actual, expected));
     }
 
@@ -70,6 +74,17 @@ TEST_CASE("Zip with") {
         auto actual = lz::zip_with([](int a, int b, int c) { return a + b + c; }, v1, v2, v3);
         REQUIRE(lz::equal(actual, expected));
     }
+}
+
+TEST_CASE("Unzip with") {
+    const std::vector<std::tuple<int, int>> zipped = { std::make_tuple(1, 6), std::make_tuple(2, 7), std::make_tuple(3, 8),
+                                                       std::make_tuple(4, 9), std::make_tuple(5, 10) };
+    std::function<int(int, int)> unzip_fn = [](int a, int b) {
+        return a + b;
+    };
+    lz::unzip_with_iterable<decltype(zipped), std::function<int(int, int)>> actual = zipped | lz::unzip_with(std::move(unzip_fn));
+    const std::vector<int> expected = { 7, 9, 11, 13, 15 };
+    REQUIRE(lz::equal(actual, expected));
 }
 
 TEST_CASE("Pairwise") {
@@ -143,28 +158,44 @@ TEST_CASE("Keys & values") {
     std::map<int, std::string> m = { { 1, "hello" }, { 2, "world" }, { 3, "!" } };
     const std::vector<int> expected_keys = { 1, 2, 3 };
     const std::vector<std::string> expected_values = { "hello", "world", "!" };
-    auto keys = lz::keys(m);
-    auto values = lz::values(m);
-    REQUIRE(lz::equal(keys, expected_keys));
-    REQUIRE(lz::equal(values, expected_values));
-    keys = m | lz::keys;
-    values = m | lz::values;
-    REQUIRE(lz::equal(keys, expected_keys));
-    REQUIRE(lz::equal(values, expected_values));
 
-    const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
-    const std::vector<int> expected = { 3, 6, 9 };
+    SECTION("Key & value") {
+        lz::keys_iterable<decltype(m)> keys = lz::keys(m);
+        lz::values_iterable<decltype(m)> values = lz::values(m);
+        REQUIRE(lz::equal(keys, expected_keys));
+        REQUIRE(lz::equal(values, expected_values));
+        keys = m | lz::keys;
+        values = m | lz::values;
+        REQUIRE(lz::equal(keys, expected_keys));
+        REQUIRE(lz::equal(values, expected_values));
+    }
+
+    SECTION("Get nth") {
+        const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+        const std::vector<int> expected = { 3, 6, 9 };
 #ifdef LZ_HAS_CXX_11
-    auto actual = lz::get_nth<2>{}(three_tuple_vec);
-    REQUIRE(lz::equal(actual, expected));
-    actual = three_tuple_vec | lz::get_nth<2>{};
-    REQUIRE(lz::equal(actual, expected));
+        lz::get_nth_iterable<decltype(three_tuple_vec), 2> actual = lz::get_nth<2>{}(three_tuple_vec);
+        REQUIRE(lz::equal(actual, expected));
+        actual = three_tuple_vec | lz::get_nth<2>{};
+        REQUIRE(lz::equal(actual, expected));
 #else
-    auto actual = lz::get_nth<2>(three_tuple_vec);
-    REQUIRE(lz::equal(actual, expected));
-    actual = three_tuple_vec | lz::get_nth<2>;
-    REQUIRE(lz::equal(actual, expected));
+        lz::get_nth_iterable<decltype(three_tuple_vec), 2> actual = lz::get_nth<2>(three_tuple_vec);
+        REQUIRE(lz::equal(actual, expected));
+        actual = three_tuple_vec | lz::get_nth<2>;
+        REQUIRE(lz::equal(actual, expected));
 #endif
+    }
+
+    SECTION("Get nths") {
+        const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+        const std::vector<std::tuple<int, int>> expected = { { 1, 3 }, { 4, 6 }, { 7, 9 } };
+#ifdef LZ_HAS_CXX_11
+        lz::get_nths_iterable<decltype(three_tuple_vec), 0, 2> actual = lz::get_nths<0, 2>{}(three_tuple_vec);
+#else
+        lz::get_nths_iterable<decltype(three_tuple_vec), 0, 2> actual = lz::get_nths<0, 2>(three_tuple_vec);
+#endif
+        REQUIRE(lz::equal(actual, expected));
+    }
 }
 
 TEST_CASE("Filtermap") {
@@ -178,7 +209,8 @@ TEST_CASE("Filtermap") {
 
         const auto actual = lz::c_string("hello world");
         const auto expected = lz::c_string("eoo");
-        auto actual_filter_map = lz::filter_map(actual, filter_fun, map_fun);
+        lz::filter_map_iterable<decltype(actual), decltype(filter_fun), decltype(map_fun)> actual_filter_map =
+            lz::filter_map(actual, filter_fun, map_fun);
         REQUIRE(lz::equal(actual_filter_map, expected));
         actual_filter_map = actual | lz::filter_map(std::move(filter_fun), std::move(map_fun));
         REQUIRE(lz::equal(actual_filter_map, expected));
@@ -205,7 +237,7 @@ TEST_CASE("Select") {
     std::array<int, 6> to_select = { 1, 2, 3, 4, 5, 6 };
     std::array<bool, to_select.size()> selector = { true, false, true, false, true, false };
     const std::vector<int> expected = { 1, 3, 5 };
-    auto actual = lz::select(to_select, selector);
+    lz::select_iterable<decltype(to_select), decltype(selector)> actual = lz::select(to_select, selector);
     REQUIRE(lz::equal(actual, expected));
     actual = to_select | lz::select(selector);
     REQUIRE(lz::equal(actual, expected));
@@ -218,7 +250,7 @@ TEST_CASE("Trim variants") {
         };
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<int> expected = { 1, 2, 3 };
-        auto actual_trim_back = lz::drop_back_while(actual, pred);
+        lz::drop_back_iterable<decltype(actual), decltype(pred)> actual_trim_back = lz::drop_back_while(actual, pred);
         REQUIRE(lz::equal(actual_trim_back, expected));
         actual_trim_back = actual | lz::drop_back_while(std::move(pred));
         REQUIRE(lz::equal(actual_trim_back, expected));
@@ -227,14 +259,21 @@ TEST_CASE("Trim variants") {
     SECTION("Trim vec") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<int> expected = { 3, 4 };
-        auto actual_trim = lz::trim(actual, [](int i) { return i < 3; }, [](int i) { return i > 4; });
+        std::function<bool(int)> first_pred = [](int i) {
+            return i < 3;
+        };
+        std::function<bool(int)> last_pred = [](int i) {
+            return i > 4;
+        };
+        lz::trim_iterable<decltype(actual), decltype(first_pred), decltype(last_pred)> actual_trim =
+            lz::trim(actual, std::move(first_pred), std::move(last_pred));
         REQUIRE(lz::equal(actual_trim, expected));
     }
 
     SECTION("Trim string") {
         const std::string actual = "   hello world   ";
         const std::string expected = "hello world";
-        auto actual_trim = lz::trim(actual);
+        lz::trim_string_iterable<const std::string> actual_trim = lz::trim(actual);
         REQUIRE(lz::equal(actual_trim, expected));
         actual_trim = actual | lz::trim;
         REQUIRE(lz::equal(actual_trim, expected));

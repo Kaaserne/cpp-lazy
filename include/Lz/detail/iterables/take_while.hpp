@@ -29,20 +29,48 @@ public:
         _unary_predicate{ std::move(unary_predicate) } {
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr iterator begin() const& {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
+        }
+        else {
+            return { std::begin(_iterable), std::end(_iterable), _unary_predicate };
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::end(_iterable), _unary_predicate };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_unary_predicate) };
-    }
-
-    template<class I = typename iterator::iterator_category>
     LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
         return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
     }
+
+#endif
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_unary_predicate) };
+    }
+
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return iterator{ std::end(_iterable), std::begin(_iterable), std::end(_iterable), _unary_predicate };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
 
     template<class I = typename iterator::iterator_category>
     LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
@@ -53,7 +81,9 @@ public:
     constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
         return {};
     }
+#endif
 };
 } // namespace detail
 } // namespace lz
+
 #endif

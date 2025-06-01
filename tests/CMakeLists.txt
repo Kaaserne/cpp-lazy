@@ -26,6 +26,8 @@ endif ()
 
 include(CTest)
 
+add_subdirectory(c_string)
+
 # ---- Tests ----
 add_executable(cpp-lazy-tests
 	algorithm.cpp
@@ -83,7 +85,9 @@ target_link_libraries(cpp-lazy-tests
 	PRIVATE
 		cpp-lazy::cpp-lazy
 		Catch2::Catch2
+		c_string_forward_declarations
 )
+target_include_directories(cpp-lazy-tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 add_test(
 	NAME cpp-lazy-tests
 	COMMAND $<TARGET_FILE:cpp-lazy-tests>

@@ -1,7 +1,7 @@
-#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -9,7 +9,10 @@
 
 TEST_CASE("Group by with sentinels") {
     auto cstr = lz::c_string("aaabbccccd");
-    auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
+    std::function<bool(char, char)> equal = [](char a, char b) {
+        return a == b;
+    };
+    lz::group_by_iterable<decltype(cstr), decltype(equal)> grouper = lz::group_by(cstr, std::move(equal));
     auto it = grouper.begin();
 
     REQUIRE(lz::equal(it->second, lz::c_string("aaa")));

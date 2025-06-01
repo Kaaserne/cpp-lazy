@@ -7,30 +7,9 @@
 #include <iterator>
 
 namespace lz {
-struct default_sentinel {
-    friend constexpr bool operator==(default_sentinel, default_sentinel) noexcept {
-        return true;
-    }
-};
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
-struct iterator;
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
-constexpr bool
-operator==(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
-    return it.operator==(default_sentinel{});
-}
-
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
-constexpr bool
-operator!=(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
-    return it.operator!=(default_sentinel{});   
-}
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
-public:
     using iterator_category = std::forward_iterator_tag;
     using sentinel = S;
 
@@ -45,18 +24,12 @@ public:
         return copy;
     }
 
-    LZ_NODISCARD constexpr Reference operator*() const {
+    LZ_NODISCARD constexpr auto operator*() const -> Reference {
         return static_cast<const Derived&>(*this).dereference();
     }
 
-    template<class T = Reference>
-    LZ_NODISCARD constexpr detail::enable_if<std::is_lvalue_reference<T>::value, detail::decay_t<T>&> operator*() {
-        return const_cast<detail::decay_t<T>&>(static_cast<const iterator&>(*this).operator*());
-    }
-
-    template<class T = Reference>
-    LZ_NODISCARD constexpr detail::enable_if<!std::is_lvalue_reference<T>::value, T> operator*() {
-        return static_cast<const iterator&>(*this).operator*();
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator*() -> Reference {
+        return static_cast<Derived&>(*this).dereference();
     }
 
     LZ_NODISCARD constexpr Pointer operator->() const {

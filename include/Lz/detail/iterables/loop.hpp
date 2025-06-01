@@ -51,6 +51,24 @@ public:
         return { first, first, last, _amount - 1 };
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            auto first = detail::begin(_iterable);
+            auto last = detail::end(_iterable);
+            if (_amount == 0) {
+                first = last;
+            }
+            return iterator{ last, first, last, 0 };
+        }
+        else {
+            return default_sentinel{};
+        }
+    }
+
+#else
+
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
         auto first = detail::begin(_iterable);
@@ -65,6 +83,8 @@ public:
     LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
         return {};
     }
+
+#endif
 };
 
 template<class Iterable>

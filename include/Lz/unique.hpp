@@ -37,7 +37,7 @@ LZ_INLINE_VAR constexpr detail::unique_adaptor unique{};
  * lz::unique_iterable<std::vector> vec_unique = lz::unique(vec);
  * ```
  */
-template<class Iterable, class BinaryPredicate>
+template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
 using unique_iterable = detail::unique_iterable<Iterable, BinaryPredicate>;
 
 LZ_MODULE_EXPORT_SCOPE_END

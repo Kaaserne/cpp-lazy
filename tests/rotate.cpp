@@ -1,16 +1,17 @@
-#include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");
-    auto rotated = lz::rotate(c_str, 7);
+    lz::rotate_iterable<decltype(c_str)> rotated = lz::rotate(c_str, 7);
     static_assert(!std::is_same<decltype(rotated.begin()), decltype(rotated.end())>::value, "Should be sentinel");
     REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
 
@@ -126,88 +127,33 @@ TEST_CASE("rotate_iterable binary operations") {
     }
 
     SECTION("Operator+") {
-        auto do_test = [](const decltype(rotate)& rotator, std::vector<int> expected) {
-            auto begin = rotator.begin();
-            auto end = rotator.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(rotator) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin + i) == *(expected.begin() + i));
-            }
-            REQUIRE(begin + lz::ssize(rotator) == rotator.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(rotator); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end - i) == *(expected.end() - i));
-            }
-            REQUIRE(end - lz::ssize(rotator) == rotator.begin());
-
-            std::advance(begin, lz::ssize(rotator));
-            std::advance(end, -lz::ssize(rotator));
-            REQUIRE(begin + 0 == begin);
-            REQUIRE(end + 0 == end);
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(rotator) - 1; ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(end + i) == *(expected.begin() + i));
-            }
-            REQUIRE(end + lz::ssize(rotator) == rotator.end());
-            for (std::ptrdiff_t i = 1; i <= lz::ssize(rotator); ++i) {
-                INFO("With i = " << i);
-                REQUIRE(*(begin - i) == *(expected.end() - i));
-            }
-            REQUIRE(begin - lz::ssize(rotator) == rotator.begin());
-        };
-
-        INFO("lz::rotate(container, 3)");
         std::vector<int> expected = { 4, 1, 2, 3 };
-        do_test(rotate, std::move(expected));
+        test_procs::test_operator_plus(rotate, expected);
 
         std::vector<int> container = { 1, 2, 3, 4, 5 };
-        INFO("lz::rotate(container, 3)");
-        auto rotator = lz::rotate(container, 3);
+        rotate = lz::rotate(container, 3);
         expected = { 4, 5, 1, 2, 3 };
-        do_test(rotator, std::move(expected));
+        test_procs::test_operator_plus(rotate, expected);
 
         container = { 1, 2, 3, 4 };
-        rotator = lz::rotate(container, 2);
+        rotate = lz::rotate(container, 2);
         expected = { 3, 4, 1, 2 };
-        INFO("lz::rotate(container, 2)");
-        do_test(rotator, std::move(expected));
+        test_procs::test_operator_plus(rotate, expected);
     }
 
     SECTION("Operator-") {
-        using lz_iterable = decltype(rotate);
-        auto test_iterable = [](const lz_iterable& rotator) {
-            auto begin = rotator.begin();
-            auto end = rotator.end();
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(rotator); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - begin == lz::ssize(rotator) - i);
-                REQUIRE(end - (begin + i) == lz::ssize(rotator) - i);
-                REQUIRE((begin + i) - end == -(lz::ssize(rotator) - i));
-                REQUIRE(begin - (end - i) == -(lz::ssize(rotator) - i));
-            }
-
-            for (std::ptrdiff_t i = 0; i < lz::ssize(rotator); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - (begin + i) == lz::ssize(rotator) - 2 * i);
-                REQUIRE((begin + i) - (end - i) == -(lz::ssize(rotator) - 2 * i));
-            }
-        };
-
         INFO("test_iterable(rotate)");
-        test_iterable(rotate);
+        test_procs::test_operator_minus(rotate);
 
         std::vector<int> container = { 1, 2, 3, 4, 5 };
-        auto rotator = lz::rotate(container, 3);
+        rotate = lz::rotate(container, 3);
         INFO("lz::rotate(container, 3)");
-        test_iterable(rotator);
+        test_procs::test_operator_minus(rotate);
 
         container = { 1, 2, 3, 4 };
-        rotator = lz::rotate(container, 2);
+        rotate = lz::rotate(container, 2);
         INFO("lz::rotate(container, 2)");
-        test_iterable(rotator);
+        test_procs::test_operator_minus(rotate);
     }
 }
 

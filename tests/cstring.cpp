@@ -1,7 +1,7 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <map>
@@ -25,7 +25,7 @@ TEST_CASE("Empty or one element c_string") {
 
 TEST_CASE("CString binary operations") {
     const char string[] = "123 456 789";
-    auto c_string = string | lz::c_string;
+    lz::c_string_iterable<const char> c_string = string | lz::c_string;
 
     SECTION("Operator++") {
         lz::string_view expected1 = "123 456 789";

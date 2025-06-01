@@ -1,10 +1,11 @@
-#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <forward_list>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
 
 struct TestStruct {
@@ -49,7 +50,7 @@ TEST_CASE("Map changing and creating elements") {
             REQUIRE(&t == &array[count++]);
             return t.test_field_str;
         };
-        auto map = array | lz::map(std::move(f));
+        lz::map_iterable<decltype(array), decltype(f)> map = array | lz::map(std::move(f));
 
         for (auto&& _ : map) {
             static_cast<void>(_);
@@ -85,54 +86,11 @@ TEST_CASE("Map binary operations") {
 
     SECTION("Operator+") {
         auto expected = std::vector<std::string>{ "FieldA", "FieldB", "FieldC" };
-        auto begin = map.begin();
-        auto end = map.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(map) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin + i) == *(expected.begin() + i));
-        }
-        REQUIRE(begin + lz::ssize(map) == map.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(map); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end - i) == *(expected.end() - i));
-        }
-        REQUIRE(end - lz::ssize(map) == map.begin());
-
-        std::advance(begin, lz::ssize(map));
-        std::advance(end, -lz::ssize(map));
-        REQUIRE(begin + 0 == begin);
-        REQUIRE(end + 0 == end);
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(map) - 1; ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(end + i) == *(expected.begin() + i));
-        }
-        REQUIRE(end + lz::ssize(map) == map.end());
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(map); ++i) {
-            INFO("With i = " << i);
-            REQUIRE(*(begin - i) == *(expected.end() - i));
-        }
-        REQUIRE(begin - lz::ssize(map) == map.begin());
+        test_procs::test_operator_plus(map, expected);
     }
 
     SECTION("Operator-") {
-        auto begin = map.begin();
-        auto end = map.end();
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(map); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - begin == lz::ssize(map) - i);
-            REQUIRE(end - (begin + i) == lz::ssize(map) - i);
-            REQUIRE((begin + i) - end == -(lz::ssize(map) - i));
-            REQUIRE(begin - (end - i) == -(lz::ssize(map) - i));
-        }
-
-        for (std::ptrdiff_t i = 0; i < lz::ssize(map); ++i) {
-            INFO("With i = " << i);
-            REQUIRE((end - i) - (begin + i) == lz::ssize(map) - 2 * i);
-            REQUIRE((begin + i) - (end - i) == -(lz::ssize(map) - 2 * i));
-        }
+        test_procs::test_operator_minus(map);
     }
 }
 
