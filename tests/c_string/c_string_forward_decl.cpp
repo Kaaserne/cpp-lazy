@@ -6,5 +6,17 @@
 
 template class lz::detail::c_string_iterable<const char>;
 template class lz::detail::c_string_iterator<const char>;
+
+#if defined(_MSC_VER) && _MSC_VER >= 1920 && _MSC_VER < 1930
+
+template<>
+lz::detail::c_string_iterable<const char> lz::detail::c_string_adaptor::operator()<const char>(const char* str) const noexcept {
+    return { str };
+}
+
+#else
+
 template lz::detail::c_string_iterable<const char>
 lz::detail::c_string_adaptor::operator()<const char>(const char* str) const noexcept;
+
+#endif
