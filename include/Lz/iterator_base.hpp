@@ -12,7 +12,6 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::forward_iterator_tag;
     using sentinel = S;
-    using value_type = detail::remove_cvref<Reference>;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator++() {
         static_cast<Derived&>(*this).increment();
@@ -25,13 +24,11 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         return copy;
     }
 
-    LZ_NODISCARD constexpr auto
-    operator*() const -> detail::conditional<std::is_reference<Reference>::value, Reference, value_type> {
+    LZ_NODISCARD constexpr auto operator*() const -> Reference {
         return static_cast<const Derived&>(*this).dereference();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
-    operator*() -> detail::conditional<std::is_reference<Reference>::value, Reference, value_type> {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator*() -> Reference {
         return static_cast<Derived&>(*this).dereference();
     }
 
