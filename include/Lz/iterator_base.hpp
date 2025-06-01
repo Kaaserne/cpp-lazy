@@ -12,6 +12,7 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::forward_iterator_tag;
     using sentinel = S;
+    using value_type = detail::remove_cvref<Reference>;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator++() {
         static_cast<Derived&>(*this).increment();
@@ -22,10 +23,6 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         Derived copy = static_cast<Derived&>(*this);
         static_cast<Derived&>(*this).increment();
         return copy;
-    }
-
-    LZ_NODISCARD constexpr Reference operator*() const {
-        return static_cast<const Derived&>(*this).dereference();
     }
 
 #ifdef LZ_HAS_CXX_17
@@ -41,14 +38,14 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
 
 #else
 
-    template<class T = Reference>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<std::is_lvalue_reference<T>::value, T> operator*() {
-        return const_cast<T>(static_cast<const iterator&>(*this).operator*());
+    LZ_NODISCARD constexpr auto
+    operator*() const -> detail::conditional<std::is_reference<Reference>::value, Reference, value_type> {
+        return static_cast<const Derived&>(*this).dereference();
     }
 
-    template<class T = Reference>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<!std::is_lvalue_reference<T>::value, T> operator*() {
-        return static_cast<const iterator&>(*this).operator*();
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
+    operator*() -> detail::conditional<std::is_reference<Reference>::value, Reference, value_type> {
+        return static_cast<Derived&>(*this).dereference();
     }
 
 #endif
