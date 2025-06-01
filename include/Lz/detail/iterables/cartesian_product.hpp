@@ -61,7 +61,7 @@ class cartesian_product_iterable : public lazy_view {
     concat_iterables(Iterable2&& iterable2, cartesian_product_iterable<Iterable, Iterables...>&& cartesian,
                      index_sequence<Is...>) {
         return { std::forward<Iterable2>(iterable2), std::move(cartesian._first_iterable),
-                 std::move(std::get<Is>(cartesian._rest_iterables))... };
+                 std::get<Is>(std::move(cartesian._rest_iterables))... };
     }
 
     template<class Iterable2, std::size_t... Is>

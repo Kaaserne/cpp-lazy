@@ -26,7 +26,7 @@ class interleave_iterable {
     template<class Iterable2, std::size_t... Is>
     static interleave_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, interleave_iterable<Iterables...>&& interleaved, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(interleaved._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(std::move(interleaved._iterables))... };
     }
 
     template<class Iterable2, std::size_t... Is>

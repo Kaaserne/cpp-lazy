@@ -23,7 +23,7 @@ class concatenate_iterable : public lazy_view {
     template<class Iterable2, std::size_t... Is>
     static concatenate_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...>&& cat, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(cat._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(std::move(cat._iterables))... };
     }
 
     template<class Iterable2, std::size_t... Is>

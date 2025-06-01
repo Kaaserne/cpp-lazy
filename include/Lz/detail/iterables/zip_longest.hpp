@@ -30,7 +30,7 @@ public:
     template<class Iterable2, std::size_t... Is>
     static zip_longest_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, zip_longest_iterable<Iterables...>&& zipper, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(zipper._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(std::move(zipper._iterables))... };
     }
 
     template<class Iterable2, std::size_t... Is>
