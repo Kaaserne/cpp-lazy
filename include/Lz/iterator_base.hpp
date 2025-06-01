@@ -25,19 +25,6 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         return copy;
     }
 
-#ifdef LZ_HAS_CXX_17
-
-    LZ_NODISCARD constexpr decltype(auto) operator*() {
-        if constexpr (std::is_lvalue_reference<Reference>::value) {
-            return const_cast<Reference>(static_cast<const iterator&>(*this).operator*());
-        }
-        else {
-            return static_cast<const iterator&>(*this).operator*();
-        }
-    }
-
-#else
-
     LZ_NODISCARD constexpr auto
     operator*() const -> detail::conditional<std::is_reference<Reference>::value, Reference, value_type> {
         return static_cast<const Derived&>(*this).dereference();
@@ -47,8 +34,6 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
     operator*() -> detail::conditional<std::is_reference<Reference>::value, Reference, value_type> {
         return static_cast<Derived&>(*this).dereference();
     }
-
-#endif
 
     LZ_NODISCARD constexpr Pointer operator->() const {
         return static_cast<const Derived&>(*this).arrow();
