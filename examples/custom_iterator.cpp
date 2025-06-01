@@ -19,7 +19,6 @@ public:
     using value_type = int;
     using reference = int&;
     using pointer = int*;
-    using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
 
     custom_fwd_iterator(int iter) : _iter(iter) {
@@ -67,7 +66,6 @@ public:
     using reference = int&;
     using pointer = int*;
     using difference_type = std::ptrdiff_t;
-    using iterator_category = std::bidirectional_iterator_tag;
 
     custom_bidi_iterator(int iter) : _iter(iter) {
     }
@@ -119,7 +117,6 @@ public:
     using reference = int&;
     using pointer = int*;
     using difference_type = std::ptrdiff_t;
-    using iterator_category = std::random_access_iterator_tag;
 
     custom_ra_iterator(int iter) : _iter(iter) {
     }
