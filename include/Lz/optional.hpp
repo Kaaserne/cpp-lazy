@@ -103,11 +103,9 @@ public:
 
     ~optional() {
         if LZ_CONSTEXPR_IF (std::is_trivially_destructible<T>::value) {
-            _has_value = false;
             return;
         }
         if (_has_value) {
-            _has_value = false;
             _value.~T();
         }
     }
