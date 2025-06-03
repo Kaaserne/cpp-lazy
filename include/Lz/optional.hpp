@@ -7,28 +7,30 @@
 #include <cstdint>
 #include <type_traits>
 
-#ifdef __cpp_lib_optional
+#ifdef LZ_HAS_CXX_17
 
 #include <optional>
 
-#else // ^^ __cpp_lib_optional vv !__cpp_lib_optional
+#else // LZ_HAS_CXX_17
 
 #include <Lz/detail/procs.hpp>
 #include <stdexcept>
 
-#endif // __cpp_lib_optional
+#endif // LZ_HAS_CXX_17
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-#ifdef __cpp_lib_optional
+#ifdef LZ_HAS_CXX_17
+
 template<class T>
 using optional = std::optional<T>;
 
 using nullopt_t = std::nullopt_t;
 
 constexpr inline nullopt_t nullopt = std::nullopt;
+
 #else
 
 struct nullopt_t {
