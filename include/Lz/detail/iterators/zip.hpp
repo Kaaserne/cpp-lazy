@@ -72,13 +72,18 @@ private:
 #endif
     }
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SentinelTuple& other, const index_sequence<I...>&) {
+        decompose(std::get<I>(_iterators) = std::get<I>(other)...);
+    }
+
 public:
     LZ_CONSTEXPR_CXX_14 zip_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
         static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
     LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SentinelTuple& end) {
-        _iterators = end;
+        assign_sentinels(end, make_idx_sequence_for_this{});
         return *this;
     }
 

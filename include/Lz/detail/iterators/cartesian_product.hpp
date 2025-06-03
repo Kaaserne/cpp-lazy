@@ -184,6 +184,11 @@ private:
 
     using index_sequence_for_this = make_index_sequence<tup_size>;
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+        decompose(std::get<I>(_iterators) = std::get<I>(_end)...);
+    }
+
 public:
     LZ_CONSTEXPR_CXX_14
     cartesian_product_iterator(IterTuple iterators, IterTuple begin, STuple end) :
@@ -194,7 +199,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 cartesian_product_iterator& operator=(default_sentinel) {
-        _iterators = _end;
+        assign_sentinels(index_sequence_for_this{});
         return *this;
     }
 

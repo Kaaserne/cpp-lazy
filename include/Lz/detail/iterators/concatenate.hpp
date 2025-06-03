@@ -12,9 +12,6 @@
 namespace lz {
 namespace detail {
 
-template<class Tuple>
-using first_it = tup_element<0, Tuple>;
-
 template<class IterTuple, class SentinelTuple>
 class concatenate_iterator
     : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, iter_tuple_common_ref_t<IterTuple>,

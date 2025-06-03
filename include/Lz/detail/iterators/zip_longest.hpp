@@ -21,6 +21,12 @@ struct optional_iter_tuple_value_type_helper<std::tuple<Iterators...>> {
     using type = std::tuple<optional<val_t<Iterators>>...>;
 };
 
+template<class Iterator, std::size_t N>
+struct optional_iter_tuple_value_type_helper<std::array<Iterator, N>> {
+    using optional_value_type = optional<val_t<Iterator>>;
+    using type = decltype(tuple_of<optional_value_type>(make_index_sequence<N>()));
+};
+
 template<class IterTuple>
 using optional_value_type_iter_tuple_t = typename optional_iter_tuple_value_type_helper<IterTuple>::type;
 
@@ -30,7 +36,7 @@ struct reference_or_value_type_helper;
 template<>
 struct reference_or_value_type_helper<true /* is lvalue reference */> {
     template<class Ref, class>
-    using type = std::reference_wrapper<typename std::remove_reference<Ref>::type>;
+    using type = std::reference_wrapper<remove_ref<Ref>>;
 };
 
 template<>
@@ -51,6 +57,12 @@ struct optional_iter_tuple_ref_type_helper<std::tuple<Iterators...>> {
     using type = std::tuple<optional<reference_or_value_type<ref_t<Iterators>, val_t<Iterators>>>...>;
 };
 
+template<class Iterator, std::size_t N>
+struct optional_iter_tuple_ref_type_helper<std::array<Iterator, N>> {
+    using optional_ref_or_value_type = optional<reference_or_value_type<ref_t<Iterator>, val_t<Iterator>>>;
+    using type = decltype(tuple_of<optional_ref_or_value_type>(make_index_sequence<N>()));
+};
+
 template<class IterTuple>
 using optional_iter_tuple_ref_type = typename optional_iter_tuple_ref_type_helper<IterTuple>::type;
 
@@ -61,9 +73,9 @@ template<class IterTuple, class SentinelTuple>
 class zip_longest_iterator<false /* bidi */, IterTuple, SentinelTuple>
     : public iterator<zip_longest_iterator<false, IterTuple, SentinelTuple>, optional_iter_tuple_ref_type<IterTuple>,
                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                      std::forward_iterator_tag, default_sentinel> {
+                      iter_tuple_iter_cat_t<IterTuple>, default_sentinel> {
 public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
     using value_type = optional_value_type_iter_tuple_t<IterTuple>;
     using difference_type = iter_tuple_diff_type_t<IterTuple>;
     using reference = optional_iter_tuple_ref_type<IterTuple>;
@@ -75,13 +87,24 @@ private:
     IterTuple _iterators;
     SentinelTuple _end;
 
+    template<std::size_t I>
+    LZ_CONSTEXPR_CXX_14 auto
+    deref_one() const -> optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
+                                                          val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>> {
+
+        using iter_type = remove_cvref<decltype(std::get<I>(_iterators))>;
+        using ref_or_value_type = optional<reference_or_value_type<ref_t<iter_type>, val_t<iter_type>>>;
+
+        if (std::get<I>(_iterators) == std::get<I>(_end)) {
+            return lz::nullopt;
+        }
+
+        return ref_or_value_type{ *std::get<I>(_iterators) };
+    }
+
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
-        return reference{ std::get<I>(_iterators) == std::get<I>(_end)
-                              ? lz::nullopt
-                              : optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
-                                                                 val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>>(
-                                    *std::get<I>(_iterators))... };
+        return reference{ deref_one<I>()... };
     }
 
     template<std::size_t... I>
@@ -116,6 +139,11 @@ private:
 #endif
     }
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+        decompose(std::get<I>(_iterators) = std::get<I>(_end)...);
+    }
+
 public:
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator(IterTuple iterators, SentinelTuple end) :
         _iterators{ std::move(iterators) },
@@ -123,10 +151,8 @@ public:
         static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
-    constexpr zip_longest_iterator() = default;
-
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel) {
-        _iterators = _end;
+        assign_sentinels(make_idx_sequence_for_this{});
         return *this;
     }
 
@@ -168,19 +194,30 @@ public:
 
 private:
     using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
-    using difference_tuple = decltype(tuple_of_n<difference_type>(make_idx_sequence_for_this()));
+    using difference_tuple = decltype(make_homogeneous_of<difference_type>(make_idx_sequence_for_this{}));
 
     IterTuple _iterators;
     SentinelTuple _end;
     difference_tuple _distances;
 
+    template<std::size_t I>
+    LZ_CONSTEXPR_CXX_14 auto
+    deref_one() const -> optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
+                                                          val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>> {
+
+        using iter_type = remove_cvref<decltype(std::get<I>(_iterators))>;
+        using ref_or_value_type = optional<reference_or_value_type<ref_t<iter_type>, val_t<iter_type>>>;
+
+        if (std::get<I>(_iterators) == std::get<I>(_end)) {
+            return lz::nullopt;
+        }
+
+        return ref_or_value_type{ *std::get<I>(_iterators) };
+    }
+
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
-        return reference{ std::get<I>(_iterators) == std::get<I>(_end)
-                              ? lz::nullopt
-                              : optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
-                                                                 val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>>(
-                                    *std::get<I>(_iterators))... };
+        return reference{ deref_one<I>()... };
     }
 
     template<std::size_t... I>
@@ -281,6 +318,11 @@ private:
 #endif
     }
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+        decompose(std::get<I>(_iterators) = std::get<I>(_end)...);
+    }
+
 public:
     constexpr zip_longest_iterator(IterTuple it, SentinelTuple end, difference_tuple distances) :
         _iterators{ std::move(it) },
@@ -290,7 +332,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel) {
-        _iterators = _end;
+        assign_sentinels(make_idx_sequence_for_this{});
         return *this;
     }
 

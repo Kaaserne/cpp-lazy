@@ -11,10 +11,10 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_iterable : public lazy_view {
-    using iter_tuple = std::tuple<iter_t<Iterables>...>;
-    using sentinel_tuple = std::tuple<sentinel_t<Iterables>...>;
+    using iter_tuple = maybe_homogeneous<iter_t<Iterables>...>;
+    using sentinel_tuple = maybe_homogeneous<sentinel_t<Iterables>...>;
 
-    std::tuple<ref_or_view<Iterables>...> _iterables;
+    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
 
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
@@ -34,7 +34,7 @@ class zip_iterable : public lazy_view {
     }
 
 public:
-    using iterator = zip_iterator<std::tuple<iter_t<Iterables>...>, sentinel_tuple>;
+    using iterator = zip_iterator<iter_tuple, sentinel_tuple>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -52,30 +52,30 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { begin_tuple(_iterables) };
+        return { begin_maybe_homo(_iterables) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { begin_tuple(std::move(_iterables)) };
+        return { begin_maybe_homo(std::move(_iterables)) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
         if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ smallest_end_tuple(_iterables, seq{}) };
+            return iterator{ smallest_end_maybe_homo(_iterables, seq{}) };
         }
         else {
-            return typename iterator::sentinel{ end_tuple(_iterables) };
+            return typename iterator::sentinel{ end_maybe_homo(_iterables) };
         }
     }
 
     [[nodiscard]] constexpr auto end() && {
         if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ smallest_end_tuple(std::move(_iterables), seq{}) };
+            return iterator{ smallest_end_maybe_homo(std::move(_iterables), seq{}) };
         }
         else {
-            return typename iterator::sentinel{ end_tuple(std::move(_iterables)) };
+            return typename iterator::sentinel{ end_maybe_homo(std::move(_iterables)) };
         }
     }
 
@@ -83,22 +83,22 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
-        return { smallest_end_tuple(_iterables, seq{}) };
+        return { smallest_end_maybe_homo(_iterables, seq{}) };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, typename iterator::sentinel> end() const& {
-        return { end_tuple(_iterables) };
+        return { end_maybe_homo(_iterables) };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
-        return { smallest_end_tuple(std::move(_iterables), seq{}) };
+        return { smallest_end_maybe_homo(std::move(_iterables), seq{}) };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, typename iterator::sentinel> end() && {
-        return { end_tuple(std::move(_iterables)) };
+        return { end_maybe_homo(std::move(_iterables)) };
     }
 
 #endif

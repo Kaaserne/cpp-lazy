@@ -15,17 +15,6 @@
 namespace lz {
 namespace detail {
 
-template<class IterTuple>
-using first_iter = typename std::tuple_element<0, IterTuple>::type;
-
-template<class I, class... Is>
-struct all_same_reference;
-
-template<class I, class... Is>
-struct all_same_reference<std::tuple<I, Is...>> {
-    static constexpr bool value = conjunction<std::is_same<ref_t<I>, ref_t<Is>>...>::value;
-};
-
 template<class IterTuple, class SentinelTuple>
 class interleave_iterator
     : public iterator<
@@ -33,7 +22,7 @@ class interleave_iterator
           fake_ptr_proxy<iter_tuple_common_ref_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
           sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, interleave_iterator<IterTuple, SentinelTuple>, SentinelTuple>> {
 
-    using traits = std::iterator_traits<first_iter<IterTuple>>;
+    using traits = std::iterator_traits<first_it<IterTuple>>;
 
 public:
     using value_type = typename traits::value_type;
@@ -163,14 +152,18 @@ private:
         decompose(std::get<Is>(_iterators) += n...);
     }
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SentinelTuple& end, index_sequence<I...>) {
+        decompose(std::get<I>(_iterators) = std::get<I>(end)...);
+    }
+
 public:
     LZ_CONSTEXPR_CXX_14 interleave_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
         static_assert(tuple_size > 1, "interleaved_iterator must have at least two iterators");
-        static_assert(all_same_reference<IterTuple>::value, "All iterators must have the same reference type");
     }
 
     LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const SentinelTuple& end) {
-        _iterators = end;
+        assign_sentinels(end, index_sequence_for_this{});
         _index = 0;
         return *this;
     }
