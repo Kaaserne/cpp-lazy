@@ -66,6 +66,7 @@ struct except_adaptor {
     operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }
+
     // clang-format on
 };
 } // namespace detail

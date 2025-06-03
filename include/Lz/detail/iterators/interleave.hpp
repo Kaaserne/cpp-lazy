@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Lz/detail/procs.hpp"
-#include "Lz/detail/traits.hpp"
 #ifndef LZ_INTERLEAVED_ITERATOR_HPP
 #define LZ_INTERLEAVED_ITERATOR_HPP
 

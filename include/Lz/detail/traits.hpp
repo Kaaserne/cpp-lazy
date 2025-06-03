@@ -4,7 +4,7 @@
 #define LZ_TRAITS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <array> // tuple_element
+#include <array>
 #include <cstddef>
 #include <iterator>
 #include <type_traits>

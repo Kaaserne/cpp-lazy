@@ -1,6 +1,5 @@
 #pragma once
 
-#include <utility>
 #ifndef LZ_CARTESIAN_PRODUCT_ITERABLE_HPP
 #define LZ_CARTESIAN_PRODUCT_ITERABLE_HPP
 

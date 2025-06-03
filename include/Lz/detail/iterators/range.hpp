@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Lz/detail/compiler_checks.hpp"
-
-#include <type_traits>
 #ifndef LZ_RANGE_ITERATOR_HPP
 #define LZ_RANGE_ITERATOR_HPP
 

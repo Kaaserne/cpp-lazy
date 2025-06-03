@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Lz/detail/traits.hpp"
 #ifndef LZ_INTERSECTION_HPP
 #define LZ_INTERSECTION_HPP
 

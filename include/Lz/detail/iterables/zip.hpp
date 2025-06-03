@@ -1,10 +1,5 @@
 #pragma once
 
-#include "Lz/detail/compiler_checks.hpp"
-#include "Lz/detail/procs.hpp"
-#include "Lz/detail/traits.hpp"
-
-#include <algorithm>
 #ifndef LZ_ZIP_ITERABLE_HPP
 #define LZ_ZIP_ITERABLE_HPP
 
