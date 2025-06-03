@@ -235,7 +235,7 @@ TEST_CASE("Filtermap") {
 
 TEST_CASE("Select") {
     std::array<int, 6> to_select = { 1, 2, 3, 4, 5, 6 };
-    std::array<bool, to_select.size()> selector = { true, false, true, false, true, false };
+    const std::array<bool, to_select.size()> selector = { true, false, true, false, true, false };
     const std::vector<int> expected = { 1, 3, 5 };
     lz::select_iterable<decltype(to_select), decltype(selector)> actual = lz::select(to_select, selector);
     REQUIRE(lz::equal(actual, expected));
