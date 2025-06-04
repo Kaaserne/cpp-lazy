@@ -1,5 +1,6 @@
 #include <Lz/except.hpp>
 #include <iostream>
+#include <vector>
 
 int main() {
     std::vector<int> vec = { 1, 2, 3, 4, 5 };
@@ -8,7 +9,7 @@ int main() {
 
     auto excepted = lz::except(vec, to_except); // excepted = { 1, 2, 4 }
 
-#ifdef LZ_HAS_CXX_11
+#ifndef LZ_HAS_CXX_17
 
     lz::for_each(excepted, [](int i) { std::cout << i << " "; });
 

@@ -1,5 +1,6 @@
 #include <Lz/map.hpp>
 #include <iostream>
+#include <vector>
 
 struct non_lz_iterable {
     const int* _begin{};
