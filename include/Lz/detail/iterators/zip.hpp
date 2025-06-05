@@ -78,6 +78,20 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr zip_iterator()
+        requires std::default_initializable<IterTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr zip_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 zip_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
         static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
     }

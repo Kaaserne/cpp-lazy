@@ -25,6 +25,23 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr exclusive_scan_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T> &&
+                     std::default_initializable<BinaryOp>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<T>::value && std::is_default_constructible<BinaryOp>::value>>
+    constexpr exclusive_scan_iterator() {
+    }
+
+#endif
+
     constexpr exclusive_scan_iterator(Iterator it, S end, T init, BinaryOp binary_op) :
         _iterator{ std::move(it) },
         _reducer{ std::move(init) },

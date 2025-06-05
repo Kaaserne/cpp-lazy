@@ -88,8 +88,8 @@ public:
 
 private:
     ref_or_view<Iterable> _iterable;
-    std::size_t _offset;
-    std::size_t _start;
+    std::size_t _offset{};
+    std::size_t _start{};
 
     template<class I = inner_iter>
     LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, inner_iter> get_begin() const {
@@ -102,6 +102,20 @@ private:
     using diff_type = typename iterator::difference_type;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_every_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr take_every_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr take_every_iterable(I&& iterable, const std::size_t offset, const std::size_t start) :
         _iterable{ std::forward<I>(iterable) },

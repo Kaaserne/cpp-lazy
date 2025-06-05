@@ -145,6 +145,21 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr zip_longest_iterator()
+        requires std::default_initializable<IterTuple> && std::default_initializable<SentinelTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SentinelTuple>::value>>
+    constexpr zip_longest_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator(IterTuple iterators, SentinelTuple end) :
         _iterators{ std::move(iterators) },
         _end{ std::move(end) } {
@@ -324,6 +339,21 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr zip_longest_iterator()
+        requires std::default_initializable<IterTuple> && std::default_initializable<SentinelTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SentinelTuple>::value>>
+    constexpr zip_longest_iterator() {
+    }
+
+#endif
+
     constexpr zip_longest_iterator(IterTuple it, SentinelTuple end, difference_tuple distances) :
         _iterators{ std::move(it) },
         _end{ std::move(end) },

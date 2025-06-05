@@ -20,6 +20,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr map_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<UnaryOp>
+    = default;
+
+#else
+
+    template<class I = Iterable,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
+    constexpr map_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr map_iterable(I&& iterable, UnaryOp unary_op) :
         _iterable{ std::forward<I>(iterable) },

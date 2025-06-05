@@ -24,6 +24,8 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+    constexpr common_iterator() noexcept = default;
+
     constexpr common_iterator(const Iterator& iter) : _data{ iter } {
     }
 

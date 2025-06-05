@@ -10,12 +10,26 @@ namespace detail {
 template<class Iterable>
 class cached_size_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    std::size_t _size;
+    std::size_t _size{};
 
 public:
     using iterator = iter_t<Iterable>;
     using const_iterator = iterator;
     using sentinel = sentinel_t<Iterable>;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr cached_size_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr cached_size_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr cached_size_iterable(I&& iterable) :

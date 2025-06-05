@@ -25,6 +25,20 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr cached_reverse_iterator()
+        requires std::default_initializable<Iterator>
+    = default;
+
+#else
+
+    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr cached_reverse_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 cached_reverse_iterator(Iterator it, Iterator begin, Iterator end) :
         _iterator{ std::move(it) },
         _prev_it{ _iterator },

@@ -67,7 +67,7 @@ class cartesian_product_iterable : public lazy_view {
     }
 
     static constexpr std::size_t tuple_size = sizeof...(Iterables);
-    using is = std::make_index_sequence<tuple_size>;
+    using is = make_index_sequence<tuple_size>;
 
 public:
     using iterator =
@@ -75,6 +75,20 @@ public:
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr cartesian_product_iterable()
+        requires(std::default_initializable<Iterables> && ...)
+    = default;
+
+#else
+
+    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr cartesian_product_iterable() {
+    }
+
+#endif
 
     template<class... Is>
     LZ_CONSTEXPR_CXX_14 cartesian_product_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {

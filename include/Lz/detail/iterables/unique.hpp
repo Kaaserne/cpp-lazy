@@ -20,6 +20,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr unique_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterable,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr unique_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr unique_iterable(I&& iterable, BinaryPredicate compare) :
         _iterable{ std::forward<I>(iterable) },

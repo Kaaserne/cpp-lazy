@@ -86,7 +86,20 @@ public:
         _end{ std::move(end) } {
     }
 
-    constexpr flatten_wrapper() = default;
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr flatten_wrapper()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr flatten_wrapper() {
+    }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
         _iterator = _end;
@@ -178,6 +191,21 @@ class flatten_wrapper<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
     using traits = std::iterator_traits<Iterator>;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr flatten_wrapper()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr flatten_wrapper() {
+    }
+
+#endif
+
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
     using value_type = typename traits::value_type;
@@ -312,6 +340,22 @@ private:
     this_inner _inner_iter;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr flatten_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<this_inner>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<this_inner>::value>>
+    constexpr flatten_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 flatten_iterator(Iterator it, Iterator begin, S end) :
         _outer_iter{ std::move(it), std::move(begin), std::move(end) } {
         if (_outer_iter.has_next()) {
@@ -500,6 +544,21 @@ class flatten_iterator<Iterator, S, 0>
     using traits = std::iterator_traits<Iterator>;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr flatten_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr flatten_iterator() {
+    }
+
+#endif
+
     using pointer = typename traits::pointer;
     using reference = typename traits::reference;
     using value_type = typename traits::value_type;

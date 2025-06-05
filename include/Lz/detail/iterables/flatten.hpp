@@ -80,6 +80,20 @@ public:
     using const_iterator = iterator;
     using value_type = typename flatten_iterator<inner_iter, inner_sentinel, 0>::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr flatten_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr flatten_iterable() {
+    }
+
+#endif
+
     template<class I>
     LZ_CONSTEXPR_CXX_14 flatten_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }

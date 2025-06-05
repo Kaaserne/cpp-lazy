@@ -21,6 +21,21 @@ class generate_while_iterator
     fn_return_type _last_returned{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr generate_while_iterator()
+        requires std::default_initializable<GeneratorFunc> && std::default_initializable<fn_return_type>
+    = default;
+
+#else
+
+    template<class G = GeneratorFunc,
+             class = enable_if<std::is_default_constructible<G>::value && std::is_default_constructible<fn_return_type>::value>>
+    constexpr generate_while_iterator() {
+    }
+
+#endif
+
     using reference = tup_element<1, fn_return_type>;
     using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;

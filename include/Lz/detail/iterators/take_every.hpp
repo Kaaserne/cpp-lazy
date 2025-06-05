@@ -32,6 +32,21 @@ public:
     std::size_t _offset;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_every_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr take_every_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, S end, const std::size_t offset) :
         _iterator{ std::move(it) },
         _end{ std::move(end) },
@@ -87,6 +102,21 @@ public:
     std::size_t _distance{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_every_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr take_every_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, S end, const std::size_t offset, const std::size_t distance) :
         _iterator{ std::move(it) },
         _end{ std::move(end) },
@@ -152,6 +182,21 @@ public:
     std::size_t _offset{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_every_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr take_every_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, Iterator begin, S end, const std::size_t offset) :
         _begin{ std::move(begin) },
         _iterator{ std::move(it) },

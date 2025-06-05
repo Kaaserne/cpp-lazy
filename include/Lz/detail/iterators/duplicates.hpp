@@ -24,6 +24,7 @@ public:
     using reference = std::pair<typename traits::reference, std::size_t>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+    using iterator_category = std::bidirectional_iterator_tag;
 
 private:
     Iterator _begin;
@@ -40,6 +41,23 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr duplicates_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr duplicates_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator it, Iterator begin, S end, BinaryPredicate compare) :
         _begin{ std::move(begin) },
         _last{ std::move(it) },
@@ -126,6 +144,23 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr duplicates_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr duplicates_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator it, Iterator begin, S end, BinaryPredicate compare) :
         _begin{ std::move(begin) },
         _last{ std::move(it) },
@@ -213,6 +248,23 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr duplicates_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr duplicates_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 duplicates_iterator(Iterator begin, S end, BinaryPredicate compare) :
         _last{ std::move(begin) },
         _first{ std::move(_last) },

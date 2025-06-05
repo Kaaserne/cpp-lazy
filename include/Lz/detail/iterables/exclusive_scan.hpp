@@ -3,6 +3,7 @@
 #ifndef LZ_EXCLUSIVE_SCAN_ITERABLE_HPP
 #define LZ_EXCLUSIVE_SCAN_ITERABLE_HPP
 
+#include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/exclusive_scan.hpp>
 #include <Lz/detail/ref_or_view.hpp>
 #include <Lz/detail/traits.hpp>
@@ -12,12 +13,28 @@ namespace detail {
 template<class Iterable, class T, class BinaryOp>
 class exclusive_scan_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    T _init;
-    BinaryOp _binary_op;
+    T _init{};
+    func_container<BinaryOp> _binary_op;
 
 public:
-    using iterator = exclusive_scan_iterator<iter_t<Iterable>, sentinel_t<Iterable>, T, BinaryOp>;
+    using iterator = exclusive_scan_iterator<iter_t<Iterable>, sentinel_t<Iterable>, T, func_container<BinaryOp>>;
     using const_iterator = iterator;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr exclusive_scan_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<T> && std::default_initializable<BinaryOp>
+    = default;
+
+#else
+
+    template<class I = Iterable,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
+                               std::is_default_constructible<BinaryOp>::value>>
+    constexpr exclusive_scan_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr exclusive_scan_iterable(I&& iterable, T init, BinaryOp binary_op) :

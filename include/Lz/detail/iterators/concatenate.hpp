@@ -249,6 +249,20 @@ private:
 #endif // LZ_HAS_CXX_17
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr concatenate_iterator()
+        requires std::default_initializable<IterTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr concatenate_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 concatenate_iterator(IterTuple iterators, IterTuple begin, SentinelTuple end) :
         _iterators{ std::move(iterators) },
         _begin{ std::move(begin) },

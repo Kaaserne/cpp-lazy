@@ -29,7 +29,7 @@ private:
     Iterator _iterator;
     Iterable _to_except;
     S _end;
-    BinaryPredicate _predicate;
+    mutable BinaryPredicate _predicate;
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;
@@ -43,6 +43,24 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr except_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<Iterable> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<Iterable>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr except_iterator() {
+    }
+
+#endif
+
     template<class I>
     LZ_CONSTEXPR_CXX_14 except_iterator(Iterator begin, S end, I&& to_except, BinaryPredicate compare) :
         _iterator{ std::move(begin) },
@@ -103,7 +121,7 @@ private:
     Iterable _to_except;
     diff_iterable _size{};
     S _end;
-    BinaryPredicate _predicate;
+    mutable BinaryPredicate _predicate;
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;
@@ -116,6 +134,24 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr except_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<Iterable> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<Iterable>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr except_iterator() {
+    }
+
+#endif
+
     template<class I>
     LZ_CONSTEXPR_CXX_14 except_iterator(Iterator begin, S end, I&& to_except, BinaryPredicate predicate) :
         _iterator{ std::move(begin) },

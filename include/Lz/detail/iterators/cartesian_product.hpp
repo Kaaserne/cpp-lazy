@@ -190,6 +190,19 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr cartesian_product_iterator()
+        requires std::default_initializable<IterTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr cartesian_product_iterator() {
+    }
+
+#endif
     LZ_CONSTEXPR_CXX_14
     cartesian_product_iterator(IterTuple iterators, IterTuple begin, STuple end) :
         _begin{ std::move(begin) },

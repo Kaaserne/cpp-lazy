@@ -12,7 +12,7 @@ namespace detail {
 template<class Iterable, class IntType>
 class enumerate_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    IntType _start;
+    IntType _start{};
 
     IntType get_last_index() const {
         return _start + static_cast<IntType>(lz::eager_size(_iterable));
@@ -23,6 +23,20 @@ public:
     using const_iterator = iterator;
     using sentinel = typename iterator::sentinel;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr enumerate_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr enumerate_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr enumerate_iterable(I&& iterable, const IntType start = 0) : _iterable{ iterable }, _start{ start } {

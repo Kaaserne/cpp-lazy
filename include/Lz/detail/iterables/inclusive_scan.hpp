@@ -14,13 +14,29 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 template<class Iterable, class T, class BinaryOp>
 class inclusive_scan_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    T _init;
+    T _init{};
     func_container<BinaryOp> _binary_op;
 
 public:
     using iterator = inclusive_scan_iterator<iter_t<Iterable>, sentinel_t<Iterable>, T, func_container<BinaryOp>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr inclusive_scan_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<T> && std::default_initializable<BinaryOp>
+    = default;
+
+#else
+
+    template<class I = Iterable,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
+                               std::is_default_constructible<BinaryOp>::value>>
+    constexpr inclusive_scan_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr inclusive_scan_iterable(I&& iterable, T init, BinaryOp binary_op) :

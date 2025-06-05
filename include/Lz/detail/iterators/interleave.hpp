@@ -158,6 +158,20 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr interleave_iterator()
+        requires std::default_initializable<IterTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr interleave_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 interleave_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
         static_assert(tuple_size > 1, "interleaved_iterator must have at least two iterators");
     }

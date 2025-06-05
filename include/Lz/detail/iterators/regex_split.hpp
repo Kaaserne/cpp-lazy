@@ -31,6 +31,20 @@ private:
     RegexTokenIter _current;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr regex_split_iterator()
+        requires std::default_initializable<RegexTokenIter>
+    = default;
+
+#else
+
+    template<class R = RegexTokenIter, class = enable_if<std::is_default_constructible<R>::value>>
+    constexpr regex_split_iterator() {
+    }
+
+#endif
+
     regex_split_iterator(RegexTokenIter first, RegexTokenSentinel last) : _current{ std::move(first) } {
         while (_current != last && _current->length() == 0) {
             ++_current;

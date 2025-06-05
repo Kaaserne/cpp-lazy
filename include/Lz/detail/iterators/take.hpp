@@ -25,6 +25,20 @@ private:
     std::size_t _n{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr n_take_iterator()
+        requires std::default_initializable<Iterator>
+    = default;
+
+#else
+
+    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr n_take_iterator() {
+    }
+
+#endif
+
     constexpr n_take_iterator(Iterator it, const std::size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
@@ -86,6 +100,20 @@ private:
     Iterator _iterator;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr bounded_take_iterator()
+        requires std::default_initializable<Iterator>
+    = default;
+
+#else
+
+    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr bounded_take_iterator() {
+    }
+
+#endif
+
     constexpr bounded_take_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 

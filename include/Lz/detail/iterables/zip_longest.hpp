@@ -25,6 +25,20 @@ public:
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr zip_longest_iterable()
+        requires(std::default_initializable<Iterables> && ...)
+    = default;
+
+#else
+
+    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr zip_longest_iterable() {
+    }
+
+#endif
+
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
         return std::max({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });

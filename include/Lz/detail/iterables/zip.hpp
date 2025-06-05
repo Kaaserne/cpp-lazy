@@ -40,8 +40,22 @@ public:
 
 private:
     using seq = make_index_sequence<sizeof...(Iterables)>;
-
+// TODO add test bloat size with Release debug symbols
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr zip_iterable()
+        requires(std::default_initializable<Iterables> && ...)
+    = default;
+
+#else
+
+    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr zip_iterable() {
+    }
+
+#endif
+
     template<class... Is>
     LZ_CONSTEXPR_CXX_14 zip_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }

@@ -11,14 +11,28 @@ namespace detail {
 template<class Iterable>
 class exclude_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    diff_iterable_t<Iterable> _from;
-    diff_iterable_t<Iterable> _to;
+    diff_iterable_t<Iterable> _from{};
+    diff_iterable_t<Iterable> _to{};
 
 public:
     using iterator = exclude_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr exclude_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr exclude_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr exclude_iterable(I&& iterable, const diff_iterable_t<Iterable> from, const diff_iterable_t<Iterable> to) :

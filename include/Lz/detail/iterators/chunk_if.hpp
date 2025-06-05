@@ -35,6 +35,23 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunk_if_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr chunk_if_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 chunk_if_iterator(Iterator begin, S end, UnaryPredicate predicate, bool is_empty) :
         _sub_range_begin{ std::move(begin) },
         _sub_range_end{ _sub_range_begin },

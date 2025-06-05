@@ -39,6 +39,20 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr concatenate_iterable()
+        requires(std::default_initializable<Iterables> && ...)
+    = default;
+
+#else
+
+    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr concatenate_iterable() {
+    }
+
+#endif
+
     template<class... Is>
     LZ_CONSTEXPR_CXX_14 concatenate_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }

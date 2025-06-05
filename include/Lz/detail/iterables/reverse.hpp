@@ -21,6 +21,20 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr reverse_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr reverse_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }

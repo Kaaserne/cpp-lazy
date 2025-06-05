@@ -14,13 +14,27 @@ class repeat_iterable;
 
 template<class T>
 class repeat_iterable<false, T> : public lazy_view {
-    T _value;
-    std::size_t _amount;
+    T _value{};
+    std::size_t _amount{};
 
 public:
     using iterator = repeat_iterator<false, T>;
     using const_iterator = iterator;
     using value_type = T;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr repeat_iterable()
+        requires std::default_initializable<T>
+    = default;
+
+#else
+
+    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    constexpr repeat_iterable() {
+    }
+
+#endif
 
     constexpr repeat_iterable(T value, const std::size_t amount) : _value{ std::move(value) }, _amount{ amount } {
     }

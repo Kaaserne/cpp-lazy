@@ -25,6 +25,21 @@ public:
     using const_iterator = iterator;
     using value_type = val_iterable_t<Iterable>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr drop_while_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterable,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr drop_while_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _iterable{ iterable },

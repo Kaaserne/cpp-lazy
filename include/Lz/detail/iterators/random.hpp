@@ -29,6 +29,20 @@ private:
     std::size_t _current{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr random_iterator()
+        requires std::default_initializable<Distribution>
+    = default;
+
+#else
+
+    template<class D = Distribution, class = enable_if<std::is_default_constructible<D>::value>>
+    constexpr random_iterator() {
+    }
+
+#endif
+
     constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::size_t current) :
         _distribution{ distribution },
         _generator{ std::addressof(generator) },

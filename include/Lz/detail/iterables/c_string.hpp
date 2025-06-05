@@ -17,6 +17,8 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+    constexpr c_string_iterable() noexcept = default;
+
     constexpr c_string_iterable(C* begin) noexcept : _begin{ begin } {
     }
 

@@ -23,13 +23,30 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>
 
     Iterator _iterator;
     S _end;
-    BinaryPredicate _predicate;
+    mutable BinaryPredicate _predicate;
 
 public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr unique_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr unique_iterator() {
+    }
+
+#endif
 
     constexpr unique_iterator(Iterator begin, S end, BinaryPredicate binary_predicate) :
         _iterator{ std::move(begin) },
@@ -78,7 +95,7 @@ class unique_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator>:
 
     Iterator _begin{};
     Iterator _iterator{};
-    Iterator _end{};
+    S _end{};
     BinaryPredicate _predicate{};
 
 public:
@@ -87,7 +104,24 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    constexpr unique_iterator(Iterator it, Iterator begin, Iterator end, BinaryPredicate compare) :
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr unique_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr unique_iterator() {
+    }
+
+#endif
+
+    constexpr unique_iterator(Iterator it, Iterator begin, S end, BinaryPredicate compare) :
         _begin{ std::move(begin) },
         _iterator{ std::move(it) },
         _end{ std::move(end) },

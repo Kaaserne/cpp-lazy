@@ -20,7 +20,7 @@ struct dimensions;
  * ```
  * @tparam Iterable The iterable type to get the dimensions of.
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
+template<class Iterable>
 struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> : detail::count_dims<Iterable> {};
 
 /**
@@ -32,7 +32,7 @@ struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> 
  * ```
  * @tparam Iterable The iterable type to get the dimensions of.
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
+template<class Iterable>
 struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
     : std::integral_constant<std::size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
 
@@ -49,7 +49,7 @@ struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
  * ```
  * @tparam Iterable The iterable type to get the dimensions of.
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
+template<class Iterable>
 inline constexpr std::size_t dimensions_v = dimensions<Iterable>::value;
 
 #endif
@@ -77,7 +77,10 @@ struct flatten_adaptor {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     flatten_iterable<remove_ref<Iterable>, dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>
     operator()(Iterable&& iterable) const {
-        static_assert(std::is_default_constructible<iter_t<Iterable>>::value, "underlying iterator needs to be default constructible");
+        using it = iter_t<Iterable>;
+        static_assert(std::is_default_constructible<it>::value, "underlying iterator needs to be default constructible");
+        static_assert(std::is_copy_assignable<it>::value || std::is_move_assignable<it>::value,
+                      "underling iterator needs to be copy or move assignable");
         return { std::forward<Iterable>(iterable) };
     }
 

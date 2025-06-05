@@ -23,6 +23,23 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr except_iterable()
+        requires std::default_initializable<Iterable1> && std::default_initializable<Iterable2> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterable1,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr except_iterable() {
+    }
+
+#endif
+
     template<class I1, class I2>
     constexpr except_iterable(I1&& iterable1, I2&& iterable2, BinaryPredicate binary_predicate) :
         _iterable1{ iterable1 },

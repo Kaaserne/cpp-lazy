@@ -18,6 +18,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename RegexTokenIter::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr regex_split_iterable()
+        requires std::default_initializable<RegexTokenIter> && std::default_initializable<RegexTokenSentinel>
+    = default;
+
+#else
+
+    template<class I = RegexTokenIter, class = enable_if<std::is_default_constructible<I>::value &&
+                                                         std::is_default_constructible<RegexTokenSentinel>::value>>
+    constexpr regex_split_iterable() {
+    }
+
+#endif
+
     constexpr regex_split_iterable(RegexTokenIter begin, RegexTokenSentinel end) :
         _begin{ std::move(begin) },
         _end{ std::move(end) } {
