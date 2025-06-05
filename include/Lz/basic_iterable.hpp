@@ -620,7 +620,7 @@ LZ_MODULE_EXPORT_SCOPE_END
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-template<LZ_CONCEPT_ITERABLE Iterable, class Adaptor>
+template<class Iterable, class Adaptor>
 constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
     -> lz::detail::enable_if<lz::detail::is_adaptor<lz::detail::remove_cvref<Adaptor>>::value &&
                                  lz::detail::is_iterable<Iterable>::value,
