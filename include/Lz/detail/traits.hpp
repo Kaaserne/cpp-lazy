@@ -38,7 +38,7 @@ template<class>
 using void_t = void;
 
 template<bool B>
-struct enable_if_impl;
+struct enable_if_impl {};
 
 template<>
 struct enable_if_impl<true> {
