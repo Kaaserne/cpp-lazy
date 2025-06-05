@@ -32,6 +32,7 @@ add_subdirectory(c_string)
 add_executable(cpp-lazy-tests
 	algorithm.cpp
 	any_iterable.cpp
+	as_iterator.cpp
 	cached_size.cpp
 	cartesian_product.cpp
 	piping.cpp
