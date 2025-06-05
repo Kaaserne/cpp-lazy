@@ -3,11 +3,12 @@
 #ifndef LZ_REVERSE_ADAPTOR_HPP
 #define LZ_REVERSE_ADAPTOR_HPP
 
+#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/reverse.hpp>
 
 namespace lz {
 namespace detail {
-// TODO can we get rid of the Cached template parameter?
+
 template<bool Cached>
 struct reverse_adaptor {
     using adaptor = reverse_adaptor;
@@ -26,7 +27,7 @@ struct reverse_adaptor {
      * @param iterable The iterable to reverse.
      * @return A (cached_)reverse_iterable object that can be used to iterate over the reversed iterable.
      */
-    template<class Iterable>
+    template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
     LZ_NODISCARD constexpr reverse_iterable<remove_ref<Iterable>, Cached> operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
