@@ -7,16 +7,16 @@
 #include <Lz/detail/ref_or_view.hpp>
 #include <Lz/detail/traits.hpp>
 #include <tuple>
-// TODO add as_iterator
+
 namespace lz {
 namespace detail {
 
 template<class Tuple>
 struct first_it_helper;
 
-template<class... Iterators>
-struct first_it_helper<std::tuple<Iterators...>> {
-    using type = tup_element<0, std::tuple<Iterators...>>;
+template<class Iterator, class... Iterators>
+struct first_it_helper<std::tuple<Iterator, Iterators...>> {
+    using type = Iterator;
 };
 
 template<class Iterator, std::size_t N>
