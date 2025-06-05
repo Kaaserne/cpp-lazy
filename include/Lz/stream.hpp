@@ -83,11 +83,12 @@ struct iterable_formatter {
 #else // ^^ LZ_STANDALONE - vv !LZ_STANDALONE
 
         std::ostream_iterator<char> out_it(stream);
-        std::format_to(out_it, format, *it);
+        std::vformat_to(out_it, format, std::make_format_args(*it));
+        auto sep = std::make_format_args(separator);
 
         for (++it; it != end; ++it) {
-            std::format_to(out_it, "{}", separator);
-            std::format_to(out_it, format, *it);
+            std::vformat_to(out_it, "{}", sep);
+            std::vformat_to(out_it, format, std::make_format_args(*it));
         }
 
 #endif // !LZ_STANDALONE
@@ -110,14 +111,14 @@ struct iterable_formatter {
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     std::ostream& operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
-        auto begin = std::begin(iterable);
+        auto it = std::begin(iterable);
         auto end = std::end(iterable);
-        if (begin == end) {
+        if (it == end) {
             return stream;
         }
-        stream << *begin;
-        for (++begin; begin != end; ++begin) {
-            stream << separator << *begin;
+        stream << *it;
+        for (++it; it != end; ++it) {
+            stream << separator << *it;
         }
 
         return stream;
@@ -245,24 +246,21 @@ struct iterable_formatter {
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-        auto begin = std::begin(iterable);
+        auto it = std::begin(iterable);
         auto end = std::end(iterable);
-        if (begin == end) {
+        if (it == end) {
             return "";
         }
 
         std::string result;
         auto back_inserter = std::back_inserter(result);
 
-        std::vformat_to(back_inserter, format, std::make_format_args(*begin));
-        ++begin;
+        std::vformat_to(back_inserter, format, std::make_format_args(*it));
+        auto sep = std::make_format_args(separator);
 
-        std::string_view fmt{ format };
-        std::string_view sep{ separator };
-
-        for (; begin != end; ++begin) {
+        for (++it; it != end; ++it) {
             std::vformat_to(back_inserter, "{}", sep);
-            std::vformat_to(back_inserter, fmt, std::make_format_args(*begin));
+            std::vformat_to(back_inserter, format, std::make_format_args(*it));
         }
 
         return result;
