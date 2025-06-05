@@ -3,6 +3,7 @@
 #include <Lz/split.hpp>
 #include <Lz/stream.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 
 TEST_CASE("Formatting and compile tests") {
     SECTION("Compile test") {

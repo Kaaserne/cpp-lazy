@@ -3,6 +3,7 @@
 #ifndef LZ_MAP_HPP
 #define LZ_MAP_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/map.hpp>
 
 namespace lz {

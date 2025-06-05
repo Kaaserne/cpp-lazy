@@ -3,6 +3,8 @@
 #ifndef LZ_UNIQUE_PTR_HPP
 #define LZ_UNIQUE_PTR_HPP
 
+#include <Lz/detail/compiler_checks.hpp>
+
 #ifdef LZ_HAS_CXX_14
 
 #include <memory>

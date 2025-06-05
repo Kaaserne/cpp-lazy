@@ -3,6 +3,7 @@
 #ifndef LZ_SLICE_HPP
 #define LZ_SLICE_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/slice.hpp>
 
 namespace lz {

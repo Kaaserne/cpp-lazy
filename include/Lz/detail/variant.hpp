@@ -8,7 +8,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/traits.hpp>
 
-#if defined(__cpp_lib_variant) && defined(LZ_HAS_CXX_17)
+#if defined(LZ_HAS_CXX_17) && LZ_HAS_INCLUDE(<variant>)
 
 #include <variant>
 

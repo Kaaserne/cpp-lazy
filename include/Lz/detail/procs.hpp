@@ -8,18 +8,19 @@
 #include <cstddef>
 #include <iterator>
 
+// clang-format off
 #if !defined(NDEBUG) || defined(LZ_DEBUG_ASSERTIONS)
-#define LZ_USE_DEBUG_ASSERTIONS
+  #define LZ_USE_DEBUG_ASSERTIONS
 #endif
 
 #if defined(LZ_USE_DEBUG_ASSERTIONS)
-#include <cstdio>
-#include <exception>
+  #include <cstdio>
+  #include <exception>
+  #if defined(LZ_HAS_CXX_23) && LZ_HAS_INCLUDE(<stacktrace>)
+    #include <stacktrace>
+  #endif
 #endif
-
-#if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>) && defined(LZ_USE_DEBUG_ASSERTIONS)
-#include <stacktrace>
-#endif
+// clang-format on
 
 namespace lz {
 namespace detail {

@@ -1,6 +1,7 @@
 #ifndef LZ_DUPLICATES_HPP
 #define LZ_DUPLICATES_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/duplicates.hpp>
 
 namespace lz {
