@@ -1,7 +1,7 @@
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
 #include <catch2/catch.hpp>
-// TODO add static_assert default constructors
+
 TEST_CASE("With sentinels") {
     SECTION("Equal to c_string") {
         auto cstr = lz::c_string("Hello, World!");
