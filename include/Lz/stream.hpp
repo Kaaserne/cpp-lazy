@@ -18,10 +18,10 @@
 #elif defined(LZ_HAS_FORMAT)
 
 #include <format>
+#include <sstream>
 
 #else
 
-#include <iostream>
 #include <sstream>
 
 #endif // !defined(LZ_STANDALONE)
@@ -82,12 +82,11 @@ struct iterable_formatter {
 
 #else // ^^ LZ_STANDALONE - vv !LZ_STANDALONE
 
-        std::ostream_iterator<char> out_it(stream);
+        std::ostreambuf_iterator<char> out_it(stream);
         std::vformat_to(out_it, format, std::make_format_args(*it));
-        auto sep = std::make_format_args(separator);
 
         for (++it; it != end; ++it) {
-            std::vformat_to(out_it, "{}", sep);
+            std::vformat_to(out_it, "{}", std::make_format_args(separator));
             std::vformat_to(out_it, format, std::make_format_args(*it));
         }
 
