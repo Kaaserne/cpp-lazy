@@ -20,6 +20,20 @@ public:
     using iterator = as_iterator_iterator<value_type, sentinel_t<Iterable>, IterCat>;
     using const_iterator = iterator;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr as_iterator_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr as_iterator_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr as_iterator_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
