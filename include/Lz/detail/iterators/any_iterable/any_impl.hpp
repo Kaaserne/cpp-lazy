@@ -28,6 +28,8 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
+    constexpr any_iterator_impl() = default;
+
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
@@ -79,6 +81,20 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterator_impl()
+        requires std::default_initializable<Iter>
+    = default;
+
+#else
+
+    template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr any_iterator_impl() noexcept(std::is_default_constructible<I>::value) {
+    }
+
+#endif
+
     constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
 
@@ -121,6 +137,20 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = DiffType;
     using iterator_category = std::bidirectional_iterator_tag;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterator_impl()
+        requires std::default_initializable<Iter>
+    = default;
+
+#else
+
+    template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr any_iterator_impl() noexcept(std::is_default_constructible<I>::value) {
+    }
+
+#endif
 
     constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
     }
@@ -168,6 +198,20 @@ public:
     using pointer = fake_ptr_proxy<Reference>;
     using difference_type = DiffType;
     using iterator_category = std::random_access_iterator_tag;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterator_impl()
+        requires std::default_initializable<Iter>
+    = default;
+
+#else
+
+    template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr any_iterator_impl() noexcept(std::is_default_constructible<I>::value) {
+    }
+
+#endif
 
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }

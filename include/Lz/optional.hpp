@@ -7,28 +7,30 @@
 #include <cstdint>
 #include <type_traits>
 
-#ifdef __cpp_lib_optional
+#ifdef LZ_HAS_CXX_17
 
 #include <optional>
 
-#else // ^^ __cpp_lib_optional vv !__cpp_lib_optional
+#else // LZ_HAS_CXX_17
 
 #include <Lz/detail/procs.hpp>
 #include <stdexcept>
 
-#endif // __cpp_lib_optional
+#endif // LZ_HAS_CXX_17
 
 namespace lz {
 
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
-#ifdef __cpp_lib_optional
+#ifdef LZ_HAS_CXX_17
+
 template<class T>
 using optional = std::optional<T>;
 
 using nullopt_t = std::nullopt_t;
 
 constexpr inline nullopt_t nullopt = std::nullopt;
+
 #else
 
 struct nullopt_t {
@@ -47,7 +49,7 @@ class optional {
         typename std::remove_const<T>::type _value;
         std::uint8_t _dummy;
     };
-    bool _has_value{false};
+    bool _has_value{ false };
 
     template<class U>
     void construct(U&& obj) noexcept(std::is_nothrow_constructible<T, U>::value) {
@@ -62,7 +64,7 @@ public:
     constexpr optional() noexcept : optional{ nullopt } {
     }
 
-    constexpr optional(nullopt_t) noexcept  {
+    constexpr optional(nullopt_t) noexcept {
     }
 
     constexpr optional(const T& value) : _value{ value }, _has_value{ true } {
@@ -103,12 +105,12 @@ public:
 
     ~optional() {
         if LZ_CONSTEXPR_IF (std::is_trivially_destructible<T>::value) {
-            _has_value = false;
             return;
         }
-        if (_has_value) {
-            _has_value = false;
-            _value.~T();
+        else {
+            if (_has_value) {
+                _value.~T();
+            }
         }
     }
 

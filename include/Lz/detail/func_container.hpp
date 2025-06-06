@@ -56,6 +56,20 @@ class func_container {
     Func _func;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr func_container()
+        requires std::default_initializable<Func>
+    = default;
+
+#else
+
+    template<class F = Func, class = enable_if<std::is_default_constructible<F>::value>>
+    constexpr func_container() {
+    }
+
+#endif
+
     explicit func_container(const Func& func) : _func(func) {
     }
 
@@ -81,7 +95,7 @@ public:
     }
 
     template<class... Args>
-    auto operator()(Args&&... args) const -> decltype(_func(std::forward<Args>(args)...)) {
+    constexpr auto operator()(Args&&... args) const& -> decltype(_func(std::forward<Args>(args)...)) {
 #ifndef LZ_HAS_CXX_17
 
         return invoke(_func, std::forward<Args>(args)...);
@@ -93,13 +107,25 @@ public:
     }
 
     template<class... Args>
-    auto operator()(Args&&... args) -> decltype(_func(std::forward<Args>(args)...)) {
+    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) & -> decltype(_func(std::forward<Args>(args)...)) {
 #ifndef LZ_HAS_CXX_17
 
         return invoke(_func, std::forward<Args>(args)...);
 #else
 
         return std::invoke(_func, std::forward<Args>(args)...);
+
+#endif
+    }
+
+    template<class... Args>
+    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) && -> decltype(_func(std::forward<Args>(args)...)) {
+#ifndef LZ_HAS_CXX_17
+
+        return invoke(std::move(_func), std::forward<Args>(args)...);
+#else
+
+        return std::invoke(std::move(_func), std::forward<Args>(args)...);
 
 #endif
     }

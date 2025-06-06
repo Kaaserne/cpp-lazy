@@ -21,6 +21,23 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr intersection_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<Iterable2> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr intersection_iterable() {
+    }
+
+#endif
+
     template<class I, class I2>
     constexpr intersection_iterable(I&& iterable, I2&& iterable2, BinaryPredicate compare) :
         _iterable{ std::forward<I>(iterable) },

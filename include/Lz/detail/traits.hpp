@@ -4,7 +4,7 @@
 #define LZ_TRAITS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <array> // tuple_element
+#include <array>
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
@@ -38,7 +38,7 @@ template<class>
 using void_t = void;
 
 template<bool B>
-struct enable_if_impl;
+struct enable_if_impl {};
 
 template<>
 struct enable_if_impl<true> {

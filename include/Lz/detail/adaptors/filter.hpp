@@ -23,6 +23,7 @@ struct filter_adaptor {
      * ```
      * @param iterable The iterable to filter
      * @param predicate The predicate to filter on
+     * @return A filter_iterable that will yield the filtered elements
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr filter_iterable<remove_ref<Iterable>, UnaryPredicate>
@@ -40,6 +41,7 @@ struct filter_adaptor {
      * auto filtered = vec | lz::filter([](int i) { return i % 2 == 0; }); // { 2, 4 }
      * ```
      * @param predicate The predicate to filter on
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class UnaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate predicate) const {

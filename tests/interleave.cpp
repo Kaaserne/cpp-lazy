@@ -24,6 +24,8 @@ TEST_CASE("Interleaved with sentinels permutations") {
 
     SECTION("Operator=") {
         lz::interleave_iterable<decltype(str3), decltype(str4)> interleaved_3_4 = lz::interleave(str3, str4);
+        using t2 = decltype(*interleaved_3_4.begin());
+        static_assert(std::is_same<t2, const char&>::value, "Should be const char&");
         auto it_3_4 = interleaved_3_4.begin();
         REQUIRE(it_3_4 == interleaved_3_4.begin());
         it_3_4 = interleaved_3_4.end();
@@ -128,6 +130,9 @@ TEST_CASE("Empty or one element") {
     SECTION("All empty") {
         std::vector<int> a, b, c;
         auto interleaved = lz::interleave(a, b, c);
+        using t = decltype(*interleaved.begin());
+        static_assert(std::is_same<t, int&>::value, "Should be int&");
+
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
         REQUIRE(!lz::has_one(interleaved));

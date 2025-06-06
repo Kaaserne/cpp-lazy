@@ -1,6 +1,5 @@
 #pragma once
 
-#include <utility>
 #ifndef LZ_CARTESIAN_PRODUCT_ITERABLE_HPP
 #define LZ_CARTESIAN_PRODUCT_ITERABLE_HPP
 
@@ -11,126 +10,120 @@
 
 namespace lz {
 namespace detail {
-template<class Iterable, class... Iterables>
+template<class... Iterables>
 class cartesian_product_iterable : public lazy_view {
-    ref_or_view<Iterable> _first_iterable;
-    std::tuple<ref_or_view<Iterables>...> _rest_iterables;
+    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
 
     template<std::size_t... Is>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<Is...>) const {
-        const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(_first_iterable)),
-                                      static_cast<std::size_t>(lz::size(std::get<Is>(_rest_iterables)))... };
+        const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(std::get<Is>(_iterables)))... };
         return std::accumulate(std::begin(sizes), std::end(sizes), std::size_t{ 1 }, std::multiplies<std::size_t>{});
     }
 
 #ifdef LZ_HAS_CXX_17
 
-    template<std::ptrdiff_t I, class Iterator, class... Iterators>
-    constexpr void init_iterators(Iterator& first_it, const std::tuple<Iterators...>& rest_it, bool& first_at_end) const {
+    template<std::ptrdiff_t I, class Iterators>
+    constexpr void init_iterators(Iterators& it, bool& first_at_end) const {
         if constexpr (I >= 0) {
-            const bool this_at_end = std::get<I>(rest_it) == std::end(std::get<I>(_rest_iterables));
+            const bool this_at_end = std::get<I>(it) == std::end(std::get<I>(_iterables));
             if (this_at_end && !first_at_end) {
-                first_it = std::end(_first_iterable);
+                std::get<0>(it) = std::end(std::get<0>(_iterables));
                 first_at_end = true;
+                return;
             }
-            init_iterators<I - 1>(first_it, rest_it, first_at_end);
+            init_iterators<I - 1>(it, first_at_end);
         }
     }
 
 #else
 
-    template<std::ptrdiff_t I, class Iterator, class... Iterators>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)>
-    init_iterators(Iterator& first_it, const std::tuple<Iterators...>& rest_it, bool& first_at_end) const {
-        const bool this_at_end = std::get<I>(rest_it) == std::end(std::get<I>(_rest_iterables));
+    template<std::ptrdiff_t I, class Iterators>
+    LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)> init_iterators(Iterators& it, bool& first_at_end) const {
+        const bool this_at_end = std::get<I>(it) == std::end(std::get<I>(_iterables));
         if (this_at_end && !first_at_end) {
-            first_it = std::end(_first_iterable);
+            std::get<0>(it) = std::end(std::get<0>(_iterables));
             first_at_end = true;
+            return;
         }
-        init_iterators<I - 1>(first_it, rest_it, first_at_end);
+        init_iterators<I - 1>(it, first_at_end);
     }
 
-    template<std::ptrdiff_t I, class Iterator, class... Iterators>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I < 0)> init_iterators(Iterator&, const std::tuple<Iterators...>&, bool&) const noexcept {
+    template<std::ptrdiff_t I, class Iterators>
+    LZ_CONSTEXPR_CXX_14 enable_if<(I < 0)> init_iterators(Iterators&, bool&) const noexcept {
     }
 
 #endif
 
     template<class Iterable2, std::size_t... Is>
-    static cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
-    concat_iterables(Iterable2&& iterable2, cartesian_product_iterable<Iterable, Iterables...>&& cartesian,
-                     index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(cartesian._first_iterable),
-                 std::move(std::get<Is>(cartesian._rest_iterables))... };
+    static cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, cartesian_product_iterable<Iterables...>&& cartesian, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(cartesian._iterables))... };
     }
 
     template<class Iterable2, std::size_t... Is>
-    static cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
-    concat_iterables(Iterable2&& iterable2, const cartesian_product_iterable<Iterable, Iterables...>& cartesian,
-                     index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), cartesian._first_iterable, std::get<Is>(cartesian._rest_iterables)... };
+    static cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, const cartesian_product_iterable<Iterables...>& cartesian, index_sequence<Is...>) {
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(cartesian._iterables)... };
     }
 
+    static constexpr std::size_t tuple_size = sizeof...(Iterables);
+    using is = make_index_sequence<tuple_size>;
+
 public:
-    using iterator = cartesian_product_iterator<std::tuple<iter_t<Iterable>, iter_t<Iterables>...>,
-                                                std::tuple<sentinel_t<Iterable>, sentinel_t<Iterables>...>>;
+    using iterator =
+        cartesian_product_iterator<maybe_homogeneous<iter_t<Iterables>...>, maybe_homogeneous<sentinel_t<Iterables>...>>;
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
-    template<class I, class... Is>
-    LZ_CONSTEXPR_CXX_14 cartesian_product_iterable(I&& first, Is&&... rest) :
-        _first_iterable{ std::forward<I>(first) },
-        _rest_iterables{ std::forward<Is>(rest)... } {
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr cartesian_product_iterable()
+        requires(std::default_initializable<Iterables> && ...)
+    = default;
+
+#else
+
+    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr cartesian_product_iterable() {
+    }
+
+#endif
+
+    template<class... Is>
+    LZ_CONSTEXPR_CXX_14 cartesian_product_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }
 
     template<class T = conjunction<sized<Iterables>...>>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
-        return size(make_index_sequence<sizeof...(Iterables)>{});
+        return size(is{});
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        auto first_it = std::begin(_first_iterable);
-        auto first_end = std::end(_first_iterable);
-
-        auto rest_it = begin_tuple(_rest_iterables);
-        auto end = end_tuple(_rest_iterables);
-        auto first_at_end = first_it == first_end;
-
-        init_iterators<static_cast<std::ptrdiff_t>(sizeof...(Iterables) - 1)>(first_it, rest_it, first_at_end);
-
-        return { std::tuple_cat(std::make_tuple(first_it), rest_it), std::tuple_cat(std::make_tuple(first_it), rest_it),
-                 std::tuple_cat(std::make_tuple(first_end), end) };
+        auto it = begin_maybe_homo(_iterables);
+        auto end = end_maybe_homo(_iterables);
+        auto first_at_end = std::get<0>(it) == std::get<0>(end);
+        init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
+        return { it, it, end };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        auto first_it = detail::begin(std::move(_first_iterable));
-        auto first_end = detail::end(std::move(_first_iterable));
-
-        auto rest_it = begin_tuple(std::move(_rest_iterables));
-        auto end = end_tuple(std::move(_rest_iterables));
-        auto first_at_end = first_it == first_end;
-
-        init_iterators<static_cast<std::ptrdiff_t>(sizeof...(Iterables) - 1)>(first_it, rest_it, first_at_end);
-
-        return { std::tuple_cat(std::make_tuple(first_it), rest_it), std::tuple_cat(std::make_tuple(first_it), rest_it),
-                 std::tuple_cat(std::make_tuple(first_end), end) };
+        auto it = begin_maybe_homo(std::move(_iterables));
+        auto end = end_maybe_homo(std::move(_iterables));
+        auto first_at_end = std::get<0>(it) == std::get<0>(end);
+        init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
+        return { it, it, end };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            auto first_it = std::end(_first_iterable);
-            auto first_end = std::end(_first_iterable);
-
-            auto rest_it = begin_tuple(_rest_iterables);
-            auto end = end_tuple(_rest_iterables);
-            // clang-format off
-            return iterator{ std::tuple_cat(std::make_tuple(first_it), rest_it), std::tuple_cat(std::make_tuple(first_it), rest_it),
-                             std::tuple_cat(std::make_tuple(first_end), end) };
-            // clang-format on
+            auto rest_it = begin_maybe_homo(_iterables);
+            auto end = end_maybe_homo(_iterables);
+            std::get<0>(rest_it) = std::get<0>(end);
+            return iterator{ rest_it, rest_it, end };
         }
         else {
             return sentinel{};
@@ -141,14 +134,10 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        auto first_it = std::end(_first_iterable);
-        auto first_end = std::end(_first_iterable);
-
-        auto rest_it = begin_tuple(_rest_iterables);
-        auto end = end_tuple(_rest_iterables);
-
-        return { std::tuple_cat(std::make_tuple(first_it), rest_it), std::tuple_cat(std::make_tuple(first_it), rest_it),
-                 std::tuple_cat(std::make_tuple(first_end), end) };
+        auto rest_it = begin_maybe_homo(_iterables);
+        auto end = end_maybe_homo(_iterables);
+        std::get<0>(rest_it) = std::get<0>(end);
+        return iterator{ rest_it, rest_it, end };
     }
 
     template<class I = typename iterator::iterator_category>
@@ -159,16 +148,15 @@ public:
 #endif
 
     template<class Iterable2>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
-    operator|(Iterable2&& iterable2, cartesian_product_iterable<Iterable, Iterables...>&& cartesian) {
-        return concat_iterables(std::forward<Iterable2>(iterable2), std::move(cartesian),
-                                make_index_sequence<sizeof...(Iterables)>());
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    operator|(Iterable2&& iterable2, cartesian_product_iterable<Iterables...>&& cartesian) {
+        return concat_iterables(std::forward<Iterable2>(iterable2), std::move(cartesian), is{});
     }
 
     template<class Iterable2>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterable, Iterables...>
-    operator|(Iterable2&& iterable2, const cartesian_product_iterable<Iterable, Iterables...>& cartesian) {
-        return concat_iterables(std::forward<Iterable2>(iterable2), cartesian, make_index_sequence<sizeof...(Iterables)>());
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    operator|(Iterable2&& iterable2, const cartesian_product_iterable<Iterables...>& cartesian) {
+        return concat_iterables(std::forward<Iterable2>(iterable2), cartesian, is{});
     }
 };
 

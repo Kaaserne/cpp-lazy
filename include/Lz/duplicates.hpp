@@ -1,15 +1,17 @@
 #ifndef LZ_DUPLICATES_HPP
 #define LZ_DUPLICATES_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/duplicates.hpp>
 
 namespace lz {
 
 /**
  * @brief This iterable returns a pair of each element in the iterable and the number of times it appears in the iterable.
- * `pair::first` is the element and `pair::second` is the count. The count is `std::size_t` and starts from 1. The iterator
- * category is min(bidirectional, input iterator category). Its end() function will return a sentinel if the input iterable is
- * forward. This iterable does not contain a .size() method. Example:
+ * `pair::first` is the element and `pair::second` is the count. The count is `std::size_t` and starts from 1. The input iterable
+ * needs to be sorted first in order to count the duplicates. The iterator category is min(bidirectional, input iterator
+ * category). Its end() function will return a sentinel if the input iterable is forward. This iterable does not contain a .size()
+ * method. Example:
  * ```cpp
  * std::vector<int> input{ 1, 2, 2, 3, 4, 4, 5 };
  * auto dupes = input | lz::duplicates; // { { 1, 1 }, { 2, 2 }, { 3, 1 }, { 4, 2 }, { 5, 1 } }

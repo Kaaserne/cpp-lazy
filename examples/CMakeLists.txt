@@ -9,6 +9,7 @@ FetchContent_MakeAvailable(cpp-lazy)
 set(examples
     algorithm
     any_iterable
+    as_iterator
     basic_iterable
     c_string
     cached_reverse

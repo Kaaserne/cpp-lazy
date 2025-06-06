@@ -37,9 +37,10 @@ struct cached_size_adaptor {
      * // iterable = { {0, {0, 2, 4}}, {1, {6, 8}} }
      * ```
      * @param iterable The iterable to cache the size of
+     * @return A cached_size_iterable object that can be used to iterate over the elements in the iterable with a cached size.
      */
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 cached_size_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr cached_size_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
         return { std::forward<Iterable>(iterable) };
     }
 };

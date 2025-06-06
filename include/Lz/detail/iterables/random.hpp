@@ -11,12 +11,26 @@ template<class Arithmetic, class Distribution, class Generator, bool UseSentinel
 class random_iterable : public lazy_view {
     Distribution _distribution;
     Generator* _generator{ nullptr };
-    std::size_t _current;
+    std::size_t _current{};
 
 public:
     using iterator = random_iterator<Arithmetic, Distribution, Generator, UseSentinel>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr random_iterable()
+        requires std::default_initializable<Distribution>
+    = default;
+
+#else
+
+    template<class D = Distribution, class = enable_if<std::is_default_constructible<D>::value>>
+    constexpr random_iterable() {
+    }
+
+#endif
 
     constexpr random_iterable(const Distribution& distribution, Generator& generator, const std::size_t current) :
         _distribution{ distribution },

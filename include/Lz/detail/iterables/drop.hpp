@@ -21,9 +21,23 @@ private:
     using diff = diff_type<iterator>;
 
     ref_or_view<Iterable> _iterable;
-    std::size_t _n;
+    std::size_t _n{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr drop_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr drop_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr drop_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }

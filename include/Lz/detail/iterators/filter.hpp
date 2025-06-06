@@ -35,9 +35,26 @@ public:
 private:
     Iterator _iterator;
     S _end;
-    mutable UnaryPredicate _predicate;
+    UnaryPredicate _predicate;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr filter_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr filter_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator it, Iterator begin, S end, UnaryPredicate up) :
         _iterator{ std::move(it) },
         _end{ std::move(end) },
@@ -101,6 +118,23 @@ private:
     mutable UnaryPredicate _predicate;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr filter_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr filter_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 filter_iterator(Iterator it, Iterator begin, S end, UnaryPredicate up) :
         _begin{ std::move(begin) },
         _iterator{ std::move(it) },

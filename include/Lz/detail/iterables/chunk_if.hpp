@@ -20,6 +20,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunk_if_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr chunk_if_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr chunk_if_iterable(I&& iterable, UnaryPredicate predicate) :
         _iterable{ iterable },

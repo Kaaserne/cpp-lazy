@@ -37,6 +37,21 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunks_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr chunks_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const std::size_t chunk_size) :
         _sub_range_begin{ it },
         _sub_range_end{ std::move(it) },

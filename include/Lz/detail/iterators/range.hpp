@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Lz/detail/compiler_checks.hpp"
-
-#include <type_traits>
 #ifndef LZ_RANGE_ITERATOR_HPP
 #define LZ_RANGE_ITERATOR_HPP
 
@@ -26,6 +23,8 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<Arithmetic>;
     using reference = Arithmetic;
+
+    constexpr range_iterator() noexcept = default;
 
     constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept : _index{ it }, _step{ step } {
     }

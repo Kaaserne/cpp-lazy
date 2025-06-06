@@ -25,6 +25,23 @@ public:
     using difference_type = typename traits::difference_type;
     using iterator_category = std::forward_iterator_tag;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr inclusive_scan_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<T> && std::default_initializable<BinaryOp> &&
+                     std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
+                               std::is_default_constructible<BinaryOp>::value && std::is_default_constructible<S>::value>>
+    constexpr inclusive_scan_iterator() {
+    }
+
+#endif
+
     constexpr inclusive_scan_iterator(Iterator it, S end, T init, BinaryOp bin_op) :
         _iterator{ std::move(it) },
         _reducer{ std::move(init) },

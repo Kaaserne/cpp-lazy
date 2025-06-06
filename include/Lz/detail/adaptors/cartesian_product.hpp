@@ -24,6 +24,7 @@ struct cartesian_product_adaptor {
      * auto product = a | lz::cartesian_product(b); // product = {{1, 3}, {1, 4}, {2, 3}, {2, 4}}
      * ```
      * @param iterables The iterables to perform the cartesian product on.
+     * @return A cartesian_product_iterable containing the cartesian product of the given iterables.
      */
     template<LZ_CONCEPT_ITERABLE... Iterables>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 cartesian_product_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {

@@ -26,6 +26,20 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr generate_iterator()
+        requires std::default_initializable<GeneratorFunc>
+    = default;
+
+#else
+
+    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    constexpr generate_iterator() {
+    }
+
+#endif
+
     constexpr generate_iterator(GeneratorFunc generator_func, const std::size_t amount) :
         _func{ std::move(generator_func) },
         _current{ amount } {
@@ -69,6 +83,20 @@ public:
     using value_type = decay_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr generate_iterator()
+        requires std::default_initializable<GeneratorFunc>
+    = default;
+
+#else
+
+    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    constexpr generate_iterator() {
+    }
+
+#endif
 
     constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
     }

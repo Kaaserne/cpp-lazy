@@ -184,7 +184,25 @@ private:
 
     using index_sequence_for_this = make_index_sequence<tup_size>;
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+        decompose(std::get<I>(_iterators) = std::get<I>(_end)...);
+    }
+
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr cartesian_product_iterator()
+        requires std::default_initializable<IterTuple>
+    = default;
+
+#else
+
+    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr cartesian_product_iterator() {
+    }
+
+#endif
     LZ_CONSTEXPR_CXX_14
     cartesian_product_iterator(IterTuple iterators, IterTuple begin, STuple end) :
         _begin{ std::move(begin) },
@@ -194,7 +212,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 cartesian_product_iterator& operator=(default_sentinel) {
-        _iterators = _end;
+        assign_sentinels(index_sequence_for_this{});
         return *this;
     }
 

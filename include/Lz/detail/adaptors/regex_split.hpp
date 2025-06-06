@@ -30,6 +30,7 @@ struct regex_split_adaptor {
      * ```
      * @param s The string to split
      * @param regex The regex to use to split the string with
+     * @return An iterable that can be used to iterate over the split strings
      */
     template<class String>
     LZ_NODISCARD regex_split_iterable<regex_it<String>, regex_it<String>>
@@ -50,6 +51,7 @@ struct regex_split_adaptor {
      * auto splitter = s | lz::regex_split(r1); // { "Hello,", "world!", "How", "are", "you?" }
      * ```
      * @param regex The regex to use to split the string with
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class CharT>
     LZ_NODISCARD fn_args_holder<adaptor, const std::basic_regex<CharT>&> operator()(const std::basic_regex<CharT>& regex) const {
@@ -71,6 +73,7 @@ struct regex_split_adaptor {
      * ```
      * @param first The first regex iterator
      * @param last The last regex iterator
+     * @return An iterable that can be used to iterate over the split strings
      */
     template<class RegexTokenIter, class RegexTokenSentinel>
     LZ_NODISCARD regex_split_iterable<RegexTokenIter, RegexTokenSentinel>

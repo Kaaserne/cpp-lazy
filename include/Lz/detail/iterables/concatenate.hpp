@@ -12,7 +12,7 @@ namespace detail {
 
 template<class... Iterables>
 class concatenate_iterable : public lazy_view {
-    std::tuple<ref_or_view<Iterables>...> _iterables;
+    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
 
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
@@ -35,9 +35,23 @@ class concatenate_iterable : public lazy_view {
     using is = make_index_sequence<sizeof...(Iterables)>;
 
 public:
-    using iterator = concatenate_iterator<std::tuple<iter_t<Iterables>...>, std::tuple<sentinel_t<Iterables>...>>;
+    using iterator = concatenate_iterator<maybe_homogeneous<iter_t<Iterables>...>, maybe_homogeneous<sentinel_t<Iterables>...>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr concatenate_iterable()
+        requires(std::default_initializable<Iterables> && ...)
+    = default;
+
+#else
+
+    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr concatenate_iterable() {
+    }
+
+#endif
 
     template<class... Is>
     LZ_CONSTEXPR_CXX_14 concatenate_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
@@ -49,19 +63,20 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { begin_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
+        return { begin_maybe_homo(_iterables), begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { begin_tuple(std::move(_iterables)), begin_tuple(std::move(_iterables)), end_tuple(std::move(_iterables)) };
+        return { begin_maybe_homo(std::move(_iterables)), begin_maybe_homo(std::move(_iterables)),
+                 end_maybe_homo(std::move(_iterables)) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ end_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
+            return iterator{ end_maybe_homo(_iterables), begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
         }
         else {
             return default_sentinel{};
@@ -72,7 +87,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { end_tuple(_iterables), begin_tuple(_iterables), end_tuple(_iterables) };
+        return { end_maybe_homo(_iterables), begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
     }
 
     template<class I = typename iterator::iterator_category>

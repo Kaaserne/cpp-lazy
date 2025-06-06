@@ -22,6 +22,7 @@ struct range_adaptor {
      * @param start The start of the range
      * @param end The end of the range (exclusive)
      * @param step The step of the range
+     * @return A range_iterable that can be used in range-based for loops or with other algorithms
      */
     template<class Arithmetic>
     LZ_NODISCARD constexpr range_iterable<Arithmetic>
@@ -37,6 +38,7 @@ struct range_adaptor {
      * auto range = lz::range(5); // {0, 1, 2, 3, 4} (T = int)
      * ```
      * @param end The end of the range (exclusive)
+     * @return A range_iterable that can be used in range-based for loops or with other algorithms
      */
     template<class Arithmetic>
     LZ_NODISCARD constexpr range_iterable<Arithmetic>

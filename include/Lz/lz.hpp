@@ -5,6 +5,7 @@
 
 #include <Lz/algorithm.hpp>
 #include <Lz/any_iterable.hpp>
+#include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/cartesian_product.hpp>
@@ -14,6 +15,7 @@
 #include <Lz/concatenate.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/drop_while.hpp>
+#include <Lz/duplicates.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/except.hpp>
 #include <Lz/exclude.hpp>

@@ -28,6 +28,21 @@ public:
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr map_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<UnaryOp>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
+    constexpr map_iterator() {
+    }
+
+#endif
+
     constexpr map_iterator(Iterator it, UnaryOp unary_op) :
         _iterator{ std::move(it) },
         _unary_op{ std::move(unary_op) } {

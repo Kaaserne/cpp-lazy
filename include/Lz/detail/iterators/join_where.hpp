@@ -59,6 +59,27 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr join_where_iterator()
+        requires std::default_initializable<IterA> && std::default_initializable<SA> && std::default_initializable<IterB> &&
+                     std::default_initializable<SB> && std::default_initializable<SelectorA> &&
+                     std::default_initializable<SelectorB> && std::default_initializable<ResultSelector>
+    = default;
+
+#else
+
+    template<
+        class I = IterA,
+        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SA>::value &&
+                          std::is_default_constructible<IterB>::value && std::is_default_constructible<SB>::value &&
+                          std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
+                          std::is_default_constructible<ResultSelector>::value>>
+    constexpr join_where_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_17
     join_where_iterator(IterA it_a, SA end_a, IterB it_b, SB end_b, SelectorA a, SelectorB b, ResultSelector result_selector) :
         _iterable{ std::move(it_b), std::move(end_b) },

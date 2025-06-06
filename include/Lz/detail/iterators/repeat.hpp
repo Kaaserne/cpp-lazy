@@ -25,6 +25,20 @@ public:
     using pointer = T*;
     using reference = T&;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr repeat_iterator()
+        requires std::default_initializable<T>
+    = default;
+
+#else
+
+    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    constexpr repeat_iterator() {
+    }
+
+#endif
+
     constexpr repeat_iterator(T to_repeat, const std::size_t start) : _to_repeat{ std::move(to_repeat) }, _amount{ start } {
     }
 
@@ -66,6 +80,20 @@ public:
     using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using reference = T&;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr repeat_iterator()
+        requires std::default_initializable<T>
+    = default;
+
+#else
+
+    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    constexpr repeat_iterator() {
+    }
+
+#endif
 
     constexpr repeat_iterator(T to_repeat) : _to_repeat{ std::move(to_repeat) } {
     }

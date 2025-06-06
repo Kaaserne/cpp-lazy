@@ -19,17 +19,20 @@ class ref_or_view_helper<Iterable, false> : public lazy_view {
 public:
     static constexpr bool holds_reference = true;
 
+    constexpr ref_or_view_helper() noexcept = default;
+
     template<class I>
     LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
-        static_assert(std::is_lvalue_reference<I>::value, "Cannot only bind to lvalues");
+        static_assert(std::is_lvalue_reference<I>::value, "Can only bind to lvalues. Check if you are passing a temporary "
+                                                          "object, or forgot to add/remove const/volatile qualifiers.");
     }
 
     template<class T, std::size_t N>
-    constexpr ref_or_view_helper(const T (&iterable)[N]) noexcept : _iterable_ref_ptr{ &iterable } {
+    constexpr ref_or_view_helper(const T (&iterable)[N]) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
     }
 
     template<class T, std::size_t N>
-    constexpr ref_or_view_helper(T (&iterable)[N]) noexcept : _iterable_ref_ptr{ &iterable } {
+    constexpr ref_or_view_helper(T (&iterable)[N]) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
     }
 
     template<class I>
@@ -79,6 +82,20 @@ class ref_or_view_helper<Iterable, true> : public lazy_view {
 
 public:
     static constexpr bool holds_reference = false;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr ref_or_view_helper()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr ref_or_view_helper() {
+    }
+
+#endif
 
     constexpr ref_or_view_helper(it&& iterable) : _iterable_value{ std::move(iterable) } {
     }

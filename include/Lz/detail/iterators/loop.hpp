@@ -32,6 +32,21 @@ public:
     using difference_type = typename traits::difference_type;
     using iterator_category = typename traits::iterator_category;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr loop_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr loop_iterator() {
+    }
+
+#endif
+
     constexpr loop_iterator(Iterator it, Iterator begin, S end, std::size_t amount) :
         _begin{ std::move(begin) },
         _iterator{ std::move(it) },
@@ -121,6 +136,21 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
     using iterator_category = typename traits::iterator_category;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr loop_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr loop_iterator() {
+    }
+
+#endif
 
     constexpr loop_iterator(Iterator begin, S end) : _iterator{ begin }, _begin{ std::move(begin) }, _end{ std::move(end) } {
     }

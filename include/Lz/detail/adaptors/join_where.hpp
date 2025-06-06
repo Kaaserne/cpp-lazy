@@ -33,6 +33,7 @@ struct join_where_adaptor {
      * @param b The selector for the second iterable, this is the value that will be compared with the first selector
      * @param result_selector The result selector, this is the value that will be returned when the join condition (`a(*iter_a) <
      * b(*iter_b)`) is met
+     * @return A join_where_iterable that can be used to iterate over the joined elements
      */
     template<LZ_CONCEPT_ITERABLE IterableA, LZ_CONCEPT_ITERABLE IterableB, class SelectorA, class SelectorB, class ResultSelector>
     LZ_NODISCARD constexpr join_where_iterable<remove_ref<IterableA>, remove_ref<IterableB>, SelectorA, SelectorB, ResultSelector>
@@ -67,6 +68,7 @@ struct join_where_adaptor {
      * @param b The selector for the second iterable, this is the value that will be compared with the first selector
      * @param result_selector The result selector, this is the value that will be returned when the join condition (`a(*iter_a) <
      * b(*iter_b)`) is met
+     * @return An adaptor that can be used in pipe expressions
      */
     template<LZ_CONCEPT_ITERABLE IterableB, class SelectorA, class SelectorB, class ResultSelector>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14

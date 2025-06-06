@@ -22,6 +22,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr rotate_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<inner_iter>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<inner_iter>::value>>
+    constexpr rotate_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr rotate_iterable(I&& iterable, const diff_type<inner_iter> start) :
         _iterable{ std::forward<I>(iterable) },

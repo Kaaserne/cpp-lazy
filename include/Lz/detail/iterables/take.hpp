@@ -20,9 +20,23 @@ public:
 
 private:
     Iterator _iterator;
-    std::size_t _n;
+    std::size_t _n{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_iterable()
+        requires std::default_initializable<Iterator>
+    = default;
+
+#else
+
+    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr take_iterable() {
+    }
+
+#endif
+
     constexpr take_iterable(Iterator it, const std::size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
@@ -68,7 +82,7 @@ public:
 template<class Iterable>
 class take_iterable<Iterable, enable_if<is_iterable<Iterable>::value>> : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    std::size_t _n;
+    std::size_t _n{};
 
     using inner_iter = iter_t<Iterable>;
     using inner_sentinel = sentinel_t<Iterable>;
@@ -81,6 +95,20 @@ public:
     using iterator = bounded_take_iterator<inner_iter, inner_sentinel>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr take_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr take_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {

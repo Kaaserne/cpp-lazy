@@ -33,6 +33,23 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<is_sentinel<Ite
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_while_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr take_while_iterator() {
+    }
+
+#endif
+
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;

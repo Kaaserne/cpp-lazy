@@ -26,6 +26,20 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr enumerate_iterator()
+        requires std::default_initializable<Iterator>
+    = default;
+
+#else
+
+    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr enumerate_iterator() {
+    }
+
+#endif
+
     constexpr enumerate_iterator(Iterator it, const Arithmetic start) : 
         _iterator{ std::move(it) },
         _index{ start } {

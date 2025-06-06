@@ -24,6 +24,7 @@ struct loop_adaptor {
      * auto looper = vec | lz::loop; // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
      * ```
      * @param iterable The iterable to loop over
+     * @return A loop_iterable that will loop over the input iterable infinitely.
      */
     template<class Iterable>
     LZ_NODISCARD constexpr
@@ -46,6 +47,7 @@ struct loop_adaptor {
      * ```
      * @param iterable The iterable to loop over
      * @param amount The amount of times to loop over the iterable
+     * @return A loop_iterable that will loop over the input iterable n times.
      */
     template<class Iterable>
     LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, false>
@@ -63,6 +65,7 @@ struct loop_adaptor {
      * ```
      * @param iterable The iterable to loop over
      * @param amount The amount of times to loop over the iterable
+     * @return An adaptor that can be used in pipe expressions
      */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t amount) const {
         return { amount };

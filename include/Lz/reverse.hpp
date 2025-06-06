@@ -24,9 +24,9 @@ LZ_INLINE_VAR constexpr detail::reverse_adaptor<false> reverse{};
 /**
  * @brief Reverses the iterable with a caching mechanism. Normally, the std::reverse_iterator uses an operator-- in its operator*
  * to access the previous element, which can be inefficient for some iterables such as iterables that traverses multiple elements
- * in its operator-- (such as `lz::filter` or `lz::take_every`). Say filter_iterator::operator-- traverses 10 elements to get
- * to the previous element, then this means 20 elements will be traversed when operator-- and operator* are called in a row. This
- * iterable prevents that by using a caching mechanism.
+ * in its operator-- (such as `lz::filter` or bidirectional `lz::take_every`). Say filter_iterator::operator-- traverses 10
+ * elements to get to the previous element, then this means 20 elements will be traversed when operator-- and operator* are called
+ * in a row. This iterable prevents that by using a caching mechanism.
  * ```cpp
  * std::vector<int> v = // very large vector ranging from 0 to 10.000.000
  * auto reversed_slow = v | lz::filter([](int i) { return i < 3; }) | lz::reverse; // Traverses 20.000.000 items.

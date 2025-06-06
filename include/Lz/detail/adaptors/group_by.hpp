@@ -24,6 +24,7 @@ struct group_by_adaptor {
      * ```
      * @param iterable The iterable to group by
      * @param binary_predicate The predicate to group by
+     * @return An iterable that groups elements by the given predicate
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate>
     LZ_NODISCARD constexpr group_by_iterable<remove_ref<Iterable>, BinaryPredicate>
@@ -42,6 +43,7 @@ struct group_by_adaptor {
      * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
      * ```
      * @param binary_predicate The predicate to group by
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class BinaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, decay_t<BinaryPredicate>>

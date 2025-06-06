@@ -23,6 +23,26 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr join_where_iterable()
+        requires std::default_initializable<IterableA> && std::default_initializable<IterableB> &&
+                     std::default_initializable<SelectorA> && std::default_initializable<SelectorB> &&
+                     std::default_initializable<ResultSelector>
+    = default;
+
+#else
+
+    template<
+        class I = decltype(_iterable_a),
+        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
+                          std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
+                          std::is_default_constructible<ResultSelector>::value>>
+    constexpr join_where_iterable() {
+    }
+
+#endif
+
     template<class I, class I2>
     constexpr join_where_iterable(I&& iterable, I2&& iterable2, SelectorA a, SelectorB b, ResultSelector result_selector) :
         _iterable_a{ std::forward<I>(iterable) },

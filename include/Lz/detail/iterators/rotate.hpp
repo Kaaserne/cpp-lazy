@@ -31,6 +31,21 @@ private:
     std::size_t _offset{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr rotate_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr rotate_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 rotate_iterator(Iterator begin, S end, Iterator start, const std::size_t offset) :
         _iterator{ std::move(start) },
         _begin{ std::move(begin) },

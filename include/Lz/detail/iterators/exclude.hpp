@@ -28,6 +28,20 @@ private:
     difference_type _to{};
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr exclude_iterator()
+        requires std::default_initializable<Iterator>
+    = default;
+
+#else
+
+    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr exclude_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_17
     exclude_iterator(Iterator begin, S end, const difference_type from, const difference_type to,
                      const difference_type start_index) :

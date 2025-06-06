@@ -28,6 +28,23 @@ public:
     using difference_type = diff_type<Iterator>;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr split_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<Iterator2> &&
+                     std::default_initializable<S2>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
+    constexpr split_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 split_iterator(Iterator begin, S end, Iterator2 begin2, S2 end2) :
         _sub_range_end{ begin, begin },
         _sub_range_begin{ std::move(begin) },
@@ -121,6 +138,22 @@ class split_single_iterator
     bool _ends_with_trailing{ true };
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr split_single_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<T>::value>>
+    constexpr split_single_iterator() {
+    }
+
+#endif
+
     using iterator_category = std::forward_iterator_tag;
     using value_type = ValueType;
     using reference = value_type;

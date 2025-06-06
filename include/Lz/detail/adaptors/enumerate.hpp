@@ -42,6 +42,7 @@ struct enumerate_adaptor {
      * combinations)
      * @param iterable The iterable to enumerate
      * @param start The start index of the enumeration
+     * @return An iterable that enumerates the elements of the input iterable
      */
     template<class Iterable, class IntType = int>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, enumerate_iterable<remove_ref<Iterable>, IntType>>
@@ -78,6 +79,7 @@ struct enumerate_adaptor {
      * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
      * combinations)
      * @param start The start index of the enumeration
+     * @return An adaptor that can be used with a pipe operator
      */
     template<class IntType = int>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_arithmetic<IntType>::value, fn_args_holder<adaptor, IntType>>

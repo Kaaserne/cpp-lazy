@@ -21,6 +21,20 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr loop_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr loop_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr loop_iterable(I&& iterable, const std::size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
     }
@@ -95,6 +109,20 @@ public:
     using iterator = loop_iterator<iter_t<Iterable>, sentinel_t<Iterable>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr loop_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr loop_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {

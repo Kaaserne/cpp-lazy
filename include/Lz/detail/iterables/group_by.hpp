@@ -20,6 +20,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr group_by_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr group_by_iterable() {
+    }
+
+#endif
+
     template<class I>
     LZ_CONSTEXPR_CXX_14 group_by_iterable(I&& iterable, BinaryPredicate binary_predicate) :
         _iterable{ std::forward<I>(iterable) },

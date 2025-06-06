@@ -14,12 +14,26 @@ class generate_iterable;
 template<class GeneratorFunc>
 class generate_iterable<GeneratorFunc, false> : public lazy_view {
     func_container<GeneratorFunc> _func;
-    std::size_t _amount;
+    std::size_t _amount{};
 
 public:
     using iterator = generate_iterator<func_container<GeneratorFunc>, false>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr generate_iterable()
+        requires std::default_initializable<GeneratorFunc>
+    = default;
+
+#else
+
+    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    constexpr generate_iterable() {
+    }
+
+#endif
 
     constexpr generate_iterable(GeneratorFunc func, const std::size_t amount) : _func{ std::move(func) }, _amount{ amount } {
     }
@@ -49,7 +63,21 @@ public:
     using iterator = generate_iterator<func_container<GeneratorFunc>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
-    
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr generate_iterable()
+        requires std::default_initializable<GeneratorFunc>
+    = default;
+
+#else
+
+    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    constexpr generate_iterable() {
+    }
+
+#endif
+
     constexpr generate_iterable(GeneratorFunc func) : _func{ std::move(func) } {
     }
 

@@ -29,6 +29,7 @@ struct concatenate_adaptor {
      * auto c = lz::concat(a, range); // yields by value, not by reference
      * ```
      * @param iterables The iterables to concatenate
+     * @return An iterable that yields the concatenated elements of the input iterables.
      */
     template<LZ_CONCEPT_ITERABLE... Iterables>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 concatenate_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {

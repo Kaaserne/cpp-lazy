@@ -21,8 +21,17 @@ TEST_CASE("Zip with sentinels") {
     SECTION("Operator=") {
         auto it = zip.begin();
         REQUIRE(it == zip.begin());
-        it = std::make_tuple(cstr.end(), cstr2.end());
+        using sentinel = decltype(zip.end());
+        it = sentinel{ cstr.end(), cstr2.end() };
         REQUIRE(it == zip.end());
+
+        std::vector<int> ints = { 1, 2, 3, 4 };
+        auto zipper = lz::zip(cstr, ints);
+        using sentinel2 = decltype(zipper.end());
+        auto it2 = zipper.begin();
+        REQUIRE(it2 == zipper.begin());
+        it2 = sentinel2{ cstr.end(), ints.end() };
+        REQUIRE(it2 == zipper.end());
     }
 }
 

@@ -9,7 +9,7 @@
 namespace lz {
 namespace detail {
 template<class Iterable, class BinaryPredicate>
-class duplicates_iterable : public lz::lazy_view {
+class duplicates_iterable : public lazy_view {
 public:
     using iterator = duplicates_iterator<iter_t<Iterable>, sentinel_t<Iterable>, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
@@ -20,6 +20,21 @@ private:
     func_container<BinaryPredicate> _compare;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr duplicates_iterable()
+        requires std::default_initializable<Iterable> && std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr duplicates_iterable() {
+    }
+
+#endif
+
     template<class I>
     constexpr duplicates_iterable(I&& iterable, BinaryPredicate compare) :
         _iterable{ std::forward<I>(iterable) },

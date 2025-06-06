@@ -31,6 +31,7 @@ struct except_adaptor {
      * @param iterable1 The iterable to except.
      * @param iterable2 The iterable that must be skipped in @p iterable1.
      * @param binary_predicate The binary predicate to use for comparison.
+     * @return An iterable that contains every item from @p iterable1 that is not in @p iterable2.
      */
     template<class Iterable1, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr 
@@ -57,6 +58,7 @@ struct except_adaptor {
      * ```
      * @param iterable2 The iterable that must be skipped in @p iterable1.
      * @param binary_predicate The binary predicate to use for comparison.
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
@@ -64,6 +66,7 @@ struct except_adaptor {
     operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }
+
     // clang-format on
 };
 } // namespace detail

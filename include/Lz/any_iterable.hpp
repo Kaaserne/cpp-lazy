@@ -42,6 +42,20 @@ private:
     it _end;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterable()
+        requires std::default_initializable<it>
+    = default;
+
+#else
+
+    template<class I = it, class = detail::enable_if<std::is_default_constructible<I>::value>>
+    constexpr any_iterable() {
+    }
+
+#endif
+
     /**
      * @brief Construct a new any_iterable object
      *

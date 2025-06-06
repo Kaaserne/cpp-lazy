@@ -10,15 +10,17 @@ namespace lz {
 namespace detail {
 template<class Arithmetic>
 class range_iterable : public lazy_view {
-    Arithmetic _start;
-    Arithmetic _end;
-    Arithmetic _step;
+    Arithmetic _start{};
+    Arithmetic _end{};
+    Arithmetic _step{};
 
 public:
     using iterator = range_iterator<Arithmetic>;
     using const_iterator = iterator;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using value_type = typename iterator::value_type;
+
+    constexpr range_iterable() noexcept = default;
 
     LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
         _start{ start },

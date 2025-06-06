@@ -22,6 +22,7 @@ struct map_adaptor {
      * ```
      * @param iterable The iterable to apply the function to
      * @param function The function to apply to each element in the iterable
+     * @return A map_iterable that applies the function to each element in the iterable
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class Function>
     constexpr map_iterable<remove_ref<Iterable>, Function> operator()(Iterable&& iterable, Function function) const {
@@ -37,6 +38,7 @@ struct map_adaptor {
      * auto map = vec | lz::map([](int i) { return i * 2; }); // map = { 2, 4, 6, 8, 10 }
      * ```
      * @param function The function to apply to each element in the iterable
+     * @return An adaptor that can be used in pipe expressions
      */
     template<class Function>
     LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, Function> operator()(Function&& function) const {

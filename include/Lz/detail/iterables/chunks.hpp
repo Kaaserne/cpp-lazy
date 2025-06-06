@@ -11,13 +11,27 @@ namespace detail {
 template<class Iterable>
 class chunks_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
-    std::size_t _chunk_size;
+    std::size_t _chunk_size{};
 
 public:
     using iterator = chunks_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunks_iterable()
+        requires std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr chunks_iterable() {
+    }
+
+#endif
 
     template<class I>
     constexpr chunks_iterable(I&& iterable, const std::size_t chunk_size) :

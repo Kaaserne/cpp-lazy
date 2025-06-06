@@ -56,6 +56,24 @@ public:
     using reference = typename iter_traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr intersection_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<Iterator2> && std::default_initializable<S> &&
+                     std::default_initializable<S2> && std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterator2>::value &&
+                               std::is_default_constructible<S>::value && std::is_default_constructible<S2>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr intersection_iterator() {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 intersection_iterator(Iterator it, S end, Iterator2 iterator2, S2 end2, BinaryPredicate compare) :
         _iterator{ std::move(it) },
         _iterator2{ std::move(iterator2) },
@@ -135,6 +153,24 @@ public:
     using difference_type = typename iter_traits::difference_type;
     using reference = typename iter_traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr intersection_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<Iterator2> && std::default_initializable<S> &&
+                     std::default_initializable<S2> && std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterator2>::value &&
+                               std::is_default_constructible<S>::value && std::is_default_constructible<S2>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr intersection_iterator() {
+    }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 
     intersection_iterator(Iterator it, Iterator begin, S end, Iterator2 iterator2, Iterator2 begin2, S2 end2, BinaryPredicate compare) :
