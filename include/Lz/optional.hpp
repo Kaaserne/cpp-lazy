@@ -49,7 +49,7 @@ class optional {
         typename std::remove_const<T>::type _value;
         std::uint8_t _dummy;
     };
-    bool _has_value{false};
+    bool _has_value{ false };
 
     template<class U>
     void construct(U&& obj) noexcept(std::is_nothrow_constructible<T, U>::value) {
@@ -64,7 +64,7 @@ public:
     constexpr optional() noexcept : optional{ nullopt } {
     }
 
-    constexpr optional(nullopt_t) noexcept  {
+    constexpr optional(nullopt_t) noexcept {
     }
 
     constexpr optional(const T& value) : _value{ value }, _has_value{ true } {
@@ -107,8 +107,10 @@ public:
         if LZ_CONSTEXPR_IF (std::is_trivially_destructible<T>::value) {
             return;
         }
-        if (_has_value) {
-            _value.~T();
+        else {
+            if (_has_value) {
+                _value.~T();
+            }
         }
     }
 
