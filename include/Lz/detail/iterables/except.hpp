@@ -32,7 +32,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable) 1,
+    template<class I = decltype(_iterable1),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr except_iterable() {

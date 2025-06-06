@@ -34,7 +34,7 @@ public:
 #else
 
     template<
-        class I = decltype(_iterable),
+        class I = decltype(_iterable_a),
         class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
                           std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
                           std::is_default_constructible<ResultSelector>::value>>
