@@ -30,7 +30,7 @@ public:
 
 #else
 
-    template<class I = Iterable,
+    template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<inner_iter>::value>>
     constexpr rotate_iterable() {
     }

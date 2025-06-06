@@ -31,7 +31,7 @@ public:
 
 #else
 
-    template<class I = Iterable,
+    template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value>>
     constexpr split_iterable() {
     }
@@ -71,7 +71,7 @@ public:
 
 #else
 
-    template<class I = Iterable,
+    template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value>>
     constexpr split_iterable() {
     }
