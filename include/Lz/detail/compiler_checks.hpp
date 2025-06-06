@@ -93,7 +93,7 @@
   #define LZ_MODULE_EXPORT_SCOPE_END
 #endif
 
-#if (LZ_HAS_INCLUDE(<format>)) && defined(LZ_HAS_CXX_20)
+#if defined(LZ_HAS_CXX_20) && defined(__cpp_lib_format) && (__cpp_lib_format >= 201907L)
   #define LZ_HAS_FORMAT
 #endif // format
 
