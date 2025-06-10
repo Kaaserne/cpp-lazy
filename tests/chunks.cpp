@@ -1,32 +1,12 @@
 #include <Lz/chunks.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/stream.hpp>
 #include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
 #include <list>
 #include <test_procs.hpp>
 #include <vector>
-
-TEST_CASE("Chunks changing and creating elements") {
-    std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7 };
-    lz::chunks_iterable<std::vector<int>> chunked = lz::chunks(v, 3);
-    auto it = chunked.begin();
-    std::vector<int> expected = { 1, 2, 3 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = { 4, 5, 6 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = { 7 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    REQUIRE(it == chunked.end());
-
-    it = chunked.begin();
-    REQUIRE(it != chunked.end());
-    it = chunked.end();
-    REQUIRE(it == chunked.end());
-}
 
 TEST_CASE("empty or one element chunks") {
     SECTION("Empty") {
@@ -58,153 +38,65 @@ TEST_CASE("Chunks binary operations random access") {
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
 
-    REQUIRE(uneven_chunksize_even_size.size() ==
-            static_cast<std::size_t>(lz::distance(uneven_chunksize_even_size.begin(), uneven_chunksize_even_size.end())));
-    REQUIRE(even_chunksize_even_size.size() ==
-            static_cast<std::size_t>(lz::distance(even_chunksize_even_size.begin(), even_chunksize_even_size.end())));
-    REQUIRE(uneven_chunksize_uneven_size.size() ==
-            static_cast<std::size_t>(lz::distance(uneven_chunksize_uneven_size.begin(), uneven_chunksize_uneven_size.end())));
-    REQUIRE(even_chunksize_uneven_size.size() ==
-            static_cast<std::size_t>(lz::distance(even_chunksize_uneven_size.begin(), even_chunksize_uneven_size.end())));
+    REQUIRE(lz::ssize(uneven_chunksize_even_size) ==
+            lz::distance(uneven_chunksize_even_size.begin(), uneven_chunksize_even_size.end()));
+    REQUIRE(lz::ssize(even_chunksize_even_size) ==
+            lz::distance(even_chunksize_even_size.begin(), even_chunksize_even_size.end()));
+    REQUIRE(lz::ssize(uneven_chunksize_uneven_size) ==
+            lz::distance(uneven_chunksize_uneven_size.begin(), uneven_chunksize_uneven_size.end()));
+    REQUIRE(lz::ssize(even_chunksize_uneven_size) ==
+            lz::distance(even_chunksize_uneven_size.begin(), even_chunksize_uneven_size.end()));
 
     static_assert(std::is_same<decltype(uneven_chunksize_even_size.begin()), decltype(uneven_chunksize_even_size.end())>::value,
                   "Should not be sentinel");
 
-    auto it = uneven_chunksize_even_size.begin();
-    auto it_end = uneven_chunksize_even_size.end();
-    auto it2 = even_chunksize_even_size.begin();
-    auto it_end2 = even_chunksize_even_size.end();
-
-    auto it3 = uneven_chunksize_uneven_size.begin();
-    auto it_end3 = uneven_chunksize_uneven_size.end();
-    auto it4 = even_chunksize_uneven_size.begin();
-    auto it_end4 = even_chunksize_uneven_size.end();
+    using iterable = typename decltype(uneven_chunksize_even_size)::value_type;
+    const auto equal_fn = [](iterable a, const auto& b) {
+        return lz::equal(a, b);
+    };
 
     SECTION("Operator++") {
-        std::vector<int> expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        expected = { 7, 8 };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        REQUIRE(it == uneven_chunksize_even_size.end());
+        std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(uneven_chunksize_even_size, expected, equal_fn));
 
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { 7, 8 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        REQUIRE(it2 == even_chunksize_even_size.end());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(even_chunksize_even_size, expected, equal_fn));
 
-        expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        REQUIRE(it3 == uneven_chunksize_uneven_size.end());
+        expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(uneven_chunksize_uneven_size, expected, equal_fn));
 
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        REQUIRE(it4 == even_chunksize_uneven_size.end());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(even_chunksize_uneven_size, expected, equal_fn));
     }
 
     SECTION("Operator--") {
-        --it_end;
-        std::vector<int> expected = { 7, 8 };
-        REQUIRE(lz::equal(*it_end, expected));
-        --it_end;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it_end, expected));
-        --it_end;
-        expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it_end, expected));
-        REQUIRE(it_end == uneven_chunksize_even_size.begin());
+        std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(uneven_chunksize_even_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
-        --it_end2;
-        expected = { 7, 8 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        --it_end2;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        --it_end2;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        --it_end2;
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        REQUIRE(it2 == even_chunksize_even_size.begin());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(even_chunksize_even_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
-        --it_end3;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it_end3, expected));
-        --it_end3;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it_end3, expected));
-        --it_end3;
-        expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it_end3, expected));
-        REQUIRE(it_end3 == uneven_chunksize_uneven_size.begin());
+        expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(uneven_chunksize_uneven_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
-        --it_end4;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        --it_end4;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        --it_end4;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        --it_end4;
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        REQUIRE(it_end4 == even_chunksize_uneven_size.begin());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(even_chunksize_uneven_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
     }
 
     SECTION("Operator+") {
         std::vector<std::vector<int>> expected;
 
         expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
-        using t1 = decltype(*uneven_chunksize_even_size.begin());
-        using t2 = std::vector<int>;
-
-        const auto cmp = [](const t1& a, const t2& b) {
-            return lz::equal(a, b);
-        };
-
-        test_procs::test_operator_plus(uneven_chunksize_even_size, expected, cmp);
+        test_procs::test_operator_plus(uneven_chunksize_even_size, expected, equal_fn);
 
         expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
-        test_procs::test_operator_plus(uneven_chunksize_uneven_size, expected, cmp);
+        test_procs::test_operator_plus(uneven_chunksize_uneven_size, expected, equal_fn);
 
         expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 } };
-        test_procs::test_operator_plus(even_chunksize_even_size, expected, cmp);
+        test_procs::test_operator_plus(even_chunksize_even_size, expected, equal_fn);
 
         expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7 } };
-        test_procs::test_operator_plus(even_chunksize_uneven_size, expected, cmp);
+        test_procs::test_operator_plus(even_chunksize_uneven_size, expected, equal_fn);
     }
 
     SECTION("Operator-") {
@@ -225,130 +117,49 @@ TEST_CASE("Chunks binary operations bidirectional access") {
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
 
-    REQUIRE(uneven_chunksize_even_size.size() ==
-            static_cast<std::size_t>(lz::distance(uneven_chunksize_even_size.begin(), uneven_chunksize_even_size.end())));
-    REQUIRE(even_chunksize_even_size.size() ==
-            static_cast<std::size_t>(lz::distance(even_chunksize_even_size.begin(), even_chunksize_even_size.end())));
-    REQUIRE(uneven_chunksize_uneven_size.size() ==
-            static_cast<std::size_t>(lz::distance(uneven_chunksize_uneven_size.begin(), uneven_chunksize_uneven_size.end())));
-    REQUIRE(even_chunksize_uneven_size.size() ==
-            static_cast<std::size_t>(lz::distance(even_chunksize_uneven_size.begin(), even_chunksize_uneven_size.end())));
+    REQUIRE(lz::ssize(uneven_chunksize_even_size) ==
+            lz::distance(uneven_chunksize_even_size.begin(), uneven_chunksize_even_size.end()));
+    REQUIRE(lz::ssize(even_chunksize_even_size) ==
+            lz::distance(even_chunksize_even_size.begin(), even_chunksize_even_size.end()));
+    REQUIRE(lz::ssize(uneven_chunksize_uneven_size) ==
+            lz::distance(uneven_chunksize_uneven_size.begin(), uneven_chunksize_uneven_size.end()));
+    REQUIRE(lz::ssize(even_chunksize_uneven_size) ==
+            lz::distance(even_chunksize_uneven_size.begin(), even_chunksize_uneven_size.end()));
 
     static_assert(std::is_same<decltype(uneven_chunksize_even_size.begin()), decltype(uneven_chunksize_even_size.end())>::value,
                   "Should not be sentinel");
 
-    auto it = uneven_chunksize_even_size.begin();
-    auto it_end = uneven_chunksize_even_size.end();
-    auto it2 = even_chunksize_even_size.begin();
-    auto it_end2 = even_chunksize_even_size.end();
-
-    auto it3 = uneven_chunksize_uneven_size.begin();
-    auto it_end3 = uneven_chunksize_uneven_size.end();
-    auto it4 = even_chunksize_uneven_size.begin();
-    auto it_end4 = even_chunksize_uneven_size.end();
+    using iterable = typename decltype(uneven_chunksize_even_size)::value_type;
+    const auto equal_fn = [](iterable a, const auto& b) {
+        return lz::equal(a, b);
+    };
 
     SECTION("Operator++") {
-        std::vector<int> expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        expected = { 7, 8 };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        REQUIRE(it == uneven_chunksize_even_size.end());
+        std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(uneven_chunksize_even_size, expected, equal_fn));
 
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { 7, 8 };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        REQUIRE(it2 == even_chunksize_even_size.end());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(even_chunksize_even_size, expected, equal_fn));
 
-        expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        REQUIRE(it3 == uneven_chunksize_uneven_size.end());
+        expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(uneven_chunksize_uneven_size, expected, equal_fn));
 
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        REQUIRE(it4 == even_chunksize_uneven_size.end());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(even_chunksize_uneven_size, expected, equal_fn));
     }
 
     SECTION("Operator--") {
-        --it_end;
-        std::vector<int> expected = { 7, 8 };
-        REQUIRE(lz::equal(*it_end, expected));
-        --it_end;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it_end, expected));
-        --it_end;
-        expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it_end, expected));
-        REQUIRE(it_end == uneven_chunksize_even_size.begin());
+        std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(uneven_chunksize_even_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
-        --it_end2;
-        expected = { 7, 8 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        --it_end2;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        --it_end2;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        --it_end2;
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it_end2, expected));
-        REQUIRE(it2 == even_chunksize_even_size.begin());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7, 8 } };
+        REQUIRE(lz::equal(even_chunksize_even_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
-        --it_end3;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it_end3, expected));
-        --it_end3;
-        expected = { 4, 5, 6 };
-        REQUIRE(lz::equal(*it_end3, expected));
-        --it_end3;
-        expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(*it_end3, expected));
-        REQUIRE(it_end3 == uneven_chunksize_uneven_size.begin());
+        expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(uneven_chunksize_uneven_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
-        --it_end4;
-        expected = { 7 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        --it_end4;
-        expected = { 5, 6 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        --it_end4;
-        expected = { 3, 4 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        --it_end4;
-        expected = { 1, 2 };
-        REQUIRE(lz::equal(*it_end4, expected));
-        REQUIRE(it_end4 == even_chunksize_uneven_size.begin());
+        expected = { { 1, 2 }, { 3, 4 }, { 5, 6 }, { 7 } };
+        REQUIRE(lz::equal(even_chunksize_uneven_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
     }
 }
 
@@ -362,65 +173,40 @@ TEST_CASE("Chunks with sentinels / fwd") {
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
 
+    SECTION("Operator=") {
+        auto it = even_size.begin();
+        REQUIRE(it == even_size.begin());
+        REQUIRE(it != even_size.end());
+        REQUIRE(even_size.end() != it);
+        REQUIRE(even_size.begin() == it);
+
+        it = even_size.end();
+        REQUIRE(it == even_size.end());
+        REQUIRE(it != even_size.begin());
+        REQUIRE(even_size.end() == it);
+        REQUIRE(even_size.begin() != it);
+    }
+
     static_assert(!std::is_same<decltype(uneven_chunksize_even_size.begin()), decltype(uneven_chunksize_even_size.end())>::value,
                   "Should not be sentinel");
 
-    auto it = uneven_chunksize_even_size.begin();
-    auto it2 = even_chunksize_even_size.begin();
-
-    auto it3 = uneven_chunksize_uneven_size.begin();
-    auto it4 = even_chunksize_uneven_size.begin();
+    using iterable = typename decltype(uneven_chunksize_even_size)::value_type;
+    const auto equal_fn = [](iterable a, const auto& b) {
+        return lz::equal(a, b);
+    };
 
     SECTION("Operator++") {
-        std::vector<int> expected = { '1', '2', '3' };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        expected = { '4', '5', '6' };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        expected = { '7', '8' };
-        REQUIRE(lz::equal(*it, expected));
-        ++it;
-        REQUIRE(it == uneven_chunksize_even_size.end());
+        std::vector<std::vector<char>> expected = { { '1', '2', '3' }, { '4', '5', '6' }, { '7', '8' } };
+        REQUIRE(lz::equal(uneven_chunksize_even_size, expected, equal_fn));
 
-        expected = { '1', '2' };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { '3', '4' };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { '5', '6' };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        expected = { '7', '8' };
-        REQUIRE(lz::equal(*it2, expected));
-        ++it2;
-        REQUIRE(it2 == even_chunksize_even_size.end());
+        expected = { { '1', '2' }, { '3', '4' }, { '5', '6' }, { '7', '8' } };
+        REQUIRE(lz::equal(even_chunksize_even_size, expected, equal_fn));
 
-        expected = { '1', '2', '3' };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        expected = { '4', '5', '6' };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        expected = { '7' };
-        REQUIRE(lz::equal(*it3, expected));
-        ++it3;
-        REQUIRE(it3 == uneven_chunksize_uneven_size.end());
+        expected = { { '1', '2', '3' }, { '4', '5', '6' }, { '7' } };
+        REQUIRE(lz::equal(uneven_chunksize_uneven_size, expected, equal_fn));
 
-        expected = { '1', '2' };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { '3', '4' };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { '5', '6' };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        expected = { '7' };
-        REQUIRE(lz::equal(*it4, expected));
-        ++it4;
-        REQUIRE(it4 == even_chunksize_uneven_size.end());
+        expected = { { '1', '2' }, { '3', '4' }, { '5', '6' }, { '7' } };
+        REQUIRE(lz::equal(even_chunksize_uneven_size, expected, equal_fn));
     }
 }
 

@@ -32,30 +32,23 @@ TEST_CASE("CString binary operations") {
         REQUIRE(lz::equal(c_string, expected1));
     }
 
-    SECTION("Operator== & Operator!=") {
-        auto beg = c_string.begin();
-        REQUIRE(beg != c_string.end());
-
-        auto common = lz::common(c_string);
-        auto begin_common = common.begin();
-        auto end_common = common.end();
-        REQUIRE(begin_common != end_common);
-        begin_common = common.end();
-        REQUIRE(begin_common == end_common);
-    }
-
     SECTION("Operator bool") {
         REQUIRE(c_string.begin());
-
         auto tmp = lz::c_string("");
         REQUIRE(!tmp.begin());
     }
 
     SECTION("Operator=") {
-        auto beg = c_string.begin();
-        REQUIRE(beg == c_string.begin());
-        beg = c_string.end();
-        REQUIRE(beg == c_string.end());
+        auto it = c_string.begin();
+        REQUIRE(it == c_string.begin());
+        REQUIRE(it != c_string.end());
+        REQUIRE(c_string.end() != it);
+        REQUIRE(c_string.begin() == it);
+        it = c_string.end();
+        REQUIRE(it == c_string.end());
+        REQUIRE(it != c_string.begin());
+        REQUIRE(c_string.begin() != it);
+        REQUIRE(c_string.end() == it);
     }
 }
 

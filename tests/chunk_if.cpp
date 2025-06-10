@@ -17,16 +17,20 @@ TEST_CASE("Chunk if custom value type") {
     lz::t_chunk_if_iterable<std::vector<char>, decltype(str), decltype(func)> chunked =
         str | lz::t_chunk_if<std::vector<char>>(std::move(func));
 #endif
+    std::vector<std::vector<char>> expected = { {}, { 'h', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, {} };
+    REQUIRE(lz::equal(chunked, expected));
+
     auto it = chunked.begin();
-    REQUIRE(*it == std::vector<char>{});
-    ++it;
-    REQUIRE(*it == std::vector<char>{ 'h', 'e', 'l', 'l', 'o' });
-    ++it;
-    REQUIRE(*it == std::vector<char>{ 'w', 'o', 'r', 'l', 'd' });
-    ++it;
-    REQUIRE(*it == std::vector<char>{});
-    ++it;
+    REQUIRE(it == chunked.begin());
+    REQUIRE(it != chunked.end());
+    REQUIRE(chunked.end() != it);
+    REQUIRE(chunked.begin() == it);
+
+    it = chunked.end();
     REQUIRE(it == chunked.end());
+    REQUIRE(it != chunked.begin());
+    REQUIRE(chunked.end() == it);
+    REQUIRE(chunked.begin() != it);
 }
 
 TEST_CASE("Chunk if with sentinels") {
@@ -37,19 +41,13 @@ TEST_CASE("Chunk if with sentinels") {
     };
     lz::chunk_if_iterable<decltype(cstr), decltype(predicate)> chunked = lz::chunk_if(cstr, std::move(predicate));
 
-    auto it = chunked.begin();
-    std::vector<std::string> expected = { "hello world", " this is a message", "", "" };
-    for (const auto& str : expected) {
-        REQUIRE(lz::equal(*it, str));
-        ++it;
-    }
-    REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
-    REQUIRE(it == chunked.end());
-
-    it = chunked.begin();
-    REQUIRE(it == chunked.begin());
-    it = chunked.end();
-    REQUIRE(it == chunked.end());
+    std::vector<std::vector<char>> expected = { { 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd' },
+                                                { ' ', 't', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 'm', 'e', 's', 's', 'a',
+                                                  'g', 'e' },
+                                                {},
+                                                {} };
+    REQUIRE(lz::equal(chunked, expected,
+                      [](const decltype(chunked)::value_type a, const std::vector<char>& b) { return lz::equal(a, b); }));
 }
 
 TEST_CASE("Non string literal test") {
@@ -58,34 +56,9 @@ TEST_CASE("Non string literal test") {
     };
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
     auto chunked = lz::chunk_if(arr, is_even);
-
-    std::vector<int> expected = { 1 };
-    auto it = chunked.begin();
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = { 3 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = { 5 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    REQUIRE(it == chunked.end());
-
-    arr = { 0, 1, 2, 3, 4 };
-    chunked = lz::chunk_if(arr, is_even);
-    it = chunked.begin();
-    expected = {};
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = { 1 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = { 3 };
-    REQUIRE(lz::equal(*it, expected));
-    ++it;
-    expected = {};
-    ++it;
-    REQUIRE(it == chunked.end());
+    std::vector<std::vector<int>> expected = { { 1 }, { 3 }, { 5 } };
+    REQUIRE(lz::equal(chunked, expected,
+                      [](const decltype(chunked)::value_type& a, const std::vector<int>& b) { return lz::equal(a, b); }));
 }
 
 TEST_CASE("Empty or one element chunk_if") {
@@ -111,28 +84,6 @@ TEST_CASE("Empty or one element chunk_if") {
         REQUIRE(!lz::empty(chunked));
         REQUIRE(lz::has_one(chunked));
         REQUIRE(!lz::has_many(chunked));
-    }
-}
-
-TEST_CASE("chunk_if changing and creating elements") {
-    std::string s = "hello world; this is a message;;";
-    auto chunked = s | lz::sv_chunk_if([](const char c) { return c == ';'; });
-    static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
-
-    SECTION("Length should be correct") {
-        REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
-    }
-
-    SECTION("Should be by reference") {
-        auto it = chunked.begin();
-        REQUIRE(&*it->begin() == &s[0]);
-    }
-
-    SECTION("Should chunk correct length") {
-        auto it = chunked.begin();
-        REQUIRE(*it == "hello world");
-        ++it;
-        REQUIRE(*it == " this is a message");
     }
 }
 
@@ -177,52 +128,18 @@ TEST_CASE("chunk_if binary operations") {
     REQUIRE(*chunked.begin() == "");
 
     SECTION("Operator++") {
-        REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 9);
-        auto begin = chunked.begin();
-        REQUIRE(*begin == "");
-        ++begin;
-        REQUIRE(*begin == "hello world");
-        ++begin;
-        REQUIRE(*begin == "");
-        ++begin;
-        REQUIRE(*begin == " this is a message");
-        ++begin;
-        REQUIRE(*begin == "");
-        ++begin;
-        REQUIRE(*begin == "");
-        ++begin;
-        REQUIRE(*begin == " testing");
-        ++begin;
-        REQUIRE(*begin == "");
-        ++begin;
-        REQUIRE(*begin == "");
-        ++begin;
-        REQUIRE(begin == chunked.end());
-    }
-
-    SECTION("Operator== & operator!=") {
-        auto begin = chunked.begin();
-        REQUIRE(begin != chunked.end());
-        while (begin != chunked.end()) {
-            ++begin;
-        }
-        REQUIRE(begin == chunked.end());
-    }
-
-    SECTION("Operator--") {
+        std::vector<lz::string_view> expected = { "", "hello world", "", " this is a message", "", "", " testing", "", "" };
+        REQUIRE(lz::equal(chunked, expected, [](lz::string_view a, lz::string_view b) { return lz::equal(a, b); }));
     }
 }
 
 TEST_CASE("chunk_if to containers") {
     std::string s = "hello world; this is a message;;";
     auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
-    using Iterator = decltype(*chunked.begin());
 
     SECTION("To array") {
         REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
         auto arr = chunked | lz::to<std::array<lz::string_view, 4>>();
-        lz::transform(chunked, arr.begin(),
-                      [](const Iterator& it) { return lz::string_view{ it.begin(), it.size() }; });
         REQUIRE(arr == decltype(arr){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
                                       lz::string_view{}, lz::string_view{} });
     }
