@@ -29,13 +29,13 @@ namespace detail {
 
 [[noreturn]] inline void
 assertion_fail(const char* file, const int line, const char* func, const char* message, const char* expr) {
-#if defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
-    
+#if defined(LZ_HAS_CXX_23) && defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
+
     auto st = std::stacktrace::current();
     auto str = std::to_string(st);
     std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line,
                  expr, func, message, str.c_str());
-    
+
 #else // ^^ defined(__cpp_lib_stacktrace) vv !defined(__cpp_lib_stacktrace)
 
     std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\n", file, line, expr, func, message);
