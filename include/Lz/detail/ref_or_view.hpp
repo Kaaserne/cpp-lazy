@@ -55,18 +55,22 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
+        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call begin() on an empty ref_or_view.");
         return std::begin(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
+        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call begin() on an empty ref_or_view.");
         return detail::begin(std::move(*_iterable_ref_ptr));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
+        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call end() on an empty ref_or_view.");
         return std::end(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
+        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call end() on an empty ref_or_view.");
         return detail::end(std::move(*_iterable_ref_ptr));
     }
 };
@@ -123,7 +127,7 @@ public:
     }
 
     template<class I>
-    ref_or_view_helper& operator=(ref_or_view_helper<I, true>&& other) noexcept {
+    ref_or_view_helper& operator=(ref_or_view_helper<I, true>&& other) noexcept(std::is_nothrow_move_assignable<it>::value) {
         if (this == &other) {
             return *this;
         }
