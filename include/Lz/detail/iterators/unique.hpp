@@ -43,7 +43,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr unique_iterator() {
+    constexpr unique_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value &&
+                                         std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif
@@ -116,7 +118,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr unique_iterator() {
+    constexpr unique_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value &&
+                                         std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif

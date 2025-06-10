@@ -92,19 +92,21 @@ public:
 #else
 
     template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr ref_or_view_helper() {
+    constexpr ref_or_view_helper() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
-    constexpr ref_or_view_helper(it&& iterable) : _iterable_value{ std::move(iterable) } {
+    constexpr ref_or_view_helper(it&& iterable) noexcept(std::is_move_constructible<it>::value) :
+        _iterable_value{ std::move(iterable) } {
     }
 
     constexpr ref_or_view_helper(const it& iterable) : _iterable_value{ iterable } {
     }
 
     template<class I>
-    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) : ref_or_view_helper{ std::move(other._iterable_value) } {
+    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) noexcept(std::is_move_constructible<it>::value) :
+        ref_or_view_helper{ std::move(other._iterable_value) } {
     }
 
     template<class I>

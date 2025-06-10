@@ -155,7 +155,8 @@ public:
 
     template<class I = IterTuple,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SentinelTuple>::value>>
-    constexpr zip_longest_iterator() {
+    constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                              std::is_nothrow_default_constructible<SentinelTuple>::value) {
     }
 
 #endif
@@ -349,7 +350,8 @@ public:
 
     template<class I = IterTuple,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SentinelTuple>::value>>
-    constexpr zip_longest_iterator() {
+    constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                              std::is_nothrow_default_constructible<SentinelTuple>::value) {
     }
 
 #endif

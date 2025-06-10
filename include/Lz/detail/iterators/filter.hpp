@@ -41,16 +41,18 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr filter_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+        requires std::default_initializable<Iterable> && std::defaultl_initializable<Iterator> &&
                      std::default_initializable<UnaryPredicate>
     = default;
 
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
                                std::is_default_constructible<UnaryPredicate>::value>>
-    constexpr filter_iterator() {
+    constexpr filter_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<Iterable>::value &&
+                                         std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
 
 #endif

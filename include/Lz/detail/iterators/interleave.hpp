@@ -167,7 +167,7 @@ public:
 #else
 
     template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr interleave_iterator() {
+    constexpr interleave_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

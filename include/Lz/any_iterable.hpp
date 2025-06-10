@@ -51,7 +51,7 @@ public:
 #else
 
     template<class I = it, class = detail::enable_if<std::is_default_constructible<I>::value>>
-    constexpr any_iterable() {
+    constexpr any_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

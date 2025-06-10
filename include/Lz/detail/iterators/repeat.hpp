@@ -34,7 +34,7 @@ public:
 #else
 
     template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
-    constexpr repeat_iterator() {
+    constexpr repeat_iterator() noexcept(std::is_nothrow_default_constructible<T>::value) {
     }
 
 #endif

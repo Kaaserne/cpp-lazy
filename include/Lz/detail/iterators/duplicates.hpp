@@ -44,16 +44,18 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+        requires std::default_initializable<Iterator> && std::default_initializable<Iterable> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr duplicates_iterator() {
+    constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<Iterable>::value &&
+                                             std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif
@@ -147,16 +149,18 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+        requires std::default_initializable<Iterator> && std::default_initializable<Iterable> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr duplicates_iterator() {
+    constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<Iterable>::value &&
+                                             std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif

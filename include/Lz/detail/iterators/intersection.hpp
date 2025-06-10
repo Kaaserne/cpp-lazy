@@ -69,7 +69,11 @@ public:
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterator2>::value &&
                                std::is_default_constructible<S>::value && std::is_default_constructible<S2>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr intersection_iterator() {
+    constexpr intersection_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                               std::is_nothrow_default_constructible<Iterator2>::value &&
+                                               std::is_nothrow_default_constructible<S>::value &&
+                                               std::is_nothrow_default_constructible<S2>::value &&
+                                               std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif
@@ -167,7 +171,11 @@ public:
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterator2>::value &&
                                std::is_default_constructible<S>::value && std::is_default_constructible<S2>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr intersection_iterator() {
+    constexpr intersection_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                               std::is_nothrow_default_constructible<Iterator2>::value &&
+                                               std::is_nothrow_default_constructible<S>::value &&
+                                               std::is_nothrow_default_constructible<S2>::value &&
+                                               std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif

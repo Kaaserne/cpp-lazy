@@ -30,7 +30,7 @@ public:
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr loop_iterable() {
+    constexpr loop_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -119,7 +119,7 @@ public:
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr loop_iterable() {
+    constexpr loop_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

@@ -252,13 +252,15 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr concatenate_iterator()
-        requires std::default_initializable<IterTuple>
+        requires std::default_initializable<IterTuple> && std::default_initializable<IterableTuple>
     = default;
 
 #else
 
-    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr concatenate_iterator() {
+    template<class I = IterTuple,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableTuple>::value>>
+    constexpr concatenate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                              std::is_nothrow_default_constructible<IterableTuple>::value) {
     }
 
 #endif

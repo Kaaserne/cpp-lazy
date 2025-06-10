@@ -79,13 +79,13 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterable()
-        requires(std::default_initializable<Iterables> && ...)
+        requires(std::default_initializable<Iterables> && ...) && (std::default_initializable < Iterators >> && ...)
     = default;
 
 #else
 
     template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr cartesian_product_iterable() {
+    constexpr cartesian_product_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

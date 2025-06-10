@@ -38,7 +38,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
-    constexpr map_iterator() {
+    constexpr map_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                      std::is_nothrow_default_constructible<UnaryOp>::value) {
     }
 
 #endif

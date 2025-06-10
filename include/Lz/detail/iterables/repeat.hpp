@@ -31,7 +31,7 @@ public:
 #else
 
     template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
-    constexpr repeat_iterable() {
+    constexpr repeat_iterable() noexcept(std::is_nothrow_default_constructible<U>::value) {
     }
 
 #endif
@@ -64,6 +64,20 @@ public:
     using iterator = repeat_iterator<true, T>;
     using const_iterator = iterator;
     using value_type = T;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr repeat_iterable()
+        requires std::default_initializable<T>
+    = default;
+
+#else
+
+    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    constexpr repeat_iterable() noexcept(std::is_nothrow_default_constructible<U>::value) {
+    }
+
+#endif
 
     constexpr repeat_iterable(T value) : _value{ std::move(value) } {
     }

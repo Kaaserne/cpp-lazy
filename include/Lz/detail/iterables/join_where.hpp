@@ -38,7 +38,11 @@ public:
         class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
                           std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
                           std::is_default_constructible<ResultSelector>::value>>
-    constexpr join_where_iterable() {
+    constexpr join_where_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<IterableB>::value &&
+                                             std::is_nothrow_default_constructible<SelectorA>::value &&
+                                             std::is_nothrow_default_constructible<SelectorB>::value &&
+                                             std::is_nothrow_default_constructible<ResultSelector>::value) {
     }
 
 #endif

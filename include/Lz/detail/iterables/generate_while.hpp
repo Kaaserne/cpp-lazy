@@ -30,7 +30,8 @@ public:
 
     template<class G = GeneratorFunc,
              class = enable_if<std::is_default_constructible<G>::value && std::is_default_constructible<fn_return_type>::value>>
-    constexpr generate_while_iterable() {
+    constexpr generate_while_iterable() noexcept(std::is_nothrow_default_constructible<G>::value &&
+                                                 std::is_nothrow_default_constructible<fn_return_type>::value) {
     }
 
 #endif

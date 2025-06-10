@@ -35,7 +35,9 @@ public:
     template<class I = decltype(_iterable1),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr except_iterable() {
+    constexpr except_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<Iterable2>::value &&
+                                         std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif

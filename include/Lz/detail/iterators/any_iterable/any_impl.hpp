@@ -90,7 +90,7 @@ public:
 #else
 
     template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr any_iterator_impl() noexcept(std::is_default_constructible<I>::value) {
+    constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -147,7 +147,7 @@ public:
 #else
 
     template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr any_iterator_impl() noexcept(std::is_default_constructible<I>::value) {
+    constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -208,7 +208,7 @@ public:
 #else
 
     template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr any_iterator_impl() noexcept(std::is_default_constructible<I>::value) {
+    constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

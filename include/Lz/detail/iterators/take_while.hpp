@@ -45,7 +45,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<UnaryPredicate>::value>>
-    constexpr take_while_iterator() {
+    constexpr take_while_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<S>::value &&
+                                             std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
 
 #endif
@@ -102,7 +104,7 @@ class take_while_iterator<Iterator, S, UnaryPredicate, enable_if<!is_sentinel<It
 
     using traits = std::iterator_traits<Iterator>;
 
-    void incremented_check() {
+    LZ_CONSTEXPR_CXX_14 void incremented_check() {
         if (_iterator != _end && !_unary_predicate(*_iterator)) {
             _iterator = _end;
         }
@@ -114,6 +116,23 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr take_while_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<UnaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<UnaryPredicate>::value>>
+    constexpr take_while_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<UnaryPredicate>::value) {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14 take_while_iterator(Iterator it, Iterator begin, Iterator end, UnaryPredicate unary_predicate) :
         _begin{ std::move(begin) },
         _iterator{ std::move(it) },
@@ -124,12 +143,12 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 void increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         incremented_check();
     }
 
-    LZ_CONSTEXPR_CXX_20 void decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         if (_iterator != _end) {
             --_iterator;
             return;
@@ -139,20 +158,20 @@ public:
         } while (_iterator != _begin && !_unary_predicate(*_iterator));
     }
 
-    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    constexpr reference dereference() const {
         return *_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const take_while_iterator& b) const noexcept {
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_while_iterator& b) const noexcept {
         LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel) const noexcept {
         return _iterator == _end;
     }
 };

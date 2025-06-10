@@ -63,7 +63,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr group_by_iterator() {
+    constexpr group_by_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                           std::is_nothrow_default_constructible<S>::value &&
+                                           std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif
@@ -143,6 +145,25 @@ public:
     using reference = std::pair<ref_type, basic_iterable<Iterator>>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr group_by_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+                     std::default_initializable<BinaryPredicate>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                               std::is_default_constructible<BinaryPredicate>::value>>
+    constexpr group_by_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                           std::is_nothrow_default_constructible<S>::value &&
+                                           std::is_nothrow_default_constructible<BinaryPredicate>::value) {
+    }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator it, Iterator begin, S end, BinaryPredicate binary_predicate) :
         _begin{ std::move(begin) },

@@ -27,7 +27,7 @@ public:
 #else
 
     template<class D = Distribution, class = enable_if<std::is_default_constructible<D>::value>>
-    constexpr random_iterable() {
+    constexpr random_iterable() noexcept(std::is_nothrow_default_constructible<D>::value) {
     }
 
 #endif

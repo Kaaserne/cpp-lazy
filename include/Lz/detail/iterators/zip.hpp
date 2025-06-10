@@ -87,7 +87,7 @@ public:
 #else
 
     template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr zip_iterator() {
+    constexpr zip_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

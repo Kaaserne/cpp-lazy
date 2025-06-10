@@ -47,7 +47,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr chunks_iterator() {
+    constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -113,6 +114,22 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunks_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14
     chunks_iterator(Iterator begin, S end, const std::size_t chunk_size, const std::size_t cur_distance) :
         _sub_range_begin{ begin },
@@ -182,7 +199,24 @@ private:
     std::size_t _chunk_size{};
 
 public:
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, Iterator begin, S end, const std::size_t chunk_size) :
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunks_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<Iterable>::value) {
+    }
+
+#endif
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const std::size_t chunk_size) :
         _begin{ std::move(begin) },
         _sub_range_begin{ std::move(it) },
         _end{ std::move(end) },

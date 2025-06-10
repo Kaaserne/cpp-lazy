@@ -193,13 +193,15 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterator()
-        requires std::default_initializable<IterTuple>
+        requires std::default_initializable<IterTuple> && std::default_initializable<STuple>
     = default;
 
 #else
 
-    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr cartesian_product_iterator() {
+    template<class I = IterTuple,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<STuple>::value>>
+    constexpr cartesian_product_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                                    std::is_nothrow_default_constructible<Iterables>::value) {
     }
 
 #endif

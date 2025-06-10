@@ -40,7 +40,10 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
-    constexpr split_iterator() {
+    constexpr split_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                        std::is_nothrow_default_constructible<S>::value &&
+                                        std::is_nothrow_default_constructible<Iterator2>::value &&
+                                        std::is_nothrow_default_constructible<S2>::value) {
     }
 
 #endif
@@ -149,7 +152,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<T>::value>>
-    constexpr split_single_iterator() {
+    constexpr split_single_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                               std::is_nothrow_default_constructible<S>::value &&
+                                               std::is_nothrow_default_constructible<T>::value) {
     }
 
 #endif

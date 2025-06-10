@@ -21,7 +21,7 @@ public:
     using difference_type = typename std::iterator_traits<Iterator>::difference_type;
 
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr as_iterator_iterator() {
+    constexpr as_iterator_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
     constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {

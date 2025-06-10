@@ -75,7 +75,20 @@ public:
                           std::is_default_constructible<IterB>::value && std::is_default_constructible<SB>::value &&
                           std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
                           std::is_default_constructible<ResultSelector>::value>>
-    constexpr join_where_iterator() {
+    constexpr join_where_iterator() noexcept(std::is_nothrow_default_constructible<IterA>::value &&
+                                             std::is_nothrow_default_constructible<SA>::value &&
+                                             std::is_nothrow_default_constructible<IterB>::value &&
+                                             std::is_nothrow_default_constructible<SB>::value &&
+                                             std::is_nothrow_default_constructible<SelectorA>::value &&
+                                             std::is_nothrow_default_constructible<SelectorB>::value &&
+                                             std::is_nothrow_default_constructible<ResultSelector>::value) :
+        _iterable{},
+        _iter_a{},
+        _begin_b{},
+        _end_a{},
+        _selector_a{},
+        _selector_b{},
+        _result_selector{} {
     }
 
 #endif

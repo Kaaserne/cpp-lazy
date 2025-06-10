@@ -96,7 +96,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr flatten_wrapper() {
+    constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -191,6 +192,11 @@ class flatten_wrapper<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
     using traits = std::iterator_traits<Iterator>;
 
 public:
+    using reference = typename traits::reference;
+    using pointer = fake_ptr_proxy<reference>;
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_wrapper()
@@ -201,22 +207,16 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr flatten_wrapper() {
+    constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
-
-    using reference = typename traits::reference;
-    using pointer = fake_ptr_proxy<reference>;
-    using value_type = typename traits::value_type;
-    using difference_type = typename traits::difference_type;
 
     constexpr flatten_wrapper(Iterator /* iterator */, Iterator begin, S end) :
         _iterator{ std::move(begin) },
         _end{ std::move(end) } {
     }
-
-    constexpr flatten_wrapper() = default;
 
     LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
         _iterator = _end;
@@ -348,10 +348,10 @@ public:
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<this_inner>::value>>
-    constexpr flatten_iterator() {
+    template<class I = decltype(_outer_iter),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<this_inner>::value>>
+    constexpr flatten_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                          std::is_nothrow_default_constructible<this_inner>::value) {
     }
 
 #endif
@@ -544,6 +544,11 @@ class flatten_iterator<Iterator, S, 0>
     using traits = std::iterator_traits<Iterator>;
 
 public:
+    using pointer = typename traits::pointer;
+    using reference = typename traits::reference;
+    using value_type = typename traits::value_type;
+    using difference_type = typename traits::difference_type;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterator()
@@ -552,19 +557,11 @@ public:
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr flatten_iterator() {
+    template<class I = decltype(_iterator), class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr flatten_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
-
-    using pointer = typename traits::pointer;
-    using reference = typename traits::reference;
-    using value_type = typename traits::value_type;
-    using difference_type = typename traits::difference_type;
-
-    constexpr flatten_iterator() = default;
 
     constexpr flatten_iterator(Iterator it, Iterator begin, S end) :
         _iterator{ std::move(it), std::move(begin), std::move(end) } {

@@ -49,7 +49,7 @@ public:
 #else
 
     template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr interleave_iterable() {
+    constexpr interleave_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

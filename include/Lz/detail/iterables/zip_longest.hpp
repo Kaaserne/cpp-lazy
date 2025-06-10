@@ -34,7 +34,7 @@ public:
 #else
 
     template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr zip_longest_iterable() {
+    constexpr zip_longest_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

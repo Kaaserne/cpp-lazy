@@ -1,13 +1,12 @@
 #pragma once
 
-#include <cstddef>
-#include <limits>
 #ifndef LZ_ROTATE_ITERATOR_HPP
 #define LZ_ROTATE_ITERATOR_HPP
 
 #include <Lz/detail/traits.hpp>
 #include <Lz/iterator_base.hpp>
 #include <iterator>
+#include <limits>
 
 namespace lz {
 namespace detail {
@@ -41,7 +40,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr rotate_iterator() {
+    constexpr rotate_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif

@@ -42,7 +42,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr take_every_iterator() {
+    constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -112,7 +113,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr take_every_iterator() {
+    constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -192,7 +194,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr take_every_iterator() {
+    constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -268,8 +271,9 @@ public:
     LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {
         LZ_ASSERT(_end == other._end && _offset == other._offset && _begin == other._begin, "Incompatible iterators");
         const auto remaining = _iterator - other._iterator;
-        const auto lldiv = std::lldiv(static_cast<std::ptrdiff_t>(remaining), static_cast<std::ptrdiff_t>(_offset));
-        return lldiv.rem == 0 ? lldiv.quot : lldiv.quot + (remaining < 0 ? -1 : 1);
+        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
+        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
+        return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {

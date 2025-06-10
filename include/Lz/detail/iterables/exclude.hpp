@@ -29,7 +29,7 @@ public:
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr exclude_iterable() {
+    constexpr exclude_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

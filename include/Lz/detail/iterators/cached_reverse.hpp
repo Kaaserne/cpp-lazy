@@ -34,7 +34,7 @@ public:
 #else
 
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr cached_reverse_iterator() {
+    constexpr cached_reverse_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
