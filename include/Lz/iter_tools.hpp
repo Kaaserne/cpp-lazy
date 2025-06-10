@@ -7,7 +7,7 @@
 #include <Lz/detail/adaptors/iter_tools.hpp>
 
 namespace lz {
-
+// TODO add iterator_decay
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**

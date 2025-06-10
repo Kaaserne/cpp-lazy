@@ -12,13 +12,12 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
  * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
- * argument. Can be used with a custom comparer. Does not contain a .size() method, it's a forward iterator and returns a
- * sentinel. The second iterable must be sorted in order for it to work.
- * Example:
+ * argument. Can be used with a custom comparer. Does not contain a .size() method, stores the (eager) size of the second iterable
+ * internally using lz::cache_size, and its category is min(bidirectional, <category first iterable>). Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * std::vector<int> to_except = { 5, 3 };
- * std::sort(to_except.begin(), to_except.end());
+ * std::sort(to_except.begin(), to_except.end()); // to_except is now { 3, 5 }
  * auto excepted = lz::except(vec, to_except); // excepted = { 1, 2, 4 }
  * // or
  * auto excepted = lz::except(vec, to_except, std::less<int>{}); // excepted = { 1, 2, 4 }
