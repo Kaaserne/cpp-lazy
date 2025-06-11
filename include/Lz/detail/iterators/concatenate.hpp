@@ -258,9 +258,9 @@ public:
 #else
 
     template<class I = IterTuple,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableTuple>::value>>
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterTuple>::value>>
     constexpr concatenate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                              std::is_nothrow_default_constructible<IterableTuple>::value) {
+                                              std::is_nothrow_default_constructible<IterTuple>::value) {
     }
 
 #endif
