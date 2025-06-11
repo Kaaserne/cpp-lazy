@@ -43,18 +43,14 @@ public:
         return static_cast<std::size_t>(lz::size(_iterable));
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return { std::begin(_iterable) };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
-    LZ_NODISCARD constexpr auto end() const& {
-        if constexpr (std::is_same_v<value_type, sentinel>) {
+    LZ_NODISCARD constexpr auto end() const {
+        if constexpr (!is_sentinel<value_type, sentinel>::value) {
             return iterator{ std::end(_iterable) };
         }
         else {
@@ -62,35 +58,16 @@ public:
         }
     }
 
-    LZ_NODISCARD constexpr auto end() && {
-        if constexpr (std::is_same_v<value_type, sentinel>) {
-            return iterator{ std::end(std::move(_iterable)) };
-        }
-        else {
-            return std::end(std::move(_iterable));
-        }
-    }
-
 #else
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if<std::is_same<I, sentinel>::value, iterator> end() const& {
+    LZ_NODISCARD constexpr enable_if<!is_sentinel<I, sentinel>::value, iterator> end() const& {
         return { std::end(_iterable) };
     }
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if<!std::is_same<I, sentinel>::value, sentinel> end() const& {
+    LZ_NODISCARD constexpr enable_if<is_sentinel<I, sentinel>::value, sentinel> end() const& {
         return std::end(_iterable);
-    }
-
-    template<class I = value_type>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_same<I, sentinel>::value, iterator> end() && {
-        return { detail::end(std::move(_iterable)) };
-    }
-
-    template<class I = value_type>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_same<I, sentinel>::value, sentinel> end() && {
-        return std::end(std::move(_iterable));
     }
 
 #endif // LZ_HAS_CXX_17
