@@ -13,8 +13,11 @@ class chunks_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     std::size_t _chunk_size{};
 
+    using inner = iter_t<Iterable>;
+
 public:
-    using iterator = chunks_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
+    using iterator = conditional<is_ra<inner>::value, chunks_iterator<ref_or_view<Iterable>, inner>,
+                                 chunks_iterator<iter_t<Iterable>, sentinel_t<Iterable>>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
@@ -48,7 +51,7 @@ public:
 
     [[nodiscard]] constexpr iterator begin() const& {
         if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
-            return iterator{ std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+            return iterator{ _iterable, std::begin(_iterable), _chunk_size };
         }
         else if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
             return iterator{ std::begin(_iterable), std::end(_iterable), _chunk_size, 0 };
@@ -72,7 +75,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> begin() const& {
-        return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+        return iterator{ _iterable, std::begin(_iterable), _chunk_size };
     }
 
 #endif
@@ -86,7 +89,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const& {
         if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
-            return iterator{ std::end(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+            return iterator{ _iterable, std::end(_iterable), _chunk_size };
         }
         else if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
             return iterator{ std::end(_iterable), std::end(_iterable), _chunk_size, lz::eager_size(_iterable) };
@@ -100,7 +103,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> end() const& {
-        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _chunk_size };
+        return { _iterable, std::end(_iterable), _chunk_size };
     }
 
     template<class I = typename iterator::iterator_category>
