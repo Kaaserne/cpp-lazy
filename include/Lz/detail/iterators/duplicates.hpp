@@ -51,10 +51,10 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                             std::is_nothrow_default_constructible<Iterable>::value &&
+                                             std::is_nothrow_default_constructible<S>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
@@ -149,17 +149,17 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<Iterable> &&
+        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                             std::is_nothrow_default_constructible<Iterable>::value &&
+                                             std::is_nothrow_default_constructible<S>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
