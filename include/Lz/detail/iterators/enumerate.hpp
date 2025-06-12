@@ -12,8 +12,7 @@ namespace detail {
 template<class Iterator, class S, class Arithmetic>
 class enumerate_iterator
     : public iterator<enumerate_iterator<Iterator, S, Arithmetic>, std::pair<Arithmetic, ref_t<Iterator>>,
-                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>,
-                      sentinel_selector<iter_cat_t<Iterator>, enumerate_iterator<Iterator, S, Arithmetic>, S>> {
+                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
 
     Iterator _iterator;
     Arithmetic _index{};
