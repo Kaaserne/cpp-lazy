@@ -11,9 +11,12 @@ namespace detail {
 template<class Iterable, class BinaryPredicate>
 class duplicates_iterable : public lazy_view {
 public:
-    using iterator = duplicates_iterator<iter_t<Iterable>, sentinel_t<Iterable>, func_container<BinaryPredicate>>;
+    using iterator = duplicates_iterator<ref_or_view<Iterable>, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
+
+    using it = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
 
 private:
     ref_or_view<Iterable> _iterable;
@@ -42,41 +45,20 @@ public:
         _compare{ std::move(compare) } {
     }
 
-#ifdef LZ_HAS_CXX_17
-
-    [[nodiscard]] constexpr iterator begin() const& {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return { detail::begin(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
-        }
-        else {
-            return { detail::begin(_iterable), detail::end(_iterable), _compare };
-        }
-    }
-
-#else
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() const& {
-        return { detail::begin(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+        return { _iterable, std::begin(_iterable), _compare };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
-        return { detail::begin(_iterable), detail::end(_iterable), _compare };
-    }
-
-#endif // LZ_HAS_CXX_17
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_compare) };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value || is_sentinel<it, sent>::value, iterator> begin() && {
+        return { _iterable, std::begin(_iterable), std::move(_compare) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ detail::end(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value && !is_sentinel<it, sent>::value) {
+            return iterator{ _iterable, std::end(_iterable), _compare };
         }
         else {
             return default_sentinel{};
@@ -86,16 +68,16 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { detail::end(_iterable), detail::begin(_iterable), detail::end(_iterable), _compare };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_sentinel<it, sent>::value, iterator> end() const {
+        return { _iterable, std::end(_iterable), _compare };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value || is_sentinel<it, sent>::value, default_sentinel> end() const {
         return {};
     }
 
-#endif // LZ_HAS_CXX_17
+#endif
 };
 } // namespace detail
 } // namespace lz
