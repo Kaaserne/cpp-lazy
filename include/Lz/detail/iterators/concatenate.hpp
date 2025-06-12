@@ -12,25 +12,23 @@
 namespace lz {
 namespace detail {
 
-template<class IterTuple, class SentinelTuple>
+template<class Iterables, class Iterators>
 class concatenate_iterator
-    : public iterator<concatenate_iterator<IterTuple, SentinelTuple>, iter_tuple_common_ref_t<IterTuple>,
-                      fake_ptr_proxy<iter_tuple_common_ref_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                      iter_tuple_iter_cat_t<IterTuple>,
-                      sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, concatenate_iterator<IterTuple, SentinelTuple>>> {
+    : public iterator<concatenate_iterator<Iterables, Iterators>, iter_tuple_common_ref_t<Iterators>,
+                      fake_ptr_proxy<iter_tuple_common_ref_t<Iterators>>, iter_tuple_diff_type_t<Iterators>,
+                      iter_tuple_iter_cat_t<Iterators>, default_sentinel> {
 
-    IterTuple _iterators;
-    IterTuple _begin;
-    SentinelTuple _end;
+    Iterators _iterators;
+    Iterables _iterables;
 
-    using first_tuple_iterator = std::iterator_traits<first_it<IterTuple>>;
+    using first_tuple_iterator = std::iterator_traits<first_it<Iterators>>;
 
-    static constexpr std::size_t tuple_size = std::tuple_size<IterTuple>::value;
+    static constexpr std::size_t tuple_size = std::tuple_size<Iterators>::value;
 
 public:
     using value_type = typename first_tuple_iterator::value_type;
-    using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = iter_tuple_common_ref_t<IterTuple>;
+    using difference_type = iter_tuple_diff_type_t<Iterators>;
+    using reference = iter_tuple_common_ref_t<Iterators>;
     using pointer = fake_ptr_proxy<reference>;
 
 private:
@@ -47,12 +45,12 @@ private:
     constexpr void min_is_n(const difference_type offset) {
         if constexpr (I != 0) {
             auto& current = std::get<I>(_iterators);
-            auto& begin = std::get<I>(_begin);
+            auto begin = std::begin(std::get<I>(_iterables));
 
             if (current != begin) {
                 const auto dist = current - begin;
                 if (dist <= offset) {
-                    current = begin;
+                    current = std::move(begin);
                     min_is_n<I - 1>(dist == 0 ? 1 : offset - dist);
                 }
                 else {
@@ -73,7 +71,7 @@ private:
     constexpr void plus_is_n(const difference_type offset) {
         if constexpr (I != tuple_size) {
             auto& current = std::get<I>(_iterators);
-            const auto& current_end = std::get<I>(_end);
+            const auto current_end = std::end(std::get<I>(_iterables));
             const auto dist = current_end - current;
 
             if (dist > offset) {
@@ -91,7 +89,7 @@ private:
     constexpr void minus_minus() {
         if constexpr (I != 0) {
             auto& current = std::get<I>(_iterators);
-            if (current != std::get<I>(_begin)) {
+            if (current != std::begin(std::get<I>(_iterables))) {
                 --current;
             }
             else {
@@ -109,7 +107,7 @@ private:
             return *std::get<I>(_iterators);
         }
         else {
-            if (std::get<I>(_iterators) != std::get<I>(_end)) {
+            if (std::get<I>(_iterators) != std::end(std::get<I>(_iterables))) {
                 return *std::get<I>(_iterators);
             }
             else {
@@ -121,7 +119,7 @@ private:
     template<std::size_t I>
     constexpr void plus_plus() {
         if constexpr (I != tuple_size) {
-            if (std::get<I>(_iterators) != std::get<I>(_end)) {
+            if (std::get<I>(_iterators) != std::end(std::get<I>(_iterables))) {
                 ++std::get<I>(_iterators);
             }
             else {
@@ -146,12 +144,12 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I != 0> min_is_n(const difference_type offset) {
         auto& current = std::get<I>(_iterators);
-        auto& begin = std::get<I>(_begin);
+        auto begin = std::begin(std::get<I>(_iterables));
 
         if (current != begin) {
             const auto dist = current - begin;
             if (dist <= offset) {
-                current = begin;
+                current = std::move(begin);
                 min_is_n<I - 1>(dist == 0 ? 1 : offset - dist);
             }
             else {
@@ -172,7 +170,7 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size> plus_is_n(const difference_type offset) {
         auto& current = std::get<I>(_iterators);
-        const auto& current_end = std::get<I>(_end);
+        const auto& current_end = std::end(std::get<I>(_iterables));
         const auto dist = current_end - current;
 
         if (dist > offset) {
@@ -192,7 +190,7 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I != 0> minus_minus() {
         auto& current = std::get<I>(_iterators);
-        if (current != std::get<I>(_begin)) {
+        if (current != std::begin(std::get<I>(_iterables))) {
             --current;
         }
         else {
@@ -212,7 +210,7 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, reference> deref() const {
-        if (std::get<I>(_iterators) != std::get<I>(_end)) {
+        if (std::get<I>(_iterators) != std::end(std::get<I>(_iterables))) {
             return *std::get<I>(_iterators);
         }
         else {
@@ -221,8 +219,8 @@ private:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<IterTuple>::value> plus_plus() {
-        if (std::get<I>(_iterators) != std::get<I>(_end)) {
+    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<Iterators>::value> plus_plus() {
+        if (std::get<I>(_iterators) != std::end(std::get<I>(_iterables))) {
             ++std::get<I>(_iterators);
         }
         else {
@@ -231,22 +229,27 @@ private:
     }
 
     template<std::size_t I>
-    constexpr enable_if<I == std::tuple_size<IterTuple>::value> plus_plus() const noexcept {
+    constexpr enable_if<I == std::tuple_size<Iterators>::value> plus_plus() const noexcept {
         return;
     }
 
     template<std::size_t I, class EndIter>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<IterTuple>::value - 1, bool> iter_equal_to(const EndIter& end) const {
+    LZ_CONSTEXPR_CXX_14 enable_if<I != std::tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         const auto has_value = std::get<I>(_iterators) == std::get<I>(end);
         return has_value ? iter_equal_to<I + 1>(end) : has_value;
     }
 
     template<std::size_t I, class EndIter>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<IterTuple>::value - 1, bool> iter_equal_to(const EndIter& end) const {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         return std::get<I>(_iterators) == std::get<I>(end);
     }
 
 #endif // LZ_HAS_CXX_17
+
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+        decompose(std::get<I>(_iterators) = std::end(std::get<I>(_iterables))...);
+    }
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -257,23 +260,23 @@ public:
 
 #else
 
-    template<class I = IterTuple,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterTuple>::value>>
+    template<class I = Iterators,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterators>::value>>
     constexpr concatenate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                              std::is_nothrow_default_constructible<IterTuple>::value) {
+                                              std::is_nothrow_default_constructible<Iterators>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 concatenate_iterator(IterTuple iterators, IterTuple begin, SentinelTuple end) :
-        _iterators{ std::move(iterators) },
-        _begin{ std::move(begin) },
-        _end{ std::move(end) } {
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 concatenate_iterator(I&& iterables, Iterators iterators) :
+        _iterators(std::move(iterators)),
+        _iterables(std::forward<I>(iterables)) {
         static_assert(tuple_size > 1, "Cannot concat one/zero iterables");
     }
 
     LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
-        _iterators = _end;
+        assign_sentinels(make_index_sequence<tuple_size>());
         return *this;
     }
 
@@ -303,17 +306,21 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const concatenate_iterator& other) const {
-        LZ_ASSERT(_end == other._end && _begin == other._begin, "Incompatible iterators");
+        LZ_ASSERT(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
+                      end_maybe_homo(_iterables) == end_maybe_homo(other._iterables),
+                  "Incompatible iterators");
         return minus(make_index_sequence<tuple_size>(), other);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& b) const {
-        LZ_ASSERT(_end == b._end && _begin == b._begin, "Incompatible iterators");
-        return iter_equal_to<0>(b._iterators);
+    LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& other) const {
+        LZ_ASSERT(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
+                      end_maybe_homo(_iterables) == end_maybe_homo(other._iterables),
+                  "Incompatible iterators");
+        return iter_equal_to<0>(other._iterators);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
-        return iter_equal_to<0>(_end);
+        return iter_equal_to<0>(end_maybe_homo(_iterables));
     }
 };
 

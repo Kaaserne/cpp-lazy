@@ -12,7 +12,8 @@ namespace detail {
 
 template<class... Iterables>
 class concatenate_iterable : public lazy_view {
-    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
+    using iterables = maybe_homogeneous<ref_or_view<Iterables>...>;
+    iterables _iterables;
 
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
@@ -35,7 +36,7 @@ class concatenate_iterable : public lazy_view {
     using is = make_index_sequence<sizeof...(Iterables)>;
 
 public:
-    using iterator = concatenate_iterator<maybe_homogeneous<iter_t<Iterables>...>, maybe_homogeneous<sentinel_t<Iterables>...>>;
+    using iterator = concatenate_iterator<iterables, maybe_homogeneous<iter_t<Iterables>...>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -54,7 +55,7 @@ public:
 #endif
 
     template<class... Is>
-    LZ_CONSTEXPR_CXX_14 concatenate_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
+    LZ_CONSTEXPR_CXX_14 concatenate_iterable(Is&&... its) : _iterables{ std::forward<Is>(its)... } {
     }
 
     template<class T = conjunction<sized<Iterables>...>>
@@ -62,21 +63,15 @@ public:
         return size(make_index_sequence<sizeof...(Iterables)>{});
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { begin_maybe_homo(_iterables), begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
-    }
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { begin_maybe_homo(std::move(_iterables)), begin_maybe_homo(std::move(_iterables)),
-                 end_maybe_homo(std::move(_iterables)) };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
+        return { _iterables, begin_maybe_homo(_iterables) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ end_maybe_homo(_iterables), begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
+        if constexpr (is_bidi_tag<I>::value && conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value) {
+            return { _iterables, end_maybe_homo(_iterables) };
         }
         else {
             return default_sentinel{};
@@ -84,17 +79,23 @@ public:
     }
 
 #else
+    // clang-format off
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { end_maybe_homo(_iterables), begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<
+        is_bidi_tag<I>::value && conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value, iterator>
+    end() const {
+        return { _iterables, end_maybe_homo(_iterables) };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<
+        !is_bidi_tag<I>::value || !conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value, default_sentinel>
+    end() const {
         return {};
     }
 
+    // clang-format on
 #endif // LZ_HAS_CXX_17
 
     template<class Iterable>
