@@ -11,18 +11,11 @@
 namespace lz {
 namespace detail {
 
-template<class, class>
-class cartesian_product_iterator;
-
-template<class IterTuple, class STuple>
-using default_sentinel_selector =
-    sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, cartesian_product_iterator<IterTuple, STuple>>;
-
 template<class IterTuple, class STuple>
 class cartesian_product_iterator
     : public iterator<cartesian_product_iterator<IterTuple, STuple>, iter_tuple_ref_type_t<IterTuple>,
                       fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                      iter_tuple_iter_cat_t<IterTuple>, default_sentinel_selector<IterTuple, STuple>> {
+                      iter_tuple_iter_cat_t<IterTuple>, default_sentinel> {
 
     static constexpr std::size_t tup_size = std::tuple_size<IterTuple>::value;
 

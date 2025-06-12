@@ -91,7 +91,7 @@ public:
 template<class Iterator, class S>
 class chunks_iterator<Iterator, S, enable_if<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -182,7 +182,7 @@ public:
 template<class Iterable, class Iterator>
 class chunks_iterator<Iterable, Iterator, enable_if<is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterable, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -193,8 +193,8 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterable _iterable;
     Iterator _sub_range_begin;
+    Iterable _iterable;
     std::size_t _chunk_size{};
 
 public:
@@ -216,8 +216,8 @@ public:
 
     template<class I>
     LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const std::size_t chunk_size) :
-        _iterable{ std::forward<I>(iterable) },
         _sub_range_begin{ std::move(it) },
+        _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {
         LZ_ASSERT(_chunk_size != 0, "Can't increment by 0");
     }

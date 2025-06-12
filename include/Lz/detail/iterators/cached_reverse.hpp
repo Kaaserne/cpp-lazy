@@ -12,7 +12,7 @@ namespace detail {
 template<class Iterator>
 class cached_reverse_iterator
     : public iterator<cached_reverse_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, cached_reverse_iterator<Iterator>> {
+                      iter_cat_t<Iterator>, default_sentinel> {
     using traits = std::iterator_traits<Iterator>;
 
     Iterator _iterator;
@@ -90,6 +90,10 @@ public:
 
     constexpr bool eq(const cached_reverse_iterator& other) const {
         return _iterator == other._iterator;
+    }
+    // TODO test
+    constexpr bool eq(default_sentinel) const {
+        return _iterator == _begin;
     }
 };
 
