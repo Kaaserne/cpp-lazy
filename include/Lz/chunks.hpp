@@ -13,10 +13,10 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
  * category is the same as its input iterable. It returns an iterable of iterables. Its end() function will return a sentinel,
- * if the input iterable has a forward iterator. If its input iterable has a .size() method, then this iterable will also have a
- * .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
- * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
- * So, all in all: use lz::cache_size if:
+ * if the input iterable has a forward iterator or has a sentinel. If its input iterable has a .size() method, then this iterable
+ * will also have a .size() method. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example),
+ * the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use
+ * `lz::cache_size`. So, all in all: use lz::cache_size if:
  * - Your iterable is exactly bidirectional (so forward/random access excluded) and
  * - Your iterable is not sized and
  * - You either use multiple/a combination of the following iterables OR (see last point):

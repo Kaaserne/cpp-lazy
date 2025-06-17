@@ -14,8 +14,8 @@ struct take_every_adaptor {
 
     /**
      * @brief Takes every `offset` element from the iterable, starting from `start`. Returns the same iterator category as the
-     * input iterable. Contains a size() method if the input iterable is sized. If input iterable is forward or less, the end()
-     * method will return a default sentinel. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for
+     * input iterable. Contains a size() method if the input iterable is sized. Will return a sentinel if the input iterable
+     * contains a sentinel or is forward. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for
      * example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to
      * use `lz::cache_size`. So, all in all: use lz::cache_size if:
      * - Your iterable is exactly bidirectional (so forward/random access excluded) and

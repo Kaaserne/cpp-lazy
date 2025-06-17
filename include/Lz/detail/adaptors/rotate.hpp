@@ -13,7 +13,7 @@ struct rotate_adaptor {
 
     /**
      * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
-     * Its iterator category is the same as the input iterable. If the input iterable is forward, it
+     * Its iterator category is the same as the input iterable. If the input iterable is forward or has a sentinel, it
      * will return the end type of its input iterable, rather than a rotate_iterator/default_sentinel. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
@@ -36,7 +36,7 @@ struct rotate_adaptor {
 
     /**
      * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
-     * Its iterator category is the same as the input iterable. If the input iterable is forward, it
+     * Its iterator category is the same as the input iterable. If the input iterable is forward or has a sentinel, it
      * will return the end type of its input iterable, rather than a rotate_iterator/default_sentinel. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };

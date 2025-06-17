@@ -13,8 +13,8 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 /**
  * @brief Performs a cartesian product on the given iterables. This means that it will return all possible combinations
  * of the elements of the given iterables. Contains a .size() function if all of the iterables have a .size() function.
- * Returns a sentinel if one of the iterables has a forward iterator. Returns the same iterator category of the 'weakest' input
- * iterables. Example:
+ * Returns a sentinel if one of the iterables has a forward iterator or a sentinel. Returns the same iterator category of the
+ * 'weakest' input iterables. Example:
  * ```cpp
  * std::vector<int> a = {1, 2};
  * std::vector<int> b = {3, 4};

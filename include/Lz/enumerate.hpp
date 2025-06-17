@@ -16,7 +16,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * the value of the input iterable (by reference). The index starts at 0 by default, but can be changed by passing a start
  * value to the function. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire
  * sequence is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`.
- * It will return a `default_sentinel` if the input iterable is forward. The iterator category is the same as its input
+ * It will return a `default_sentinel` if the input iterable is forward or has a sentinel. The iterator category is the same as its input
  * iterable. Example:
  * ```cpp
  * std::forward_list<int> list = {1, 2, 3, 4, 5};

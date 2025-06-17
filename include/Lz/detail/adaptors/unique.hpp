@@ -16,7 +16,8 @@ struct unique_adaptor {
      * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted
      * beforehand. This iterator will 'decay' into a bidirectional one if the input iterator is bidirectional or higher. If the
      * input iterable is not bidirectional or higher, then the output iterator will be forward, and will also return a sentinel,
-     * rather than an iterator. This method does not contain a .size() method. Example:
+     * rather than an iterator. It will also return a sentinel if the input iterable contains a sentinel. This method does not
+     * contain a .size() method. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
      * std::sort(vec.begin(), vec.end());
@@ -37,7 +38,8 @@ struct unique_adaptor {
      * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted
      * beforehand. This iterator will 'decay' into a bidirectional one if the input iterator is bidirectional or higher. If the
      * input iterable is not bidirectional or higher, then the output iterator will be forward, and will also return a sentinel,
-     * rather than an iterator. This method does not contain a .size() method. Example:
+     * rather than an iterator. It will also return a sentinel if the input iterable contains a sentinel.This method does not
+     * contain a .size() method. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 1, 2, 3, 3, 3, 4, 5, 5 };
      * std::sort(vec.begin(), vec.end());

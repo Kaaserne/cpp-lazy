@@ -20,11 +20,11 @@ struct interleave_adaptor {
      * - be by const reference if one of the iterables yield by const reference.
      * - be by mutable reference if all iterables yield by mutable reference.
      * Contains a .size() function if all iterables have a .size() function. The size is the sum of all the sizes of the
-     * iterables. Contains a sentinel if one of the iterables contains a sentinel. Its iterator category is the 'weakest' of the
-     * input iterables. It returns a sentinel if the input iterable has a forward iterator. If its input iterables all have a
-     * .size() method, then this iterable will also have a .size() method. If the input iterable is exactly bidirectional and not
-     * sized (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it
-     * may be worth your while to use `lz::cache_size`. So, all in all: use lz::cache_size if:
+     * iterables. Contains a sentinel if one of the iterables contains a sentinel or if one of them is forward. Its iterator
+     * category is the 'weakest' of the input iterables. It returns a sentinel if the input iterable has a forward iterator. If
+     * its input iterables all have a .size() method, then this iterable will also have a .size() method. If the input iterable is
+     * exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence is traversed to get its end size
+     * (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`. So, all in all: use lz::cache_size if:
      * - Your iterable is exactly bidirectional (so forward/random access excluded) and
      * - Your iterable is not sized and
      * - You either use multiple/a combination of the following iterables OR (see last point):
