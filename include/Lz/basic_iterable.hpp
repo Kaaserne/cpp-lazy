@@ -74,19 +74,16 @@ class sized_iterable_impl : public lazy_view {
     std::size_t _size{};
 
 public:
-    using iterator = bounded_take_iterator<iterator_type, S>;
+    using iterator = I;
     using const_iterator = iterator_type;
     using value_type = val_t<iterator_type>;
     using sentinel = S;
 
-private:
-    using diff_type = typename iterator::difference_type;
-
 public:
     constexpr sized_iterable_impl(iterator_type begin, S end) :
-        _begin{ begin },
-        _end{ end },
-        _size{ static_cast<std::size_t>(end - begin) } {
+        _begin{ std::move(begin) },
+        _end{ std::move(end) },
+        _size{ static_cast<std::size_t>(_end - _begin) } {
     }
 
     template<class Iterable>
