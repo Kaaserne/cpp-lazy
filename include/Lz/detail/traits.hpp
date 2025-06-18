@@ -453,26 +453,6 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
  * ```
  */
 using detail::sized;
-
-/**
- * @brief Selects @p S if @p Tag is not at least bidirectional, otherwise selects @p Iterator.
- *
- * @tparam Tag The iterator category tag to check.
- * @tparam Iterator The iterator type to select if @p Tag is at least bidirectional.
- * @tparam S The sentinel type to select if @p Tag is not at least bidirectional.
- */
-template<class Tag, class Iterator, class S = default_sentinel>
-using sentinel_selector = detail::conditional<!detail::is_bidi_tag<Tag>::value, S, Iterator>;
-
-/**
- * @brief Is @p TagFrom convertible to @p TagTo? If so, return @p TagFrom, otherwise return @p ToDecay.
- *
- * @tparam TagFrom The iterator tag to convert from.
- * @tparam TagTo The iterator tag to convert to.
- * @tparam ToDecay The type to decay to if @p TagFrom is not convertible to @p TagTo.
- */
-template<class TagFrom, class TagTo, class ToDecay>
-using iter_cat_decay = detail::conditional<std::is_convertible<TagFrom, TagTo>::value, TagFrom, ToDecay>;
 } // namespace lz
 
 #endif // LZ_TRAITS_HPP
