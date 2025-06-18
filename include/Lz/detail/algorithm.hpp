@@ -83,6 +83,7 @@ LZ_CONSTEXPR_CXX_14 Iterator min_element(Iterator begin, S end, BinaryPredicate 
 #if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
 
     return max_element(std::move(begin), std::move(end), std::not_fn(std::move(binary_predicate)));
+
 #else
 
     using rt = ref_t<Iterator>;
