@@ -210,8 +210,9 @@ TEST_CASE("zip_longest_iterable binary operations") {
 TEST_CASE("Empty and one element zip longest") {
     SECTION("Empty") {
         std::vector<int> a;
-        std::vector<float> b;
+        auto b = lz::c_string("");
         auto zipper = lz::zip_longest(a, b);
+        static_assert(std::is_same<decltype(zipper.end()), lz::default_sentinel>::value, "should be default sentinel");
         REQUIRE(lz::empty(zipper));
         REQUIRE(!lz::has_one(zipper));
         REQUIRE(!lz::has_many(zipper));

@@ -14,12 +14,20 @@ class exclude_iterable : public lazy_view {
     diff_iterable_t<Iterable> _from{};
     diff_iterable_t<Iterable> _to{};
 
+    using it = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+
 public:
-    using iterator = exclude_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
+    using iterator = exclude_iterator<it, sent>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
 
+private:
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<it, sent>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterable()
@@ -57,7 +65,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             return iterator{ std::end(_iterable), std::end(_iterable), _from, _to,
                              static_cast<typename iterator::difference_type>(lz::eager_size(_iterable)) };
         }
@@ -68,13 +76,13 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
         return { std::end(_iterable), std::end(_iterable), _from, _to,
                  static_cast<typename iterator::difference_type>(lz::eager_size(_iterable)) };
     }
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const {
         return std::end(_iterable);
     }
 

@@ -7,7 +7,7 @@
 #include <Lz/detail/adaptors/as_iterator.hpp>
 
 namespace lz {
-
+// TODO docs
 LZ_INLINE_VAR constexpr detail::as_iterator_adaptor as_iterator{};
 
 template<class Iterable, class IterCat = iter_cat_iterable_t<Iterable>>

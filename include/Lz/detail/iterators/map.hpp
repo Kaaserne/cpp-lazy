@@ -14,8 +14,7 @@ namespace detail {
 template<class Iterator, class S, class UnaryOp>
 class map_iterator
     : public iterator<map_iterator<Iterator, S, UnaryOp>, func_ret_type_iter<UnaryOp, Iterator>,
-                      fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>,
-                      sentinel_selector<iter_cat_t<Iterator>, map_iterator<Iterator, S, UnaryOp>, S>> {
+                      fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
     Iterator _iterator;
     mutable UnaryOp _unary_op;
 

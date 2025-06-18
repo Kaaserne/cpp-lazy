@@ -7,7 +7,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
-
+// TODO bidirectional
 namespace lz {
 namespace detail {
 template<class IterA, class SA, class IterB, class SB, class SelectorA, class SelectorB, class ResultSelector>
@@ -43,17 +43,17 @@ private:
             auto pos = lz::lower_bound(_iterable, to_find,
                                        [this](ref_t<IterB> b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
 
-            if (pos != _iterable.end() && !(to_find < _selector_b(*pos))) {
-                _iterable = lz::basic_iterable<IterB, SB>{ pos, _iterable.end() };
+            if (pos != std::end(_iterable) && !(to_find < _selector_b(*pos))) {
+                _iterable = lz::basic_iterable<IterB, SB>{ pos, std::end(_iterable) };
                 return true;
             }
-            _iterable = lz::basic_iterable<IterB, SB>{ _begin_b, _iterable.end() };
+            _iterable = lz::basic_iterable<IterB, SB>{ _begin_b, std::end(_iterable) };
             return false;
         });
     }
 
 public:
-    using reference = decltype(_result_selector(*_iter_a, *_iterable.begin()));
+    using reference = decltype(_result_selector(*_iter_a, *std::begin(_iterable)));
     using value_type = decay_t<reference>;
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
@@ -81,14 +81,7 @@ public:
                                              std::is_nothrow_default_constructible<SB>::value &&
                                              std::is_nothrow_default_constructible<SelectorA>::value &&
                                              std::is_nothrow_default_constructible<SelectorB>::value &&
-                                             std::is_nothrow_default_constructible<ResultSelector>::value) :
-        _iterable{},
-        _iter_a{},
-        _begin_b{},
-        _end_a{},
-        _selector_a{},
-        _selector_b{},
-        _result_selector{} {
+                                             std::is_nothrow_default_constructible<ResultSelector>::value) {
     }
 
 #endif

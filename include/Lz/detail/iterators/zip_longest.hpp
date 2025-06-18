@@ -69,23 +69,23 @@ using optional_iter_tuple_ref_type = typename optional_iter_tuple_ref_type_helpe
 template<bool, class, class>
 class zip_longest_iterator;
 
-template<class IterTuple, class SentinelTuple>
-class zip_longest_iterator<false /* bidi */, IterTuple, SentinelTuple>
-    : public iterator<zip_longest_iterator<false, IterTuple, SentinelTuple>, optional_iter_tuple_ref_type<IterTuple>,
-                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                      iter_tuple_iter_cat_t<IterTuple>, default_sentinel> {
+template<class IterMaybeHomo, class SMaybeHomo>
+class zip_longest_iterator<false /* bidi */, IterMaybeHomo, SMaybeHomo>
+    : public iterator<zip_longest_iterator<false, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
+                      iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel> {
 public:
-    using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
-    using value_type = optional_value_type_iter_tuple_t<IterTuple>;
-    using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = optional_iter_tuple_ref_type<IterTuple>;
+    using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
+    using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
+    using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
+    using reference = optional_iter_tuple_ref_type<IterMaybeHomo>;
     using pointer = fake_ptr_proxy<value_type>;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
+    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterMaybeHomo>::value>;
 
-    IterTuple _iterators;
-    SentinelTuple _end;
+    IterMaybeHomo _iterators;
+    SMaybeHomo _end;
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 auto
@@ -153,18 +153,18 @@ public:
 
 #else
 
-    template<class I = IterTuple,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SentinelTuple>::value>>
+    template<class I = IterMaybeHomo,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
     constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                              std::is_nothrow_default_constructible<SentinelTuple>::value) {
+                                              std::is_nothrow_default_constructible<SMaybeHomo>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 zip_longest_iterator(IterTuple iterators, SentinelTuple end) :
+    LZ_CONSTEXPR_CXX_14 zip_longest_iterator(IterMaybeHomo iterators, SMaybeHomo end) :
         _iterators{ std::move(iterators) },
         _end{ std::move(end) } {
-        static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
+        static_assert(std::tuple_size<IterMaybeHomo>::value > 1, "Cannot concat one/zero iterables");
     }
 
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel) {
@@ -194,26 +194,26 @@ public:
     }
 };
 
-template<class IterTuple, class SentinelTuple>
-class zip_longest_iterator<true /* bidi */, IterTuple, SentinelTuple>
-    : public iterator<zip_longest_iterator<true, IterTuple, IterTuple>, optional_iter_tuple_ref_type<IterTuple>,
-                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                      iter_tuple_iter_cat_t<IterTuple>> {
+template<class IterMaybeHomo, class SMaybeHomo>
+class zip_longest_iterator<true /* bidi */, IterMaybeHomo, SMaybeHomo>
+    : public iterator<zip_longest_iterator<true, IterMaybeHomo, IterMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
+                      iter_tuple_iter_cat_t<IterMaybeHomo>> {
 public:
-    using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
-    using value_type = optional_value_type_iter_tuple_t<IterTuple>;
-    using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = optional_iter_tuple_ref_type<IterTuple>;
+    using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
+    using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
+    using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
+    using reference = optional_iter_tuple_ref_type<IterMaybeHomo>;
     using pointer = fake_ptr_proxy<value_type>;
 
-    static constexpr std::size_t tuple_size = std::tuple_size<IterTuple>::value;
+    static constexpr std::size_t tuple_size = std::tuple_size<IterMaybeHomo>::value;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
+    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterMaybeHomo>::value>;
     using difference_tuple = decltype(make_homogeneous_of<difference_type>(make_idx_sequence_for_this{}));
 
-    IterTuple _iterators;
-    SentinelTuple _end;
+    IterMaybeHomo _iterators;
+    SMaybeHomo _end;
     difference_tuple _distances;
 
     template<std::size_t I>
@@ -348,15 +348,15 @@ public:
 
 #else
 
-    template<class I = IterTuple,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SentinelTuple>::value>>
+    template<class I = IterMaybeHomo,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
     constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                              std::is_nothrow_default_constructible<SentinelTuple>::value) {
+                                              std::is_nothrow_default_constructible<SMaybeHomo>::value) {
     }
 
 #endif
 
-    constexpr zip_longest_iterator(IterTuple it, SentinelTuple end, difference_tuple distances) :
+    constexpr zip_longest_iterator(IterMaybeHomo it, SMaybeHomo end, difference_tuple distances) :
         _iterators{ std::move(it) },
         _end{ std::move(end) },
         _distances{ distances } {

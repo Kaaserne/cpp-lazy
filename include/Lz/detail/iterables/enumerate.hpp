@@ -11,6 +11,9 @@ namespace lz {
 namespace detail {
 template<class Iterable, class IntType>
 class enumerate_iterable : public lazy_view {
+    using iter = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+
     ref_or_view<Iterable> _iterable;
     IntType _start{};
 
@@ -19,11 +22,15 @@ class enumerate_iterable : public lazy_view {
     }
 
 public:
-    using iterator = enumerate_iterator<iter_t<Iterable>, sentinel_t<Iterable>, IntType>;
+    using iterator = enumerate_iterator<iter, sent, IntType>;
     using const_iterator = iterator;
-    using sentinel = typename iterator::sentinel;
+    using sentinel = sent;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || is_sentinel<iter, sent>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr enumerate_iterable()
@@ -58,7 +65,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             return iterator{ std::end(_iterable), get_last_index() };
         }
         else {
@@ -68,20 +75,20 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
         return { std::end(_iterable), get_last_index() };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const& {
         return std::end(_iterable);
     }
 
 #endif
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() && {
         return { detail::end(std::move(_iterable)), get_last_index() };
     }
 };

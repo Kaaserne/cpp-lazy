@@ -25,6 +25,9 @@ public:
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
+    static constexpr bool return_sentinel = !bidi || disjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterable()
@@ -69,7 +72,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const& {
-        if constexpr (bidi) {
+        if constexpr (!return_sentinel) {
             using diff = typename iterator::difference_type;
             return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
         }
@@ -80,28 +83,28 @@ public:
 
 #else
 
-    template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> begin() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> begin() const& {
         using diff = typename iterator::difference_type;
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
     }
 
-    template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() const& {
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
     }
 
 #endif
 
-    template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
         return { begin_maybe_homo(std::move(_iterables)), end_maybe_homo(std::move(_iterables)) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (bidi) {
+        if constexpr (!return_sentinel) {
             using diff = typename iterator::difference_type;
             return iterator{ end_maybe_homo(_iterables), end_maybe_homo(_iterables),
                              iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
@@ -113,15 +116,15 @@ public:
 
 #else
 
-    template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
         using diff = typename iterator::difference_type;
         return { end_maybe_homo(_iterables), end_maybe_homo(_iterables),
                  iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
     }
 
-    template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, default_sentinel> end() const noexcept {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
         return {};
     }
 

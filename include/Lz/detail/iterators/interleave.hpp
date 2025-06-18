@@ -15,37 +15,36 @@
 namespace lz {
 namespace detail {
 
-template<class IterTuple, class SentinelTuple>
+template<class IterMaybeHomo, class SMaybeHomo>
 class interleave_iterator
-    : public iterator<
-          interleave_iterator<IterTuple, SentinelTuple>, iter_tuple_common_ref_t<IterTuple>,
-          fake_ptr_proxy<iter_tuple_common_ref_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
-          sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, interleave_iterator<IterTuple, SentinelTuple>, SentinelTuple>> {
+    : public iterator<interleave_iterator<IterMaybeHomo, SMaybeHomo>, iter_tuple_common_ref_t<IterMaybeHomo>,
+                      fake_ptr_proxy<iter_tuple_common_ref_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
+                      iter_tuple_iter_cat_t<IterMaybeHomo>, SMaybeHomo> {
 
-    using traits = std::iterator_traits<first_it<IterTuple>>;
+    using traits = std::iterator_traits<first_it<IterMaybeHomo>>;
 
 public:
     using value_type = typename traits::value_type;
-    using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = iter_tuple_common_ref_t<IterTuple>;
+    using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
+    using reference = iter_tuple_common_ref_t<IterMaybeHomo>;
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    static_assert(std::tuple_size<IterTuple>::value <= std::numeric_limits<std::uint_least8_t>::max(),
+    static_assert(std::tuple_size<IterMaybeHomo>::value <= std::numeric_limits<std::uint_least8_t>::max(),
                   "interleave_iterator tuple size exceeds uint_least8_t. This is not supported.");
 
-    static constexpr auto tuple_size = static_cast<std::uint_least8_t>(std::tuple_size<IterTuple>::value);
+    static constexpr auto tuple_size = static_cast<std::uint_least8_t>(std::tuple_size<IterMaybeHomo>::value);
 
-    IterTuple _iterators;
+    IterMaybeHomo _iterators;
     // Using uint_least8_t because generally the max number of function parameters is 256
     std::uint_least8_t _index{};
 
-    using index_sequence_for_this = make_index_sequence<tuple_size>;
+    using is = make_index_sequence<tuple_size>;
 
 #ifdef LZ_HAS_CXX_17
 
     template<std::size_t I>
-    constexpr bool eq(const SentinelTuple& other) const {
+    constexpr bool eq(const SMaybeHomo& other) const {
         if constexpr (I != tuple_size - 1) {
             return std::get<I>(_iterators) == std::get<I>(other) ? _index == 0 : eq<I + 1>(other);
         }
@@ -153,7 +152,7 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SentinelTuple& end, index_sequence<I...>) {
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& end, index_sequence<I...>) {
         decompose(std::get<I>(_iterators) = std::get<I>(end)...);
     }
 
@@ -166,18 +165,18 @@ public:
 
 #else
 
-    template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = IterMaybeHomo, class = enable_if<std::is_default_constructible<I>::value>>
     constexpr interleave_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 interleave_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
+    LZ_CONSTEXPR_CXX_14 interleave_iterator(IterMaybeHomo iterators) : _iterators{ std::move(iterators) } {
         static_assert(tuple_size > 1, "interleaved_iterator must have at least two iterators");
     }
 
-    LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const SentinelTuple& end) {
-        assign_sentinels(end, index_sequence_for_this{});
+    LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const SMaybeHomo& end) {
+        assign_sentinels(end, is{});
         _index = 0;
         return *this;
     }
@@ -191,15 +190,15 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        increment(index_sequence_for_this{});
+        increment(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        decrement(index_sequence_for_this{});
+        decrement(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const interleave_iterator& other) const {
-        return difference(other, index_sequence_for_this{});
+        return difference(other, is{});
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
@@ -213,7 +212,7 @@ public:
 
         if (n > 0) {
             const auto u_n = static_cast<unsigned_diff>(n);
-            plus_is(n_plus_index / static_cast<difference_type>(tuple_size), index_sequence_for_this{});
+            plus_is(n_plus_index / static_cast<difference_type>(tuple_size), is{});
             // clang-format off
             _index = u_tup_size * (u_n / tuple_size) == u_n
                          ? 0 : static_cast<std::uint_least8_t>(static_cast<std::size_t>(n_plus_index) % u_tup_size);
@@ -223,7 +222,7 @@ public:
 
         const auto u_n = static_cast<unsigned_diff>(-n);
         constexpr auto s_tuple_size = static_cast<difference_type>(tuple_size);
-        plus_is((n_plus_index - s_tuple_size + 1) / s_tuple_size, index_sequence_for_this{});
+        plus_is((n_plus_index - s_tuple_size + 1) / s_tuple_size, is{});
         // clang-format off
         _index = u_tup_size * (u_n / tuple_size) == u_n ? 
             0 : static_cast<std::uint_least8_t>((tuple_size + n_plus_index % s_tuple_size) % tuple_size);
@@ -234,7 +233,7 @@ public:
         return eq<0>(other);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const SentinelTuple& last) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const SMaybeHomo& last) const {
         return eq<0>(last);
     }
 };

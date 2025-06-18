@@ -7,6 +7,7 @@
 Examples can be found [here](https://github.com/MarcDirven/cpp-lazy/tree/master/examples). Installation can be found [here](https://github.com/MarcDirven/cpp-lazy#installation).
 
 # cpp-lazy
+// TODO fix readme after using correct sentinels
 `cpp-lazy` is an easy and fast lazy evaluation library for C++11/14/17/20. The library tries to reduce redundant data usage for begin/end iterator pairs. Also internally this is done through template specialization for forward, bidirectional and random access iterators. For instance: `lz::random_iterable::end()` will return a `lz::default_sentinel` to prevent duplicate data that is also present in `lz::random_iterable::begin()`. If a 'symmetrical' end-begin iterator pair is needed, one can use `lz::common` or `lz::common_random`.
 
 The library uses one optional dependency: the library `{fmt}`, more of which can be found out in the [installation section](https://github.com/MarcDirven/cpp-lazy#Installation). This dependency is only used for printing and formatting.

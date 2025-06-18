@@ -14,12 +14,20 @@ class map_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     func_container<UnaryOp> _unary_op;
 
+    using iter = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+
 public:
-    using iterator = map_iterator<iter_t<Iterable>, sentinel_t<Iterable>, func_container<UnaryOp>>;
-    using sentinel = typename iterator::sentinel;
+    using iterator = map_iterator<iter, sent, func_container<UnaryOp>>;
+    using sentinel = sent;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter, sent>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr map_iterable()
@@ -50,7 +58,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() && {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             return { detail::begin(std::move(_iterable)), _unary_op };
         }
         else {
@@ -60,13 +68,13 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> begin() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> begin() && {
         return { detail::begin(std::move(_iterable)), _unary_op };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
         return { detail::begin(std::move(_iterable)), std::move(_unary_op) };
     }
 
@@ -76,15 +84,15 @@ public:
         return { std::begin(_iterable), _unary_op };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() && {
         return { detail::end(std::move(_iterable)), _unary_op };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             return iterator{ std::end(_iterable), _unary_op };
         }
         else {
@@ -94,13 +102,13 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
         return { std::end(_iterable), _unary_op };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const& {
         return std::end(_iterable);
     }
 

@@ -66,8 +66,8 @@ class flatten_wrapper;
 template<class Iterator, class S>
 class flatten_wrapper<Iterator, S, enable_if<is_bidi<Iterator>::value>>
     : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, flatten_wrapper<Iterator, S>> {
-
+                      iter_cat_t<Iterator>, default_sentinel> {
+// TODO use iterable
     Iterator _begin{};
     Iterator _iterator{};
     S _end{};
@@ -278,8 +278,7 @@ using iter_cat = common_type<iter_cat_t<inner<Iterator, N>>, iter_cat_t<flatten_
 template<class Iterator, class S, std::size_t N>
 class flatten_iterator
     : public iterator<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>, fake_ptr_proxy<ref_t<inner<Iterator, N>>>,
-                      diff_type<inner<Iterator, N>>, iter_cat<Iterator, S, N>,
-                      sentinel_selector<iter_cat<Iterator, S, N>, flatten_iterator<Iterator, S, N>>> {
+                      diff_type<inner<Iterator, N>>, iter_cat<Iterator, S, N>, default_sentinel> {
 
     using this_inner = inner<Iterator, N>;
 
@@ -537,8 +536,7 @@ template<class Iterator, class S>
 class flatten_iterator<Iterator, S, 0>
     : public iterator<flatten_iterator<Iterator, S, 0>, ref_t<flatten_wrapper<Iterator, S>>,
                       fake_ptr_proxy<ref_t<flatten_wrapper<Iterator, S>>>, diff_type<flatten_wrapper<Iterator, S>>,
-                      iter_cat_t<flatten_wrapper<Iterator, S>>,
-                      sentinel_selector<iter_cat_t<flatten_wrapper<Iterator, S>>, flatten_iterator<Iterator, S, 0>>> {
+                      iter_cat_t<flatten_wrapper<Iterator, S>>, default_sentinel> {
 
     flatten_wrapper<Iterator, S> _iterator;
     using traits = std::iterator_traits<Iterator>;
@@ -588,7 +586,7 @@ public:
         return _iterator.has_next_inner();
     }
 
-    void initialize_last() {
+    LZ_CONSTEXPR_CXX_14 void initialize_last() {
         _iterator.initialize_last();
     }
 
