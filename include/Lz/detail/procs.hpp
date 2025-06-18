@@ -58,7 +58,7 @@ template<class... Ts>
 LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
 }
 
-// next_fast: check whether it's faster to go forward or backward when incrementing n steps
+// next_fast(_safe): check whether it's faster to go forward or backward when incrementing n steps
 // Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
 // for random access iterators this is O(1) anyway. For forward iterators this is not O(1),
 // but we can't go any other way than forward. Random access iterators will use the same
@@ -68,21 +68,37 @@ LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
-    if constexpr (!sized<I>::value || !std::is_same_v<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>) {
-        using diff_type = diff_iterable_t<I>;
-        return std::next(detail::begin(std::forward<I>(iterable)), static_cast<diff_type>(n));
-    }
-    else {
-        using diff_type = diff_iterable_t<I>;
-        const auto size = static_cast<diff_type>(lz::size(iterable));
+    using iter = iter_t<I>;
+
+    if constexpr (sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value) {
+        const auto size = static_cast<diff_iterable_t<I>>(lz::size(iterable));
         if (n > size / 2) {
             return std::prev(detail::end(std::forward<I>(iterable)), size - n);
         }
-        return std::next(detail::begin(std::forward<I>(iterable)), n);
     }
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
 }
 
-// clang-format on
+template<class I>
+constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+    using diff_type = diff_iterable_t<I>;
+
+    auto begin = std::begin(iterable);
+    auto end = std::end(iterable);
+
+    if constexpr (sized<I>::value && is_bidi<iter_t<I>>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value) {
+        const auto size = static_cast<diff_type>(lz::size(iterable));
+        if (n >= size) {
+            return end;
+        }
+        return next_fast(std::forward<I>(iterable), n);
+    }
+    else {
+        for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
+        }
+        return begin;
+    }
+}
 
 template<class Iterator, class S>
 constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
@@ -99,12 +115,11 @@ constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
 
 #else
 
-// clang-format off
-
 template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-enable_if<sized<I>::value && std::is_same<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>::value, iter_t<I>>
-next_fast(I&& iterable, const diff_iterable_t<I> n) {
+LZ_NODISCARD
+    LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value, iter_t<I>>
+    next_fast(I&& iterable, const diff_iterable_t<I> n) {
+
     using diff_type = diff_iterable_t<I>;
     const auto size = static_cast<diff_type>(lz::size(iterable));
     if (n > size / 2) {
@@ -114,14 +129,39 @@ next_fast(I&& iterable, const diff_iterable_t<I> n) {
 }
 
 template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-enable_if<!sized<I>::value || !std::is_same<iter_cat_iterable_t<I>, std::bidirectional_iterator_tag>::value, iter_t<I>>
-next_fast(I&& iterable, diff_iterable_t<I> n) {
-    using diff_type = diff_iterable_t<I>;
-    return std::next(detail::begin(std::forward<I>(iterable)), static_cast<diff_type>(n));
+LZ_NODISCARD
+    LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value || is_sentinel<iter, sentinel_t<I>>::value || !is_bidi<iter>::value, iter_t<I>>
+    next_fast(I&& iterable, diff_iterable_t<I> n) {
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
 }
 
-// clang-format on
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+    enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+
+    using diff_type = diff_iterable_t<I>;
+    const auto size = static_cast<diff_type>(lz::size(iterable));
+    if (n >= size) {
+        return end;
+    }
+    return next_fast(std::forward<I>(iterable), n);
+}
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+    enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+
+    using diff_type = diff_iterable_t<I>;
+
+    auto begin = detail::begin(std::forward<I>(iterable));
+    const auto end = detail::end(std::forward<I>(iterable));
+
+    for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
+    }
+    return begin;
+}
 
 template<class Iterator, class S>
 LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
