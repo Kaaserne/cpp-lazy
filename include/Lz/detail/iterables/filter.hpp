@@ -15,12 +15,20 @@ class filter_iterable : public lazy_view {
     ref_or_view<Iterable> _iterable;
     func_container<UnaryPredicate> _predicate;
 
+    using it = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+
 public:
-    using iterator = filter_iterator<iter_t<Iterable>, sentinel_t<Iterable>, func_container<UnaryPredicate>>;
+    using iterator = filter_iterator<ref_or_view<Iterable>, func_container<UnaryPredicate>>;
     using const_iterator = iterator;
     using sentinel = typename iterator::sentinel;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<it, sent>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr filter_iterable()
@@ -44,19 +52,19 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
+        return { _iterable, std::begin(_iterable), _predicate };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { std::begin(_iterable), std::begin(_iterable), detail::end(std::move(_iterable)), std::move(_predicate) };
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
+        return { _iterable, std::begin(_iterable), std::move(_predicate) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ std::end(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
+        if constexpr (!return_sentinel) {
+            return iterator{ _iterable, std::end(_iterable), _predicate };
         }
         else {
             return default_sentinel{};
@@ -65,13 +73,13 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable), _predicate };
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+        return { _iterable, std::end(_iterable), _predicate };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const noexcept {
         return {};
     }
 

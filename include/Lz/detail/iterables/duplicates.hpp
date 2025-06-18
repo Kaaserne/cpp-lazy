@@ -22,6 +22,8 @@ private:
     ref_or_view<Iterable> _iterable;
     func_container<BinaryPredicate> _compare;
 
+    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || is_sentinel<it, sent>::value;
+
 public:
 #ifdef LZ_HAS_CONCEPTS
 
@@ -49,15 +51,15 @@ public:
         return { _iterable, std::begin(_iterable), _compare };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value || is_sentinel<it, sent>::value, iterator> begin() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
         return { _iterable, std::begin(_iterable), std::move(_compare) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value && !is_sentinel<it, sent>::value) {
+        if constexpr (!return_sentinel) {
             return iterator{ _iterable, std::end(_iterable), _compare };
         }
         else {
@@ -67,13 +69,13 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_sentinel<it, sent>::value, iterator> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
         return { _iterable, std::end(_iterable), _compare };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value || is_sentinel<it, sent>::value, default_sentinel> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const {
         return {};
     }
 

@@ -15,6 +15,7 @@ class except_iterator
     : public iterator<except_iterator<Iterable, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
                       common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+
     using iter = iter_t<Iterable>;
     using iter_traits = std::iterator_traits<iter>;
 
@@ -46,17 +47,19 @@ public:
 
     constexpr except_iterator()
         requires std::default_initializable<Iterable> && std::default_initializable<Iterable2> &&
-                     std::default_initializable<BinaryPredicate>
+                     std::default_initializable<BinaryPredicate> && std::default_initializable<iter>
     = default;
 
 #else
 
-    template<class I = Iterable,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+    template<
+        class I = Iterable,
+        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
+                          std::is_default_constructible<BinaryPredicate>::value && std::is_default_constructible<iter>::value>>
     constexpr except_iterator() noexcept(std::is_nothrow_default_constructible<Iterable2>::value &&
                                          std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<BinaryPredicate>::value) {
+                                         std::is_nothrow_default_constructible<BinaryPredicate>::value &&
+                                         std::is_nothrow_default_constructible<iter>::value) {
     }
 
 #endif
@@ -104,8 +107,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 bool eq(const except_iterator& b) const {
         LZ_ASSERT(std::end(_iterable) == std::end(b._iterable) && std::begin(_iterable) == std::begin(b._iterable) &&
-                      std::begin(_to_except) == std::begin(b._to_except) && std::end(_to_except) == std::end(b._to_except) &&
-                      lz::size(b._to_except) == lz::size(_to_except),
+                      std::begin(_to_except) == std::begin(b._to_except) && std::end(_to_except) == std::end(b._to_except),
                   "Incompatible iterators");
         return _iterator == b._iterator;
     }

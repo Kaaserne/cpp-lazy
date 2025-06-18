@@ -5,7 +5,8 @@
 
 #include <Lz/detail/iterators/take_every.hpp>
 #include <Lz/detail/ref_or_view.hpp>
-
+// TODO edit all docs "or has a sentinel itself"
+// TODO also add "or decay to a forward iterator using lz::iter_decay" to the docs
 namespace lz {
 namespace detail {
 
@@ -15,74 +16,17 @@ namespace detail {
 
 #ifdef LZ_HAS_CXX_17
 
-template<class I>
-constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-    using diff_type = diff_iterable_t<I>;
-
-    auto begin = detail::begin(std::forward<I>(iterable));
-    auto end = detail::end(std::forward<I>(iterable));
-
-    if constexpr (sized<I>::value) {
-        const auto size = static_cast<diff_type>(lz::size(iterable));
-        if (n > size / 2) {
-
-            for (diff_type i = 0; i < (size - n) && begin != end; ++i, --end) {
-            }
-            return end;
-        }
-
-        for (diff_type i = 0; i < n && begin != end; ++begin, ++i) {
-        }
-        return begin;
-    }
-    else {
-        for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
-        }
-        return begin;
-    }
-}
-
 #else
-
-template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, iter_t<I>> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-    using diff_type = diff_iterable_t<I>;
-
-    const auto size = static_cast<diff_type>(lz::size(iterable));
-    auto begin = detail::begin(std::forward<I>(iterable));
-    auto end = detail::end(std::forward<I>(iterable));
-
-    if (n > size / 2) {
-        for (diff_type i = 0; i < (size - n) && begin != end; ++i, --end) {
-        }
-        return end;
-    }
-
-    for (diff_type i = 0; i < n && begin != end; ++begin, ++i) {
-    }
-    return begin;
-}
-
-template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value, iter_t<I>> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-    using diff_type = diff_iterable_t<I>;
-
-    auto begin = detail::begin(std::forward<I>(iterable));
-    const auto end = detail::end(std::forward<I>(iterable));
-
-    for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
-    }
-    return begin;
-}
 
 #endif
 
 template<class Iterable>
 class take_every_iterable : public lazy_view {
-    using inner_iter = iter_t<Iterable>;
+    using iter = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
 
 public:
-    using iterator = take_every_iterator<inner_iter, sentinel_t<Iterable>>;
+    using iterator = take_every_iterator<ref_or_view<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -91,8 +35,8 @@ private:
     std::size_t _offset{};
     std::size_t _start{};
 
-    template<class I = inner_iter>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, inner_iter> get_begin() const {
+    template<class I = iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iter> get_begin() const {
         if (_start >= static_cast<std::size_t>(std::end(_iterable) - std::begin(_iterable))) {
             return std::end(_iterable);
         }
@@ -100,6 +44,9 @@ private:
     }
 
     using diff_type = typename iterator::difference_type;
+
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter_t<Iterable>, sent>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -198,7 +145,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (!is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (return_sentinel) {
             return default_sentinel{};
         }
         else if constexpr (std::is_same_v<typename iterator::iterator_category, std::bidirectional_iterator_tag>) {
@@ -214,19 +161,22 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() const {
         // random access iterator can go both ways O(1), no need to use next_fast_safe
         auto start_pos = get_begin();
         return { std::end(_iterable), start_pos, std::end(_iterable), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+        // std::is_same is not the same as is_bidi_tag, explicitly check for bidirectional iterator tag
+        enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value && !is_sentinel<iter, sent>::value, iterator>
+        end() const {
         return { std::end(_iterable), std::end(_iterable), _offset, lz::eager_size(_iterable) - _start };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const noexcept {
+    template<bool R = return_sentinel> // checks for not bidirectional or if is sentinel
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
         return {};
     }
 

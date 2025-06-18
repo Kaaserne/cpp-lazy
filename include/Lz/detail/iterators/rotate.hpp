@@ -10,12 +10,12 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S>
-class rotate_iterator
-    : public iterator<rotate_iterator<Iterator, S>, ref_t<Iterator>, ptr_t<Iterator>, diff_type<Iterator>, iter_cat_t<Iterator>,
-                      sentinel_selector<iter_cat_t<Iterator>, rotate_iterator<Iterator, S>, Iterator>> {
+template<class Iterable>
+class rotate_iterator : public iterator<rotate_iterator<Iterable>, ref_t<iter_t<Iterable>>, ptr_t<iter_t<Iterable>>,
+                                        diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, iter_t<Iterable>> {
 
-    using traits = std::iterator_traits<Iterator>;
+    using iter = iter_t<Iterable>;
+    using traits = std::iterator_traits<iter>;
 
 public:
     using reference = typename traits::reference;
@@ -24,9 +24,8 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    Iterator _iterator;
-    Iterator _begin;
-    S _end;
+    iter _iterator;
+    Iterable _iterable;
     std::size_t _offset{};
 
 public:
@@ -38,22 +37,22 @@ public:
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr rotate_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
-                                         std::is_nothrow_default_constructible<S>::value) {
+    template<class I = iter,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    constexpr rotate_iterator() noexcept(std::is_nothrow_default_constructible<iter>::value &&
+                                         std::is_nothrow_default_constructible<Iterable>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 rotate_iterator(Iterator begin, S end, Iterator start, const std::size_t offset) :
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 rotate_iterator(I&& iterable, iter start, const std::size_t offset) :
         _iterator{ std::move(start) },
-        _begin{ std::move(begin) },
-        _end{ std::move(end) },
+        _iterable{ std::forward<I>(iterable) },
         _offset{ offset } {
     }
 
-    LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const Iterator& end) {
+    LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const iter& end) {
         _iterator = end;
         _offset = std::numeric_limits<std::size_t>::max();
         return *this;
@@ -70,34 +69,35 @@ public:
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
         ++_offset;
-        if (_iterator == _end) {
-            _iterator = _begin;
+        if (_iterator == std::end(_iterable)) {
+            _iterator = std::begin(_iterable);
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        if (_iterator == _begin) {
-            _iterator = _end;
+        if (_iterator == std::begin(_iterable)) {
+            _iterator = std::end(_iterable);
         }
         --_iterator;
         --_offset;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
-        LZ_ASSERT((n < 0 ? -n : n) <= (_end - _begin), "Cannot increment/decrement after fake iterator end/begin");
+        LZ_ASSERT((n < 0 ? -n : n) <= (std::end(_iterable) - std::begin(_iterable)),
+                  "Cannot increment/decrement after fake iterator end/begin");
         _offset += static_cast<std::size_t>(n);
         if (n < 0) {
             n = -n;
-            if (n > _iterator - _begin) {
-                _iterator = _end - (n - (_iterator - _begin));
+            if (n > _iterator - std::begin(_iterable)) {
+                _iterator = std::end(_iterable) - (n - (_iterator - std::begin(_iterable)));
             }
             else {
                 _iterator += -n;
             }
             return;
         }
-        if (n >= _end - _iterator) {
-            _iterator = _begin + (n - (_end - _iterator));
+        if (n >= std::end(_iterable) - _iterator) {
+            _iterator = std::begin(_iterable) + (n - (std::end(_iterable) - _iterator));
         }
         else {
             _iterator += n;
@@ -105,17 +105,19 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
-        LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
-        return static_cast<difference_type>(_offset - other._offset);
+        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
+                  "Incompatible iterators");
+        return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& b) const {
-        LZ_ASSERT(_begin == b._begin && _end == b._end, "Incompatible iterators");
+        LZ_ASSERT(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable),
+                  "Incompatible iterators");
         return _offset == b._offset;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const Iterator& b) const {
-        if (_offset == 0 && _iterator != _end) {
+    LZ_CONSTEXPR_CXX_14 bool eq(const iter& b) const {
+        if (_offset == 0 && _iterator != std::end(_iterable)) {
             return false;
         }
         return _iterator == b;

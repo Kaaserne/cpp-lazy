@@ -40,6 +40,11 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel = !is_bidi_tag<typename iterator::iterator_category>::value ||
+                                            !conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr concatenate_iterable()
@@ -70,8 +75,8 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<I>::value && conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value) {
-            return { _iterables, end_maybe_homo(_iterables) };
+        if constexpr (!return_sentinel) {
+            return iterator{ _iterables, end_maybe_homo(_iterables) };
         }
         else {
             return default_sentinel{};
@@ -79,19 +84,14 @@ public:
     }
 
 #else
-    // clang-format off
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<
-        is_bidi_tag<I>::value && conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value, iterator>
-    end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
         return { _iterables, end_maybe_homo(_iterables) };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<
-        !is_bidi_tag<I>::value || !conjunction<std::is_same<iter_t<Iterables>, sentinel_t<Iterables>>...>::value, default_sentinel>
-    end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const {
         return {};
     }
 

@@ -270,8 +270,8 @@ public:
 
     template<class I>
     LZ_CONSTEXPR_CXX_14 concatenate_iterator(I&& iterables, Iterators iterators) :
-        _iterators(std::move(iterators)),
-        _iterables(std::forward<I>(iterables)) {
+        _iterators{ std::move(iterators) },
+        _iterables{ std::forward<I>(iterables) } {
         static_assert(tuple_size > 1, "Cannot concat one/zero iterables");
     }
 

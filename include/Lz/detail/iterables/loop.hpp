@@ -17,10 +17,15 @@ class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
     std::size_t _amount{};
 
 public:
-    using iterator = loop_iterator<iter_t<Iterable>, sentinel_t<Iterable>, false>;
+    using iterator = loop_iterator<ref_or_view<Iterable>, false>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterable()
@@ -45,36 +50,29 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        auto first = detail::begin(_iterable);
-        auto last = detail::end(_iterable);
+        auto first = std::begin(_iterable);
         if (_amount == 0) {
-            first = last;
-            return { first, first, last, _amount };
+            first = std::end(_iterable);
+            return { _iterable, first, _amount };
         }
-        return { first, first, last, _amount - 1 };
+        return { _iterable, first, _amount - 1 };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
         auto first = detail::begin(std::move(_iterable));
-        auto last = detail::end(std::move(_iterable));
         if (_amount == 0) {
-            first = last;
-            return { first, first, last, _amount };
+            first = detail::end(std::move(_iterable));
+            return { _iterable, first, _amount };
         }
-        return { first, first, last, _amount - 1 };
+        return { _iterable, first, _amount - 1 };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            auto first = detail::begin(_iterable);
-            auto last = detail::end(_iterable);
-            if (_amount == 0) {
-                first = last;
-            }
-            return iterator{ last, first, last, 0 };
+        if constexpr (!return_sentinel) {
+            return iterator{ _iterable, std::end(_iterable), 0 };
         }
         else {
             return default_sentinel{};
@@ -83,18 +81,13 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
-        auto first = detail::begin(_iterable);
-        auto last = detail::end(_iterable);
-        if (_amount == 0) {
-            first = last;
-        }
-        return { last, first, last, 0 };
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+        return iterator{ _iterable, std::end(_iterable), 0 };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const {
         return {};
     }
 
@@ -106,7 +99,7 @@ class loop_iterable<Iterable, true /* is inf loop */> : public lazy_view {
     ref_or_view<Iterable> _iterable;
 
 public:
-    using iterator = loop_iterator<iter_t<Iterable>, sentinel_t<Iterable>, true>;
+    using iterator = loop_iterator<ref_or_view<Iterable>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -129,11 +122,11 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), std::end(_iterable) };
+        return { _iterable, std::begin(_iterable) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)) };
+        return { _iterable, detail::begin(std::move(_iterable)) };
     }
 
     LZ_NODISCARD constexpr default_sentinel end() const {

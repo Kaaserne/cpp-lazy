@@ -24,6 +24,11 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    using iter = iter_t<Iterable1>;
+    static constexpr bool return_sentinel = !is_bidi<iter>::value || is_sentinel<iter, sentinel_t<Iterable1>>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr except_iterable()
@@ -54,28 +59,20 @@ public:
         return { _iterable1, std::begin(_iterable1), _iterable2, _binary_predicate };
     }
 
-    template<class I = iter_t<Iterable1>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<I>::value || is_sentinel<I, sentinel_t<Iterable1>>::value, iterator>
-    begin() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
         return { _iterable1, std::begin(_iterable1), std::move(_iterable2), std::move(_binary_predicate) };
     }
 
-    template<class I = iter_t<Iterable1>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi<I>::value && !is_sentinel<I, sentinel_t<Iterable1>>::value, iterator>
-    end() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
         return { _iterable1, std::end(_iterable1), _iterable2, _binary_predicate };
     }
 
-    // clang-format off
-
-    template<class I = iter_t<Iterable1>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<!is_bidi<I>::value || is_sentinel<I, sentinel_t<Iterable1>>::value, default_sentinel>
-    end() const noexcept {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
         return {};
     }
-
-    // clang-format on
 };
 } // namespace detail
 } // namespace lz

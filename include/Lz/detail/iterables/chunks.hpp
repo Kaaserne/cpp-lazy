@@ -49,7 +49,7 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr iterator begin() const& {
+    [[nodiscard]] constexpr auto begin() const& {
         if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
             return iterator{ _iterable, std::begin(_iterable), _chunk_size };
         }
@@ -75,7 +75,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> begin() const& {
-        return iterator{ _iterable, std::begin(_iterable), _chunk_size };
+        return { _iterable, std::begin(_iterable), _chunk_size };
     }
 
 #endif
@@ -88,10 +88,11 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
-        if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
+        constexpr auto is_sent = is_sentinel<inner, sentinel_t<Iterable>>::value;
+        if constexpr (is_ra_tag<typename iterator::iterator_category>::value && !is_sent) {
             return iterator{ _iterable, std::end(_iterable), _chunk_size };
         }
-        else if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        else if constexpr (is_bidi_tag<typename iterator::iterator_category>::value && !is_sent) {
             return iterator{ std::end(_iterable), std::end(_iterable), _chunk_size, lz::eager_size(_iterable) };
         }
         else {
@@ -102,17 +103,21 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value && !is_sentinel<inner, sentinel_t<Iterable>>::value, iterator>
+    end() const& {
         return { _iterable, std::end(_iterable), _chunk_size };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_ra_tag<I>::value, iterator> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+        enable_if<is_bidi_tag<I>::value && !is_ra_tag<I>::value && !is_sentinel<inner, sentinel_t<Iterable>>::value, iterator>
+        end() const& {
         return { std::end(_iterable), std::end(_iterable), _chunk_size, lz::eager_size(_iterable) };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<is_fwd_tag<I>::value && !is_bidi_tag<I>::value, default_sentinel> end() const& {
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value || is_sentinel<inner, sentinel_t<Iterable>>::value, default_sentinel>
+    end() const& {
         return {};
     }
 

@@ -10,19 +10,18 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, bool /* is inf */>
+template<class Iterable, bool /* is inf */>
 class loop_iterator;
 
-template<class Iterator, class S>
-class loop_iterator<Iterator, S, false>
-    : public iterator<loop_iterator<Iterator, S, false>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, sentinel_selector<iter_cat_t<Iterator>, loop_iterator<Iterator, S, false>>> {
+template<class Iterable>
+class loop_iterator<Iterable, false>
+    : public iterator<loop_iterator<Iterable, false>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+    using it = iter_t<Iterable>;
+    using traits = std::iterator_traits<it>;
 
-    using traits = std::iterator_traits<Iterator>;
-
-    Iterator _begin;
-    Iterator _iterator;
-    S _end;
+    it _iterator;
+    Iterable _iterable;
     std::size_t _rotations_left{};
 
 public:
@@ -30,7 +29,6 @@ public:
     using value_type = typename traits::value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
-    using iterator_category = typename traits::iterator_category;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -40,23 +38,24 @@ public:
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr loop_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
-                                       std::is_nothrow_default_constructible<S>::value) {
+    template<class I = it,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    constexpr loop_iterator() noexcept(std::is_nothrow_default_constructible<it>::value &&
+                                       std::is_nothrow_default_constructible<Iterable>::value) {
     }
 
 #endif
 
-    constexpr loop_iterator(Iterator it, Iterator begin, S end, std::size_t amount) :
-        _begin{ std::move(begin) },
-        _iterator{ std::move(it) },
-        _end{ std::move(end) },
+    template<class I>
+    constexpr loop_iterator(I&& iterable, it iter, std::size_t amount) :
+        _iterator{ std::move(iter) },
+        _iterable{ std::forward<I>(iterable) },
         _rotations_left{ amount } {
     }
 
     LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel) {
         _rotations_left = 0;
+        // We don't set _iterator to end here otherwise eq will return true
         return *this;
     }
 
@@ -70,66 +69,68 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
-        if (_iterator == _end) {
+        if (_iterator == std::end(_iterable)) {
             --_rotations_left;
-            _iterator = _begin;
+            _iterator = std::begin(_iterable);
         }
         if (static_cast<difference_type>(_rotations_left) == -1) {
-            _iterator = _end;
+            _iterator = std::end(_iterable);
             _rotations_left = 0;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_iterator;
-        if (_iterator == _begin) {
-            _iterator = _end;
+        if (_iterator == std::begin(_iterable)) {
+            _iterator = std::end(_iterable);
             ++_rotations_left;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
-        const auto iter_length = _end - _begin;
+        const auto iter_length = std::end(_iterable) - std::begin(_iterable);
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
         _rotations_left -= static_cast<std::size_t>(offset / iter_length);
-        if (_iterator == _begin && static_cast<difference_type>(_rotations_left) == -1) {
+        if (_iterator == std::begin(_iterable) && static_cast<difference_type>(_rotations_left) == -1) {
             // We are exactly at end (rotations left is unsigned)
-            _iterator = _end;
+            _iterator = std::end(_iterable);
             _rotations_left = 0;
         }
-        else if (_iterator == _end && offset < 0 && remainder == 0) {
-            _iterator = _begin;
+        else if (_iterator == std::end(_iterable) && offset < 0 && remainder == 0) {
+            _iterator = std::begin(_iterable);
             --_rotations_left;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& other) const {
-        LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
+        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
+                  "Incompatible iterators");
         const auto rotations_left_diff = static_cast<difference_type>(other._rotations_left - _rotations_left);
-        return (_iterator - other._iterator) + rotations_left_diff * (_end - _begin);
+        return (_iterator - other._iterator) + rotations_left_diff * (std::end(_iterable) - std::begin(_iterable));
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const loop_iterator& other) const {
-        LZ_ASSERT(_begin == other._begin && _end == other._end, "Incompatible iterators");
+        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
+                  "Incompatible iterators");
         return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _rotations_left == 0 && _iterator == _end;
+        return _rotations_left == 0 && _iterator == std::end(_iterable);
     }
 };
 
-template<class Iterator, class S>
-class loop_iterator<Iterator, S, true>
-    : public iterator<loop_iterator<Iterator, S, true>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, default_sentinel> {
+template<class Iterable>
+class loop_iterator<Iterable, true>
+    : public iterator<loop_iterator<Iterable, true>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
 
-    using traits = std::iterator_traits<Iterator>;
+    using it = iter_t<Iterable>;
+    using traits = std::iterator_traits<it>;
 
-    Iterator _iterator;
-    Iterator _begin;
-    S _end;
+    it _iterator;
+    Iterable _iterable;
 
 public:
     using reference = typename traits::reference;
@@ -141,20 +142,21 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires std::default_initializable<Iterable> && std::default_initializable<it>
     = default;
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr loop_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
-                                       std::is_nothrow_default_constructible<S>::value) {
+    template<class I = it,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    constexpr loop_iterator() noexcept(std::is_nothrow_default_constructible<it>::value &&
+                                       std::is_nothrow_default_constructible<Iterable>::value) {
     }
 
 #endif
 
-    constexpr loop_iterator(Iterator begin, S end) : _iterator{ begin }, _begin{ std::move(begin) }, _end{ std::move(end) } {
+    template<class I>
+    constexpr loop_iterator(I&& iterable, it iter) : _iterator{ std::move(iter) }, _iterable{ std::forward<I>(iterable) } {
     }
 
     LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel) noexcept {
@@ -171,8 +173,8 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
-        if (_iterator == _end) {
-            _iterator = _begin;
+        if (_iterator == std::end(_iterable)) {
+            _iterator = std::begin(_iterable);
         }
     }
 
@@ -186,7 +188,7 @@ public:
 #endif
 
     constexpr bool eq(default_sentinel) const {
-        return _begin == _end;
+        return std::begin(_iterable) == std::end(_iterable);
     }
 
 #ifdef _MSC_VER

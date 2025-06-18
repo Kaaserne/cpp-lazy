@@ -11,127 +11,31 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class BinaryPredicate, class = void>
-class group_by_iterator;
 
-template<class Iterator, class S, class BinaryPredicate>
-class group_by_iterator<Iterator, S, BinaryPredicate, enable_if<!is_bidi<Iterator>::value>>
-    : public iterator<group_by_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, basic_iterable<Iterator>>,
-                      fake_ptr_proxy<std::pair<ref_t<Iterator>, basic_iterable<Iterator>>>, std::ptrdiff_t, iter_cat_t<Iterator>,
-                      default_sentinel> {
+template<class Iterable, class BinaryPredicate>
+class group_by_iterator
+    : public iterator<group_by_iterator<Iterable, BinaryPredicate>,
+                      std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>,
+                      fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>>, std::ptrdiff_t,
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+    using it = iter_t<Iterable>;
 
-    Iterator _sub_range_end;
-    Iterator _sub_range_begin;
-    S _end;
+    it _sub_range_end;
+    it _sub_range_begin;
+    Iterable _iterable;
     mutable BinaryPredicate _comparer;
 
-    using ref_type = ref_t<Iterator>;
-
-    LZ_CONSTEXPR_CXX_14 void find_next(ref_type next) {
-        using detail::find_if;
-        using std::find_if;
-
-        using rt = ref_t<Iterator>;
-        _sub_range_end = find_if(std::move(_sub_range_end), _end, [this, &next](rt v) { return !_comparer(v, next); });
-    }
-
-    LZ_CONSTEXPR_CXX_14 void advance() {
-        if (_sub_range_end == _end) {
-            return;
-        }
-        ref_type next = *_sub_range_end;
-        ++_sub_range_end;
-        find_next(next);
-    }
-
-public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = std::pair<decay_t<ref_type>, basic_iterable<Iterator>>;
-    using reference = std::pair<ref_type, basic_iterable<Iterator>>;
-    using pointer = fake_ptr_proxy<reference>;
-    using difference_type = std::ptrdiff_t;
-
-#ifdef LZ_HAS_CONCEPTS
-
-    constexpr group_by_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
-                     std::default_initializable<BinaryPredicate>
-    = default;
-
-#else
-
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr group_by_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                           std::is_nothrow_default_constructible<S>::value &&
-                                           std::is_nothrow_default_constructible<BinaryPredicate>::value) {
-    }
-
-#endif
-
-    LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator begin, S end, BinaryPredicate binary_predicate) :
-        _sub_range_end{ begin },
-        _sub_range_begin{ std::move(begin) },
-        _end{ std::move(end) },
-        _comparer{ std::move(binary_predicate) } {
-        if (_sub_range_begin == _end) {
-            return;
-        }
-        advance();
-    }
-
-    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
-        _sub_range_begin = _end;
-        return *this;
-    }
-
-    constexpr reference dereference() const {
-        return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
-    }
-
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
-        return fake_ptr_proxy<decltype(**this)>(**this);
-    }
-
-    LZ_CONSTEXPR_CXX_14 void increment() {
-        _sub_range_begin = _sub_range_end;
-        advance();
-    }
-
-    LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& rhs) const {
-        LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
-        return _sub_range_begin == rhs._sub_range_begin;
-    }
-
-    constexpr bool eq(default_sentinel) const {
-        return _sub_range_begin == _end;
-    }
-};
-
-template<class Iterator, class S, class BinaryPredicate>
-class group_by_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator>::value>>
-    : public iterator<group_by_iterator<Iterator, S, BinaryPredicate>, std::pair<ref_t<Iterator>, basic_iterable<Iterator>>,
-                      fake_ptr_proxy<std::pair<ref_t<Iterator>, basic_iterable<Iterator>>>, std::ptrdiff_t,
-                      std::bidirectional_iterator_tag, group_by_iterator<Iterator, S, BinaryPredicate>> {
-
-    Iterator _begin;
-    Iterator _sub_range_end;
-    Iterator _sub_range_begin;
-    S _end;
-    mutable BinaryPredicate _comparer;
-
-    using ref_type = ref_t<Iterator>;
+    using ref_type = ref_t<it>;
 
     LZ_CONSTEXPR_CXX_14 void find_next(ref_type last_seen) {
         using detail::find_if_not;
         using std::find_if;
-        _sub_range_end =
-            find_if(std::move(_sub_range_end), _end, [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
+        _sub_range_end = find_if(std::move(_sub_range_end), std::end(_iterable),
+                                 [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
     }
 
     LZ_CONSTEXPR_CXX_14 void advance() {
-        if (_sub_range_end == _end) {
+        if (_sub_range_end == std::end(_iterable)) {
             return;
         }
         ref_type last_seen = *_sub_range_end;
@@ -140,45 +44,42 @@ class group_by_iterator<Iterator, S, BinaryPredicate, enable_if<is_bidi<Iterator
     }
 
 public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type = std::pair<decay_t<ref_type>, basic_iterable<Iterator>>;
-    using reference = std::pair<ref_type, basic_iterable<Iterator>>;
+    using value_type = std::pair<decay_t<ref_type>, basic_iterable<it>>;
+    using reference = std::pair<ref_type, basic_iterable<it>>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr group_by_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
+        requires std::default_initializable<it> && std::default_initializable<Iterable> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+    template<class I = it,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr group_by_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                           std::is_nothrow_default_constructible<S>::value &&
+                                           std::is_nothrow_default_constructible<Iterable>::value &&
                                            std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 group_by_iterator(Iterator it, Iterator begin, S end, BinaryPredicate binary_predicate) :
-        _begin{ std::move(begin) },
-        _sub_range_end{ it },
-        _sub_range_begin{ std::move(it) },
-        _end{ std::move(end) },
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 group_by_iterator(I&& iterable, it iter, BinaryPredicate binary_predicate) :
+        _sub_range_end{ iter },
+        _sub_range_begin{ std::move(iter) },
+        _iterable{ std::forward<I>(iterable) },
         _comparer{ std::move(binary_predicate) } {
-        if (_sub_range_begin == _end) {
-            return;
-        }
         advance();
     }
 
     LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
-        _sub_range_begin = _end;
+        _sub_range_begin = std::end(_iterable);
+        return *this;
     }
 
     constexpr reference dereference() const {
@@ -199,24 +100,25 @@ public:
         auto prev = --_sub_range_begin;
 
         ref_type last_seen = *_sub_range_begin;
-        while (_sub_range_begin != _begin && _comparer(*_sub_range_begin, last_seen)) {
+        while (_sub_range_begin != std::begin(_iterable) && _comparer(*_sub_range_begin, last_seen)) {
             prev = _sub_range_begin;
             --_sub_range_begin;
         }
 
-        if (_sub_range_begin == _begin && _comparer(*_sub_range_begin, last_seen)) {
+        if (_sub_range_begin == std::begin(_iterable) && _comparer(*_sub_range_begin, last_seen)) {
             return;
         }
         _sub_range_begin = std::move(prev);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& rhs) const {
-        LZ_ASSERT(_end == rhs._end && _begin == rhs._begin, "Incompatible iterators");
+        LZ_ASSERT(std::end(_iterable) == std::end(rhs._iterable) && std::begin(_iterable) == std::begin(rhs._iterable),
+                  "Incompatible iterators");
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _sub_range_begin == _end;
+        return _sub_range_begin == std::end(_iterable);
     }
 };
 } // namespace detail
