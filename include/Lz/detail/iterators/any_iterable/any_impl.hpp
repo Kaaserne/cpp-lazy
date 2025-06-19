@@ -68,10 +68,6 @@ class any_iterator_impl<Iter, Iter, T, Reference, std::forward_iterator_tag, Dif
 
     Iter _iter;
 
-    static_assert(std::is_same<Reference, decltype(*_iter)>::value,
-                  "The iterator operator* returns a different type than template parameter `Reference`. Try adding/removing "
-                  "`&` to `Reference`");
-
     using any_iter_base = iterator_base<Reference, std::forward_iterator_tag, DiffType>;
 
 public:
@@ -125,9 +121,6 @@ template<class Iter, class S, class T, class Reference, class DiffType>
 class any_iterator_impl<Iter, S, T, Reference, std::bidirectional_iterator_tag, DiffType> final
     : public iterator_base<Reference, std::bidirectional_iterator_tag, DiffType> {
     Iter _iter;
-
-    static_assert(std::is_same<Reference, decltype(*_iter)>::value,
-                  "The iterator operator* returns a different type than template parameter `Reference`");
 
     using any_iter_base = iterator_base<Reference, std::bidirectional_iterator_tag, DiffType>;
 
@@ -187,8 +180,6 @@ class any_iterator_impl<Iter, S, T, Reference, std::random_access_iterator_tag, 
     : public iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
     Iter _iter;
-    static_assert(std::is_same<Reference, decltype(*_iter)>::value,
-                  "The iterator operator* returns a different type than template parameter `Reference`");
 
     using any_iter_base = iterator_base<Reference, std::random_access_iterator_tag, DiffType>;
 
