@@ -55,22 +55,30 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
-        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call begin() on an empty ref_or_view.");
+        if (!_iterable_ref_ptr) {
+            return iter_t<Iterable>{};
+        }
         return std::begin(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
-        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call begin() on an empty ref_or_view.");
+        if (!_iterable_ref_ptr) {
+            return iter_t<Iterable>{};
+        }
         return detail::begin(std::move(*_iterable_ref_ptr));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
-        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call end() on an empty ref_or_view.");
+        if (!_iterable_ref_ptr) {
+            return sentinel_t<Iterable>{};
+        }
         return std::end(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
-        LZ_ASSERT(_iterable_ref_ptr != nullptr, "Cannot call end() on an empty ref_or_view.");
+        if (!_iterable_ref_ptr) {
+            return sentinel_t<Iterable>{};
+        }
         return detail::end(std::move(*_iterable_ref_ptr));
     }
 };
