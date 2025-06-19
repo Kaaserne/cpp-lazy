@@ -91,7 +91,7 @@ public:
     constexpr bool eq(const cached_reverse_iterator& other) const {
         return _iterator == other._iterator;
     }
-    // TODO test
+
     constexpr bool eq(default_sentinel) const {
         return _iterator == _begin;
     }

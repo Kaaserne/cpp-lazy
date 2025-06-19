@@ -30,7 +30,7 @@ struct zip_adaptor {
      * - `lz::take_every`
      * - `lz::zip_longest`
      * - `lz::zip`
-     * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+     * - Are planning call end() multiple times on the same instance (with one or more of the above iterable
      * combinations) Example:
      * ```cpp
      * std::vector<int> a = { 1, 2, 3 };

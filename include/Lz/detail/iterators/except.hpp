@@ -9,7 +9,7 @@
 
 namespace lz {
 namespace detail {
-// TODO add iterable if begin and end are included in the iterator
+
 template<class Iterable, class Iterable2, class BinaryPredicate>
 class except_iterator
     : public iterator<except_iterator<Iterable, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable>>,

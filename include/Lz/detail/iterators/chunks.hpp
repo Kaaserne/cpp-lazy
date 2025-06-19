@@ -6,7 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/iterator_base.hpp>
-// TODO add widen iterator
+
 namespace lz {
 namespace detail {
 template<class Iterator, class S, class = void>

@@ -29,7 +29,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
- * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+ * - Are planning call end() multiple times on the same instance (with one or more of the above iterable
  * combinations)
  *
  * Example:
