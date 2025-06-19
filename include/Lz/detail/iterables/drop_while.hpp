@@ -47,7 +47,7 @@ public:
 
     template<class I>
     constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
-        _iterable{ iterable },
+        _iterable{ std::forward<I>(iterable) },
         _unary_predicate{ std::move(unary_predicate) } {
     }
 
