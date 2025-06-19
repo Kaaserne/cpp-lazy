@@ -28,6 +28,11 @@ TEST_CASE("Cached reverse") {
         REQUIRE(!lz::has_many(rev));
         REQUIRE(!lz::has_one(rev));
     }
+
+    SECTION("Opertor== sentinel") {
+        REQUIRE(reversed.begin() != lz::default_sentinel{});
+        REQUIRE(reversed.end() == lz::default_sentinel{});
+    }
     
     SECTION("Operator--") {
         auto expected = { 5, 4, 3, 2, 1 };

@@ -5,7 +5,9 @@
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/ref_or_view.hpp>
 #include <Lz/iterator_base.hpp>
+#include <iterator>
 
 namespace lz {
 namespace detail {
@@ -60,19 +62,17 @@ using count_dims = std::integral_constant<std::size_t, count_dims_helper<is_iter
 #endif
 
 // Improvement of https://stackoverflow.com/a/21076724/8729023
-template<class T, class S, class = void>
-class flatten_wrapper;
+template<class Iterable>
+class flatten_wrapper
+    : public iterator<flatten_wrapper<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
 
-template<class Iterator, class S>
-class flatten_wrapper<Iterator, S, enable_if<is_bidi<Iterator>::value>>
-    : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, default_sentinel> {
-// TODO use iterable
-    Iterator _begin{};
-    Iterator _iterator{};
-    S _end{};
+    using iter = iter_t<Iterable>;
 
-    using traits = std::iterator_traits<Iterator>;
+    iter _iterator{};
+    ref_or_view<Iterable> _iterable;
+
+    using traits = std::iterator_traits<iter>;
 
 public:
     using reference = typename traits::reference;
@@ -80,39 +80,37 @@ public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
 
-    constexpr flatten_wrapper(Iterator current, Iterator begin, S end) :
-        _begin{ std::move(begin) },
-        _iterator{ std::move(current) },
-        _end{ std::move(end) } {
+    template<class I>
+    constexpr flatten_wrapper(I&& iterable, iter it) : _iterator{ std::move(it) }, _iterable{ std::forward<I>(iterable) } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_wrapper()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires std::default_initializable<iter> && std::default_initializable<Iterable>
     = default;
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    template<class I = iter,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
     constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<S>::value) {
+                                         std::is_nothrow_default_constructible<Iterable>::value) {
     }
 
 #endif
 
     LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
-        _iterator = _end;
+        initialize_last();
         return *this;
     }
 
     constexpr bool has_next() const {
-        return _iterator != _end;
+        return _iterator != std::end(_iterable);
     }
 
     constexpr bool has_prev() const {
-        return _iterator != _begin;
+        return _iterator != std::begin(_iterable);
     }
 
     constexpr bool has_prev_inner() const {
@@ -123,37 +121,38 @@ public:
         return has_next();
     }
 
-    constexpr Iterator iterator() const {
+    constexpr iter iterator() const {
         return _iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 void iterator(Iterator c) {
+    LZ_CONSTEXPR_CXX_14 void iterator(iter c) {
         _iterator = std::move(c);
     }
 
-    constexpr S end() const {
-        return _end;
+    constexpr sentinel_t<Iterable> end() const {
+        return std::end(_iterable);
     }
 
     LZ_CONSTEXPR_CXX_14 void initialize_last() {
-        _iterator = _end;
+        _iterator = std::end(_iterable);
     }
 
     constexpr difference_type current_to_begin() const {
-        return _iterator - _begin;
+        return _iterator - std::begin(_iterable);
     }
 
     constexpr difference_type end_to_current() const {
-        return _end - _iterator;
+        return std::end(_iterable) - _iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& b) const {
-        LZ_ASSERT(_begin == b._begin && _end == b._end, "Incompatible iterators");
+        LZ_ASSERT(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable),
+                  "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _iterator == _end;
+        return _iterator == std::end(_iterable);
     }
 
     constexpr reference dereference() const {
@@ -181,106 +180,22 @@ public:
     }
 };
 
-template<class Iterator, class S>
-class flatten_wrapper<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
-    : public iterator<flatten_wrapper<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, default_sentinel> {
-
-    Iterator _iterator{};
-    S _end{};
-
-    using traits = std::iterator_traits<Iterator>;
-
-public:
-    using reference = typename traits::reference;
-    using pointer = fake_ptr_proxy<reference>;
-    using value_type = typename traits::value_type;
-    using difference_type = typename traits::difference_type;
-
-#ifdef LZ_HAS_CONCEPTS
-
-    constexpr flatten_wrapper()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
-    = default;
-
-#else
-
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<S>::value) {
-    }
-
-#endif
-
-    constexpr flatten_wrapper(Iterator /* iterator */, Iterator begin, S end) :
-        _iterator{ std::move(begin) },
-        _end{ std::move(end) } {
-    }
-
-    LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
-        _iterator = _end;
-        return *this;
-    }
-
-    constexpr bool has_next() const {
-        return _iterator != _end;
-    }
-
-    LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
-        return _iterator == b._iterator;
-    }
-
-    constexpr bool eq(default_sentinel) const {
-        return _iterator == _end;
-    }
-
-    constexpr Iterator iterator() const {
-        return _iterator;
-    }
-
-    LZ_CONSTEXPR_CXX_14 void iterator(Iterator c) {
-        _iterator = std::move(c);
-    }
-
-    LZ_CONSTEXPR_CXX_14 void initialize_last() {
-        _iterator = _end;
-    }
-
-    constexpr S end() const {
-        return _end;
-    }
-
-    constexpr reference dereference() const {
-        return *_iterator;
-    }
-
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
-        return fake_ptr_proxy<decltype(**this)>(**this);
-    }
-
-    LZ_CONSTEXPR_CXX_14 void increment() {
-        ++_iterator;
-    }
-};
-
-template<class, class, std::size_t>
+template<class, std::size_t>
 class flatten_iterator;
 
-template<class Iterator, std::size_t N>
-using inner =
-    flatten_iterator<decltype(std::begin(*std::declval<Iterator>())), decltype(std::end(*std::declval<Iterator>())), N - 1>;
+template<class Iterable, std::size_t N>
+using inner = flatten_iterator<remove_ref<ref_iterable_t<Iterable>>, N - 1>;
 
-template<class Iterator, class S, std::size_t N>
-using iter_cat = common_type<iter_cat_t<inner<Iterator, N>>, iter_cat_t<flatten_wrapper<Iterator, S>>>;
+template<class Iterable, std::size_t N>
+using iter_cat = common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>;
 
-template<class Iterator, class S, std::size_t N>
+template<class Iterable, std::size_t N>
 class flatten_iterator
-    : public iterator<flatten_iterator<Iterator, S, N>, ref_t<inner<Iterator, N>>, fake_ptr_proxy<ref_t<inner<Iterator, N>>>,
-                      diff_type<inner<Iterator, N>>, iter_cat<Iterator, S, N>, default_sentinel> {
+    : public iterator<flatten_iterator<Iterable, N>, ref_t<inner<Iterable, N>>, fake_ptr_proxy<ref_t<inner<Iterable, N>>>,
+                      diff_type<inner<Iterable, N>>, iter_cat<Iterable, N>, default_sentinel> {
 
-    using this_inner = inner<Iterator, N>;
+    using iter = iter_t<Iterable>;
+    using this_inner = inner<Iterable, N>;
 
     LZ_CONSTEXPR_CXX_14 void find_next_non_empty_inner() {
         using lz::detail::find_if;
@@ -288,8 +203,8 @@ class flatten_iterator
         using ref = decltype(*_outer_iter.iterator());
 
         ++_outer_iter;
-        _outer_iter.iterator(find_if(_outer_iter.iterator(), _outer_iter.end(), [this](const ref& inner) {
-            _inner_iter = this_inner(std::begin(inner), std::begin(inner), std::end(inner));
+        _outer_iter.iterator(find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
+            _inner_iter = this_inner(inner, std::begin(inner));
             return _inner_iter.has_next();
         }));
 
@@ -325,7 +240,7 @@ private:
 
     LZ_CONSTEXPR_CXX_14 void previous_outer() {
         --_outer_iter;
-        _inner_iter = this_inner(std::end(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+        _inner_iter = this_inner(*_outer_iter, std::end(*_outer_iter));
     }
 
     LZ_CONSTEXPR_CXX_14 void try_previous_inner() {
@@ -335,14 +250,14 @@ private:
         }
     }
 
-    flatten_wrapper<Iterator, S> _outer_iter;
+    flatten_wrapper<Iterable> _outer_iter;
     this_inner _inner_iter;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<this_inner>
+        requires std::default_initializable<flatten_wrapper<Iterable>> && std::default_initializable<this_inner>
     = default;
 
 #else
@@ -355,10 +270,10 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 flatten_iterator(Iterator it, Iterator begin, S end) :
-        _outer_iter{ std::move(it), std::move(begin), std::move(end) } {
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 flatten_iterator(I&& iterable, iter it) : _outer_iter{ std::forward<I>(iterable), std::move(it) } {
         if (_outer_iter.has_next()) {
-            _inner_iter = this_inner(std::begin(*_outer_iter), std::begin(*_outer_iter), std::end(*_outer_iter));
+            _inner_iter = this_inner(*_outer_iter, std::begin(*_outer_iter));
             this->advance();
         }
     }
@@ -517,29 +432,29 @@ public:
         difference_type total = 0;
         auto outer_iter = _outer_iter;
 
-        total -= this_inner(std::end(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter)) - _inner_iter;
+        total -= this_inner(*outer_iter, std::end(*outer_iter)) - _inner_iter;
         if (other._outer_iter.has_next()) {
-            total += this_inner(std::begin(*other._outer_iter), std::begin(*other._outer_iter), std::end(*other._outer_iter)) -
-                     other._inner_iter;
+            total += this_inner(*other._outer_iter, std::begin(*other._outer_iter)) - other._inner_iter;
         }
 
         for (++outer_iter; outer_iter != other._outer_iter; ++outer_iter) {
-            total -= (this_inner(std::end(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter)) -
-                      this_inner(std::begin(*outer_iter), std::begin(*outer_iter), std::end(*outer_iter)));
+            total -= (this_inner(*outer_iter, std::end(*outer_iter)) - this_inner(*outer_iter, std::begin(*outer_iter)));
         }
 
         return total;
     }
 };
 
-template<class Iterator, class S>
-class flatten_iterator<Iterator, S, 0>
-    : public iterator<flatten_iterator<Iterator, S, 0>, ref_t<flatten_wrapper<Iterator, S>>,
-                      fake_ptr_proxy<ref_t<flatten_wrapper<Iterator, S>>>, diff_type<flatten_wrapper<Iterator, S>>,
-                      iter_cat_t<flatten_wrapper<Iterator, S>>, default_sentinel> {
+template<class Iterable>
+class flatten_iterator<Iterable, 0>
+    : public iterator<flatten_iterator<Iterable, 0>, ref_t<flatten_wrapper<Iterable>>,
+                      fake_ptr_proxy<ref_t<flatten_wrapper<Iterable>>>, diff_type<flatten_wrapper<Iterable>>,
+                      iter_cat_t<flatten_wrapper<Iterable>>, default_sentinel> {
 
-    flatten_wrapper<Iterator, S> _iterator;
-    using traits = std::iterator_traits<Iterator>;
+    using iter = iter_t<Iterable>;
+    using traits = std::iterator_traits<iter>;
+
+    flatten_wrapper<Iterable> _iterator;
 
 public:
     using pointer = typename traits::pointer;
@@ -550,7 +465,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires std::default_initializable<Iterable>
     = default;
 
 #else
@@ -561,8 +476,8 @@ public:
 
 #endif
 
-    constexpr flatten_iterator(Iterator it, Iterator begin, S end) :
-        _iterator{ std::move(it), std::move(begin), std::move(end) } {
+    template<class I>
+    constexpr flatten_iterator(I&& iterable, iter it) : _iterator{ std::forward<I>(iterable), std::move(it) } {
     }
 
     LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel) {
