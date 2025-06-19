@@ -286,3 +286,20 @@ TEST_CASE("Trim variants") {
         REQUIRE(lz::equal(actual_trim_view, expected_view));
     }
 }
+
+TEST_CASE("iter_decay") {
+    std::vector<int> v1 = { 1, 2, 3, 4, 5 };
+    std::vector<int> v2 = { 6, 7, 8, 9, 10 };
+    auto f1 = lz::filter(v1, [](int i) { return i % 2 == 0; });
+    auto f2 = lz::filter(v2, [](int i) { return i % 2 == 0; });
+
+#ifdef LZ_HAS_CXX_11
+    auto zipped = lz::zip(f1 | lz::iter_decay<std::forward_iterator_tag>{}, f2);
+#else
+    auto zipped = lz::zip(f1 | lz::iter_decay(std::forward_iterator_tag{}), f2);
+#endif
+
+    static_assert(std::is_same<lz::iter_cat_iterable_t<decltype(zipped)>, std::forward_iterator_tag>::value, "must be forward");
+    auto expeted = { std::make_tuple(2, 6), std::make_tuple(4, 8) };
+    REQUIRE(lz::equal(zipped, expeted));
+}

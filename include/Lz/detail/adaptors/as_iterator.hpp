@@ -31,7 +31,7 @@ struct as_iterator_adaptor {
      * }
      * ```
      * @param iterable
-     * @return
+     * @return An `as_iterator_iterable` that contains the iterators of the iterable.
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD constexpr as_iterator_iterable<remove_ref<Iterable>, iter_cat_iterable_t<Iterable>>

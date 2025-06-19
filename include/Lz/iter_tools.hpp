@@ -7,7 +7,7 @@
 #include <Lz/detail/adaptors/iter_tools.hpp>
 
 namespace lz {
-// TODO add iterator_decay
+
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
@@ -479,6 +479,35 @@ LZ_INLINE_VAR constexpr detail::drop_back_while_adaptor drop_back_while{};
  * ```
  */
 LZ_INLINE_VAR constexpr detail::trim_adaptor trim{};
+
+/**
+ * @brief Decays the given iterable to an iterator category of the given tag, using `lz::as_iterator`
+ * and `lz::map`. This can be handy to return sentinels at some point or prevent `lz::eager_size` calls. Example:
+ * ```cpp
+ * auto v1 = {1, 2, 3};
+ * auto v2 = {1, 2, 3};
+ * // f1 is not sized and returns a bidirectional iterator
+ * auto f1 = lz::filter(v1, [](auto&& i) {
+ *     return i > 1;
+ * });
+ * // f2 is not sized and returns a bidirectional iterator
+ * auto f2 = lz::filter(v2, [](auto&& i) {
+ *     return i > 1;
+ * });
+ *
+ * // lz::zip calls lz::eager_size if:
+ * // - the iterable is at least bidirectional.
+ * // - the iterable is not sentinelled
+ * // f1 and f2 are both bidirectional, so lz::zip will call lz::eager_size on them.
+ * // In this case we don't want to call lz::eager_size because we're not interested in going bidirectionally.
+ * // We can use lz::iter_decay(std::forward_iterator_tag{}) to decay the iterables to a forward iterator
+ *
+ * iterable auto zipper = lz::zip(lz::iter_decay(f1, std::forward_iterator_tag{}), f2);
+ *
+ * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on .end().
+ * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
+ */
+LZ_INLINE_VAR constexpr detail::iter_decay iter_decay{};
 
 LZ_MODULE_EXPORT_SCOPE_END
 
