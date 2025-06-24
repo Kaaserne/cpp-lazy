@@ -167,10 +167,7 @@ search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_
     }
     else {
         auto pos = std::search(std::move(begin), std::move(end), begin2, end2, std::move(binary_predicate));
-        if (pos == end) {
-            return { pos, pos };
-        }
-        return { pos, std::next(pos, std::distance(begin2, end2)) };
+        return pos == end ? std::make_pair(pos, pos) : std::make_pair(pos, std::next(pos, std::distance(begin2, end2)));
     }
 }
 
@@ -241,10 +238,7 @@ LZ_CONSTEXPR_CXX_14
 enable_if<std::is_same<Iterator, S>::value && std::is_same<Iterator2, S2>::value, std::pair<Iterator, Iterator>>
 search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate) {
     auto pos = std::search(std::move(begin), std::move(end), begin2, end2, std::move(binary_predicate));
-    if (pos == end) {
-        return { pos, pos };
-    }
-    return { pos, std::next(pos, std::distance(begin2, end2)) };
+    return pos == end ? std::make_pair(pos, pos) : std::make_pair(pos, std::next(pos, std::distance(begin2, end2)));
 }
 
 // clang-format on
@@ -340,10 +334,7 @@ LZ_CONSTEXPR_CXX_14 std::size_t index_of_if(Iterator begin, S end, UnaryPredicat
             return index;
         }
     }
-    if (begin == end) {
-        return npos;
-    }
-    return index;
+    return begin == end ? npos : index;
 }
 
 template<class Iterator, class S, class T>
@@ -388,12 +379,11 @@ LZ_CONSTEXPR_CXX_14 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
     if (size_of_iterable1 < size_of_iterable2) {
         return false;
     }
-    while (size_of_iterable1 > size_of_iterable2) {
-        LZ_ASSERT(begin != end, "size of iterable and distance of begin and end do not match");
-        ++begin;
-        --size_of_iterable1;
-    }
-    return starts_with(std::move(begin), std::move(end), std::move(begin2), std::move(end2), std::move(binary_predicate));
+
+    const auto distance = static_cast<diff_type<Iterator1>>(size_of_iterable1 - size_of_iterable2);
+    begin = std::next(begin, distance);
+    using std::equal;
+    return equal(std::move(begin), std::move(end), std::move(begin2), std::move(end2), std::move(binary_predicate));
 }
 
 template<class Iterator, class S, class UnaryPredicate>
@@ -404,11 +394,13 @@ LZ_CONSTEXPR_CXX_14 Iterator partition(Iterator begin, S end, UnaryPredicate una
         return begin;
     }
 
-    for (auto i = std::next(begin); i != end; ++i)
-        if (unary_predicate(*i)) {
-            std::swap(*i, *begin);
-            ++begin;
+    for (auto i = std::next(begin); i != end; ++i) {
+        if (!unary_predicate(*i)) {
+            continue;
         }
+        std::swap(*i, *begin);
+        ++begin;
+    }
 
     return begin;
 }
