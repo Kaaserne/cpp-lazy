@@ -117,7 +117,7 @@ constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
 
 template<class I>
 LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value, iter_t<I>>
+    LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, const diff_iterable_t<I> n) {
 
     using diff_type = diff_iterable_t<I>;
@@ -130,7 +130,7 @@ LZ_NODISCARD
 
 template<class I>
 LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value || is_sentinel<iter, sentinel_t<I>>::value || !is_bidi<iter>::value, iter_t<I>>
+    LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, diff_iterable_t<I> n) {
     return std::next(detail::begin(std::forward<I>(iterable)), n);
 }
@@ -143,7 +143,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     using diff_type = diff_iterable_t<I>;
     const auto size = static_cast<diff_type>(lz::size(iterable));
     if (n >= size) {
-        return end;
+        return detail::end(std::forward<I>(iterable));
     }
     return next_fast(std::forward<I>(iterable), n);
 }
