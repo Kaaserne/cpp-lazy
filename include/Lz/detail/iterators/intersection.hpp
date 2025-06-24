@@ -97,7 +97,7 @@ public:
         return *_iterator1;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -109,7 +109,7 @@ public:
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_iterator2, --_iterator1;
 
-        while (_iterator2 != std::begin(_iterable2) && _iterator1 != std::begin(_iterable2)) {
+        while (_iterator2 != std::begin(_iterable2) && _iterator1 != std::begin(_iterable1)) {
             if (_compare(*_iterator1, *_iterator2)) {
                 --_iterator2;
                 continue;
