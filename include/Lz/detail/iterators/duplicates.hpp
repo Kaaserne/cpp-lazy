@@ -31,7 +31,7 @@ private:
     it _last;
     it _first;
     Iterable _iterable;
-    BinaryPredicate _compare;
+    mutable BinaryPredicate _compare;
 
     LZ_CONSTEXPR_CXX_14 void next() {
         using detail::find_if;
@@ -77,7 +77,7 @@ public:
         return { *_first, static_cast<std::size_t>(_last - _first) };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<reference>(**this);
     }
 
@@ -89,8 +89,7 @@ public:
     LZ_CONSTEXPR_CXX_14 void decrement() {
         _last = _first;
 
-        while (_first != std::begin(_iterable)) {
-            --_first;
+        for (--_first; _first != std::begin(_iterable); --_first) {
             auto prev = std::prev(_first);
             if (_compare(*prev, *_first)) {
                 return;
@@ -98,13 +97,13 @@ public:
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
         LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
                   "Incompatible iterators");
         return _first == other._first;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
         return _first == std::end(_iterable);
     }
 };
@@ -129,7 +128,7 @@ private:
     it _first;
     Iterable _iterable;
     std::size_t _last_distance;
-    BinaryPredicate _compare;
+    mutable BinaryPredicate _compare;
 
     LZ_CONSTEXPR_CXX_14 void next() {
         using detail::find_if;
@@ -183,7 +182,7 @@ public:
         return { *_first, _last_distance };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<reference>(**this);
     }
 
@@ -193,26 +192,24 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        _last_distance = 0;
+        _last_distance = 1;
         _last = _first;
 
-        while (_first != std::begin(_iterable)) {
-            --_first;
-            auto prev = std::prev(_first);
-            ++_last_distance;
+        for (--_first; _first != std::begin(_iterable); --_first, ++_last_distance) {
+            const auto prev = std::prev(_first);
             if (_compare(*prev, *_first)) {
                 return;
             }
         }
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
         LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
                   "Incompatible iterators");
         return _first == other._first;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
         return _first == std::end(_iterable);
     }
 };
