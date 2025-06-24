@@ -12,7 +12,7 @@ template<class C>
 class c_string_iterator : public iterator<c_string_iterator<C>, C&, C*, std::ptrdiff_t,
                                           std::forward_iterator_tag, default_sentinel> {
 
-    C* _it{};
+    C* _it{ nullptr };
 
 public:
     using value_type = typename std::remove_const<C>::type;
