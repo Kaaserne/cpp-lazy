@@ -65,12 +65,12 @@ private:
 #else
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, bool> eq(const SentinelTuple& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, bool> eq(const SMaybeHomo& other) const {
         return std::get<I>(_iterators) == std::get<I>(other) ? _index == 0 : eq<I + 1>(other);
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, bool> eq(const SentinelTuple& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, bool> eq(const SMaybeHomo& other) const {
         return std::get<I>(_iterators) == std::get<I>(other);
     }
 
@@ -185,7 +185,7 @@ public:
         return dereference<0>();
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -215,7 +215,7 @@ public:
             plus_is(n_plus_index / static_cast<difference_type>(tuple_size), is{});
             // clang-format off
             _index = u_tup_size * (u_n / tuple_size) == u_n
-                         ? 0 : static_cast<std::uint_least8_t>(static_cast<std::size_t>(n_plus_index) % u_tup_size);
+                         ? 0 : static_cast<std::uint_least8_t>(static_cast<unsigned_diff>(n_plus_index) % u_tup_size);
             // clang-format on
             return;
         }
