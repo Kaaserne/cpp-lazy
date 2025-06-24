@@ -40,12 +40,12 @@ public:
         return { detail::begin(std::move(_iterable)) };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
-        return { detail::end(std::move(_iterable)) };
-    }
-
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable) };
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
+        return { detail::end(std::move(_iterable)) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {
