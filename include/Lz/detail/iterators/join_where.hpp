@@ -107,7 +107,7 @@ public:
         return _result_selector(*_iter_a, *_iterable.begin());
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

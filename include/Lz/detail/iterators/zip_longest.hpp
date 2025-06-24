@@ -172,11 +172,11 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -368,11 +368,11 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_20 reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_20 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

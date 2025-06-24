@@ -86,7 +86,7 @@ public:
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

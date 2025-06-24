@@ -28,7 +28,7 @@ LZ_MODULE_EXPORT_SCOPE_END
 
 namespace detail {
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 bool empty(Iterator begin, S end) {
+constexpr bool empty(Iterator begin, S end) {
     return begin == end;
 }
 
@@ -383,7 +383,7 @@ LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
 }
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate,
+LZ_CONSTEXPR_CXX_14 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate,
                                    std::size_t size_of_iterable1, std::size_t size_of_iterable2) {
     if (size_of_iterable1 < size_of_iterable2) {
         return false;
@@ -397,7 +397,7 @@ LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
 }
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_17 Iterator partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
+LZ_CONSTEXPR_CXX_14 Iterator partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
     using std::find_if_not;
     begin = find_if_not(begin, end, unary_predicate);
     if (begin == end) {
@@ -521,7 +521,7 @@ equal(IterableA&& a, IterableB&& b, BinaryPredicate&& binary_predicate) {
 #endif
 
 template<class Iterator, class T, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17 Iterator sized_lower_bound(Iterator begin, const T& value, BinaryPredicate binary_predicate,
+LZ_CONSTEXPR_CXX_14 Iterator sized_lower_bound(Iterator begin, const T& value, BinaryPredicate binary_predicate,
                                                diff_type<Iterator> count) {
     while (count > 0) {
         const auto step = count / 2;
@@ -538,7 +538,7 @@ LZ_CONSTEXPR_CXX_17 Iterator sized_lower_bound(Iterator begin, const T& value, B
 }
 
 template<class Iterable, class T, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
+LZ_CONSTEXPR_CXX_14 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
     using diff = diff_type<iter_t<Iterable>>;
 
     auto begin = detail::begin(std::forward<Iterable>(iterable));
@@ -546,14 +546,14 @@ LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& v
 }
 
 template<class Iterable, class T, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17 iter_t<Iterable> upper_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
+LZ_CONSTEXPR_CXX_14 iter_t<Iterable> upper_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
     return detail::lower_bound(
         std::forward<Iterable>(iterable), value,
         [&binary_predicate](ref_iterable_t<Iterable> v1, const T& v2) { return !binary_predicate(v2, v1); });
 }
 
 template<class Iterable, class T, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_17 bool binary_search(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
+LZ_CONSTEXPR_CXX_14 bool binary_search(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
     auto end = detail::end(std::forward<Iterable>(iterable));
     auto it = detail::lower_bound(std::forward<Iterable>(iterable), value, binary_predicate);
     return it != end && !binary_predicate(value, *it);

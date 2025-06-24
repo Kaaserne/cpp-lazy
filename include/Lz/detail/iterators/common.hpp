@@ -66,7 +66,7 @@ public:
         return *get<0>(_data);
     }
 
-    LZ_CONSTEXPR_CXX_17 fake_ptr_proxy<reference> arrow() const {
+    LZ_CONSTEXPR_CXX_14 fake_ptr_proxy<reference> arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

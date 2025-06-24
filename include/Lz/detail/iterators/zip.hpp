@@ -29,7 +29,7 @@ private:
     IterTuple _iterators;
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
+    constexpr reference dereference(index_sequence<I...>) const {
         return reference{ *std::get<I>(_iterators)... };
     }
 
@@ -99,11 +99,11 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+    constexpr reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

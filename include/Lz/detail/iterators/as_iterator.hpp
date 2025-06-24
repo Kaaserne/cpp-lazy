@@ -32,11 +32,11 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+    constexpr reference dereference() const {
         return _iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<Iterator>{ _iterator };
     }
 
