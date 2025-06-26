@@ -17,7 +17,9 @@ template<class Iter, class S, class T, class Reference, class DiffType>
 class any_iterator_impl<Iter, S, T, Reference, std::forward_iterator_tag, DiffType> final
     : public iterator_base<Reference, std::forward_iterator_tag, DiffType> {
 
-    common_iterator<Iter, S> _iter{};
+    static constexpr bool is_sent = is_sentinel<S, Iter>::value;
+    using iter_type = conditional<!is_sent, Iter, common_iterator<Iter, S>>;
+    iter_type _iter{};
 
     using any_iter_base = iterator_base<Reference, std::forward_iterator_tag, DiffType>;
 
@@ -28,70 +30,29 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
-    constexpr any_iterator_impl() = default;
-
-    constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
-    }
-
-    constexpr any_iterator_impl(S s) : _iter{ std::move(s) } {
-    }
-
-    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
-    }
-
-    ~any_iterator_impl() override = default;
-
-    reference dereference() override {
-        return *_iter;
-    }
-
-    pointer arrow() override {
-        return pointer{ dereference() };
-    }
-
-    void increment() override {
-        ++_iter;
-    }
-
-    bool eq(const any_iter_base& other) const override {
-        return _iter == static_cast<const any_iterator_impl&>(other)._iter;
-    }
-
-    detail::unique_ptr<any_iter_base> clone() const override {
-        return detail::make_unique<any_iterator_impl>(_iter);
-    }
-};
-
-template<class Iter, class T, class Reference, class DiffType>
-class any_iterator_impl<Iter, Iter, T, Reference, std::forward_iterator_tag, DiffType> final
-    : public iterator_base<Reference, std::forward_iterator_tag, DiffType> {
-
-    Iter _iter;
-
-    using any_iter_base = iterator_base<Reference, std::forward_iterator_tag, DiffType>;
-
-public:
-    using value_type = T;
-    using reference = Reference;
-    using pointer = fake_ptr_proxy<reference>;
-    using difference_type = DiffType;
-    using iterator_category = std::forward_iterator_tag;
-
-#ifdef LZ_HAS_CONCEPTS
+#ifdef LZ_HAS_CXX_20
 
     constexpr any_iterator_impl()
-        requires std::default_initializable<Iter>
+        requires std::default_initializable<iter_type>
     = default;
 
 #else
 
-    template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = iter_type, class = enable_if<std::is_default_constructible<I>::value>>
     constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
-    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
+    }
+
+    template<bool I = is_sent, class = enable_if<I>>
+    constexpr any_iterator_impl(S s) : _iter{ std::move(s) } {
+    }
+
+    template<bool I = is_sent, class = enable_if<I>>
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 
     ~any_iterator_impl() override = default;
@@ -120,7 +81,10 @@ public:
 template<class Iter, class S, class T, class Reference, class DiffType>
 class any_iterator_impl<Iter, S, T, Reference, std::bidirectional_iterator_tag, DiffType> final
     : public iterator_base<Reference, std::bidirectional_iterator_tag, DiffType> {
-    Iter _iter;
+
+    static constexpr bool is_sent = is_sentinel<S, Iter>::value;
+    using iter_type = conditional<!is_sent, Iter, common_iterator<Iter, S>>;
+    iter_type _iter{};
 
     using any_iter_base = iterator_base<Reference, std::bidirectional_iterator_tag, DiffType>;
 
@@ -134,18 +98,26 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr any_iterator_impl()
-        requires std::default_initializable<Iter>
+        requires std::default_initializable<iter_type>
     = default;
 
 #else
 
-    template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = iter_type, class = enable_if<std::is_default_constructible<I>::value>>
     constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
-    constexpr any_iterator_impl(Iter iter) : _iter(std::move(iter)) {
+    constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
+    }
+
+    template<bool I = is_sent, class = enable_if<I>>
+    constexpr any_iterator_impl(S iter) : _iter{ std::move(iter) } {
+    }
+
+    template<bool I = is_sent, class = enable_if<I>>
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 
     ~any_iterator_impl() override = default;
@@ -179,7 +151,9 @@ template<class Iter, class S, class T, class Reference, class DiffType>
 class any_iterator_impl<Iter, S, T, Reference, std::random_access_iterator_tag, DiffType> final
     : public iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
-    Iter _iter;
+    static constexpr bool is_sent = is_sentinel<S, Iter>::value;
+    using iter_type = conditional<!is_sent, Iter, common_iterator<Iter, S>>;
+    iter_type _iter{};
 
     using any_iter_base = iterator_base<Reference, std::random_access_iterator_tag, DiffType>;
 
@@ -193,18 +167,26 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr any_iterator_impl()
-        requires std::default_initializable<Iter>
+        requires std::default_initializable<iter_type>
     = default;
 
 #else
 
-    template<class I = Iter, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = iter_type, class = enable_if<std::is_default_constructible<I>::value>>
     constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
+    }
+
+    template<bool I = is_sent, class = enable_if<I>>
+    constexpr any_iterator_impl(S iter) : _iter{ std::move(iter) } {
+    }
+
+    template<bool I = is_sent, class = enable_if<I>>
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 
     ~any_iterator_impl() override = default;
@@ -235,10 +217,6 @@ public:
 
     DiffType minus(const any_iter_base& other) const override {
         return _iter - static_cast<const any_iterator_impl&>(other)._iter;
-    }
-
-    bool lt(const any_iter_base& other) const override {
-        return _iter < static_cast<const any_iterator_impl&>(other)._iter;
     }
 
     detail::unique_ptr<any_iter_base> clone() const override {

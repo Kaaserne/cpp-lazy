@@ -17,6 +17,9 @@ class common_iterator : public iterator<common_iterator<Iterator, S>, ref_t<Iter
 
     using traits = std::iterator_traits<Iterator>;
 
+    static_assert(!std::is_same<S, Iterator>::value,
+                  "common_iterator should not be used with the same type for Iterator and S. Use Iterator directly.");
+
 public:
     using iterator_category = typename traits::iterator_category;
     using value_type = typename traits::value_type;
