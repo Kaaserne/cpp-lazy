@@ -22,7 +22,7 @@ public:
     constexpr ref_or_view_helper() noexcept = default;
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
+    constexpr ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
         static_assert(std::is_lvalue_reference<I>::value, "Can only bind to lvalues. Check if you are passing a temporary "
                                                           "object, or forgot to add/remove const/volatile qualifiers.");
     }
@@ -36,12 +36,25 @@ public:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(const ref_or_view_helper<I, false>& other) noexcept :
+    constexpr ref_or_view_helper(const ref_or_view_helper<I, false>& other) noexcept :
         _iterable_ref_ptr{ other._iterable_ref_ptr } {
     }
 
     template<class I>
-    ref_or_view_helper& operator=(const ref_or_view_helper<I, false>& other) noexcept {
+    constexpr ref_or_view_helper(ref_or_view_helper<I, false>& other) noexcept : _iterable_ref_ptr{ other._iterable_ref_ptr } {
+    }
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 ref_or_view_helper& operator=(const ref_or_view_helper<I, false>& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        _iterable_ref_ptr = other._iterable_ref_ptr;
+        return *this;
+    }
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 ref_or_view_helper& operator=(ref_or_view_helper<I, false>& other) noexcept {
         if (this == &other) {
             return *this;
         }
@@ -98,12 +111,12 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr ref_or_view_helper()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<it>
     = default;
 
 #else
 
-    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = it, class = enable_if<std::is_default_constructible<I>::value>>
     constexpr ref_or_view_helper() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
