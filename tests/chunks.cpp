@@ -51,7 +51,7 @@ TEST_CASE("Chunks binary operations random access") {
                   "Should not be sentinel");
 
     using iterable = typename decltype(uneven_chunksize_even_size)::value_type;
-    const auto equal_fn = [](iterable a, const auto& b) {
+    const auto equal_fn = [](iterable a, const std::vector<int>& b) {
         return lz::equal(a, b);
     };
 
@@ -130,7 +130,7 @@ TEST_CASE("Chunks binary operations bidirectional access") {
                   "Should not be sentinel");
 
     using iterable = typename decltype(uneven_chunksize_even_size)::value_type;
-    const auto equal_fn = [](iterable a, const auto& b) {
+    const auto equal_fn = [](iterable a, const std::vector<int>& b) {
         return lz::equal(a, b);
     };
 
@@ -191,7 +191,7 @@ TEST_CASE("Chunks with sentinels / fwd") {
                   "Should not be sentinel");
 
     using iterable = typename decltype(uneven_chunksize_even_size)::value_type;
-    const auto equal_fn = [](iterable a, const auto& b) {
+    const auto equal_fn = [](iterable a, const std::vector<char>& b) {
         return lz::equal(a, b);
     };
 

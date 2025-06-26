@@ -294,7 +294,7 @@ TEST_CASE("iter_decay") {
     auto f2 = lz::filter(v2, [](int i) { return i % 2 == 0; });
 
 #ifdef LZ_HAS_CXX_11
-    auto zipped = lz::zip(f1 | lz::iter_decay<std::forward_iterator_tag>{}, f2);
+    auto zipped = lz::zip(f1 | lz::iter_decay(std::forward_iterator_tag{}), f2);
 #else
     auto zipped = lz::zip(f1 | lz::iter_decay(std::forward_iterator_tag{}), f2);
 #endif
