@@ -41,7 +41,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr filter_iterator()
-        requires std::default_initializable<S> && std::defaultl_initializable<Iterator> &&
+        requires std::default_initializable<Iterable> && std::default_initializable<it> &&
                      std::default_initializable<UnaryPredicate>
     = default;
 

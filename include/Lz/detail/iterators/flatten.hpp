@@ -87,15 +87,15 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_wrapper()
-        requires std::default_initializable<iter> && std::default_initializable<Iterable>
+        requires std::default_initializable<iter> && std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else
 
-    template<class I = iter,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    template<class I = iter, class = enable_if<std::is_default_constructible<I>::value &&
+                                               std::is_default_constructible<ref_or_view<Iterable>>::value>>
     constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<Iterable>::value) {
+                                         std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value) {
     }
 
 #endif
@@ -389,7 +389,7 @@ public:
                 continue;
             }
             // Outer iterator has no next, we are done. Set _inner_iter to end/empty
-            _inner_iter = this_inner();
+            _inner_iter = this_inner{};
             return;
         }
 
@@ -465,7 +465,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterator()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<flatten_wrapper<Iterable>>
     = default;
 
 #else

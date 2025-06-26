@@ -206,7 +206,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterator()
-        requires std::default_initializable<IterTuple> && std::default_initializable<STuple>
+        requires std::default_initializable<iterators> && std::default_initializable<IterablesMaybeHomo>
     = default;
 
 #else

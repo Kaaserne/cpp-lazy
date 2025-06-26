@@ -148,7 +148,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires std::default_initializable<IterTuple> && std::default_initializable<SentinelTuple>
+        requires std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>
     = default;
 
 #else
@@ -343,7 +343,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires std::default_initializable<IterTuple> && std::default_initializable<SentinelTuple>
+        requires std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>
     = default;
 
 #else

@@ -160,7 +160,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr interleave_iterator()
-        requires std::default_initializable<IterTuple>
+        requires std::default_initializable<IterMaybeHomo>
     = default;
 
 #else
