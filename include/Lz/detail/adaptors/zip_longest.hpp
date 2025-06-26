@@ -5,7 +5,7 @@
 
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/zip_longest.hpp>
-// TODO add zip_longest_cheap, zip_cheap and cartesian_cheap. For all std::tuple like interfaces?
+
 namespace lz {
 namespace detail {
 struct zip_longest_adaptor {
@@ -13,12 +13,12 @@ struct zip_longest_adaptor {
 
     /**
      * @brief Zips two or more iterables together. Returns a sentinel if one of the iterables has a sentinel or is forward. If one
-     *of the iterables is shorter than the others, it will return an empty optional instead of a non empty optional. The optional
-     *contains a tuple of `std::reference_wrapper`s to the elements itself if it is not empty. Contains a size() method if all the
-     *iterables are sized. Will return the size of the largest iterable. Its iterator category is the same as its 'weakest' input
-     *iterables. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence
-     *is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`. So, all in
-     *all: use lz::cache_size if:
+     * of the iterables is shorter than the others, it will return an empty optional instead of a non empty optional. The optional
+     * contains a tuple of `std::reference_wrapper`s to the elements itself if it is not empty. Contains a size() method if all the
+     * iterables are sized. Will return the size of the largest iterable. Its iterator category is the same as its 'weakest' input
+     * iterables. If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence
+     * is traversed to get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`. So, all in
+     * all: use lz::cache_size if:
      * - Your iterable is exactly bidirectional (so forward/random access excluded) and
      * - Your iterable is not sized and
      * - You either use multiple/a combination of the following iterables OR (see last point):

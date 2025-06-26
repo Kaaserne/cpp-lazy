@@ -91,7 +91,7 @@ struct take_adaptor {
      * - Are planning call end() multiple times on the same instance (with one or more of the above iterable
      * combinations).
      *
-     Example:
+     * Example:
      * ```cpp
      * auto vec = std::vector<int>{1, 2, 3, 4, 5};
      * auto res = lz::take(vec, 2); // res = {1, 2}
