@@ -29,7 +29,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else
@@ -106,7 +106,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else

@@ -26,15 +26,15 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<Iterable2>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<ref_or_view<Iterable2>>
     = default;
 
 #else
 
-    template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value>>
-    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<Iterable>::value &&
-                                        std::is_nothrow_default_constructible<Iterable2>::value) {
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value &&
+                                                              std::is_default_constructible<ref_or_view<Iterable2>>::value>>
+    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
+                                        std::is_nothrow_default_constructible<ref_or_view<Iterable2>>::value) {
     }
 
 #endif
@@ -67,14 +67,14 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<T>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<T>
     = default;
 
 #else
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value>>
-    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<Iterable>::value &&
+    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
                                         std::is_nothrow_default_constructible<T>::value) {
     }
 

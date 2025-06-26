@@ -5,8 +5,7 @@
 
 #include <Lz/detail/iterators/take_every.hpp>
 #include <Lz/detail/ref_or_view.hpp>
-// TODO edit all docs "or has a sentinel itself"
-// TODO also add "or decay to a forward iterator using lz::iter_decay" to the docs
+
 namespace lz {
 namespace detail {
 
@@ -52,7 +51,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else

@@ -48,7 +48,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr interleave_iterable()
-        requires(std::default_initializable<Iterables> && ...)
+        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
     = default;
 
 #else

@@ -31,14 +31,14 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr map_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<UnaryOp>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<UnaryOp>
     = default;
 
 #else
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
-    constexpr map_iterable() noexcept(std::is_nothrow_default_constructible<Iterable>::value &&
+    constexpr map_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
                                       std::is_nothrow_default_constructible<UnaryOp>::value) {
     }
 

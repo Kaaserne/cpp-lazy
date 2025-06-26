@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else

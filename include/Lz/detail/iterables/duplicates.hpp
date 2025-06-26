@@ -28,7 +28,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<BinaryPredicate>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<BinaryPredicate>
     = default;
 
 #else

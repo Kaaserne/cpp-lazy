@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr rotate_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<inner_iter>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<inner_iter>
     = default;
 
 #else

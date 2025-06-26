@@ -32,7 +32,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr except_iterable()
-        requires std::default_initializable<Iterable1> && std::default_initializable<iterable2_type> &&
+        requires std::default_initializable<ref_or_view<Iterable1>> && std::default_initializable<iterable2_type> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 

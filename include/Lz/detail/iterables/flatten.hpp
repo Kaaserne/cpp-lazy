@@ -88,7 +88,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else

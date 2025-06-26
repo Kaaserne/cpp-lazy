@@ -83,7 +83,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterable()
-        requires(std::default_initializable<Iterables> && ...) && (std::default_initializable<Iterators> && ...)
+        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
     = default;
 
 #else

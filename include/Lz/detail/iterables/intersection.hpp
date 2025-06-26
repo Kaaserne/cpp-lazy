@@ -29,17 +29,17 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr intersection_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<Iterable2> &&
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<ref_or_view<Iterable2>> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
-    template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value &&
+                                                              std::is_default_constructible<ref_or_view<Iterable2>>::value &&
+                                                              std::is_default_constructible<BinaryPredicate>::value>>
     constexpr intersection_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                               std::is_nothrow_default_constructible<Iterable2>::value &&
+                                               std::is_nothrow_default_constructible<ref_or_view<Iterable2>>::value &&
                                                std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
