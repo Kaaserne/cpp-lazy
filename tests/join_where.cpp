@@ -40,8 +40,14 @@ TEST_CASE("Join where with sentinels") {
     SECTION("Operator=") {
         auto begin = joined.begin();
         REQUIRE(begin == joined.begin());
+        REQUIRE(begin != joined.end());
+        REQUIRE(joined.begin() == begin);
+        REQUIRE(joined.end() != begin);
         begin = joined.end();
         REQUIRE(begin == joined.end());
+        REQUIRE(begin != joined.begin());
+        REQUIRE(joined.end() == begin);
+        REQUIRE(joined.begin() != begin);
     }
 }
 
@@ -124,14 +130,12 @@ TEST_CASE("Left join binary operations") {
                   lz::join_where(
                       payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
                       [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
-    auto it = joined.begin();
 
+    auto expected = std::vector<std::tuple<customer, payment_bill>>{ std::make_tuple(customer{ 25 }, payment_bill{ 25, 0 }),
+                                                                     std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
+                                                                     std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
+                                                                     std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
     SECTION("Operator++") {
-        auto expected = std::vector<std::tuple<customer, payment_bill>>{ std::make_tuple(customer{ 25 }, payment_bill{ 25, 0 }),
-                                                                         std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
-                                                                         std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
-                                                                         std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
-
         REQUIRE(lz::equal(joined, expected,
                           [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
                               auto& a_fst = std::get<0>(a);
@@ -140,14 +144,6 @@ TEST_CASE("Left join binary operations") {
                               auto& b_snd = std::get<1>(b);
                               return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
                           }));
-    }
-
-    SECTION("Operator== & operator!=") {
-        REQUIRE(it != joined.end());
-        while (it != joined.end()) {
-            ++it;
-        }
-        REQUIRE(it == joined.end());
     }
 }
 
