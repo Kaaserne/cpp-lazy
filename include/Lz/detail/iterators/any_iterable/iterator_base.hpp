@@ -62,8 +62,6 @@ struct iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
     virtual bool eq(const iterator_base& other) const = 0;
 
-    virtual bool lt(const iterator_base& other) const = 0;
-
     virtual detail::unique_ptr<iterator_base> clone() const = 0;
 };
 } // namespace detail
