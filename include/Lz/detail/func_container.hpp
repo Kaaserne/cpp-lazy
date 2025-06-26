@@ -79,7 +79,7 @@ public:
     explicit func_container(const Func& func) : _func{ func } {
     }
 
-    explicit func_container(Func&& func) noexcept(std::is_nothrow_copy_constructible<Func>::value) : _func{ std::move(func) } {
+    explicit func_container(Func&& func) noexcept(std::is_nothrow_move_constructible<Func>::value) : _func{ std::move(func) } {
     }
 
     func_container(const func_container& other) : _func{ other._func } {
