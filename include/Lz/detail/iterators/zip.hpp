@@ -13,11 +13,9 @@ namespace lz {
 namespace detail {
 
 template<class IterTuple, class SentinelTuple>
-class zip_iterator
-    : public iterator<
-          zip_iterator<IterTuple, SentinelTuple>, iter_tuple_ref_type_t<IterTuple>,
-          fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>, iter_tuple_iter_cat_t<IterTuple>,
-          sentinel_selector<iter_tuple_iter_cat_t<IterTuple>, zip_iterator<IterTuple, SentinelTuple>, SentinelTuple>> {
+class zip_iterator : public iterator<zip_iterator<IterTuple, SentinelTuple>, iter_tuple_ref_type_t<IterTuple>,
+                                     fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
+                                     iter_tuple_iter_cat_t<IterTuple>, SentinelTuple> {
 
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
@@ -31,7 +29,7 @@ private:
     IterTuple _iterators;
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 reference dereference(index_sequence<I...>) const {
+    constexpr reference dereference(index_sequence<I...>) const {
         return reference{ *std::get<I>(_iterators)... };
     }
 
@@ -87,7 +85,7 @@ public:
 #else
 
     template<class I = IterTuple, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr zip_iterator() {
+    constexpr zip_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -101,11 +99,11 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+    constexpr reference dereference() const {
         return dereference(make_idx_sequence_for_this());
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

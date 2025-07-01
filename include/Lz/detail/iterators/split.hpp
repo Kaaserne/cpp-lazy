@@ -40,7 +40,10 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
-    constexpr split_iterator() {
+    constexpr split_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                        std::is_nothrow_default_constructible<S>::value &&
+                                        std::is_nothrow_default_constructible<Iterator2>::value &&
+                                        std::is_nothrow_default_constructible<S2>::value) {
     }
 
 #endif
@@ -93,7 +96,7 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -149,7 +152,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<T>::value>>
-    constexpr split_single_iterator() {
+    constexpr split_single_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                               std::is_nothrow_default_constructible<S>::value &&
+                                               std::is_nothrow_default_constructible<T>::value) {
     }
 
 #endif
@@ -190,7 +195,7 @@ public:
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

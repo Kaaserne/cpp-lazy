@@ -16,9 +16,9 @@ struct concatenate_adaptor {
      * - be by value if one of the iterables yields by value
      * - be by const reference if one of the iterables yield by const reference.
      * - be by mutable reference if all iterables yield by mutable reference.
-     * Contains a .size() function if all iterables have a .size()function. The size is the sum of all the sizes of the iterables.
-     * Contains a sentinel if one of the iterables contains a sentinel. Its iterator category is the 'weakest' of the input
-     * iterables. Example:
+     * Contains a .size() function if all iterables have a .size() function. The size is the sum of all the sizes of the
+     * iterables. Contains a sentinel if one of the iterables contains a sentinel or is forward. Its iterator category is the
+     * 'weakest' of the input iterables. Example:
      * ```cpp
      * std::vector<int> a = {1, 2};
      * std::vector<int> b = {3, 4};

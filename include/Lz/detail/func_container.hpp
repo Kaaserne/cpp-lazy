@@ -51,6 +51,12 @@ invoke(MemData T::*md, T* obj) -> enable_if<std::is_member_object_pointer<MemDat
 
 #endif
 
+#ifdef LZ_HAS_CXX_17
+
+using std::invoke;
+
+#endif
+
 template<class Func>
 class func_container {
     Func _func;
@@ -65,18 +71,18 @@ public:
 #else
 
     template<class F = Func, class = enable_if<std::is_default_constructible<F>::value>>
-    constexpr func_container() {
+    constexpr func_container() noexcept(std::is_nothrow_default_constructible<Func>::value) {
     }
 
 #endif
 
-    explicit func_container(const Func& func) : _func(func) {
+    explicit func_container(const Func& func) : _func{ func } {
     }
 
-    explicit func_container(Func&& func) noexcept(std::is_nothrow_copy_constructible<Func>::value) : _func(std::move(func)) {
+    explicit func_container(Func&& func) noexcept(std::is_nothrow_move_constructible<Func>::value) : _func{ std::move(func) } {
     }
 
-    func_container(const func_container& other) : _func(other._func) {
+    func_container(const func_container& other) : _func{ other._func } {
     }
 
     func_container(func_container&& other) noexcept(std::is_nothrow_copy_constructible<Func>::value) :
@@ -95,39 +101,18 @@ public:
     }
 
     template<class... Args>
-    constexpr auto operator()(Args&&... args) const& -> decltype(_func(std::forward<Args>(args)...)) {
-#ifndef LZ_HAS_CXX_17
-
+    constexpr auto operator()(Args&&... args) const& -> decltype(invoke(_func, std::forward<Args>(args)...)) {
         return invoke(_func, std::forward<Args>(args)...);
-#else
-
-        return std::invoke(_func, std::forward<Args>(args)...);
-
-#endif
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) & -> decltype(_func(std::forward<Args>(args)...)) {
-#ifndef LZ_HAS_CXX_17
-
+    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) & -> decltype(invoke(_func, std::forward<Args>(args)...)) {
         return invoke(_func, std::forward<Args>(args)...);
-#else
-
-        return std::invoke(_func, std::forward<Args>(args)...);
-
-#endif
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) && -> decltype(_func(std::forward<Args>(args)...)) {
-#ifndef LZ_HAS_CXX_17
-
+    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) && -> decltype(invoke(std::move(_func), std::forward<Args>(args)...)) {
         return invoke(std::move(_func), std::forward<Args>(args)...);
-#else
-
-        return std::invoke(std::move(_func), std::forward<Args>(args)...);
-
-#endif
     }
 };
 } // namespace detail

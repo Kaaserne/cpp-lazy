@@ -13,7 +13,7 @@ TEST_CASE("Basic common_iterable test") {
     REQUIRE(common.begin() != common.end());
     REQUIRE(common.end() != common.begin());
     REQUIRE(std::find(common.begin(), common.end(), 'h') == common.begin());
-    REQUIRE(std::equal(common.begin(), common.end(), cstr.begin()));
+    REQUIRE(lz::equal(common, cstr));
 }
 
 TEST_CASE("common_iterable binary operations") {
@@ -21,17 +21,17 @@ TEST_CASE("common_iterable binary operations") {
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);
 
-    auto begin = common.begin();
-    REQUIRE(*begin == 'h');
     SECTION("Operator++") {
-        ++begin;
-        REQUIRE(*begin == 'e');
+        REQUIRE(lz::equal(common, c_string_view));
     }
 
     SECTION("Operator== & operator!=") {
-        REQUIRE(begin != common.end());
-        begin = common.end();
-        REQUIRE(begin == common.end());
+        auto it = common.begin();
+        REQUIRE(it != common.end());
+        REQUIRE(common.end() != it);
+        it = common.end();
+        REQUIRE(it == common.end());
+        REQUIRE(common.end() != common.begin());
     }
 }
 

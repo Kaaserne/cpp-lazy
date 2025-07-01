@@ -12,8 +12,7 @@ namespace detail {
 template<class Iterator, class S, class Arithmetic>
 class enumerate_iterator
     : public iterator<enumerate_iterator<Iterator, S, Arithmetic>, std::pair<Arithmetic, ref_t<Iterator>>,
-                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>,
-                      sentinel_selector<iter_cat_t<Iterator>, enumerate_iterator<Iterator, S, Arithmetic>, S>> {
+                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
 
     Iterator _iterator;
     Arithmetic _index{};
@@ -35,7 +34,7 @@ public:
 #else
 
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr enumerate_iterator() {
+    constexpr enumerate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -67,7 +66,7 @@ public:
         return { _index, *_iterator };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

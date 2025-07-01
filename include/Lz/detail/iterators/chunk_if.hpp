@@ -47,7 +47,9 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
                                std::is_default_constructible<UnaryPredicate>::value>>
-    constexpr chunk_if_iterator() {
+    constexpr chunk_if_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                           std::is_nothrow_default_constructible<S>::value &&
+                                           std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
 
 #endif
@@ -83,7 +85,7 @@ public:
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

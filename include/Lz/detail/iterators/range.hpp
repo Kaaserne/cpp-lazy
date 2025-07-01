@@ -36,7 +36,7 @@ public:
         return _index;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const noexcept {
+    constexpr pointer arrow() const noexcept {
         return fake_ptr_proxy<value_type>(**this);
     }
 

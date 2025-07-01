@@ -1,11 +1,20 @@
 #include <Lz/drop_while.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <Lz/take_while.hpp>
 #include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <forward_list>
 #include <list>
 #include <map>
 #include <unordered_map>
+
+#ifdef __GNUC__
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
+#endif
 
 TEST_CASE("Take while with sentinels") {
     auto cstr = lz::c_string("Hello, World!");
@@ -22,24 +31,6 @@ TEST_CASE("Take while with sentinels") {
         REQUIRE(it == take_while.begin());
         it = take_while.end();
         REQUIRE(it == take_while.end());
-    }
-}
-
-TEST_CASE("take_while_iterable takes elements and is by reference") {
-    constexpr size_t size = 10;
-    std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
-    SECTION("Should take elements") {
-        auto take_while = lz::take_while(array, [](int element) { return element < 5; });
-        auto it = take_while.begin();
-        REQUIRE(std::distance(it, take_while.end()) == 4);
-    }
-
-    SECTION("Should be by reference") {
-        auto take_while = lz::take_while(array, [](int element) { return element < 5; });
-        auto it = take_while.begin();
-        *it = 50;
-        REQUIRE(array[0] == 50);
     }
 }
 
@@ -67,57 +58,117 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE(!lz::has_many(drop_while));
         REQUIRE(lz::has_one(drop_while));
     }
-}
 
-TEST_CASE("Drop while takes elements and is by reference") {
-    constexpr size_t size = 10;
-    std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-
-    SECTION("Should drop elements") {
-        auto drop_while = lz::drop_while(array, [](int element) { return element < 5; });
-        auto it = drop_while.begin();
-        REQUIRE(std::distance(it, drop_while.end()) == 6);
+    SECTION("Many elements both true") {
+        std::vector<int> vec = { 1, 2 };
+        auto drop_while = lz::drop_while(vec, [](int i) { return i < 3; });
+        REQUIRE(lz::empty(drop_while));
+        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE(!lz::has_one(drop_while));
     }
 
-    SECTION("Should be by reference") {
-        auto drop_while = lz::drop_while(array, [](int element) { return element < 5; });
-        auto it = drop_while.begin();
-        *it = 50;
-        REQUIRE(array[4] == 50);
-        REQUIRE(array[4] != 6);
-        REQUIRE(array[0] == 1);
+    SECTION("Many elements first true") {
+        std::vector<int> vec = { 1, 2 };
+        auto drop_while = lz::drop_while(vec, [](int i) { return i == 1; });
+        REQUIRE(!lz::empty(drop_while));
+        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE(lz::has_one(drop_while));
+    }
+
+    SECTION("Many elements first false") {
+        std::vector<int> vec = { 1, 2 };
+        auto drop_while = lz::drop_while(vec, [](int i) { return i > 1; });
+        REQUIRE(!lz::empty(drop_while));
+        REQUIRE(lz::has_many(drop_while));
+        REQUIRE(!lz::has_one(drop_while));
+    }
+
+    SECTION("Many elements all false") {
+        std::vector<int> vec = { 1, 2 };
+        auto drop_while = lz::drop_while(vec, [](int i) { return i > 2; });
+        REQUIRE(!lz::empty(drop_while));
+        REQUIRE(lz::has_many(drop_while));
+        REQUIRE(!lz::has_one(drop_while));
     }
 }
 
-TEST_CASE("take_while_iterable binary operations") {
+TEST_CASE("take_while_iterable binary operations random access") {
     constexpr size_t size = 10;
     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });
 
     SECTION("Operator++") {
-        auto begin = take_while.begin();
-        ++begin;
-        REQUIRE(*begin == 2);
-    }
-
-    SECTION("Operator== & Operator!=") {
-        REQUIRE(take_while.begin() != take_while.end());
-        REQUIRE_FALSE(take_while.begin() == take_while.end());
-        auto it = take_while.begin();
-        it = take_while.end();
-        REQUIRE(it == take_while.end());
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(take_while, expected));
     }
 
     SECTION("Operator--") {
-        auto end = take_while.end();
-        --end;
-        REQUIRE(*end == 4);
-        --end;
-        REQUIRE(*end == 3);
-        --end;
-        REQUIRE(*end == 2);
-        --end;
-        REQUIRE(*end == 1);
+        auto expected = { 4, 3, 2, 1 };
+        REQUIRE(lz::equal(take_while | lz::reverse, expected));
+    }
+
+    SECTION("Operator== & Operator!=") {
+        auto it = take_while.begin();
+        REQUIRE(it == take_while.begin());
+        REQUIRE(it != take_while.end());
+        REQUIRE(take_while.begin() == it);
+        REQUIRE(take_while.end() != it);
+        it = take_while.end();
+        REQUIRE(it == take_while.end());
+        REQUIRE(it != take_while.begin());
+        REQUIRE(take_while.end() == it);
+        REQUIRE(take_while.begin() != it);
+    }
+}
+
+TEST_CASE("take_while_iterable binary operations bidirectional access") {
+    std::list<int> lst{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    auto take_while = lz::take_while(lst, [](int element) { return element < 5; });
+
+    SECTION("Operator++") {
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(take_while, expected));
+    }
+
+    SECTION("Operator== & Operator!=") {
+        auto it = take_while.begin();
+        REQUIRE(it == take_while.begin());
+        REQUIRE(it != take_while.end());
+        REQUIRE(take_while.begin() == it);
+        REQUIRE(take_while.end() != it);
+        it = take_while.end();
+        REQUIRE(it == take_while.end());
+        REQUIRE(it != take_while.begin());
+        REQUIRE(take_while.end() == it);
+        REQUIRE(take_while.begin() != it);
+    }
+
+    SECTION("Operator--") {
+        auto expected = { 4, 3, 2, 1 };
+        REQUIRE(lz::equal(take_while | lz::reverse, expected));
+    }
+}
+
+TEST_CASE("take_while_iterable binary operations forward access") {
+    std::forward_list<int> fl{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    auto take_while = lz::take_while(fl, [](int element) { return element < 5; });
+
+    SECTION("Operator++") {
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(take_while, expected));
+    }
+
+    SECTION("Operator== & Operator!=") {
+        auto it = take_while.begin();
+        REQUIRE(it == take_while.begin());
+        REQUIRE(it != take_while.end());
+        REQUIRE(take_while.begin() == it);
+        REQUIRE(take_while.end() != it);
+        it = take_while.end();
+        REQUIRE(it == take_while.end());
+        REQUIRE(it != take_while.begin());
+        REQUIRE(take_while.end() == it);
+        REQUIRE(take_while.begin() != it);
     }
 }
 
@@ -127,22 +178,20 @@ TEST_CASE("take_while_iterable to containers") {
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });
 
     SECTION("To array") {
+        REQUIRE(lz::distance(take_while) == 4);
         auto arr = take_while | lz::to<std::array<int, 4>>();
-        REQUIRE(arr.size() == 4);
-        REQUIRE(arr[0] == 1);
-        REQUIRE(arr[1] == 2);
-        REQUIRE(arr[2] == 3);
-        REQUIRE(arr[3] == 4);
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(arr, expected));
     }
 
     SECTION("To vector") {
         auto vec = take_while | lz::to<std::vector>();
-        REQUIRE(std::equal(vec.begin(), vec.end(), take_while.begin()));
+        REQUIRE(lz::equal(vec, take_while));
     }
 
     SECTION("To other container using to<>()") {
         auto lst = take_while | lz::to<std::list>();
-        REQUIRE(std::equal(lst.begin(), lst.end(), take_while.begin()));
+        REQUIRE(lz::equal(lst, take_while));
     }
 
     SECTION("To map") {
@@ -159,3 +208,9 @@ TEST_CASE("take_while_iterable to containers") {
         REQUIRE(map == expected);
     }
 }
+
+#ifdef __GNUC__
+
+#pragma GCC diagnostic pop
+
+#endif

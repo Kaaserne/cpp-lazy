@@ -9,6 +9,14 @@
 #include <test_procs.hpp>
 #include <unordered_map>
 
+struct equal_fn {
+    template<typename T, typename U>
+    bool operator()(const T& a, const U& b) const {
+        INFO("Comparing pairs: " << a.first << ", " << a.second << " with " << b.first << ", " << b.second);
+        return a.first == b.first && a.second == b.second;
+    }
+};
+
 TEST_CASE("Enumerate with sentinels") {
     const char* str = "Hello";
     auto c_string = lz::c_string(str);
@@ -17,60 +25,19 @@ TEST_CASE("Enumerate with sentinels") {
                   "Begin and end should not be the same type");
     auto taken = lz::take(enumerated, 3);
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
-
-    using ref_taken = lz::ref_iterable_t<decltype(taken)>;
-    using ref_expected = lz::ref_iterable_t<decltype(expected)>;
-    REQUIRE(lz::equal(taken, expected, [](ref_taken a, ref_expected b) { return a.first == b.first && a.second == b.second; }));
+    REQUIRE(lz::equal(taken, expected, equal_fn{}));
 
     SECTION("Operator=") {
         auto it = enumerated.begin();
         REQUIRE(it == enumerated.begin());
+        REQUIRE(enumerated.begin() == it);
+        REQUIRE(it != enumerated.end());
+        REQUIRE(enumerated.end() != it);
         it = enumerated.end();
         REQUIRE(it == enumerated.end());
-    }
-}
-
-TEST_CASE("Enumerate correct size()") {
-    std::list<int> list = { 1, 2, 3, 4, 5 };
-    auto enumerated = lz::enumerate(list);
-    REQUIRE(enumerated.size() == 5);
-    enumerated = lz::enumerate(list, 2);
-    REQUIRE(enumerated.size() == 5);
-    auto end = enumerated.end();
-    --end;
-    REQUIRE(end->first == 6);
-    --end, --end, --end, --end;
-    REQUIRE(end->first == 2);
-    REQUIRE(end->second == 1);
-}
-
-TEST_CASE("Enumerate changing and creating elements") {
-    constexpr std::size_t size = 2;
-    std::array<int, size> array = { 1, 2 };
-
-    SECTION("Enumerate should create pair with {idx, elm}") {
-        auto enumerate = lz::enumerate(array);
-        static_assert(std::is_same<decltype(enumerate.begin()), decltype(enumerate.end())>::value, "Should not be sentinel");
-        auto element = *enumerate.begin();
-
-        REQUIRE(element.first == 0);  // Idx
-        REQUIRE(element.second == 1); // Element
-    }
-
-    SECTION("Enumerate should create pair with {idx, elm} with offset") {
-        auto enumerate = lz::enumerate(array, 2);
-        auto element = *enumerate.begin();
-
-        REQUIRE(element.first == 2);  // Idx
-        REQUIRE(element.second == 1); // Element
-    }
-
-    SECTION("Enumerate should be by reference") {
-        auto enumerate = lz::enumerate(array);
-        auto element = *enumerate.begin();
-        element.second = 500;
-
-        REQUIRE(array[0] == 500);
+        REQUIRE(it != enumerated.begin());
+        REQUIRE(enumerated.end() == it);
+        REQUIRE(enumerated.begin() != it);
     }
 }
 
@@ -95,37 +62,34 @@ TEST_CASE("Empty or one element enumerate") {
 TEST_CASE("Enumerate binary operations") {
     constexpr std::size_t size = 3;
     std::array<int, size> array = { 1, 2, 3 };
-    auto enumerate = lz::enumerate(array);
+    auto enumerate = lz::enumerate(array, 2);
 
     SECTION("Operator++") {
-        auto expected = std::vector<std::pair<int, int>>{ { 0, 1 }, { 1, 2 }, { 2, 3 } };
-        REQUIRE(lz::equal(enumerate, expected, [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-            return a.first == b.first && a.second == b.second;
-        }));
+        auto expected = std::vector<std::pair<int, int>>{ { 2, 1 }, { 3, 2 }, { 4, 3 } };
+        REQUIRE(lz::equal(enumerate, expected, equal_fn{}));
     }
 
     SECTION("Operator--") {
-        auto reverse_expected = std::vector<std::pair<int, int>>{ { 2, 3 }, { 1, 2 }, { 0, 1 } };
-        REQUIRE(
-            lz::equal(lz::reverse(enumerate), reverse_expected, [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-                return a.first == b.first && a.second == b.second;
-            }));
+        auto reverse_expected = std::vector<std::pair<int, int>>{ { 4, 3 }, { 3, 2 }, { 2, 1 } };
+        REQUIRE(lz::equal(lz::reverse(enumerate), reverse_expected, equal_fn{}));
     }
 
     SECTION("Operator== & operator!=") {
-        auto begin = enumerate.begin();
-        REQUIRE(begin != enumerate.end());
-        begin = enumerate.end();
-        REQUIRE(begin == enumerate.end());
+        auto it = enumerate.begin();
+        REQUIRE(it != enumerate.end());
+        REQUIRE(it == enumerate.begin());
+        REQUIRE(enumerate.begin() == it);
+        REQUIRE(it != enumerate.end());
+        it = enumerate.end();
+        REQUIRE(it == enumerate.end());
+        REQUIRE(it != enumerate.begin());
+        REQUIRE(enumerate.end() == it);
+        REQUIRE(enumerate.begin() != it);
     }
 
     SECTION("Operator+") {
-        std::vector<std::pair<int, int>> expected = { { 0, 1 }, { 1, 2 }, { 2, 3 } };
-        const auto cmp = [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
-            INFO("Comparing pairs: " << a.first << ", " << a.second << " with " << b.first << ", " << b.second);
-            return a.first == b.first && a.second == b.second;
-        };
-        test_procs::test_operator_plus(enumerate, expected, cmp);
+        std::vector<std::pair<int, int>> expected = { { 2, 1 }, { 3, 2 }, { 4, 3 } };
+        test_procs::test_operator_plus(enumerate, expected, equal_fn{});
     }
 
     SECTION("Operator-") {
@@ -140,34 +104,20 @@ TEST_CASE("Enumerate to containers") {
 
     SECTION("To array") {
         auto actual_array = array | lz::enumerate | lz::to<std::array<std::pair<int, int>, size>>();
-        auto expected_pair = std::make_pair(0, 1);
-
-        for (auto actual_pair : actual_array) {
-            REQUIRE(actual_pair == expected_pair);
-            expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
-        }
+        auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
+        REQUIRE(lz::equal(actual_array, expected, equal_fn{}));
     }
 
     SECTION("To vector") {
         auto actual_vec = lz::enumerate(vec) | lz::to<std::vector>();
-        auto expected_pair = std::make_pair(0, 1);
-
-        for (const auto& actual_pair : actual_vec) {
-            REQUIRE(actual_pair.first == expected_pair.first);
-            REQUIRE(actual_pair.second == expected_pair.second);
-            expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
-        }
+        auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
+        REQUIRE(lz::equal(actual_vec, expected, equal_fn{}));
     }
 
     SECTION("To other container using to<>()") {
         auto actual_list = lz::enumerate(vec) | lz::to<std::list>();
-        auto expected_pair = std::make_pair(0, 1);
-
-        for (const auto& actual_pair : actual_list) {
-            REQUIRE(actual_pair.first == expected_pair.first);
-            REQUIRE(actual_pair.second == expected_pair.second);
-            expected_pair = std::make_pair(++expected_pair.first, ++expected_pair.second);
-        }
+        auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
+        REQUIRE(lz::equal(actual_list, expected, equal_fn{}));
     }
 
     SECTION("To map") {

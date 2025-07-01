@@ -37,7 +37,7 @@ public:
 #else
 
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr exclude_iterator() {
+    constexpr exclude_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -65,7 +65,7 @@ public:
         return *_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

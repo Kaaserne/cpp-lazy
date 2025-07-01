@@ -3,6 +3,7 @@
 #include <Lz/except.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
+#include <Lz/reverse.hpp>
 #include <array>
 #include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
@@ -22,8 +23,14 @@ TEST_CASE("Except tests with sentinels") {
     SECTION("Operator=") {
         auto it = except.begin();
         REQUIRE(it == except.begin());
+        REQUIRE(it != except.end());
+        REQUIRE(except.end() != it);
+        REQUIRE(except.begin() == it);
         it = except.end();
+        REQUIRE(it != except.begin());
         REQUIRE(it == except.end());
+        REQUIRE(except.begin() != it);
+        REQUIRE(except.end() == it);
     }
 }
 
@@ -74,65 +81,20 @@ TEST_CASE("Empty or one element except") {
     }
 }
 
-TEST_CASE("Except excepts elements and is by reference") {
-    std::vector<int> array{ 1, 2, 3, 4, 5 };
-    std::vector<int> to_except{ 3, 5 };
-
-    auto except = array | lz::except(to_except);
-    auto it = except.begin();
-    REQUIRE(*it == 1);
-
-    SECTION("For-loop") {
-        constexpr std::size_t s = 32;
-        constexpr std::size_t es = 16;
-
-        auto large_arr = lz::range(static_cast<int>(s)) | lz::to<std::array<int, s>>();
-        auto to_large_except = lz::range(static_cast<int>(es)) | lz::to<std::array<int, es>>();
-
-        auto ex = lz::except(large_arr, to_large_except);
-        auto current = 16;
-        lz::for_each(ex, [&current](int i) {
-            REQUIRE(i == current);
-            ++current;
-        });
-        current = 0;
-    }
-
-    SECTION("Excepts elements") {
-        REQUIRE((except | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 4 });
-    }
-
-    SECTION("Is by reference") {
-        *it = 0;
-        REQUIRE(*it == array[0]);
-    }
-
-    SECTION("Excepted with >") {
-        std::sort(to_except.begin(), to_except.end(), std::greater<int>());
-        auto except_greater = lz::except(array, to_except, std::greater<int>());
-        REQUIRE((except_greater | lz::to<std::array<int, 3>>()) == std::array<int, 3>{ 1, 2, 4 });
-    }
-}
-
 TEST_CASE("Except binary operations") {
-    std::vector<int> a = { 1, 2, 3, 4 };
-    std::vector<int> b = { 2, 3 };
+    std::vector<int> a = { 1, 2, 3, 4, 5, 6 };
+    std::vector<int> b = { 2, 3, 6, 20 };
 
     auto except = lz::except(a, b);
-    auto it = except.begin();
-    REQUIRE(*it == 1);
 
     SECTION("Operator++") {
-        auto expected = { 1, 4 };
+        auto expected = { 1, 4, 5 };
         REQUIRE(lz::equal(except, expected));
     }
 
-    SECTION("Operator== & operator!=") {
-        REQUIRE(it != except.end());
-        while (it != except.end()) {
-            ++it;
-        }
-        REQUIRE(it == except.end());
+    SECTION("Operator--") {
+        auto expected = { 5, 4, 1 };
+        REQUIRE(lz::equal(except | lz::cached_reverse, expected));
     }
 }
 

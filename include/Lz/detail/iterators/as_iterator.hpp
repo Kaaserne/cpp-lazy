@@ -21,7 +21,7 @@ public:
     using difference_type = typename std::iterator_traits<Iterator>::difference_type;
 
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr as_iterator_iterator() {
+    constexpr as_iterator_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
     constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {
@@ -32,11 +32,11 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+    constexpr reference dereference() const {
         return _iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<Iterator>{ _iterator };
     }
 

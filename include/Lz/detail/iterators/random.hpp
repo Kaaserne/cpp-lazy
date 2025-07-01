@@ -38,7 +38,7 @@ public:
 #else
 
     template<class D = Distribution, class = enable_if<std::is_default_constructible<D>::value>>
-    constexpr random_iterator() {
+    constexpr random_iterator() noexcept(std::is_nothrow_default_constructible<D>::value) {
     }
 
 #endif
@@ -66,7 +66,7 @@ public:
         ++_current;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

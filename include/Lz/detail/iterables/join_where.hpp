@@ -18,11 +18,16 @@ class join_where_iterable : public lazy_view {
     func_container<ResultSelector> _result_selector;
 
 public:
-    using iterator = join_where_iterator<iter_t<IterableA>, sentinel_t<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,
+    using iterator = join_where_iterator<ref_or_view<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,
                                          func_container<SelectorA>, func_container<SelectorB>, func_container<ResultSelector>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel = !std::is_same<iter_t<IterableA>, sentinel_t<IterableA>>::value ||
+                                            !is_bidi_tag<typename iterator::iterator_category>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr join_where_iterable()
@@ -38,7 +43,11 @@ public:
         class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
                           std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
                           std::is_default_constructible<ResultSelector>::value>>
-    constexpr join_where_iterable() {
+    constexpr join_where_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<ref_or_view<IterableB>>::value &&
+                                             std::is_nothrow_default_constructible<SelectorA>::value &&
+                                             std::is_nothrow_default_constructible<SelectorB>::value &&
+                                             std::is_nothrow_default_constructible<ResultSelector>::value) {
     }
 
 #endif
@@ -53,13 +62,12 @@ public:
     }
 
     constexpr iterator begin() const& {
-        return { std::begin(_iterable_a), std::end(_iterable_a), std::begin(_iterable_b), std::end(_iterable_b), _a, _b,
-                 _result_selector };
+        return { _iterable_a, std::begin(_iterable_a), std::begin(_iterable_b), std::end(_iterable_b), _a, _b, _result_selector };
     }
 
     LZ_CONSTEXPR_CXX_14 iterator begin() && {
         // clang-format off
-        return { detail::begin(std::move(_iterable_a)), detail::end(std::move(_iterable_a)), detail::begin(std::move(_iterable_b)),
+        return { _iterable_a, std::begin(_iterable_a), detail::begin(std::move(_iterable_b)),
                  detail::end(std::move(_iterable_b)), std::move(_a), std::move(_b), std::move(_result_selector) };
         // clang-format on
     }

@@ -21,13 +21,13 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr common_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr common_iterable() {
+    constexpr common_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -40,12 +40,12 @@ public:
         return { detail::begin(std::move(_iterable)) };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
-        return { detail::end(std::move(_iterable)) };
-    }
-
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { std::begin(_iterable) };
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
+        return { detail::end(std::move(_iterable)) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {

@@ -14,9 +14,10 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @brief Zips two or more iterables together. If one of the iterables is shorter than the others, it will return an empty
  * optional instead of a non empty optional. The optional contains a tuple of `std::reference_wrapper`s to the elements itself if
  * it is not empty. Contains a size() method if all the iterables are sized. Will return the size of the largest iterable. Its
- * iterator category is the same as its 'weakest' input iterables. If the input iterable is exactly bidirectional and not sized
- * (like `lz::filter` for example), the entire sequence is traversed to get its end size (using `lz::eager_size`), so it may be
- * worth your while to use `lz::cache_size`. So, all in all: use lz::cache_size if:
+ * iterator category is the same as its 'weakest' input iterables. Returns a sentinel if one of the iterables has a sentinel. If
+ * the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence is traversed to
+ * get its end size (using `lz::eager_size`), so it may be worth your while to use `lz::cache_size`. So, all in all: use
+ * lz::cache_size if:
  * - Your iterable is exactly bidirectional (so forward/random access excluded) and
  * - Your iterable is not sized and
  * - You either use multiple/a combination of the following iterables OR (see last point):
@@ -29,7 +30,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
- * - Are planning to call begin() or end() multiple times on the same instance (with one or more of the above iterable
+ * - Are planning call end() multiple times on the same instance (with one or more of the above iterable
  * combinations) Example:
  * ```cpp
  * std::vector<int> a = { 1, 2, 3 };

@@ -20,13 +20,13 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cached_size_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr cached_size_iterable() {
+    constexpr cached_size_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -42,11 +42,11 @@ public:
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
-        return _iterable.begin();
+        return std::begin(_iterable);
     }
 
     LZ_NODISCARD constexpr sentinel end() const& {
-        return _iterable.end();
+        return std::end(_iterable);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {

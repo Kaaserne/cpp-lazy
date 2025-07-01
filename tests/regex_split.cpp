@@ -11,7 +11,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         lz::regex_split_iterable<std::sregex_token_iterator> splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = {};
-        REQUIRE(std::equal(actual.begin(), actual.end(), expected.begin()));
+        REQUIRE(lz::equal(actual, expected));
     }
 
     SECTION("Starting with delimiter") {
@@ -19,7 +19,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         auto splitter = s | lz::regex_split(r1);
         auto actual = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
-        REQUIRE(std::equal(actual.begin(), actual.end(), expected.begin()));
+        REQUIRE(lz::equal(actual, expected));
     }
 
     SECTION("Ending with delimiter") {
@@ -27,7 +27,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         auto splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
-        REQUIRE(std::equal(actual.begin(), actual.end(), expected.begin()));
+        REQUIRE(lz::equal(actual, expected));
     }
 
     SECTION("Starting and ending with delimiter") {
@@ -35,7 +35,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         auto splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
-        REQUIRE(std::equal(actual.begin(), actual.end(), expected.begin()));
+        REQUIRE(lz::equal(actual, expected));
     }
 
     SECTION("Operator=") {
@@ -105,12 +105,12 @@ TEST_CASE("regex_split_iterable to containers") {
     SECTION("To vector") {
         auto vec = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
-        REQUIRE(std::equal(vec.begin(), vec.end(), expected.begin()));
+        REQUIRE(lz::equal(vec, expected));
     }
 
     SECTION("To list") {
         auto list = splitter | lz::to<std::list>();
         std::list<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
-        REQUIRE(std::equal(list.begin(), list.end(), expected.begin()));
+        REQUIRE(lz::equal(list, expected));
     }
 }

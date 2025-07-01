@@ -12,10 +12,13 @@ namespace detail {
 
 template<class Iterator, class S>
 class common_iterator : public iterator<common_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                                        diff_type<Iterator>, iter_cat_t<Iterator>> {
+                                        diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
     variant<Iterator, S> _data;
 
     using traits = std::iterator_traits<Iterator>;
+
+    static_assert(!std::is_same<S, Iterator>::value,
+                  "common_iterator should not be used with the same type for Iterator and S. Use Iterator directly.");
 
 public:
     using iterator_category = typename traits::iterator_category;
@@ -66,7 +69,7 @@ public:
         return *get<0>(_data);
     }
 
-    LZ_CONSTEXPR_CXX_17 fake_ptr_proxy<reference> arrow() const {
+    LZ_CONSTEXPR_CXX_14 fake_ptr_proxy<reference> arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

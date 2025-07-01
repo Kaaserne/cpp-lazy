@@ -15,7 +15,7 @@ struct cartesian_product_adaptor {
     /**
      * @brief Performs a cartesian product on the given iterables. This means that it will return all possible combinations
      * of the elements of the given iterables. Contains a .size() function if all of the iterables have a .size() function.
-     * Returns a sentinel if one of the iterables has a forward iterator. Example:
+     * Returns a sentinel if one of the iterables has a forward iterator or a sentinel. Example:
      * ```cpp
      * std::vector<int> a = {1, 2};
      * std::vector<int> b = {3, 4};

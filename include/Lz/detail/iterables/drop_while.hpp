@@ -25,24 +25,29 @@ public:
     using const_iterator = iterator;
     using value_type = val_iterable_t<Iterable>;
 
+private:
+    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || is_sentinel<iterator, sentinel>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr drop_while_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<UnaryPredicate>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<UnaryPredicate>
     = default;
 
 #else
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
-    constexpr drop_while_iterable() {
+    constexpr drop_while_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
 
 #endif
 
     template<class I>
     constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
-        _iterable{ iterable },
+        _iterable{ std::forward<I>(iterable) },
         _unary_predicate{ std::move(unary_predicate) } {
     }
 
@@ -57,7 +62,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<iter_cat_t<iterator>>::value) {
+        if constexpr (!return_sentinel) {
             return std::end(_iterable);
         }
         else {
@@ -67,13 +72,14 @@ public:
 
 #else
 
-    template<class I = iter_cat_t<iterator>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, sentinel> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, sentinel> end() const {
         return std::end(_iterable);
     }
 
-    template<class I = iter_cat_t<iterator>>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel>
+    end() const {
         return {};
     }
 
@@ -106,15 +112,15 @@ public:
         return std::move(_begin);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
-        return std::move(_end);
-    }
-
     LZ_NODISCARD constexpr iterator begin() const& {
         return _begin;
     }
 
-    LZ_NODISCARD constexpr sentinel end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
+        return std::move(_end);
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() const& {
         return _end;
     }
 };

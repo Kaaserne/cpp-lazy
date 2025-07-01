@@ -56,8 +56,10 @@ TEST_CASE("zip_iterable changing and creating elements") {
 TEST_CASE("Empty or one element zip") {
     SECTION("Empty") {
         std::vector<int> empty;
-        std::vector<int> empty2;
+        auto empty2 = lz::c_string("");
         auto zipper = lz::zip(empty, empty2);
+        static_assert(std::is_same<decltype(zipper.end()), std::tuple<decltype(empty)::iterator, lz::default_sentinel>>::value,
+                      "should be sentinel like");
         REQUIRE(lz::empty(zipper));
         REQUIRE(!lz::has_many(zipper));
         REQUIRE(!lz::has_one(zipper));

@@ -40,7 +40,7 @@ public:
 #else
 
     template<class R = RegexTokenIter, class = enable_if<std::is_default_constructible<R>::value>>
-    constexpr regex_split_iterator() {
+    constexpr regex_split_iterator() noexcept(std::is_nothrow_default_constructible<R>::value) {
     }
 
 #endif
@@ -60,11 +60,11 @@ public:
         ++_current;
     }
 
-    LZ_CONSTEXPR_CXX_14 value_type dereference() const {
+    constexpr value_type dereference() const {
         return value_type(&*_current->first, static_cast<std::size_t>(_current->length()));
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

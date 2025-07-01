@@ -34,9 +34,9 @@ TEST_CASE("Exclude changing and creating elements") {
 
     SECTION("Should Exclude out element") {
         constexpr auto signed_size = static_cast<std::ptrdiff_t>(arr.size() - 2);
-        REQUIRE(lz::distance(excluded1.begin(), excluded1.end()) == signed_size);
-        REQUIRE(lz::distance(excluded2.begin(), excluded2.end()) == signed_size);
-        REQUIRE(lz::distance(excluded3.begin(), excluded3.end()) == signed_size);
+        REQUIRE(lz::distance(excluded1) == signed_size);
+        REQUIRE(lz::distance(excluded2) == signed_size);
+        REQUIRE(lz::distance(excluded3) == signed_size);
     }
 
     SECTION("Should be by reference") {

@@ -14,8 +14,7 @@ namespace detail {
 template<class Iterator, class S, class UnaryOp>
 class map_iterator
     : public iterator<map_iterator<Iterator, S, UnaryOp>, func_ret_type_iter<UnaryOp, Iterator>,
-                      fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>,
-                      sentinel_selector<iter_cat_t<Iterator>, map_iterator<Iterator, S, UnaryOp>, S>> {
+                      fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
     Iterator _iterator;
     mutable UnaryOp _unary_op;
 
@@ -38,7 +37,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
-    constexpr map_iterator() {
+    constexpr map_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
+                                      std::is_nothrow_default_constructible<UnaryOp>::value) {
     }
 
 #endif
@@ -57,7 +57,7 @@ public:
         return _unary_op(*_iterator);
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

@@ -81,7 +81,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [14]
+        version: [14, 17]
         standard: [11, 14, 17, 20]
 
     runs-on: ubuntu-latest
@@ -156,12 +156,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2019, windows-2022]
-        standard: [11, 20]
-        exclude:
-          # MSVC compiler bug with CXX11 operator surrogate func() with decltype return value
-          - os: windows-2019
-            standard: 11
+        os: [ windows-2022, windows-2025 ]
+        standard: [11, 14, 17, 20]
 
     runs-on: ${{ matrix.os }}
 

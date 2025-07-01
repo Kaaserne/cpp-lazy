@@ -25,7 +25,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr inclusive_scan_iterable()
-        requires std::default_initializable<Iterable> && std::default_initializable<T> && std::default_initializable<BinaryOp>
+        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<T> &&
+                     std::default_initializable<BinaryOp>
     = default;
 
 #else
@@ -33,7 +34,9 @@ public:
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
                                std::is_default_constructible<BinaryOp>::value>>
-    constexpr inclusive_scan_iterable() {
+    constexpr inclusive_scan_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                                 std::is_nothrow_default_constructible<T>::value &&
+                                                 std::is_nothrow_default_constructible<BinaryOp>::value) {
     }
 
 #endif

@@ -4,29 +4,27 @@
 
 ![](https://i.ibb.co/ccn2V8N/Screenshot-2021-05-05-Make-A-High-Quality-Logo-In-Just-5-Minutes-For-Under-30-v1-cropped.png)
 
-Examples can be found [here](https://github.com/MarcDirven/cpp-lazy/tree/master/examples). Installation can be found [here](https://github.com/MarcDirven/cpp-lazy#installation).
+Examples can be found [here](https://github.com/Kaaserne/cpp-lazy/tree/master/examples). Installation can be found [here](https://github.com/Kaaserne/cpp-lazy#installation).
 
 # cpp-lazy
-`cpp-lazy` is an easy and fast lazy evaluation library for C++11/14/17/20. The library tries to reduce redundant data usage for begin/end iterator pairs. Also internally this is done through template specialization for forward, bidirectional and random access iterators. For instance: `lz::random_iterable::end()` will return a `lz::default_sentinel` to prevent duplicate data that is also present in `lz::random_iterable::begin()`. If a 'symmetrical' end-begin iterator pair is needed, one can use `lz::common` or `lz::common_random`.
+`cpp-lazy` is an easy and fast lazy evaluation library for C++11/14/17/20. The library tries to reduce redundant data usage for begin/end iterator pairs. For instance: `lz::random_iterable::end()` will return a `lz::default_sentinel` to prevent duplicate data that is also present in `lz::random_iterable::begin()`. If a 'symmetrical' end-begin iterator pair is needed, one can use `lz::common` or `lz::common_random`. Generally, `lz` *forward* iterators will return a `lz::default_sentinel` (or if the input iterable is sentinelled) because forward iterators can only go forward, so there is no need to store the end iterator, is the philosophy.
 
-The library uses one optional dependency: the library `{fmt}`, more of which can be found out in the [installation section](https://github.com/MarcDirven/cpp-lazy#Installation). This dependency is only used for printing and formatting.
+The library uses one optional dependency: the library `{fmt}`, more of which can be found out in the [installation section](https://github.com/Kaaserne/cpp-lazy#Installation). This dependency is only used for printing and formatting.
 
 # Features
 - C++11/14/17/20 compatible
 - Easy printing/formatting using `lz::format`, `fmt::print` or `std::cout`
 - Tested with `-Wpedantic -Wextra -Wall -Wshadow -Wno-unused-function -Werror -Wconversion` and `/WX` for MSVC
-- One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt))
+- One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP-LAZY_USE_STANDALONE=TRUE` in CMake
 - STL compatible
 - Little overhead, as little as data usage possible
 - Any compiler with at least C++11 support should be suitable
-- [Easy installation](https://github.com/MarcDirven/cpp-lazy#installation)
+- [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
 
 # What is lazy?
-Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this
-library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could 
-write a for loop:
+Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could write a for loop:
 
 ```cpp
 std::random_device rd;
@@ -47,52 +45,34 @@ std::cout << lz::random(0, 32, n);
 fmt::print("{}", lz::random(0, 32, n));
 ```
 
-Both methods do not allocate any memory but the second example is a much more convenient way of writing the same thing.
-Now what if you wanted to do eager evaluation? Well then you could do this:
+Both methods do not allocate any memory but the second example is a much more convenient way of writing the same thing. Now what if you wanted to do eager evaluation? Well then you could do this:
 
 ```cpp
 std::random_device rd;
-std::std::mt19937 gen(rd());
+std::mt19937 gen(rd());
 std::uniform_int_distribution dist(0, 32);
 std::vector<int> random_numbers;
 std::generate(random_numbers.begin(), random_numbers.end(), [&dist, &gen]{ return dist(gen); });
 ```
 
-That is pretty verbose. Instead, try this for change:
+or, using `cpp-lazy`:
+
 ```cpp
 std::vector<int> random_numbers = lz::random(0, 32, n) | lz::to<std::vector>();
 ```
-> I want to search if the sequence of random numbers contain 6. 
 
-In 'regular' C++ code that would be:
-```cpp
-std::random_device rd;
-std::std::mt19937 gen(rd());
-std::uniform_int_distribution dist(0, 32);
+`cpp-lazy` is also (semi) compatible with the STL `<algorithm>` library. This means that you can use `std::find`, `std::find_if`, etc. on `lz` iterables, as long as the input iterable is not sentinelled. If the input iterable is sentinelled, you can use `lz::find`, `lz::find_if`, etc instead. `lz` algorithm equivalents will try to use `std::*` equivalents if possible.
 
-for (int i = 0; i < n; i++) {
- if (gen(dist) == 6) {
-  // do something
- }
-}
-```
-
-With `cpp-lazy` you can do this:
 ```cpp
 auto random = lz::random(0, 32, n);
-if (lz::find(random, 6) != random.end()) {
- // do something
-}
+// Calls lz::find
+auto pos = lz::find(random, 6) != random.end();
 
-// or
 auto common = lz::common_random(0, 32, n);
-if (lz::find(common, 6) != common.end()) {
- // do something
-}
+// Calls std::find
+auto pos = lz::find(common, 6) != common.end();
 // or (exactly the same as above)
-if (std::find(common.begin(), common.end(), 6) != common.end()) {
- // do something
-}
+auto pos = std::find(common.begin(), common.end(), 6) != common.end();
 ```
 
 ## Basic usage
@@ -175,23 +155,6 @@ int main() {
   lz::copied_iterable<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
   // Or use the helper function:
   copied = lz::as_copied_iterable(non_lz); // Holds a copy of non_lz = cheap to copy
-}
-```
-
-## Compatibility with STL `<algorithm>`
-The library will use the STL `<algorithm>` functions if possible:
-
-```cpp
-#include <Lz/algorithm.hpp>
-#include <Lz/map.hpp>
-#include <Lz/c_string.hpp>
-
-int main() {
-  auto c_str = lz::c_string("Hello World");
-  lz::find(c_str, 'o'); // Calls lz::find, not std::find, because c_str is sentinelled
-
-  auto vec = std::vector<int>{1, 2, 3, 4};
-  lz::find(vec, 2); // Calls std::find, because vec is not sentinelled
 }
 ```
 

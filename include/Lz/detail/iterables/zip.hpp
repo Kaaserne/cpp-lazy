@@ -40,18 +40,21 @@ public:
 
 private:
     using seq = make_index_sequence<sizeof...(Iterables)>;
-// TODO add test bloat size with Release debug symbols
+
+    static constexpr bool return_sentinel = !is_bidi_tag<typename iterator::iterator_category>::value ||
+                                            disjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_iterable()
-        requires(std::default_initializable<Iterables> && ...)
+        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
     = default;
 
 #else
 
     template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr zip_iterable() {
+    constexpr zip_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -76,7 +79,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             return iterator{ smallest_end_maybe_homo(_iterables, seq{}) };
         }
         else {
@@ -85,7 +88,7 @@ public:
     }
 
     [[nodiscard]] constexpr auto end() && {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             return iterator{ smallest_end_maybe_homo(std::move(_iterables), seq{}) };
         }
         else {
@@ -95,23 +98,23 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
         return { smallest_end_maybe_homo(_iterables, seq{}) };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, typename iterator::sentinel> end() const& {
-        return { end_maybe_homo(_iterables) };
-    }
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() && {
         return { smallest_end_maybe_homo(std::move(_iterables), seq{}) };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, typename iterator::sentinel> end() && {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, typename iterator::sentinel> end() const& {
+        return { end_maybe_homo(_iterables) };
+    }
+
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, typename iterator::sentinel> end() && {
         return { end_maybe_homo(std::move(_iterables)) };
     }
 

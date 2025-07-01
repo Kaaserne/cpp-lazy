@@ -3,6 +3,7 @@
 #ifndef LZ_TAKE_EVERY_ITERATOR_HPP
 #define LZ_TAKE_EVERY_ITERATOR_HPP
 
+#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/procs.hpp>
@@ -11,44 +12,47 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class = void>
+template<class Iterable, class = void>
 class take_every_iterator;
 
-template<class Iterator, class S>
-class take_every_iterator<Iterator, S, enable_if<!is_bidi<Iterator>::value>>
-    : public iterator<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, default_sentinel> {
-    using traits = std::iterator_traits<Iterator>;
+template<class Iterable>
+class take_every_iterator<Iterable, enable_if<!is_bidi<iter_t<Iterable>>::value>>
+    : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+    using it = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+    using traits = std::iterator_traits<it>;
 
 public:
     using value_type = typename traits::value_type;
-    using iterator_category = iter_cat_t<Iterator>;
+    using iterator_category = iter_cat_t<it>;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    Iterator _iterator;
-    S _end;
+    it _iterator;
+    sent _end;
     std::size_t _offset;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires std::default_initializable<it> && std::default_initializable<sent>
     = default;
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr take_every_iterator() {
+    template<class I = it,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
+    constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<sent>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, S end, const std::size_t offset) :
-        _iterator{ std::move(it) },
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(it iter, sent end, const std::size_t offset) :
+        _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
@@ -63,7 +67,7 @@ public:
         return *_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -83,11 +87,13 @@ public:
     }
 };
 
-template<class Iterator, class S>
-class take_every_iterator<Iterator, S, enable_if<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
-    : public iterator<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>> {
-    using traits = std::iterator_traits<Iterator>;
+template<class Iterable>
+class take_every_iterator<Iterable, enable_if<is_bidi<iter_t<Iterable>>::value && !is_ra<iter_t<Iterable>>::value>>
+    : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
+                      diff_type<iter_t<Iterable>>, std::bidirectional_iterator_tag, default_sentinel> {
+    using it = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+    using traits = std::iterator_traits<it>;
 
 public:
     using value_type = typename traits::value_type;
@@ -96,8 +102,8 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    Iterator _iterator;
-    S _end;
+    it _iterator;
+    sent _end;
     std::size_t _offset{};
     std::size_t _distance{};
 
@@ -105,20 +111,21 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires std::default_initializable<it> && std::default_initializable<sent>
     = default;
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr take_every_iterator() {
+    template<class I = it,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
+    constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<sent>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, S end, const std::size_t offset, const std::size_t distance) :
-        _iterator{ std::move(it) },
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(it iter, sent end, const std::size_t offset, const std::size_t distance) :
+        _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset },
         _distance{ distance } {
@@ -134,7 +141,7 @@ public:
         return *_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -163,11 +170,14 @@ public:
     }
 };
 
-template<class Iterator, class S>
-class take_every_iterator<Iterator, S, enable_if<is_ra<Iterator>::value>>
-    : public iterator<take_every_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>> {
-    using traits = std::iterator_traits<Iterator>;
+template<class Iterable>
+class take_every_iterator<Iterable, enable_if<is_ra<iter_t<Iterable>>::value>>
+    : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+
+    using it = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+    using traits = std::iterator_traits<it>;
 
 public:
     using value_type = typename traits::value_type;
@@ -176,30 +186,31 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    Iterator _begin;
-    Iterator _iterator;
-    S _end;
+    it _iterator;
+    it _begin;
+    sent _end;
     std::size_t _offset{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires std::default_initializable<it> && std::default_initializable<sent>
     = default;
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr take_every_iterator() {
+    template<class I = it,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
+    constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<sent>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(Iterator it, Iterator begin, S end, const std::size_t offset) :
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(it iter, it begin, sent end, const std::size_t offset) :
+        _iterator{ std::move(iter) },
         _begin{ std::move(begin) },
-        _iterator{ std::move(it) },
         _end{ std::move(end) },
         _offset{ offset } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
@@ -214,7 +225,7 @@ public:
         return *_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -268,8 +279,9 @@ public:
     LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {
         LZ_ASSERT(_end == other._end && _offset == other._offset && _begin == other._begin, "Incompatible iterators");
         const auto remaining = _iterator - other._iterator;
-        const auto lldiv = std::lldiv(static_cast<std::ptrdiff_t>(remaining), static_cast<std::ptrdiff_t>(_offset));
-        return lldiv.rem == 0 ? lldiv.quot : lldiv.quot + (remaining < 0 ? -1 : 1);
+        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
+        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
+        return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {

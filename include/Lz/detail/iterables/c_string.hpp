@@ -9,7 +9,7 @@ namespace lz {
 namespace detail {
 template<class C>
 class c_string_iterable : public lazy_view {
-    C* _begin{};
+    C* _begin{ nullptr };
 
 public:
     using iterator = c_string_iterator<C>;

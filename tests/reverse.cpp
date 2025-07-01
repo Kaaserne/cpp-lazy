@@ -28,6 +28,22 @@ TEST_CASE("Cached reverse") {
         REQUIRE(!lz::has_many(rev));
         REQUIRE(!lz::has_one(rev));
     }
+
+    SECTION("One element") {
+        std::vector<int> one_element = { 1 };
+        auto rev = lz::cached_reverse(one_element);
+        REQUIRE(lz::size(rev) == 1);
+        REQUIRE(!lz::empty(rev));
+        REQUIRE(lz::has_one(rev));
+        REQUIRE(!lz::has_many(rev));
+        auto expected = { 1 };
+        REQUIRE(lz::equal(rev, expected));
+    }
+
+    SECTION("Opertor== sentinel") {
+        REQUIRE(reversed.begin() != lz::default_sentinel{});
+        REQUIRE(reversed.end() == lz::default_sentinel{});
+    }
     
     SECTION("Operator--") {
         auto expected = { 5, 4, 3, 2, 1 };

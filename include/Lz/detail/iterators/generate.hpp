@@ -35,7 +35,7 @@ public:
 #else
 
     template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
-    constexpr generate_iterator() {
+    constexpr generate_iterator() noexcept(std::is_nothrow_default_constructible<G>::value) {
     }
 
 #endif
@@ -54,7 +54,7 @@ public:
         return _func();
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -109,7 +109,7 @@ public:
         return _func();
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

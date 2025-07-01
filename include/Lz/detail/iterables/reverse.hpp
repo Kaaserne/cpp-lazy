@@ -24,13 +24,13 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr reverse_iterable()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<ref_or_view<Iterable>>
     = default;
 
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr reverse_iterable() {
+    constexpr reverse_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif

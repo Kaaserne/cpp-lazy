@@ -21,7 +21,7 @@ class interleave_iterable {
         return std::min({ static_cast<std::size_t>(std::get<I>(_iterables).size())... }) * sizeof...(Iterables);
     }
 
-    using index_sequence_for_this = make_index_sequence<sizeof...(Iterables)>;
+    using is = make_index_sequence<sizeof...(Iterables)>;
 
     template<class Iterable2, std::size_t... Is>
     static interleave_iterable<remove_ref<Iterable2>, Iterables...>
@@ -40,16 +40,21 @@ public:
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel = !is_bidi_tag<typename iterator::iterator_category>::value ||
+                                            conjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr interleave_iterable()
-        requires(std::default_initializable<Iterables> && ...)
+        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
     = default;
 
 #else
 
     template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr interleave_iterable() {
+    constexpr interleave_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -60,7 +65,7 @@ public:
 
     template<class T = conjunction<sized<Iterables>...>>
     LZ_NODISCARD constexpr enable_if<T::value, std::size_t> size() const {
-        return size(index_sequence_for_this{});
+        return size(is{});
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
@@ -74,43 +79,57 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return iterator{ smallest_end_maybe_homo(_iterables, index_sequence_for_this{}) };
+        if constexpr (!return_sentinel) {
+            return iterator{ smallest_end_maybe_homo(_iterables, is{}) };
         }
         else {
             return end_maybe_homo(_iterables);
         }
     }
 
-#else
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const& {
-        return { smallest_end_maybe_homo(_iterables, index_sequence_for_this{}) };
+    [[nodiscard]] constexpr auto end() && {
+        if constexpr (!return_sentinel) {
+            return iterator{ smallest_end_maybe_homo(std::move(_iterables), is{}) };
+        }
+        else {
+            return end_maybe_homo(std::move(_iterables));
+        }
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinels> end() const& {
+#else
+
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
+        return { smallest_end_maybe_homo(_iterables, is{}) };
+    }
+
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() && {
+        return { smallest_end_maybe_homo(std::move(_iterables), is{}) };
+    }
+
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinels> end() const& {
         return end_maybe_homo(_iterables);
+    }
+
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinels> end() && {
+        return end_maybe_homo(std::move(_iterables));
     }
 
 #endif
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() && {
-        return { smallest_end_maybe_homo(std::move(_iterables), index_sequence_for_this{}) };
-    }
-
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, interleave_iterable<Iterables...>&& interleaved) {
-        return concat_iterables(std::forward<Iterable>(iterable), std::move(interleaved), index_sequence_for_this{});
+        return concat_iterables(std::forward<Iterable>(iterable), std::move(interleaved), is{});
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const interleave_iterable<Iterables...>& interleaved) {
-        return concat_iterables(std::forward<Iterable>(iterable), interleaved, index_sequence_for_this{});
+        return concat_iterables(std::forward<Iterable>(iterable), interleaved, is{});
     }
 };
 

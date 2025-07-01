@@ -12,7 +12,7 @@ namespace detail {
 template<class Iterator>
 class cached_reverse_iterator
     : public iterator<cached_reverse_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>, diff_type<Iterator>,
-                      iter_cat_t<Iterator>, cached_reverse_iterator<Iterator>> {
+                      iter_cat_t<Iterator>, default_sentinel> {
     using traits = std::iterator_traits<Iterator>;
 
     Iterator _iterator;
@@ -34,7 +34,7 @@ public:
 #else
 
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr cached_reverse_iterator() {
+    constexpr cached_reverse_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -57,7 +57,7 @@ public:
         return *_prev_it;
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -90,6 +90,10 @@ public:
 
     constexpr bool eq(const cached_reverse_iterator& other) const {
         return _iterator == other._iterator;
+    }
+
+    constexpr bool eq(default_sentinel) const {
+        return _iterator == _begin;
     }
 };
 

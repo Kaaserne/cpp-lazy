@@ -47,7 +47,8 @@ public:
 
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
-    constexpr chunks_iterator() {
+    constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -68,7 +69,7 @@ public:
         return { _sub_range_begin, _sub_range_end };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -90,7 +91,7 @@ public:
 template<class Iterator, class S>
 class chunks_iterator<Iterator, S, enable_if<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -113,6 +114,22 @@ private:
     }
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunks_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<S>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<S>::value) {
+    }
+
+#endif
+
     LZ_CONSTEXPR_CXX_14
     chunks_iterator(Iterator begin, S end, const std::size_t chunk_size, const std::size_t cur_distance) :
         _sub_range_begin{ begin },
@@ -131,7 +148,7 @@ public:
         return { _sub_range_begin, _sub_range_end };
     }
 
-    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
+    constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -162,10 +179,10 @@ public:
     }
 };
 
-template<class Iterator, class S>
-class chunks_iterator<Iterator, S, enable_if<is_ra<Iterator>::value>>
-    : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>> {
+template<class Iterable, class Iterator>
+class chunks_iterator<Iterable, Iterator, enable_if<is_ra<Iterator>::value>>
+    : public iterator<chunks_iterator<Iterable, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -176,44 +193,61 @@ public:
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _begin;
     Iterator _sub_range_begin;
-    S _end;
+    Iterable _iterable;
     std::size_t _chunk_size{};
 
 public:
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, Iterator begin, S end, const std::size_t chunk_size) :
-        _begin{ std::move(begin) },
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr chunks_iterator()
+        requires std::default_initializable<Iterator> && std::default_initializable<Iterable>
+    = default;
+
+#else
+
+    template<class I = Iterator,
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                         std::is_nothrow_default_constructible<Iterable>::value) {
+    }
+
+#endif
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const std::size_t chunk_size) :
         _sub_range_begin{ std::move(it) },
-        _end{ std::move(end) },
+        _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {
         LZ_ASSERT(_chunk_size != 0, "Can't increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel) {
-        _sub_range_begin = _end;
+        _sub_range_begin = std::end(_iterable);
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         using s = typename std::make_signed<std::size_t>::type;
         auto sub_range_end =
-            _sub_range_begin + static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin)));
+            _sub_range_begin +
+            static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
         return { _sub_range_begin, sub_range_end };
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_sub_range_begin != _end, "Out of bounds");
+        LZ_ASSERT(_sub_range_begin != std::end(_iterable), "Out of bounds");
         using s = typename std::make_signed<std::size_t>::type;
-        _sub_range_begin += static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(_end - _sub_range_begin)));
+        _sub_range_begin +=
+            static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        const auto remaining = static_cast<std::size_t>(_sub_range_begin - _begin);
+        const auto remaining = static_cast<std::size_t>(_sub_range_begin - std::begin(_iterable));
         const auto offset = remaining % _chunk_size;
 
         if (offset == 0) {
@@ -230,7 +264,7 @@ public:
     }
 
     constexpr bool eq(default_sentinel) const {
-        return _sub_range_begin == _end;
+        return _sub_range_begin == std::end(_iterable);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
@@ -238,17 +272,17 @@ public:
         const auto to_add = offset * s_chunk_size;
 
         if (to_add >= 0) {
-            const auto current_distance = _end - _sub_range_begin;
+            const auto current_distance = std::end(_iterable) - _sub_range_begin;
             if (to_add <= current_distance) {
                 _sub_range_begin += to_add;
                 return;
             }
             LZ_ASSERT(to_add - current_distance < s_chunk_size, "Out of bounds");
-            _sub_range_begin = _end;
+            _sub_range_begin = std::end(_iterable);
             return;
         }
 
-        const auto current_distance = _sub_range_begin - _begin;
+        const auto current_distance = _sub_range_begin - std::begin(_iterable);
         const auto remainder = current_distance % s_chunk_size;
         if (remainder == 0) {
             _sub_range_begin += to_add;
@@ -259,7 +293,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size && _begin == rhs._begin && _end == rhs._end, "Incompatible iterators");
+        LZ_ASSERT(_chunk_size == rhs._chunk_size && std::begin(_iterable) == std::begin(rhs._iterable) &&
+                      std::end(_iterable) == std::end(rhs._iterable),
+                  "Incompatible iterators");
         const auto left = _sub_range_begin - rhs._sub_range_begin;
         const auto remainder = left % static_cast<difference_type>(_chunk_size);
         const auto quotient = left / static_cast<difference_type>(_chunk_size);

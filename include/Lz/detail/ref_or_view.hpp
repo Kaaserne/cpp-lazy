@@ -22,7 +22,7 @@ public:
     constexpr ref_or_view_helper() noexcept = default;
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
+    constexpr ref_or_view_helper(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
         static_assert(std::is_lvalue_reference<I>::value, "Can only bind to lvalues. Check if you are passing a temporary "
                                                           "object, or forgot to add/remove const/volatile qualifiers.");
     }
@@ -36,12 +36,25 @@ public:
     }
 
     template<class I>
-    LZ_CONSTEXPR_CXX_17 ref_or_view_helper(const ref_or_view_helper<I, false>& other) noexcept :
+    constexpr ref_or_view_helper(const ref_or_view_helper<I, false>& other) noexcept :
         _iterable_ref_ptr{ other._iterable_ref_ptr } {
     }
 
     template<class I>
-    ref_or_view_helper& operator=(const ref_or_view_helper<I, false>& other) noexcept {
+    constexpr ref_or_view_helper(ref_or_view_helper<I, false>& other) noexcept : _iterable_ref_ptr{ other._iterable_ref_ptr } {
+    }
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 ref_or_view_helper& operator=(const ref_or_view_helper<I, false>& other) noexcept {
+        if (this == &other) {
+            return *this;
+        }
+        _iterable_ref_ptr = other._iterable_ref_ptr;
+        return *this;
+    }
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 ref_or_view_helper& operator=(ref_or_view_helper<I, false>& other) noexcept {
         if (this == &other) {
             return *this;
         }
@@ -55,18 +68,30 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
+        if (!_iterable_ref_ptr) {
+            return iter_t<Iterable>{};
+        }
         return std::begin(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
+        if (!_iterable_ref_ptr) {
+            return iter_t<Iterable>{};
+        }
         return detail::begin(std::move(*_iterable_ref_ptr));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
+        if (!_iterable_ref_ptr) {
+            return sentinel_t<Iterable>{};
+        }
         return std::end(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
+        if (!_iterable_ref_ptr) {
+            return sentinel_t<Iterable>{};
+        }
         return detail::end(std::move(*_iterable_ref_ptr));
     }
 };
@@ -86,25 +111,27 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr ref_or_view_helper()
-        requires std::default_initializable<Iterable>
+        requires std::default_initializable<it>
     = default;
 
 #else
 
-    template<class I = Iterable, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr ref_or_view_helper() {
+    template<class I = it, class = enable_if<std::is_default_constructible<I>::value>>
+    constexpr ref_or_view_helper() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
-    constexpr ref_or_view_helper(it&& iterable) : _iterable_value{ std::move(iterable) } {
+    constexpr ref_or_view_helper(it&& iterable) noexcept(std::is_move_constructible<it>::value) :
+        _iterable_value{ std::move(iterable) } {
     }
 
     constexpr ref_or_view_helper(const it& iterable) : _iterable_value{ iterable } {
     }
 
     template<class I>
-    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) : ref_or_view_helper{ std::move(other._iterable_value) } {
+    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) noexcept(std::is_move_constructible<it>::value) :
+        ref_or_view_helper{ std::move(other._iterable_value) } {
     }
 
     template<class I>
@@ -121,7 +148,7 @@ public:
     }
 
     template<class I>
-    ref_or_view_helper& operator=(ref_or_view_helper<I, true>&& other) noexcept {
+    ref_or_view_helper& operator=(ref_or_view_helper<I, true>&& other) noexcept(std::is_nothrow_move_assignable<it>::value) {
         if (this == &other) {
             return *this;
         }

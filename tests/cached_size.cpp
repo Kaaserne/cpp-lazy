@@ -28,7 +28,5 @@ TEST_CASE("Correct size i.c.m. with other iterators") {
     using r1 = lz::ref_iterable_t<decltype(iterable)>;
     using r2 = lz::ref_iterable_t<decltype(expected)>;
 
-    REQUIRE(lz::equal(iterable, expected, [](r1 p1, r2 p2) {
-        return p1.first == p2.first && std::equal(p1.second.begin(), p1.second.end(), p2.second.begin());
-    }));
+    REQUIRE(lz::equal(iterable, expected, [](r1 p1, r2 p2) { return p1.first == p2.first && lz::equal(p1.second, p2.second); }));
 }

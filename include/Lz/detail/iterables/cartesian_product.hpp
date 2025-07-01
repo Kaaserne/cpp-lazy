@@ -70,22 +70,26 @@ class cartesian_product_iterable : public lazy_view {
     using is = make_index_sequence<tuple_size>;
 
 public:
-    using iterator =
-        cartesian_product_iterator<maybe_homogeneous<iter_t<Iterables>...>, maybe_homogeneous<sentinel_t<Iterables>...>>;
+    using iterator = cartesian_product_iterator<maybe_homogeneous<ref_or_view<Iterables>...>>;
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
+private:
+    static constexpr bool return_sentinel = !is_bidi_tag<typename iterator::iterator_category>::value ||
+                                            disjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterable()
-        requires(std::default_initializable<Iterables> && ...)
+        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
     = default;
 
 #else
 
     template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr cartesian_product_iterable() {
+    constexpr cartesian_product_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
@@ -104,26 +108,26 @@ public:
         auto end = end_maybe_homo(_iterables);
         auto first_at_end = std::get<0>(it) == std::get<0>(end);
         init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
-        return { it, it, end };
+        return { _iterables, it };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
-        auto it = begin_maybe_homo(std::move(_iterables));
-        auto end = end_maybe_homo(std::move(_iterables));
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
+        auto it = begin_maybe_homo(_iterables);
+        auto end = end_maybe_homo(_iterables);
         auto first_at_end = std::get<0>(it) == std::get<0>(end);
         init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
-        return { it, it, end };
+        return { std::move(_iterables), it };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+        if constexpr (!return_sentinel) {
             auto rest_it = begin_maybe_homo(_iterables);
             auto end = end_maybe_homo(_iterables);
             std::get<0>(rest_it) = std::get<0>(end);
-            return iterator{ rest_it, rest_it, end };
+            return iterator{ _iterables, rest_it };
         }
         else {
             return sentinel{};
@@ -132,16 +136,16 @@ public:
 
 #else
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value, iterator> end() const {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
         auto rest_it = begin_maybe_homo(_iterables);
         auto end = end_maybe_homo(_iterables);
         std::get<0>(rest_it) = std::get<0>(end);
-        return iterator{ rest_it, rest_it, end };
+        return iterator{ _iterables, rest_it };
     }
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, sentinel> end() const noexcept {
+    template<bool R = return_sentinel>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const noexcept {
         return {};
     }
 

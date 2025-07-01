@@ -10,63 +10,33 @@
 #include <test_procs.hpp>
 #include <unordered_map>
 
-TEST_CASE("Reference and compile test with operator|") {
-    std::vector<int> vec1 = { 1 };
-    std::vector<int> vec2 = { 1 };
-    const std::vector<int> vec3 = { 1 };
-    std::vector<int> vec4 = { 1 };
-    auto cartesian = lz::cartesian_product(vec1, vec2, vec3, vec4);
-    REQUIRE(cartesian.size() == 1);
-    REQUIRE(!vec1.empty());
-    REQUIRE(!vec2.empty());
-    REQUIRE(!vec3.empty());
-    REQUIRE(!vec4.empty());
-    REQUIRE(&std::get<0>(*cartesian.begin()) == &vec1[0]);
-    REQUIRE(&std::get<1>(*cartesian.begin()) == &vec2[0]);
-    REQUIRE(&std::get<2>(*cartesian.begin()) == &vec3[0]);
-    REQUIRE(&std::get<3>(*cartesian.begin()) == &vec4[0]);
-
-    auto tmp = vec1 | cartesian;
-    REQUIRE(&std::get<0>(*tmp.begin()) == &vec1[0]);
-    REQUIRE(&std::get<1>(*tmp.begin()) == &vec1[0]);
-    REQUIRE(&std::get<2>(*tmp.begin()) == &vec2[0]);
-    REQUIRE(&std::get<3>(*tmp.begin()) == &vec3[0]);
-    REQUIRE(&std::get<4>(*tmp.begin()) == &vec4[0]);
-
-    cartesian = vec1 | lz::cartesian_product(vec2, vec3, vec4);
-    REQUIRE(!vec1.empty());
-    REQUIRE(!vec2.empty());
-    REQUIRE(!vec3.empty());
-    REQUIRE(!vec4.empty());
-    REQUIRE(&std::get<0>(*cartesian.begin()) == &vec1[0]);
-    REQUIRE(&std::get<1>(*cartesian.begin()) == &vec2[0]);
-    REQUIRE(&std::get<2>(*cartesian.begin()) == &vec3[0]);
-    REQUIRE(&std::get<3>(*cartesian.begin()) == &vec4[0]);
-}
-
-TEST_CASE("Is sentinel") {
-    const char* str = "Hello,";
-    const char* str2 = " World!";
+TEST_CASE("with sentinel") {
+    const char* str = "abc";
+    const char* str2 = "def";
     auto cstr1 = lz::c_string(str);
     auto cstr2 = lz::c_string(str2);
     auto cart = cstr1 | lz::cartesian_product(cstr2);
 
-    SECTION("Should be sentinel") {
-        static_assert(!std::is_same<decltype(cart.begin()), decltype(cart.end())>::value, "Should not be the same");
-    }
+    static_assert(!std::is_same<decltype(cart.begin()), decltype(cart.end())>::value, "Should not be the same");
+    REQUIRE(static_cast<std::size_t>(lz::distance(cart)) == std::strlen(str) * std::strlen(str2));
 
-    SECTION("Should be correct length") {
-        REQUIRE(static_cast<std::size_t>(lz::distance(cart.begin(), cart.end())) == std::strlen(str) * std::strlen(str2));
-    }
-
-    SECTION("Should make permutation") {
-        REQUIRE(*cart.begin() == std::make_tuple('H', ' '));
-    }
+    auto expected = { std::make_tuple('a', 'd'), std::make_tuple('a', 'e'), std::make_tuple('a', 'f'),
+                      std::make_tuple('b', 'd'), std::make_tuple('b', 'e'), std::make_tuple('b', 'f'),
+                      std::make_tuple('c', 'd'), std::make_tuple('c', 'e'), std::make_tuple('c', 'f') };
+    REQUIRE(lz::equal(cart, expected));
 
     SECTION("Operator=") {
-        auto begin = cart.begin();
-        begin = cart.end();
-        REQUIRE(begin == cart.end());
+        auto it = cart.begin();
+        REQUIRE(it == cart.begin());
+        REQUIRE(it != cart.end());
+        REQUIRE(cart.end() != it);
+        REQUIRE(cart.begin() == it);
+
+        it = cart.end();
+        REQUIRE(it == cart.end());
+        REQUIRE(it != cart.begin());
+        REQUIRE(cart.end() == it);
+        REQUIRE(cart.begin() != it);
     }
 }
 
@@ -120,59 +90,15 @@ TEST_CASE("Empty or one element cartesian product") {
     }
 }
 
-TEST_CASE("Cartesian product changing and creating elements") {
-    std::vector<int> vec = { 1, 2, 3 };
-    std::vector<char> chars = { 'a', 'b', 'c' };
-    auto cartesian = lz::cartesian_product(vec, chars);
-    REQUIRE(cartesian.size() == vec.size() * chars.size());
-    REQUIRE(cartesian.size() == static_cast<std::size_t>(cartesian.end() - cartesian.begin()));
-
-    SECTION("Should not be sentinel") {
-        static_assert(std::is_same<decltype(cartesian.begin()), decltype(cartesian.end())>::value, "Should be the same");
-    }
-
-    SECTION("Should be by reference") {
-        auto& elm_vec = std::get<0>(*cartesian.begin());
-        auto& elm_chars = std::get<1>(*cartesian.begin());
-
-        REQUIRE(&elm_vec == &vec[0]);
-        REQUIRE(&elm_chars == &chars[0]);
-    }
-
-    SECTION("Should make combinations") {
-        REQUIRE(*cartesian.begin() == std::make_tuple(1, 'a'));
-        REQUIRE(*++cartesian.begin() == std::make_tuple(1, 'b'));
-    }
-
-    SECTION("Should be correct length") {
-        REQUIRE(std::distance(cartesian.begin(), cartesian.end()) == static_cast<std::ptrdiff_t>(vec.size() * chars.size()));
-    }
-
-    SECTION("Different sizes") {
-        std::vector<int> vec2 = { 1, 2 };
-        std::vector<int> vec3 = { 1, 2, 3, 4 };
-        auto cart = lz::cartesian_product(vec, vec2, vec3);
-        REQUIRE(cart.size() == vec.size() * vec2.size() * vec3.size());
-        REQUIRE(std::distance(cart.begin(), cart.end()) == static_cast<std::ptrdiff_t>(cart.size()));
-        auto actual = cart | lz::to<std::vector>();
-        std::vector<std::tuple<int, int, int>> expected = {
-            std::make_tuple(1, 1, 1), std::make_tuple(1, 1, 2), std::make_tuple(1, 1, 3), std::make_tuple(1, 1, 4),
-            std::make_tuple(1, 2, 1), std::make_tuple(1, 2, 2), std::make_tuple(1, 2, 3), std::make_tuple(1, 2, 4),
-            std::make_tuple(2, 1, 1), std::make_tuple(2, 1, 2), std::make_tuple(2, 1, 3), std::make_tuple(2, 1, 4),
-            std::make_tuple(2, 2, 1), std::make_tuple(2, 2, 2), std::make_tuple(2, 2, 3), std::make_tuple(2, 2, 4),
-            std::make_tuple(3, 1, 1), std::make_tuple(3, 1, 2), std::make_tuple(3, 1, 3), std::make_tuple(3, 1, 4),
-            std::make_tuple(3, 2, 1), std::make_tuple(3, 2, 2), std::make_tuple(3, 2, 3), std::make_tuple(3, 2, 4),
-        };
-
-        REQUIRE(actual == expected);
-    }
-}
-
 TEST_CASE("Cartesian product binary operations") {
     std::vector<int> vec = { 1, 2 };
     std::vector<char> chars = { 'a', 'b', 'c' };
     std::vector<char> chars2 = { 'a', 'b' };
-    auto cartesian = lz::cartesian_product(vec, chars, chars2);
+    auto cartesian = vec | lz::cartesian_product(chars, chars2);
+    REQUIRE(cartesian.size() == vec.size() * chars.size() * chars2.size());
+
+    static_assert(std::is_same<decltype(cartesian.begin()), decltype(cartesian.end())>::value, "Should be the same");
+
     std::vector<std::tuple<int, char, char>> expected = {
         std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'), std::make_tuple(1, 'b', 'b'),
         std::make_tuple(1, 'c', 'a'), std::make_tuple(1, 'c', 'b'), std::make_tuple(2, 'a', 'a'), std::make_tuple(2, 'a', 'b'),

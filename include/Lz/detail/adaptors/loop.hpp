@@ -12,8 +12,6 @@ namespace detail {
 struct loop_adaptor {
     using adaptor = loop_adaptor;
 
-    // clang-format off
-
     /**
      * @brief Loops over an iterable infinately. Does not contain a .size() method. Loop infinitely over the input iterable. Its
      * input iterator category will always be forward. It also returns a default_sentinel. Example:
@@ -33,12 +31,10 @@ struct loop_adaptor {
         return { std::forward<Iterable>(iterable) };
     }
 
-    // clang-format on
-
     /**
      * @brief Loops n times over an iterable. Contains a .size() method if the input iterable has a .size()
-     * method. Will return an actual iterator if the input iterable is at least bidirectional. Otherwise it will return a
-     * default_sentinel. Its input iterator category will be the same as the input iterator category. Example:
+     * method. Will return an actual iterator if the input iterable is at least bidirectional and isn't sentinelled. Otherwise it
+     * will return a default_sentinel. Its input iterator category will be the same as the input iterator category. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4 };
      * auto looper = lz::loop(vec, 2); // {1, 2, 3, 4, 1, 2, 3, 4}
@@ -57,8 +53,9 @@ struct loop_adaptor {
 
     /**
      * @brief Loops n times over an iterable. Contains a .size() method if the input iterable has a
-     * .size() method. Will return an actual iterator if the input iterable is at least bidirectional. Otherwise it will return a
-     * default_sentinel. Its input iterator category will be the same as the input iterator category. Example:
+     * .size() method. Will return an actual iterator if the input iterable is at least bidirectional and isn't sentinelled.
+     * Otherwise it will return a default_sentinel. Its input iterator category will be the same as the input iterator category.
+     * Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4 };
      * auto looper = vec | lz::loop(2); // {1, 2, 3, 4, 1, 2, 3, 4}

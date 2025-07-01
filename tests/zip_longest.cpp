@@ -16,7 +16,7 @@ TEST_CASE("Zip longest with sentinels") {
     auto cstr3 = lz::c_string("S");
     lz::zip_longest_iterable<decltype(cstr), decltype(cstr2), decltype(cstr3)> longest = lz::zip_longest(cstr, cstr2, cstr3);
     static_assert(!std::is_same<decltype(longest.begin()), decltype(longest.end())>::value, "should be sentinel");
-    REQUIRE(lz::distance(longest.begin(), longest.end()) == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
+    REQUIRE(lz::distance(longest) == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
 
     auto begin = longest.begin();
     lz::optional<std::reference_wrapper<const char>> ref1(std::get<0>(*begin));
@@ -210,8 +210,9 @@ TEST_CASE("zip_longest_iterable binary operations") {
 TEST_CASE("Empty and one element zip longest") {
     SECTION("Empty") {
         std::vector<int> a;
-        std::vector<float> b;
+        auto b = lz::c_string("");
         auto zipper = lz::zip_longest(a, b);
+        static_assert(std::is_same<decltype(zipper.end()), lz::default_sentinel>::value, "should be default sentinel");
         REQUIRE(lz::empty(zipper));
         REQUIRE(!lz::has_one(zipper));
         REQUIRE(!lz::has_many(zipper));
@@ -249,7 +250,7 @@ TEST_CASE("Zip longest iterable to container") {
             std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
             std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
-        REQUIRE(std::equal(to_arr.begin(), to_arr.end(), expected.begin()));
+        REQUIRE(lz::equal(to_arr, expected));
     }
 
     SECTION("To vector") {
@@ -259,7 +260,7 @@ TEST_CASE("Zip longest iterable to container") {
             std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
             std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
-        REQUIRE(std::equal(to_vec.begin(), to_vec.end(), expected.begin()));
+        REQUIRE(lz::equal(to_vec, expected));
     }
 
     SECTION("To other container using to<>()") {
@@ -269,7 +270,7 @@ TEST_CASE("Zip longest iterable to container") {
             std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
             std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
-        REQUIRE(std::equal(to_list.begin(), to_list.end(), expected.begin()));
+        REQUIRE(lz::equal(to_list, expected));
     }
 
     SECTION("To map") {

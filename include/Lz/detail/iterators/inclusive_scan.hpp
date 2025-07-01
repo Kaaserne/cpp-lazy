@@ -37,7 +37,10 @@ public:
     template<class I = Iterator,
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
                                std::is_default_constructible<BinaryOp>::value && std::is_default_constructible<S>::value>>
-    constexpr inclusive_scan_iterator() {
+    constexpr inclusive_scan_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                                 std::is_nothrow_default_constructible<T>::value &&
+                                                 std::is_nothrow_default_constructible<BinaryOp>::value &&
+                                                 std::is_nothrow_default_constructible<S>::value) {
     }
 
 #endif
@@ -65,7 +68,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_17 pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
