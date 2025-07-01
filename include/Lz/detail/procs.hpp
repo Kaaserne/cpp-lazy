@@ -190,8 +190,14 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @return The length of the iterable
  */
 template<class Iterator, class S>
-constexpr diff_type<Iterator> distance(Iterator begin, S end) {
+LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
     return detail::distance_impl(std::move(begin), std::move(end));
+}
+
+template<class Iterable>
+LZ_NODISCARD constexpr diff_iterable_t<Iterable> distance(const Iterable& iterable) {
+    using std::distance;
+    return distance(std::begin(iterable), std::end(iterable));
 }
 
 #ifdef LZ_HAS_CXX_17
