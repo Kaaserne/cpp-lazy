@@ -18,7 +18,7 @@ TEST_CASE("with sentinel") {
     auto cart = cstr1 | lz::cartesian_product(cstr2);
 
     static_assert(!std::is_same<decltype(cart.begin()), decltype(cart.end())>::value, "Should not be the same");
-    REQUIRE(static_cast<std::size_t>(lz::distance(cart.begin(), cart.end())) == std::strlen(str) * std::strlen(str2));
+    REQUIRE(static_cast<std::size_t>(lz::distance(cart)) == std::strlen(str) * std::strlen(str2));
 
     auto expected = { std::make_tuple('a', 'd'), std::make_tuple('a', 'e'), std::make_tuple('a', 'f'),
                       std::make_tuple('b', 'd'), std::make_tuple('b', 'e'), std::make_tuple('b', 'f'),

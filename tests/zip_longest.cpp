@@ -16,7 +16,7 @@ TEST_CASE("Zip longest with sentinels") {
     auto cstr3 = lz::c_string("S");
     lz::zip_longest_iterable<decltype(cstr), decltype(cstr2), decltype(cstr3)> longest = lz::zip_longest(cstr, cstr2, cstr3);
     static_assert(!std::is_same<decltype(longest.begin()), decltype(longest.end())>::value, "should be sentinel");
-    REQUIRE(lz::distance(longest.begin(), longest.end()) == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
+    REQUIRE(lz::distance(longest) == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
 
     auto begin = longest.begin();
     lz::optional<std::reference_wrapper<const char>> ref1(std::get<0>(*begin));

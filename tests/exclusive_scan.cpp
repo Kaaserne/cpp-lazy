@@ -31,7 +31,7 @@ TEST_CASE("exclusive_scan basic functionality") {
     static_assert(!std::is_same<decltype(scan.begin()), decltype(scan.end())>::value, "Iterators should not be the same type");
 
     REQUIRE(*scan.begin() == 0);
-    REQUIRE(static_cast<std::size_t>(lz::distance(std::begin(scan), std::end(scan))) == scan.size());
+    REQUIRE(static_cast<std::size_t>(lz::distance(scan)) == scan.size());
     REQUIRE(scan.size() == arr_size + 1);
     constexpr auto is_same = std::is_same<int&, decltype(*scan.begin())>::value;
     REQUIRE(is_same);

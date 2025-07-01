@@ -38,14 +38,10 @@ TEST_CASE("Chunks binary operations random access") {
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
 
-    REQUIRE(lz::ssize(uneven_chunksize_even_size) ==
-            lz::distance(uneven_chunksize_even_size.begin(), uneven_chunksize_even_size.end()));
-    REQUIRE(lz::ssize(even_chunksize_even_size) ==
-            lz::distance(even_chunksize_even_size.begin(), even_chunksize_even_size.end()));
-    REQUIRE(lz::ssize(uneven_chunksize_uneven_size) ==
-            lz::distance(uneven_chunksize_uneven_size.begin(), uneven_chunksize_uneven_size.end()));
-    REQUIRE(lz::ssize(even_chunksize_uneven_size) ==
-            lz::distance(even_chunksize_uneven_size.begin(), even_chunksize_uneven_size.end()));
+    REQUIRE(lz::ssize(uneven_chunksize_even_size) == lz::distance(uneven_chunksize_even_size));
+    REQUIRE(lz::ssize(even_chunksize_even_size) == lz::distance(even_chunksize_even_size));
+    REQUIRE(lz::ssize(uneven_chunksize_uneven_size) == lz::distance(uneven_chunksize_uneven_size));
+    REQUIRE(lz::ssize(even_chunksize_uneven_size) == lz::distance(even_chunksize_uneven_size));
 
     static_assert(std::is_same<decltype(uneven_chunksize_even_size.begin()), decltype(uneven_chunksize_even_size.end())>::value,
                   "Should not be sentinel");

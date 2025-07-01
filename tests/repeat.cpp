@@ -31,6 +31,7 @@ TEST_CASE("repeat_iterable binary operations") {
     auto begin = repeater.begin();
 
     SECTION("Operator++") {
+        REQUIRE(lz::distance(begin, repeater.end()) == amount);
         ++begin;
         REQUIRE(lz::distance(begin, repeater.end()) == amount - 1);
     }

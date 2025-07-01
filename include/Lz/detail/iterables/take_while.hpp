@@ -38,7 +38,7 @@ public:
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
-    constexpr take_while_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
+    constexpr take_while_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
 

@@ -138,7 +138,7 @@ TEST_CASE("chunk_if to containers") {
     auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
 
     SECTION("To array") {
-        REQUIRE(lz::distance(chunked.begin(), chunked.end()) == 4);
+        REQUIRE(lz::distance(chunked) == 4);
         auto arr = chunked | lz::to<std::array<lz::string_view, 4>>();
         REQUIRE(arr == decltype(arr){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
                                       lz::string_view{}, lz::string_view{} });

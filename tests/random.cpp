@@ -46,7 +46,7 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
     std::poisson_distribution<> d(500000);
     lz::random_iterable<int, std::poisson_distribution<>, std::mt19937_64> r = lz::random(d, gen, 3);
     static_assert(!std::is_same<decltype(r.begin()), decltype(r.end())>::value, "Should not be the same");
-    REQUIRE(lz::distance(r.begin(), r.end()) == 3);
+    REQUIRE(lz::distance(r) == 3);
 
     const auto current_rand = *r.begin();
     auto next_rand = *r.begin();
@@ -77,6 +77,7 @@ TEST_CASE("random_iterable binary operations") {
 
     SECTION("Operator++") {
         auto it = random.begin();
+        REQUIRE(lz::distance(it, random.end()) == 5);
         ++it;
         REQUIRE(*it >= 0.);
         REQUIRE(*it <= 1.);
@@ -85,6 +86,7 @@ TEST_CASE("random_iterable binary operations") {
 
     SECTION("Operator--") {
         auto it = random.end();
+        REQUIRE(-lz::distance(it, random.begin()) == 5);
         --it;
         REQUIRE(*it >= 0.);
         REQUIRE(*it <= 1.);
