@@ -13,7 +13,7 @@ TEST_CASE("Basic common_iterable test") {
     REQUIRE(common.begin() != common.end());
     REQUIRE(common.end() != common.begin());
     REQUIRE(std::find(common.begin(), common.end(), 'h') == common.begin());
-    REQUIRE(std::equal(common.begin(), common.end(), cstr.begin()));
+    REQUIRE(lz::equal(common, cstr));
 }
 
 TEST_CASE("common_iterable binary operations") {

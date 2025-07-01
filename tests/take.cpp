@@ -239,7 +239,7 @@ TEST_CASE("Drop & slice") {
         REQUIRE(slice.size() == 4);
         std::vector<int> expected = { 3, 4, 5, 6 };
         auto result = lz::to<std::vector>(slice, std::allocator<int>());
-        REQUIRE(std::equal(slice.begin(), slice.end(), expected.begin()));
+        REQUIRE(lz::equal(slice, expected));
     }
 }
 

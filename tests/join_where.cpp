@@ -167,14 +167,14 @@ TEST_CASE("join_where_iterable to containers") {
                                                                        std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
 
         auto array = joined | lz::to<std::array<std::tuple<customer, payment_bill>, 4>>();
-        REQUIRE(std::equal(array.begin(), array.end(), expected.begin(),
-                           [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
-                               auto& a_fst = std::get<0>(a);
-                               auto& a_snd = std::get<1>(a);
-                               auto& b_fst = std::get<0>(b);
-                               auto& b_snd = std::get<1>(b);
-                               return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
-                           }));
+        REQUIRE(lz::equal(array, expected,
+                          [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
+                              auto& a_fst = std::get<0>(a);
+                              auto& a_snd = std::get<1>(a);
+                              auto& b_fst = std::get<0>(b);
+                              auto& b_snd = std::get<1>(b);
+                              return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
+                          }));
     }
 
     SECTION("To vector") {
@@ -184,14 +184,14 @@ TEST_CASE("join_where_iterable to containers") {
                                                                      std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
 
         auto vec = joined | lz::to<std::vector>();
-        REQUIRE(std::equal(vec.begin(), vec.end(), expected.begin(),
-                           [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
-                               auto& a_fst = std::get<0>(a);
-                               auto& a_snd = std::get<1>(a);
-                               auto& b_fst = std::get<0>(b);
-                               auto& b_snd = std::get<1>(b);
-                               return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
-                           }));
+        REQUIRE(lz::equal(vec, expected,
+                          [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
+                              auto& a_fst = std::get<0>(a);
+                              auto& a_snd = std::get<1>(a);
+                              auto& b_fst = std::get<0>(b);
+                              auto& b_snd = std::get<1>(b);
+                              return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
+                          }));
     }
 
     SECTION("To other container using to<>()") {
@@ -201,14 +201,14 @@ TEST_CASE("join_where_iterable to containers") {
                                                                    std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
 
         auto list = joined | lz::to<std::list>();
-        REQUIRE(std::equal(list.begin(), list.end(), expected.begin(),
-                           [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
-                               auto& a_fst = std::get<0>(a);
-                               auto& a_snd = std::get<1>(a);
-                               auto& b_fst = std::get<0>(b);
-                               auto& b_snd = std::get<1>(b);
-                               return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
-                           }));
+        REQUIRE(lz::equal(list, expected,
+                          [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
+                              auto& a_fst = std::get<0>(a);
+                              auto& a_snd = std::get<1>(a);
+                              auto& b_fst = std::get<0>(b);
+                              auto& b_snd = std::get<1>(b);
+                              return a_fst.id == b_fst.id && a_snd.id == b_snd.id && a_snd.customer_id == b_snd.customer_id;
+                          }));
     }
 
     SECTION("To map") {
@@ -226,7 +226,7 @@ TEST_CASE("join_where_iterable to containers") {
                       }) |
                       lz::to<std::map<int, std::tuple<customer, payment_bill>>>();
 
-        REQUIRE(std::equal(expected.begin(), expected.end(), actual.begin(), [](const pair& a, const pair& b) {
+        REQUIRE(lz::equal(expected, actual, [](const pair& a, const pair& b) {
             return a.first == b.first && std::get<1>(a.second).id == std::get<1>(b.second).id &&
                    std::get<1>(a.second).customer_id == std::get<1>(b.second).customer_id;
         }));
@@ -247,7 +247,7 @@ TEST_CASE("join_where_iterable to containers") {
                       }) |
                       lz::to<std::unordered_map<int, std::tuple<customer, payment_bill>>>();
 
-        REQUIRE(std::equal(expected.begin(), expected.end(), actual.begin(), [](const pair& a, const pair& b) {
+        REQUIRE(lz::equal(expected, actual, [](const pair& a, const pair& b) {
             return a.first == b.first && std::get<1>(a.second).id == std::get<1>(b.second).id &&
                    std::get<1>(a.second).customer_id == std::get<1>(b.second).customer_id;
         }));

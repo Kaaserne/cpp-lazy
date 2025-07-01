@@ -96,10 +96,18 @@ TEST_CASE("random_iterable binary operations") {
     SECTION("Operator== & Operator!=") {
         auto it = random.begin();
         REQUIRE(it != random.end());
+        REQUIRE(it == random.begin());
+        REQUIRE(random.end() != it);
+        REQUIRE(random.begin() == it);
+
         while (it != random.end()) {
             ++it;
         }
+
         REQUIRE(it == random.end());
+        REQUIRE(it != random.begin());
+        REQUIRE(random.end() == it);
+        REQUIRE(random.begin() != it);
     }
 
     SECTION("Operator*") {

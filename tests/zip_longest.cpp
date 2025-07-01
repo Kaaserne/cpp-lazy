@@ -250,7 +250,7 @@ TEST_CASE("Zip longest iterable to container") {
             std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
             std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
-        REQUIRE(std::equal(to_arr.begin(), to_arr.end(), expected.begin()));
+        REQUIRE(lz::equal(to_arr, expected));
     }
 
     SECTION("To vector") {
@@ -260,7 +260,7 @@ TEST_CASE("Zip longest iterable to container") {
             std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
             std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
-        REQUIRE(std::equal(to_vec.begin(), to_vec.end(), expected.begin()));
+        REQUIRE(lz::equal(to_vec, expected));
     }
 
     SECTION("To other container using to<>()") {
@@ -270,7 +270,7 @@ TEST_CASE("Zip longest iterable to container") {
             std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
             std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
-        REQUIRE(std::equal(to_list.begin(), to_list.end(), expected.begin()));
+        REQUIRE(lz::equal(to_list, expected));
     }
 
     SECTION("To map") {
