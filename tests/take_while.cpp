@@ -9,6 +9,13 @@
 #include <map>
 #include <unordered_map>
 
+#ifdef __GNUC__
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
+#endif
+
 TEST_CASE("Take while with sentinels") {
     auto cstr = lz::c_string("Hello, World!");
     std::function<bool(char)> condition = [](char c) {
@@ -115,8 +122,8 @@ TEST_CASE("take_while_iterable binary operations random access") {
 }
 
 TEST_CASE("take_while_iterable binary operations bidirectional access") {
-    std::list<int> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    auto take_while = lz::take_while(array, [](int element) { return element < 5; });
+    std::list<int> lst{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    auto take_while = lz::take_while(lst, [](int element) { return element < 5; });
 
     SECTION("Operator++") {
         auto expected = { 1, 2, 3, 4 };
@@ -143,8 +150,8 @@ TEST_CASE("take_while_iterable binary operations bidirectional access") {
 }
 
 TEST_CASE("take_while_iterable binary operations forward access") {
-    std::forward_list<int> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    auto take_while = lz::take_while(array, [](int element) { return element < 5; });
+    std::forward_list<int> fl{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    auto take_while = lz::take_while(fl, [](int element) { return element < 5; });
 
     SECTION("Operator++") {
         auto expected = { 1, 2, 3, 4 };
@@ -171,22 +178,20 @@ TEST_CASE("take_while_iterable to containers") {
     auto take_while = lz::take_while(array, [](int element) { return element < 5; });
 
     SECTION("To array") {
+        REQUIRE(lz::distance(take_while) == 4);
         auto arr = take_while | lz::to<std::array<int, 4>>();
-        REQUIRE(arr.size() == 4);
-        REQUIRE(arr[0] == 1);
-        REQUIRE(arr[1] == 2);
-        REQUIRE(arr[2] == 3);
-        REQUIRE(arr[3] == 4);
+        auto expected = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(arr, expected));
     }
 
     SECTION("To vector") {
         auto vec = take_while | lz::to<std::vector>();
-        REQUIRE(std::equal(vec.begin(), vec.end(), take_while.begin()));
+        REQUIRE(lz::equal(vec, take_while));
     }
 
     SECTION("To other container using to<>()") {
         auto lst = take_while | lz::to<std::list>();
-        REQUIRE(std::equal(lst.begin(), lst.end(), take_while.begin()));
+        REQUIRE(lz::equal(lst, take_while));
     }
 
     SECTION("To map") {
@@ -203,3 +208,9 @@ TEST_CASE("take_while_iterable to containers") {
         REQUIRE(map == expected);
     }
 }
+
+#ifdef __GNUC__
+
+#pragma GCC diagnostic pop
+
+#endif
