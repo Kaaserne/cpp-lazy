@@ -44,7 +44,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 generate_while_iterator(GeneratorFunc generator_func, fn_return_type last_returned) :
         _func{ std::move(generator_func) },
-        _last_returned{ std::forward<fn_return_type>(last_returned) } {
+        _last_returned{ std::move(last_returned) } {
     }
 
     LZ_CONSTEXPR_CXX_14 generate_while_iterator& operator=(default_sentinel) noexcept {
