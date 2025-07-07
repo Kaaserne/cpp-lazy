@@ -36,6 +36,8 @@ TEST_CASE("CString binary operations") {
         REQUIRE(c_string.begin());
         auto tmp = lz::c_string("");
         REQUIRE(!tmp.begin());
+        tmp = lz::c_string_iterable<const char>{};
+        REQUIRE(!tmp.begin());
     }
 
     SECTION("Operator=") {
