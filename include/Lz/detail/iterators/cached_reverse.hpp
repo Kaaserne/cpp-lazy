@@ -49,7 +49,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 cached_reverse_iterator& operator=(default_sentinel) {
-        _iterator = default_sentinel{};
+        _iterator = _begin;
         return *this;
     }
 
@@ -74,9 +74,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
-        if (n == 0) {
-            return;
-        }
         _iterator -= n;
         if (_iterator != _begin) {
             _prev_it = (_iterator - 1);

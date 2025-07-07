@@ -1,4 +1,5 @@
 #include <Lz/algorithm.hpp>
+#include <Lz/filter.hpp>
 #include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <test_procs.hpp>
@@ -17,6 +18,30 @@ TEST_CASE("Reverse basic test") {
 }
 
 TEST_CASE("Cached reverse") {
+    SECTION("default sentinel") {
+        const std::vector<int> v2 = { 1, 2, 3, 4, 5 };
+        using func = std::function<bool(int)>;
+        using vec = const std::vector<int>;
+        using cached_filtered_reverse_iterable = lz::cached_reverse_iterable<lz::filter_iterable<vec, func>>;
+
+        std::function<bool(int)> filter_func = [](int i) {
+            return i > 0;
+        };
+        cached_filtered_reverse_iterable r = lz::cached_reverse(v2 | lz::filter(std::move(filter_func)));
+
+        auto it = r.begin();
+        it = lz::default_sentinel{};
+
+        REQUIRE(it == lz::default_sentinel{});
+        REQUIRE(lz::default_sentinel{} == it);
+
+        REQUIRE(it != r.begin());
+        REQUIRE(r.begin() != it);
+
+        REQUIRE(it == r.end());
+        REQUIRE(r.end() == it);
+    }
+
     const std::vector<int> v = { 1, 2, 3, 4, 5 };
     lz::cached_reverse_iterable<const std::vector<int>> reversed = lz::cached_reverse(v);
 
@@ -44,7 +69,7 @@ TEST_CASE("Cached reverse") {
         REQUIRE(reversed.begin() != lz::default_sentinel{});
         REQUIRE(reversed.end() == lz::default_sentinel{});
     }
-    
+
     SECTION("Operator--") {
         auto expected = { 5, 4, 3, 2, 1 };
         REQUIRE(lz::equal(reversed, expected));
