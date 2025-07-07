@@ -107,4 +107,41 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),
                       std::make_pair(3, 4), std::make_pair(4, 5), std::make_pair(5, 6) };
     REQUIRE(lz::equal(view, expected, eq_fn));
+    REQUIRE(lz::equal(view | lz::reverse, expected | lz::reverse, eq_fn));
+    test_procs::test_operator_plus(view, expected);
+    test_procs::test_operator_minus(view);
+}
+
+// TODO add test with SBO sizes
+TEST_CASE("Any iterable with different SBO sizes") {
+    SECTION("Both fit") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        static_assert(sizeof(vec.begin()) <= 64, "Larger than 64 bytes, SBO size is 64 bytes");
+        static_assert(sizeof(vec.end()) <= 64, "Larger than 64 bytes, SBO size is 64 bytes");
+        lz::any_iterable<int, int&, std::random_access_iterator_tag> view = vec;
+        auto expected = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(view, expected));
+        REQUIRE(lz::equal(view | lz::reverse, expected | lz::reverse));
+        test_procs::test_operator_plus(view, expected);
+        test_procs::test_operator_minus(view);
+    }
+
+    SECTION("Both do not fit") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+
+        std::array<char, 64> buf{};
+        auto mapper = lz::map(vec, [buf](int& i) -> int& {
+            static_cast<void>(buf);
+            return i;
+        });
+        static_assert(sizeof(mapper.begin()) > 64, "Larger than 64 bytes, SBO size is 64 bytes");
+        static_assert(sizeof(mapper.end()) > 64, "Larger than 64 bytes, SBO size is 64 bytes");
+
+        lz::any_iterable<int, int&, std::random_access_iterator_tag> view = mapper;
+        auto expected = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(view, expected));
+        REQUIRE(lz::equal(view | lz::reverse, expected | lz::reverse));
+        test_procs::test_operator_plus(view, expected);
+        test_procs::test_operator_minus(view);
+    }
 }

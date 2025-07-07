@@ -41,6 +41,42 @@ private:
     it _begin;
     it _end;
 
+    // Both do not fit
+    template<class Iterable>
+    any_iterable(
+        Iterable&& iterable,
+        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
+        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
+        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    }
+
+    // Both fit
+    template<class Iterable>
+    any_iterable(
+        Iterable&& iterable,
+        detail::enable_if<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
+        _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
+        _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
+    }
+
+    // Iterator does not fit, sentinel does fit
+    template<class Iterable>
+    any_iterable(
+        Iterable&& iterable,
+        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
+        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
+        _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
+    }
+
+    // Iterator fits, sentinel does not fit
+    template<class Iterable>
+    any_iterable(
+        Iterable&& iterable,
+        detail::enable_if<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
+        _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
+        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    }
+
 public:
 #ifdef LZ_HAS_CONCEPTS
 
@@ -62,9 +98,7 @@ public:
      * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    any_iterable(Iterable&& iterable) :
-        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
-        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    any_iterable(Iterable&& iterable) : any_iterable(std::forward<Iterable>(iterable), 0) {
     }
 
     LZ_NODISCARD it begin() const& {
