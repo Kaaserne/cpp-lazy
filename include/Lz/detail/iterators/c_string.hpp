@@ -45,14 +45,8 @@ public:
         ++_it;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const c_string_iterator& b) const noexcept {
-        if (b._it == nullptr) {
-            if (_it == nullptr) {
-                return true;
-            }
-            return *_it == '\0';
-        }
-        return _it == b._it;
+    constexpr bool eq(const c_string_iterator& b) const noexcept {
+        return b._it == nullptr ? _it == nullptr || *_it == '\0' : _it == b._it;
     }
 
     constexpr bool eq(default_sentinel) const noexcept {
