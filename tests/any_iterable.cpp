@@ -116,8 +116,8 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
 TEST_CASE("Any iterable with different SBO sizes") {
     SECTION("Both fit") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
-        static_assert(sizeof(vec.begin()) <= 64, "Larger than 64 bytes, SBO size is 64 bytes");
-        static_assert(sizeof(vec.end()) <= 64, "Larger than 64 bytes, SBO size is 64 bytes");
+        static_assert(sizeof(vec.begin()) <= 64, "");
+        static_assert(sizeof(vec.end()) <= 64, "");
         lz::any_iterable<int, int&, std::random_access_iterator_tag> view = vec;
         auto expected = { 1, 2, 3, 4, 5 };
         REQUIRE(lz::equal(view, expected));
@@ -134,8 +134,8 @@ TEST_CASE("Any iterable with different SBO sizes") {
             static_cast<void>(buf);
             return i;
         });
-        static_assert(sizeof(mapper.begin()) > 64, "Larger than 64 bytes, SBO size is 64 bytes");
-        static_assert(sizeof(mapper.end()) > 64, "Larger than 64 bytes, SBO size is 64 bytes");
+        static_assert(sizeof(mapper.begin()) > 64, "");
+        static_assert(sizeof(mapper.end()) > 64, "");
 
         lz::any_iterable<int, int&, std::random_access_iterator_tag> view = mapper;
         auto expected = { 1, 2, 3, 4, 5 };
