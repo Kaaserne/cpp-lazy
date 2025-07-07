@@ -77,24 +77,27 @@ struct conjunction<T, Ts...> : conditional<T::value, conjunction<Ts...>, std::fa
 
 struct less {
     template<class T, class U>
-    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&>(lhs) < static_cast<U&&>(rhs)))
-        ->decltype(static_cast<T&&>(lhs) < static_cast<U&&>(rhs)) {
+    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const
+        noexcept(noexcept(static_cast<T&&>(lhs) < static_cast<U&&>(rhs)))
+            -> decltype(static_cast<T&&>(lhs) < static_cast<U&&>(rhs)) {
         return static_cast<T&&>(lhs) < static_cast<U&&>(rhs);
     }
 };
 
 struct equal_to {
     template<class T, class U>
-    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&>(lhs) == static_cast<U&&>(rhs)))
-        ->decltype(static_cast<T&&>(lhs) == static_cast<U&&>(rhs)) {
+    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const
+        noexcept(noexcept(static_cast<T&&>(lhs) == static_cast<U&&>(rhs)))
+            -> decltype(static_cast<T&&>(lhs) == static_cast<U&&>(rhs)) {
         return static_cast<T&&>(lhs) == static_cast<U&&>(rhs);
     }
 };
 
 struct plus {
     template<class T, class U>
-    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const noexcept(noexcept(static_cast<T&&>(lhs) + static_cast<U&&>(rhs)))
-        ->decltype(static_cast<T&&>(lhs) + static_cast<U&&>(rhs)) {
+    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const
+        noexcept(noexcept(static_cast<T&&>(lhs) + static_cast<U&&>(rhs)))
+            -> decltype(static_cast<T&&>(lhs) + static_cast<U&&>(rhs)) {
         return static_cast<T&&>(lhs) + static_cast<U&&>(rhs);
     }
 };
@@ -188,8 +191,7 @@ struct is_invocable_impl_n_args<void_t<decltype(std::declval<Function>()(std::de
     : std::true_type {};
 
 template<class F, class... Args>
-using is_invocable = typename std::conditional<sizeof...(Args) == 0, is_invocable_impl_no_args<F>,
-                                               is_invocable_impl_n_args<void, F, Args...>>::type;
+using is_invocable = conditional<sizeof...(Args) == 0, is_invocable_impl_no_args<F>, is_invocable_impl_n_args<void, F, Args...>>;
 
 #endif
 
@@ -418,22 +420,22 @@ template<class... Ts>
 using common_type = typename std::common_type<Ts...>::type;
 
 template<class IterTag>
+using is_ra_tag = std::is_convertible<IterTag, std::random_access_iterator_tag>;
+
+template<class IterTag>
 using is_bidi_tag = std::is_convertible<IterTag, std::bidirectional_iterator_tag>;
 
 template<class IterTag>
 using is_fwd_tag = std::is_convertible<IterTag, std::forward_iterator_tag>;
 
 template<class Iterator>
+using is_ra = is_ra_tag<iter_cat_t<Iterator>>;
+
+template<class Iterator>
 using is_bidi = is_bidi_tag<iter_cat_t<Iterator>>;
 
 template<class Iterator>
 using is_fwd = std::is_convertible<iter_cat_t<Iterator>, std::forward_iterator_tag>;
-
-template<class IterTag>
-using is_ra_tag = std::is_convertible<IterTag, std::random_access_iterator_tag>;
-
-template<class Iterator>
-using is_ra = is_ra_tag<iter_cat_t<Iterator>>;
 
 template<class Iterator, class S>
 using is_sentinel = std::integral_constant<bool, !std::is_same<Iterator, S>::value>;
@@ -447,12 +449,14 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
  * ```cpp
  * std::vector<int> v;
  * static_assert(lz::sized<decltype(v)>::value, "Vector is sized");
- * 
+ *
  * auto not_sized = lz::cstring("Hello");
  * static_assert(!lz::sized<decltype(not_sized)>::value, "C string is not sized"); // C strings are not sized
  * ```
+ * @tparam T The type to check.
  */
-using detail::sized;
+template<class T>
+using sized = detail::sized<T>;
 } // namespace lz
 
 #endif // LZ_TRAITS_HPP
