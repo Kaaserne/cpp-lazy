@@ -34,7 +34,7 @@ class variant {
         none = static_cast<std::uint_least8_t>(-1),
         t = 0,
         t2 = 1,
-    } _state;
+    } _state{ state::none };
 
     union types {
         T _t;
@@ -69,22 +69,21 @@ class variant {
     }
 
 public:
-    constexpr variant() noexcept : _state(state::none) {
-    }
+    constexpr variant() noexcept = default;
 
-    variant(const T& t) : _state(state::t) {
+    variant(const T& t) : _state{ state::t } {
         ::new (std::addressof(_variant._t)) T(t);
     }
 
-    variant(const T2& t2) : _state(state::t2) {
+    variant(const T2& t2) : _state{ state::t } {
         ::new (std::addressof(_variant._t2)) T2(t2);
     }
 
-    variant(T&& t) noexcept : _state(state::t) {
+    variant(T&& t) noexcept(std::is_nothrow_move_constructible<T>::value) : _state{ state::t } {
         ::new (std::addressof(_variant._t)) T(std::move(t));
     }
 
-    variant(T2&& t2) noexcept : _state(state::t2) {
+    variant(T2&& t2) noexcept(std::is_nothrow_move_constructible<T2>::value) : _state{ state::t2 } {
         ::new (std::addressof(_variant._t2)) T2(std::move(t2));
     }
 
@@ -92,7 +91,9 @@ public:
         construct(other._variant._t, other._variant._t2);
     }
 
-    LZ_CONSTEXPR_CXX_14 variant(variant&& other) noexcept : _state{ other._state } {
+    LZ_CONSTEXPR_CXX_14 variant(variant&& other) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                                          std::is_nothrow_move_constructible<T2>::value) :
+        _state{ other._state } {
         other._state = state::none;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
     }
@@ -107,12 +108,12 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 variant& operator=(T&& t) noexcept {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(T&& t) noexcept(std::is_nothrow_move_constructible<T>::value) {
         reconstruct(state::t, _variant._t, std::move(t));
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 variant& operator=(T2&& t2) noexcept {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(T2&& t2) noexcept(std::is_nothrow_move_constructible<T2>::value) {
         reconstruct(state::t2, _variant._t2, std::move(t2));
         return *this;
     }
@@ -124,12 +125,27 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 variant& operator=(variant&& other) noexcept {
+    LZ_CONSTEXPR_CXX_14 variant& operator=(variant&& other) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                                                     std::is_nothrow_move_constructible<T2>::value) {
         this->~variant();
         _state = other._state;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
         other._state = state::none;
         return *this;
+    }
+
+    template<std::size_t I, class... Args>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value) {
+        this->~variant();
+        ::new (std::addressof(_variant._t)) T(std::forward<Args>(args)...);
+        _state = state::t;
+    }
+
+    template<std::size_t I, class... Args>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 1> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T2, Args...>::value) {
+        this->~variant();
+        ::new (std::addressof(_variant._t2)) T2(std::forward<Args>(args)...);
+        _state = state::t2;
     }
 
     template<std::size_t I>
