@@ -112,7 +112,6 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
     test_procs::test_operator_minus(view);
 }
 
-// TODO add test with SBO sizes
 TEST_CASE("Any iterable with different SBO sizes") {
     SECTION("Both fit") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
