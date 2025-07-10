@@ -7,14 +7,23 @@
 #include <Lz/detail/unique_ptr.hpp>
 #include <Lz/detail/variant.hpp>
 #include <Lz/iterator_base.hpp>
+#include <cstring>
 
 namespace lz {
 namespace detail {
 
+#ifdef LZ_HAS_CXX_17
+
+using std::in_place_t;
+
+#else
+
 template<class T>
-struct in_place_type_t {
-    explicit in_place_type_t() = default;
+struct in_place_t {
+    explicit in_place_t() = default;
 };
+
+#endif
 
 template<class T, class Reference, class IterCat, class DiffType>
 class iterator_wrapper : public iterator<iterator_wrapper<T, Reference, IterCat, DiffType>, Reference, fake_ptr_proxy<Reference>,
@@ -32,6 +41,13 @@ private:
 
     variant<unique_ptr<any_iter_base>, storage> _storage;
 
+    void copy_buf_other(const iterator_wrapper& other) noexcept {
+        LZ_ASSERT(other._storage.index() == 1, "Invalid storage index");
+        using std::get;
+        _storage.template emplace<1>();
+        std::memcpy(static_cast<void*>(&get<1>(_storage)), static_cast<const void*>(&get<1>(other._storage)), sizeof(storage));
+    }
+
 public:
     using value_type = T;
     using reference = Reference;
@@ -42,7 +58,7 @@ public:
     constexpr iterator_wrapper() noexcept = default;
 
     template<class Impl, class... Args>
-    explicit iterator_wrapper(in_place_type_t<Impl>, Args&&... args) {
+    iterator_wrapper(in_place_t<Impl>, Args&&... args) {
         static_assert(sizeof(Impl) <= SBO_SIZE, "Impl too large for SBO");
         using std::get;
         _storage.template emplace<1>();
@@ -61,19 +77,17 @@ public:
             _storage = get<0>(other._storage)->clone();
         }
         else {
-            LZ_ASSERT(other._storage.index() == 1, "Invalid storage index");
-            _storage = get<1>(other._storage);
+            copy_buf_other(other);
         }
     }
 
-    iterator_wrapper(iterator_wrapper&& other) noexcept(std::is_nothrow_move_constructible<unique_ptr<any_iter_base>>::value) {
+    iterator_wrapper(iterator_wrapper&& other) noexcept {
         using std::get;
         if (other._storage.index() == 0) {
             _storage = std::move(get<0>(other._storage));
         }
         else {
-            LZ_ASSERT(other._storage.index() == 1, "Invalid storage index");
-            _storage = get<1>(other._storage);
+            copy_buf_other(other);
         }
     }
 
@@ -84,22 +98,20 @@ public:
                 _storage = get<0>(other._storage)->clone();
             }
             else {
-                LZ_ASSERT(other._storage.index() == 1, "Invalid storage index");
-                _storage = get<1>(other._storage);
+                copy_buf_other(other);
             }
         }
         return *this;
     }
 
-    iterator_wrapper& operator=(iterator_wrapper&& other) {
+    iterator_wrapper& operator=(iterator_wrapper&& other) noexcept {
         if (this != &other) {
             using std::get;
             if (other._storage.index() == 0) {
                 _storage = std::move(get<0>(other._storage));
             }
             else {
-                LZ_ASSERT(other._storage.index() == 1, "Invalid storage index");
-                _storage = get<1>(other._storage);
+                copy_buf_other(other);
             }
         }
         return *this;
@@ -163,15 +175,21 @@ public:
 
     bool eq(const iterator_wrapper& other) const {
         using std::get;
-        if (_storage.index() == 0 && other._storage.index() == 0) {
+
+        switch ((_storage.index() << 1) | other._storage.index()) {
+        case 0: // (0, 0)
             return get<0>(_storage)->eq(*get<0>(other._storage));
-        }
-        if (_storage.index() == 1 && other._storage.index() == 1) {
+        case 1: // (0, 1)
+            return get<0>(_storage)->eq(reinterpret_cast<const any_iter_base&>(get<1>(other._storage)));
+        case 2: // (1, 0)
+            return reinterpret_cast<const any_iter_base&>(get<1>(_storage)).eq(*get<0>(other._storage));
+        case 3: // (1, 1)
             return reinterpret_cast<const any_iter_base&>(get<1>(_storage))
                 .eq(reinterpret_cast<const any_iter_base&>(get<1>(other._storage)));
+        default:
+            LZ_ASSERT(_storage.index() < 2 && other._storage.index() < 2, "Invalid storage index");
+            return false;
         }
-        LZ_ASSERT(_storage.index() == 1 && other._storage.index() == 0, "Invalid storage index");
-        return reinterpret_cast<const any_iter_base&>(get<1>(_storage)).eq(*get<0>(other._storage));
     }
 
     void plus_is(const DiffType n) {
@@ -185,15 +203,21 @@ public:
 
     DiffType difference(const iterator_wrapper& other) const {
         using std::get;
-        if (_storage.index() == 0 && other._storage.index() == 0) {
+
+        switch ((_storage.index() << 1) | other._storage.index()) {
+        case 0: // (0, 0)
             return get<0>(_storage)->difference(*get<0>(other._storage));
-        }
-        if (_storage.index() == 1 && other._storage.index() == 1) {
+        case 1: // (0, 1)
+            return get<0>(_storage)->difference(reinterpret_cast<const any_iter_base&>(get<1>(other._storage)));
+        case 2: // (1, 0)
+            return reinterpret_cast<const any_iter_base&>(get<1>(_storage)).difference(*get<0>(other._storage));
+        case 3: // (1, 1)
             return reinterpret_cast<const any_iter_base&>(get<1>(_storage))
                 .difference(reinterpret_cast<const any_iter_base&>(get<1>(other._storage)));
+        default:
+            LZ_ASSERT(_storage.index() < 2 && other._storage.index() < 2, "Invalid storage index");
+            return false;
         }
-        LZ_ASSERT(_storage.index() == 1 && other._storage.index() == 0, "Invalid storage index");
-        return reinterpret_cast<const any_iter_base&>(get<1>(_storage)).difference(*get<0>(other._storage));
     }
 };
 

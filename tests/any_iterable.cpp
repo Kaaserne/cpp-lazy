@@ -108,7 +108,7 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
                       std::make_pair(3, 4), std::make_pair(4, 5), std::make_pair(5, 6) };
     REQUIRE(lz::equal(view, expected, eq_fn));
     REQUIRE(lz::equal(view | lz::reverse, expected | lz::reverse, eq_fn));
-    test_procs::test_operator_plus(view, expected);
+    test_procs::test_operator_plus(view, expected, eq_fn);
     test_procs::test_operator_minus(view);
 }
 
@@ -143,5 +143,23 @@ TEST_CASE("Any iterable with different SBO sizes") {
         REQUIRE(lz::equal(view | lz::reverse, expected | lz::reverse));
         test_procs::test_operator_plus(view, expected);
         test_procs::test_operator_minus(view);
+    }
+
+    SECTION("Iter does not fit, sentinel does fit") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+
+        std::array<char, 64> buf{};
+        // Decay to forward so that filt returns sentinel
+        auto filt = vec | lz::iter_decay(std::forward_iterator_tag{}) | lz::filter([buf](int&) {
+                        static_cast<void>(buf);
+                        return true;
+                    });
+
+        static_assert(sizeof(filt.begin()) > 64, "");
+        static_assert(sizeof(filt.end()) == sizeof(lz::default_sentinel), "");
+
+        lz::any_iterable<int, int&, std::forward_iterator_tag> view = filt;
+        auto expected = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(view, expected));
     }
 }

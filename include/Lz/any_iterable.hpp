@@ -41,11 +41,11 @@ private:
     it _begin;
     it _end;
 
-    // Both do not fit
+    // One of them fits, the other does not
     template<class Iterable>
     any_iterable(
         Iterable&& iterable,
-        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
+        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) || (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
         _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
         _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
     }
@@ -55,26 +55,8 @@ private:
     any_iterable(
         Iterable&& iterable,
         detail::enable_if<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
-        _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
-        _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
-    }
-
-    // Iterator does not fit, sentinel does fit
-    template<class Iterable>
-    any_iterable(
-        Iterable&& iterable,
-        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
-        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
-        _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
-    }
-
-    // Iterator fits, sentinel does not fit
-    template<class Iterable>
-    any_iterable(
-        Iterable&& iterable,
-        detail::enable_if<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
-        _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
-        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+        _begin{ detail::in_place_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
+        _end{ detail::in_place_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
     }
 
 public:
