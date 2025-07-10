@@ -189,12 +189,12 @@ public:
     // custom_iterable(I&& iterable) : _iterable(std::forward<I>(iterable)) {}
 
     // The begin function
-    auto begin() const {
+    lz::iter_t<Iterable> begin() const {
         return std::begin(_iterable);
     }
 
     // The end function
-    auto end() const {
+    lz::sentinel_t<Iterable> end() const {
         return std::end(_iterable);
     }
 };
