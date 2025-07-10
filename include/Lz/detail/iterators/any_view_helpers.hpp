@@ -216,7 +216,7 @@ public:
                 .difference(reinterpret_cast<const any_iter_base&>(get<1>(other._storage)));
         default:
             LZ_ASSERT(_storage.index() < 2 && other._storage.index() < 2, "Invalid storage index");
-            return false;
+            return 0;
         }
     }
 };
