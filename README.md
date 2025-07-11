@@ -313,16 +313,16 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 The time is equal to one iteration. One iteration includes the creation of the iterable and one iteration of that iterable. Compiled with: gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04).
 
 C++11
-<div style="text-align:center"><img src="https://raw.githubusercontent.com/MarcDirven/cpp-lazy/master/bench/benchmarks-iterators-C%2B%2B11.png" /></div>
+![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-11.png?raw=true)
 
 C++14
 
-<div style="text-align:center"><img src="https://raw.githubusercontent.com/MarcDirven/cpp-lazy/master/bench/benchmarks-iterators-C%2B%2B14.png" /></div>
+![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-14.png?raw=true)
 
 C++17
 
-<div style="text-align:center"><img src="https://raw.githubusercontent.com/MarcDirven/cpp-lazy/master/bench/benchmarks-iterators-C%2B%2B17.png" /></div>
+![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-17.png?raw=true)
 
 C++20
 
-<div style="text-align:center"><img src="https://raw.githubusercontent.com/MarcDirven/cpp-lazy/master/bench/benchmarks-iterators-C%2B%2B20.png" /></div>
+![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-20.png?raw=true)
