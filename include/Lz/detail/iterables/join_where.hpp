@@ -72,7 +72,7 @@ public:
         // clang-format on
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

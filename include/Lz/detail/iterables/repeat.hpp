@@ -51,7 +51,7 @@ public:
         return { std::move(_value), _amount };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };
@@ -90,7 +90,7 @@ public:
         return { std::move(_value) };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

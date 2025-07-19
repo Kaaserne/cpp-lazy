@@ -5,7 +5,7 @@
 
 int main() {
     auto iterable_with_end_sentinel = lz::c_string("hello world");
-    // .end() is a sentinel (lz::default_sentinel) meaning it is a different type than its .begin() type
+    // .end() is a sentinel (lz::default_sentinel_t) meaning it is a different type than its .begin() type
     // To make it a common one, use:
     auto iterable = iterable_with_end_sentinel | lz::common;
     // or

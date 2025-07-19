@@ -26,7 +26,7 @@ endif ()
 
 include(CTest)
 
-add_subdirectory(c_string)
+add_subdirectory(cpp-lazy-ut-helper)
 
 # ---- Tests ----
 add_executable(cpp-lazy-tests
@@ -56,6 +56,7 @@ add_executable(cpp-lazy-tests
 	interleave.cpp
 	intersection.cpp
 	iter_tools.cpp
+	iterator.cpp
 	join_where.cpp
 	loop.cpp
 	map.cpp
@@ -86,7 +87,7 @@ target_link_libraries(cpp-lazy-tests
 	PRIVATE
 		cpp-lazy::cpp-lazy
 		Catch2::Catch2
-		c_string_forward_declarations
+		cpp-lazy-ut-helper 
 )
 target_include_directories(cpp-lazy-tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 add_test(

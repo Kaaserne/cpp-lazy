@@ -17,7 +17,7 @@ template<class Iterable, class UnaryPredicate>
 class take_while_iterator
     : public iterator<take_while_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
 
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(default_sentinel_t) {
         _iterator = std::end(_iterable);
         return *this;
     }
@@ -101,7 +101,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return _iterator == std::end(_iterable);
     }
 };

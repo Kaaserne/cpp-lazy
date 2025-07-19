@@ -15,7 +15,8 @@ class generate_iterator;
 template<class GeneratorFunc>
 class generate_iterator<GeneratorFunc, false>
     : public iterator<generate_iterator<GeneratorFunc, false>, func_ret_type<GeneratorFunc>,
-                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
+                      default_sentinel_t> {
 
     mutable GeneratorFunc _func;
     std::size_t _current{};
@@ -45,7 +46,7 @@ public:
         _current{ amount } {
     }
 
-    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel_t) noexcept {
         _current = 0;
         return *this;
     }
@@ -66,7 +67,7 @@ public:
         return _current == b._current;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return _current == 0;
     }
 };
@@ -74,7 +75,8 @@ public:
 template<class GeneratorFunc>
 class generate_iterator<GeneratorFunc, true>
     : public iterator<generate_iterator<GeneratorFunc, true>, func_ret_type<GeneratorFunc>,
-                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
+                      default_sentinel_t> {
 
     GeneratorFunc _func;
 
@@ -101,7 +103,7 @@ public:
     constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel_t) noexcept {
         return *this;
     }
 
@@ -120,7 +122,7 @@ public:
         return false;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return false;
     }
 };

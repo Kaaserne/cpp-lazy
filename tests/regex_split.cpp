@@ -54,26 +54,26 @@ TEST_CASE("Empty or one element regex split") {
         std::string s;
         auto splitter = lz::regex_split(s, r1);
         REQUIRE(lz::empty(splitter));
-        REQUIRE(!lz::has_one(splitter));
-        REQUIRE(!lz::has_many(splitter));
+        REQUIRE_FALSE(lz::has_one(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
     }
 
     SECTION("One element with result") {
         std::regex r1(R"(\s+)");
         std::string s = "Hello ";
         auto splitter = lz::regex_split(s, r1);
-        REQUIRE(!lz::empty(splitter));
+        REQUIRE_FALSE(lz::empty(splitter));
         REQUIRE(lz::has_one(splitter));
-        REQUIRE(!lz::has_many(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
     }
 
     SECTION("One element without result") {
         std::regex r1(R"(\s+)");
         std::string s = "Hello";
         auto splitter = lz::regex_split(s, r1);
-        REQUIRE(!lz::empty(splitter));
+        REQUIRE_FALSE(lz::empty(splitter));
         REQUIRE(lz::has_one(splitter));
-        REQUIRE(!lz::has_many(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
     }
 }
 

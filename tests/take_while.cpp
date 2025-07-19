@@ -2,8 +2,8 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take_while.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <forward_list>
 #include <list>
 #include <map>
@@ -39,23 +39,23 @@ TEST_CASE("Empty or one element drop while") {
         std::vector<int> vec;
         auto drop_while = lz::drop_while(vec, [](int i) { return i == 2; });
         REQUIRE(lz::empty(drop_while));
-        REQUIRE(!lz::has_many(drop_while));
-        REQUIRE(!lz::has_one(drop_while));
+        REQUIRE_FALSE(lz::has_many(drop_while));
+        REQUIRE_FALSE(lz::has_one(drop_while));
     }
 
     SECTION("One element true") {
         std::vector<int> vec = { 1 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i == 1; });
         REQUIRE(lz::empty(drop_while));
-        REQUIRE(!lz::has_many(drop_while));
-        REQUIRE(!lz::has_one(drop_while));
+        REQUIRE_FALSE(lz::has_many(drop_while));
+        REQUIRE_FALSE(lz::has_one(drop_while));
     }
 
     SECTION("One element false") {
         std::vector<int> vec = { 1 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i != 1; });
-        REQUIRE(!lz::empty(drop_while));
-        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE_FALSE(lz::empty(drop_while));
+        REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE(lz::has_one(drop_while));
     }
 
@@ -63,32 +63,32 @@ TEST_CASE("Empty or one element drop while") {
         std::vector<int> vec = { 1, 2 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i < 3; });
         REQUIRE(lz::empty(drop_while));
-        REQUIRE(!lz::has_many(drop_while));
-        REQUIRE(!lz::has_one(drop_while));
+        REQUIRE_FALSE(lz::has_many(drop_while));
+        REQUIRE_FALSE(lz::has_one(drop_while));
     }
 
     SECTION("Many elements first true") {
         std::vector<int> vec = { 1, 2 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i == 1; });
-        REQUIRE(!lz::empty(drop_while));
-        REQUIRE(!lz::has_many(drop_while));
+        REQUIRE_FALSE(lz::empty(drop_while));
+        REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE(lz::has_one(drop_while));
     }
 
     SECTION("Many elements first false") {
         std::vector<int> vec = { 1, 2 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i > 1; });
-        REQUIRE(!lz::empty(drop_while));
+        REQUIRE_FALSE(lz::empty(drop_while));
         REQUIRE(lz::has_many(drop_while));
-        REQUIRE(!lz::has_one(drop_while));
+        REQUIRE_FALSE(lz::has_one(drop_while));
     }
 
     SECTION("Many elements all false") {
         std::vector<int> vec = { 1, 2 };
         auto drop_while = lz::drop_while(vec, [](int i) { return i > 2; });
-        REQUIRE(!lz::empty(drop_while));
+        REQUIRE_FALSE(lz::empty(drop_while));
         REQUIRE(lz::has_many(drop_while));
-        REQUIRE(!lz::has_one(drop_while));
+        REQUIRE_FALSE(lz::has_one(drop_while));
     }
 }
 

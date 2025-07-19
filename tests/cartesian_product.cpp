@@ -2,8 +2,9 @@
 #include <Lz/cartesian_product.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cstddef>
 #include <list>
 #include <map>
@@ -45,17 +46,17 @@ TEST_CASE("Empty or one element cartesian product") {
         std::vector<int> vec;
         lz::cartesian_product_iterable<std::vector<int>, std::vector<int>> cart = lz::cartesian_product(vec, vec);
         REQUIRE(lz::empty(cart));
-        REQUIRE(!lz::has_one(cart));
-        REQUIRE(!lz::has_many(cart));
+        REQUIRE_FALSE(lz::has_one(cart));
+        REQUIRE_FALSE(lz::has_many(cart));
         REQUIRE(cart.size() == 0);
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto cart = lz::cartesian_product(vec, vec);
-        REQUIRE(!lz::empty(cart));
+        REQUIRE_FALSE(lz::empty(cart));
         REQUIRE(lz::has_one(cart));
-        REQUIRE(!lz::has_many(cart));
+        REQUIRE_FALSE(lz::has_many(cart));
         REQUIRE(cart.size() == 1);
     }
 
@@ -64,14 +65,14 @@ TEST_CASE("Empty or one element cartesian product") {
         std::vector<int> vec2;
         auto cart = lz::cartesian_product(vec, vec2);
         REQUIRE(lz::empty(cart));
-        REQUIRE(!lz::has_one(cart));
-        REQUIRE(!lz::has_many(cart));
+        REQUIRE_FALSE(lz::has_one(cart));
+        REQUIRE_FALSE(lz::has_many(cart));
         REQUIRE(cart.size() == 0);
 
         cart = lz::cartesian_product(vec2, vec);
         REQUIRE(lz::empty(cart));
-        REQUIRE(!lz::has_one(cart));
-        REQUIRE(!lz::has_many(cart));
+        REQUIRE_FALSE(lz::has_one(cart));
+        REQUIRE_FALSE(lz::has_many(cart));
         REQUIRE(cart.size() == 0);
     }
 
@@ -80,13 +81,13 @@ TEST_CASE("Empty or one element cartesian product") {
         auto cstr2 = lz::c_string("");
         auto cart = lz::cartesian_product(cstr, cstr2);
         REQUIRE(lz::empty(cart));
-        REQUIRE(!lz::has_one(cart));
-        REQUIRE(!lz::has_many(cart));
+        REQUIRE_FALSE(lz::has_one(cart));
+        REQUIRE_FALSE(lz::has_many(cart));
 
         cart = lz::cartesian_product(cstr2, cstr);
         REQUIRE(lz::empty(cart));
-        REQUIRE(!lz::has_one(cart));
-        REQUIRE(!lz::has_many(cart));
+        REQUIRE_FALSE(lz::has_one(cart));
+        REQUIRE_FALSE(lz::has_many(cart));
     }
 }
 
@@ -119,6 +120,14 @@ TEST_CASE("Cartesian product binary operations") {
 
     SECTION("Operator-") {
         test_procs::test_operator_minus(cartesian);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto repeat1 = lz::repeat(1, 3);
+        auto repeat2 = lz::repeat(2, 4);
+        auto cartesian2 = repeat1 | lz::cartesian_product(repeat2);
+        REQUIRE(lz::size(cartesian2) == 12);
+        test_procs::test_operator_minus(cartesian2);
     }
 }
 

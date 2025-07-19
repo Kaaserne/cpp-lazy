@@ -1,7 +1,8 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/stream.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <deque>
 #include <forward_list>
 #include <iostream>
@@ -11,6 +12,7 @@
 #include <sstream>
 #include <unordered_set>
 
+// TODO: add overloads with default_sentinel in all classes
 template<class T>
 class custom_container {
     std::vector<T> _vec;
@@ -395,13 +397,13 @@ TEST_CASE("Empty") {
     SECTION("With non-empty c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::empty(iterable));
+        REQUIRE_FALSE(lz::empty(iterable));
     }
 
     SECTION("With one element") {
         const char* str = "H";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::empty(iterable));
+        REQUIRE_FALSE(lz::empty(iterable));
     }
 }
 
@@ -409,13 +411,13 @@ TEST_CASE("Has one") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::has_one(iterable));
+        REQUIRE_FALSE(lz::has_one(iterable));
     }
 
     SECTION("With non-empty c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::has_one(iterable));
+        REQUIRE_FALSE(lz::has_one(iterable));
     }
 
     SECTION("With one element") {
@@ -429,7 +431,7 @@ TEST_CASE("Has many") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::has_many(iterable));
+        REQUIRE_FALSE(lz::has_many(iterable));
     }
 
     SECTION("With non-empty c-string") {
@@ -441,7 +443,7 @@ TEST_CASE("Has many") {
     SECTION("With one element") {
         const char* str = "H";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::has_many(iterable));
+        REQUIRE_FALSE(lz::has_many(iterable));
     }
 }
 
@@ -468,6 +470,11 @@ TEST_CASE("Back") {
     SECTION("With one element") {
         std::vector<int> vec = { 1 };
         REQUIRE(lz::back(vec) == 1);
+    }
+
+    SECTION("With sentinel") {
+        auto repeater = lz::repeat(20, 5);
+        REQUIRE(lz::back(repeater) == 20);
     }
 }
 
@@ -1259,13 +1266,13 @@ TEST_CASE("Contains") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::contains(iterable, 'H'));
+        REQUIRE_FALSE(lz::contains(iterable, 'H'));
     }
 
     SECTION("Not found c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::contains(iterable, 'a'));
+        REQUIRE_FALSE(lz::contains(iterable, 'a'));
     }
 }
 
@@ -1289,17 +1296,17 @@ TEST_CASE("Starts with") {
     SECTION("With empty c-string") {
         auto iterable = lz::c_string("");
         auto iterable2 = lz::c_string("H");
-        REQUIRE(!lz::starts_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
 
         iterable = lz::c_string("H");
         iterable2 = lz::c_string("");
-        REQUIRE(!lz::starts_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 
     SECTION("Not found c-string") {
         auto iterable = lz::c_string("Hello");
         auto iterable2 = lz::c_string("a");
-        REQUIRE(!lz::starts_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 
     SECTION("With non-empty string") {
@@ -1317,17 +1324,17 @@ TEST_CASE("Starts with") {
     SECTION("With empty string") {
         auto iterable = std::string("");
         auto iterable2 = std::string("H");
-        REQUIRE(!lz::starts_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
 
         iterable = std::string("H");
         iterable2 = std::string("");
-        REQUIRE(!lz::starts_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 
     SECTION("Not found string") {
         auto iterable = std::string("Hello");
         auto iterable2 = std::string("a");
-        REQUIRE(!lz::starts_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 }
 
@@ -1335,7 +1342,7 @@ TEST_CASE("Ends with") {
     SECTION("Forward non sized") {
         auto iterable = lz::c_string("");
         auto iterable2 = lz::c_string("H");
-        REQUIRE(!lz::ends_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::ends_with(iterable, iterable2));
 
         iterable2 = lz::c_string("");
         REQUIRE(lz::ends_with(iterable, iterable2));
@@ -1347,7 +1354,7 @@ TEST_CASE("Ends with") {
         REQUIRE(lz::ends_with(iterable, iterable2));
 
         iterable2 = lz::c_string("H");
-        REQUIRE(!lz::ends_with(iterable, iterable2));
+        REQUIRE_FALSE(lz::ends_with(iterable, iterable2));
     }
 
     SECTION("Bidirectional sized") {
@@ -1355,10 +1362,10 @@ TEST_CASE("Ends with") {
         std::list<char> lst2;
         REQUIRE(lz::ends_with(lst, lst2));
         lst = { 'H' };
-        REQUIRE(!lz::ends_with(lst, lst2));
+        REQUIRE_FALSE(lz::ends_with(lst, lst2));
         lst = {};
         lst2 = { 'H' };
-        REQUIRE(!lz::ends_with(lst, lst2));
+        REQUIRE_FALSE(lz::ends_with(lst, lst2));
         lst = { 'A', 'B' };
         lst2 = { 'B' };
         REQUIRE(lz::ends_with(lst, lst2));
@@ -1673,7 +1680,7 @@ TEST_CASE("Equal") {
         auto iterable = lz::c_string(str);
         const char* str2 = "Helloo";
         auto iterable2 = lz::c_string(str2);
-        REQUIRE(!lz::equal(iterable, iterable2));
+        REQUIRE_FALSE(lz::equal(iterable, iterable2));
     }
 }
 
@@ -1761,13 +1768,13 @@ TEST_CASE("Binary search") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::binary_search(iterable, 'H'));
+        REQUIRE_FALSE(lz::binary_search(iterable, 'H'));
     }
 
     SECTION("Not found c-string") {
         const char* str = "aaabcccdeee";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::binary_search(iterable, 'f'));
+        REQUIRE_FALSE(lz::binary_search(iterable, 'f'));
     }
 }
 
@@ -1793,7 +1800,7 @@ TEST_CASE("All of") {
     SECTION("Not found c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::all_of(iterable, [](char c) { return c == 'a'; }));
+        REQUIRE_FALSE(lz::all_of(iterable, [](char c) { return c == 'a'; }));
     }
 }
 
@@ -1813,13 +1820,13 @@ TEST_CASE("Any of") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::any_of(iterable, [](char c) { return c == 'H'; }));
+        REQUIRE_FALSE(lz::any_of(iterable, [](char c) { return c == 'H'; }));
     }
 
     SECTION("Not found c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::any_of(iterable, [](char c) { return c == 'a'; }));
+        REQUIRE_FALSE(lz::any_of(iterable, [](char c) { return c == 'a'; }));
     }
 }
 
@@ -1845,7 +1852,7 @@ TEST_CASE("None of") {
     SECTION("Not found c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::none_of(iterable, [](char c) { return c == 'o'; }));
+        REQUIRE_FALSE(lz::none_of(iterable, [](char c) { return c == 'o'; }));
     }
 }
 
@@ -1957,6 +1964,6 @@ TEST_CASE("Is sorted") {
     SECTION("Not sorted c-string") {
         const char* str = "abcdea";
         auto iterable = lz::c_string(str);
-        REQUIRE(!lz::is_sorted(iterable));
+        REQUIRE_FALSE(lz::is_sorted(iterable));
     }
 }

@@ -3,8 +3,9 @@
 #include <Lz/reverse.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -64,10 +65,15 @@ TEST_CASE("Take binary operations where n is smaller than size") {
 
     SECTION("Operator== & Operator!=") {
         REQUIRE(take.begin() != take.end());
+        REQUIRE(take.end() != take.begin());
         REQUIRE_FALSE(take.begin() == take.end());
+        REQUIRE_FALSE(take.end() == take.begin());
         auto it = take.begin();
         it = take.end();
         REQUIRE(it == take.end());
+        REQUIRE(take.end() == it);
+        REQUIRE_FALSE(it != take.end());
+        REQUIRE_FALSE(take.end() != it);
     }
 
     SECTION("Operator+") {
@@ -77,6 +83,15 @@ TEST_CASE("Take binary operations where n is smaller than size") {
 
     SECTION("Operator-") {
         test_procs::test_operator_minus(take);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto r = lz::repeat(1, 5) | lz::take(3);
+        test_procs::test_operator_minus(r);
+
+        auto rep = lz::repeat(0, 5);
+        auto r2 = lz::take(rep.begin(), 3);
+        test_procs::test_operator_minus(r2);
     }
 }
 
@@ -123,17 +138,17 @@ TEST_CASE("Empty or one element take") {
         auto take = lz::take(vec, 0);
         REQUIRE(take.size() == 0);
         REQUIRE(lz::empty(take));
-        REQUIRE(!lz::has_one(take));
-        REQUIRE(!lz::has_many(take));
+        REQUIRE_FALSE(lz::has_one(take));
+        REQUIRE_FALSE(lz::has_many(take));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto take = lz::take(vec, 1);
         REQUIRE(take.size() == 1);
-        REQUIRE(!lz::empty(take));
+        REQUIRE_FALSE(lz::empty(take));
         REQUIRE(lz::has_one(take));
-        REQUIRE(!lz::has_many(take));
+        REQUIRE_FALSE(lz::has_many(take));
     }
 
     SECTION("Empty iterator") {
@@ -141,17 +156,17 @@ TEST_CASE("Empty or one element take") {
         auto take = lz::take(vec.begin(), 0);
         REQUIRE(take.size() == 0);
         REQUIRE(lz::empty(take));
-        REQUIRE(!lz::has_one(take));
-        REQUIRE(!lz::has_many(take));
+        REQUIRE_FALSE(lz::has_one(take));
+        REQUIRE_FALSE(lz::has_many(take));
     }
 
     SECTION("One element iterator") {
         std::vector<int> vec = { 1 };
         auto take = lz::take(vec.begin(), 1);
         REQUIRE(take.size() == 1);
-        REQUIRE(!lz::empty(take));
+        REQUIRE_FALSE(lz::empty(take));
         REQUIRE(lz::has_one(take));
-        REQUIRE(!lz::has_many(take));
+        REQUIRE_FALSE(lz::has_many(take));
     }
 }
 

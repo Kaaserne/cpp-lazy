@@ -36,9 +36,9 @@ TEST_CASE("Empty or one element inclusive scan") {
     SECTION("One element") {
         std::vector<int> one_element = { 1 };
         auto scan = lz::inclusive_scan(one_element);
-        REQUIRE(!lz::empty(scan));
+        REQUIRE_FALSE(lz::empty(scan));
         REQUIRE(lz::has_one(scan));
-        REQUIRE(!lz::has_many(scan));
+        REQUIRE_FALSE(lz::has_many(scan));
     }
 }
 

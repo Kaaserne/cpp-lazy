@@ -16,7 +16,7 @@ template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, std::size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, std::size_t>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -68,7 +68,7 @@ public:
         next();
     }
 
-    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel_t) {
         _first = std::end(_iterable);
         return *this;
     }
@@ -103,7 +103,7 @@ public:
         return _first == other._first;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
         return _first == std::end(_iterable);
     }
 };
@@ -112,7 +112,7 @@ template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>>
     : public lz::iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, std::size_t>,
                           fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, std::size_t>>, diff_type<iter_t<Iterable>>,
-                          std::bidirectional_iterator_tag, default_sentinel> {
+                          std::bidirectional_iterator_tag, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<iter_t<Iterable>>;
@@ -173,7 +173,7 @@ public:
         next();
     }
 
-    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel_t) {
         _first = std::end(_iterable);
         return *this;
     }
@@ -209,7 +209,7 @@ public:
         return _first == other._first;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
         return _first == std::end(_iterable);
     }
 };

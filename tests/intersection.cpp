@@ -1,8 +1,8 @@
 #include <Lz/intersection.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -32,8 +32,8 @@ TEST_CASE("Empty or one element intersection") {
         std::string b;
         auto intersect = a | lz::intersection(b);
         REQUIRE(lz::empty(intersect));
-        REQUIRE(!lz::has_one(intersect));
-        REQUIRE(!lz::has_many(intersect));
+        REQUIRE_FALSE(lz::has_one(intersect));
+        REQUIRE_FALSE(lz::has_many(intersect));
     }
 
     SECTION("One element 1") {
@@ -41,8 +41,8 @@ TEST_CASE("Empty or one element intersection") {
         std::string b;
         auto intersect = a | lz::intersection(b, MAKE_BIN_PRED(less){});
         REQUIRE(lz::empty(intersect));
-        REQUIRE(!lz::has_one(intersect));
-        REQUIRE(!lz::has_many(intersect));
+        REQUIRE_FALSE(lz::has_one(intersect));
+        REQUIRE_FALSE(lz::has_many(intersect));
     }
 
     SECTION("One element 2") {
@@ -50,17 +50,17 @@ TEST_CASE("Empty or one element intersection") {
         std::string b = "w";
         auto intersect = lz::intersection(a, b);
         REQUIRE(lz::empty(intersect));
-        REQUIRE(!lz::has_one(intersect));
-        REQUIRE(!lz::has_many(intersect));
+        REQUIRE_FALSE(lz::has_one(intersect));
+        REQUIRE_FALSE(lz::has_many(intersect));
     }
 
     SECTION("One element both 1") {
         std::string a = "h";
         std::string b = "h";
         auto intersect = lz::intersection(a, b);
-        REQUIRE(!lz::empty(intersect));
+        REQUIRE_FALSE(lz::empty(intersect));
         REQUIRE(lz::has_one(intersect));
-        REQUIRE(!lz::has_many(intersect));
+        REQUIRE_FALSE(lz::has_many(intersect));
     }
 
     SECTION("One element both 2") {
@@ -68,8 +68,8 @@ TEST_CASE("Empty or one element intersection") {
         std::string b = "w";
         auto intersect = lz::intersection(a, b);
         REQUIRE(lz::empty(intersect));
-        REQUIRE(!lz::has_one(intersect));
-        REQUIRE(!lz::has_many(intersect));
+        REQUIRE_FALSE(lz::has_one(intersect));
+        REQUIRE_FALSE(lz::has_many(intersect));
     }
 }
 

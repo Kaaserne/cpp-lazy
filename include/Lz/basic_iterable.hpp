@@ -137,6 +137,18 @@ using sized_iterable = detail::sized_iterable_impl<It, S>;
 template<class It, class S = It>
 using basic_iterable = detail::basic_iterable_impl<It, S>;
 
+/**
+ * @brief Creates a basic_iterable from an iterator and a sentinel. It can be used to create an iterable from a pair of iterators.
+ *
+ * @param begin The begin iterator.
+ * @param end The end sentinel.
+ * @return A basic_iterable object
+ */
+template<class I, class S>
+LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
+    return { std::move(begin), std::move(end) };
+}
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 namespace detail {

@@ -110,6 +110,10 @@ public:
         return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        return -static_cast<difference_type>(_offset);
+    }
+
     LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& b) const {
         LZ_ASSERT(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable),
                   "Incompatible iterators");

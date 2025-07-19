@@ -12,7 +12,7 @@ struct repeat_adaptor {
 
     /**
      * @brief Returns an element n times. It returns a sentinel as its end() iterator. It contains a .size() method which is equal
-     * to the amount of times the element is repeated. Its iterator category is forward. Example:
+     * to the amount of times the element is repeated. Its iterator category is random access. Example:
      * ```cpp
      * auto repeater = lz::repeat(20, 5); // {20, 20, 20, 20, 20}
      * ```
@@ -27,7 +27,7 @@ struct repeat_adaptor {
 
     /**
      * @brief Returns an element infinite times. It returns a sentinel as its end() iterator. It does not
-     * contains a .size() method. Its iterator category is forward. Example:
+     * contains a .size() method. Its iterator category is random access. Example:
      * ```cpp
      * auto repeater = lz::repeat(20, 5); // {20, 20, 20, 20, 20}
      * ```

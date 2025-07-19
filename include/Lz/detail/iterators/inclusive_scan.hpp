@@ -10,7 +10,7 @@ namespace lz {
 namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
 class inclusive_scan_iterator : public iterator<inclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
-                                                diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+                                                diff_type<Iterator>, std::forward_iterator_tag, default_sentinel_t> {
     Iterator _iterator;
     mutable T _reducer;
     S _end;
@@ -52,7 +52,7 @@ public:
         _binary_op{ std::move(bin_op) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator& operator=(default_sentinel_t) {
         _iterator = _end;
         return *this;
     }
@@ -77,7 +77,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == _end;
     }
 };

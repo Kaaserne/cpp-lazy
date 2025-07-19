@@ -1,7 +1,7 @@
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -83,8 +83,8 @@ TEST_CASE("Empty or one element join where") {
             customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
             [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
         REQUIRE(lz::empty(joined));
-        REQUIRE(!lz::has_many(joined));
-        REQUIRE(!lz::has_one(joined));
+        REQUIRE_FALSE(lz::has_many(joined));
+        REQUIRE_FALSE(lz::has_one(joined));
     }
 
     SECTION("One element join 1") {
@@ -112,8 +112,8 @@ TEST_CASE("Empty or one element join where") {
             customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
             [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
         REQUIRE(lz::has_one(joined));
-        REQUIRE(!lz::has_many(joined));
-        REQUIRE(!lz::empty(joined));
+        REQUIRE_FALSE(lz::has_many(joined));
+        REQUIRE_FALSE(lz::empty(joined));
     }
 }
 

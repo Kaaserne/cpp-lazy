@@ -34,13 +34,45 @@ private:
     std::size_t _offset{};
     std::size_t _start{};
 
+#ifdef LZ_HAS_CXX_17
+
+    constexpr iter get_begin() const {
+        const auto dist = std::end(_iterable) - std::begin(_iterable);
+
+        if constexpr (is_sentinel<iter, sent>::value) {
+            if (_start >= static_cast<std::size_t>(dist)) {
+                return std::begin(_iterable) + dist;
+            }
+        }
+        else {
+            if (_start >= static_cast<std::size_t>(dist)) {
+                return std::end(_iterable);
+            }
+        }
+        return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
+    }
+
+#else
+
     template<class I = iter>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_ra<I>::value, iter> get_begin() const {
+    LZ_CONSTEXPR_CXX_14 enable_if<is_sentinel<I, sent>::value, iter> get_begin() const {
+        const auto dist = std::end(_iterable) - std::begin(_iterable);
+
+        if (_start >= static_cast<std::size_t>(dist)) {
+            return std::begin(_iterable) + dist;
+        }
+        return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
+    }
+
+    template<class I = iter>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sent>::value, iter> get_begin() const {
         if (_start >= static_cast<std::size_t>(std::end(_iterable) - std::begin(_iterable))) {
             return std::end(_iterable);
         }
         return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
     }
+
+#endif
 
     using diff_type = typename iterator::difference_type;
 
@@ -145,7 +177,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (return_sentinel) {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
         else if constexpr (std::is_same_v<typename iterator::iterator_category, std::bidirectional_iterator_tag>) {
             return iterator{ std::end(_iterable), std::end(_iterable), _offset, lz::eager_size(_iterable) - _start };
@@ -175,7 +207,7 @@ public:
     }
 
     template<bool R = return_sentinel> // checks for not bidirectional or if is sentinel
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

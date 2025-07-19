@@ -2,8 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -15,7 +16,8 @@ TEST_CASE("Concatenate with sentinels") {
 
     std::vector<char> vec = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
     lz::concatenate_iterable<decltype(cstr), decltype(vec)> concat = lz::concat(cstr, vec);
-    static_assert(std::is_same<lz::default_sentinel, decltype(concat.end())>::value, "Sentinel type should be default_sentinel");
+    static_assert(std::is_same<lz::default_sentinel_t, decltype(concat.end())>::value,
+                  "Sentinel type should be default_sentinel_t");
     auto expected = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!',
                       'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
     REQUIRE(lz::equal(concat, expected));
@@ -77,8 +79,8 @@ TEST_CASE("Empty or one element concatenate") {
         auto concat = lz::concat(a, b);
         REQUIRE(concat.size() == 0);
         REQUIRE(lz::empty(concat));
-        REQUIRE(!lz::has_one(concat));
-        REQUIRE(!lz::has_many(concat));
+        REQUIRE_FALSE(lz::has_one(concat));
+        REQUIRE_FALSE(lz::has_many(concat));
     }
 
     SECTION("One element 1") {
@@ -86,9 +88,9 @@ TEST_CASE("Empty or one element concatenate") {
         std::string b;
         auto concat = lz::concat(a, b);
         REQUIRE(concat.size() == 1);
-        REQUIRE(!lz::empty(concat));
+        REQUIRE_FALSE(lz::empty(concat));
         REQUIRE(lz::has_one(concat));
-        REQUIRE(!lz::has_many(concat));
+        REQUIRE_FALSE(lz::has_many(concat));
     }
 
     SECTION("One element 2") {
@@ -96,9 +98,9 @@ TEST_CASE("Empty or one element concatenate") {
         std::string b = "w";
         auto concat = lz::concat(a, b);
         REQUIRE(concat.size() == 1);
-        REQUIRE(!lz::empty(concat));
+        REQUIRE_FALSE(lz::empty(concat));
         REQUIRE(lz::has_one(concat));
-        REQUIRE(!lz::has_many(concat));
+        REQUIRE_FALSE(lz::has_many(concat));
     }
 
     SECTION("One element both") {
@@ -106,8 +108,8 @@ TEST_CASE("Empty or one element concatenate") {
         std::string b = "w";
         auto concat = lz::concat(a, b);
         REQUIRE(concat.size() == 2);
-        REQUIRE(!lz::empty(concat));
-        REQUIRE(!lz::has_one(concat));
+        REQUIRE_FALSE(lz::empty(concat));
+        REQUIRE_FALSE(lz::has_one(concat));
         REQUIRE(lz::has_many(concat));
     }
 }
@@ -146,6 +148,13 @@ TEST_CASE("Concat binary operations") {
 
     SECTION("Operator-") {
         test_procs::test_operator_minus(concat);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto rep1 = lz::repeat(42, 5);
+        auto rep2 = lz::repeat(43, 5);
+        auto concat_rep = lz::concat(rep1, rep2);
+        test_procs::test_operator_minus(concat_rep);
     }
 }
 

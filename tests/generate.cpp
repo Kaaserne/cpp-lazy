@@ -85,15 +85,15 @@ TEST_CASE("Empty or one element generate") {
     SECTION("Empty") {
         auto generator = lz::generate([]() { return 0; }, 0);
         REQUIRE(lz::empty(generator));
-        REQUIRE(!lz::has_one(generator));
-        REQUIRE(!lz::has_many(generator));
+        REQUIRE_FALSE(lz::has_one(generator));
+        REQUIRE_FALSE(lz::has_many(generator));
     }
 
     SECTION("One element") {
         auto generator = lz::generate([]() { return 0; }, 1);
-        REQUIRE(!lz::empty(generator));
+        REQUIRE_FALSE(lz::empty(generator));
         REQUIRE(lz::has_one(generator));
-        REQUIRE(!lz::has_many(generator));
+        REQUIRE_FALSE(lz::has_many(generator));
     }
 }
 

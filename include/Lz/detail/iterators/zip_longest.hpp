@@ -73,7 +73,7 @@ template<class IterMaybeHomo, class SMaybeHomo>
 class zip_longest_iterator<false /* bidi */, IterMaybeHomo, SMaybeHomo>
     : public iterator<zip_longest_iterator<false, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
-                      iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel> {
+                      iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
     using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
@@ -82,7 +82,7 @@ public:
     using pointer = fake_ptr_proxy<value_type>;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterMaybeHomo>::value>;
+    using is = make_index_sequence<std::tuple_size<IterMaybeHomo>::value>;
 
     IterMaybeHomo _iterators;
     SMaybeHomo _end;
@@ -109,39 +109,39 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) != std::get<I>(_end) ? static_cast<void>(++std::get<I>(_iterators)) : (void)(0)), ...);
+#else
         decompose(
             (std::get<I>(_iterators) != std::get<I>(_end) ? static_cast<void>(++std::get<I>(_iterators)) : (void)(0), 0)...);
-    }
-
-    template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
-#ifdef LZ_HAS_CXX_17
-
-        return ((std::get<I>(_iterators) == std::get<I>(other._iterators)) && ...);
-
-#else
-
-        return std::min({ std::get<I>(_iterators) == std::get<I>(other._iterators)... });
-
 #endif
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_17 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
 #ifdef LZ_HAS_CXX_17
-
-        return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
-
+        return ((std::get<I>(_iterators) == std::get<I>(other._iterators)) && ...);
 #else
+        return std::min({ std::get<I>(_iterators) == std::get<I>(other._iterators)... });
+#endif
+    }
 
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_17 bool eq(index_sequence<I...>) const {
+#ifdef LZ_HAS_CXX_17
+        return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
+#else
         return std::min({ std::get<I>(_iterators) == std::get<I>(_end)... });
-
 #endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::get<I>(_end)), ...);
+#else
         decompose(std::get<I>(_iterators) = std::get<I>(_end)...);
+#endif
     }
 
 public:
@@ -167,13 +167,13 @@ public:
         static_assert(std::tuple_size<IterMaybeHomo>::value > 1, "Cannot concat one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel) {
-        assign_sentinels(make_idx_sequence_for_this{});
+    LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel_t) {
+        assign_sentinels(is{});
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        return dereference(make_idx_sequence_for_this());
+        return dereference(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const {
@@ -181,16 +181,16 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        increment(make_idx_sequence_for_this());
+        increment(is{});
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_longest_iterator& b) const {
+    LZ_CONSTEXPR_CXX_17 bool eq(const zip_longest_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
-        return eq(b, make_idx_sequence_for_this());
+        return eq(b, is{});
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
-        return eq(make_idx_sequence_for_this());
+    LZ_CONSTEXPR_CXX_17 bool eq(default_sentinel_t) const {
+        return eq(is{});
     }
 };
 
@@ -198,7 +198,7 @@ template<class IterMaybeHomo, class SMaybeHomo>
 class zip_longest_iterator<true /* bidi */, IterMaybeHomo, SMaybeHomo>
     : public iterator<zip_longest_iterator<true, IterMaybeHomo, IterMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
-                      iter_tuple_iter_cat_t<IterMaybeHomo>> {
+                      iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
     using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
@@ -209,8 +209,8 @@ public:
     static constexpr std::size_t tuple_size = std::tuple_size<IterMaybeHomo>::value;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterMaybeHomo>::value>;
-    using difference_tuple = decltype(make_homogeneous_of<difference_type>(make_idx_sequence_for_this{}));
+    using is = make_index_sequence<std::tuple_size<IterMaybeHomo>::value>;
+    using difference_tuple = decltype(make_homogeneous_of<difference_type>(is{}));
 
     IterMaybeHomo _iterators;
     SMaybeHomo _end;
@@ -238,18 +238,30 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) != std::get<I>(_end) ? static_cast<void>(++std::get<I>(_iterators), ++std::get<I>(_distances))
+                                                       : (void)(0)),
+         ...);
+#else
         decompose((std::get<I>(_iterators) != std::get<I>(_end)
                        ? static_cast<void>(++std::get<I>(_iterators), ++std::get<I>(_distances))
                        : (void)(0),
                    0)...);
+#endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_distances) == longest ? static_cast<void>(--std::get<I>(_iterators), --std::get<I>(_distances))
+                                             : (void)(0)),
+         ...);
+#else
         decompose((std::get<I>(_distances) == longest ? static_cast<void>(--std::get<I>(_iterators), --std::get<I>(_distances))
                                                       : (void)(0),
                    0)...);
+#endif
     }
 
     template<std::size_t I>
@@ -270,18 +282,12 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset, index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        (plus_is_one<I>(offset), ...);
+#else
         decompose((plus_is_one<I>(offset), 0)...);
-    }
-
-    template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_longest_iterator& other, index_sequence<I...>) const {
-        // Find the longest distance between the iterators
-        const auto max = std::max({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
-        if (max > 0) {
-            return max;
-        }
-        return std::min({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+#endif
     }
 
     template<std::size_t I>
@@ -303,40 +309,54 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void min_is(index_sequence<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void min_is(const difference_type offset, index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
+#ifdef LZ_HAS_CXX_17
+        (min_is_one<I>(longest, offset), ...);
+#else
         decompose((min_is_one<I>(longest, offset), 0)...);
+#endif
+    }
+
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_longest_iterator& other, index_sequence<I...>) const {
+        const auto max = std::max({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        if (max > 0) {
+            return max;
+        }
+        return std::min({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+    }
+
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 difference_type minus(index_sequence<I...>) const {
+        return std::min({ (std::get<I>(_iterators) - std::get<I>(_end))... });
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
 #ifdef LZ_HAS_CXX_17
-
         return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
-
 #else
-
         return std::min({ std::get<I>(_iterators) == std::get<I>(_end)... });
-
 #endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
 #ifdef LZ_HAS_CXX_17
-
         return ((std::get<I>(_iterators) == std::get<I>(other._iterators)) && ...);
-
 #else
-
         return std::min({ (std::get<I>(_iterators) == std::get<I>(other._iterators))... });
-
 #endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::get<I>(_end)), ...);
+#else
         decompose(std::get<I>(_iterators) = std::get<I>(_end)...);
+#endif
     }
 
 public:
@@ -363,13 +383,13 @@ public:
         static_assert(tuple_size > 1, "Cannot zip one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel) {
-        assign_sentinels(make_idx_sequence_for_this{});
+    LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel_t) {
+        assign_sentinels(is{});
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        return dereference(make_idx_sequence_for_this());
+        return dereference(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const {
@@ -377,34 +397,38 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        increment(make_idx_sequence_for_this());
+        increment(is{});
     }
 
     LZ_CONSTEXPR_CXX_20 void decrement() {
-        decrement(make_idx_sequence_for_this());
+        decrement(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         if (offset < 0) {
-            min_is(make_idx_sequence_for_this(), -offset);
+            min_is(-offset, is{});
         }
         else {
-            plus_is(make_idx_sequence_for_this(), offset);
+            plus_is(offset, is{});
         }
     }
 
-    LZ_CONSTEXPR_CXX_20 difference_type difference(const zip_longest_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const zip_longest_iterator& other) const {
         LZ_ASSERT(_end == other._end, "Incompatible iterators");
-        return minus(other, make_idx_sequence_for_this());
+        return minus(other, is{});
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        return minus(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& b) const {
         LZ_ASSERT(_end == b._end, "Incompatible iterators");
-        return eq(b, make_idx_sequence_for_this());
+        return eq(b, is{});
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel) const {
-        return eq(make_idx_sequence_for_this());
+    LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel_t) const {
+        return eq(is{});
     }
 };
 } // namespace detail

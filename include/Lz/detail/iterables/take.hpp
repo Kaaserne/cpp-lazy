@@ -60,7 +60,7 @@ public:
             return iterator{ std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -72,7 +72,7 @@ public:
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel> end() const {
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel_t> end() const {
         return {};
     }
 

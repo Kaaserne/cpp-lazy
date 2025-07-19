@@ -3,7 +3,6 @@
 #ifndef LZ_COMMON_HPP
 #define LZ_COMMON_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/common.hpp>
 
 namespace lz {
@@ -12,14 +11,20 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
  * Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
- * must return a different type than its end() function), otherwise a static assertion will fail.
- * Example:
+ * must return a different type than its end() function), otherwise a static assertion will fail. If the input iterable is
+ * random access, it will return a basic_iterable. Otherwise, it will return a common_iterable. Example:
  * ```cpp
  * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
  * auto common_view = lz::common(c_str);
  * // or
  * auto common_view = lz::c_string("Hello, World!") | lz::common;
  * // now you can use common_view in <algorithm> functions
+ *
+ * // random access:
+ * auto repeated = lz::repeat(20, 5); // begin() and end() return different types
+ * auto common_view = lz::common(repeated); // common_view is a basic_iterable
+ * // or
+ * auto common_view = lz::repeat(20, 5) | lz::common;
  * ```
  * @attention Always try to use lz::common as late as possible. cpp-lazy is implemented in such a way that it will return
  * sentinels if possible to avoid duplicate data. So this for example:

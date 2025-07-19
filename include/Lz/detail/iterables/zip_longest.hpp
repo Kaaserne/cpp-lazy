@@ -72,7 +72,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const& {
-        if constexpr (!return_sentinel) {
+        if constexpr (bidi) {
             using diff = typename iterator::difference_type;
             return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
         }
@@ -83,14 +83,14 @@ public:
 
 #else
 
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> begin() const& {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> begin() const& {
         using diff = typename iterator::difference_type;
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
     }
 
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() const& {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() const& {
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
     }
 
@@ -110,7 +110,7 @@ public:
                              iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -124,7 +124,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

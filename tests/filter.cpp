@@ -1,8 +1,8 @@
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -31,16 +31,16 @@ TEST_CASE("Empty or one element filter") {
         std::list<int> empty;
         auto filter = lz::filter(empty, [](int i) { return i != 0; });
         REQUIRE(lz::empty(filter));
-        REQUIRE(!lz::has_one(filter));
-        REQUIRE(!lz::has_many(filter));
+        REQUIRE_FALSE(lz::has_one(filter));
+        REQUIRE_FALSE(lz::has_many(filter));
     }
 
     SECTION("One element") {
         std::list<int> one_element = { 1 };
         auto filter = lz::filter(one_element, [](int i) { return i != 0; });
-        REQUIRE(!lz::empty(filter));
+        REQUIRE_FALSE(lz::empty(filter));
         REQUIRE(lz::has_one(filter));
-        REQUIRE(!lz::has_many(filter));
+        REQUIRE_FALSE(lz::has_many(filter));
         REQUIRE(*filter.begin() == 1);
     }
 }

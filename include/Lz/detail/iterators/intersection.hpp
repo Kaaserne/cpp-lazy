@@ -16,7 +16,7 @@ class intersection_iterator
     : public iterator<intersection_iterator<Iterable1, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable1>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable1>>>, diff_type<iter_t<Iterable1>>,
                       common_type<iter_cat_t<iter_t<Iterable1>>, iter_cat_t<iter_t<Iterable2>>, std::bidirectional_iterator_tag>,
-                      default_sentinel> {
+                      default_sentinel_t> {
 
     using it1 = iter_t<Iterable1>;
     using it2 = iter_t<Iterable2>;
@@ -88,7 +88,7 @@ public:
         find_next();
     }
 
-    LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(default_sentinel_t) {
         _iterator1 = std::end(_iterable1);
         return *this;
     }
@@ -132,7 +132,7 @@ public:
         return _iterator1 == other._iterator1;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator1 == std::end(_iterable1);
     }
 };

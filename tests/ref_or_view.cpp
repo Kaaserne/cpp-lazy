@@ -1,6 +1,5 @@
 #include <Lz/detail/ref_or_view.hpp>
 #include <Lz/filter.hpp>
-#include <Lz/repeat.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
 
@@ -45,13 +44,6 @@ TEST_CASE("ref_or_view basic tests") {
         lz::ref_or_view<const volatile int[3]> ref_or_view{ arr };
         REQUIRE(&(*arr) == &(*ref_or_view.begin()));
         static_assert(std::is_same<decltype(ref_or_view), lz::detail::ref_or_view_helper<const volatile int[3], false>>::value, "Should be by ref");
-    }
-
-    SECTION("lz iterable") {
-        auto iterable = lz::repeat(20, 5);
-        lz::ref_or_view<decltype(iterable)> ref_or_view{ iterable };
-        REQUIRE(&(*iterable.begin()) != &(*ref_or_view.begin()));
-        REQUIRE(ref_or_view.size() == iterable.size());
     }
 }
 

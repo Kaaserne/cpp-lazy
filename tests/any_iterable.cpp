@@ -2,8 +2,8 @@
 #include <Lz/enumerate.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/take.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <test_procs.hpp>
 
@@ -18,16 +18,16 @@ TEST_CASE("Empty or one element any iterable") {
         std::vector<int> vec;
         lz::any_iterable<int, int&> iterable = vec;
         REQUIRE(lz::empty(iterable));
-        REQUIRE(!lz::has_one(iterable));
-        REQUIRE(!lz::has_many(iterable));
+        REQUIRE_FALSE(lz::has_one(iterable));
+        REQUIRE_FALSE(lz::has_many(iterable));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         lz::any_iterable<int, int&> iterable = vec;
-        REQUIRE(!lz::empty(iterable));
+        REQUIRE_FALSE(lz::empty(iterable));
         REQUIRE(lz::has_one(iterable));
-        REQUIRE(!lz::has_many(iterable));
+        REQUIRE_FALSE(lz::has_many(iterable));
     }
 }
 
@@ -155,7 +155,7 @@ TEST_CASE("Any iterable with different SBO sizes") {
                     });
 
         static_assert(sizeof(filt.begin()) > 64, "");
-        static_assert(sizeof(filt.end()) == sizeof(lz::default_sentinel), "");
+        static_assert(sizeof(filt.end()) == sizeof(lz::default_sentinel_t), "");
 
         lz::any_iterable<int, int&, std::forward_iterator_tag> view = filt;
         auto expected = { 1, 2, 3, 4, 5 };

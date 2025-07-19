@@ -29,8 +29,8 @@ public:
     constexpr range_iterator(const Arithmetic it, const Arithmetic step) noexcept : _index{ it }, _step{ step } {
     }
 
-    // Operator= default_sentinel not necessary, as it never returns as default_sentinel
-    LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel) = delete;
+    // Operator= default_sentinel_t not necessary, as it never returns as default_sentinel_t
+    LZ_CONSTEXPR_CXX_14 range_iterator& operator=(default_sentinel_t) = delete;
 
     constexpr value_type dereference() const noexcept {
         return _index;
@@ -47,6 +47,9 @@ public:
     LZ_CONSTEXPR_CXX_14 void decrement() noexcept {
         _index -= _step;
     }
+
+    constexpr difference_type
+        difference(default_sentinel_t) const noexcept = delete; // Cannot calculate difference with default_sentinel_t
 
 #ifdef LZ_HAS_CXX_17
 
@@ -91,7 +94,7 @@ public:
         _index += static_cast<Arithmetic>(value) * _step;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const noexcept = delete; // Cannot compare with default_sentinel
+    constexpr bool eq(default_sentinel_t) const noexcept = delete; // Cannot compare with default_sentinel_t
 
     LZ_CONSTEXPR_CXX_14 bool eq(const range_iterator& other) const noexcept {
         LZ_ASSERT(_step == other._step, "Incompatible iterators");

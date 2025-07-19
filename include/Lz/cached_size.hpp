@@ -11,12 +11,16 @@ namespace lz {
 LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
- * @brief Creates an iterable with a size. Gets the size eagerly (using `lz::eager_size`), so if the input iterable is
- * bidirectional and not sized (like lz::filter for example), the entire iterable will be traversed. This can be handy if you want
- * to cache the size of an iterable. For instance, if you want to know the size multiple times. Also some lz iterables require an
- * (eager_)sized iterable. If you use multiple of these, it can be handy to cache the size. Please bear in mind that this is
- * only useful for non sized iterables and iterables that are exactly bidirectional (so forward/random access excluded). The
- * following iterables require the size/distance of an iterable:
+ * @brief Creates an iterable with a size method. Gets the size eagerly (using `lz::eager_size`). Some iterables will traverse
+ * its entire input iterable to get to its end, or to get to know its size. For instance `z = zip(filter(x))` will traverse
+ * the entire sequence of `filter` in `filter::end()` if `filter` is not sentinelled and if `filter` is bidirectional or
+ * stronger. Now if you were to call `z.end()` it would traverse the entire `filter` iterable each time you
+ * call `z.end()`. This is not very efficient, so you can use `lz::cache_size` to cache the size of the iterable. This will
+ * traverse the iterable once and cache the size, so that subsequent calls to `z.end()` will not traverse the iterable again,
+ * but will return the cached size instead. Another solution would be to use `lz::iter_decay`, defined in
+ * `<Lz/iter_tools.hpp>`, to decay the iterable to a forward one.
+ *
+ * The following iterables require a(n) (eagerly)sized iterable:
  * - `lz::chunks`
  * - `lz::enumerate`
  * - `lz::exclude`
@@ -26,32 +30,18 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * - `lz::take_every`
  * - `lz::zip_longest`
  * - `lz::zip`
- * The size will be calculated when calling begin() or end() (or begin(), or end(), so not both) on the iterable. So if you call
- * begin()/end() multiple times, the size will be calculated multiple times.
+ *
+ * Example:
  * ```cpp
  * auto to_filter = lz::range(10); // {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
- * auto filtered = to_filter | lz::filter([](int i) { return i % 2 == 0; }); // filter isn't sized
+ * // f isn't sized and is bidirectional
+ * auto f = to_filter | lz::filter([](int i) { return i % 2 == 0; }); // {0, 2, 4, 6, 8}
  *
  * // Get the size first, then chunks and enumerate will use the cached size
- * auto iterable = filtered | lz::cache_size | lz::chunks(3) | lz::enumerate;
+ * auto iterable = f | lz::cache_size | lz::chunks(3) | lz::enumerate;
  *
  * // iterable = { {0, {0, 2, 4}}, {1, {6, 8}} }
  * ```
- * So, all in all: use lz::cache_size if:
- * - Your iterable is exactly bidirectional (so forward/random access excluded) and
- * - Your iterable is not sized and
- * - You either use multiple/a combination of the following iterables OR (see last point):
- * - `lz::chunks`
- * - `lz::enumerate`
- * - `lz::exclude`
- * - `lz::interleave`
- * - `lz::rotate`
- * - `lz::take`
- * - `lz::take_every`
- * - `lz::zip_longest`
- * - `lz::zip`
- * - Are planning to call end() multiple times on the same instance (with one or more of the above iterable
- * combinations)
  */
 LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
 

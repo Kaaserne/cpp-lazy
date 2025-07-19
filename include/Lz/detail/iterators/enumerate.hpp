@@ -86,6 +86,10 @@ public:
     constexpr difference_type difference(const enumerate_iterator& other) const {
         return _iterator - other._iterator;
     }
+
+    constexpr difference_type difference(const S& other) const {
+        return _iterator - other;
+    }
 };
 } // namespace detail
 } // namespace lz

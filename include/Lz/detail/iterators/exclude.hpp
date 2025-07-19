@@ -97,6 +97,10 @@ public:
         return _index >= _from || other._index < _to ? diff : diff + (_to - _from);
     }
 
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const S& s) const {
+        return _iterator - s + (_index >= _from ? 0 : _to - _from);
+    }
+
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         if (offset == 0) {
             return;

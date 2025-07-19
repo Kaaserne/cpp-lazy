@@ -51,12 +51,6 @@ struct join_where_adaptor {
      * ```cpp
      * std::vector<std::pair<int, int>> vec = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
      * std::vector<std::pair<int, int>> vec2 = {{1, 2}, {3, 4}, {4, 5}, {5, 6}};
-     * auto joined = lz::join_where(vec, vec2,
-     *                              [](const auto& a) { return a.first; }, // join on the first element of the pair in vec
-     *                              [](const auto& a) { return a.first; }, // join on the first element of the pair in vec2
-     *                              [](const auto& a, const auto& b) { return std::make_pair(a.first, b.second); }
-     * ); // joined contains: {{1, 2}, {3, 4}, {4, 5}}
-     * // or
      * auto joined = vec | lz::join_where(vec2,
      *                                   [](const auto& a) { return a.first; }, // join on the first element of the pair in vec
      *                                   [](const auto& a) { return a.first; }, // join on the first element of the pair in vec2

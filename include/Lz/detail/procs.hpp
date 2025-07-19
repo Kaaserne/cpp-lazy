@@ -9,6 +9,7 @@
 #include <iterator>
 
 // clang-format off
+
 #if !defined(NDEBUG) || defined(LZ_DEBUG_ASSERTIONS)
   #define LZ_USE_DEBUG_ASSERTIONS
 #endif
@@ -20,185 +21,10 @@
     #include <stacktrace>
   #endif
 #endif
+
 // clang-format on
 
 namespace lz {
-namespace detail {
-
-#if defined(LZ_USE_DEBUG_ASSERTIONS)
-
-[[noreturn]] inline void
-assertion_fail(const char* file, const int line, const char* func, const char* message, const char* expr) {
-#if defined(LZ_HAS_CXX_23) && defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
-
-    auto st = std::stacktrace::current();
-    auto str = std::to_string(st);
-    std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line,
-                 expr, func, message, str.c_str());
-
-#else // ^^ defined(__cpp_lib_stacktrace) vv !defined(__cpp_lib_stacktrace)
-
-    std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\n", file, line, expr, func, message);
-
-#endif // __cpp_lib_stacktrace
-    
-    std::terminate();
-}
-
-#define LZ_ASSERT(CONDITION, MSG)                                                                                                \
-    ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
-
-#else // ^^ defined(LZ_USE_DEBUG_ASSERTIONS) vv !defined(LZ_USE_DEBUG_ASSERTIONS)
-
-#define LZ_ASSERT(CONDITION, MSG)
-
-#endif // defined(LZ_USE_DEBUG_ASSERTIONS)
-
-template<class... Ts>
-LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
-}
-
-// next_fast(_safe): check whether it's faster to go forward or backward when incrementing n steps
-// Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
-// for random access iterators this is O(1) anyway. For forward iterators this is not O(1),
-// but we can't go any other way than forward. Random access iterators will use the same
-// implementation as the forward non-sized iterables so we can skip that if statement.
-
-#ifdef LZ_HAS_CXX_17
-
-template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
-    using iter = iter_t<I>;
-
-    if constexpr (sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value) {
-        const auto size = static_cast<diff_iterable_t<I>>(lz::size(iterable));
-        if (n > size / 2) {
-            return std::prev(detail::end(std::forward<I>(iterable)), size - n);
-        }
-    }
-    return std::next(detail::begin(std::forward<I>(iterable)), n);
-}
-
-template<class I>
-constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-    using diff_type = diff_iterable_t<I>;
-
-    auto begin = std::begin(iterable);
-    auto end = std::end(iterable);
-
-    if constexpr (sized<I>::value && is_bidi<iter_t<I>>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value) {
-        const auto size = static_cast<diff_type>(lz::size(iterable));
-        if (n >= size) {
-            return end;
-        }
-        return next_fast(std::forward<I>(iterable), n);
-    }
-    else {
-        for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
-        }
-        return begin;
-    }
-}
-
-template<class Iterator, class S>
-constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
-    if constexpr (!is_ra<Iterator>::value) {
-        diff_type<Iterator> dist = 0;
-        for (; begin != end; ++begin, ++dist) {
-        }
-        return dist;
-    }
-    else {
-        return end - begin;
-    }
-}
-
-#else
-
-template<class I>
-LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
-    next_fast(I&& iterable, const diff_iterable_t<I> n) {
-
-    using diff_type = diff_iterable_t<I>;
-    const auto size = static_cast<diff_type>(lz::size(iterable));
-    if (n > size / 2) {
-        return std::prev(detail::end(std::forward<I>(iterable)), size - n);
-    }
-    return std::next(detail::begin(std::forward<I>(iterable)), n);
-}
-
-template<class I>
-LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
-    next_fast(I&& iterable, diff_iterable_t<I> n) {
-    return std::next(detail::begin(std::forward<I>(iterable)), n);
-}
-
-template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
-    next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-
-    using diff_type = diff_iterable_t<I>;
-    const auto size = static_cast<diff_type>(lz::size(iterable));
-    if (n >= size) {
-        return detail::end(std::forward<I>(iterable));
-    }
-    return next_fast(std::forward<I>(iterable), n);
-}
-
-template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
-    next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-
-    using diff_type = diff_iterable_t<I>;
-
-    auto begin = detail::begin(std::forward<I>(iterable));
-    const auto end = detail::end(std::forward<I>(iterable));
-
-    for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
-    }
-    return begin;
-}
-
-template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
-    diff_type<Iterator> dist = 0;
-    for (; begin != end; ++begin, ++dist) {
-    }
-    return dist;
-}
-
-template<class Iterator, class S>
-constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
-    return end - begin;
-}
-
-#endif
-
-} // namespace detail
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-/**
- * @brief Gets the distance of an iterable. If iterable is not random access, the operation will be O(n), otherwise O(1).
- *
- * @param begin The beginning of the iterable
- * @param end The end of the iterable
- * @return The length of the iterable
- */
-template<class Iterator, class S>
-LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
-    return detail::distance_impl(std::move(begin), std::move(end));
-}
-
-template<class Iterable>
-LZ_NODISCARD constexpr diff_iterable_t<Iterable> distance(const Iterable& iterable) {
-    using std::distance;
-    return distance(std::begin(iterable), std::end(iterable));
-}
 
 #ifdef LZ_HAS_CXX_17
 
@@ -308,6 +134,187 @@ LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
 }
 
 #endif
+
+namespace detail {
+
+#if defined(LZ_USE_DEBUG_ASSERTIONS)
+
+[[noreturn]] inline void
+assertion_fail(const char* file, const int line, const char* func, const char* message, const char* expr) {
+#if defined(LZ_HAS_CXX_23) && defined(__cpp_lib_stacktrace) && LZ_HAS_INCLUDE(<stacktrace>)
+
+    auto st = std::stacktrace::current();
+    auto str = std::to_string(st);
+    std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\nStacktrace:\n%s\n", file, line,
+                 expr, func, message, str.c_str());
+
+#else // ^^ defined(__cpp_lib_stacktrace) vv !defined(__cpp_lib_stacktrace)
+
+    std::fprintf(stderr, "%s:%d assertion \"%s\" failed in function '%s' with message:\n\t%s\n", file, line, expr, func, message);
+
+#endif // __cpp_lib_stacktrace
+    
+    std::terminate();
+}
+
+#define LZ_ASSERT(CONDITION, MSG)                                                                                                \
+    ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
+
+#else // ^^ defined(LZ_USE_DEBUG_ASSERTIONS) vv !defined(LZ_USE_DEBUG_ASSERTIONS)
+
+#define LZ_ASSERT(CONDITION, MSG)
+
+#endif // defined(LZ_USE_DEBUG_ASSERTIONS)
+
+template<class... Ts>
+LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
+}
+
+// next_fast(_safe): check whether it's faster to go forward or backward when incrementing n steps
+// Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
+// for random access iterators this is O(1) anyway. For forward iterators this is not O(1),
+// but we can't go any other way than forward. Random access iterators will use the same
+// implementation as the forward non-sized iterables so we can skip that if statement.
+
+#ifdef LZ_HAS_CXX_17
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
+    using iter = iter_t<I>;
+
+    if constexpr (sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value) {
+        const auto size = lz::ssize(iterable);
+        if (n > size / 2) {
+            return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+        }
+    }
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
+}
+
+template<class I>
+constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+    using diff_type = diff_iterable_t<I>;
+
+    auto begin = std::begin(iterable);
+    auto end = std::end(iterable);
+
+    if constexpr (sized<I>::value && is_bidi<iter_t<I>>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value) {
+        const auto size = lz::ssize(iterable);
+        if (n >= size) {
+            return end;
+        }
+        return next_fast(std::forward<I>(iterable), n);
+    }
+    else {
+        for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
+        }
+        return begin;
+    }
+}
+
+template<class Iterator, class S>
+constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
+    if constexpr (!is_ra<Iterator>::value) {
+        diff_type<Iterator> dist = 0;
+        for (; begin != end; ++begin, ++dist) {
+        }
+        return dist;
+    }
+    else {
+        return end - begin;
+    }
+}
+
+#else
+
+template<class I>
+LZ_NODISCARD
+    LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    next_fast(I&& iterable, const diff_iterable_t<I> n) {
+
+    const auto size = lz::ssize(iterable);
+    if (n > size / 2) {
+        return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+    }
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
+}
+
+template<class I>
+LZ_NODISCARD
+    LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    next_fast(I&& iterable, diff_iterable_t<I> n) {
+    return std::next(detail::begin(std::forward<I>(iterable)), n);
+}
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+    enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+
+    const auto size = lz::ssize(iterable);
+    if (n >= size) {
+        return detail::end(std::forward<I>(iterable));
+    }
+    return next_fast(std::forward<I>(iterable), n);
+}
+
+template<class I>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+    enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+
+    using diff_type = diff_iterable_t<I>;
+
+    auto begin = detail::begin(std::forward<I>(iterable));
+    const auto end = detail::end(std::forward<I>(iterable));
+
+    for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
+    }
+    return begin;
+}
+
+template<class Iterator, class S>
+LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
+    diff_type<Iterator> dist = 0;
+    for (; begin != end; ++begin, ++dist) {
+    }
+    return dist;
+}
+
+template<class Iterator, class S>
+constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
+    return end - begin;
+}
+
+#endif
+
+} // namespace detail
+
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
+/**
+ * @brief Gets the distance of an iterator pair. If iterator is not random access, the operation will be O(n), otherwise O(1).
+ *
+ * @param begin The beginning of the iterator
+ * @param end The end of the iterator
+ * @return The length of the iterator
+ */
+template<class Iterator, class S>
+LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
+    return detail::distance_impl(std::move(begin), std::move(end));
+}
+
+/**
+ * @brief Gets the distance of an iterable. If iterable is not random access, the operation will be O(n), otherwise O(1).
+ *
+ * @param iterable The iterable to get the distance of
+ * @return The length of the iterable
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr diff_iterable_t<detail::decay_t<Iterable>> distance(const Iterable& iterable) {
+    using std::distance;
+    return distance(std::begin(iterable), std::end(iterable));
+}
 
 #ifdef LZ_HAS_CXX_17
 

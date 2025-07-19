@@ -96,7 +96,7 @@ public:
             return iterator{ std::end(_iterable), std::end(_iterable), _chunk_size, lz::eager_size(_iterable) };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -116,7 +116,8 @@ public:
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value || is_sentinel<inner, sentinel_t<Iterable>>::value, default_sentinel>
+    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value || is_sentinel<inner, sentinel_t<Iterable>>::value,
+                                     default_sentinel_t>
     end() const& {
         return {};
     }

@@ -55,7 +55,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
  * @return (A reference to) the first element of the sequence.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD constexpr ref_t<iter_t<Iterable>> front(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 ref_t<iter_t<Iterable>> front(Iterable&& iterable) {
+    LZ_ASSERT(!lz::empty(iterable), "Cannot get the front element of an empty iterable.");
     return *std::begin(iterable);
 }
 
@@ -68,8 +69,11 @@ LZ_NODISCARD constexpr ref_t<iter_t<Iterable>> front(Iterable&& iterable) {
  */
 template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 ref_t<iter_t<Iterable>> back(Iterable&& iterable) {
-    auto end = std::end(iterable);
-    return *--end;
+    static_assert(lz::detail::has_sentinel<Iterable>::value ? lz::detail::is_ra<iter_t<Iterable>>::value
+                                                            : lz::detail::is_bidi<iter_t<Iterable>>::value,
+                  "If iterable has sentinels, it must be random access, otherwise it must be bidirectional.");
+    LZ_ASSERT(!lz::empty(iterable), "Cannot get the back element of an empty iterable.");
+    return detail::back(std::forward<Iterable>(iterable));
 }
 
 /**
@@ -188,8 +192,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find(Iterable&& iterable, cons
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable, const T& value) {
-    return detail::find_last(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                             value);
+    return detail::find_last(std::forward<Iterable>(iterable), value);
 }
 
 /**
@@ -202,8 +205,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable,
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    return detail::find_last_if(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                                std::forward<UnaryPredicate>(unary_predicate));
+    return detail::find_last_if(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -253,8 +255,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if_not(Iterable&& iterabl
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    return detail::find_last_if_not(detail::begin(std::forward<Iterable>(iterable)),
-                                    detail::end(std::forward<Iterable>(iterable)), std::forward<UnaryPredicate>(unary_predicate));
+    return detail::find_last_if_not(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -300,8 +301,7 @@ find_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& de
 template<LZ_CONCEPT_ITERABLE Iterable, class T, class U>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
 find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
-    return detail::find_last_or_default(detail::begin(std::forward<Iterable>(iterable)),
-                                        detail::end(std::forward<Iterable>(iterable)), std::forward<T>(to_find),
+    return detail::find_last_or_default(std::forward<Iterable>(iterable), std::forward<T>(to_find),
                                         std::forward<U>(default_value));
 }
 
@@ -318,9 +318,8 @@ find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
 find_last_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value) {
-    return detail::find_last_or_default_if(detail::begin(std::forward<Iterable>(iterable)),
-                                           detail::end(std::forward<Iterable>(iterable)),
-                                           std::forward<UnaryPredicate>(unary_predicate), std::forward<U>(default_value));
+    return detail::find_last_or_default_if(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate),
+                                           std::forward<U>(default_value));
 }
 
 /**
@@ -335,8 +334,7 @@ find_last_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U
 template<LZ_CONCEPT_ITERABLE Iterable, class T, class U>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
 find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value) {
-    return detail::find_last_or_default_not(detail::begin(std::forward<Iterable>(iterable)),
-                                            detail::end(std::forward<Iterable>(iterable)), std::forward<T>(value),
+    return detail::find_last_or_default_not(std::forward<Iterable>(iterable), std::forward<T>(value),
                                             std::forward<U>(default_value));
 }
 

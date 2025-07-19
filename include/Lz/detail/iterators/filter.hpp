@@ -15,7 +15,7 @@ template<class Iterable, class UnaryPredicate>
 class filter_iterator
     : public iterator<filter_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
                       diff_type<iter_t<Iterable>>, common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>,
-                      default_sentinel> {
+                      default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -65,7 +65,7 @@ public:
         find();
     }
 
-    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel_t) {
         _iterator = std::end(_iterable);
         return *this;
     }
@@ -95,7 +95,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == std::end(_iterable);
     }
 };

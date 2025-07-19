@@ -33,7 +33,7 @@ class cartesian_product_iterator
                       iter_tuple_ref_type_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>,
                       fake_ptr_proxy<iter_tuple_ref_type_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>>,
                       iter_tuple_diff_type_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>,
-                      iter_tuple_iter_cat_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>, default_sentinel> {
+                      iter_tuple_iter_cat_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>, default_sentinel_t> {
 
     using iterators = iter_t_maybe_homogeneous<IterablesMaybeHomo>;
     static constexpr std::size_t tup_size = std::tuple_size<iterators>::value;
@@ -170,11 +170,22 @@ private:
         if constexpr (I > 0) {
             const auto distance = std::get<I>(_iterators) - std::get<I>(other._iterators);
             const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
-            const auto result = size * distance_impl<I - 1>(other) + distance;
-            return result;
+            return size * distance_impl<I - 1>(other) + distance;
         }
         else {
             return std::get<0>(_iterators) - std::get<0>(other._iterators);
+        }
+    }
+
+    template<std::size_t I>
+    constexpr difference_type distance_impl() const {
+        if constexpr (I > 0) {
+            const auto distance = std::get<I>(_iterators) - std::begin(std::get<I>(_iterables));
+            const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
+            return size * distance_impl<I - 1>() + distance;
+        }
+        else {
+            return std::get<I>(_iterators) - std::end(std::get<I>(_iterables));
         }
     }
 
@@ -193,13 +204,29 @@ private:
         return std::get<0>(_iterators) - std::get<0>(other._iterators);
     }
 
+    template<std::size_t I>
+    constexpr enable_if<(I > 0), difference_type> distance_impl() const {
+        const auto distance = std::get<I>(_iterators) - std::begin(std::get<I>(_iterables));
+        const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
+        return size * distance_impl<I - 1>() + distance;
+    }
+
+    template<std::size_t I>
+    constexpr enable_if<I == 0, difference_type> distance_impl() const {
+        return std::get<I>(_iterators) - std::end(std::get<I>(_iterables));
+    }
+
 #endif
 
     using is = make_index_sequence<tup_size>;
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::end(std::get<I>(_iterables))), ...);
+#else
         decompose(std::get<I>(_iterators) = std::end(std::get<I>(_iterables))...);
+#endif
     }
 
 public:
@@ -225,7 +252,7 @@ public:
         static_assert(tup_size > 1, "Cannot cartesian product one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 cartesian_product_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 cartesian_product_iterator& operator=(default_sentinel_t) {
         assign_sentinels(is{});
         return *this;
     }
@@ -254,12 +281,16 @@ public:
         return _iterators == other._iterators;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return std::get<0>(_iterators) == std::end(std::get<0>(_iterables));
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const cartesian_product_iterator& other) const {
         return distance_impl<tup_size - 1>(other);
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        return distance_impl<tup_size - 1>();
     }
 };
 } // namespace detail

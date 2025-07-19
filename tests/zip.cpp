@@ -1,8 +1,9 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -58,11 +59,11 @@ TEST_CASE("Empty or one element zip") {
         std::vector<int> empty;
         auto empty2 = lz::c_string("");
         auto zipper = lz::zip(empty, empty2);
-        static_assert(std::is_same<decltype(zipper.end()), std::tuple<decltype(empty)::iterator, lz::default_sentinel>>::value,
+        static_assert(std::is_same<decltype(zipper.end()), std::tuple<decltype(empty)::iterator, lz::default_sentinel_t>>::value,
                       "should be sentinel like");
         REQUIRE(lz::empty(zipper));
-        REQUIRE(!lz::has_many(zipper));
-        REQUIRE(!lz::has_one(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
+        REQUIRE_FALSE(lz::has_one(zipper));
     }
 
     SECTION("One element 1") {
@@ -70,8 +71,8 @@ TEST_CASE("Empty or one element zip") {
         std::vector<int> empty;
         auto zipper = lz::zip(one, empty);
         REQUIRE(lz::empty(zipper));
-        REQUIRE(!lz::has_many(zipper));
-        REQUIRE(!lz::has_one(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
+        REQUIRE_FALSE(lz::has_one(zipper));
     }
 
     SECTION("One element 2") {
@@ -79,16 +80,16 @@ TEST_CASE("Empty or one element zip") {
         std::vector<int> one = { 1 };
         auto zipper = lz::zip(empty, one);
         REQUIRE(lz::empty(zipper));
-        REQUIRE(!lz::has_many(zipper));
-        REQUIRE(!lz::has_one(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
+        REQUIRE_FALSE(lz::has_one(zipper));
     }
 
     SECTION("One element 3") {
         std::vector<int> one = { 1 };
         std::vector<int> one2 = { 1 };
         auto zipper = lz::zip(one, one2);
-        REQUIRE(!lz::empty(zipper));
-        REQUIRE(!lz::has_many(zipper));
+        REQUIRE_FALSE(lz::empty(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
         REQUIRE(lz::has_one(zipper));
     }
 }
@@ -129,6 +130,13 @@ TEST_CASE("zip_iterable binary operations") {
 
     SECTION("Operator-(Iterator)") {
         test_procs::test_operator_minus(zipper);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto first = lz::repeat(1, 5), second = lz::repeat(2, 5);
+        test_procs::test_operator_minus(lz::zip(first, second));
+        second = lz::repeat(2, 3);
+        test_procs::test_operator_minus(lz::zip(first, second));
     }
 }
 

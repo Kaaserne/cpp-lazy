@@ -18,7 +18,7 @@ class take_every_iterator;
 template<class Iterable>
 class take_every_iterator<Iterable, enable_if<!is_bidi<iter_t<Iterable>>::value>>
     : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
     using it = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -58,7 +58,7 @@ public:
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
         _iterator = _end;
         return *this;
     }
@@ -82,7 +82,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == _end;
     }
 };
@@ -90,7 +90,7 @@ public:
 template<class Iterable>
 class take_every_iterator<Iterable, enable_if<is_bidi<iter_t<Iterable>>::value && !is_ra<iter_t<Iterable>>::value>>
     : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, std::bidirectional_iterator_tag, default_sentinel> {
+                      diff_type<iter_t<Iterable>>, std::bidirectional_iterator_tag, default_sentinel_t> {
     using it = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -132,7 +132,7 @@ public:
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
         _iterator = _end;
         return *this;
     }
@@ -165,7 +165,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == _end;
     }
 };
@@ -173,7 +173,7 @@ public:
 template<class Iterable>
 class take_every_iterator<Iterable, enable_if<is_ra<iter_t<Iterable>>::value>>
     : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;
@@ -185,7 +185,7 @@ public:
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
-
+    // TODO add iterable
     it _iterator;
     it _begin;
     sent _end;
@@ -216,7 +216,7 @@ public:
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
         _iterator = _end;
         return *this;
     }
@@ -284,12 +284,19 @@ public:
         return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
     }
 
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        const auto remaining = _iterator - _end;
+        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
+        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
+        return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
+    }
+
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
         LZ_ASSERT(_end == b._end && _offset == b._offset && _begin == b._begin, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == _end;
     }
 };

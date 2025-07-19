@@ -14,13 +14,13 @@ namespace detail {
 
 #ifdef LZ_HAS_CXX_17
 
-using std::in_place_t;
+using std::in_place_type_t;
 
 #else
 
 template<class T>
-struct in_place_t {
-    explicit in_place_t() = default;
+struct in_place_type_t {
+    explicit in_place_type_t() = default;
 };
 
 #endif
@@ -58,7 +58,7 @@ public:
     constexpr iterator_wrapper() noexcept = default;
 
     template<class Impl, class... Args>
-    iterator_wrapper(in_place_t<Impl>, Args&&... args) {
+    iterator_wrapper(in_place_type_t<Impl>, Args&&... args) {
         static_assert(sizeof(Impl) <= SBO_SIZE, "Impl too large for SBO");
         using std::get;
         _storage.template emplace<1>();

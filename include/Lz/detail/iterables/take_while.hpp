@@ -66,7 +66,7 @@ public:
             return iterator{ _iterable, std::end(_iterable), _unary_predicate };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -78,7 +78,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    constexpr enable_if<R, default_sentinel> end() const noexcept {
+    constexpr enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 #endif

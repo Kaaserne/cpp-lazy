@@ -1,8 +1,8 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/duplicates.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <vector>
 

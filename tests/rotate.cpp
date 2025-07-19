@@ -2,8 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -155,6 +156,17 @@ TEST_CASE("rotate_iterable binary operations") {
         INFO("lz::rotate(container, 2)");
         test_procs::test_operator_minus(rotate);
     }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto r = lz::repeat(1, 5);
+        test_procs::test_operator_minus(r);
+
+        r = lz::repeat(1, 0);
+        test_procs::test_operator_minus(r);
+
+        r = lz::repeat(1, 1);
+        test_procs::test_operator_minus(r);
+    }
 }
 
 TEST_CASE("Empty or one element rotate") {
@@ -162,15 +174,15 @@ TEST_CASE("Empty or one element rotate") {
         std::vector<int> vec{};
         auto rotate = lz::rotate(vec, 0);
         REQUIRE(lz::empty(rotate));
-        REQUIRE(!lz::has_many(rotate));
-        REQUIRE(!lz::has_one(rotate));
+        REQUIRE_FALSE(lz::has_many(rotate));
+        REQUIRE_FALSE(lz::has_one(rotate));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto rotate = lz::rotate(vec, 0);
-        REQUIRE(!lz::empty(rotate));
-        REQUIRE(!lz::has_many(rotate));
+        REQUIRE_FALSE(lz::empty(rotate));
+        REQUIRE_FALSE(lz::has_many(rotate));
         REQUIRE(lz::has_one(rotate));
     }
 
@@ -178,15 +190,15 @@ TEST_CASE("Empty or one element rotate") {
         auto cstr = lz::c_string("");
         auto rotate = lz::rotate(cstr, 0);
         REQUIRE(lz::empty(rotate));
-        REQUIRE(!lz::has_many(rotate));
-        REQUIRE(!lz::has_one(rotate));
+        REQUIRE_FALSE(lz::has_many(rotate));
+        REQUIRE_FALSE(lz::has_one(rotate));
     }
 
     SECTION("One element with sentinel") {
         auto cstr = lz::c_string("a");
         auto rotate = lz::rotate(cstr, 0);
-        REQUIRE(!lz::empty(rotate));
-        REQUIRE(!lz::has_many(rotate));
+        REQUIRE_FALSE(lz::empty(rotate));
+        REQUIRE_FALSE(lz::has_many(rotate));
         REQUIRE(lz::has_one(rotate));
     }
 }

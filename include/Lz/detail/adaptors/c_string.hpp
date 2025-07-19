@@ -11,14 +11,14 @@ struct c_string_adaptor {
     using adaptor = c_string_adaptor;
 
     /**
-     * @brief This adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a
+     * @brief This adaptor is used to create a forward iterable cstring iterable object. Its end() function will return a
      * sentinel, rather than an actual iterator. This iterable does not contain a .size() method. Example:
      * ```cpp
      * const char* str = "Hello, World!";
      * auto cstr = lz::c_string(str);
      * // or:
      * const char str[] = "Hello, World!";
-     * auto cstr = str | lz::c_string;
+     * auto cstr = str | lz::c_string; // Only works for arrays
      * ```
      * @param str The string to create a cstring iterable from.
      * @return A c_string_iterable object that can be used to iterate over the characters in the string.
@@ -29,14 +29,14 @@ struct c_string_adaptor {
     }
 
     /**
-     * @brief Thi s adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a
+     * @brief This adaptor is used to create a forward iterable cstring iterable object. Its end() function will return a
      * sentinel, rather than an actual iterator. This iterable does not contain a .size() method. Example:
      * ```cpp
      * const char* str = "Hello, World!";
      * auto cstr = lz::c_string(str);
      * // or:
      * const char str[] = "Hello, World!";
-     * auto cstr = str | lz::c_string;
+     * auto cstr = str | lz::c_string; // Only works for arrays
      * ```
      * @param str The string to create a cstring iterable from.
      * @return A c_string_iterable object that can be used to iterate over the characters in the string.

@@ -16,7 +16,7 @@ template<class Iterables, class Iterators>
 class concatenate_iterator
     : public iterator<concatenate_iterator<Iterables, Iterators>, iter_tuple_common_ref_t<Iterators>,
                       fake_ptr_proxy<iter_tuple_common_ref_t<Iterators>>, iter_tuple_diff_type_t<Iterators>,
-                      iter_tuple_iter_cat_t<Iterators>, default_sentinel> {
+                      iter_tuple_iter_cat_t<Iterators>, default_sentinel_t> {
 
     Iterators _iterators;
     Iterables _iterables;
@@ -36,6 +36,13 @@ private:
     LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>, const concatenate_iterator& other) const {
         const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
                                                                         std::get<I>(other._iterators))... };
+        return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });
+    }
+
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>) const {
+        const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
+                                                                        std::end(std::get<I>(_iterables)))... };
         return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });
     }
 
@@ -248,7 +255,11 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::end(std::get<I>(_iterables))), ...);
+#else
         decompose(std::get<I>(_iterators) = std::end(std::get<I>(_iterables))...);
+#endif
     }
 
 public:
@@ -275,7 +286,7 @@ public:
         static_assert(tuple_size > 1, "Cannot concat one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel_t) {
         assign_sentinels(make_index_sequence<tuple_size>());
         return *this;
     }
@@ -312,6 +323,10 @@ public:
         return minus(make_index_sequence<tuple_size>(), other);
     }
 
+    LZ_CONSTEXPR_CXX_20 difference_type difference(default_sentinel_t) const {
+        return minus(make_index_sequence<tuple_size>());
+    }
+
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& other) const {
         LZ_ASSERT(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
                       end_maybe_homo(_iterables) == end_maybe_homo(other._iterables),
@@ -319,7 +334,7 @@ public:
         return iter_equal_to<0>(other._iterators);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
         return iter_equal_to<0>(end_maybe_homo(_iterables));
     }
 };

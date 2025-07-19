@@ -2,8 +2,9 @@
 #include <Lz/interleave.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <test_procs.hpp>
 
 TEST_CASE("Interleaved with sentinels permutations") {
@@ -30,12 +31,14 @@ TEST_CASE("Interleaved with sentinels permutations") {
         REQUIRE(it_3_4 == interleaved_3_4.begin());
         it_3_4 = interleaved_3_4.end();
         REQUIRE(it_3_4 == interleaved_3_4.end());
+        REQUIRE(it_3_4 == interleaved_3_4.end());
 
         auto interleaved_4_3 = str4 | lz::interleave(str3);
         auto it_4_3 = interleaved_4_3.begin();
         REQUIRE(it_4_3 == interleaved_4_3.begin());
         it_4_3 = interleaved_4_3.end();
         REQUIRE(it_4_3 == interleaved_4_3.end());
+        REQUIRE(interleaved_4_3.end() == it_4_3);
 
         auto interleaved_3_4_5 = lz::interleave(str3, str4, str5);
         using t = decltype(*interleaved_3_4_5.begin());
@@ -135,8 +138,8 @@ TEST_CASE("Empty or one element") {
 
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("One empty first") {
@@ -144,8 +147,8 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("One empty second") {
@@ -153,8 +156,8 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("One empty third") {
@@ -162,8 +165,8 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("One empty third") {
@@ -171,8 +174,8 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("First empty, second and third one") {
@@ -180,8 +183,8 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("First one, second empty and third one") {
@@ -189,8 +192,8 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("First one, second one and third empty") {
@@ -198,16 +201,16 @@ TEST_CASE("Empty or one element") {
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 0);
         REQUIRE(lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
-        REQUIRE(!lz::has_many(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::has_many(interleaved));
     }
 
     SECTION("All one") {
         std::vector<int> a = { 1 }, b = { 2 }, c = { 3 };
         auto interleaved = lz::interleave(a, b, c);
         REQUIRE(interleaved.size() == 3);
-        REQUIRE(!lz::empty(interleaved));
-        REQUIRE(!lz::has_one(interleaved));
+        REQUIRE_FALSE(lz::empty(interleaved));
+        REQUIRE_FALSE(lz::has_one(interleaved));
         REQUIRE(lz::has_many(interleaved));
     }
 }
@@ -379,6 +382,89 @@ TEST_CASE("Non sentinelled, operator+/-. length 4, 5, 6, 7") {
         std::vector<int> expected = { 1, 10, 16, 5, 2, 11, 17, 6, 3, 12, 18, 7, 4, 13, 19, 8 };
         REQUIRE(lz::size(interleaved) == lz::size(expected));
         test_procs::test_operator_plus(interleaved, expected);
+        test_procs::test_operator_minus(interleaved);
+    }
+}
+
+TEST_CASE("Sentinelled, operator+/-. length 4, 5, 6, 7") {
+    auto a = lz::repeat(0, 4), b = lz::repeat(0, 5), c = lz::repeat(0, 6), d = lz::repeat(0, 7);
+
+    SECTION("Permutation 1: a, b, c, d") {
+        auto interleaved = lz::interleave(a, b, c, d);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 2: b, c, d, a") {
+        auto interleaved = lz::interleave(b, c, d, a);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 3: c, d, a, b") {
+        auto interleaved = lz::interleave(c, d, a, b);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 4: d, a, b, c") {
+        auto interleaved = lz::interleave(d, a, b, c);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 5: a, d, b, c") {
+        auto interleaved = lz::interleave(a, d, b, c);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 6: d, c, b, a") {
+        auto interleaved = lz::interleave(d, c, b, a);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 7: c, b, a, d") {
+        auto interleaved = lz::interleave(c, b, a, d);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 8: b, a, d, c") {
+        auto interleaved = lz::interleave(b, a, d, c);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 9: a, c, d, b") {
+        auto interleaved = lz::interleave(a, c, d, b);
+        test_procs::test_operator_minus(interleaved);
+    }
+}
+
+TEST_CASE("Sentinelled, operator+/-. length 4, 5, 6") {
+    auto a = lz::repeat(0, 4), b = lz::repeat(0, 5), c = lz::repeat(0, 6);
+
+    SECTION("Permutation 1: a, b, c") {
+        auto interleaved = lz::interleave(a, b, c);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 2: b, a, c") {
+        auto interleaved = lz::interleave(b, a, c);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 3: b, c, a") {
+        auto interleaved = lz::interleave(b, c, a);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 4: c, b, a") {
+        auto interleaved = lz::interleave(c, b, a);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 5: c, a, b") {
+        auto interleaved = lz::interleave(c, a, b);
+        test_procs::test_operator_minus(interleaved);
+    }
+
+    SECTION("Permutation 6: a, c, b") {
+        auto interleaved = lz::interleave(a, c, b);
         test_procs::test_operator_minus(interleaved);
     }
 }

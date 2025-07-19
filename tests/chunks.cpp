@@ -2,8 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/stream.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <test_procs.hpp>
 #include <vector>
@@ -13,17 +14,17 @@ TEST_CASE("empty or one element chunks") {
         std::vector<int> vec;
         auto chunked = lz::chunks(vec, 3);
         REQUIRE(lz::empty(chunked));
-        REQUIRE(!lz::has_one(chunked));
-        REQUIRE(!lz::has_many(chunked));
+        REQUIRE_FALSE(lz::has_one(chunked));
+        REQUIRE_FALSE(lz::has_many(chunked));
         REQUIRE(chunked.size() == 0);
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto chunked = lz::chunks(vec, 3);
-        REQUIRE(!lz::empty(chunked));
+        REQUIRE_FALSE(lz::empty(chunked));
         REQUIRE(lz::has_one(chunked));
-        REQUIRE(!lz::has_many(chunked));
+        REQUIRE_FALSE(lz::has_many(chunked));
         REQUIRE(chunked.size() == 1);
     }
 }
@@ -100,6 +101,17 @@ TEST_CASE("Chunks binary operations random access") {
         test_procs::test_operator_minus(even_chunksize_even_size);
         test_procs::test_operator_minus(uneven_chunksize_uneven_size);
         test_procs::test_operator_minus(even_chunksize_uneven_size);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto uneven_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 3), 3);
+        auto even_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 3), 2);
+        auto uneven_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 2), 3);
+        auto even_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 2), 2);
+        test_procs::test_operator_minus(uneven_chunksize_uneven_size_repeat);
+        test_procs::test_operator_minus(even_chunksize_uneven_size_repeat);
+        test_procs::test_operator_minus(uneven_chunksize_even_size_repeat);
+        test_procs::test_operator_minus(even_chunksize_even_size_repeat);
     }
 }
 

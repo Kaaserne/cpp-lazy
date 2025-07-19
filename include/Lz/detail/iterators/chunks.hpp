@@ -15,7 +15,7 @@ class chunks_iterator;
 template<class Iterator, class S>
 class chunks_iterator<Iterator, S, enable_if<is_fwd<Iterator>::value && !is_bidi<Iterator>::value>>
     : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -61,7 +61,7 @@ public:
         next_chunk();
     }
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
     }
 
@@ -83,7 +83,7 @@ public:
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _sub_range_begin == _end;
     }
 };
@@ -91,7 +91,7 @@ public:
 template<class Iterator, class S>
 class chunks_iterator<Iterator, S, enable_if<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -140,7 +140,7 @@ public:
         next_chunk();
     }
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
     }
 
@@ -174,7 +174,7 @@ public:
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _sub_range_begin == _end;
     }
 };
@@ -182,7 +182,7 @@ public:
 template<class Iterable, class Iterator>
 class chunks_iterator<Iterable, Iterator, enable_if<is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterable, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
     using iter_traits = std::iterator_traits<Iterator>;
 
@@ -222,7 +222,7 @@ public:
         LZ_ASSERT(_chunk_size != 0, "Can't increment by 0");
     }
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = std::end(_iterable);
         return *this;
     }
@@ -263,7 +263,7 @@ public:
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _sub_range_begin == std::end(_iterable);
     }
 
@@ -300,6 +300,13 @@ public:
         const auto remainder = left % static_cast<difference_type>(_chunk_size);
         const auto quotient = left / static_cast<difference_type>(_chunk_size);
         return remainder == 0 ? quotient : quotient + (left < 0 ? -1 : 1);
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        const auto total_distance = std::end(_iterable) - _sub_range_begin;
+        const auto remainder = total_distance % _chunk_size;
+        const auto quotient = total_distance / _chunk_size;
+        return -(remainder == 0 ? quotient : quotient + (total_distance < 0 ? -1 : 1));
     }
 };
 } // namespace detail

@@ -1,8 +1,8 @@
 #include <Lz/common.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -37,16 +37,16 @@ TEST_CASE("Empty or one element group by") {
     SECTION("Empty") {
         auto grouper = lz::group_by(lz::c_string(""), [](char a, char b) { return a == b; });
         REQUIRE(lz::empty(grouper));
-        REQUIRE(!lz::has_one(grouper));
-        REQUIRE(!lz::has_many(grouper));
+        REQUIRE_FALSE(lz::has_one(grouper));
+        REQUIRE_FALSE(lz::has_many(grouper));
     }
 
     SECTION("One element") {
         auto grouper = lz::group_by(lz::c_string("a"), [](char a, char b) { return a == b; });
         static_assert(!lz::detail::is_bidi<decltype(grouper.begin())>::value, "Should not be bidirectional iterator");
-        REQUIRE(!lz::empty(grouper));
+        REQUIRE_FALSE(lz::empty(grouper));
         REQUIRE(lz::has_one(grouper));
-        REQUIRE(!lz::has_many(grouper));
+        REQUIRE_FALSE(lz::has_many(grouper));
     }
 }
 

@@ -1,8 +1,8 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/iter_tools.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 
 TEST_CASE("Chunk if custom value type") {
@@ -66,24 +66,24 @@ TEST_CASE("Empty or one element chunk_if") {
         std::string s;
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
         REQUIRE(lz::empty(chunked));
-        REQUIRE(!lz::has_one(chunked));
-        REQUIRE(!lz::has_many(chunked));
+        REQUIRE_FALSE(lz::has_one(chunked));
+        REQUIRE_FALSE(lz::has_many(chunked));
     }
 
     SECTION("One element") {
         std::string s = ";";
         auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
-        REQUIRE(!lz::empty(chunked));
-        REQUIRE(!lz::has_one(chunked));
+        REQUIRE_FALSE(lz::empty(chunked));
+        REQUIRE_FALSE(lz::has_one(chunked));
         REQUIRE(lz::has_many(chunked));
     }
 
     SECTION("One element that does not satisfy predicate") {
         std::string s = "h";
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
-        REQUIRE(!lz::empty(chunked));
+        REQUIRE_FALSE(lz::empty(chunked));
         REQUIRE(lz::has_one(chunked));
-        REQUIRE(!lz::has_many(chunked));
+        REQUIRE_FALSE(lz::has_many(chunked));
     }
 }
 

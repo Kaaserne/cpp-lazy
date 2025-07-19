@@ -12,7 +12,7 @@ namespace detail {
 template<class ValueType, class Iterator, class S, class UnaryPredicate>
 class chunk_if_iterator
     : public iterator<chunk_if_iterator<ValueType, Iterator, S, UnaryPredicate>, ValueType, fake_ptr_proxy<ValueType>,
-                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel> {
+                      diff_type<Iterator>, std::forward_iterator_tag, default_sentinel_t> {
     using iter_traits = std::iterator_traits<Iterator>;
 
 public:
@@ -67,7 +67,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 chunk_if_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 chunk_if_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
         _ends_with_trailing = false;
         return *this;
@@ -116,7 +116,7 @@ public:
                _ends_with_trailing == rhs._ends_with_trailing;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _sub_range_begin == _end && !_ends_with_trailing;
     }
 };

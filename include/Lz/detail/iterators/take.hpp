@@ -9,7 +9,7 @@ namespace lz {
 namespace detail {
 template<class Iterator>
 class n_take_iterator : public iterator<n_take_iterator<Iterator>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                                        diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+                                        diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -41,7 +41,7 @@ public:
     constexpr n_take_iterator(Iterator it, const std::size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
-    LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(default_sentinel_t) {
         _n = 0;
         return *this;
     }
@@ -73,11 +73,15 @@ public:
         return static_cast<difference_type>(b._n) - static_cast<difference_type>(_n);
     }
 
+    constexpr difference_type difference(default_sentinel_t) const {
+        return -static_cast<difference_type>(_n);
+    }
+
     constexpr bool eq(const n_take_iterator& b) const {
         return _n == b._n;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _n == 0;
     }
 };

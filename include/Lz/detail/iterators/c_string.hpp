@@ -9,8 +9,8 @@
 namespace lz {
 namespace detail {
 template<class C>
-class c_string_iterator : public iterator<c_string_iterator<C>, C&, C*, std::ptrdiff_t,
-                                          std::forward_iterator_tag, default_sentinel> {
+class c_string_iterator
+    : public iterator<c_string_iterator<C>, C&, C*, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
 
     C* _it{ nullptr };
 
@@ -25,7 +25,7 @@ public:
     constexpr c_string_iterator(C* it) noexcept : _it{ it } {
     }
 
-    LZ_CONSTEXPR_CXX_14 c_string_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 c_string_iterator& operator=(default_sentinel_t) noexcept {
         _it = nullptr;
         return *this;
     }
@@ -49,7 +49,7 @@ public:
         return b._it == nullptr ? _it == nullptr || *_it == '\0' : _it == b._it;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return _it == nullptr || *_it == '\0';
     }
 

@@ -119,7 +119,7 @@ public:
             return iterator{ _iterable, std::end(_iterable) };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -131,7 +131,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

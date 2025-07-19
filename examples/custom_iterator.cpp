@@ -12,10 +12,12 @@ class custom_fwd_iterator
           /* Pointer type returned by operator->()*/ int*,
           /* Difference type returned by operator-() among others*/ std::ptrdiff_t,
           /* The iterator category. Forward only in this case */ std::forward_iterator_tag,
-          /* The sentinel type. Can be custom_fwd_iterator or for e.g. default_sentinel */ custom_fwd_iterator> {
+          /* The sentinel type. Can be custom_fwd_iterator or for e.g. default_sentinel_t */ custom_fwd_iterator> {
     int _iter;
 
 public:
+    // Match the types with the iterator base
+    // This is important for the iterator to work correctly with lz::reverse and other algorithms
     using value_type = int;
     using reference = int&;
     using pointer = int*;
@@ -52,7 +54,7 @@ public:
     }
 
     // Add this function overload if you're dealing with a sentinel. Add const too
-    bool eq(lz::default_sentinel) const {
+    bool eq(lz::default_sentinel_t) const {
         return false; // Or something else
     }
 };
@@ -62,6 +64,8 @@ class custom_bidi_iterator : public lz::iterator<custom_bidi_iterator, int&, int
     int _iter;
 
 public:
+    // Match the types with the iterator base
+    // This is important for the iterator to work correctly with lz::reverse and other algorithms
     using value_type = int;
     using reference = int&;
     using pointer = int*;
@@ -103,7 +107,7 @@ public:
     }
 
     // Add this function overload if you're dealing with a sentinel
-    bool eq(lz::default_sentinel) const {
+    bool eq(lz::default_sentinel_t) const {
         return false; // Or something else
     }
 };
@@ -113,6 +117,8 @@ class custom_ra_iterator
     int _iter;
 
 public:
+    // Match the types with the iterator base
+    // This is important for the iterator to work correctly with lz::reverse and other algorithms
     using value_type = int;
     using reference = int&;
     using pointer = int*;
@@ -153,7 +159,7 @@ public:
     }
 
     // Add this function overload if you're dealing with a sentinel. Add const too
-    bool eq(lz::default_sentinel) const {
+    bool eq(lz::default_sentinel_t) const {
         return false; // Or something else
     }
 
@@ -166,6 +172,12 @@ public:
     difference_type difference(const custom_ra_iterator& other) const {
         return static_cast<difference_type>(_iter - other._iter);
     }
+
+    // Added difference function with default_sentinel, must be const. Can only be added if you can calculate the difference
+    // without the need of another iterator
+    // difference_type difference(lz::default_sentinel_t) const {
+        // return static_cast<difference_type>(_iter - _end);
+    // }
 };
 
 // If you want to create your own iterable, you can use the following code:

@@ -15,7 +15,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 #ifdef LZ_HAS_CXX_11
 
 /**
- * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
+ * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
  * iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor must meet
  * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(<decltype(std::adressof(Iterator))>,
  * std::size_t)`. The distance between the iterators are calculated using std::distance, if the second constructor is used.
@@ -39,7 +39,7 @@ using t_split = detail::split_adaptor<ValueType>;
 #else
 
 /**
- * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
+ * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
  * iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor must meet
  * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(<decltype(std::adressof(Iterator))>,
  * std::size_t)`. The distance between the iterators are calculated using std::distance, if the second constructor is used.
@@ -63,7 +63,7 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<ValueType> t_split{};
 #endif
 
 /**
- * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
+ * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
  * iterable does not contain a .size() method. Example:
  * ```cpp
  * // Careful: split_values must be passed by reference, because it holds a reference to the values.
@@ -84,7 +84,7 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<ValueType> t_split{};
 LZ_INLINE_VAR constexpr detail::split_adaptor<void> split{};
 
 /**
- * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
+ * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
  * iterable does not contain a .size() method. Returns a std::string to its substrings. Example:
  * ```cpp
  * std::string str = "Hello, World!";
@@ -104,7 +104,7 @@ LZ_INLINE_VAR constexpr detail::split_adaptor<void> split{};
 LZ_INLINE_VAR constexpr detail::split_adaptor<std::string> s_split{};
 
 /**
- * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and the
+ * @brief Splits a string on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
  * iterable does not contain a .size() method. Returns a string_view to its substrings. Example:
  * ```cpp
  * std::string str = "Hello, World!";

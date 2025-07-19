@@ -2,7 +2,6 @@
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
-#include <cstddef>
 #include <test_procs.hpp>
 #include <vector>
 

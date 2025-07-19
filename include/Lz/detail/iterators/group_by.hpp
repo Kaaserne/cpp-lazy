@@ -17,7 +17,7 @@ class group_by_iterator
     : public iterator<group_by_iterator<Iterable, BinaryPredicate>,
                       std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>>, std::ptrdiff_t,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
     using it = iter_t<Iterable>;
 
     it _sub_range_end;
@@ -77,7 +77,7 @@ public:
         advance();
     }
 
-    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = std::end(_iterable);
         return *this;
     }
@@ -117,7 +117,7 @@ public:
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _sub_range_begin == std::end(_iterable);
     }
 };

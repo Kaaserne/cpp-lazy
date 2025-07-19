@@ -10,25 +10,86 @@
 #include <type_traits>
 
 namespace lz {
-struct default_sentinel {
-    friend constexpr bool operator==(default_sentinel, default_sentinel) noexcept {
+struct default_sentinel_t {
+    LZ_NODISCARD friend constexpr bool operator==(default_sentinel_t, default_sentinel_t) noexcept {
+        return true;
+    }
+
+    LZ_NODISCARD friend constexpr bool operator!=(default_sentinel_t, default_sentinel_t) noexcept {
+        return false;
+    }
+
+    LZ_NODISCARD friend constexpr bool operator<(default_sentinel_t, default_sentinel_t) noexcept {
+        return false;
+    }
+
+    LZ_NODISCARD friend constexpr bool operator>(default_sentinel_t, default_sentinel_t) noexcept {
+        return false;
+    }
+
+    LZ_NODISCARD friend constexpr bool operator>=(default_sentinel_t, default_sentinel_t) noexcept {
+        return true;
+    }
+
+    LZ_NODISCARD friend constexpr bool operator<=(default_sentinel_t, default_sentinel_t) noexcept {
         return true;
     }
 };
 
+/**
+ * @brief Holds a default sentinel value that can be used in iterators. Example:
+ * ```cpp
+ * auto it = lz::repeat(20, 5).begin();
+ * if (it == lz::default_sentinel) {
+ *     // do something
+ * }
+ * ```
+ */
+LZ_INLINE_VAR static constexpr default_sentinel_t default_sentinel{};
+
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
 struct iterator;
 
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
 constexpr bool
-operator==(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
-    return it.operator==(default_sentinel{});
+operator==(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return it == sent;
 }
 
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat>
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
 constexpr bool
-operator!=(default_sentinel, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, default_sentinel>& it) {
-    return it.operator!=(default_sentinel{});
+operator!=(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return !(it == sent);
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
+LZ_NODISCARD constexpr bool
+operator<(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return sent - it < 0;
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
+LZ_NODISCARD constexpr bool
+operator>(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return it < sent;
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
+LZ_NODISCARD constexpr bool
+operator<=(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return !(it < sent);
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
+LZ_NODISCARD constexpr bool
+operator>=(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return !(sent < it);
+}
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
+LZ_NODISCARD constexpr typename Derived::difference_type
+operator-(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+    return -(it - sent);
 }
 
 struct lazy_view {};
@@ -382,7 +443,7 @@ struct is_iterable : std::false_type {};
 template<class T>
 struct is_iterable<T, void_t<decltype(std::begin(std::declval<T>()), std::end(std::declval<T>()))>> : std::true_type {};
 
-template<typename T, std::size_t N>
+template<class T, std::size_t N>
 struct is_iterable<T[N]> : std::true_type {};
 
 template<class, class = void>

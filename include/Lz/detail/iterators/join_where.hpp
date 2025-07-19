@@ -15,7 +15,7 @@ class join_where_iterator
     : public iterator<join_where_iterator<IterableA, IterB, SB, SelectorA, SelectorB, ResultSelector>,
                       func_ret_type_iters<ResultSelector, iter_t<IterableA>, IterB>,
                       fake_ptr_proxy<func_ret_type_iters<ResultSelector, iter_t<IterableA>, IterB>>, std::ptrdiff_t,
-                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<IterableA>>>, default_sentinel> {
+                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<IterableA>>>, default_sentinel_t> {
 private:
     using iter_a = iter_t<IterableA>;
     using traits_a = std::iterator_traits<iter_a>;
@@ -101,7 +101,7 @@ public:
         find_next();
     }
 
-    LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel_t) {
         _iter_a = std::end(_iterable_a);
         return *this;
     }
@@ -124,7 +124,7 @@ public:
         return _iter_a == b._iter_a;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iter_a == std::end(_iterable_a);
     }
 };

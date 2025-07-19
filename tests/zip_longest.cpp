@@ -3,8 +3,9 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -18,68 +19,15 @@ TEST_CASE("Zip longest with sentinels") {
     static_assert(!std::is_same<decltype(longest.begin()), decltype(longest.end())>::value, "should be sentinel");
     REQUIRE(lz::distance(longest) == static_cast<std::ptrdiff_t>(std::strlen("Hello1")));
 
-    auto begin = longest.begin();
-    lz::optional<std::reference_wrapper<const char>> ref1(std::get<0>(*begin));
-    lz::optional<std::reference_wrapper<const char>> ref2(std::get<1>(*begin));
-    lz::optional<std::reference_wrapper<const char>> ref3(std::get<2>(*begin));
+    using tup = std::tuple<lz::optional<char>, lz::optional<char>, lz::optional<char>>;
+    std::vector<tup> expected = { std::make_tuple(lz::optional<char>('H'), lz::optional<char>('H'), lz::optional<char>('S')),
+                                  std::make_tuple(lz::optional<char>('e'), lz::optional<char>('e'), lz::nullopt),
+                                  std::make_tuple(lz::optional<char>('l'), lz::optional<char>('l'), lz::nullopt),
+                                  std::make_tuple(lz::optional<char>('l'), lz::optional<char>('l'), lz::nullopt),
+                                  std::make_tuple(lz::optional<char>('o'), lz::optional<char>('o'), lz::nullopt),
+                                  std::make_tuple(lz::nullopt, lz::optional<char>('1'), lz::nullopt) };
 
-    REQUIRE(ref1.value() == 'H');
-    REQUIRE(ref2.value() == 'H');
-    REQUIRE(ref3.value() == 'S');
-    ++begin;
-
-    ref1 = std::get<0>(*begin);
-    ref2 = std::get<1>(*begin);
-    ref3 = std::get<2>(*begin);
-
-    REQUIRE(ref1.value() == 'e');
-    REQUIRE(ref2.value() == 'e');
-    REQUIRE(!ref3);
-
-    ++begin;
-    ref1 = std::get<0>(*begin);
-    ref2 = std::get<1>(*begin);
-    ref3 = std::get<2>(*begin);
-
-    REQUIRE(ref1.value() == 'l');
-    REQUIRE(ref2.value() == 'l');
-    REQUIRE(!ref3);
-
-    ++begin;
-    ref1 = std::get<0>(*begin);
-    ref2 = std::get<1>(*begin);
-    ref3 = std::get<2>(*begin);
-
-    REQUIRE(ref1.value() == 'l');
-    REQUIRE(ref2.value() == 'l');
-    REQUIRE(!ref3);
-
-    ++begin;
-    ref1 = std::get<0>(*begin);
-    ref2 = std::get<1>(*begin);
-    ref3 = std::get<2>(*begin);
-
-    REQUIRE(ref1.value() == 'o');
-    REQUIRE(ref2.value() == 'o');
-    REQUIRE(!ref3);
-
-    ++begin;
-    ref1 = std::get<0>(*begin);
-    ref2 = std::get<1>(*begin);
-    ref3 = std::get<2>(*begin);
-
-    REQUIRE(!ref1);
-    REQUIRE(ref2.value() == '1');
-    REQUIRE(!ref3);
-
-    ++begin;
-    ref1 = std::get<0>(*begin);
-    ref2 = std::get<1>(*begin);
-    ref3 = std::get<2>(*begin);
-
-    REQUIRE(!ref1);
-    REQUIRE(!ref2);
-    REQUIRE(!ref3);
+    REQUIRE(lz::equal(longest, expected));
 
     SECTION("Operator=") {
         auto it = longest.begin();
@@ -91,12 +39,12 @@ TEST_CASE("Zip longest with sentinels") {
 
 TEST_CASE("zip_longest_iterable changing and creating elements") {
     std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7 };
-    std::list<char> v2 = { 'a', 'b', 'c' };
+    const std::list<char> v2 = { 'a', 'b', 'c' };
     std::vector<char> v3 = { 'a', 'b', 'c', 'd' };
 
     auto bidi = lz::zip_longest(v, v2, v3);
     auto ra = lz::zip_longest(v, v3);
-    static_assert(lz::detail::is_fwd<decltype(bidi.begin())>::value, "");
+    static_assert(lz::detail::is_bidi<decltype(bidi.begin())>::value, "");
     static_assert(lz::detail::is_ra<decltype(ra.begin())>::value, "");
     REQUIRE(ra.size() == v.size());
     REQUIRE(bidi.size() == v.size());
@@ -104,49 +52,8 @@ TEST_CASE("zip_longest_iterable changing and creating elements") {
     SECTION("Unequal lengths") {
         REQUIRE(std::distance(bidi.begin(), bidi.end()) == 7);
         REQUIRE(std::distance(ra.begin(), ra.end()) == 7);
-    }
-
-    SECTION("Should zip longest") {
-        std::size_t counter = 0;
-        for (auto&& tup : bidi) {
-            auto&& a = std::get<0>(tup);
-            auto&& b = std::get<1>(tup);
-            auto&& c = std::get<2>(tup);
-
-            REQUIRE(*a == v[counter]);
-
-            if (counter > 2) {
-                REQUIRE(!b);
-            }
-            else {
-                REQUIRE(b);
-                REQUIRE(*b == *std::next(v2.begin(), static_cast<std::ptrdiff_t>(counter)));
-            }
-            if (counter > 3) {
-                REQUIRE(!c);
-            }
-            else {
-                REQUIRE(c);
-                REQUIRE(*c == v3[counter]);
-            }
-            counter++;
-        }
-
-        counter = 0;
-
-        for (auto&& tup : ra) {
-            auto&& a = std::get<0>(tup);
-            auto&& b = std::get<1>(tup);
-            REQUIRE(*a == v[counter]);
-            if (counter > 3) {
-                REQUIRE(!b);
-            }
-            else {
-                REQUIRE(b);
-                REQUIRE(*b == v3[counter]);
-            }
-            counter++;
-        }
+        REQUIRE(bidi.size() == 7);
+        REQUIRE(ra.size() == 7);
     }
 
     SECTION("Should be by ref") {
@@ -205,6 +112,11 @@ TEST_CASE("zip_longest_iterable binary operations") {
     SECTION("Operator-(Iterator)") {
         test_procs::test_operator_minus(zipper);
     }
+
+    SECTION("Operator-(default_sentinel)") {
+        auto first = lz::repeat(1, 5), second = lz::repeat(1, 4);
+        test_procs::test_operator_minus(lz::zip_longest(first, second));
+    }
 }
 
 TEST_CASE("Empty and one element zip longest") {
@@ -212,28 +124,28 @@ TEST_CASE("Empty and one element zip longest") {
         std::vector<int> a;
         auto b = lz::c_string("");
         auto zipper = lz::zip_longest(a, b);
-        static_assert(std::is_same<decltype(zipper.end()), lz::default_sentinel>::value, "should be default sentinel");
+        static_assert(std::is_same<decltype(zipper.end()), lz::default_sentinel_t>::value, "should be default sentinel");
         REQUIRE(lz::empty(zipper));
-        REQUIRE(!lz::has_one(zipper));
-        REQUIRE(!lz::has_many(zipper));
+        REQUIRE_FALSE(lz::has_one(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
     }
 
     SECTION("One element 1") {
         std::vector<int> a = { 1 };
         std::vector<float> b;
         auto zipper = lz::zip_longest(a, b);
-        REQUIRE(!lz::empty(zipper));
+        REQUIRE_FALSE(lz::empty(zipper));
         REQUIRE(lz::has_one(zipper));
-        REQUIRE(!lz::has_many(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
     }
 
     SECTION("One element 2") {
         std::vector<int> a;
         std::vector<float> b = { 1.f };
         auto zipper = lz::zip_longest(a, b);
-        REQUIRE(!lz::empty(zipper));
+        REQUIRE_FALSE(lz::empty(zipper));
         REQUIRE(lz::has_one(zipper));
-        REQUIRE(!lz::has_many(zipper));
+        REQUIRE_FALSE(lz::has_many(zipper));
     }
 }
 

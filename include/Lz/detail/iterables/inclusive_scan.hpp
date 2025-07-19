@@ -74,7 +74,7 @@ public:
         return { begin, end, std::move(_init), std::move(_binary_op) };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

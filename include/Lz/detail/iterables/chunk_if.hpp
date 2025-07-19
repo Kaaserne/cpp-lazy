@@ -54,7 +54,7 @@ public:
         return { std::begin(_iterable), std::end(_iterable), _predicate, is_end };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

@@ -14,7 +14,7 @@ template<class Iterable, class Iterable2, class BinaryPredicate>
 class except_iterator
     : public iterator<except_iterator<Iterable, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
     using iter_traits = std::iterator_traits<iter>;
@@ -76,7 +76,7 @@ public:
         find_next();
     }
 
-    LZ_CONSTEXPR_CXX_14 except_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 except_iterator& operator=(default_sentinel_t) {
         _iterator = std::end(_iterable);
         return *this;
     }
@@ -112,7 +112,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == std::end(_iterable);
     }
 };

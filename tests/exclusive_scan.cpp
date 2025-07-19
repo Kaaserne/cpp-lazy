@@ -42,16 +42,16 @@ TEST_CASE("Empty or one element exclusive scan") {
         std::vector<int> empty;
         auto scan = empty | lz::exclusive_scan(0, MAKE_BIN_PRED(equal_to){});
         REQUIRE(lz::empty(scan));
-        REQUIRE(!lz::has_one(scan));
-        REQUIRE(!lz::has_many(scan));
+        REQUIRE_FALSE(lz::has_one(scan));
+        REQUIRE_FALSE(lz::has_many(scan));
         REQUIRE(lz::size(scan) == empty.size());
     }
 
     SECTION("One element") {
         std::vector<int> one_element = { 1 };
         auto scan = lz::exclusive_scan(one_element);
-        REQUIRE(!lz::empty(scan));
-        REQUIRE(!lz::has_one(scan));
+        REQUIRE_FALSE(lz::empty(scan));
+        REQUIRE_FALSE(lz::has_one(scan));
         REQUIRE(lz::has_many(scan));
         REQUIRE(*scan.begin() == 0);
         REQUIRE(lz::size(scan) == one_element.size() + 1);

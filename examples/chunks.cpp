@@ -7,7 +7,7 @@ int main() {
 	auto chunks = lz::chunks(v, 3);
 
 	for (auto&& chunk : chunks) {
-        std::cout << "This chunk has length " << std::distance(chunk.begin(), chunk.end()) << '\n';
+        std::cout << "This chunk has length " << lz::distance(chunk) << '\n';
         // or use fmt::print("This chunk has length {}\n", std::distance(chunk.begin(), chunk.end()));
         for (int& i : chunk) {
             std::cout << i << ' ';
@@ -26,7 +26,7 @@ int main() {
     // 7 8
 
     for (auto&& chunk : v | lz::chunks(3)) {
-        std::cout << "This chunk has length " << std::distance(chunk.begin(), chunk.end()) << '\n';
+        std::cout << "This chunk has length " << lz::distance(chunk) << '\n';
         // or use fmt::print("This chunk has length {}\n", std::distance(chunk.begin(), chunk.end()));
         for (int& i : chunk) {
             std::cout << i << ' ';

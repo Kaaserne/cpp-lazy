@@ -77,6 +77,10 @@ public:
         return _iterator - b._iterator;
     }
 
+    constexpr difference_type difference(const S& b) const {
+        return _iterator - b;
+    }
+
     constexpr bool eq(const map_iterator& b) const {
         return _iterator == b._iterator;
     }
