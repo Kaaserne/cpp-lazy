@@ -4,8 +4,6 @@
 #define LZ_OPTIONAL_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <cstdint>
-#include <type_traits>
 
 #ifdef LZ_HAS_CXX_17
 
@@ -14,7 +12,9 @@
 #else // LZ_HAS_CXX_17
 
 #include <Lz/detail/procs.hpp>
+#include <cstdint>
 #include <stdexcept>
+#include <type_traits>
 
 #endif // LZ_HAS_CXX_17
 
@@ -67,7 +67,9 @@ public:
     constexpr optional(nullopt_t) noexcept {
     }
 
-    constexpr optional(const T& value) : _value{ value }, _has_value{ true } {
+    constexpr optional(const T& value) noexcept(std::is_nothrow_copy_constructible<T>::value) :
+        _value{ value },
+        _has_value{ true } {
     }
 
     constexpr optional(T&& value) noexcept(std::is_move_constructible<T>::value) :
@@ -82,7 +84,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 optional(const optional<T>& that) {
+    LZ_CONSTEXPR_CXX_14 optional(const optional<T>& that) noexcept(noexcept(construct(*that))) {
         if (that) {
             construct(*that);
         }
@@ -97,24 +99,20 @@ public:
     }
 
     template<class U>
-    LZ_CONSTEXPR_CXX_14 optional(const optional<U>& that) {
+    LZ_CONSTEXPR_CXX_14 optional(const optional<U>& that) noexcept(noexcept(construct(*that))) {
         if (that) {
             construct(*that);
         }
     }
 
     ~optional() {
-        if LZ_CONSTEXPR_IF (std::is_trivially_destructible<T>::value) {
-            return;
-        }
-        else {
-            if (_has_value) {
-                _value.~T();
-            }
+        if (_has_value) {
+            _value.~T();
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 optional& operator=(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value) {
+    LZ_CONSTEXPR_CXX_14 optional&
+    operator=(T&& value) noexcept(std::is_nothrow_move_assignable<T>::value && std::is_nothrow_move_constructible<T>::value) {
         if (_has_value) {
             _value = std::move(value);
         }
@@ -124,7 +122,8 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 optional& operator=(const T& value) {
+    LZ_CONSTEXPR_CXX_14 optional& operator=(const T& value) noexcept(std::is_nothrow_copy_assignable<T>::value &&
+                                                                     std::is_nothrow_copy_constructible<T>::value) {
         if (_has_value) {
             _value = value;
         }
@@ -134,7 +133,8 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 optional& operator=(const optional<T>& that) {
+    LZ_CONSTEXPR_CXX_14 optional& operator=(const optional<T>& that) noexcept(std::is_nothrow_copy_assignable<T>::value &&
+                                                                              std::is_nothrow_copy_constructible<T>::value) {
         if (*this && that) {
             _value = *that;
         }
@@ -147,7 +147,8 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 optional& operator=(optional<T>&& that) noexcept(std::is_nothrow_move_assignable<T>::value) {
+    LZ_CONSTEXPR_CXX_14 optional& operator=(optional<T>&& that) noexcept(std::is_nothrow_move_assignable<T>::value &&
+                                                                         std::is_nothrow_move_constructible<T>::value) {
         if (*this && that) {
             _value = std::move(*that);
         }
@@ -201,12 +202,12 @@ public:
 };
 
 template<class T, class U>
-constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs) {
+constexpr bool operator==(const optional<T>& lhs, const optional<U>& rhs) noexcept {
     return bool(lhs) != bool(rhs) ? false : !bool(lhs) ? true : *lhs == *rhs;
 }
 
 template<class T, class U>
-constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs) {
+constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs) noexcept {
     return !(lhs == rhs);
 }
 
