@@ -12,7 +12,6 @@
 #include <sstream>
 #include <unordered_set>
 
-// TODO: add overloads with default_sentinel in all classes
 template<class T>
 class custom_container {
     std::vector<T> _vec;
@@ -1018,7 +1017,7 @@ TEST_CASE("Find or default") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_or_default(iterable, 'H', 'a') == 'a');
+        REQUIRE(lz::find_or_default(iterable, 'H') == char{});
     }
 
     SECTION("Not found c-string") {
@@ -1044,7 +1043,7 @@ TEST_CASE("Find or default if") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_or_default_if(iterable, [](char c) { return c == 'H'; }, 'a') == 'a');
+        REQUIRE(lz::find_or_default_if(iterable, [](char c) { return c == 'H'; }) == char{});
     }
 
     SECTION("Not found c-string") {
@@ -1070,7 +1069,7 @@ TEST_CASE("Find last or default") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default(iterable, 'H', 'a') == 'a');
+        REQUIRE(lz::find_last_or_default(iterable, 'H') == char{});
     }
 
     SECTION("Not found c-string") {
@@ -1093,7 +1092,7 @@ TEST_CASE("Find last or default random access") {
 
     SECTION("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default(vec, 1, 0) == 0);
+        REQUIRE(lz::find_last_or_default(vec, 1) == 0);
     }
 
     SECTION("Not found") {
@@ -1118,7 +1117,7 @@ TEST_CASE("Find last or default if") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_if(iterable, [](char c) { return c == 'H'; }, 'a') == 'a');
+        REQUIRE(lz::find_last_or_default_if(iterable, [](char c) { return c == 'H'; }) == char{});
     }
 
     SECTION("Not found c-string") {
@@ -1141,12 +1140,60 @@ TEST_CASE("Find last or default if random access") {
 
     SECTION("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }, 0) == 0);
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }) == 0);
     }
 
     SECTION("Not found") {
         std::vector<int> vec = { 5, 5, 5 };
         REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 6; }, 0) == 0);
+    }
+}
+
+TEST_CASE("Find last or default if not random access") {
+    SECTION("With non-empty") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 6; }, 0) == 5);
+    }
+
+    SECTION("With one element") {
+        std::vector<int> vec = { 1 };
+        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 1; }, 0) == 0);
+    }
+
+    SECTION("With empty") {
+        std::vector<int> vec = {};
+        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 1; }) == 0);
+    }
+
+    SECTION("Not found") {
+        std::vector<int> vec = { 5, 5, 5 };
+        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 5; }, 0) == 0);
+    }
+}
+
+TEST_CASE("Find last or default if not") {
+    SECTION("With non-empty c-string") {
+        const char* str = "Hello";
+        auto iterable = lz::c_string(str);
+        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'o'; }, 'a') == 'l');
+    }
+
+    SECTION("With one element") {
+        const char* str = "H";
+        auto iterable = lz::c_string(str);
+        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'H'; }, 'a') == 'a');
+    }
+
+    SECTION("With empty c-string") {
+        const char* str = "";
+        auto iterable = lz::c_string(str);
+        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'H'; }) == char{});
+    }
+
+    SECTION("Not found c-string") {
+        const char* str = "Hello";
+        auto iterable = lz::c_string(str);
+        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'a'; }, 'b') == 'o');
     }
 }
 
@@ -1166,7 +1213,7 @@ TEST_CASE("Find last or default not") {
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_not(iterable, 'H', 'a') == 'a');
+        REQUIRE(lz::find_last_or_default_not(iterable, 'H') == char{});
     }
 
     SECTION("Not found c-string") {
@@ -1189,7 +1236,7 @@ TEST_CASE("Find last or default not random access") {
 
     SECTION("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_not(vec, 1, 0) == 0);
+        REQUIRE(lz::find_last_or_default_not(vec, 1) == 0);
     }
 
     SECTION("Not found") {
