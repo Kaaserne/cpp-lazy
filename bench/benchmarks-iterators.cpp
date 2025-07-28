@@ -12,7 +12,7 @@ namespace {
 constexpr std::size_t size_policy = 32;
 
 void any_iterable_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr;
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int i : lz::make_any_iterable(arr)) {
@@ -36,6 +36,16 @@ void c_string_lz(benchmark::State& state) {
     }
 }
 
+void cached_reverse_lz(benchmark::State& state) {
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+
+    for (auto _ : state) {
+        for (int c : lz::cached_reverse(arr)) {
+            benchmark::DoNotOptimize(c);
+        }
+    }
+}
+
 void cartesian_product_lz(benchmark::State& state) {
     std::array<int, size_policy / 8> a;
     std::array<char, size_policy / 4> b;
@@ -48,7 +58,7 @@ void cartesian_product_lz(benchmark::State& state) {
 }
 
 void chunk_if_lz(benchmark::State& state) {
-    std::array<int, size_policy> a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
     constexpr static auto half = static_cast<int>(size_policy / 2);
 
     for (auto _ : state) {
@@ -71,7 +81,7 @@ void chunk_if_lz(benchmark::State& state) {
 }
 
 void chunks_lz(benchmark::State& state) {
-    std::array<int, size_policy> a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
     for (auto _ : state) {
         for (auto&& chunk : lz::chunks(a, 8)) {
             for (int x : chunk) {
@@ -102,8 +112,18 @@ void concatenate_lz(benchmark::State& state) {
     }
 }
 
+void duplicates_lz(benchmark::State& state) {
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+
+    for (auto _ : state) {
+        for (std::pair<char, std::size_t> c : lz::duplicates(arr)) {
+            benchmark::DoNotOptimize(c);
+        }
+    }
+}
+
 void enumerate_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr;
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto pair : lz::enumerate(arr)) {
@@ -113,9 +133,8 @@ void enumerate_lz(benchmark::State& state) {
 }
 
 void except_lz(benchmark::State& state) {
-    std::array<int, size_policy> large_arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
-    std::array<int, size_policy / 2> large_arr_except =
-        lz::range(static_cast<int>(size_policy) / 2) | lz::to<std::array<int, size_policy / 2>>();
+    auto large_arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto large_arr_except = lz::range(static_cast<int>(size_policy) / 2) | lz::to<std::array<int, size_policy / 2>>();
 
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
@@ -130,7 +149,7 @@ void except_lz(benchmark::State& state) {
 }
 
 void exclude_lz(benchmark::State& state) {
-    std::array<int, size_policy> a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
@@ -160,7 +179,7 @@ void exclusive_scan_lz(benchmark::State& state) {
 }
 
 void filter_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr;
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int filtered : lz::filter(arr, [](const int i) noexcept { return i == 0; })) {
@@ -218,7 +237,7 @@ void generate_lz(benchmark::State& state) {
 }
 
 void groupy_by_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
@@ -268,8 +287,8 @@ void interleave_lz(benchmark::State& state) {
 }
 
 void intersection_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
-    std::array<int, size_policy> arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
@@ -326,7 +345,7 @@ void loop_lz(benchmark::State& state) {
 }
 
 void map_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int mapped : lz::map(arr, [](const int i) noexcept { return i == 0 ? 10 : 5; })) {
@@ -399,7 +418,7 @@ void repeat_lz(benchmark::State& state) {
 }
 
 void rotate_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int i : lz::rotate(arr, 5)) {
@@ -409,7 +428,7 @@ void rotate_lz(benchmark::State& state) {
 }
 
 void slice_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int i : lz::slice(arr, 0, size_policy)) {
@@ -462,7 +481,7 @@ void take_every_lz(benchmark::State& state) {
 }
 
 void take_while_lz(benchmark::State& state) {
-    std::array<int, size_policy> array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int taken : lz::take_while(array, [](const int i) noexcept { return i != size_policy - 1; })) {
@@ -472,7 +491,7 @@ void take_while_lz(benchmark::State& state) {
 }
 
 void take_iterable_lz(benchmark::State& state) {
-    std::array<int, size_policy> array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int taken : lz::take(array, size_policy)) {
@@ -482,7 +501,7 @@ void take_iterable_lz(benchmark::State& state) {
 }
 
 void take_iterator_lz(benchmark::State& state) {
-    std::array<int, size_policy> array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int taken : lz::take(array.begin(), size_policy)) {
@@ -492,7 +511,7 @@ void take_iterator_lz(benchmark::State& state) {
 }
 
 void unique_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (char c : lz::unique(arr)) {
@@ -502,10 +521,10 @@ void unique_lz(benchmark::State& state) {
 }
 
 void zip4_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy> arr_b;
-    std::array<int, size_policy> arr_c;
-    std::array<int, size_policy> arr_d;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_c = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_d = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto tuple : lz::zip(arr_a, arr_b, arr_c, arr_d)) {
@@ -515,9 +534,9 @@ void zip4_lz(benchmark::State& state) {
 }
 
 void zip3_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy> arr_b;
-    std::array<int, size_policy> arr_c;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_c = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto tuple : lz::zip(arr_a, arr_b, arr_c)) {
@@ -527,8 +546,8 @@ void zip3_lz(benchmark::State& state) {
 }
 
 void zip2_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy> arr_b;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto tuple : lz::zip(arr_a, arr_b)) {
@@ -538,10 +557,10 @@ void zip2_lz(benchmark::State& state) {
 }
 
 void zip_longest4_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy - 1> arr_b;
-    std::array<int, size_policy - 2> arr_c;
-    std::array<int, size_policy - 3> arr_d;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy) - 1) | lz::to<std::array<int, size_policy - 1>>();
+    auto arr_c = lz::range(static_cast<int>(size_policy) - 2) | lz::to<std::array<int, size_policy - 2>>();
+    auto arr_d = lz::range(static_cast<int>(size_policy) - 3) | lz::to<std::array<int, size_policy - 3>>();
 
     for (auto _ : state) {
         for (auto tuple : lz::zip_longest(arr_a, arr_b, arr_c, arr_d)) {
@@ -551,9 +570,9 @@ void zip_longest4_lz(benchmark::State& state) {
 }
 
 void zip_longest3_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy - 1> arr_b;
-    std::array<int, size_policy - 2> arr_c;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy) - 1) | lz::to<std::array<int, size_policy - 1>>();
+    auto arr_c = lz::range(static_cast<int>(size_policy) - 2) | lz::to<std::array<int, size_policy - 2>>();
 
     for (auto _ : state) {
         for (auto tuple : lz::zip_longest(arr_a, arr_b, arr_c)) {
@@ -563,8 +582,8 @@ void zip_longest3_lz(benchmark::State& state) {
 }
 
 void zip_longest2_lz(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy - 1> arr_b;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy) - 1) | lz::to<std::array<int, size_policy - 1>>();
 
     for (auto _ : state) {
         for (auto tuple : lz::zip_longest(arr_a, arr_b)) {
@@ -586,7 +605,7 @@ void common_std(benchmark::State& state) {
 }
 
 void filter_std(benchmark::State& state) {
-    std::array<int, size_policy> arr;
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int filtered : std::views::filter(arr, [](const int i) noexcept { return i == 0; })) {
@@ -609,7 +628,7 @@ void flatten_std(benchmark::State& state) {
 }
 
 void map_std(benchmark::State& state) {
-    std::array<int, size_policy> arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int mapped : std::views::transform(arr, [](const int i) noexcept { return i == 0 ? 10 : 5; })) {
@@ -651,7 +670,7 @@ void repeat_std(benchmark::State& state) {
 #endif
 
 void take_iterable_std(benchmark::State& state) {
-    std::array<int, size_policy> array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int taken : std::views::take(array, size_policy)) {
@@ -661,7 +680,7 @@ void take_iterable_std(benchmark::State& state) {
 }
 
 void take_iterator_std(benchmark::State& state) {
-    std::array<int, size_policy> array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (int taken : std::views::counted(array.begin(), size_policy)) {
@@ -673,10 +692,10 @@ void take_iterator_std(benchmark::State& state) {
 #if defined(__cpp_lib_ranges_zip) && CMAKE_CXX_STANDARD >= 20
 
 void zip4_std(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy> arr_b;
-    std::array<int, size_policy> arr_c;
-    std::array<int, size_policy> arr_d;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_c = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_d = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto tuple : std::views::zip(arr_a, arr_b, arr_c, arr_d)) {
@@ -686,9 +705,9 @@ void zip4_std(benchmark::State& state) {
 }
 
 void zip3_std(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy> arr_b;
-    std::array<int, size_policy> arr_c;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_c = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto tuple : std::views::zip(arr_a, arr_b, arr_c)) {
@@ -698,8 +717,8 @@ void zip3_std(benchmark::State& state) {
 }
 
 void zip2_std(benchmark::State& state) {
-    std::array<int, size_policy> arr_a;
-    std::array<int, size_policy> arr_b;
+    auto arr_a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    auto arr_b = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
     for (auto _ : state) {
         for (auto tuple : std::views::zip(arr_a, arr_b)) {
@@ -716,11 +735,13 @@ void zip2_std(benchmark::State& state) {
 
 BENCHMARK(any_iterable_lz);
 BENCHMARK(c_string_lz);
+BENCHMARK(cached_reverse_lz);
 BENCHMARK(cartesian_product_lz);
 BENCHMARK(chunk_if_lz);
 BENCHMARK(chunks_lz);
 BENCHMARK(common_lz);
 BENCHMARK(concatenate_lz);
+BENCHMARK(duplicates_lz);
 BENCHMARK(enumerate_lz);
 BENCHMARK(except_lz);
 BENCHMARK(exclude_lz);
