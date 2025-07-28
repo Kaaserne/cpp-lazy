@@ -236,7 +236,7 @@ private:
     }
 
     template<std::size_t I>
-    constexpr enable_if<(I > 0), difference_type> difference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0), difference_type> difference() const {
         const auto distance = std::get<I>(_iterators) - std::begin(std::get<I>(_iterables));
         const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
         return size * difference<I - 1>() + distance;

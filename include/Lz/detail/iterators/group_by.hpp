@@ -83,12 +83,12 @@ public:
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

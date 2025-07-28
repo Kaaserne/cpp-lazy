@@ -84,7 +84,7 @@ public:
 #else
 
     template<class V = ValueType>
-    constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT(_sub_range_begin != _end, "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end.first };
     }
@@ -99,7 +99,7 @@ public:
 
 #endif
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -205,7 +205,7 @@ public:
 #else
 
     template<class V = ValueType>
-    constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end };
     }
@@ -219,7 +219,7 @@ public:
 
 #endif
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

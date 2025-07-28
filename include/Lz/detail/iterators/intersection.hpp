@@ -93,12 +93,12 @@ public:
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator1;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

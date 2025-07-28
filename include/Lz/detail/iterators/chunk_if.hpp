@@ -74,20 +74,20 @@ public:
     }
 
     template<class V = ValueType>
-    constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         static_assert(is_ra<Iterator>::value, "Iterator must be a random access");
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

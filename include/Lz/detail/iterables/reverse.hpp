@@ -84,8 +84,8 @@ public:
     template<bool C = Cached>
     LZ_NODISCARD constexpr enable_if<C && !std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
         static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-        const auto size = std::end(_iterable) - std::begin(_iterable);
-        return { std::begin(_iterable) + size, std::begin(_iterable), std::end(_iterable) };
+        return { std::begin(_iterable) + (std::end(_iterable) - std::begin(_iterable)), std::begin(_iterable),
+                 std::end(_iterable) };
     }
 
     // Using constexpr 17 here because cxx 17 has constexpr reverse_iterator

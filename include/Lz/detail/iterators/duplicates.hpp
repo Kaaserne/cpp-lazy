@@ -73,12 +73,12 @@ public:
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { *_first, static_cast<std::size_t>(_last - _first) };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<reference>(**this);
     }
 
@@ -181,12 +181,12 @@ public:
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end of iterable");
         return { *_first, _last_distance };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<reference>(**this);
     }
 

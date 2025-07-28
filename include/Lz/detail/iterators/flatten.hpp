@@ -155,12 +155,12 @@ public:
         return _iterator == std::end(_iterable);
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
@@ -180,7 +180,7 @@ public:
         _iterator += n;
     }
 
-    constexpr difference_type difference(const flatten_wrapper& other) const {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
         LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
                   "Incompatible iterators");
         return _iterator - other._iterator;
