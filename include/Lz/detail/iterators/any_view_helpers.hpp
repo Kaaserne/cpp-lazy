@@ -224,6 +224,4 @@ public:
 } // namespace detail
 } // namespace lz
 
-// #undef _ENABLE_EXTENDED_ALIGNED_STORAGE
-
 #endif // LZ_ANY_VIEW_HELPERS_HPP
