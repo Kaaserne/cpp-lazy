@@ -322,7 +322,7 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_longest_iterator& other, index_sequence<I...>) const {
-        const auto max = std::max({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        const auto max = std::max({ static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other._iterators))... });
         if (max > 0) {
             return max;
         }
@@ -331,7 +331,7 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(index_sequence<I...>) const {
-        return std::min({ (std::get<I>(_iterators) - std::get<I>(_end))... });
+        return std::min({ static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(_end))... });
     }
 
     template<std::size_t... I>
