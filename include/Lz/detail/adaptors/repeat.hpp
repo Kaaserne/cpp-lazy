@@ -37,7 +37,7 @@ struct repeat_adaptor {
      */
     template<class T>
     LZ_NODISCARD constexpr repeat_iterable<true, T> operator()(T value) const {
-        return { std::move(value) };
+        return repeat_iterable<true, T>{ std::move(value) };
     }
 };
 } // namespace detail

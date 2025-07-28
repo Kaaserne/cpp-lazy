@@ -79,15 +79,15 @@ public:
 
 #endif
 
-    constexpr repeat_iterable(T value) : _value{ std::move(value) } {
+    explicit constexpr repeat_iterable(T value) : _value{ std::move(value) } {
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
-        return { _value };
+        return iterator{ _value };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_value) };
+        return iterator{ std::move(_value) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

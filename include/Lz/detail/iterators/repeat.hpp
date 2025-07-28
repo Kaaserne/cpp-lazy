@@ -115,7 +115,7 @@ public:
 
 #endif
 
-    constexpr repeat_iterator(T to_repeat) : _to_repeat{ std::move(to_repeat) } {
+    explicit constexpr repeat_iterator(T to_repeat) : _to_repeat{ std::move(to_repeat) } {
     }
 
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel_t) {
