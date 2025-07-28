@@ -133,13 +133,13 @@ public:
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, zip_longest_iterable<Iterables...>&& zipper) {
-        return concat_iterables(std::forward<Iterable>(iterable), std::move(zipper._iterables), is{});
+        return concat_iterables(std::forward<Iterable>(iterable), std::move(zipper), is{});
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const zip_longest_iterable<Iterables...>& zipper) {
-        return concat_iterables(std::forward<Iterable>(iterable), zipper._iterables, is{});
+        return concat_iterables(std::forward<Iterable>(iterable), zipper, is{});
     }
 };
 } // namespace detail
