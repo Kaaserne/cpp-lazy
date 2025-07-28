@@ -13,8 +13,8 @@ namespace lz {
 namespace detail {
 
 template<class Floating>
-constexpr bool almost_equal(const Floating a, const Floating b) {
-    return std::fabs(a - b) < static_cast<Floating>(1e-6);
+constexpr bool almost_equal(const Floating a, const Floating b, const Floating epsilon = static_cast<Floating>(1e-6)) {
+    return std::fabs(a - b) < epsilon;
 }
 
 template<class Arithmetic, bool /* step wise */>
@@ -62,16 +62,16 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     constexpr difference_type difference(const range_iterator& b) const noexcept {
-        LZ_ASSERT(_step == b._step, "Incompatible iterators");
-        LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
-
         if constexpr (std::is_floating_point_v<Arithmetic>) {
+            LZ_ASSERT(almost_equal(_step, b._step, std::numeric_limits<Arithmetic>::epsilon()), "Incompatible iterators");
+            LZ_ASSERT(std::abs(_step) > std::numeric_limits<Arithmetic>::epsilon(), "Division by zero in range size calculation");
             const auto current_size = (_index - b._index) / _step;
             const auto int_part = static_cast<difference_type>(current_size);
             const auto arithmetic_int_part = static_cast<Arithmetic>(int_part);
             return !almost_equal(current_size, arithmetic_int_part) ? int_part + 1 : int_part;
         }
         else {
+            LZ_ASSERT(_step != 0, "Division by zero in range size calculation");
             return static_cast<difference_type>(_index - b._index) / static_cast<difference_type>(_step);
         }
     }
@@ -91,7 +91,8 @@ public:
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& b) const noexcept {
         LZ_ASSERT(_step == b._step, "Incompatible iterators");
-        LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
+        constexpr Arithmetic epsilon = std::numeric_limits<Arithmetic>::epsilon();
+        LZ_ASSERT(std::abs(_step) > epsilon, "Division by zero in range size calculation");
 
         const auto current_size = (_index - b._index) / _step;
         const auto int_part = static_cast<difference_type>(current_size);

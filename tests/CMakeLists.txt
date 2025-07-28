@@ -82,7 +82,10 @@ add_executable(cpp-lazy-tests
 target_compile_options(cpp-lazy-tests
 	PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
-	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion>
+
+	$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings>
+
+	$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion  -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow -Wformat-signedness -Wformat=2 -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings>
 )
 target_link_libraries(cpp-lazy-tests
 	PRIVATE
