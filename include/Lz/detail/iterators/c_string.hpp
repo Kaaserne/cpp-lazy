@@ -31,17 +31,17 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const noexcept {
-        LZ_ASSERT(_it != nullptr, "Cannot dereference a nullptr");
+        LZ_ASSERT(_it != nullptr, "Cannot dereference nullptr");
         return *_it;
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const noexcept {
-        LZ_ASSERT(_it != nullptr, "Cannot dereference a nullptr");
+        LZ_ASSERT(_it != nullptr, "Cannot dereference nullptr");
         return _it;
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
-        LZ_ASSERT(_it != nullptr, "Cannot increment a nullptr");
+        LZ_ASSERT(_it != nullptr, "Cannot increment nullptr");
         ++_it;
     }
 

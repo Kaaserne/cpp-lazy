@@ -6,6 +6,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/ref_or_view.hpp>
 #include <Lz/detail/traits.hpp>
+#include <limits>
 
 namespace lz {
 namespace detail {
@@ -44,16 +45,15 @@ public:
 
     template<bool Sized = sized<Iterable>::value>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
-        const auto size = lz::size(_iterable);
-        return size > _n ? size - _n : 0;
+        return lz::size(_iterable) > _n ? lz::size(_iterable) - _n : 0;
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return next_fast(std::move(_iterable), static_cast<diff>(_n));
+        return next_fast_safe(std::move(_iterable), static_cast<diff>(_n));
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return next_fast(_iterable, static_cast<diff>(_n));
+        return next_fast_safe(_iterable, static_cast<diff>(_n));
     }
 
     LZ_NODISCARD constexpr sentinel end() const& {

@@ -156,6 +156,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
@@ -164,18 +165,24 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         ++_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
         --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
+        LZ_ASSERT(n < 0 ? -n <= _iterator - std::begin(_iterable) : n <= std::end(_iterable) - _iterator,
+                  "Cannot add after end/cannot subtract before begin");
         _iterator += n;
     }
 
     constexpr difference_type difference(const flatten_wrapper& other) const {
+        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
+                  "Incompatible iterators");
         return _iterator - other._iterator;
     }
 
@@ -461,8 +468,11 @@ public:
         difference_type total = 0;
         auto outer_iter = _outer_iter;
 
-        total -=
-            this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) - _inner_iter;
+        if (outer_iter.has_next()) {
+            // If the first outer iterator has next, we need to subtract the distance from the inner iterator
+            total -= this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
+                     _inner_iter;
+        }
         if (other._outer_iter.has_next()) {
             total += this_inner(*other._outer_iter, std::begin(*other._outer_iter)) - other._inner_iter;
         }

@@ -170,15 +170,23 @@ TEST_CASE("rotate_iterable binary operations") {
 }
 
 TEST_CASE("Empty or one element rotate") {
-    SECTION("Empty") {
+    SECTION("Empty, increment 2") {
         std::vector<int> vec{};
-        auto rotate = lz::rotate(vec, 0);
+        auto rotate = lz::rotate(vec, 2);
         REQUIRE(lz::empty(rotate));
         REQUIRE_FALSE(lz::has_many(rotate));
         REQUIRE_FALSE(lz::has_one(rotate));
     }
 
-    SECTION("One element") {
+    SECTION("One element, increment 2") {
+        std::vector<int> vec = { 1 };
+        auto rotate = lz::rotate(vec, 2);
+        REQUIRE(lz::empty(rotate));
+        REQUIRE(!lz::has_many(rotate));
+        REQUIRE(!lz::has_one(rotate));
+    }
+
+    SECTION("One element, increment 0") {
         std::vector<int> vec = { 1 };
         auto rotate = lz::rotate(vec, 0);
         REQUIRE_FALSE(lz::empty(rotate));
@@ -186,20 +194,28 @@ TEST_CASE("Empty or one element rotate") {
         REQUIRE(lz::has_one(rotate));
     }
 
-    SECTION("Empty with sentinel") {
+    SECTION("Empty, increment 2 with sentinel") {
         auto cstr = lz::c_string("");
-        auto rotate = lz::rotate(cstr, 0);
+        auto rotate = lz::rotate(cstr, 2);
         REQUIRE(lz::empty(rotate));
         REQUIRE_FALSE(lz::has_many(rotate));
         REQUIRE_FALSE(lz::has_one(rotate));
     }
 
-    SECTION("One element with sentinel") {
+    SECTION("One element, increment 0 with sentinel") {
         auto cstr = lz::c_string("a");
         auto rotate = lz::rotate(cstr, 0);
         REQUIRE_FALSE(lz::empty(rotate));
         REQUIRE_FALSE(lz::has_many(rotate));
         REQUIRE(lz::has_one(rotate));
+    }
+
+    SECTION("One element, increment 2") {
+        auto cstr = lz::c_string("a");
+        auto rotate = lz::rotate(cstr, 2);
+        REQUIRE(lz::empty(rotate));
+        REQUIRE(!lz::has_many(rotate));
+        REQUIRE(!lz::has_one(rotate));
     }
 }
 

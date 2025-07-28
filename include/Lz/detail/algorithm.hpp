@@ -116,7 +116,7 @@ LZ_CONSTEXPR_CXX_14 Iterator find(Iterator begin, S end, const T& value) {
 template<class Iterable>
 constexpr ref_t<iter_t<Iterable>> back(Iterable&& iterable) {
     if constexpr (has_sentinel<Iterable>::value && is_ra<iter_t<Iterable>>::value) {
-        return *(detail::begin(std::forward<Iterable>(iterable)) + (lz::eager_size(iterable) - 1));
+        return *(detail::begin(std::forward<Iterable>(iterable)) + ((std::end(iterable) - std::begin(iterable)) - 1));
     }
     else {
         auto end = detail::end(std::forward<Iterable>(iterable));
@@ -196,7 +196,7 @@ search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_
 template<class Iterable>
 constexpr enable_if<has_sentinel<Iterable>::value && is_ra<iter_t<Iterable>>::value, ref_t<iter_t<Iterable>>>
 back(Iterable&& iterable) {
-    return *(detail::begin(std::forward<Iterable>(iterable)) + (lz::eager_size(iterable) - 1));
+    return *(detail::begin(std::forward<Iterable>(iterable)) + ((std::end(iterable) - std::begin(iterable)) - 1));
 }
 
 template<class Iterable>

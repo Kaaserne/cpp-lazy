@@ -51,8 +51,16 @@ using string_view = fmt::string_view;
 
 #else
 
+namespace detail {
+template<class CharT>
+constexpr std::size_t constexpr_str_len(const CharT* str, std::size_t n = 0) noexcept {
+    return str[n] == static_cast<CharT>(0) ? n : constexpr_str_len(str, n + 1);
+}
+} // namespace detail
+
 template<class CharT>
 class basic_string_view {
+
 public:
     using iterator = const CharT*;
     using const_iterator = const CharT*;
@@ -63,9 +71,7 @@ public:
     constexpr basic_string_view(const CharT* data, std::size_t size) noexcept : _data{ data }, _size{ size } {
     }
 
-    LZ_CONSTEXPR_CXX_17 basic_string_view(const CharT* data) noexcept :
-        _data{ data },
-        _size{ std::char_traits<CharT>::length(data) } {
+    constexpr basic_string_view(const CharT* data) noexcept : basic_string_view(data, detail::constexpr_str_len(data)) {
     }
 
     constexpr basic_string_view(const CharT* begin, const CharT* end) noexcept :
@@ -86,7 +92,7 @@ public:
     }
 
     constexpr const CharT* end() const noexcept {
-        return _data + _size;
+        return _data == nullptr ? nullptr : _data + _size;
     }
 
     constexpr std::size_t length() const noexcept {

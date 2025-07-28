@@ -75,13 +75,15 @@ public:
 
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
-        static_assert(is_ra<Iterator>::value, "Iterator must be a random access range");
+        static_assert(is_ra<Iterator>::value, "Iterator must be a random access");
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
     }
 
@@ -90,12 +92,14 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         if (_ends_with_trailing && _sub_range_end == _end) {
             _sub_range_begin = _sub_range_end;
             _ends_with_trailing = false;
             return;
         }
 
+        LZ_ASSERT(_sub_range_end != _end, "Cannot increment end iterator");
         auto prev = _sub_range_end++;
         if (_sub_range_end != _end) {
             _sub_range_begin = _sub_range_end;

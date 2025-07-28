@@ -74,6 +74,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { *_first, static_cast<std::size_t>(_last - _first) };
     }
 
@@ -82,11 +83,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         _first = std::move(_last);
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_first != std::begin(_iterable), "Cannot decrement begin iterator");
         _last = _first;
 
         for (--_first; _first != std::begin(_iterable); --_first) {
@@ -179,6 +182,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end of iterable");
         return { *_first, _last_distance };
     }
 
@@ -187,11 +191,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment past end of iterable");
         _first = std::move(_last);
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_first != std::begin(_iterable), "Cannot decrement before beginning of iterable");
         _last_distance = 1;
         _last = _first;
 

@@ -221,6 +221,7 @@ TEST_CASE("Non sentinelled, forward, backward") {
     SECTION("Operator++/--, permutation 1: 3 vs 4 vs 5 items vs 4 vs 3 vs 5 items") {
         std::vector<int> expected = { 1, 4, 8, 2, 5, 9, 3, 6, 10 };
         auto interleaved = lz::interleave(a, b, c);
+
         static_assert(std::is_same<decltype(interleaved.begin()), decltype(interleaved.end())>::value, "Must not be sentinel");
 
         REQUIRE(lz::equal(interleaved, expected));

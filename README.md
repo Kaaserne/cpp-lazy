@@ -209,7 +209,7 @@ The following CMake options are available:
 - `CPP-LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
 - `CPP-LAZY_LZ_USE_MODULES` (experimental): Use C++20 modules. Default is `FALSE`
 - `CPP-LAZY_USE_INSTALLED_FMT`: Use the installed version of `{fmt}`. This will not use the bundled version. Will use `find_package(fmt)` if enabled. Default is `FALSE`.
-- `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions in other build configurations than debug (debug is always enabled). Default is `FALSE`.
+- `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
 
 ### Using `FetchContent`
 The following way is recommended (cpp-lazy version >= 5.0.1). Note that you choose the cpp-lazy-src.zip, and not the source-code.zip/source-code.tar.gz. This prevents you from downloading stuff that you don't need, and thus preventing pollution of the cmake build directory:

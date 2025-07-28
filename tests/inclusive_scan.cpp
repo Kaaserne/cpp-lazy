@@ -45,7 +45,7 @@ TEST_CASE("Empty or one element inclusive scan") {
 TEST_CASE("Inclusive scan changing and creating elements") {
     int arr[32];
     std::iota(std::begin(arr), std::end(arr), 0);
-    auto scan = arr | lz::inclusive_scan(0);
+    auto scan = arr | lz::inclusive_scan;
     REQUIRE(scan.size() == lz::size(arr));
     auto begin = scan.begin();
 

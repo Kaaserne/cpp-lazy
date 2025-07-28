@@ -123,7 +123,6 @@ private:
             return _index == I ? *std::get<I>(_iterators) : dereference<I + 1>();
         }
         else {
-            LZ_ASSERT(_index == I, "Out of bounds dereference");
             return *std::get<I>(_iterators);
         }
     }
@@ -137,7 +136,6 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, reference> dereference() const noexcept {
-        LZ_ASSERT(_index == I, "Out of bounds dereference");
         return *std::get<I>(_iterators);
     }
 

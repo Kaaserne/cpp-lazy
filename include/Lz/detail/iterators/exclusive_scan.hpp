@@ -14,7 +14,7 @@ class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator
     Iterator _iterator;
     mutable T _reducer;
     S _end;
-    bool _reached_end{true};
+    bool _reached_end{ true };
     mutable BinaryOp _binary_op;
 
     using traits = std::iterator_traits<Iterator>;
@@ -60,6 +60,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return _reducer;
     }
 
@@ -68,6 +69,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         if (_iterator == _end) {
             _reached_end = true;
             return;

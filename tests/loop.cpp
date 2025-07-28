@@ -75,14 +75,11 @@ TEST_CASE("Loop with non while true argument") {
 
     SECTION("Size") {
         auto looper = lz::loop(vec, 2);
-        REQUIRE(looper.size() == 8);
-        REQUIRE(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
-    }
-
-    SECTION("To vector") {
-        auto looper = lz::loop(vec, 2);
-        std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
-        REQUIRE((looper | lz::to<std::vector>()) == expected);
+        CHECK(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
+        CHECK(looper.size() == 8);
+        looper = lz::loop(vec, 3);
+        CHECK(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
+        CHECK(looper.size() == 12);
     }
 
     SECTION("Operator+") {
@@ -90,12 +87,15 @@ TEST_CASE("Loop with non while true argument") {
         std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
         test_procs::test_operator_plus(looper, expected);
 
+        looper = lz::loop(vec, 3);
+        expected = { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
+        test_procs::test_operator_plus(looper, expected);
+
         looper = lz::loop(vec, 1);
         expected = { 1, 2, 3, 4 };
         test_procs::test_operator_plus(looper, expected);
     }
 
-    
     SECTION("Operator-") {
         auto looper = lz::loop(vec, 2);
         test_procs::test_operator_minus(looper);

@@ -56,6 +56,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_prev_it;
     }
 
@@ -64,6 +65,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot decrement end iterator");
         _iterator = _prev_it;
         if (_prev_it != _begin) {
             --_prev_it;
@@ -83,7 +85,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const cached_reverse_iterator& other) const {
-        LZ_ASSERT(other._begin == _begin, "Cannot compare iterators from different ranges");
+        LZ_ASSERT(other._begin == _begin, "Incompatible iterators");
         return static_cast<difference_type>(other._iterator - _iterator);
     }
 

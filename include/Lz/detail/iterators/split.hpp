@@ -71,6 +71,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     constexpr reference dereference() const {
+        LZ_ASSERT(_sub_range_begin != _end, "Cannot dereference end iterator");
         if constexpr (std::is_constructible_v<ValueType, Iterator, Iterator>) {
             return { _sub_range_begin, _sub_range_end.first };
         }
@@ -84,12 +85,14 @@ public:
 
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        LZ_ASSERT(_sub_range_begin != _end, "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end.first };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        LZ_ASSERT(_sub_range_begin != _end, "Cannot dereference end iterator");
         return { std::addressof(*_sub_range_begin),
                  static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
     }
@@ -101,6 +104,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+
         if (_ends_with_trailing && _sub_range_end.second == _end) {
             _sub_range_begin = _sub_range_end.first;
             _ends_with_trailing = false;
@@ -184,24 +189,43 @@ public:
         return *this;
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        if constexpr (std::is_constructible_v<ValueType, Iterator, Iterator>) {
+            return { _sub_range_begin, _sub_range_end };
+        }
+        else {
+            return { std::addressof(*_sub_range_begin),
+                     static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
+        }
+    }
+
+#else
+
     template<class V = ValueType>
     constexpr enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
     }
+
+#endif
 
     constexpr pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         _sub_range_begin = _sub_range_end;
-
         if (_sub_range_begin == _end) {
             _ends_with_trailing = false;
             _sub_range_begin = _sub_range_end;

@@ -73,11 +73,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         ++_iterator;
         incremented_check();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
         if (_iterator != std::end(_iterable)) {
             --_iterator;
             return;
@@ -88,10 +90,11 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
-    constexpr pointer arrow() const {
+    constexpr pointer arrow() const {   
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 

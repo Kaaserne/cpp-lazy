@@ -1,35 +1,44 @@
 #include <Lz/common.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <catch2/catch.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
 
+struct eq_pair {
+    template<class T1, class T2>
+    bool operator()(const T1& first, const T2& second) const {
+        return first.first == second.first && lz::equal(first.second, second.second);
+    }
+};
+
 TEST_CASE("Group by with sentinels") {
     auto cstr = lz::c_string("aaabbccccd");
     std::function<bool(char, char)> equal = [](char a, char b) {
         return a == b;
     };
-    lz::group_by_iterable<decltype(cstr), decltype(equal)> grouper = lz::group_by(cstr, std::move(equal));
-    auto it = grouper.begin();
 
-    REQUIRE(lz::equal(it->second, lz::c_string("aaa")));
-    ++it;
-    REQUIRE(lz::equal(it->second, lz::c_string("bb")));
-    ++it;
-    REQUIRE(lz::equal(it->second, lz::c_string("cccc")));
-    ++it;
-    REQUIRE(lz::equal(it->second, lz::c_string("d")));
-    ++it;
-    REQUIRE(it == grouper.end());
+    lz::group_by_iterable<decltype(cstr), decltype(equal)> grouper = lz::group_by(cstr, std::move(equal));
+    auto expected = { std::make_pair('a', lz::c_string("aaa")), std::make_pair('b', lz::c_string("bb")),
+                      std::make_pair('c', lz::c_string("cccc")), std::make_pair('d', lz::c_string("d")) };
+
+    REQUIRE(lz::equal(grouper, expected, eq_pair{}));
 
     SECTION("Operator=") {
-        it = grouper.begin();
+        auto it = grouper.begin();
         REQUIRE(it == grouper.begin());
+        REQUIRE(it != grouper.end());
+        REQUIRE(grouper.end() != it);
+        REQUIRE(grouper.begin() == it);
+
         it = grouper.end();
         REQUIRE(it == grouper.end());
+        REQUIRE(grouper.end() == it);
+        REQUIRE(grouper.begin() != it);
+        REQUIRE(it != grouper.begin());
     }
 }
 
@@ -82,127 +91,36 @@ TEST_CASE("group_by binary operations") {
     auto grouper = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
 
     SECTION("Operator++") {
-        auto it = grouper.begin();
-        std::vector<std::string> expected = { "a" };
-        REQUIRE(lz::equal(it->second, expected));
-        REQUIRE(it->first == "a");
-        ++it;
-        expected = { "bb" };
-        REQUIRE(it->first == "bb");
-        REQUIRE(lz::equal(it->second, expected));
-        ++it;
-        expected = { "ccc", "ccc" };
-        REQUIRE(it->first == "ccc");
-        REQUIRE(lz::equal(it->second, expected));
-        ++it;
-        expected = { "dddd", "dddd" };
-        REQUIRE(it->first == "dddd");
-        REQUIRE(lz::equal(it->second, expected));
-        ++it;
-        REQUIRE(it == grouper.end());
+        std::vector<std::pair<std::string, std::vector<std::string>>> expected = {
+            std::make_pair("a", std::vector<std::string>{ "a" }), std::make_pair("bb", std::vector<std::string>{ "bb" }),
+            std::make_pair("ccc", std::vector<std::string>{ "ccc", "ccc" }),
+            std::make_pair("dddd", std::vector<std::string>{ "dddd", "dddd" })
+        };
+        REQUIRE(lz::equal(grouper, expected, eq_pair{}));
 
         vec = { "a", "bb", "ccc", "ccc", "dddd" };
         auto grouper2 = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
-        auto it2 = grouper2.begin();
-        REQUIRE(it2->first == "a");
-        expected = { "a" };
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        REQUIRE(it2->first == "bb");
-        expected = { "bb" };
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        REQUIRE(it2->first == "ccc");
-        expected = { "ccc", "ccc" };
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        REQUIRE(it2->first == "dddd");
-        expected = { "dddd" };
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        REQUIRE(it2 == grouper2.end());
+        expected = { std::make_pair("a", std::vector<std::string>{ "a" }), std::make_pair("bb", std::vector<std::string>{ "bb" }),
+                     std::make_pair("ccc", std::vector<std::string>{ "ccc", "ccc" }),
+                     std::make_pair("dddd", std::vector<std::string>{ "dddd" }) };
+        REQUIRE(lz::equal(grouper2, expected, eq_pair{}));
     }
 
     SECTION("Operator--") {
-        auto it = grouper.end();
-        --it;
-        std::vector<std::string> expected = { "dddd", "dddd" };
-        REQUIRE(it->first == "dddd");
-        REQUIRE(lz::equal(it->second, expected));
-        --it;
-        expected = { "ccc", "ccc" };
-        REQUIRE(it->first == "ccc");
-        REQUIRE(lz::equal(it->second, expected));
-        --it;
-        expected = { "bb" };
-        REQUIRE(it->first == "bb");
-        REQUIRE(lz::equal(it->second, expected));
-        --it;
-        expected = { "a" };
-        REQUIRE(it->first == "a");
-        REQUIRE(lz::equal(it->second, expected));
-        REQUIRE(it == grouper.begin());
-
-        ++it;
-        expected = { "bb" };
-        REQUIRE(it->first == "bb");
-        REQUIRE(lz::equal(it->second, expected));
-        ++it;
-        expected = { "ccc", "ccc" };
-        REQUIRE(it->first == "ccc");
-        REQUIRE(lz::equal(it->second, expected));
-        ++it;
-        expected = { "dddd", "dddd" };
-        REQUIRE(it->first == "dddd");
-        REQUIRE(lz::equal(it->second, expected));
-        ++it;
-        REQUIRE(it == grouper.end());
+        std::vector<std::pair<std::string, std::vector<std::string>>> expected = {
+            std::make_pair("dddd", std::vector<std::string>{ "dddd", "dddd" }),
+            std::make_pair("ccc", std::vector<std::string>{ "ccc", "ccc" }),
+            std::make_pair("bb", std::vector<std::string>{ "bb" }), std::make_pair("a", std::vector<std::string>{ "a" })
+        };
+        REQUIRE(lz::equal(grouper | lz::reverse, expected, eq_pair{}));
 
         vec = { "a", "a", "bb", "ccc", "ccc", "dddd", "dddd" };
         auto grouper2 = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
-        auto it2 = grouper2.end();
-        --it2;
-
-        expected = { "dddd", "dddd" };
-        REQUIRE(it2->first == "dddd");
-        REQUIRE(lz::equal(it2->second, expected));
-        --it2;
-        expected = { "ccc", "ccc" };
-        REQUIRE(it2->first == "ccc");
-        REQUIRE(lz::equal(it2->second, expected));
-        --it2;
-        expected = { "bb" };
-        REQUIRE(it2->first == "bb");
-        REQUIRE(lz::equal(it2->second, expected));
-        --it2;
-        expected = { "a", "a" };
-        REQUIRE(it2->first == "a");
-        REQUIRE(lz::equal(it2->second, expected));
-        REQUIRE(it2 == grouper2.begin());
-
-        ++it2;
-        expected = { "bb" };
-        REQUIRE(it2->first == "bb");
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        expected = { "ccc", "ccc" };
-        REQUIRE(it2->first == "ccc");
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        expected = { "dddd", "dddd" };
-        REQUIRE(it2->first == "dddd");
-        REQUIRE(lz::equal(it2->second, expected));
-        ++it2;
-        REQUIRE(it2 == grouper2.end());
-    }
-
-    SECTION("Operator== & operator!=") {
-        auto it = grouper.begin();
-        REQUIRE(it != grouper.end());
-        while (it != grouper.end()) {
-            ++it;
-        }
-        REQUIRE(it == grouper.end());
+        expected = { std::make_pair("dddd", std::vector<std::string>{ "dddd", "dddd" }),
+                     std::make_pair("ccc", std::vector<std::string>{ "ccc", "ccc" }),
+                     std::make_pair("bb", std::vector<std::string>{ "bb" }),
+                     std::make_pair("a", std::vector<std::string>{ "a", "a" }) };
+        REQUIRE(lz::equal(grouper2 | lz::reverse, expected, eq_pair{}));
     }
 }
 

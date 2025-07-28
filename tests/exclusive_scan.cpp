@@ -24,7 +24,7 @@ TEST_CASE("Exclusive scan with sentinels") {
 TEST_CASE("exclusive_scan basic functionality") {
     static constexpr std::size_t arr_size = 8;
     int arr[arr_size] = { 3, 1, 4, 1, 5, 9, 2, 6 };
-    auto scan = arr | lz::exclusive_scan(0);
+    auto scan = arr | lz::exclusive_scan;
     REQUIRE(scan.size() == arr_size + 1);
     auto vec = scan | lz::to<std::vector>();
     (void)vec;

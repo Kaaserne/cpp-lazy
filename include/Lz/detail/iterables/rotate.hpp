@@ -13,9 +13,11 @@ namespace detail {
 template<class Iterable>
 class rotate_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
+    using diff_t = diff_type<inner_iter>;
 
     ref_or_view<Iterable> _iterable;
     inner_iter _start_iter;
+    std::size_t _start_index{};
 
 public:
     using iterator = rotate_iterator<ref_or_view<Iterable>>;
@@ -45,9 +47,10 @@ public:
 #endif
 
     template<class I>
-    constexpr rotate_iterable(I&& iterable, const diff_type<inner_iter> start) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterable(I&& iterable, const diff_t start) :
         _iterable{ std::forward<I>(iterable) },
-        _start_iter{ next_fast(_iterable, start) } {
+        _start_iter{ next_fast_safe(_iterable, start) },
+        _start_index{ static_cast<std::size_t>(start) } {
     }
 
     template<class I = Iterable>
@@ -56,12 +59,12 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { _iterable, _start_iter, 0 };
+        return { _iterable, _start_iter, _start_iter == std::end(_iterable) ? _start_index : 0 };
     }
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { std::move(_iterable), std::move(_start_iter), 0 };
+        return { std::move(_iterable), std::move(_start_iter), _start_iter == std::end(_iterable) ? _start_index : 0 };
     }
 
 #ifdef LZ_HAS_CXX_17

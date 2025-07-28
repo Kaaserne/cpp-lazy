@@ -46,7 +46,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 rotate_iterator(I&& iterable, iter start, const std::size_t offset) :
+    constexpr rotate_iterator(I&& iterable, iter start, const std::size_t offset) :
         _iterator{ std::move(start) },
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset } {
@@ -58,7 +58,8 @@ public:
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT(_iterator != std::end(_iterable), "Cannot dereference end iterator");
         return *_iterator;
     }
 
@@ -67,6 +68,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(_iterator != std::end(_iterable), "Cannot increment end iterator");
         ++_iterator;
         ++_offset;
         if (_iterator == std::end(_iterable)) {
@@ -78,13 +80,14 @@ public:
         if (_iterator == std::begin(_iterable)) {
             _iterator = std::end(_iterable);
         }
+        LZ_ASSERT(_offset != 0 && _iterator != std::begin(_iterable), "Cannot decrement begin iterator");
         --_iterator;
         --_offset;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         LZ_ASSERT((n < 0 ? -n : n) <= (std::end(_iterable) - std::begin(_iterable)),
-                  "Cannot increment/decrement after fake iterator end/begin");
+                  "Cannot add after end/cannot subtract before begin");
         _offset += static_cast<std::size_t>(n);
         if (n < 0) {
             n = -n;
@@ -94,9 +97,8 @@ public:
             else {
                 _iterator += -n;
             }
-            return;
         }
-        if (n >= std::end(_iterable) - _iterator) {
+        else if (n >= std::end(_iterable) - _iterator) {
             _iterator = std::begin(_iterable) + (n - (std::end(_iterable) - _iterator));
         }
         else {
@@ -110,21 +112,18 @@ public:
         return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
-    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+    constexpr difference_type difference(default_sentinel_t) const {
         return -static_cast<difference_type>(_offset);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& b) const {
         LZ_ASSERT(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable),
                   "Incompatible iterators");
-        return _offset == b._offset;
+        return _offset == b._offset || (_iterator == std::end(_iterable) && b._iterator == std::end(b._iterable));
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const iter& b) const {
-        if (_offset == 0 && _iterator != std::end(_iterable)) {
-            return false;
-        }
-        return _iterator == b;
+    constexpr bool eq(const iter& b) const {
+        return (_offset != 0 || _iterator == std::end(_iterable)) && _iterator == b;
     }
 };
 } // namespace detail

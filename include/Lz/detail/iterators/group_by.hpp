@@ -74,6 +74,7 @@ public:
         _sub_range_begin{ std::move(iter) },
         _iterable{ std::forward<I>(iterable) },
         _comparer{ std::move(binary_predicate) } {
+
         advance();
     }
 
@@ -83,6 +84,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
 
@@ -91,11 +93,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         _sub_range_begin = _sub_range_end;
         advance();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
         _sub_range_end = _sub_range_begin;
         auto prev = --_sub_range_begin;
 

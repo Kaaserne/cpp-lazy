@@ -253,6 +253,7 @@ private:
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
+        LZ_ASSERT(longest > 0, "Cannot decrement before begin");
 #ifdef LZ_HAS_CXX_17
         ((std::get<I>(_distances) == longest ? static_cast<void>(--std::get<I>(_iterators), --std::get<I>(_distances))
                                              : (void)(0)),
@@ -311,6 +312,7 @@ private:
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void min_is(const difference_type offset, index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
+        LZ_ASSERT(offset <= longest, "Cannot subtract before begin");
 #ifdef LZ_HAS_CXX_17
         (min_is_one<I>(longest, offset), ...);
 #else
@@ -334,20 +336,12 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
-#ifdef LZ_HAS_CXX_17
-        return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
-#else
-        return std::min({ std::get<I>(_iterators) == std::get<I>(_end)... });
-#endif
+        return _iterators == _end;
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
-#ifdef LZ_HAS_CXX_17
-        return ((std::get<I>(_iterators) == std::get<I>(other._iterators)) && ...);
-#else
-        return std::min({ (std::get<I>(_iterators) == std::get<I>(other._iterators))... });
-#endif
+        return _iterators == other._iterators;
     }
 
     template<std::size_t... I>
@@ -389,6 +383,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return dereference(is{});
     }
 
@@ -397,6 +392,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         increment(is{});
     }
 
@@ -409,6 +405,7 @@ public:
             min_is(-offset, is{});
         }
         else {
+            LZ_ASSERT(difference(lz::default_sentinel) <= offset, "Cannot increment end iterator");
             plus_is(offset, is{});
         }
     }

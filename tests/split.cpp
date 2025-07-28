@@ -61,6 +61,7 @@ TEST_CASE("Splitter permutations") {
     SECTION("Ending with one delimiter starting with none") {
         const std::string to_split = "Hello world test 123 ";
         auto splitter = lz::sv_split(to_split, " ");
+
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
         REQUIRE(lz::equal(splitter, expected));
 

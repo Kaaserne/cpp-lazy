@@ -60,6 +60,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
@@ -68,7 +69,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         ++_iterator;
+
         if (_iterator == std::end(_iterable)) {
             --_rotations_left;
             _iterator = std::begin(_iterable);
@@ -92,6 +95,9 @@ public:
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
         _rotations_left -= static_cast<std::size_t>(offset / iter_length);
+
+        LZ_ASSERT(static_cast<difference_type>(_rotations_left) >= -1, "Cannot increment after end");
+
         if (_iterator == std::begin(_iterable) && static_cast<difference_type>(_rotations_left) == -1) {
             // We are exactly at end (rotations left is unsigned)
             _iterator = std::end(_iterable);

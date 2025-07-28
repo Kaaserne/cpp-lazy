@@ -66,6 +66,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return { _sub_range_begin, _sub_range_end };
     }
 
@@ -74,6 +75,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
@@ -153,13 +155,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_sub_range_begin != _end, "Out of bounds");
+        LZ_ASSERT(_sub_range_begin != _end, "Cannot increment end iterator");
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_distance != 0, "Out of bounds");
+        LZ_ASSERT(_distance != 0, "Cannot decrement begin iterator");
         _sub_range_end = _sub_range_begin;
 
         auto start_pos = _distance % _chunk_size;
@@ -219,7 +221,7 @@ public:
         _sub_range_begin{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {
-        LZ_ASSERT(_chunk_size != 0, "Can't increment by 0");
+        LZ_ASSERT(_chunk_size != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
@@ -229,6 +231,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         using s = typename std::make_signed<std::size_t>::type;
+        LZ_ASSERT(_sub_range_begin != std::end(_iterable), "Cannot dereference end iterator");
         auto sub_range_end =
             _sub_range_begin +
             static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
@@ -240,13 +243,14 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_sub_range_begin != std::end(_iterable), "Out of bounds");
+        LZ_ASSERT(_sub_range_begin != std::end(_iterable), "Cannot increment end iterator");
         using s = typename std::make_signed<std::size_t>::type;
         _sub_range_begin +=
             static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
         const auto remaining = static_cast<std::size_t>(_sub_range_begin - std::begin(_iterable));
         const auto offset = remaining % _chunk_size;
 
@@ -277,7 +281,7 @@ public:
                 _sub_range_begin += to_add;
                 return;
             }
-            LZ_ASSERT(to_add - current_distance < s_chunk_size, "Out of bounds");
+            LZ_ASSERT(to_add - current_distance < s_chunk_size, "Cannot add after end");
             _sub_range_begin = std::end(_iterable);
             return;
         }
@@ -288,8 +292,9 @@ public:
             _sub_range_begin += to_add;
             return;
         }
-        _sub_range_begin -= remainder;
-        _sub_range_begin += (offset + 1) * s_chunk_size;
+        const auto to_subtract = remainder + (-(offset + 1) * s_chunk_size);
+        LZ_ASSERT(current_distance >= to_subtract, "Cannot subtract before begin");
+        _sub_range_begin -= to_subtract;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const chunks_iterator& rhs) const {
@@ -304,8 +309,8 @@ public:
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
         const auto total_distance = std::end(_iterable) - _sub_range_begin;
-        const auto remainder = total_distance % _chunk_size;
-        const auto quotient = total_distance / _chunk_size;
+        const auto remainder = total_distance % static_cast<difference_type>(_chunk_size);
+        const auto quotient = total_distance / static_cast<difference_type>(_chunk_size);
         return -(remainder == 0 ? quotient : quotient + (total_distance < 0 ? -1 : 1));
     }
 };

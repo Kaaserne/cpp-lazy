@@ -225,6 +225,24 @@ TEST_CASE("Drop & slice") {
         REQUIRE(lz::equal(drop, expected));
     }
 
+    SECTION("Empty drop") {
+        std::vector<int> vec;
+        auto drop = vec | lz::drop(3);
+        REQUIRE(drop.size() == 0);
+        REQUIRE(lz::empty(drop));
+        REQUIRE(!lz::has_one(drop));
+        REQUIRE(!lz::has_many(drop));
+    }
+
+    SECTION("Drop where n is larger than size") {
+        std::vector<int> vec = { 1, 2, 3 };
+        auto drop = vec | lz::drop(10);
+        REQUIRE(drop.size() == 0);
+        REQUIRE(lz::empty(drop));
+        REQUIRE(!lz::has_one(drop));
+        REQUIRE(!lz::has_many(drop));
+    }
+
     SECTION("Drop where n is larger than size / 2, sized & random access") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
         auto drop = vec | lz::drop(6);

@@ -83,7 +83,12 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
     }
 
     LZ_CONSTEXPR_CXX_14 Derived operator+(const DifferenceType n) const {
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
         auto tmp = static_cast<const Derived&>(*this);
+#pragma GCC diagnostic pop
+#endif
         tmp += n;
         return tmp;
     }

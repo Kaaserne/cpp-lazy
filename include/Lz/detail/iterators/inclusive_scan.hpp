@@ -58,10 +58,12 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return _reducer;
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         ++_iterator;
         if (_iterator != _end) {
             _reducer = _binary_op(std::move(_reducer), *_iterator);
@@ -73,7 +75,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const inclusive_scan_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "inclusive_scan_iterators are not compatible");
+        LZ_ASSERT(_end == b._end, "Incompatible iterators");
         return _iterator == b._iterator;
     }
 

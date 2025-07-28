@@ -115,7 +115,9 @@ TEST_CASE("zip_longest_iterable binary operations") {
 
     SECTION("Operator-(default_sentinel)") {
         auto first = lz::repeat(1, 5), second = lz::repeat(1, 4);
-        test_procs::test_operator_minus(lz::zip_longest(first, second));
+        auto l = lz::zip_longest(first, second);
+        REQUIRE(lz::size(l) == 5);
+        test_procs::test_operator_minus(l);
     }
 }
 

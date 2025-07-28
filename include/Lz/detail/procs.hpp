@@ -10,7 +10,7 @@
 
 // clang-format off
 
-#if !defined(NDEBUG) || defined(LZ_DEBUG_ASSERTIONS)
+#if defined(LZ_DEBUG_ASSERTIONS)
   #define LZ_USE_DEBUG_ASSERTIONS
 #endif
 
@@ -179,7 +179,7 @@ LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
 #ifdef LZ_HAS_CXX_17
 
 template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
+[[nodiscard]] constexpr iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
     using iter = iter_t<I>;
 
     if constexpr (sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value) {
@@ -192,7 +192,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<I> next_fast(I&& iterable, diff_iterable
 }
 
 template<class I>
-constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
+[[nodiscard]] constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
     using diff_type = diff_iterable_t<I>;
 
     auto begin = std::begin(iterable);
@@ -229,7 +229,7 @@ constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
 
 template<class I>
 LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    LZ_CONSTEXPR_CXX_17 enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, const diff_iterable_t<I> n) {
 
     const auto size = lz::ssize(iterable);
@@ -241,13 +241,13 @@ LZ_NODISCARD
 
 template<class I>
 LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_14 enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    LZ_CONSTEXPR_CXX_17 enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, diff_iterable_t<I> n) {
     return std::next(detail::begin(std::forward<I>(iterable)), n);
 }
 
 template<class I>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17
     enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
@@ -391,6 +391,27 @@ LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, std::s
 }
 
 #endif
+
+/**
+ * @brief Gets the signed size of an iterable. If the iterable is not sized, it will calculate the size by iterating over the
+ * iterable, which is O(n), unless it is random access. Example:
+ * ```cpp
+ * // Sized, making it O(1)
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * std::cout << lz::eager_ssize(vec) << '\n'; // prints 5
+ *
+ * // Not sized, not random access, making it O(n)
+ * auto not_sized = lz::c_string("Hello");
+ * std::cout << lz::eager_ssize(not_sized) << '\n'; // prints 5
+ * ```
+ *
+ * @param c The iterable to get the size of.
+ * @return The size of the iterable.
+ */
+template<class Iterable>
+LZ_NODISCARD constexpr diff_iterable_t<Iterable> eager_ssize(Iterable&& c) {
+    return static_cast<diff_iterable_t<Iterable>>(eager_size(std::forward<Iterable>(c)));
+}
 
 LZ_MODULE_EXPORT_SCOPE_END
 

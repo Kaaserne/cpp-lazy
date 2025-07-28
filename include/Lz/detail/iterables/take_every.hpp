@@ -34,47 +34,7 @@ private:
     std::size_t _offset{};
     std::size_t _start{};
 
-#ifdef LZ_HAS_CXX_17
-
-    constexpr iter get_begin() const {
-        const auto dist = std::end(_iterable) - std::begin(_iterable);
-
-        if constexpr (is_sentinel<iter, sent>::value) {
-            if (_start >= static_cast<std::size_t>(dist)) {
-                return std::begin(_iterable) + dist;
-            }
-        }
-        else {
-            if (_start >= static_cast<std::size_t>(dist)) {
-                return std::end(_iterable);
-            }
-        }
-        return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
-    }
-
-#else
-
-    template<class I = iter>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_sentinel<I, sent>::value, iter> get_begin() const {
-        const auto dist = std::end(_iterable) - std::begin(_iterable);
-
-        if (_start >= static_cast<std::size_t>(dist)) {
-            return std::begin(_iterable) + dist;
-        }
-        return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
-    }
-
-    template<class I = iter>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sent>::value, iter> get_begin() const {
-        if (_start >= static_cast<std::size_t>(std::end(_iterable) - std::begin(_iterable))) {
-            return std::end(_iterable);
-        }
-        return std::begin(_iterable) + static_cast<typename iterator::difference_type>(_start);
-    }
-
-#endif
-
-    using diff_type = typename iterator::difference_type;
+    using diff = typename iterator::difference_type;
 
     static constexpr bool return_sentinel =
         !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter_t<Iterable>, sent>::value;
@@ -104,13 +64,13 @@ public:
     template<class I = Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, std::size_t> size() const {
         const auto cur_size = static_cast<std::size_t>(lz::size(_iterable));
-        if (cur_size == 0) {
+        if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
             return 0;
         }
 
-        const auto actual_size = std::max(diff_type{ 1 }, static_cast<diff_type>(cur_size - _start));
-        const auto rem = actual_size % static_cast<diff_type>(_offset);
-        const auto quot = actual_size / static_cast<diff_type>(_offset);
+        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size - _start));
+        const auto rem = actual_size % static_cast<diff>(_offset);
+        const auto quot = actual_size / static_cast<diff>(_offset);
 
         return static_cast<std::size_t>(quot) + static_cast<std::size_t>(rem == 0 ? 0 : 1);
     }
@@ -118,22 +78,15 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const& {
-        if constexpr (!is_bidi_tag<typename iterator::iterator_category>::value) {
-            // forward iterators can only go forward, so next_fast_safe is not needed
-            auto begin = std::begin(_iterable);
-            for (std::size_t i = 0; i < _start && begin != std::end(_iterable); ++i, ++begin) {
-            }
-            return { begin, std::end(_iterable), _offset };
+        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
+            return { _iterable, start_pos, _offset };
         }
-        else if constexpr (std::is_same_v<typename iterator::iterator_category, std::bidirectional_iterator_tag>) {
-            // bidirectional iterator can go both ways, so we use next_fast_safe
-            auto begin = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
-            return { begin, std::end(_iterable), _offset, _start };
+        else if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
+            return { start_pos, std::end(_iterable), _offset, _start };
         }
         else {
-            // random access iterator can go both ways O(1), no need to use next_fast_safe
-            auto start_pos = get_begin();
-            return { start_pos, start_pos, std::end(_iterable), _offset };
+            return { start_pos, std::end(_iterable), _offset };
         }
     }
 
@@ -141,24 +94,21 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
-        // forward iterator can only go forward, so next_fast_safe is not needed
-        auto begin = std::begin(_iterable);
-        for (std::size_t i = 0; i < _start && begin != std::end(_iterable); ++i, ++begin) {
-        }
-        return { begin, std::end(_iterable), _offset };
+        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        return { start_pos, std::end(_iterable), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator> begin() const& {
-        auto begin = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
-        return { begin, std::end(_iterable), _offset, _start };
+        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        return { start_pos, std::end(_iterable), _offset, _start };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> begin() const& {
         // random access iterator can go both ways O(1), no need to use next_fast_safe
-        auto start_pos = get_begin();
-        return { start_pos, start_pos, std::end(_iterable), _offset };
+        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        return { _iterable, start_pos, _offset };
     }
 
 #endif
@@ -166,11 +116,9 @@ public:
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
         // forward iterator can only go forward, so next_fast_safe is not needed
-        auto begin = detail::begin(std::move(_iterable));
-        auto end = detail::end(std::move(_iterable));
-        for (std::size_t i = 0; i < _start && begin != end; ++i, ++begin) {
-        }
-        return { begin, end, _offset };
+        auto end = std::end(_iterable);
+        auto start_pos = next_fast_safe(std::move(_iterable), static_cast<typename iterator::difference_type>(_start));
+        return { start_pos, end, _offset };
     }
 
 #ifdef LZ_HAS_CXX_17
@@ -179,13 +127,11 @@ public:
         if constexpr (return_sentinel) {
             return lz::default_sentinel;
         }
-        else if constexpr (std::is_same_v<typename iterator::iterator_category, std::bidirectional_iterator_tag>) {
+        else if constexpr (!is_ra_tag<typename iterator::iterator_category>::value) {
             return iterator{ std::end(_iterable), std::end(_iterable), _offset, lz::eager_size(_iterable) - _start };
         }
         else {
-            // random access iterator can go both ways O(1), no need to use next_fast_safe
-            auto start_pos = get_begin();
-            return iterator{ std::end(_iterable), start_pos, std::end(_iterable), _offset };
+            return iterator{ _iterable, std::end(_iterable), _offset };
         }
     }
 
@@ -193,9 +139,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() const {
-        // random access iterator can go both ways O(1), no need to use next_fast_safe
-        auto start_pos = get_begin();
-        return { std::end(_iterable), start_pos, std::end(_iterable), _offset };
+        return { _iterable, std::end(_iterable), _offset };
     }
 
     template<class I = typename iterator::iterator_category>

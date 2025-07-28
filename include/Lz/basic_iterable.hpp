@@ -348,14 +348,11 @@ copy_to_container(Iterable&& iterable, Container& container) {
 
 template<class Container>
 struct container_constructor {
-    template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
-    using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
-
 #ifdef LZ_HAS_CXX_17
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     [[nodiscard]] constexpr Container construct(Iterable&& iterable, Args&&... args) const {
-        if constexpr (can_construct<Iterable, Args...>::value) {
+        if constexpr (std::is_constructible_v<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>) {
             return Container(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                              std::forward<Args>(args)...);
         }
@@ -367,6 +364,9 @@ struct container_constructor {
     }
 
 #else
+
+    template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
+    using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     LZ_NODISCARD constexpr enable_if<can_construct<Iterable, Args...>::value, Container>

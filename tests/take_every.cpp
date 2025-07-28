@@ -97,7 +97,7 @@ TEST_CASE("Empty or one element take every") {
     SECTION("One element 2") {
         std::vector<int> vec = { 1 };
         auto take_every = lz::take_every(vec, 2, 3);
-        REQUIRE(take_every.size() == 1);
+        REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
         REQUIRE_FALSE(lz::has_many(take_every));
         REQUIRE_FALSE(lz::has_one(take_every));
@@ -115,7 +115,7 @@ TEST_CASE("Empty or one element take every") {
     SECTION("One element 4") {
         std::list<int> vec = { 1 };
         auto take_every = lz::take_every(vec, 2, 3);
-        REQUIRE(take_every.size() == 1);
+        REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
         REQUIRE_FALSE(lz::has_many(take_every));
         REQUIRE_FALSE(lz::has_one(take_every));
@@ -196,6 +196,7 @@ TEST_CASE("take_every_iterable binary operations") {
     SECTION("Operator+") {
         std::vector<int> even_sized = { 1, 2, 3, 4 };
         std::vector<int> odd_sized = { 1, 2, 3, 4, 5 };
+
         auto even_sized_even_take = lz::take_every(even_sized, 2);
         auto even_sized_odd_take = lz::take_every(even_sized, 3);
         auto uneven_sized_even_take = lz::take_every(odd_sized, 2);

@@ -55,7 +55,7 @@ public:
         _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset } {
-        LZ_ASSERT(_offset != 0, "Can't increment by 0");
+        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
@@ -64,6 +64,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
@@ -72,7 +73,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_iterator != _end, "Out of bounds");
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         for (std::size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
         }
     }
@@ -129,7 +130,7 @@ public:
         _end{ std::move(end) },
         _offset{ offset },
         _distance{ distance } {
-        LZ_ASSERT(_offset != 0, "Can't increment by 0");
+        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
@@ -138,6 +139,7 @@ public:
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
@@ -146,7 +148,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_iterator != _end, "Out of bounds");
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
         for (std::size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count, ++_distance) {
         }
     }
@@ -185,11 +187,18 @@ public:
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
-    // TODO add iterable
+
+private:
+    Iterable _iterable;
     it _iterator;
-    it _begin;
-    sent _end;
     std::size_t _offset{};
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference_impl(const sent& iter) const {
+        const auto remaining = _iterator - iter;
+        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
+        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
+        return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
+    }
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -208,20 +217,21 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(it iter, it begin, sent end, const std::size_t offset) :
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 take_every_iterator(I&& iterable, it iter, const std::size_t offset) :
+        _iterable{ std::forward<I>(iterable) },
         _iterator{ std::move(iter) },
-        _begin{ std::move(begin) },
-        _end{ std::move(end) },
         _offset{ offset } {
         LZ_ASSERT(_offset != 0, "Can't increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
-        _iterator = _end;
+        _iterator = std::end(_iterable);
         return *this;
     }
 
     constexpr reference dereference() const {
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
         return *_iterator;
     }
 
@@ -230,10 +240,10 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        const auto distance = static_cast<std::size_t>(_end - _iterator);
+        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        const auto distance = static_cast<std::size_t>(std::end(_iterable) - _iterator);
         if (_offset >= distance) {
-            LZ_ASSERT(_iterator != _end, "Out of bounds");
-            _iterator = _end;
+            _iterator = std::end(_iterable);
         }
         else {
             _iterator += static_cast<difference_type>(_offset);
@@ -241,14 +251,10 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        const auto remaining = static_cast<std::size_t>(_iterator - _begin);
+        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        const auto remaining = static_cast<std::size_t>(_iterator - std::begin(_iterable));
         const auto rem = remaining % _offset;
-        if (rem == 0) {
-            _iterator -= static_cast<difference_type>(_offset);
-        }
-        else {
-            _iterator -= static_cast<difference_type>(rem);
-        }
+        _iterator -= rem == 0 ? static_cast<difference_type>(_offset) : static_cast<difference_type>(rem);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
@@ -256,48 +262,47 @@ public:
         const auto to_add = offset * s_offset;
 
         if (to_add >= 0) {
-            const auto current_distance = _end - _iterator;
+            const auto current_distance = std::end(_iterable) - _iterator;
             if (to_add <= current_distance) {
                 _iterator += to_add;
                 return;
             }
-            LZ_ASSERT(to_add - current_distance < s_offset, "Out of bounds");
-            _iterator = _end;
+            LZ_ASSERT(to_add - current_distance < s_offset, "Cannot add after end");
+            _iterator = std::end(_iterable);
             return;
         }
 
-        const auto current_distance = _iterator - _begin;
+        const auto current_distance = _iterator - std::begin(_iterable);
         const auto remainder = current_distance % s_offset;
         if (remainder == 0) {
+            LZ_ASSERT(-to_add <= current_distance, "Cannot add before begin");
             _iterator += to_add;
             return;
         }
-        _iterator -= remainder;
-        _iterator += (offset + 1) * s_offset;
+        LZ_ASSERT(-((offset + 1) * s_offset - remainder) <= current_distance, "Cannot subtract before begin");
+        _iterator += (offset + 1) * s_offset - remainder;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {
-        LZ_ASSERT(_end == other._end && _offset == other._offset && _begin == other._begin, "Incompatible iterators");
-        const auto remaining = _iterator - other._iterator;
-        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
-        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
-        return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
+        LZ_ASSERT(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
+                      std::begin(_iterable) == std::begin(other._iterable),
+                  "Incompatible iterators");
+        return difference_impl(other._iterator);
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
-        const auto remaining = _iterator - _end;
-        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
-        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
-        return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
+        return difference_impl(std::end(_iterable));
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
-        LZ_ASSERT(_end == b._end && _offset == b._offset && _begin == b._begin, "Incompatible iterators");
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& other) const {
+        LZ_ASSERT(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
+                      std::begin(_iterable) == std::begin(other._iterable),
+                  "Incompatible iterators");
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator == _end;
+        return _iterator == std::end(_iterable);
     }
 };
 } // namespace detail

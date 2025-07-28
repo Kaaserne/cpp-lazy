@@ -50,16 +50,14 @@ public:
         return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 enumerate_iterator& increment() {
+    LZ_CONSTEXPR_CXX_14 void increment() {
         ++_index;
         ++_iterator;
-        return *this;
     }
 
-    LZ_CONSTEXPR_CXX_14 enumerate_iterator& decrement() {
+    LZ_CONSTEXPR_CXX_14 void decrement() {
         --_index;
         --_iterator;
-        return *this;
     }
 
     constexpr reference dereference() const {

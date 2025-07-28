@@ -27,8 +27,8 @@ struct interleave_adaptor {
      * If the input iterable is exactly bidirectional and not sized (like `lz::filter` for example), the entire sequence is
      * traversed to get its end size (using `lz::eager_size`); this can be inefficient. To prevent this traversal alltogether, you
      * can use `lz::iter_decay` defined in `<Lz/iter_tools.hpp>` or you can use `lz::cache_size` to cache the size of the
-     * iterable. `lz::iter_decay` decays the iterable into a forward one and since forward iterators cannot go backward, its
-     * entire size is therefore also not needed to create an iterator from its end() funciton. `lz::cache_size` however will
+     * iterable. `lz::iter_decay` can decay the iterable into a forward one and since forward iterators cannot go backward, its
+     * entire size is therefore also not needed to create an iterator from its end() function. `lz::cache_size` however will
      * traverse the iterable once and cache the size, so that subsequent calls to `end()` will not traverse the iterable again,
      * but will return the cached size instead. The following iterables require a(n) (eagerly)sized iterable:
      * - `lz::chunks`
