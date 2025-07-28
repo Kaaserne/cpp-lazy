@@ -196,7 +196,7 @@ public:
 
 template<class IterMaybeHomo, class SMaybeHomo>
 class zip_longest_iterator<true /* bidi */, IterMaybeHomo, SMaybeHomo>
-    : public iterator<zip_longest_iterator<true, IterMaybeHomo, IterMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
+    : public iterator<zip_longest_iterator<true, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
                       fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
                       iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
 public:
