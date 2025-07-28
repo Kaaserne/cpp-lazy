@@ -176,9 +176,13 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
 
 #endif // defined(LZ_USE_DEBUG_ASSERTIONS)
 
+#ifndef LZ_HAS_CXX_17
+
 template<class... Ts>
 LZ_CONSTEXPR_CXX_14 void decompose(const Ts&...) noexcept {
 }
+
+#endif
 
 // next_fast(_safe): check whether it's faster to go forward or backward when incrementing n steps
 // Only relevant for sized (requesting size is then O(1)) bidirectional iterators because
