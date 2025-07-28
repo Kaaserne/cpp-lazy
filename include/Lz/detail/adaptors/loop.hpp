@@ -26,7 +26,7 @@ struct loop_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const {
-        return { std::forward<Iterable>(iterable) };
+        return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }
 
     /**

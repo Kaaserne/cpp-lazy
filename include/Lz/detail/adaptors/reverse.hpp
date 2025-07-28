@@ -29,7 +29,7 @@ struct reverse_adaptor {
      */
     template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
     LZ_NODISCARD constexpr reverse_iterable<remove_ref<Iterable>, Cached> operator()(Iterable&& iterable) const {
-        return { std::forward<Iterable>(iterable) };
+        return reverse_iterable<remove_ref<Iterable>, Cached>{ std::forward<Iterable>(iterable) };
     }
 };
 

@@ -100,7 +100,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 flatten_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit LZ_CONSTEXPR_CXX_14 flatten_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     template<class T = all_sized<Iterable>>

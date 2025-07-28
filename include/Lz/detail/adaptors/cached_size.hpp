@@ -47,7 +47,7 @@ struct cached_size_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD constexpr cached_size_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
-        return { std::forward<Iterable>(iterable) };
+        return cached_size_iterable<remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
     }
 };
 } // namespace detail

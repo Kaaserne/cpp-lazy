@@ -32,7 +32,7 @@ public:
 #endif
 
     template<class I>
-    constexpr cached_size_iterable(I&& iterable) :
+    explicit constexpr cached_size_iterable(I&& iterable) :
         _iterable{ std::forward<I>(iterable) },
         _size{ static_cast<std::size_t>(lz::eager_size(_iterable)) } {
     }

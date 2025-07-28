@@ -116,7 +116,7 @@ template<LZ_CONCEPT_ITERABLE Iterable>
 any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>, diff_iterable_t<Iterable>>
 make_any_iterable(Iterable&& iterable) {
     return any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>,
-                        diff_iterable_t<Iterable>>(std::forward<Iterable>(iterable));
+                        diff_iterable_t<Iterable>>{ std::forward<Iterable>(iterable) };
 }
 
 } // namespace lz

@@ -102,7 +102,7 @@ public:
 
 #endif
 
-    constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
+    explicit constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
     }
 
     LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel_t) noexcept {

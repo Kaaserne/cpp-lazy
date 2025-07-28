@@ -78,15 +78,15 @@ public:
 
 #endif
 
-    constexpr generate_iterable(GeneratorFunc func) : _func{ std::move(func) } {
+    explicit constexpr generate_iterable(GeneratorFunc func) : _func{ std::move(func) } {
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
-        return { _func };
+        return iterator{ _func };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_func) };
+        return iterator{ std::move(_func) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

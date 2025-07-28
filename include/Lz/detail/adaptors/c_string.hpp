@@ -25,7 +25,7 @@ struct c_string_adaptor {
      **/
     template<class C>
     LZ_NODISCARD constexpr c_string_iterable<C> operator()(C* str) const noexcept {
-        return { str };
+        return c_string_iterable<C>{ str };
     }
 
     /**
@@ -43,7 +43,7 @@ struct c_string_adaptor {
      **/
     template<class C>
     LZ_NODISCARD constexpr c_string_iterable<const C> operator()(const C* str) const noexcept {
-        return { str };
+        return c_string_iterable<const C>{ str };
     }
 };
 } // namespace detail

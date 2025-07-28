@@ -52,6 +52,7 @@ struct common_adaptor {
             return common_iterable<remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
         }
     }
+
 #else
 
     /**
@@ -79,7 +80,7 @@ struct common_adaptor {
     LZ_NODISCARD constexpr enable_if<!is_ra<iter_t<Iterable>>::value, common_iterable<remove_ref<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
-        return { std::forward<Iterable>(iterable) };
+        return common_iterable<remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
     }
 
     /**
@@ -107,7 +108,8 @@ struct common_adaptor {
     LZ_NODISCARD constexpr enable_if<is_ra<iter_t<Iterable>>::value, basic_iterable<iter_t<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
-        return { std::begin(iterable), std::begin(iterable) + (std::end(iterable) - std::begin(iterable)) };
+        return basic_iterable<iter_t<Iterable>>{ std::begin(iterable),
+                                                 std::begin(iterable) + (std::end(iterable) - std::begin(iterable)) };
     }
 
 #endif

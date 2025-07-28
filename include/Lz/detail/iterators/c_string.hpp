@@ -22,7 +22,7 @@ public:
 
     constexpr c_string_iterator() noexcept = default;
 
-    constexpr c_string_iterator(C* it) noexcept : _it{ it } {
+    explicit constexpr c_string_iterator(C* it) noexcept : _it{ it } {
     }
 
     LZ_CONSTEXPR_CXX_14 c_string_iterator& operator=(default_sentinel_t) noexcept {

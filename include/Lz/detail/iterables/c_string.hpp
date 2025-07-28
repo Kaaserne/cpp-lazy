@@ -19,11 +19,11 @@ public:
 
     constexpr c_string_iterable() noexcept = default;
 
-    constexpr c_string_iterable(C* begin) noexcept : _begin{ begin } {
+    explicit constexpr c_string_iterable(C* begin) noexcept : _begin{ begin } {
     }
 
     LZ_NODISCARD constexpr iterator begin() const noexcept {
-        return { _begin };
+        return iterator{ _begin };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

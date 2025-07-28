@@ -35,7 +35,7 @@ public:
 #endif
 
     template<class I>
-    constexpr as_iterator_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit constexpr as_iterator_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     template<class T = sized<Iterable>>
@@ -44,7 +44,7 @@ public:
     }
 
     LZ_NODISCARD constexpr iterator begin() const {
-        return { std::begin(_iterable) };
+        return iterator{ std::begin(_iterable) };
     }
 
 #ifdef LZ_HAS_CXX_17
@@ -62,7 +62,7 @@ public:
 
     template<class I = value_type>
     LZ_NODISCARD constexpr enable_if<!is_sentinel<I, sentinel>::value, iterator> end() const& {
-        return { std::end(_iterable) };
+        return iterator{ std::end(_iterable) };
     }
 
     template<class I = value_type>

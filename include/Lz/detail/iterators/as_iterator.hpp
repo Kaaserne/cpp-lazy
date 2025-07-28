@@ -24,7 +24,7 @@ public:
     constexpr as_iterator_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
-    constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {
+    explicit constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 
     LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const S& other) {

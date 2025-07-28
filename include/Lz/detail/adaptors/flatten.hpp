@@ -77,11 +77,15 @@ struct flatten_adaptor {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     flatten_iterable<remove_ref<Iterable>, dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>
     operator()(Iterable&& iterable) const {
+        using flattener = flatten_iterable<remove_ref<Iterable>, 
+                                           dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>;
         using it = iter_t<Iterable>;
+
         static_assert(std::is_default_constructible<it>::value, "underlying iterator needs to be default constructible");
         static_assert(std::is_copy_assignable<it>::value || std::is_move_assignable<it>::value,
                       "underling iterator needs to be copy or move assignable");
-        return { std::forward<Iterable>(iterable) };
+
+        return flattener{ std::forward<Iterable>(iterable) };
     }
 
     // clang-format on

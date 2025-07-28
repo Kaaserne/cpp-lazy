@@ -29,16 +29,16 @@ public:
 
     constexpr common_iterator() noexcept = default;
 
-    constexpr common_iterator(const Iterator& iter) : _data{ iter } {
+    explicit constexpr common_iterator(const Iterator& iter) : _data{ iter } {
     }
 
-    constexpr common_iterator(Iterator&& iter) noexcept : _data{ std::move(iter) } {
+    explicit constexpr common_iterator(Iterator&& iter) noexcept : _data{ std::move(iter) } {
     }
 
-    constexpr common_iterator(const S& sent) : _data{ sent } {
+    explicit constexpr common_iterator(const S& sent) : _data{ sent } {
     }
 
-    constexpr common_iterator(S&& sent) noexcept : _data{ std::move(sent) } {
+    explicit constexpr common_iterator(S&& sent) noexcept : _data{ std::move(sent) } {
     }
 
     LZ_CONSTEXPR_CXX_14 common_iterator& operator=(const Iterator& iter) {

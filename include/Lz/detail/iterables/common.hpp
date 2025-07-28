@@ -33,23 +33,23 @@ public:
 #endif
 
     template<class I>
-    constexpr common_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit constexpr common_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)) };
+        return iterator{ detail::begin(std::move(_iterable)) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable) };
+        return iterator{ std::begin(_iterable) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
-        return { detail::end(std::move(_iterable)) };
+        return iterator{ detail::end(std::move(_iterable)) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {
-        return { std::end(_iterable) };
+        return iterator{ std::end(_iterable) };
     }
 };
 } // namespace detail

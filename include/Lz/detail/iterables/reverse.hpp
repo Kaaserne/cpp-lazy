@@ -37,7 +37,7 @@ public:
 #endif
 
     template<class I>
-    constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     template<class I = Iterable>

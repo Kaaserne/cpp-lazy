@@ -118,7 +118,7 @@ public:
 #endif
 
     template<class I>
-    constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
