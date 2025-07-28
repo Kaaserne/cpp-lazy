@@ -69,7 +69,7 @@ private:
             }
         }
         else {
-            LZ_ASSERT(offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables)), "Cannot subtract before begin");
+            LZ_ASSERT_SUBTRACTABLE(offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables)));
             auto& current = std::get<0>(_iterators);
             current -= offset;
         }
@@ -92,7 +92,7 @@ private:
             }
         }
         else {
-            LZ_ASSERT(offset == 0, "Cannot increment end iterator");
+            LZ_ASSERT_INCREMENTABLE(offset == 0);
         }
     }
 
@@ -116,7 +116,7 @@ private:
     template<std::size_t I>
     constexpr reference deref() const {
         if constexpr (I == tuple_size - 1) {
-            LZ_ASSERT(std::get<I>(_iterators) != std::end(std::get<I>(_iterables)), "Cannot dereference end iterator");
+            LZ_ASSERT_DEREFERENCABLE(std::get<I>(_iterators) != std::end(std::get<I>(_iterables)));
             return *std::get<I>(_iterators);
         }
         else {
@@ -140,8 +140,7 @@ private:
             }
         }
         else {
-            LZ_ASSERT(std::get<tuple_size - 1>(_iterators) != std::end(std::get<tuple_size - 1>(_iterables)),
-                      "Cannot increment end iterator");
+            LZ_ASSERT_INCREMENTABLE(std::get<tuple_size - 1>(_iterators) != std::end(std::get<tuple_size - 1>(_iterables)));
         }
     }
 
@@ -181,7 +180,7 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> min_is_n(const difference_type offset) {
         auto& current = std::get<0>(_iterators);
-        LZ_ASSERT(offset <= current - std::begin(std::get<0>(_iterables)), "Cannot increment begin iterator");
+        LZ_ASSERT_SUBTRACTABLE(offset <= current - std::begin(std::get<0>(_iterables)));
         current -= offset;
     }
 
@@ -203,7 +202,7 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size> plus_is_n(const difference_type offset) const noexcept {
-        LZ_ASSERT(offset == 0, "Cannot add after end");
+        LZ_ASSERT_ADDABLE(offset == 0);
     }
 
     template<std::size_t I>
@@ -304,7 +303,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return deref<0>();
     }
 
@@ -313,7 +312,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         plus_plus<0>();
     }
 

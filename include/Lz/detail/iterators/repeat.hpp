@@ -50,7 +50,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const noexcept {
-        LZ_ASSERT(_amount != 0, "Cannot dereference after end of repeat iterator");
+        LZ_ASSERT_DEREFERENCABLE(_amount != 0);
         return _to_repeat;
     }
 
@@ -59,7 +59,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
-        LZ_ASSERT(_amount != 0, "Cannot increment after end of repeat iterator");
+        LZ_ASSERT_INCREMENTABLE(_amount != 0);
         --_amount;
     }
 
@@ -76,7 +76,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
-        LZ_ASSERT(value > 0 ? _amount >= static_cast<std::size_t>(value) : true, "Cannot increment after end of repeat iterator");
+        LZ_ASSERT_ADDABLE(value > 0 ? _amount >= static_cast<std::size_t>(value) : true);
         _amount -= static_cast<std::size_t>(value);
     }
 

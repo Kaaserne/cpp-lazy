@@ -59,7 +59,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(_iterator != std::end(_iterable), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(_iterator != std::end(_iterable));
         return *_iterator;
     }
 
@@ -68,7 +68,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_iterator != std::end(_iterable), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(_iterator != std::end(_iterable));
         ++_iterator;
         ++_offset;
         if (_iterator == std::end(_iterable)) {
@@ -86,8 +86,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
-        LZ_ASSERT((n < 0 ? -n : n) <= (std::end(_iterable) - std::begin(_iterable)),
-                  "Cannot add after end/cannot subtract before begin");
+        LZ_ASSERT_SUB_ADDABLE((n < 0 ? -n : n) <= (std::end(_iterable) - std::begin(_iterable)));
         _offset += static_cast<std::size_t>(n);
         if (n < 0) {
             n = -n;

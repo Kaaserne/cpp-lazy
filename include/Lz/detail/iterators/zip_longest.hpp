@@ -312,7 +312,7 @@ private:
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void min_is(const difference_type offset, index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
-        LZ_ASSERT(offset <= longest, "Cannot subtract before begin");
+        LZ_ASSERT_SUBTRACTABLE(offset <= longest);
 #ifdef LZ_HAS_CXX_17
         (min_is_one<I>(longest, offset), ...);
 #else
@@ -383,7 +383,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return dereference(is{});
     }
 
@@ -392,7 +392,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         increment(is{});
     }
 
@@ -405,7 +405,7 @@ public:
             min_is(-offset, is{});
         }
         else {
-            LZ_ASSERT(difference(lz::default_sentinel) <= offset, "Cannot increment end iterator");
+            LZ_ASSERT_INCREMENTABLE(difference(lz::default_sentinel) <= offset);
             plus_is(offset, is{});
         }
     }

@@ -66,7 +66,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { _sub_range_begin, _sub_range_end };
     }
 
@@ -75,7 +75,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
@@ -155,7 +155,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_sub_range_begin != _end, "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(_sub_range_begin != _end);
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
@@ -231,7 +231,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         using s = typename std::make_signed<std::size_t>::type;
-        LZ_ASSERT(_sub_range_begin != std::end(_iterable), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != std::end(_iterable));
         auto sub_range_end =
             _sub_range_begin +
             static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
@@ -243,7 +243,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_sub_range_begin != std::end(_iterable), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(_sub_range_begin != std::end(_iterable));
         using s = typename std::make_signed<std::size_t>::type;
         _sub_range_begin +=
             static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
@@ -281,7 +281,7 @@ public:
                 _sub_range_begin += to_add;
                 return;
             }
-            LZ_ASSERT(to_add - current_distance < s_chunk_size, "Cannot add after end");
+            LZ_ASSERT_ADDABLE(to_add - current_distance < s_chunk_size);
             _sub_range_begin = std::end(_iterable);
             return;
         }
@@ -293,7 +293,7 @@ public:
             return;
         }
         const auto to_subtract = remainder + (-(offset + 1) * s_chunk_size);
-        LZ_ASSERT(current_distance >= to_subtract, "Cannot subtract before begin");
+        LZ_ASSERT_SUBTRACTABLE(current_distance >= to_subtract);
         _sub_range_begin -= to_subtract;
     }
 

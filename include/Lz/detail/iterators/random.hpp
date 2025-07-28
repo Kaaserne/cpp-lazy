@@ -55,13 +55,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 value_type dereference() const {
-        LZ_ASSERT(_current > 0, "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(_current > 0);
         LZ_ASSERT(_generator != nullptr, "Generator is not initialized");
         return _distribution(*_generator);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
-        LZ_ASSERT(static_cast<difference_type>(_current) >= 0, "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(static_cast<difference_type>(_current) >= 0);
         --_current;
     }
 
@@ -83,7 +83,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) noexcept {
         _current -= static_cast<std::size_t>(n);
-        LZ_ASSERT(static_cast<difference_type>(_current) >= 0, "Cannot add after end");
+        LZ_ASSERT_ADDABLE(static_cast<difference_type>(_current) >= 0);
     }
 
     constexpr difference_type difference(const random_iterator& b) const noexcept {

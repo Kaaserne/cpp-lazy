@@ -76,9 +76,8 @@ private:
     template<std::size_t I>
     constexpr void operator_plus_impl(const difference_type offset) {
         if constexpr (I == 0) {
-            LZ_ASSERT(offset < 0 ? -offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables))
-                                 : offset <= std::end(std::get<0>(_iterables)) - std::get<0>(_iterators),
-                      "Cannot add after end/cannot subtract before begin");
+            LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables))
+                                             : offset <= std::end(std::get<0>(_iterables)) - std::get<0>(_iterators));
             std::get<0>(_iterators) += offset;
         }
         else {
@@ -138,9 +137,8 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
-        LZ_ASSERT(offset < 0 ? -offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables))
-                             : offset <= std::end(std::get<0>(_iterables)) - std::get<0>(_iterators),
-                  "Cannot add after end/cannot subtract before begin");
+        LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables))
+                                         : offset <= std::end(std::get<0>(_iterables)) - std::get<0>(_iterators));
         std::get<0>(_iterators) += offset;
     }
 
@@ -289,7 +287,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return dereference(is{});
     }
 
@@ -298,7 +296,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         next<tup_size - 1>();
     }
 

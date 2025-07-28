@@ -64,7 +64,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
@@ -73,7 +73,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         for (std::size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
         }
     }
@@ -139,7 +139,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
@@ -148,7 +148,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         for (std::size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count, ++_distance) {
         }
     }
@@ -222,7 +222,7 @@ public:
         _iterable{ std::forward<I>(iterable) },
         _iterator{ std::move(iter) },
         _offset{ offset } {
-        LZ_ASSERT(_offset != 0, "Can't increment by 0");
+        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
@@ -231,7 +231,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot dereference end iterator");
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
@@ -240,7 +240,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(!eq(lz::default_sentinel), "Cannot increment end iterator");
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         const auto distance = static_cast<std::size_t>(std::end(_iterable) - _iterator);
         if (_offset >= distance) {
             _iterator = std::end(_iterable);
@@ -267,7 +267,7 @@ public:
                 _iterator += to_add;
                 return;
             }
-            LZ_ASSERT(to_add - current_distance < s_offset, "Cannot add after end");
+            LZ_ASSERT_ADDABLE(to_add - current_distance < s_offset);
             _iterator = std::end(_iterable);
             return;
         }
@@ -279,7 +279,7 @@ public:
             _iterator += to_add;
             return;
         }
-        LZ_ASSERT(-((offset + 1) * s_offset - remainder) <= current_distance, "Cannot subtract before begin");
+        LZ_ASSERT_SUBTRACTABLE(-((offset + 1) * s_offset - remainder) <= current_distance);
         _iterator += (offset + 1) * s_offset - remainder;
     }
 
