@@ -1,14 +1,12 @@
 #pragma once
 
-#include <cstdint>
-#include <type_traits>
 #ifndef LZ_DETAIL_VARIANT_HPP
 #define LZ_DETAIL_VARIANT_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/traits.hpp>
 
-#if defined(LZ_HAS_CXX_17) && LZ_HAS_INCLUDE(<variant>)
+#ifdef LZ_HAS_CXX_17
 
 #include <variant>
 
@@ -94,7 +92,6 @@ public:
     LZ_CONSTEXPR_CXX_14 variant(variant&& other) noexcept(std::is_nothrow_move_constructible<T>::value &&
                                                           std::is_nothrow_move_constructible<T2>::value) :
         _state{ other._state } {
-        other._state = state::none;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
     }
 
@@ -130,7 +127,6 @@ public:
         this->~variant();
         _state = other._state;
         construct(std::move(other._variant._t), std::move(other._variant._t2));
-        other._state = state::none;
         return *this;
     }
 
@@ -167,7 +163,7 @@ public:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 const enable_if<I == 1, T2&> get() noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == 1, T2&> get() noexcept {
         LZ_ASSERT(_state == state::t2, "Invalid variant access");
         return _variant._t2;
     }
@@ -187,7 +183,6 @@ public:
         default:
             break;
         }
-        _state = state::none;
     }
 };
 
