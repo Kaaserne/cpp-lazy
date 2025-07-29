@@ -4,14 +4,14 @@
 #define LZ_ZIP_LONGEST_ITERABLE_HPP
 
 #include <Lz/detail/iterators/zip_longest.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_longest_iterable : public lazy_view {
-    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
+    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
 
     using iterators = maybe_homogeneous<iter_t<Iterables>...>;
     using sentinels = maybe_homogeneous<sentinel_t<Iterables>...>;
@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterable()
-        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
+        requires(std::default_initializable<maybe_owned<Iterables>> && ...)
     = default;
 
 #else
@@ -72,7 +72,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const& {
-        if constexpr (!return_sentinel) {
+        if constexpr (bidi) {
             using diff = typename iterator::difference_type;
             return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
         }
@@ -83,14 +83,14 @@ public:
 
 #else
 
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> begin() const& {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> begin() const& {
         using diff = typename iterator::difference_type;
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
     }
 
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() const& {
+    template<bool IsBidi = bidi>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() const& {
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
     }
 
@@ -110,7 +110,7 @@ public:
                              iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -124,7 +124,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 
@@ -133,13 +133,13 @@ public:
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, zip_longest_iterable<Iterables...>&& zipper) {
-        return concat_iterables(std::forward<Iterable>(iterable), std::move(zipper._iterables), is{});
+        return concat_iterables(std::forward<Iterable>(iterable), std::move(zipper), is{});
     }
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend zip_longest_iterable<remove_ref<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const zip_longest_iterable<Iterables...>& zipper) {
-        return concat_iterables(std::forward<Iterable>(iterable), zipper._iterables, is{});
+        return concat_iterables(std::forward<Iterable>(iterable), zipper, is{});
     }
 };
 } // namespace detail

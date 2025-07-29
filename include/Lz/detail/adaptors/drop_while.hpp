@@ -14,7 +14,7 @@ struct drop_while_adaptor {
 
     /**
      * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
-     * `true`. Once it has returned `false`, it will no longer do such thing. The iterator category is the same as its input
+     * `true`. Once it has returned `false`, it will return the elements as usual. The iterator category is the same as its input
      * iterable. Its end() function will return a sentinel if its input iterable is forward or less or has a sentinel. If its
      * input iterable is random access, then this iterable will have a .size() method. Example:
      * ```cpp
@@ -33,7 +33,7 @@ struct drop_while_adaptor {
 
     /**
      * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
-     * `true`. Once it has returned `false`, it will no longer do such thing. The iterator category is the same as its input
+     * `true`. Once it has returned `false`, it will return the elements as usual. The iterator category is the same as its input
      * iterable. Its end() function will return a sentinel if its input iterable is forward or less or has a sentinel. If its
      * input iterable is random access, then this iterable will have a .size() method. Example:
      * ```cpp

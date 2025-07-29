@@ -5,7 +5,7 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/split.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
@@ -14,8 +14,8 @@ class split_iterable;
 
 template<class ValueType, class Iterable, class Iterable2>
 class split_iterable<ValueType, Iterable, Iterable2, enable_if<is_iterable<Iterable2>::value>> : public lazy_view {
-    ref_or_view<Iterable> _iterable;
-    ref_or_view<Iterable2> _delimiter;
+    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable2> _delimiter;
 
 public:
     using const_iterator =
@@ -26,15 +26,15 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<ref_or_view<Iterable2>>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<maybe_owned<Iterable2>>
     = default;
 
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value &&
-                                                              std::is_default_constructible<ref_or_view<Iterable2>>::value>>
-    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
-                                        std::is_nothrow_default_constructible<ref_or_view<Iterable2>>::value) {
+                                                              std::is_default_constructible<maybe_owned<Iterable2>>::value>>
+    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
+                                        std::is_nothrow_default_constructible<maybe_owned<Iterable2>>::value) {
     }
 
 #endif
@@ -49,14 +49,14 @@ public:
         return { std::begin(_iterable), std::end(_iterable), std::begin(_delimiter), std::end(_delimiter) };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };
 
 template<class ValueType, class Iterable, class T>
 class split_iterable<ValueType, Iterable, T, enable_if<!is_iterable<T>::value>> : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     T _delimiter{};
 
 public:
@@ -67,14 +67,14 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<T>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<T>
     = default;
 
 #else
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value>>
-    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
+    constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
                                         std::is_nothrow_default_constructible<T>::value) {
     }
 
@@ -94,7 +94,7 @@ public:
         return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_delimiter) };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

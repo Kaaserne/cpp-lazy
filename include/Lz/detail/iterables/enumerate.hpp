@@ -5,7 +5,7 @@
 
 #include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterators/enumerate.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
@@ -14,7 +14,7 @@ class enumerate_iterable : public lazy_view {
     using iter = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;
 
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     IntType _start{};
 
     IntType get_last_index() const {
@@ -34,7 +34,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr enumerate_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

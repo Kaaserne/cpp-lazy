@@ -11,15 +11,15 @@
 namespace lz {
 
 /**
- * @brief Wrapper for lz::copied_iterable<lz::basic_string_view<CharT>>.
+ * @brief Wrapper for lz::copied<lz::basic_string_view<CharT>>.
  *
  * @tparam CharT The character type of the string view.
  */
 template<class CharT>
-using copied_basic_sv = lz::copied_iterable<lz::basic_string_view<CharT>>;
+using copied_basic_sv = lz::copied<lz::basic_string_view<CharT>>;
 
 /**
- * @brief Wrapper for lz::copied_iterable<lz::string_view>.
+ * @brief Wrapper for lz::copied<lz::string_view>.
  */
 using copied_sv = copied_basic_sv<char>;
 
@@ -32,7 +32,7 @@ struct split_adaptor {
 #ifdef LZ_HAS_CXX_17
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -66,7 +66,7 @@ struct split_adaptor {
 #else
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -88,7 +88,7 @@ struct split_adaptor {
     // clang-format off
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -115,7 +115,7 @@ struct split_adaptor {
 #endif
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t
      * and the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
@@ -137,7 +137,7 @@ struct split_adaptor {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t
      * and the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
@@ -158,7 +158,7 @@ struct split_adaptor {
 #ifdef LZ_HAS_CXX_17
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -190,7 +190,7 @@ struct split_adaptor {
 #else
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -210,7 +210,7 @@ struct split_adaptor {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -230,7 +230,7 @@ struct split_adaptor {
 #endif
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
@@ -245,7 +245,7 @@ struct split_adaptor {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t
      * and the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<char, 5> arr = { 'h', 'e', 'l', 'l', 'o' };
@@ -275,7 +275,7 @@ struct split_adaptor<void> {
 #ifdef LZ_HAS_CXX_17
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -308,7 +308,7 @@ struct split_adaptor<void> {
 #else
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -325,7 +325,7 @@ struct split_adaptor<void> {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp
@@ -348,7 +348,7 @@ struct split_adaptor<void> {
 #endif
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp
@@ -366,7 +366,7 @@ struct split_adaptor<void> {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp
@@ -387,7 +387,7 @@ struct split_adaptor<void> {
 #ifdef LZ_HAS_CXX_17
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp
@@ -414,7 +414,7 @@ struct split_adaptor<void> {
 #else
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp
@@ -433,7 +433,7 @@ struct split_adaptor<void> {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns `ValueType` as iterator is dereferenced. Example:
      * ```cpp
      * std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
@@ -453,7 +453,7 @@ struct split_adaptor<void> {
 #endif
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp
@@ -469,7 +469,7 @@ struct split_adaptor<void> {
     }
 
     /**
-     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel and
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
      * the iterable does not contain a .size() method. Returns an iterable of `lz::basic_iterable` as iterator is dereferenced.
      * Example:
      * ```cpp

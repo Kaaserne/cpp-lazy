@@ -36,16 +36,16 @@ TEST_CASE("Empty or one element inclusive scan") {
     SECTION("One element") {
         std::vector<int> one_element = { 1 };
         auto scan = lz::inclusive_scan(one_element);
-        REQUIRE(!lz::empty(scan));
+        REQUIRE_FALSE(lz::empty(scan));
         REQUIRE(lz::has_one(scan));
-        REQUIRE(!lz::has_many(scan));
+        REQUIRE_FALSE(lz::has_many(scan));
     }
 }
 
 TEST_CASE("Inclusive scan changing and creating elements") {
     int arr[32];
     std::iota(std::begin(arr), std::end(arr), 0);
-    auto scan = arr | lz::inclusive_scan(0);
+    auto scan = arr | lz::inclusive_scan;
     REQUIRE(scan.size() == lz::size(arr));
     auto begin = scan.begin();
 

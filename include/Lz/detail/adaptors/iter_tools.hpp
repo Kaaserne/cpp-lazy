@@ -43,7 +43,7 @@ struct trim_fn {
 
 struct deref_fn {
     template<class T>
-    LZ_NODISCARD constexpr auto operator()(T&& t) const noexcept -> decltype(*std::forward<T>(t)) {
+    LZ_NODISCARD constexpr auto operator()(T&& t) const noexcept(noexcept(*std::forward<T>(t))) -> decltype(*std::forward<T>(t)) {
         return *std::forward<T>(t);
     }
 };
@@ -152,6 +152,7 @@ struct as_adaptor {
      * auto floats = lz::as<float>(vec); // { 1.f, 2.f, 3.f, 4.f, 5.f }
      * // or
      * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
+     * auto floats = vec | lz::as<float>{}; // { 1.f, 2.f, 3.f, 4.f, 5.f } (for cxx11)
      * ```
      * @param iterable The iterable to convert.
      * @return An as_iterable that can be iterated over, containing the converted elements.
@@ -184,6 +185,7 @@ public:
      * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
      * // or
      * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
+     * auto iterable = lz::pairwise_n<2>{}(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} } (for cxx11)
      * // or
      * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
      * // or
@@ -290,13 +292,13 @@ struct filter_map_adaptor {
      */
     template<class UnaryFilterPredicate, class UnaryMapOp>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryFilterPredicate, UnaryMapOp>
-    operator()(UnaryFilterPredicate filterPredicate, UnaryMapOp mapOp) const {
-        return { std::move(filterPredicate), std::move(mapOp) };
+    operator()(UnaryFilterPredicate filterPredicate, UnaryMapOp map_op) const {
+        return { std::move(filterPredicate), std::move(map_op) };
     }
 };
 
 template<class Iterable, class SelectorIterable>
-using select_iterable = filter_map_iterable<zip_iterable<Iterable, SelectorIterable>, detail::get_fn<1>, detail::get_fn<0>>;
+using select_iterable = filter_map_iterable<zip_iterable<Iterable, SelectorIterable>, get_fn<1>, get_fn<0>>;
 
 struct select_adaptor {
     using adaptor = select_adaptor;
@@ -317,7 +319,7 @@ struct select_adaptor {
     LZ_NODISCARD constexpr select_iterable<remove_ref<Iterable>, remove_ref<SelectorIterable>>
     operator()(Iterable&& iterable, SelectorIterable&& selectors) const {
         return filter_map_adaptor{}(lz::zip(std::forward<Iterable>(iterable), std::forward<SelectorIterable>(selectors)),
-                                    detail::get_fn<1>(), detail::get_fn<0>());
+                                    get_fn<1>{}, get_fn<0>{});
     }
 
     /**
@@ -478,12 +480,13 @@ struct iter_decay {
      * // - the iterable is not sentinelled
      * // f1 and f2 are both bidirectional, so lz::zip will call lz::eager_size on them.
      * // In this case we don't want to call lz::eager_size because we're not interested in going bidirectionally.
-     * // We can use lz::iter_decay<std::forward_iterator_tag> to decay the iterables to a forward iterator
+     * // We can use lz::iter_decay(std::forward_iterator_tag{}) to decay the iterable to a forward iterator
      *
      * iterable auto zipper = lz::zip(lz::iter_decay(f1, std::forward_iterator_tag{}), f2);
      *
      * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on .end().
      * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
+     * ```
      * @param iterable The iterable to decay.
      * @param IteratorTag The tag that specifies the iterator category to decay to.
      * @return An iterable with the iterator category of the given tag @p IteratorTag.
@@ -521,6 +524,7 @@ struct iter_decay {
      *
      * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on .end().
      * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
+     * ```
      * @param IteratorTag The tag that specifies the iterator category to decay to.
      * @return An iterable with the iterator category of the given tag @p IteratorTag.
      */

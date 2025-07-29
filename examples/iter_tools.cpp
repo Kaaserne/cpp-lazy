@@ -205,4 +205,22 @@ int main() {
     }
     // 7 9 11
     std::cout << '\n';
+
+    // ------------------------------------- iter_decay ----------------------------------------------------------
+    std::vector<int> decay_numbers = { 1, 2, 3, 4, 5 };
+    // decay_iterable is now a forward iterator, also returns a sentinel. If it were bidirectional, it would not return a
+    // sentinel.
+    auto decay_iterable = decay_numbers | lz::iter_decay(std::forward_iterator_tag{});
+
+#ifndef LZ_HAS_CXX_11
+    for (const auto& d : decay_iterable) {
+        std::cout << d << ' ';
+    }
+    // 1 2 3 4 5
+    std::cout << '\n';
+#else
+    lz::for_each(decay_iterable, [](int i) { std::cout << i << ' '; });
+    // 1 2 3 4 5
+    std::cout << '\n';
+#endif
 }

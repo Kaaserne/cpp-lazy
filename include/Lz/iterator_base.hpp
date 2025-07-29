@@ -24,11 +24,11 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         return copy;
     }
 
-    LZ_NODISCARD constexpr auto operator*() const -> Reference {
+    LZ_NODISCARD constexpr Reference operator*() const {
         return static_cast<const Derived&>(*this).dereference();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator*() -> Reference {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Reference operator*() {
         return static_cast<Derived&>(*this).dereference();
     }
 
@@ -44,11 +44,11 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         return !(*this == b);
     }
 
-    friend constexpr bool operator==(const Derived& a, const Derived& b) {
+    LZ_NODISCARD friend constexpr bool operator==(const Derived& a, const Derived& b) {
         return a.eq(b);
     }
 
-    friend constexpr bool operator!=(const Derived& a, const Derived& b) {
+    LZ_NODISCARD friend constexpr bool operator!=(const Derived& a, const Derived& b) {
         return !(a == b);
     }
 };
@@ -57,6 +57,7 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S>
     : public iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::bidirectional_iterator_tag;
+    using sentinel = S;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator--() {
         static_cast<Derived&>(*this).decrement();
@@ -74,6 +75,7 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_iterator_tag, S>
     : public iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S> {
     using iterator_category = std::random_access_iterator_tag;
+    using sentinel = S;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator+=(const DifferenceType n) {
         static_cast<Derived&>(*this).plus_is(n);
@@ -90,6 +92,10 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return a.difference(b);
     }
 
+    LZ_NODISCARD constexpr DifferenceType operator-(const sentinel& b) const {
+        return static_cast<const Derived&>(*this).difference(b);
+    }
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Derived operator-(const DifferenceType n) const {
         Derived temp = static_cast<const Derived&>(*this);
         temp -= n;
@@ -101,24 +107,40 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return *static_cast<Derived*>(this);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Reference operator[](DifferenceType n) const {
+    LZ_NODISCARD constexpr Reference operator[](DifferenceType n) const {
         return *(*this + n);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend bool operator<(const Derived& a, const Derived& b) {
+    LZ_NODISCARD constexpr friend bool operator<(const Derived& a, const Derived& b) {
         return b - a > 0;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend bool operator>(const Derived& a, const Derived& b) {
+    LZ_NODISCARD constexpr friend bool operator>(const Derived& a, const Derived& b) {
         return b < a;
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend bool operator<=(const Derived& a, const Derived& b) {
+    LZ_NODISCARD constexpr friend bool operator<=(const Derived& a, const Derived& b) {
         return !(b < a);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend bool operator>=(const Derived& a, const Derived& b) {
+    LZ_NODISCARD constexpr friend bool operator>=(const Derived& a, const Derived& b) {
         return !(a < b);
+    }
+
+    LZ_NODISCARD constexpr bool operator<(const sentinel& b) const {
+        return (*this - b) < 0;
+    }
+
+    LZ_NODISCARD constexpr bool operator>(const sentinel& b) const {
+        return b < *this;
+    }
+
+    LZ_NODISCARD constexpr bool operator<=(const sentinel& b) const {
+        return !(b < *this);
+    }
+
+    LZ_NODISCARD constexpr bool operator>=(const sentinel& b) const {
+        return !(*this < b);
     }
 };
 } // namespace lz

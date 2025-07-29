@@ -11,7 +11,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
  * @brief This adaptor is used to slice an iterable from `from` to `to`. The iterator category is the same as the input
- * iterator category. Its end() function will return the same iterator as its input iterable or a default_sentinel if the input
+ * iterator category. Its end() function will return the same iterator as its input iterable or a default_sentinel_t if the input
  * iterable is forward. If its input iterable has a .size() method, then this iterable will also have a .size() method.Example:
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };

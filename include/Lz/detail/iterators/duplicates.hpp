@@ -16,7 +16,7 @@ template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, std::size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, std::size_t>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -68,25 +68,28 @@ public:
         next();
     }
 
-    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel_t) {
         _first = std::end(_iterable);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { *_first, static_cast<std::size_t>(_last - _first) };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<reference>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         _first = std::move(_last);
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_first != std::begin(_iterable), "Cannot decrement begin iterator");
         _last = _first;
 
         for (--_first; _first != std::begin(_iterable); --_first) {
@@ -103,7 +106,7 @@ public:
         return _first == other._first;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
         return _first == std::end(_iterable);
     }
 };
@@ -112,7 +115,7 @@ template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>>
     : public lz::iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, std::size_t>,
                           fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, std::size_t>>, diff_type<iter_t<Iterable>>,
-                          std::bidirectional_iterator_tag, default_sentinel> {
+                          std::bidirectional_iterator_tag, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<iter_t<Iterable>>;
@@ -173,25 +176,28 @@ public:
         next();
     }
 
-    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(default_sentinel_t) {
         _first = std::end(_iterable);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { *_first, _last_distance };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<reference>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         _first = std::move(_last);
         next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_first != std::begin(_iterable), "Cannot decrement before beginning of iterable");
         _last_distance = 1;
         _last = _first;
 
@@ -209,7 +215,7 @@ public:
         return _first == other._first;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
         return _first == std::end(_iterable);
     }
 };

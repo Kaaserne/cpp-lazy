@@ -2,8 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -46,16 +47,16 @@ TEST_CASE("Empty or one element enumerate") {
         std::string a;
         auto enumerate = lz::enumerate(a);
         REQUIRE(lz::empty(enumerate));
-        REQUIRE(!lz::has_one(enumerate));
-        REQUIRE(!lz::has_many(enumerate));
+        REQUIRE_FALSE(lz::has_one(enumerate));
+        REQUIRE_FALSE(lz::has_many(enumerate));
     }
 
     SECTION("One element") {
         std::string a = "h";
         auto enumerate = lz::enumerate(a);
-        REQUIRE(!lz::empty(enumerate));
+        REQUIRE_FALSE(lz::empty(enumerate));
         REQUIRE(lz::has_one(enumerate));
-        REQUIRE(!lz::has_many(enumerate));
+        REQUIRE_FALSE(lz::has_many(enumerate));
     }
 }
 
@@ -94,6 +95,11 @@ TEST_CASE("Enumerate binary operations") {
 
     SECTION("Operator-") {
         test_procs::test_operator_minus(enumerate);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto repeat = lz::repeat(1, 5);
+        test_procs::test_operator_minus(repeat);
     }
 }
 

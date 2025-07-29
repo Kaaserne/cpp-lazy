@@ -14,8 +14,8 @@ template<class Arithmetic, class Distribution, class Generator, bool UseSentinel
 class random_iterator
     : public iterator<
           random_iterator<Arithmetic, Distribution, Generator, UseSentinel>, Arithmetic, fake_ptr_proxy<Arithmetic>,
-          std::ptrdiff_t, conditional<UseSentinel, std::forward_iterator_tag, std::random_access_iterator_tag>,
-          conditional<UseSentinel, default_sentinel, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
+          std::ptrdiff_t, std::random_access_iterator_tag,
+          conditional<UseSentinel, default_sentinel_t, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
 public:
     using value_type = Arithmetic;
     using difference_type = std::ptrdiff_t;
@@ -25,7 +25,7 @@ public:
 
 private:
     mutable Distribution _distribution;
-    Generator* _generator{ nullptr };
+    decltype(std::addressof(std::declval<Generator&>())) _generator{ nullptr };
     std::size_t _current{};
 
 public:
@@ -49,16 +49,19 @@ public:
         _current{ current } {
     }
 
-    LZ_CONSTEXPR_CXX_14 random_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 random_iterator& operator=(default_sentinel_t) noexcept {
         _current = 0;
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 value_type dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(_current > 0);
+        LZ_ASSERT(_generator != nullptr, "Generator is not initialized");
         return _distribution(*_generator);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
+        LZ_ASSERT_INCREMENTABLE(static_cast<difference_type>(_current) >= 0);
         --_current;
     }
 
@@ -80,10 +83,15 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) noexcept {
         _current -= static_cast<std::size_t>(n);
+        LZ_ASSERT_ADDABLE(static_cast<difference_type>(_current) >= 0);
     }
 
     constexpr difference_type difference(const random_iterator& b) const noexcept {
         return static_cast<difference_type>(b._current) - static_cast<difference_type>(_current);
+    }
+
+    constexpr difference_type difference(default_sentinel_t) const noexcept {
+        return -static_cast<difference_type>(_current);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& b) const noexcept {
@@ -91,7 +99,7 @@ public:
         return _current == b._current;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return _current == 0;
     }
 };

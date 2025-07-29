@@ -5,7 +5,7 @@
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/iterator_base.hpp>
 #include <iterator>
 
@@ -65,12 +65,12 @@ using count_dims = std::integral_constant<std::size_t, count_dims_helper<is_iter
 template<class Iterable>
 class flatten_wrapper
     : public iterator<flatten_wrapper<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
 
     iter _iterator{};
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
     using traits = std::iterator_traits<iter>;
 
@@ -87,20 +87,20 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_wrapper()
-        requires std::default_initializable<iter> && std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<iter> && std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
 
     template<class I = iter, class = enable_if<std::is_default_constructible<I>::value &&
-                                               std::is_default_constructible<ref_or_view<Iterable>>::value>>
+                                               std::is_default_constructible<maybe_owned<Iterable>>::value>>
     constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value) {
+                                         std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(default_sentinel_t) {
         initialize_last();
         return *this;
     }
@@ -151,32 +151,42 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == std::end(_iterable);
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
         --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
+        LZ_ASSERT_SUB_ADDABLE(n < 0 ? -n <= _iterator - std::begin(_iterable) : n <= std::end(_iterable) - _iterator);
         _iterator += n;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
+        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
+                  "Incompatible iterators");
         return _iterator - other._iterator;
+    }
+
+    constexpr difference_type difference(default_sentinel_t) const {
+        return _iterator - std::end(_iterable);
     }
 };
 
@@ -192,7 +202,7 @@ using iter_cat = common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_
 template<class Iterable, std::size_t N>
 class flatten_iterator
     : public iterator<flatten_iterator<Iterable, N>, ref_t<inner<Iterable, N>>, fake_ptr_proxy<ref_t<inner<Iterable, N>>>,
-                      diff_type<inner<Iterable, N>>, iter_cat<Iterable, N>, default_sentinel> {
+                      diff_type<inner<Iterable, N>>, iter_cat<Iterable, N>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
     using this_inner = inner<Iterable, N>;
@@ -238,10 +248,35 @@ private:
         find_next_non_empty_inner();
     }
 
-    LZ_CONSTEXPR_CXX_14 void previous_outer() {
+#ifdef LZ_HAS_CXX_17
+
+    constexpr void previous_outer() {
+        --_outer_iter;
+        if constexpr (!is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value) {
+            _inner_iter = this_inner(*_outer_iter, std::end(*_outer_iter));
+        }
+        else {
+            --_outer_iter;
+            _inner_iter =
+                this_inner(*_outer_iter, std::begin(*_outer_iter) + (std::end(*_outer_iter) - std::begin(*_outer_iter)));
+        }
+    }
+
+#else
+
+    template<class I = iter_t<Iterable>>
+    LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
         _inner_iter = this_inner(*_outer_iter, std::end(*_outer_iter));
     }
+
+    template<class I = iter_t<Iterable>>
+    LZ_CONSTEXPR_CXX_14 enable_if<is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
+        --_outer_iter;
+        _inner_iter = this_inner(*_outer_iter, std::begin(*_outer_iter) + (std::end(*_outer_iter) - std::begin(*_outer_iter)));
+    }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 void try_previous_inner() {
         previous_outer();
@@ -280,9 +315,9 @@ public:
 
     constexpr flatten_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 flatten_iterator operator=(default_sentinel) {
-        _inner_iter = default_sentinel{};
-        _outer_iter = default_sentinel{};
+    LZ_CONSTEXPR_CXX_14 flatten_iterator operator=(default_sentinel_t) {
+        _inner_iter = lz::default_sentinel;
+        _outer_iter = lz::default_sentinel;
         return *this;
     }
 
@@ -314,7 +349,7 @@ public:
         return _outer_iter == b._outer_iter && _inner_iter == b._inner_iter;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return !has_next();
     }
 
@@ -432,13 +467,34 @@ public:
         difference_type total = 0;
         auto outer_iter = _outer_iter;
 
-        total -= this_inner(*outer_iter, std::end(*outer_iter)) - _inner_iter;
+        if (outer_iter.has_next()) {
+            // If the first outer iterator has next, we need to subtract the distance from the inner iterator
+            total -= this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
+                     _inner_iter;
+        }
         if (other._outer_iter.has_next()) {
             total += this_inner(*other._outer_iter, std::begin(*other._outer_iter)) - other._inner_iter;
         }
 
         for (++outer_iter; outer_iter != other._outer_iter; ++outer_iter) {
-            total -= (this_inner(*outer_iter, std::end(*outer_iter)) - this_inner(*outer_iter, std::begin(*outer_iter)));
+            total -= (this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
+                      this_inner(*outer_iter, std::begin(*outer_iter)));
+        }
+
+        return total;
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        difference_type total = 0;
+        auto outer_iter = _outer_iter;
+
+        if (outer_iter.has_next()) {
+            total -= this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
+                     _inner_iter;
+        }
+        for (++outer_iter; outer_iter.has_next(); ++outer_iter) {
+            total -= (this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
+                      this_inner(*outer_iter, std::begin(*outer_iter)));
         }
 
         return total;
@@ -449,7 +505,7 @@ template<class Iterable>
 class flatten_iterator<Iterable, 0>
     : public iterator<flatten_iterator<Iterable, 0>, ref_t<flatten_wrapper<Iterable>>,
                       fake_ptr_proxy<ref_t<flatten_wrapper<Iterable>>>, diff_type<flatten_wrapper<Iterable>>,
-                      iter_cat_t<flatten_wrapper<Iterable>>, default_sentinel> {
+                      iter_cat_t<flatten_wrapper<Iterable>>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
@@ -480,8 +536,8 @@ public:
     constexpr flatten_iterator(I&& iterable, iter it) : _iterator{ std::forward<I>(iterable), std::move(it) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel) {
-        _iterator = default_sentinel{};
+    LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel_t) {
+        _iterator = lz::default_sentinel;
         return *this;
     }
 
@@ -525,8 +581,8 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
-        return _iterator.eq(default_sentinel{});
+    constexpr bool eq(default_sentinel_t) const {
+        return _iterator == lz::default_sentinel;
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
@@ -543,6 +599,10 @@ public:
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_iterator& other) const {
         return _iterator - other._iterator;
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        return _iterator - lz::default_sentinel;
     }
 };
 } // namespace detail

@@ -62,6 +62,7 @@ private:
             return std::get<I>(_iterators) == std::get<I>(other._iterators) && _index == other._index;
         }
     }
+
 #else
 
     template<std::size_t I>
@@ -92,14 +93,22 @@ private:
         if (_index != tuple_size) {
             return;
         }
+#ifdef LZ_HAS_CXX_17
+        (++std::get<Is>(_iterators), ...);
+#else
         decompose(++std::get<Is>(_iterators)...);
+#endif
         _index = 0;
     }
 
     template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<Is...>) {
         if (_index == 0) {
+#ifdef LZ_HAS_CXX_17
+            (--std::get<Is>(_iterators), ...);
+#else
             decompose(--std::get<Is>(_iterators)...);
+#endif
             _index = tuple_size - 1;
             return;
         }
@@ -114,7 +123,6 @@ private:
             return _index == I ? *std::get<I>(_iterators) : dereference<I + 1>();
         }
         else {
-            LZ_ASSERT(_index == I, "Out of bounds dereference");
             return *std::get<I>(_iterators);
         }
     }
@@ -128,7 +136,6 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, reference> dereference() const noexcept {
-        LZ_ASSERT(_index == I, "Out of bounds dereference");
         return *std::get<I>(_iterators);
     }
 
@@ -144,16 +151,31 @@ private:
     }
 
     template<std::size_t... Is>
+    LZ_CONSTEXPR_CXX_20 difference_type difference(const SMaybeHomo& other, index_sequence<Is...>) const {
+        const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterators) - std::get<Is>(other))... };
+        const auto sum = std::max({ distances[Is]... }) * static_cast<difference_type>(tuple_size);
+        return sum + static_cast<difference_type>(_index);
+    }
+
+    template<std::size_t... Is>
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n, index_sequence<Is...>) {
         if (n == 0) {
             return;
         }
+#ifdef LZ_HAS_CXX_17
+        ((std::get<Is>(_iterators) += n), ...);
+#else
         decompose(std::get<Is>(_iterators) += n...);
+#endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& end, index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::get<I>(end)), ...);
+#else
         decompose(std::get<I>(_iterators) = std::get<I>(end)...);
+#endif
     }
 
 public:
@@ -198,6 +220,10 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const interleave_iterator& other) const {
+        return difference(other, is{});
+    }
+
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const SMaybeHomo& other) const {
         return difference(other, is{});
     }
 

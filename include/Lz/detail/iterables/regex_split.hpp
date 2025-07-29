@@ -4,7 +4,7 @@
 #define LZ_REGEX_SPLIT_ITERABLE_HPP
 
 #include <Lz/detail/iterators/regex_split.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {

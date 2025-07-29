@@ -53,7 +53,7 @@ public:
             return iterator{ _distribution, *_generator, 0 };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -65,7 +65,7 @@ public:
     }
 
     template<bool B = UseSentinel>
-    LZ_NODISCARD constexpr enable_if<B, default_sentinel> end() const {
+    LZ_NODISCARD constexpr enable_if<B, default_sentinel_t> end() const {
         return {};
     }
 

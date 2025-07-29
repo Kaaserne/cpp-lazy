@@ -37,7 +37,7 @@ struct generate_adaptor {
      */
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_iterable<GeneratorFunc, true> operator()(GeneratorFunc generator_func) const {
-        return { std::move(generator_func) };
+        return generate_iterable<GeneratorFunc, true>{ std::move(generator_func) };
     }
 };
 } // namespace detail

@@ -7,7 +7,7 @@
 Examples can be found [here](https://github.com/Kaaserne/cpp-lazy/tree/master/examples). Installation can be found [here](https://github.com/Kaaserne/cpp-lazy#installation).
 
 # cpp-lazy
-`cpp-lazy` is an easy and fast lazy evaluation library for C++11/14/17/20. The library tries to reduce redundant data usage for begin/end iterator pairs. For instance: `lz::random_iterable::end()` will return a `lz::default_sentinel` to prevent duplicate data that is also present in `lz::random_iterable::begin()`. If a 'symmetrical' end-begin iterator pair is needed, one can use `lz::common` or `lz::common_random`. Generally, `lz` *forward* iterators will return a `lz::default_sentinel` (or if the input iterable is sentinelled) because forward iterators can only go forward, so there is no need to store the end iterator, is the philosophy.
+`cpp-lazy` is an easy and fast lazy evaluation library for C++11/14/17/20. The library tries to reduce redundant data usage for begin/end iterator pairs. For instance: `lz::random_iterable::end()` will return a `lz::default_sentinel_t` to prevent duplicate data that is also present in `lz::random_iterable::begin()`. If a 'symmetrical' end-begin iterator pair is needed, one can use `lz::common` or `lz::common_random`. Generally, `lz` *forward* iterators will return a `lz::default_sentinel_t` (or if the input iterable is sentinelled) because forward iterators can only go forward, so there is no need to store the end iterator, is the philosophy. Lz random access iterators can also return a `default_sentinel` if the internal data of `begin` can already decide whether end is reached, such as `lz::repeat`.
 
 The library uses one optional dependency: the library `{fmt}`, more of which can be found out in the [installation section](https://github.com/Kaaserne/cpp-lazy#Installation). This dependency is only used for printing and formatting.
 
@@ -15,9 +15,9 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - C++11/14/17/20 compatible
 - Easy printing/formatting using `lz::format`, `fmt::print` or `std::cout`
 - Tested with `-Wpedantic -Wextra -Wall -Wshadow -Wno-unused-function -Werror -Wconversion` and `/WX` for MSVC
-- One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP-LAZY_USE_STANDALONE=TRUE` in CMake
-- STL compatible
-- Little overhead, as little as data usage possible
+- One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP-LAZY_USE_STANDALONE=TRUE`/`set(CPP-LAZY_USE_STANDALONE TRUE)` in CMake
+- STL compatible (if the input iterable is not sentinelled, otherwise use `lz::*` equivalents)
+- Little overhead, as little data usage as possible
 - Any compiler with at least C++11 support should be suitable
 - [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
@@ -90,9 +90,9 @@ int main() {
 
   // Some iterables will return sentinels, for instance (specific rules about when sentinels are returned can be found in the documentation):
   std::vector<int> vec = {1, 2, 3, 4};
-  auto forward = lz::c_string("Hello World"); // .end() returns default_sentinel
-  auto inf_loop = lz::loop(vec); // .end() returns default_sentinel
-  auto random = lz::random(0, 32, 4); // .end() returns default_sentinel
+  auto forward = lz::c_string("Hello World"); // .end() returns default_sentinel_t
+  auto inf_loop = lz::loop(vec); // .end() returns default_sentinel_t
+  auto random = lz::random(0, 32, 4); // .end() returns default_sentinel_t
 
   // Some iterables are sized, if the input iterable is also sized:
   auto sized = lz::map(vec, [](int i) { return i + 1; });
@@ -112,7 +112,7 @@ int main() {
 ```
 
 ## Ownership
-`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::ref_or_view`. This can be altered using `lz::copied_iterable` or `lz::as_copied_iterable`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
+`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::copied` or `lz::as_copied`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
 
 ```cpp
 #include <Lz/lz.hpp>
@@ -143,18 +143,18 @@ int main() {
   // str will *not* hold a reference to random, because random is a lazy iterable and is trivial to copy
   auto str = lz::map(random, [](int i) { return std::to_string(i); });
 
-  lz::ref_or_view<std::vector<int>> ref(vec); // Holds a reference to vec
+  lz::maybe_owned<std::vector<int>> ref(vec); // Holds a reference to vec
 
   using random_iterable = decltype(random);
-  lz::ref_or_view<random_iterable> ref2(random); // Does NOT hold a reference to random
+  lz::maybe_owned<random_iterable> ref2(random); // Does NOT hold a reference to random
 
   non_lz_iterable non_lz(vec.data(), vec.data() + vec.size());
-  lz::ref_or_view<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
+  lz::maybe_owned<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
 
-  // Instead, if you don't want this behaviour, you can use lz::copied_iterable:
-  lz::copied_iterable<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
+  // Instead, if you don't want this behaviour, you can use `lz::copied`:
+  lz::copied<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
   // Or use the helper function:
-  copied = lz::as_copied_iterable(non_lz); // Holds a copy of non_lz = cheap to copy
+  copied = lz::as_copied(non_lz); // Holds a copy of non_lz = cheap to copy
 }
 ```
 
@@ -209,7 +209,7 @@ The following CMake options are available:
 - `CPP-LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
 - `CPP-LAZY_LZ_USE_MODULES` (experimental): Use C++20 modules. Default is `FALSE`
 - `CPP-LAZY_USE_INSTALLED_FMT`: Use the installed version of `{fmt}`. This will not use the bundled version. Will use `find_package(fmt)` if enabled. Default is `FALSE`.
-- `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions in other build configurations than debug (debug is always enabled). Default is `FALSE`.
+- `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
 
 ### Using `FetchContent`
 The following way is recommended (cpp-lazy version >= 5.0.1). Note that you choose the cpp-lazy-src.zip, and not the source-code.zip/source-code.tar.gz. This prevents you from downloading stuff that you don't need, and thus preventing pollution of the cmake build directory:

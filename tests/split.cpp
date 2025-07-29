@@ -1,7 +1,7 @@
 #include <Lz/map.hpp>
 #include <Lz/split.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -61,6 +61,7 @@ TEST_CASE("Splitter permutations") {
     SECTION("Ending with one delimiter starting with none") {
         const std::string to_split = "Hello world test 123 ";
         auto splitter = lz::sv_split(to_split, " ");
+
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
         REQUIRE(lz::equal(splitter, expected));
 
@@ -162,24 +163,24 @@ TEST_CASE("Empty or one element string splitter") {
         iterable splitter = lz::split(to_split, " ");
 
         REQUIRE(lz::empty(splitter));
-        REQUIRE(!lz::has_many(splitter));
-        REQUIRE(!lz::has_one(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
+        REQUIRE_FALSE(lz::has_one(splitter));
     }
 
     SECTION("One element") {
         std::string to_split = "Hello";
         auto splitter = lz::split(to_split, " ");
-        REQUIRE(!lz::empty(splitter));
-        REQUIRE(!lz::has_many(splitter));
+        REQUIRE_FALSE(lz::empty(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
         REQUIRE(lz::has_one(splitter));
     }
 
     SECTION("One element with delimiter") {
         std::string to_split = "Hello ";
         auto splitter = lz::split(to_split, " ");
-        REQUIRE(!lz::empty(splitter));
+        REQUIRE_FALSE(lz::empty(splitter));
         REQUIRE(lz::has_many(splitter));
-        REQUIRE(!lz::has_one(splitter));
+        REQUIRE_FALSE(lz::has_one(splitter));
     }
 }
 
@@ -420,24 +421,24 @@ TEST_CASE("Empty or one element string one element splitter") {
         std::string to_split;
         auto splitter = lz::split(to_split, ' ');
         REQUIRE(lz::empty(splitter));
-        REQUIRE(!lz::has_many(splitter));
-        REQUIRE(!lz::has_one(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
+        REQUIRE_FALSE(lz::has_one(splitter));
     }
 
     SECTION("One element") {
         std::string to_split = "Hello";
         auto splitter = lz::split(to_split, ' ');
-        REQUIRE(!lz::empty(splitter));
-        REQUIRE(!lz::has_many(splitter));
+        REQUIRE_FALSE(lz::empty(splitter));
+        REQUIRE_FALSE(lz::has_many(splitter));
         REQUIRE(lz::has_one(splitter));
     }
 
     SECTION("One element with delimiter") {
         std::string to_split = "Hello ";
         auto splitter = lz::split(to_split, ' ');
-        REQUIRE(!lz::empty(splitter));
+        REQUIRE_FALSE(lz::empty(splitter));
         REQUIRE(lz::has_many(splitter));
-        REQUIRE(!lz::has_one(splitter));
+        REQUIRE_FALSE(lz::has_one(splitter));
     }
 }
 

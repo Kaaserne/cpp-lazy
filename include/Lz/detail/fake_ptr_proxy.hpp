@@ -1,12 +1,11 @@
 #pragma once
 
-#include <type_traits>
 #ifndef LZ_FAKE_POINTER_PROXY_HPP
 #define LZ_FAKE_POINTER_PROXY_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <memory>
-
+#include <type_traits>
 
 namespace lz {
 namespace detail {

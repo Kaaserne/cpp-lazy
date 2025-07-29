@@ -16,7 +16,7 @@ class loop_iterator;
 template<class Iterable>
 class loop_iterator<Iterable, false>
     : public iterator<loop_iterator<Iterable, false>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
 
@@ -53,22 +53,25 @@ public:
         _rotations_left{ amount } {
     }
 
-    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel_t) {
         _rotations_left = 0;
         // We don't set _iterator to end here otherwise eq will return true
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator;
+
         if (_iterator == std::end(_iterable)) {
             --_rotations_left;
             _iterator = std::begin(_iterable);
@@ -92,6 +95,9 @@ public:
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
         _rotations_left -= static_cast<std::size_t>(offset / iter_length);
+
+        LZ_ASSERT_ADDABLE(static_cast<difference_type>(_rotations_left) >= -1);
+
         if (_iterator == std::begin(_iterable) && static_cast<difference_type>(_rotations_left) == -1) {
             // We are exactly at end (rotations left is unsigned)
             _iterator = std::end(_iterable);
@@ -111,13 +117,18 @@ public:
         return (_iterator - other._iterator) + rotations_left_diff * (std::end(_iterable) - std::begin(_iterable));
     }
 
+    LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
+        const auto rotations_left_diff = static_cast<difference_type>(_rotations_left);
+        return -((std::end(_iterable) - _iterator) + rotations_left_diff * (std::end(_iterable) - std::begin(_iterable)));
+    }
+
     LZ_CONSTEXPR_CXX_14 bool eq(const loop_iterator& other) const {
         LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
                   "Incompatible iterators");
         return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _rotations_left == 0 && _iterator == std::end(_iterable);
     }
 };
@@ -125,7 +136,7 @@ public:
 template<class Iterable>
 class loop_iterator<Iterable, true>
     : public iterator<loop_iterator<Iterable, true>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel> {
+                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -160,7 +171,7 @@ public:
     constexpr loop_iterator(I&& iterable, it iter) : _iterator{ std::move(iter) }, _iterable{ std::forward<I>(iterable) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel_t) noexcept {
         return *this;
     }
 
@@ -180,7 +191,7 @@ public:
     }
 
     constexpr bool eq(const loop_iterator&) const {
-        return eq(default_sentinel{});
+        return *this == lz::default_sentinel;
     }
 
 #ifdef _MSC_VER
@@ -188,7 +199,7 @@ public:
 #pragma warning(disable : 4717) // Recursive type
 #endif
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return std::begin(_iterable) == std::end(_iterable);
     }
 

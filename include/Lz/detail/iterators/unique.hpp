@@ -16,7 +16,7 @@ template<class Iterable, class BinaryPredicate>
 class unique_iterator
     : public iterator<unique_iterator<Iterable, BinaryPredicate>, ref_t<iter_t<Iterable>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
-                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<Iterable>>>, default_sentinel> {
+                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
@@ -57,20 +57,23 @@ public:
         _predicate{ std::move(binary_predicate) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel_t) {
         _iterator = std::end(_iterable);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
+
         using std::adjacent_find;
         _iterator = adjacent_find(std::move(_iterator), std::end(_iterable), _predicate);
 
@@ -80,6 +83,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
         --_iterator;
         if (_iterator == std::begin(_iterable)) {
             return;
@@ -99,7 +103,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == std::end(_iterable);
     }
 };

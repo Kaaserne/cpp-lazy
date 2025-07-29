@@ -20,9 +20,8 @@ struct regex_split_adaptor {
 
     /**
      * @brief Splits a string based on a regex. The regex must be by reference. The `begin()` and `end()` types are different, but
-     * `end()` is not an 'actual' sentinel. Rather, its the same type as its input iterator `end()` type. For std::regex, this
-     * means `end() == std::regex_token_iterator<>{}` and `begin() = lz::regex_split_iterator`. It does not contain a .size()
-     * method and its iterator category is forward. Example:
+     * `end()` of type `RegexTokenIterator`. For std::regex, this means `end() == std::regex_token_iterator<>{}` and `begin() =
+     * lz::regex_split_iterator`. It does not contain a .size() method and its iterator category is forward. Example:
      * ```cpp
      * std::regex r1(R"(\s+)");
      * std::string s = "    Hello, world! How are you?";
@@ -42,9 +41,8 @@ struct regex_split_adaptor {
 
     /**
      * @brief Splits a string based on a regex. The regex must be by reference. The `begin()` and `end()` types are different, but
-     * `end()` is not an 'actual' sentinel. Rather, its the same type as its input iterator `end()` type. For std::regex, this
-     * means `end() == std::regex_token_iterator<>{}` and `begin() = lz::regex_split_iterator`. It does not contain a .size()
-     * method and its iterator category is forward. Example:
+     * `end()` of type `RegexTokenIterator`. For std::regex, this means `end() == std::regex_token_iterator<>{}` and `begin() =
+     * lz::regex_split_iterator`. It does not contain a .size() method and its iterator category is forward. Example:
      * ```cpp
      * std::regex r1(R"(\s+)");
      * std::string s = "    Hello, world! How are you?";
@@ -60,9 +58,8 @@ struct regex_split_adaptor {
 
     /**
      * @brief Splits a string based on a regex. The regex must be by reference. The `begin()` and `end()` types are different, but
-     * `end()` is not an 'actual' sentinel. Rather, its the same type as its input iterator `end()` type. For std::regex, this
-     * means `end() == std::regex_token_iterator<>{}` and `begin() = lz::regex_split_iterator`. It does not contain a .size()
-     * method and its iterator category is forward. Example:
+     * `end()` of type `RegexTokenIterator`. For std::regex, this means `end() == std::regex_token_iterator<>{}` and `begin() =
+     * lz::regex_split_iterator`. It does not contain a .size() method and its iterator category is forward. Example:
      * ```cpp
      * std::regex r1(R"(\s+)");
      * std::string s = "    Hello, world! How are you?";

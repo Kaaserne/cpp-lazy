@@ -1,7 +1,7 @@
 #include <Lz/iter_tools.hpp>
 #include <Lz/zip.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <map>
 
 #ifdef LZ_HAS_CXX_11

@@ -36,7 +36,7 @@ struct as_iterator_adaptor {
     template<LZ_CONCEPT_ITERABLE Iterable>
     LZ_NODISCARD constexpr as_iterator_iterable<remove_ref<Iterable>, iter_cat_iterable_t<Iterable>>
     operator()(Iterable&& iterable) const {
-        return { std::forward<Iterable>(iterable) };
+        return as_iterator_iterable<remove_ref<Iterable>, iter_cat_iterable_t<Iterable>>{ std::forward<Iterable>(iterable) };
     }
 
     /**
@@ -58,7 +58,7 @@ struct as_iterator_adaptor {
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class IterCat>
     LZ_NODISCARD constexpr as_iterator_iterable<remove_ref<Iterable>, IterCat> operator()(Iterable&& iterable, IterCat) const {
-        return { std::forward<Iterable>(iterable) };
+        return as_iterator_iterable<remove_ref<Iterable>, IterCat>{ std::forward<Iterable>(iterable) };
     }
 
     // clang-format off
@@ -80,7 +80,7 @@ struct as_iterator_adaptor {
      * @return An an adaptor that can be used in a pipe expression
      */
     template<class IterCat>
-    LZ_NODISCARD constexpr 
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 
     enable_if<is_input_tag<IterCat>::value || is_output_tag<IterCat>::value, fn_args_holder<adaptor, IterCat>>
     operator()(IterCat) const {
         return {};

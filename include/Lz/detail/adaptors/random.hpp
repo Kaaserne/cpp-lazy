@@ -127,7 +127,7 @@ struct random_adaptor {
     /**
      * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
      * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
-     * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
+     * iterator to avoid unnecessary overhead. Further, it contains a .size() method and is random access. Example:
      * ```cpp
      * std::mt19937 gen;
      * std::uniform_real_distribution<double> dist(0., 1.);
@@ -148,7 +148,7 @@ struct random_adaptor {
     /**
      * @brief Generates n amount of random numbers. May or may not contain a sentinel, depending on the adaptor used. Use
      * `lz::common_random` for no sentinel, otherwise use `lz::random`. Prefer using `lz::random` if you do not need an actual end
-     * iterator to avoid unnecessary overhead. Further, it contains a .size() method. Example:
+     * iterator to avoid unnecessary overhead. Further, it contains a .size() method and is random access. Example:
      * ```cpp
      * // Uses std::uniform_real_distribution<double> as distribution, a seed length of 8 random numbers (using
      * // std::random_device) and a std::mt19937 engine.
@@ -166,12 +166,10 @@ struct random_adaptor {
     [[nodiscard]] auto operator()(const T min, const T max, const std::size_t amount) const {
         static auto gen = create_engine();
         if constexpr (std::is_integral_v<T>) {
-            std::uniform_int_distribution<T> dist(min, max);
-            return (*this)(dist, gen, amount);
+            return (*this)(std::uniform_int_distribution<T>{ min, max }, gen, amount);
         }
         else if constexpr (std::is_floating_point_v<T>) {
-            std::uniform_real_distribution<T> dist(min, max);
-            return (*this)(dist, gen, amount);
+            return (*this)(std::uniform_real_distribution<T>{ min, max }, gen, amount);
         }
         else {
             static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>,
@@ -202,8 +200,7 @@ struct random_adaptor {
     enable_if<std::is_integral<Integral>::value, random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
     operator()(const Integral min, const Integral max, const std::size_t amount) const {
         static auto gen = create_engine();
-        std::uniform_int_distribution<Integral> dist(min, max);
-        return (*this)(dist, gen, amount);
+        return (*this)(std::uniform_int_distribution<Integral>{ min, max }, gen, amount);
     }
 
     /**
@@ -227,8 +224,7 @@ struct random_adaptor {
     enable_if<std::is_floating_point<Floating>::value, random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
     operator()(const Floating min, const Floating max, const std::size_t amount) const {
         static auto gen = create_engine();
-        std::uniform_real_distribution<Floating> dist(min, max);
-        return (*this)(dist, gen, amount);
+        return (*this)(std::uniform_real_distribution<Floating>{ min, max }, gen, amount);
     }
 
 #endif

@@ -15,7 +15,7 @@ class join_where_iterator
     : public iterator<join_where_iterator<IterableA, IterB, SB, SelectorA, SelectorB, ResultSelector>,
                       func_ret_type_iters<ResultSelector, iter_t<IterableA>, IterB>,
                       fake_ptr_proxy<func_ret_type_iters<ResultSelector, iter_t<IterableA>, IterB>>, std::ptrdiff_t,
-                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<IterableA>>>, default_sentinel> {
+                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<IterableA>>>, default_sentinel_t> {
 private:
     using iter_a = iter_t<IterableA>;
     using traits_a = std::iterator_traits<iter_a>;
@@ -101,20 +101,22 @@ public:
         find_next();
     }
 
-    LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel_t) {
         _iter_a = std::end(_iterable_a);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return _result_selector(*_iter_a, *std::begin(_iterable_b));
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         _iterable_b = lz::basic_iterable<IterB, SB>{ std::next(std::begin(_iterable_b)), std::end(_iterable_b) };
         find_next();
     }
@@ -124,7 +126,7 @@ public:
         return _iter_a == b._iter_a;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iter_a == std::end(_iterable_a);
     }
 };

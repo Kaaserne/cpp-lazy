@@ -16,9 +16,8 @@ struct chunk_if_adaptor {
 
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The
-     * iterator category is forward, and returns a sentinel. It returns an iterable of some type T of which T must be
-     * constructible from its input begin() and end(). So essentially: `my_chontainer(input_iterable.begin(),
-     * input_iterable.end())`. Iterable is forward only. Example:
+     * iterator category is forward and returns a sentinel. It returns an iterable of some type T of which T must be
+     * constructible from its input begin() and end(). So essentially: `T(input_iterable.begin(), input_iterable.end())`. Example:
      * ```cpp
      * template<class T>
      * struct my_container {
@@ -34,7 +33,7 @@ struct chunk_if_adaptor {
      * ```
      * @param iterable The iterable to chunk.
      * @param predicate The predicate to chunk on.
-     * @return An iterable of type T, where T is constructible from the begin and end iterators of the input iterable. 
+     * @return An iterable of type T, where T is constructible from the begin and end iterators of the input iterable.
      */
     template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
     constexpr chunk_if_iterable<ValueType, remove_ref<Iterable>, UnaryPredicate>
@@ -44,9 +43,8 @@ struct chunk_if_adaptor {
 
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The
-     * iterator category is forward, and returns a sentinel. It returns an iterable of some type T of which T must be
-     * constructible from its input begin() and end(). So essentially: `my_chontainer(input_iterable.begin(),
-     * input_iterable.end())`. Iterable is forward only. Example:
+     * iterator category is forward and returns a sentinel. It returns an iterable of some type T of which T must be
+     * constructible from its input begin() and end(). So essentially: `T(input_iterable.begin(), input_iterable.end())`. Example:
      * ```cpp
      * template<class T>
      * struct my_container {
@@ -75,8 +73,8 @@ struct chunk_if_adaptor<void> {
 
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The
-     * iterator category is forward, and returns a sentinel. It returns an iterable of iterables. This iterable does not contain
-     * a .size() method. Iterable is forward only. Example:
+     * iterator category is forward and returns a sentinel. It returns an iterable of iterables. This iterable does not contain
+     * a .size() method. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * auto chunked = lz::chunk_if(vec, [](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }
@@ -93,8 +91,8 @@ struct chunk_if_adaptor<void> {
 
     /**
      * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The
-     * iterator category is forward, and returns a sentinel. It returns an iterable of iterables. This iterable does not contain a
-     * .size() method. Iterable is forward only. Example:
+     * iterator category is forward and returns a sentinel. It returns an iterable of iterables. This iterable does not contain a
+     * .size() method. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * auto chunked = vec | lz::chunk_if([](int i) { return i % 2 == 0; }); // chunked = { {1, 2}, {3, 4}, {5} } }

@@ -55,7 +55,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
  * @return (A reference to) the first element of the sequence.
  */
 template<LZ_CONCEPT_ITERABLE Iterable>
-LZ_NODISCARD constexpr ref_t<iter_t<Iterable>> front(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 ref_t<iter_t<Iterable>> front(Iterable&& iterable) {
+    LZ_ASSERT(!lz::empty(iterable), "Cannot get the front element of an empty iterable.");
     return *std::begin(iterable);
 }
 
@@ -68,8 +69,11 @@ LZ_NODISCARD constexpr ref_t<iter_t<Iterable>> front(Iterable&& iterable) {
  */
 template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 ref_t<iter_t<Iterable>> back(Iterable&& iterable) {
-    auto end = std::end(iterable);
-    return *--end;
+    static_assert(lz::detail::has_sentinel<Iterable>::value ? lz::detail::is_ra<iter_t<Iterable>>::value
+                                                            : lz::detail::is_bidi<iter_t<Iterable>>::value,
+                  "If iterable has sentinels, it must be random access, otherwise it must be bidirectional.");
+    LZ_ASSERT(!lz::empty(iterable), "Cannot get the back element of an empty iterable.");
+    return detail::back(std::forward<Iterable>(iterable));
 }
 
 /**
@@ -188,8 +192,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find(Iterable&& iterable, cons
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable, const T& value) {
-    return detail::find_last(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                             value);
+    return detail::find_last(std::forward<Iterable>(iterable), value);
 }
 
 /**
@@ -202,8 +205,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable,
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    return detail::find_last_if(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                                std::forward<UnaryPredicate>(unary_predicate));
+    return detail::find_last_if(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -253,8 +255,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if_not(Iterable&& iterabl
  */
 template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    return detail::find_last_if_not(detail::begin(std::forward<Iterable>(iterable)),
-                                    detail::end(std::forward<Iterable>(iterable)), std::forward<UnaryPredicate>(unary_predicate));
+    return detail::find_last_if_not(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -262,11 +263,12 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& it
  * element is found, it returns the value, otherwise it returns @p default_value
  * @param iterable The iterable to find the element in
  * @param to_find The value to find
- * @param default_value The value to return if the element is not found
+ * @param default_value The value to return if the element is not found, defaults to `T()`
  * @return The value @p to_find if it is found, otherwise @p default_value
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class T, class U>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
+template<LZ_CONCEPT_ITERABLE Iterable, class T, class U = detail::remove_cvref<T>>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
+find_or_default(Iterable&& iterable, T&& to_find, U&& default_value = {}) {
     return detail::find_or_default(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                                    std::forward<T>(to_find), std::forward<U>(default_value));
 }
@@ -277,12 +279,12 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default(Iterab
  * @param iterable The iterable to search.
  * @param unary_predicate The search unary_predicate in [begin(iterable), end(iterable)). Must return bool.
  * @param default_value The value to return when no element matches unary_predicate @p unary_predicate in [begin(iterable),
- * end(iterable))
+ * end(iterable)). Defaults to `Iterable::value_type()`
  * @return The value if it is found, otherwise @p default_value
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U>
+template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U = val_iterable_t<Iterable>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
-find_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value) {
+find_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value = {}) {
     return detail::find_or_default_if(detail::begin(std::forward<Iterable>(iterable)),
                                       detail::end(std::forward<Iterable>(iterable)),
                                       std::forward<UnaryPredicate>(unary_predicate), std::forward<U>(default_value));
@@ -294,14 +296,14 @@ find_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& de
  * the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
  * @param iterable The iterable to find the element in
  * @param to_find The value to find
- * @param default_value The value to return when no element matches @p to_find in [begin(iterable), end(iterable))
+ * @param default_value The value to return when no element matches @p to_find in [begin(iterable), end(iterable)). Defaults to
+ * `T()`
  * @return The value if it is found, otherwise @p default_value
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class T, class U>
+template<LZ_CONCEPT_ITERABLE Iterable, class T, class U = T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
-find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
-    return detail::find_last_or_default(detail::begin(std::forward<Iterable>(iterable)),
-                                        detail::end(std::forward<Iterable>(iterable)), std::forward<T>(to_find),
+find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value = {}) {
+    return detail::find_last_or_default(std::forward<Iterable>(iterable), std::forward<T>(to_find),
                                         std::forward<U>(default_value));
 }
 
@@ -312,15 +314,14 @@ find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
  * @param iterable The iterable to search.
  * @param unary_predicate The search unary_predicate in [begin(iterable), end(iterable)). Must return bool.
  * @param default_value The value to return when no element matches unary_predicate @p unary_predicate in [begin(iterable),
- * end(iterable))
+ * end(iterable))`. Defaults to `Iterable::value_type()`
  * @return The value if it is found, otherwise @p default_value
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U>
+template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U = val_iterable_t<Iterable>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
-find_last_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value) {
-    return detail::find_last_or_default_if(detail::begin(std::forward<Iterable>(iterable)),
-                                           detail::end(std::forward<Iterable>(iterable)),
-                                           std::forward<UnaryPredicate>(unary_predicate), std::forward<U>(default_value));
+find_last_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value = {}) {
+    return detail::find_last_or_default_if(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate),
+                                           std::forward<U>(default_value));
 }
 
 /**
@@ -329,14 +330,13 @@ find_last_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, U
  * the elements.
  * @param iterable The iterable to search in
  * @param value The value to search for
- * @param default_value The value to return when no element matches @p value in [begin(iterable), end(iterable))
+ * @param default_value The value to return when no element matches @p value in [begin(iterable), end(iterable)). Defaults to `T()
  * @return The value if it is found, otherwise @p default_value
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class T, class U>
+template<LZ_CONCEPT_ITERABLE Iterable, class T, class U = T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
-find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value) {
-    return detail::find_last_or_default_not(detail::begin(std::forward<Iterable>(iterable)),
-                                            detail::end(std::forward<Iterable>(iterable)), std::forward<T>(value),
+find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value = {}) {
+    return detail::find_last_or_default_not(std::forward<Iterable>(iterable), std::forward<T>(value),
                                             std::forward<U>(default_value));
 }
 
@@ -344,17 +344,17 @@ find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value) {
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the unary_predicate @p
  * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Note that when @p
  * iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
- * @param iterable
- * @param unary_predicate
- * @param default_value
+ * @param iterable The iterable to search in
+ * @param unary_predicate The search unary_predicate in [begin(iterable), end(iterable)). Must return bool-like.
+ * @param default_value The value to return when no element matches unary_predicate @p unary_predicate in [begin(iterable),
+ * end(iterable))`. Defaults to `Iterable::value_type()`
  * @return The value if it is found, otherwise @p default_value
  */
-template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U>
+template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate, class U = val_iterable_t<Iterable>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
-find_last_or_default_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value) {
-    return detail::find_last_or_default_if_not(detail::begin(std::forward<Iterable>(iterable)),
-                                               detail::end(std::forward<Iterable>(iterable)),
-                                               std::forward<UnaryPredicate>(unary_predicate), std::forward<U>(default_value));
+find_last_or_default_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value = {}) {
+    return detail::find_last_or_default_if_not(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate),
+                                               std::forward<U>(default_value));
 }
 
 /**

@@ -1,7 +1,8 @@
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -16,7 +17,7 @@ TEST_CASE("Basic common_iterable test") {
     REQUIRE(lz::equal(common, cstr));
 }
 
-TEST_CASE("common_iterable binary operations") {
+TEST_CASE("common_iterable binary operations fwd") {
     const char* a = "hello ";
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);
@@ -35,21 +36,32 @@ TEST_CASE("common_iterable binary operations") {
     }
 }
 
+TEST_CASE("common_iterable random access") {
+    auto repeater = lz::repeat(20, 5);
+    auto common = lz::common(repeater);
+    static_assert(std::is_same<decltype(common), lz::basic_iterable<lz::iter_t<decltype(repeater)>>>::value, "");
+    static_assert(lz::detail::is_ra<lz::iter_t<decltype(repeater)>>::value, "");
+
+    SECTION("Operator++") {
+        REQUIRE(lz::equal(common, repeater));
+    }
+}
+
 TEST_CASE("common_iterable empty or one element") {
     SECTION("Empty") {
         auto c_str = lz::c_string("");
         auto common = lz::common(c_str);
         REQUIRE(lz::empty(common));
-        REQUIRE(!lz::has_one(common));
-        REQUIRE(!lz::has_many(common));
+        REQUIRE_FALSE(lz::has_one(common));
+        REQUIRE_FALSE(lz::has_many(common));
     }
 
     SECTION("One element") {
         auto c_str = lz::c_string("a");
         auto common = lz::common(c_str);
-        REQUIRE(!lz::empty(common));
+        REQUIRE_FALSE(lz::empty(common));
         REQUIRE(lz::has_one(common));
-        REQUIRE(!lz::has_many(common));
+        REQUIRE_FALSE(lz::has_many(common));
     }
 }
 

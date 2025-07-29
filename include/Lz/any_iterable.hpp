@@ -41,6 +41,24 @@ private:
     it _begin;
     it _end;
 
+    // One of them fits, the other does not
+    template<class Iterable>
+    any_iterable(
+        Iterable&& iterable,
+        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) || (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
+        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
+        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    }
+
+    // Both fit
+    template<class Iterable>
+    any_iterable(
+        Iterable&& iterable,
+        detail::enable_if<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
+        _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
+        _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
+    }
+
 public:
 #ifdef LZ_HAS_CONCEPTS
 
@@ -62,9 +80,7 @@ public:
      * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
      */
     template<LZ_CONCEPT_ITERABLE Iterable>
-    any_iterable(Iterable&& iterable) :
-        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
-        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    any_iterable(Iterable&& iterable) : any_iterable(std::forward<Iterable>(iterable), 0) {
     }
 
     LZ_NODISCARD it begin() const& {
@@ -100,7 +116,7 @@ template<LZ_CONCEPT_ITERABLE Iterable>
 any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>, diff_iterable_t<Iterable>>
 make_any_iterable(Iterable&& iterable) {
     return any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>,
-                        diff_iterable_t<Iterable>>(std::forward<Iterable>(iterable));
+                        diff_iterable_t<Iterable>>{ std::forward<Iterable>(iterable) };
 }
 
 } // namespace lz

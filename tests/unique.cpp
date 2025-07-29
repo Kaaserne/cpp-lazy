@@ -1,8 +1,8 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/unique.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -71,16 +71,16 @@ TEST_CASE("Empty or one element unique") {
         std::vector<int> vec;
         auto unique = lz::unique(vec);
         REQUIRE(lz::empty(unique));
-        REQUIRE(!lz::has_many(unique));
-        REQUIRE(!lz::has_one(unique));
+        REQUIRE_FALSE(lz::has_many(unique));
+        REQUIRE_FALSE(lz::has_one(unique));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto unique = lz::unique(vec);
         REQUIRE(lz::has_one(unique));
-        REQUIRE(!lz::has_many(unique));
-        REQUIRE(!lz::empty(unique));
+        REQUIRE_FALSE(lz::has_many(unique));
+        REQUIRE_FALSE(lz::empty(unique));
     }
 }
 

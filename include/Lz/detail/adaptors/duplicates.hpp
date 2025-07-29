@@ -17,7 +17,7 @@ struct duplicates_adaptor {
      * iterable does not contain a .size() method. Example:
      * ```cpp
      * std::vector<int> input{ 1, 2, 2, 3, 4, 4, 5 };
-     * auto dupes = lz::duplicates(input);
+     * auto dupes = lz::duplicates(input); // { { 1, 1 }, { 2, 2 }, { 3, 1 }, { 4, 2 }, { 5, 1 } }
      * ```
      * @param iterable The iterable to check the duplicates of.
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.

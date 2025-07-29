@@ -18,20 +18,17 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * // std::plus is used as the default binary operation
- * auto scan = lz::exclusive_scan(vec, 0); // scan = { 0, 1, 3, 6, 10, 15 }
- * // so 0 (= 0), 0 + 1 (= 1), 1 + 2 (= 3), 3 + 3 (= 6), 6 + 4 (= 10), 10 + 5 (= 15)
  *
- * // or
- * auto scan = vec | lz::exclusive_scan(0); // scan = { 0, 1, 3, 6, 10, 15 }
  * // you can also add a custom operator:
  * auto scan = vec | lz::exclusive_scan(0, std::plus<int>{}); // scan = { 0, 1, 3, 6, 10, 15 }
- * // When working with pipe expressions, you always need to specify the init value. When working with 'regular' functions, you
+ * // When working with pipe expressions, you always need to specify the init value. When working with 'regular' functions,
+ * you
  * // can omit the init value, in which case it will be a default constructed object of the type of the container.
  * // Example
- * auto scan = lz::exclusive_scan(vec); // OK
- * auto scan = lz::exclusive_scan(vec, 0); // OK
- * // auto scan = vec | lz::exclusive_scan; // Error, unable to determine the type of the init value
- * auto scan = vec | lz::exclusive_scan(0); // OK
+ * auto scan = lz::exclusive_scan(vec);
+ * auto scan = lz::exclusive_scan(vec, 0);
+ * auto scan = vec | lz::exclusive_scan; // uses 0 and std::plus
+ * auto scan = vec | lz::exclusive_scan(0);
  * ```
  */
 LZ_INLINE_VAR constexpr detail::exclusive_scan_adaptor exclusive_scan{};

@@ -2,8 +2,9 @@
 #include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
 #include <test_procs.hpp>
@@ -13,13 +14,13 @@ TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");
     lz::exclude_iterable<decltype(cstr)> excluded = lz::exclude(cstr, 3, 5);
     REQUIRE((excluded | lz::to<std::string>()) == "a sing to exclude");
-    static_assert(std::is_same<decltype(excluded.end()), lz::default_sentinel>::value, "Should be default sentinel");
+    static_assert(std::is_same<decltype(excluded.end()), lz::default_sentinel_t>::value, "Should be default sentinel");
 }
 
 TEST_CASE("Exclude changing and creating elements") {
     std::array<int, 10> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto excluded1 = lz::exclude(arr, 3, 5);
-    static_assert(!std::is_same<decltype(excluded1.end()), lz::default_sentinel>::value, "Should not be default sentinel");
+    static_assert(!std::is_same<decltype(excluded1.end()), lz::default_sentinel_t>::value, "Should not be default sentinel");
     auto excluded2 = lz::exclude(arr, 0, 2);
     auto excluded3 = lz::exclude(arr, 8, 10);
 
@@ -84,13 +85,6 @@ TEST_CASE("Exclude binary operations") {
     auto excluded2 = lz::exclude(arr, 0, 2); // { 3, 4, 5, 6, 7, 8, 9, 10 }
     auto excluded3 = lz::exclude(arr, 7, 10); // { 1, 2, 3, 4, 5, 6, 7 }
 
-    auto exBeg1 = excluded1.begin();
-    auto exEnd1 = excluded1.end();
-    auto exBeg2 = excluded2.begin();
-    auto exEnd2 = excluded2.end();
-    auto exBeg3 = excluded3.begin();
-    auto exEnd3 = excluded3.end();
-
     SECTION("Operator++") {
         std::vector<int> expected = { 1, 2, 3, 6, 7, 8, 9, 10 };
         REQUIRE(lz::equal(excluded1, expected));
@@ -130,16 +124,13 @@ TEST_CASE("Exclude binary operations") {
         test_procs::test_operator_minus(excluded3);
     }
 
-    SECTION("Operator== & operator!=") {
-        REQUIRE(exBeg1 != exEnd1);
-        exBeg1 = exEnd1;
-        REQUIRE(exBeg1 == exEnd1);
-        REQUIRE(exBeg2 != exEnd2);
-        exBeg2 = exEnd2;
-        REQUIRE(exBeg2 == exEnd2);
-        REQUIRE(exBeg3 != exEnd3);
-        exBeg3 = exEnd3;
-        REQUIRE(exBeg3 == exEnd3);
+    SECTION("Operator-(default_sentinel_t)") {
+        auto excluded1_sent = lz::exclude(lz::repeat(0, 10), 3, 5);
+        auto excluded2_sent = lz::exclude(lz::repeat(0, 10), 0, 2);
+        auto excluded3_sent = lz::exclude(lz::repeat(0, 10), 8, 10);
+        test_procs::test_operator_minus(excluded1_sent);
+        test_procs::test_operator_minus(excluded2_sent);
+        test_procs::test_operator_minus(excluded3_sent);
     }
 }
 

@@ -18,7 +18,11 @@ struct iterator_base<Reference, std::forward_iterator_tag, DiffType> {
 
     virtual Reference dereference() = 0;
 
+    virtual Reference dereference() const = 0;
+
     virtual fake_ptr_proxy<Reference> arrow() = 0;
+
+    virtual fake_ptr_proxy<Reference> arrow() const = 0;
 
     virtual void increment() = 0;
 
@@ -33,7 +37,11 @@ struct iterator_base<Reference, std::bidirectional_iterator_tag, DiffType> {
 
     virtual Reference dereference() = 0;
 
+    virtual Reference dereference() const = 0;
+
     virtual fake_ptr_proxy<Reference> arrow() = 0;
+
+    virtual fake_ptr_proxy<Reference> arrow() const = 0;
 
     virtual void increment() = 0;
 
@@ -50,7 +58,11 @@ struct iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
     virtual Reference dereference() = 0;
 
+    virtual Reference dereference() const = 0;
+
     virtual fake_ptr_proxy<Reference> arrow() = 0;
+
+    virtual fake_ptr_proxy<Reference> arrow() const = 0;
 
     virtual void increment() = 0;
 
@@ -58,7 +70,7 @@ struct iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
     virtual void plus_is(DiffType n) = 0;
 
-    virtual DiffType minus(const iterator_base& other) const = 0;
+    virtual DiffType difference(const iterator_base& other) const = 0;
 
     virtual bool eq(const iterator_base& other) const = 0;
 

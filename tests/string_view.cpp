@@ -10,34 +10,37 @@
 #include <catch2/catch.hpp>
 
 TEST_CASE("String view basic functionality") {
-    const std::string str = "Hello world";
-    lz::string_view view(str.data(), str.size());
+    constexpr const char* cstr = "Hello world!";
+    constexpr lz::string_view view("Hello world!");
 
     SECTION("Should have correct size") {
-        REQUIRE(view.size() == str.size());
+        static_assert(view.size() == lz::detail::constexpr_str_len(cstr), "view.size() != cstr size");
     }
 
     SECTION("Should have correct data") {
-        REQUIRE(view.data() == str.data());
+        REQUIRE(view.data() == cstr);
     }
 
     SECTION("Should have correct length") {
-        REQUIRE(view.length() == str.size());
+        static_assert(view.length() == lz::detail::constexpr_str_len(cstr), "view.length() != cstr length");
     }
 
     SECTION("Should have correct begin") {
-        REQUIRE(view.begin() == str.data());
+        REQUIRE(view.begin() == cstr);
     }
 
     SECTION("Should have correct end") {
-        REQUIRE(view.end() == str.data() + str.size());
+        REQUIRE(view.end() == cstr + lz::detail::constexpr_str_len(cstr));
     }
 
     SECTION("Empty") {
-        lz::string_view empty_view;
-        REQUIRE(empty_view.empty());
-        REQUIRE(empty_view.size() == 0);
-        REQUIRE(empty_view.data() == nullptr);
+        constexpr lz::string_view empty_view;
+        static_assert(empty_view.size() == 0, "empty_view.size() != 0");
+        static_assert(empty_view.length() == 0, "empty_view.length() != 0");
+        static_assert(empty_view.data() == nullptr, "empty_view.data() != nullptr");
+        static_assert(empty_view.begin() == nullptr, "empty_view.begin() != nullptr");
+        static_assert(empty_view.end() == nullptr, "empty_view.end() != nullptr");
+        static_assert(empty_view.begin() == empty_view.end(), "empty_view.begin() != empty_view.end()");
     }
 }
 #endif

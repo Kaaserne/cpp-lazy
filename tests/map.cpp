@@ -1,7 +1,8 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <forward_list>
 #include <list>
 #include <map>
@@ -92,6 +93,12 @@ TEST_CASE("Map binary operations") {
     SECTION("Operator-") {
         test_procs::test_operator_minus(map);
     }
+
+    SECTION("Operator- sentinel") {
+        auto repeater = lz::repeat(20, 5);
+        auto map_sentinel = lz::map(repeater, [](int i) { return i; });
+        test_procs::test_operator_minus(map_sentinel);
+    }
 }
 
 TEST_CASE("Empty or one element map") {
@@ -104,9 +111,9 @@ TEST_CASE("Empty or one element map") {
     SECTION("One element map") {
         std::vector<int> vec = { 1 };
         auto map = lz::map(vec, [](int i) { return i; });
-        REQUIRE(!lz::empty(map));
+        REQUIRE_FALSE(lz::empty(map));
         REQUIRE(lz::has_one(map));
-        REQUIRE(!lz::has_many(map));
+        REQUIRE_FALSE(lz::has_many(map));
     }
 }
 

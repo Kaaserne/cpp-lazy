@@ -3,20 +3,20 @@
 #ifndef LZ_INTERSECTION_ITERABLE_HPP
 #define LZ_INTERSECTION_ITERABLE_HPP
 
-#include <Lz/detail/iterators/intersection.hpp>
-#include <Lz/detail/ref_or_view.hpp>
 #include <Lz/detail/func_container.hpp>
+#include <Lz/detail/iterators/intersection.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable, class Iterable2, class BinaryPredicate>
 class intersection_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
-    ref_or_view<Iterable2> _iterable2;
+    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable2> _iterable2;
     func_container<BinaryPredicate> _compare;
 
 public:
-    using iterator = intersection_iterator<ref_or_view<Iterable>, ref_or_view<Iterable2>, func_container<BinaryPredicate>>;
+    using iterator = intersection_iterator<maybe_owned<Iterable>, maybe_owned<Iterable2>, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -29,17 +29,17 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr intersection_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<ref_or_view<Iterable2>> &&
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<maybe_owned<Iterable2>> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
     template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value &&
-                                                              std::is_default_constructible<ref_or_view<Iterable2>>::value &&
+                                                              std::is_default_constructible<maybe_owned<Iterable2>>::value &&
                                                               std::is_default_constructible<BinaryPredicate>::value>>
     constexpr intersection_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                               std::is_nothrow_default_constructible<ref_or_view<Iterable2>>::value &&
+                                               std::is_nothrow_default_constructible<maybe_owned<Iterable2>>::value &&
                                                std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
@@ -68,7 +68,7 @@ public:
             return iterator{ _iterable, _iterable2, std::end(_iterable), std::end(_iterable2), _compare };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -80,7 +80,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const {
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const {
         return {};
     }
 

@@ -5,18 +5,18 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/group_by.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class BinaryPredicate>
 class group_by_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     func_container<BinaryPredicate> _binary_predicate;
 
 public:
-    using iterator = group_by_iterator<ref_or_view<Iterable>, func_container<BinaryPredicate>>;
+    using iterator = group_by_iterator<maybe_owned<Iterable>, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -28,7 +28,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr group_by_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<BinaryPredicate>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<BinaryPredicate>
     = default;
 
 #else
@@ -63,7 +63,7 @@ public:
             return iterator{ _iterable, std::end(_iterable), _binary_predicate };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -75,7 +75,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const {
         return {};
     }
 

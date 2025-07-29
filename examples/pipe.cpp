@@ -13,7 +13,7 @@ int main() {
     // clang-format off
     const auto iterable = arr
         // take all elements
-        | lz::take(std::distance(std::begin(arr), std::end(arr)))
+        | lz::take(lz::distance(std::begin(arr), std::end(arr)))
         // drop the first 0 elements
         | lz::drop(0)
         // add 1 to each

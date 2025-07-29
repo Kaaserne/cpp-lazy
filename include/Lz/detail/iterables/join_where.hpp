@@ -5,20 +5,20 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/join_where.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
 class join_where_iterable : public lazy_view {
-    ref_or_view<IterableA> _iterable_a;
-    ref_or_view<IterableB> _iterable_b;
+    maybe_owned<IterableA> _iterable_a;
+    maybe_owned<IterableB> _iterable_b;
     func_container<SelectorA> _a;
     func_container<SelectorB> _b;
     func_container<ResultSelector> _result_selector;
 
 public:
-    using iterator = join_where_iterator<ref_or_view<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,
+    using iterator = join_where_iterator<maybe_owned<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,
                                          func_container<SelectorA>, func_container<SelectorB>, func_container<ResultSelector>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
@@ -44,7 +44,7 @@ public:
                           std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
                           std::is_default_constructible<ResultSelector>::value>>
     constexpr join_where_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                             std::is_nothrow_default_constructible<ref_or_view<IterableB>>::value &&
+                                             std::is_nothrow_default_constructible<maybe_owned<IterableB>>::value &&
                                              std::is_nothrow_default_constructible<SelectorA>::value &&
                                              std::is_nothrow_default_constructible<SelectorB>::value &&
                                              std::is_nothrow_default_constructible<ResultSelector>::value) {
@@ -72,7 +72,7 @@ public:
         // clang-format on
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

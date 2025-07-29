@@ -20,7 +20,15 @@ set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installatio
 option(CPP-LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
 option(CPP-LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
 option(CPP-LAZY_USE_MODULES "Enable C++20's modules, experimental" NO)
-option(CPP-LAZY_DEBUG_ASSERTIONS "Debug assertions (always enabled in debug mode)" NO)
+
+if (NOT DEFINED CPP-LAZY_DEBUG_ASSERTIONS)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CPP-LAZY_DEBUG_ASSERTIONS ON)
+    else()
+        set(CPP-LAZY_DEBUG_ASSERTIONS OFF)
+    endif()
+endif()
+option(CPP-LAZY_DEBUG_ASSERTIONS "Debug assertions" ${CPP-LAZY_DEBUG_ASSERTIONS})
 
 if (CPP-LAZY_USE_MODULES)
 	set(CPP-LAZY_SOURCE_FILES "src/lz.cppm")
@@ -52,6 +60,7 @@ else()
 			URL https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz 
 			UPDATE_DISCONNECTED YES 
 			URL_MD5 dc09168c94f90ea890257995f2c497a5
+			DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 		)
 		FetchContent_MakeAvailable(fmt)
 	endif()
@@ -64,9 +73,16 @@ message(STATUS "cpp-lazy: Debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
 add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
 add_library(cpp-lazy::cpp-lazy ALIAS cpp-lazy)
 
+# Link lib stacktrace if debug assertions are enabled, on Linux with C++23 or later
+set(IS_CXX_23 $<VERSION_GREATER_EQUAL:${CMAKE_CXX_STANDARD},23>)
+set(IS_LINUX_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
+set(LZ_LINK_LIBBACKTRACE_CONDITION
+    $<AND:$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>,${IS_LINUX_COMPILER},${IS_CXX_23}>
+)
 target_link_libraries(cpp-lazy 
 	${CPP-LAZY_LINK_VISIBILITY}
 		$<$<NOT:$<BOOL:${CPP-LAZY_USE_STANDALONE}>>:fmt::fmt>
+		$<${LZ_LINK_LIBBACKTRACE_CONDITION}:stdc++_libbacktrace>
 )
 target_compile_definitions(cpp-lazy 
 	${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}

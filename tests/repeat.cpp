@@ -1,54 +1,38 @@
+#include <Lz/common.hpp>
 #include <Lz/map.hpp>
-#include <Lz/repeat.hpp>
+#include <Lz/reverse.hpp>
 #include <array>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
 #include <map>
+#include <test_procs.hpp>
 #include <unordered_map>
-
-TEST_CASE("repeat_iterable changing and creating elements") {
-    int to_repeat = 20;
-    lz::repeat_iterable<int> repeater = lz::repeat(to_repeat, 5);
-
-    SECTION("Should be 5 times 20") {
-        std::size_t counter = 0;
-        lz::for_each(repeater, [&counter, to_repeat](int i) {
-            REQUIRE(i == to_repeat);
-            ++counter;
-        });
-        REQUIRE(counter == 5);
-    }
-
-    SECTION("Should not be by reference") {
-        auto start = repeater.begin();
-        REQUIRE(&(*start) != &to_repeat);
-    }
-}
 
 TEST_CASE("repeat_iterable binary operations") {
     const int amount = 5;
     auto repeater = lz::repeat(20, amount);
-    auto begin = repeater.begin();
+    auto expected = { 20, 20, 20, 20, 20 };
 
     SECTION("Operator++") {
-        REQUIRE(lz::distance(begin, repeater.end()) == amount);
-        ++begin;
-        REQUIRE(lz::distance(begin, repeater.end()) == amount - 1);
+        REQUIRE(lz::equal(repeater, expected));
     }
 
-    SECTION("Operator== & Operator!=") {
-        REQUIRE(begin != repeater.end());
-        while (begin != repeater.end()) {
-            ++begin;
-        }
-        REQUIRE(begin == repeater.end());
+    SECTION("Operator--") {
+        REQUIRE(lz::equal(repeater | lz::reverse, expected));
     }
 
-    SECTION("Operator=") {
-        begin = repeater.begin();
-        REQUIRE(begin == repeater.begin());
-        begin = repeater.end();
-        REQUIRE(begin == repeater.end());
+    SECTION("Operator+") {
+        test_procs::test_operator_plus(repeater, expected);
+
+        auto iterable = lz::common(repeater);
+        test_procs::test_operator_plus(iterable, expected);
+    }
+
+    SECTION("Operator-") {
+        test_procs::test_operator_minus(repeater);
+        auto iterable = lz::common(repeater);
+        test_procs::test_operator_minus(iterable);
     }
 }
 
@@ -56,15 +40,15 @@ TEST_CASE("Empty or one element repeat") {
     SECTION("Empty") {
         auto repeater = lz::repeat(20, 0);
         REQUIRE(lz::empty(repeater));
-        REQUIRE(!lz::has_one(repeater));
-        REQUIRE(!lz::has_many(repeater));
+        REQUIRE_FALSE(lz::has_one(repeater));
+        REQUIRE_FALSE(lz::has_many(repeater));
     }
 
     SECTION("One element with result") {
         auto repeater = lz::repeat(20, 1);
-        REQUIRE(!lz::empty(repeater));
+        REQUIRE_FALSE(lz::empty(repeater));
         REQUIRE(lz::has_one(repeater));
-        REQUIRE(!lz::has_many(repeater));
+        REQUIRE_FALSE(lz::has_many(repeater));
     }
 }
 
@@ -75,47 +59,32 @@ TEST_CASE("repeat_iterable to containers") {
 
     SECTION("To array") {
         std::array<int, times> array = repeater | lz::to<std::array<int, times>>();
-        for (int i : array) {
-            REQUIRE(i == to_repeat);
-        }
+        auto expected = { 20, 20, 20, 20, 20 };
+        REQUIRE(lz::equal(array, expected));
     }
 
     SECTION("To vector") {
         std::vector<int> vec = repeater | lz::to<std::vector>();
-        for (int i : vec) {
-            REQUIRE(i == to_repeat);
-        }
-        REQUIRE(vec.size() == times);
+        auto expected = { 20, 20, 20, 20, 20 };
+        REQUIRE(lz::equal(vec, expected));
     }
 
     SECTION("To other container using to<>()") {
         std::list<int> lst = repeater | lz::to<std::list>();
-        for (int i : lst) {
-            REQUIRE(i == to_repeat);
-        }
-        REQUIRE(lst.size() == times);
+        auto expected = { 20, 20, 20, 20, 20 };
+        REQUIRE(lz::equal(lst, expected));
     }
 
     SECTION("To map") {
         auto actual = repeater | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
-        std::map<int, int> expected;
-
-        for (int i = 0; i < times; i++) {
-            expected.insert(std::make_pair(20, 20));
-        }
-
+        std::map<int, int> expected = { { 20, 20 }, { 20, 20 }, { 20, 20 }, { 20, 20 }, { 20, 20 } };
         REQUIRE(actual == expected);
     }
 
     SECTION("To unordered map") {
         auto actual =
             repeater | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
-        std::unordered_map<int, int> expected;
-
-        for (int i = 0; i < times; i++) {
-            expected.insert(std::make_pair(20, 20));
-        }
-
+        std::unordered_map<int, int> expected = { { 20, 20 }, { 20, 20 }, { 20, 20 }, { 20, 20 }, { 20, 20 } };
         REQUIRE(actual == expected);
     }
 }
@@ -153,9 +122,9 @@ TEST_CASE("repeat_iterable infinite binary operations") {
     }
 
     SECTION("Not empty, has many, not has one") {
-        REQUIRE(!lz::empty(repeater));
+        REQUIRE_FALSE(lz::empty(repeater));
         REQUIRE(lz::has_many(repeater));
-        REQUIRE(!lz::has_one(repeater));
+        REQUIRE_FALSE(lz::has_one(repeater));
     }
 
     SECTION("Operator== & Operator!=") {

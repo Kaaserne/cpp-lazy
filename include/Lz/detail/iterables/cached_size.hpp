@@ -3,13 +3,13 @@
 #ifndef LZ_CACHED_SIZE_ITERABLE_HPP
 #define LZ_CACHED_SIZE_ITERABLE_HPP
 
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable>
 class cached_size_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     std::size_t _size{};
 
 public:
@@ -20,7 +20,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cached_size_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
@@ -32,7 +32,7 @@ public:
 #endif
 
     template<class I>
-    constexpr cached_size_iterable(I&& iterable) :
+    explicit constexpr cached_size_iterable(I&& iterable) :
         _iterable{ std::forward<I>(iterable) },
         _size{ static_cast<std::size_t>(lz::eager_size(_iterable)) } {
     }

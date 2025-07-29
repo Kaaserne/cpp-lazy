@@ -12,12 +12,14 @@ struct rotate_adaptor {
     using adaptor = rotate_adaptor;
 
     /**
-     * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
-     * Its iterator category is the same as the input iterable. If the input iterable is forward or has a sentinel, it
-     * will return the end type of its input iterable, rather than a rotate_iterator/default_sentinel. Example:
+     * @brief Rotates the input iterable by n elements.  If `n` is greater than or equal to its size then the iterable will be
+     * empty. Contains a .size() method if the input iterable also has a .size() method. Its iterator category is the same as the
+     * input iterable. If the input iterable is forward or has a sentinel, it will return the end type of its input iterable,
+     * rather than a rotate_iterator/default_sentinel_t. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * auto rotated = lz::rotate(vec, 2); // rotated = { 3, 4, 5, 1, 2 }
+     * auto rotated = lz::rotate(vec, 50); // rotated = {}
      *
      * // or, in case input iterable is not forward:
      * auto str = lz::c_string("Hello, World!");
@@ -35,12 +37,14 @@ struct rotate_adaptor {
     }
 
     /**
-     * @brief Rotates the input iterable by n elements. Contains a .size() method if the input iterable also has a .size() method.
-     * Its iterator category is the same as the input iterable. If the input iterable is forward or has a sentinel, it
-     * will return the end type of its input iterable, rather than a rotate_iterator/default_sentinel. Example:
+     * @brief Rotates the input iterable by n elements.  If `n` is greater than or equal to its size then the iterable will be
+     * empty. Contains a .size() method if the input iterable also has a .size() method. Its iterator category is the same as the
+     * input iterable. If the input iterable is forward or has a sentinel, it will return the end type of its input iterable,
+     * rather than a rotate_iterator/default_sentinel_t. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
-     * auto rotated = lz::rotate(vec, 2); // rotated = { 3, 4, 5, 1, 2 }
+     * auto rotated = vec | lz::rotate(2); // rotated = { 3, 4, 5, 1, 2 }
+     * auto rotated = vec | lz::rotate(50); // rotated = {}
      *
      * // or, in case input iterable is not forward:
      * auto str = lz::c_string("Hello, World!");

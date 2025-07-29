@@ -1,8 +1,8 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -11,15 +11,15 @@ TEST_CASE("Empty or one element c_string") {
     SECTION("Empty") {
         auto cstr = lz::c_string("");
         REQUIRE(lz::empty(cstr));
-        REQUIRE(!lz::has_one(cstr));
-        REQUIRE(!lz::has_many(cstr));
+        REQUIRE_FALSE(lz::has_one(cstr));
+        REQUIRE_FALSE(lz::has_many(cstr));
     }
 
     SECTION("One element") {
         auto cstr = lz::c_string("a");
-        REQUIRE(!lz::empty(cstr));
+        REQUIRE_FALSE(lz::empty(cstr));
         REQUIRE(lz::has_one(cstr));
-        REQUIRE(!lz::has_many(cstr));
+        REQUIRE_FALSE(lz::has_many(cstr));
     }
 }
 
@@ -35,7 +35,9 @@ TEST_CASE("CString binary operations") {
     SECTION("Operator bool") {
         REQUIRE(c_string.begin());
         auto tmp = lz::c_string("");
-        REQUIRE(!tmp.begin());
+        REQUIRE_FALSE(tmp.begin());
+        tmp = lz::c_string_iterable<const char>{};
+        REQUIRE_FALSE(tmp.begin());
     }
 
     SECTION("Operator=") {

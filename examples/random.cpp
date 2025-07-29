@@ -27,7 +27,7 @@ int main() {
     // Or create your own
     static std::random_device rd;
     std::mt19937_64 gen(rd());
-    std::poisson_distribution<> d(500'000);
+    std::poisson_distribution<> d(500000);
     auto r = lz::random(d, gen, 3);
 
     for (int i : r) {
@@ -53,7 +53,7 @@ int main() {
     // Or create your own
     static std::random_device rd;
     std::mt19937_64 gen(rd());
-    std::poisson_distribution<> d(500'000);
+    std::poisson_distribution<> d(500000);
     auto r = lz::random(d, gen, 3);
 
     lz::for_each(r, [](int i) {

@@ -6,7 +6,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/func_container.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/traits.hpp>
 
 namespace lz {
@@ -16,7 +16,7 @@ class drop_while_iterable;
 
 template<class Iterable, class UnaryPredicate>
 class drop_while_iterable<Iterable, UnaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>> : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     func_container<UnaryPredicate> _unary_predicate;
 
 public:
@@ -32,7 +32,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr drop_while_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<UnaryPredicate>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>
     = default;
 
 #else
@@ -66,7 +66,7 @@ public:
             return std::end(_iterable);
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -78,8 +78,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel>
-    end() const {
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const {
         return {};
     }
 

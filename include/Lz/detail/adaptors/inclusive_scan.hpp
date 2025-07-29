@@ -34,10 +34,10 @@ struct inclusive_scan_adaptor {
      * // When working with pipe expressions, you always need to specify the init value. When working with 'regular' functions, you
      * // can omit the init value, in which case it will be a default constructed object of the type of the container.
      * // Example
-     * auto scan = lz::inclusive_scan(vec); // OK
-     * auto scan = lz::inclusive_scan(vec, 0); // OK
-     * // auto scan = vec | lz::inclusive_scan; // Error, unable to determine the type of the init value
-     * auto scan = vec | lz::inclusive_scan(0); // OK
+     * auto scan = lz::inclusive_scan(vec);
+     * auto scan = lz::inclusive_scan(vec, 0);
+     * // auto scan = vec | lz::inclusive_scan; // uses 0 and std::plus
+     * auto scan = vec | lz::inclusive_scan(0);
      * ```
      * @param iterable The iterable to perform the inclusive scan on.
      * @param init The initial value to start the inclusive scan with.
@@ -68,10 +68,10 @@ struct inclusive_scan_adaptor {
      * // When working with pipe expressions, you always need to specify the init value. When working with 'regular' functions, you
      * // can omit the init value, in which case it will be a default constructed object of the type of the container.
      * // Example
-     * auto scan = lz::inclusive_scan(vec); // OK
-     * auto scan = lz::inclusive_scan(vec, 0); // OK
-     * // auto scan = vec | lz::inclusive_scan; // Error, unable to determine the type of the init value
-     * auto scan = vec | lz::inclusive_scan(0); // OK
+     * auto scan = lz::inclusive_scan(vec);
+     * auto scan = lz::inclusive_scan(vec, 0);
+     * // auto scan = vec | lz::inclusive_scan; // uses 0 and std::plus
+     * auto scan = vec | lz::inclusive_scan(0);
      * ```
      * @param init The initial value to start the inclusive scan with.
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
@@ -88,5 +88,13 @@ struct inclusive_scan_adaptor {
 };
 } // namespace detail
 } // namespace lz
+
+template<class Iterable, class Adaptor>
+constexpr auto operator|(Iterable&& iterable, lz::detail::inclusive_scan_adaptor)
+    -> lz::detail::enable_if<lz::detail::is_iterable<Iterable>::value,
+                             decltype(std::declval<lz::detail::inclusive_scan_adaptor>()(std::forward<Iterable>(iterable)))> {
+    return lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
+                                                MAKE_BIN_PRED(plus){});
+}
 
 #endif

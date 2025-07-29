@@ -12,7 +12,7 @@ namespace detail {
 
 template<class Iterator, class S>
 class common_iterator : public iterator<common_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
-                                        diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel> {
+                                        diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
     variant<Iterator, S> _data;
 
     using traits = std::iterator_traits<Iterator>;
@@ -29,16 +29,16 @@ public:
 
     constexpr common_iterator() noexcept = default;
 
-    constexpr common_iterator(const Iterator& iter) : _data{ iter } {
+    explicit constexpr common_iterator(const Iterator& iter) : _data{ iter } {
     }
 
-    constexpr common_iterator(Iterator&& iter) noexcept : _data{ std::move(iter) } {
+    explicit constexpr common_iterator(Iterator&& iter) noexcept : _data{ std::move(iter) } {
     }
 
-    constexpr common_iterator(const S& sent) : _data{ sent } {
+    explicit constexpr common_iterator(const S& sent) : _data{ sent } {
     }
 
-    constexpr common_iterator(S&& sent) noexcept : _data{ std::move(sent) } {
+    explicit constexpr common_iterator(S&& sent) noexcept : _data{ std::move(sent) } {
     }
 
     LZ_CONSTEXPR_CXX_14 common_iterator& operator=(const Iterator& iter) {
@@ -81,14 +81,22 @@ public:
         ++get<0>(_data);
     }
 
+    LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_data.index() == 0, "Incrementing a sentinel/past the end");
+#ifdef __cpp_lib_variant
+        using std::get;
+#endif
+        --get<0>(_data);
+    }
+
     LZ_CONSTEXPR_CXX_14 bool eq(const common_iterator& rhs) const {
 #ifdef __cpp_lib_variant
         using std::get;
 #endif
-        if (_data.index() != rhs._data.index()) {
-            return _data.index() == 0 ? get<0>(_data) == get<1>(rhs._data) : get<1>(_data) == get<0>(rhs._data);
+        if (_data.index() == rhs._data.index()) {
+            return true;
         }
-        return true;
+        return _data.index() == 0 ? get<0>(_data) == get<1>(rhs._data) : get<1>(_data) == get<0>(rhs._data);
     }
 };
 } // namespace detail

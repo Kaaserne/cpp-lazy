@@ -6,21 +6,21 @@
 #include <Lz/cached_size.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/except.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable1, class Iterable2, class BinaryPredicate>
 class except_iterable : public lazy_view {
-    using iterable2_type = conditional<sized<Iterable2>::value, ref_or_view<Iterable2>, cached_size_iterable<Iterable2>>;
+    using iterable2_type = conditional<sized<Iterable2>::value, maybe_owned<Iterable2>, cached_size_iterable<Iterable2>>;
 
-    ref_or_view<Iterable1> _iterable1;
+    maybe_owned<Iterable1> _iterable1;
     iterable2_type _iterable2;
     func_container<BinaryPredicate> _binary_predicate;
 
 public:
-    using iterator = except_iterator<ref_or_view<Iterable1>, iterable2_type, func_container<BinaryPredicate>>;
+    using iterator = except_iterator<maybe_owned<Iterable1>, iterable2_type, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -32,7 +32,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr except_iterable()
-        requires std::default_initializable<ref_or_view<Iterable1>> && std::default_initializable<iterable2_type> &&
+        requires std::default_initializable<maybe_owned<Iterable1>> && std::default_initializable<iterable2_type> &&
                      std::default_initializable<BinaryPredicate>
     = default;
 
@@ -70,7 +70,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 };

@@ -61,7 +61,15 @@ public:
         return *_iter;
     }
 
+    reference dereference() const override {
+        return *_iter;
+    }
+
     pointer arrow() override {
+        return pointer{ dereference() };
+    }
+
+    pointer arrow() const override {
         return pointer{ dereference() };
     }
 
@@ -126,7 +134,15 @@ public:
         return *_iter;
     }
 
+    reference dereference() const override {
+        return *_iter;
+    }
+
     pointer arrow() override {
+        return pointer{ dereference() };
+    }
+
+    pointer arrow() const override {
         return pointer{ dereference() };
     }
 
@@ -195,7 +211,15 @@ public:
         return *_iter;
     }
 
+    reference dereference() const override {
+        return *_iter;
+    }
+
     pointer arrow() override {
+        return pointer{ dereference() };
+    }
+
+    pointer arrow() const override {
         return pointer{ dereference() };
     }
 
@@ -215,7 +239,7 @@ public:
         _iter += n;
     }
 
-    DiffType minus(const any_iter_base& other) const override {
+    DiffType difference(const any_iter_base& other) const override {
         return _iter - static_cast<const any_iterator_impl&>(other)._iter;
     }
 

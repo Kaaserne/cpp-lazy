@@ -24,7 +24,7 @@ TEST_CASE("Exclusive scan with sentinels") {
 TEST_CASE("exclusive_scan basic functionality") {
     static constexpr std::size_t arr_size = 8;
     int arr[arr_size] = { 3, 1, 4, 1, 5, 9, 2, 6 };
-    auto scan = arr | lz::exclusive_scan(0);
+    auto scan = arr | lz::exclusive_scan;
     REQUIRE(scan.size() == arr_size + 1);
     auto vec = scan | lz::to<std::vector>();
     (void)vec;
@@ -42,16 +42,16 @@ TEST_CASE("Empty or one element exclusive scan") {
         std::vector<int> empty;
         auto scan = empty | lz::exclusive_scan(0, MAKE_BIN_PRED(equal_to){});
         REQUIRE(lz::empty(scan));
-        REQUIRE(!lz::has_one(scan));
-        REQUIRE(!lz::has_many(scan));
+        REQUIRE_FALSE(lz::has_one(scan));
+        REQUIRE_FALSE(lz::has_many(scan));
         REQUIRE(lz::size(scan) == empty.size());
     }
 
     SECTION("One element") {
         std::vector<int> one_element = { 1 };
         auto scan = lz::exclusive_scan(one_element);
-        REQUIRE(!lz::empty(scan));
-        REQUIRE(!lz::has_one(scan));
+        REQUIRE_FALSE(lz::empty(scan));
+        REQUIRE_FALSE(lz::has_one(scan));
         REQUIRE(lz::has_many(scan));
         REQUIRE(*scan.begin() == 0);
         REQUIRE(lz::size(scan) == one_element.size() + 1);

@@ -5,8 +5,8 @@
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <array>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -40,17 +40,17 @@ TEST_CASE("Empty or one element except") {
         std::string b;
         auto except = lz::except(a, b);
         REQUIRE(lz::empty(except));
-        REQUIRE(!lz::has_one(except));
-        REQUIRE(!lz::has_many(except));
+        REQUIRE_FALSE(lz::has_one(except));
+        REQUIRE_FALSE(lz::has_many(except));
     }
 
     SECTION("One element 1") {
         std::string a = "h";
         std::string b;
         auto except = lz::except(a, b);
-        REQUIRE(!lz::empty(except));
+        REQUIRE_FALSE(lz::empty(except));
         REQUIRE(lz::has_one(except));
-        REQUIRE(!lz::has_many(except));
+        REQUIRE_FALSE(lz::has_many(except));
     }
 
     SECTION("One element 2") {
@@ -58,17 +58,17 @@ TEST_CASE("Empty or one element except") {
         std::string b = "w";
         auto except = lz::except(a, b);
         REQUIRE(lz::empty(except));
-        REQUIRE(!lz::has_one(except));
-        REQUIRE(!lz::has_many(except));
+        REQUIRE_FALSE(lz::has_one(except));
+        REQUIRE_FALSE(lz::has_many(except));
     }
 
     SECTION("One element both") {
         std::string a = "h";
         std::string b = "w";
         auto except = lz::except(a, b);
-        REQUIRE(!lz::empty(except));
+        REQUIRE_FALSE(lz::empty(except));
         REQUIRE(lz::has_one(except));
-        REQUIRE(!lz::has_many(except));
+        REQUIRE_FALSE(lz::has_many(except));
     }
 
     SECTION("One element both 2") {
@@ -76,8 +76,8 @@ TEST_CASE("Empty or one element except") {
         std::string b = "h";
         auto except = lz::except(a, b);
         REQUIRE(lz::empty(except));
-        REQUIRE(!lz::has_one(except));
-        REQUIRE(!lz::has_many(except));
+        REQUIRE_FALSE(lz::has_one(except));
+        REQUIRE_FALSE(lz::has_many(except));
     }
 }
 

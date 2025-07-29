@@ -16,7 +16,7 @@ class intersection_iterator
     : public iterator<intersection_iterator<Iterable1, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable1>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable1>>>, diff_type<iter_t<Iterable1>>,
                       common_type<iter_cat_t<iter_t<Iterable1>>, iter_cat_t<iter_t<Iterable2>>, std::bidirectional_iterator_tag>,
-                      default_sentinel> {
+                      default_sentinel_t> {
 
     using it1 = iter_t<Iterable1>;
     using it2 = iter_t<Iterable2>;
@@ -88,25 +88,29 @@ public:
         find_next();
     }
 
-    LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(default_sentinel_t) {
         _iterator1 = std::end(_iterable1);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator1;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator2, ++_iterator1;
         find_next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_iterator1 != std::begin(_iterable1) && _iterator2 != std::begin(_iterable2),
+                  "Cannot decrement begin iterator");
         --_iterator2, --_iterator1;
 
         while (_iterator2 != std::begin(_iterable2) && _iterator1 != std::begin(_iterable1)) {
@@ -132,7 +136,7 @@ public:
         return _iterator1 == other._iterator1;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator1 == std::end(_iterable1);
     }
 };

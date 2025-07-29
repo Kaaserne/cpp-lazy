@@ -25,8 +25,8 @@ struct range_adaptor {
      * @return A range_iterable that can be used in range-based for loops or with other algorithms
      */
     template<class Arithmetic>
-    LZ_NODISCARD constexpr range_iterable<Arithmetic>
-    operator()(const Arithmetic start, const Arithmetic end, const Arithmetic step = 1) const noexcept {
+    LZ_NODISCARD constexpr range_iterable<Arithmetic, true>
+    operator()(const Arithmetic start, const Arithmetic end, const Arithmetic step) const noexcept {
         return { start, end, step };
     }
 
@@ -41,9 +41,24 @@ struct range_adaptor {
      * @return A range_iterable that can be used in range-based for loops or with other algorithms
      */
     template<class Arithmetic>
-    LZ_NODISCARD constexpr range_iterable<Arithmetic>
-    operator()(const Arithmetic end) const noexcept {
-        return { 0, end, 1 };
+    LZ_NODISCARD constexpr range_iterable<Arithmetic, false>
+    operator()(const Arithmetic start, const Arithmetic end) const noexcept {
+        return { start, end };
+    }
+
+    /**
+     * @brief Creates n amount of numbers starting from 0 (or specified otherwise). It contains a
+     * .size() method and is random access. Example:
+     * ```
+     * // This will create a range from 0 to 4
+     * auto range = lz::range(5); // {0, 1, 2, 3, 4} (T = int)
+     * ```
+     * @param end The end of the range (exclusive)
+     * @return A range_iterable that can be used in range-based for loops or with other algorithms
+     */
+    template<class Arithmetic>
+    LZ_NODISCARD constexpr range_iterable<Arithmetic, false> operator()(const Arithmetic end) const noexcept {
+        return { 0, end };
     }
 };
 } // namespace detail

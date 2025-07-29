@@ -47,7 +47,7 @@ public:
         return { std::move(_func), std::move(_init) };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 default_sentinel end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 default_sentinel_t end() const noexcept {
         return {};
     }
 };

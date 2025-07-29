@@ -15,7 +15,7 @@ template<class Iterable, class UnaryPredicate>
 class filter_iterator
     : public iterator<filter_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
                       diff_type<iter_t<Iterable>>, common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>,
-                      default_sentinel> {
+                      default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -65,25 +65,28 @@ public:
         find();
     }
 
-    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel_t) {
         _iterator = std::end(_iterable);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return *_iterator;
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator;
         find();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
         do {
             --_iterator;
         } while (!_predicate(*_iterator) && _iterator != std::begin(_iterable));
@@ -95,7 +98,7 @@ public:
         return _iterator == b._iterator;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _iterator == std::end(_iterable);
     }
 };

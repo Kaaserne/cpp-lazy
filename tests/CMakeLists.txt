@@ -7,6 +7,7 @@ Include(FetchContent)
 FetchContent_Declare(Catch2 
 	URL https://github.com/catchorg/Catch2/archive/refs/tags/v${CPP-LAZY_CATCH_VERSION}.tar.gz 
 	URL_MD5 7a4dd2fd14fb9f46198eb670ac7834b7
+	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(Catch2)
 
@@ -26,7 +27,7 @@ endif ()
 
 include(CTest)
 
-add_subdirectory(c_string)
+add_subdirectory(cpp-lazy-ut-helper)
 
 # ---- Tests ----
 add_executable(cpp-lazy-tests
@@ -56,12 +57,13 @@ add_executable(cpp-lazy-tests
 	interleave.cpp
 	intersection.cpp
 	iter_tools.cpp
+	iterator.cpp
 	join_where.cpp
 	loop.cpp
 	map.cpp
+	maybe_owned.cpp
 	random.cpp
 	range.cpp
-	ref_or_view.cpp
 	regex_split.cpp
 	repeat.cpp
 	reverse.cpp
@@ -80,13 +82,16 @@ add_executable(cpp-lazy-tests
 target_compile_options(cpp-lazy-tests
 	PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
-	$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion>
+
+	$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings>
+
+	$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion  -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow -Wformat=2 -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings>
 )
 target_link_libraries(cpp-lazy-tests
 	PRIVATE
 		cpp-lazy::cpp-lazy
 		Catch2::Catch2
-		c_string_forward_declarations
+		cpp-lazy-ut-helper 
 )
 target_include_directories(cpp-lazy-tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 add_test(

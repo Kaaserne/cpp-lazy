@@ -4,7 +4,7 @@
 #define LZ_FLATTEN_ITERABLE_HPP
 
 #include <Lz/detail/iterators/flatten.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <numeric>
 
 namespace lz {
@@ -73,7 +73,7 @@ class flatten_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
     using inner_sentinel = sentinel_t<Iterable>;
 
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
 public:
     using iterator = flatten_iterator<Iterable, Dims>;
@@ -88,7 +88,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
@@ -100,7 +100,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 flatten_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit LZ_CONSTEXPR_CXX_14 flatten_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     template<class T = all_sized<Iterable>>
@@ -119,7 +119,7 @@ public:
             return iterator{ _iterable, std::end(_iterable) };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -131,7 +131,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

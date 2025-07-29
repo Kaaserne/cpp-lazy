@@ -4,14 +4,14 @@
 #define LZ_AS_ITERATOR_ITERABLE_HPP
 
 #include <Lz/detail/iterators/as_iterator.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class IterCat>
 class as_iterator_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
     using sentinel = sentinel_t<Iterable>;
 
@@ -23,7 +23,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr as_iterator_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
@@ -35,7 +35,7 @@ public:
 #endif
 
     template<class I>
-    constexpr as_iterator_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit constexpr as_iterator_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     template<class T = sized<Iterable>>
@@ -44,7 +44,7 @@ public:
     }
 
     LZ_NODISCARD constexpr iterator begin() const {
-        return { std::begin(_iterable) };
+        return iterator{ std::begin(_iterable) };
     }
 
 #ifdef LZ_HAS_CXX_17
@@ -62,7 +62,7 @@ public:
 
     template<class I = value_type>
     LZ_NODISCARD constexpr enable_if<!is_sentinel<I, sentinel>::value, iterator> end() const& {
-        return { std::end(_iterable) };
+        return iterator{ std::end(_iterable) };
     }
 
     template<class I = value_type>

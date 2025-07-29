@@ -64,9 +64,9 @@ TEST_CASE("Empty or one element random") {
 
     SECTION("One element random") {
         auto r = lz::random(0, 0, 1);
-        REQUIRE(!lz::empty(r));
+        REQUIRE_FALSE(lz::empty(r));
         REQUIRE(lz::has_one(r));
-        REQUIRE(!lz::has_many(r));
+        REQUIRE_FALSE(lz::has_many(r));
     }
 }
 
@@ -123,6 +123,11 @@ TEST_CASE("random_iterable binary operations") {
 
     SECTION("Operator-") {
         test_procs::test_operator_minus(random);
+    }
+
+    SECTION("Operator-(default_sentinel_t)") {
+        auto rand = lz::random(0., 1., size);
+        test_procs::test_operator_minus(rand);
     }
 }
 

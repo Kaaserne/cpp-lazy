@@ -6,20 +6,20 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/unique.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable, class BinaryPredicate>
 class unique_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     func_container<BinaryPredicate> _predicate;
 
     using it = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;
 
 public:
-    using iterator = unique_iterator<ref_or_view<Iterable>, func_container<BinaryPredicate>>;
+    using iterator = unique_iterator<maybe_owned<Iterable>, func_container<BinaryPredicate>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -31,14 +31,14 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr unique_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<BinaryPredicate>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<BinaryPredicate>
     = default;
 
 #else
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
-    constexpr unique_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
+    constexpr unique_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
                                          std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
 
@@ -66,7 +66,7 @@ public:
             return iterator{ _iterable, std::end(_iterable), _predicate };
         }
         else {
-            return default_sentinel{};
+            return lz::default_sentinel;
         }
     }
 
@@ -78,7 +78,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel> end() const noexcept {
+    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

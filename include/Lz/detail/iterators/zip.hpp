@@ -12,10 +12,10 @@
 namespace lz {
 namespace detail {
 
-template<class IterTuple, class SentinelTuple>
-class zip_iterator : public iterator<zip_iterator<IterTuple, SentinelTuple>, iter_tuple_ref_type_t<IterTuple>,
+template<class IterTuple, class SMaybeHomo>
+class zip_iterator : public iterator<zip_iterator<IterTuple, SMaybeHomo>, iter_tuple_ref_type_t<IterTuple>,
                                      fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                                     iter_tuple_iter_cat_t<IterTuple>, SentinelTuple> {
+                                     iter_tuple_iter_cat_t<IterTuple>, SMaybeHomo> {
 
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
@@ -25,7 +25,7 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    using make_idx_sequence_for_this = make_index_sequence<std::tuple_size<IterTuple>::value>;
+    using is = make_index_sequence<std::tuple_size<IterTuple>::value>;
     IterTuple _iterators;
 
     template<std::size_t... I>
@@ -35,17 +35,29 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        (++std::get<I>(_iterators), ...);
+#else
         decompose(++std::get<I>(_iterators)...);
+#endif
     }
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        (--std::get<I>(_iterators), ...);
+#else
         decompose(--std::get<I>(_iterators)...);
+#endif
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void plus_is(index_sequence<I...>, const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset, index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) += offset), ...);
+#else
         decompose(std::get<I>(_iterators) += offset...);
+#endif
     }
 
     template<std::size_t... I>
@@ -55,6 +67,11 @@ private:
             return max;
         }
         return std::min({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+    }
+
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_14 difference_type minus(const SMaybeHomo& other, index_sequence<I...>) const {
+        return std::max({ (std::get<I>(_iterators) - std::get<I>(other))... });
     }
 
     template<class EndIter, std::size_t... I>
@@ -71,8 +88,12 @@ private:
     }
 
     template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SentinelTuple& other, const index_sequence<I...>&) {
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& other, const index_sequence<I...>&) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::get<I>(other)), ...);
+#else
         decompose(std::get<I>(_iterators) = std::get<I>(other)...);
+#endif
     }
 
 public:
@@ -94,13 +115,13 @@ public:
         static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SentinelTuple& end) {
-        assign_sentinels(end, make_idx_sequence_for_this{});
+    LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SMaybeHomo& end) {
+        assign_sentinels(end, is{});
         return *this;
     }
 
     constexpr reference dereference() const {
-        return dereference(make_idx_sequence_for_this());
+        return dereference(is{});
     }
 
     constexpr pointer arrow() const {
@@ -108,27 +129,31 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        increment(make_idx_sequence_for_this());
+        increment(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        decrement(make_idx_sequence_for_this());
+        decrement(is{});
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
-        plus_is(make_idx_sequence_for_this(), offset);
+        plus_is(offset, is{});
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const zip_iterator& other) const {
-        return minus(other, make_idx_sequence_for_this());
+        return minus(other, is{});
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const zip_iterator& other) const {
-        return eq(other._iterators, make_idx_sequence_for_this());
+    LZ_CONSTEXPR_CXX_20 difference_type difference(const SMaybeHomo& other) const {
+        return minus(other, is{});
     }
 
-    LZ_CONSTEXPR_CXX_20 bool eq(const SentinelTuple& other) const {
-        return eq(other, make_idx_sequence_for_this());
+    LZ_CONSTEXPR_CXX_14 bool eq(const zip_iterator& other) const {
+        return eq(other._iterators, is{});
+    }
+
+    LZ_CONSTEXPR_CXX_14 bool eq(const SMaybeHomo& other) const {
+        return eq(other, is{});
     }
 };
 } // namespace detail

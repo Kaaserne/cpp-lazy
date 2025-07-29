@@ -5,14 +5,14 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/exclusive_scan.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/traits.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable, class T, class BinaryOp>
 class exclusive_scan_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     T _init{};
     func_container<BinaryOp> _binary_op;
 
@@ -23,7 +23,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclusive_scan_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<T> &&
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<T> &&
                      std::default_initializable<BinaryOp>
     = default;
 
@@ -61,7 +61,7 @@ public:
                  std::move(_binary_op) };
     }
 
-    LZ_NODISCARD constexpr default_sentinel end() const noexcept {
+    LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
         return {};
     }
 };

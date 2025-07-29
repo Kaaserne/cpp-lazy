@@ -3,6 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_HPP
 #define LZ_DETAIL_ALGORITHM_HPP
 
+#include <Lz/detail/iterables/reverse.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
 
@@ -112,40 +113,57 @@ LZ_CONSTEXPR_CXX_14 Iterator find(Iterator begin, S end, const T& value) {
 
 #ifdef LZ_HAS_CXX_17
 
-template<class Iterator, class S, class T>
-constexpr Iterator find_last(Iterator begin, S end, const T& value) {
-    if constexpr (std::is_same_v<Iterator, S>) {
-        std::reverse_iterator<Iterator> rbegin(end);
-        std::reverse_iterator<S> rend(begin);
-        auto pos = std::find(std::move(rbegin), std::move(rend), value);
-        return unwrap_reverse_iterator(std::move(pos), begin, end);
+template<class Iterable>
+constexpr ref_t<iter_t<Iterable>> back(Iterable&& iterable) {
+    if constexpr (has_sentinel<Iterable>::value && is_ra<iter_t<Iterable>>::value) {
+        return *(detail::begin(std::forward<Iterable>(iterable)) + ((std::end(iterable) - std::begin(iterable)) - 1));
     }
     else {
-        return find_last_if(std::move(begin), std::move(end), [&value](ref_t<Iterator> val) { return val == value; });
+        auto end = detail::end(std::forward<Iterable>(iterable));
+        return *--end;
     }
 }
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_17 Iterator find_last_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    if constexpr (std::is_same_v<Iterator, S>) {
-        std::reverse_iterator<S> rbegin(end);
-        std::reverse_iterator<Iterator> rend(begin);
-        auto pos = std::find_if(std::move(rbegin), std::move(rend), std::move(unary_predicate));
-        return unwrap_reverse_iterator(std::move(pos), begin, end);
+template<class Iterable, class UnaryPredicate>
+constexpr iter_t<Iterable> find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    if constexpr (is_bidi<iter_t<Iterable>>::value) {
+        using detail::find_if;
+        using std::find_if;
+
+        reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+        auto pos = find_if(std::begin(rev), std::end(rev), std::move(unary_predicate));
+        return unwrap_reverse_iterator(std::move(pos), std::begin(iterable), std::end(iterable));
     }
     else {
-        auto current = begin;
-        auto it = begin;
+        auto current = std::begin(iterable);
+        auto it = current;
+        auto end = detail::end(std::forward<Iterable>(iterable));
         for (; it != end; ++it) {
             if (unary_predicate(*it)) {
                 current = it;
             }
         }
         // Check if current was never updated
-        if (it == end && current == begin && !unary_predicate(*current)) {
+        if (it == end && current == std::begin(iterable) && !unary_predicate(*current)) {
             return it;
         }
         return current;
+    }
+}
+
+template<class Iterable, class T>
+constexpr iter_t<Iterable> find_last(Iterable&& iterable, const T& value) {
+    if constexpr (is_bidi<iter_t<Iterable>>::value) {
+        using detail::find;
+        using std::find;
+
+        reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+        auto pos = find(std::begin(rev), std::end(rev), value);
+        return unwrap_reverse_iterator(pos, std::begin(iterable), std::end(iterable));
+    }
+    else {
+        return lz::detail::find_last_if(std::forward<Iterable>(iterable),
+                                        [&value](ref_t<iter_t<Iterable>> val) { return val == value; });
     }
 }
 
@@ -175,43 +193,64 @@ search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_
 
 #else
 
-template<class Iterator, class S, class T>
-LZ_CONSTEXPR_CXX_17 enable_if<std::is_same<Iterator, S>::value, Iterator> find_last(Iterator begin, S end, const T& value) {
-    std::reverse_iterator<Iterator> rbegin(end);
-    std::reverse_iterator<S> rend(begin);
-    auto pos = std::find(std::move(rbegin), std::move(rend), value);
-    return unwrap_reverse_iterator(std::move(pos), begin, end);
+template<class Iterable>
+constexpr enable_if<has_sentinel<Iterable>::value && is_ra<iter_t<Iterable>>::value, ref_t<iter_t<Iterable>>>
+back(Iterable&& iterable) {
+    return *(detail::begin(std::forward<Iterable>(iterable)) + ((std::end(iterable) - std::begin(iterable)) - 1));
 }
 
-template<class Iterator, class S, class T>
-LZ_CONSTEXPR_CXX_17 enable_if<!std::is_same<Iterator, S>::value, Iterator> find_last(Iterator begin, S end, const T& value) {
-    return find_last_if(std::move(begin), std::move(end), [&value](ref_t<Iterator> val) { return val == value; });
+template<class Iterable>
+LZ_CONSTEXPR_CXX_14 enable_if<!has_sentinel<Iterable>::value || !is_ra<iter_t<Iterable>>::value, ref_t<iter_t<Iterable>>>
+back(Iterable&& iterable) {
+    auto end = detail::end(std::forward<Iterable>(iterable));
+    return *--end;
 }
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_17 enable_if<std::is_same<Iterator, S>::value, Iterator>
-find_last_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    std::reverse_iterator<S> rbegin(end);
-    std::reverse_iterator<Iterator> rend(begin);
-    auto pos = std::find_if(std::move(rbegin), std::move(rend), std::move(unary_predicate));
-    return unwrap_reverse_iterator(std::move(pos), begin, end);
+template<class Iterable, class UnaryPredicate>
+LZ_CONSTEXPR_CXX_17 enable_if<is_bidi<iter_t<Iterable>>::value, iter_t<Iterable>>
+find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    using detail::find_if;
+    using std::find_if;
+
+    reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+    auto pos = find_if(std::begin(rev), std::end(rev), std::move(unary_predicate));
+    return unwrap_reverse_iterator(std::move(pos), std::begin(iterable), std::end(iterable));
 }
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if<!std::is_same<Iterator, S>::value, Iterator>
-find_last_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    auto current = begin;
-    auto it = begin;
+template<class Iterable, class UnaryPredicate>
+LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi<iter_t<Iterable>>::value, iter_t<Iterable>>
+find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    auto current = std::begin(iterable);
+    auto end = detail::end(std::forward<Iterable>(iterable));
+    auto it = current;
+
     for (; it != end; ++it) {
         if (unary_predicate(*it)) {
             current = it;
         }
     }
     // Check if current was never updated
-    if (it == end && current == begin && !unary_predicate(*current)) {
+    if (it == end && current == std::begin(iterable) && !unary_predicate(*current)) {
         return it;
     }
     return current;
+}
+
+template<class Iterable, class T>
+LZ_CONSTEXPR_CXX_17 enable_if<is_bidi<iter_t<Iterable>>::value, iter_t<Iterable>> find_last(Iterable&& iterable, const T& value) {
+    using detail::find;
+    using std::find;
+
+    reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+    auto pos = find(std::begin(rev), std::end(rev), value);
+    return unwrap_reverse_iterator(pos, std::begin(iterable), std::end(iterable));
+}
+
+template<class Iterable, class T>
+LZ_CONSTEXPR_CXX_17 enable_if<!is_bidi<iter_t<Iterable>>::value, iter_t<Iterable>>
+find_last(Iterable&& iterable, const T& value) {
+    return lz::detail::find_last_if(std::forward<Iterable>(iterable),
+                                    [&value](ref_iterable_t<Iterable> val) { return val == value; });
 }
 
 // clang-format off
@@ -245,7 +284,7 @@ search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_
 
 // clang-format on
 
-#endif
+#endif // LZ_HAS_CXX_17
 
 template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 Iterator find_if_not(Iterator begin, S end, UnaryPredicate unary_predicate) {
@@ -254,6 +293,7 @@ LZ_CONSTEXPR_CXX_14 Iterator find_if_not(Iterator begin, S end, UnaryPredicate u
 #if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
 
     return find_if(std::move(begin), std::move(end), std::not_fn(std::move(unary_predicate)));
+
 #else
 
     return find_if(std::move(begin), std::move(end),
@@ -261,15 +301,16 @@ LZ_CONSTEXPR_CXX_14 Iterator find_if_not(Iterator begin, S end, UnaryPredicate u
 #endif
 }
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 Iterator find_last_if_not(Iterator begin, S end, UnaryPredicate unary_predicate) {
+template<class Iterable, class UnaryPredicate>
+LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& iterable, UnaryPredicate unary_predicate) {
 #if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
 
-    return find_last_if(std::move(begin), std::move(end), std::not_fn(std::move(unary_predicate)));
+    return lz::detail::find_last_if(std::forward<Iterable>(iterable), std::not_fn(std::move(unary_predicate)));
+
 #else
 
-    return find_last_if(std::move(begin), std::move(end),
-                        [&unary_predicate](ref_t<Iterator> value) { return !unary_predicate(value); });
+    return lz::detail::find_last_if(std::forward<Iterable>(iterable),
+                                    [&unary_predicate](ref_iterable_t<Iterable> value) { return !unary_predicate(value); });
 
 #endif
 }
@@ -290,37 +331,38 @@ LZ_CONSTEXPR_CXX_14 val_t<Iterator> find_or_default_if(Iterator begin, S end, Un
     return static_cast<val_t<Iterator>>(pos == end ? std::forward<T>(default_value) : *pos);
 }
 
-template<class Iterator, class S, class T, class U>
-LZ_CONSTEXPR_CXX_14 val_t<Iterator> find_last_or_default(Iterator begin, S end, T&& to_find, U&& default_value) {
-    return static_cast<val_t<Iterator>>(find_last(std::move(begin), end, to_find) == end ? std::forward<U>(default_value)
-                                                                                         : std::forward<T>(to_find));
+template<class Iterable, class T, class U>
+LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
+    return static_cast<val_iterable_t<Iterable>>(lz::detail::find_last(iterable, to_find) == std::end(iterable)
+                                                     ? std::forward<U>(default_value)
+                                                     : std::forward<T>(to_find));
 }
 
-template<class Iterator, class S, class UnaryPredicate, class U>
-LZ_CONSTEXPR_CXX_14 val_t<Iterator>
-find_last_or_default_if(Iterator begin, S end, UnaryPredicate unary_predicate, U&& default_value) {
-    auto pos = find_last_if(std::move(begin), end, std::move(unary_predicate));
-    return static_cast<val_t<Iterator>>(pos == end ? std::forward<U>(default_value) : *pos);
+template<class Iterable, class UnaryPredicate, class U>
+LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
+find_last_or_default_if(Iterable&& iterable, UnaryPredicate unary_predicate, U&& default_value) {
+    auto pos = lz::detail::find_last_if(std::forward<Iterable>(iterable), std::move(unary_predicate));
+    return static_cast<val_iterable_t<Iterable>>(pos == std::end(iterable) ? std::forward<U>(default_value) : *pos);
 }
 
-template<class Iterator, class S, class T, class U>
-LZ_CONSTEXPR_CXX_14 val_t<Iterator> find_last_or_default_not(Iterator begin, S end, T&& value, U&& default_value) {
-    return find_last_or_default_if(
-        std::move(begin), std::move(end), [&value](ref_t<Iterator> val) { return !(val == value); },
+template<class Iterable, class T, class U>
+LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value) {
+    return lz::detail::find_last_or_default_if(
+        std::forward<Iterable>(iterable), [&value](ref_iterable_t<Iterable> val) { return !(val == value); },
         std::forward<U>(default_value));
 }
 
-template<class Iterator, class S, class UnaryPredicate, class U>
-LZ_CONSTEXPR_CXX_14 val_t<Iterator>
-find_last_or_default_if_not(Iterator begin, S end, UnaryPredicate unary_predicate, U&& default_value) {
+template<class Iterable, class UnaryPredicate, class U>
+LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
+find_last_or_default_if_not(Iterable&& iterable, UnaryPredicate unary_predicate, U&& default_value) {
 #ifdef LZ_HAS_CXX_17
 
-    return find_last_or_default_if(std::move(begin), std::move(end), std::not_fn(std::move(unary_predicate)),
-                                   std::forward<U>(default_value));
+    return lz::detail::find_last_or_default_if(std::forward<Iterable>(iterable), std::not_fn(std::move(unary_predicate)),
+                                               std::forward<U>(default_value));
 #else
 
-    return find_last_or_default_if(
-        std::move(begin), std::move(end), [&unary_predicate](ref_t<Iterator> val) { return !unary_predicate(val); },
+    return lz::detail::find_last_or_default_if(
+        std::forward<Iterable>(iterable), [&unary_predicate](ref_iterable_t<Iterable> val) { return !unary_predicate(val); },
         std::forward<U>(default_value));
 
 #endif

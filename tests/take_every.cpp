@@ -3,8 +3,9 @@
 #include <Lz/reverse.hpp>
 #include <Lz/take_every.hpp>
 #include <array>
-#include <c_string/c_string_forward_decl.hpp>
 #include <catch2/catch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cstddef>
 #include <forward_list>
 #include <list>
@@ -53,8 +54,8 @@ TEST_CASE("Empty or one element take every") {
         auto take_every = lz::take_every(vec, 2);
         REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
-        REQUIRE(!lz::has_one(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
+        REQUIRE_FALSE(lz::has_one(take_every));
     }
 
     SECTION("Empty 2") {
@@ -62,8 +63,8 @@ TEST_CASE("Empty or one element take every") {
         auto take_every = lz::take_every(vec, 2, 3);
         REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
-        REQUIRE(!lz::has_one(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
+        REQUIRE_FALSE(lz::has_one(take_every));
     }
 
     SECTION("Empty 3") {
@@ -71,8 +72,8 @@ TEST_CASE("Empty or one element take every") {
         auto take_every = lz::take_every(vec, 2, 3);
         REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
-        REQUIRE(!lz::has_one(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
+        REQUIRE_FALSE(lz::has_one(take_every));
     }
 
     SECTION("Empty 4") {
@@ -80,44 +81,44 @@ TEST_CASE("Empty or one element take every") {
         auto take_every = lz::take_every(vec, 2);
         REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
-        REQUIRE(!lz::has_one(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
+        REQUIRE_FALSE(lz::has_one(take_every));
     }
 
     SECTION("One element") {
         std::vector<int> vec = { 1 };
         auto take_every = lz::take_every(vec, 2);
         REQUIRE(take_every.size() == 1);
-        REQUIRE(!lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
+        REQUIRE_FALSE(lz::empty(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
         REQUIRE(lz::has_one(take_every));
     }
 
     SECTION("One element 2") {
         std::vector<int> vec = { 1 };
         auto take_every = lz::take_every(vec, 2, 3);
-        REQUIRE(take_every.size() == 1);
+        REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
-        REQUIRE(!lz::has_one(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
+        REQUIRE_FALSE(lz::has_one(take_every));
     }
 
     SECTION("One element 3") {
         std::list<int> vec = { 1 };
         auto take_every = lz::take_every(vec, 2);
         REQUIRE(take_every.size() == 1);
-        REQUIRE(!lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
+        REQUIRE_FALSE(lz::empty(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
         REQUIRE(lz::has_one(take_every));
     }
 
     SECTION("One element 4") {
         std::list<int> vec = { 1 };
         auto take_every = lz::take_every(vec, 2, 3);
-        REQUIRE(take_every.size() == 1);
+        REQUIRE(take_every.size() == 0);
         REQUIRE(lz::empty(take_every));
-        REQUIRE(!lz::has_many(take_every));
-        REQUIRE(!lz::has_one(take_every));
+        REQUIRE_FALSE(lz::has_many(take_every));
+        REQUIRE_FALSE(lz::has_one(take_every));
     }
 }
 
@@ -195,6 +196,7 @@ TEST_CASE("take_every_iterable binary operations") {
     SECTION("Operator+") {
         std::vector<int> even_sized = { 1, 2, 3, 4 };
         std::vector<int> odd_sized = { 1, 2, 3, 4, 5 };
+
         auto even_sized_even_take = lz::take_every(even_sized, 2);
         auto even_sized_odd_take = lz::take_every(even_sized, 3);
         auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
@@ -221,34 +223,24 @@ TEST_CASE("take_every_iterable binary operations") {
         auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
         auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
-        using lz_iterable = decltype(even_sized_even_take);
-        auto test_iterable = [](const lz_iterable& iterable) {
-            auto begin = iterable.begin();
-            auto end = iterable.end();
+        test_procs::test_operator_minus(even_sized_even_take);
+        test_procs::test_operator_minus(even_sized_odd_take);
+        test_procs::test_operator_minus(uneven_sized_even_take);
+        test_procs::test_operator_minus(uneven_sized_odd_take);
+    }
 
-            for (std::ptrdiff_t i = 0; i < lz::ssize(iterable); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - begin == lz::ssize(iterable) - i);
-                REQUIRE(end - (begin + i) == lz::ssize(iterable) - i);
-                REQUIRE((begin + i) - end == -(lz::ssize(iterable) - i));
-                REQUIRE(begin - (end - i) == -(lz::ssize(iterable) - i));
-            }
+    SECTION("Operator-(default_sentinel_t)") {
+        auto even_sized = lz::repeat(1, 4);
+        auto odd_sized = lz::repeat(1, 5);
+        auto even_sized_even_take = lz::take_every(even_sized, 2);
+        auto even_sized_odd_take = lz::take_every(even_sized, 3);
+        auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
+        auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
-            for (std::ptrdiff_t i = 0; i < lz::ssize(iterable); ++i) {
-                INFO("With i = " << i);
-                REQUIRE((end - i) - (begin + i) == lz::ssize(iterable) - 2 * i);
-                REQUIRE((begin + i) - (end - i) == -(lz::ssize(iterable) - 2 * i));
-            }
-        };
-
-        INFO("even_sized_even_take");
-        test_iterable(even_sized_even_take);
-        INFO("even_sized_odd_take");
-        test_iterable(even_sized_odd_take);
-        INFO("uneven_sized_even_take");
-        test_iterable(uneven_sized_even_take);
-        INFO("uneven_sized_odd_take");
-        test_iterable(uneven_sized_odd_take);
+        test_procs::test_operator_minus(even_sized_even_take);
+        test_procs::test_operator_minus(even_sized_odd_take);
+        test_procs::test_operator_minus(uneven_sized_even_take);
+        test_procs::test_operator_minus(uneven_sized_odd_take);
     }
 }
 

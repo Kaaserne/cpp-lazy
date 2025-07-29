@@ -16,7 +16,7 @@ template<class Iterables, class Iterators>
 class concatenate_iterator
     : public iterator<concatenate_iterator<Iterables, Iterators>, iter_tuple_common_ref_t<Iterators>,
                       fake_ptr_proxy<iter_tuple_common_ref_t<Iterators>>, iter_tuple_diff_type_t<Iterators>,
-                      iter_tuple_iter_cat_t<Iterators>, default_sentinel> {
+                      iter_tuple_iter_cat_t<Iterators>, default_sentinel_t> {
 
     Iterators _iterators;
     Iterables _iterables;
@@ -36,6 +36,13 @@ private:
     LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>, const concatenate_iterator& other) const {
         const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
                                                                         std::get<I>(other._iterators))... };
+        return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });
+    }
+
+    template<std::size_t... I>
+    LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>) const {
+        const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
+                                                                        std::end(std::get<I>(_iterables)))... };
         return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });
     }
 
@@ -62,6 +69,7 @@ private:
             }
         }
         else {
+            LZ_ASSERT_SUBTRACTABLE(offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables)));
             auto& current = std::get<0>(_iterators);
             current -= offset;
         }
@@ -83,6 +91,9 @@ private:
                 plus_is_n<I + 1>(offset - dist);
             }
         }
+        else {
+            LZ_ASSERT_INCREMENTABLE(offset == 0);
+        }
     }
 
     template<std::size_t I>
@@ -97,6 +108,7 @@ private:
             }
         }
         else {
+            LZ_ASSERT(std::get<0>(_iterators) != std::begin(std::get<0>(_iterables)), "Cannot decrement begin iterator");
             --std::get<0>(_iterators);
         }
     }
@@ -104,6 +116,7 @@ private:
     template<std::size_t I>
     constexpr reference deref() const {
         if constexpr (I == tuple_size - 1) {
+            LZ_ASSERT_DEREFERENCABLE(std::get<I>(_iterators) != std::end(std::get<I>(_iterables)));
             return *std::get<I>(_iterators);
         }
         else {
@@ -125,6 +138,9 @@ private:
             else {
                 plus_plus<I + 1>();
             }
+        }
+        else {
+            LZ_ASSERT_INCREMENTABLE(std::get<tuple_size - 1>(_iterators) != std::end(std::get<tuple_size - 1>(_iterables)));
         }
     }
 
@@ -164,6 +180,7 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> min_is_n(const difference_type offset) {
         auto& current = std::get<0>(_iterators);
+        LZ_ASSERT_SUBTRACTABLE(offset <= current - std::begin(std::get<0>(_iterables)));
         current -= offset;
     }
 
@@ -184,7 +201,8 @@ private:
     }
 
     template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size> plus_is_n(const difference_type) const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size> plus_is_n(const difference_type offset) const noexcept {
+        LZ_ASSERT_ADDABLE(offset == 0);
     }
 
     template<std::size_t I>
@@ -200,6 +218,7 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> minus_minus() {
+        LZ_ASSERT(std::begin(std::get<0>(_iterables)) != std::end(std::get<0>(_iterables)), "Cannot decrement end iterator");
         --std::get<0>(_iterators);
     }
 
@@ -229,8 +248,7 @@ private:
     }
 
     template<std::size_t I>
-    constexpr enable_if<I == std::tuple_size<Iterators>::value> plus_plus() const noexcept {
-        return;
+    LZ_CONSTEXPR_CXX_14 enable_if<I == std::tuple_size<Iterators>::value> plus_plus() const noexcept {
     }
 
     template<std::size_t I, class EndIter>
@@ -248,14 +266,18 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
+#ifdef LZ_HAS_CXX_17
+        ((std::get<I>(_iterators) = std::end(std::get<I>(_iterables))), ...);
+#else
         decompose(std::get<I>(_iterators) = std::end(std::get<I>(_iterables))...);
+#endif
     }
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr concatenate_iterator()
-        requires std::default_initializable<Iterators> && std::default_initializable<Iterables>
+        requires(std::default_initializable<Iterators> && std::default_initializable<Iterables>)
     = default;
 
 #else
@@ -275,12 +297,13 @@ public:
         static_assert(tuple_size > 1, "Cannot concat one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 concatenate_iterator& operator=(default_sentinel_t) {
         assign_sentinels(make_index_sequence<tuple_size>());
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return deref<0>();
     }
 
@@ -289,6 +312,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         plus_plus<0>();
     }
 
@@ -312,6 +336,10 @@ public:
         return minus(make_index_sequence<tuple_size>(), other);
     }
 
+    LZ_CONSTEXPR_CXX_20 difference_type difference(default_sentinel_t) const {
+        return minus(make_index_sequence<tuple_size>());
+    }
+
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& other) const {
         LZ_ASSERT(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
                       end_maybe_homo(_iterables) == end_maybe_homo(other._iterables),
@@ -319,7 +347,7 @@ public:
         return iter_equal_to<0>(other._iterators);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
         return iter_equal_to<0>(end_maybe_homo(_iterables));
     }
 };

@@ -49,8 +49,8 @@ TEST_CASE("Empty or one element generate while") {
         };
         lz::generate_while_iterable<decltype(func)> generator = lz::generate_while(std::move(func));
         REQUIRE(lz::empty(generator));
-        REQUIRE(!lz::has_one(generator));
-        REQUIRE(!lz::has_many(generator));
+        REQUIRE_FALSE(lz::has_one(generator));
+        REQUIRE_FALSE(lz::has_many(generator));
     }
 
     SECTION("One element") {
@@ -60,9 +60,9 @@ TEST_CASE("Empty or one element generate while") {
             b = false;
             return p;
         });
-        REQUIRE(!lz::empty(generator));
+        REQUIRE_FALSE(lz::empty(generator));
         REQUIRE(lz::has_one(generator));
-        REQUIRE(!lz::has_many(generator));
+        REQUIRE_FALSE(lz::has_many(generator));
     }
 }
 

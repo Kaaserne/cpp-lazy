@@ -17,7 +17,7 @@ class group_by_iterator
     : public iterator<group_by_iterator<Iterable, BinaryPredicate>,
                       std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>>, std::ptrdiff_t,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel> {
+                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
     using it = iter_t<Iterable>;
 
     it _sub_range_end;
@@ -74,28 +74,32 @@ public:
         _sub_range_begin{ std::move(iter) },
         _iterable{ std::forward<I>(iterable) },
         _comparer{ std::move(binary_predicate) } {
+
         advance();
     }
 
-    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel) {
+    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = std::end(_iterable);
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         return { *_sub_range_begin, { _sub_range_begin, _sub_range_end } };
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         _sub_range_begin = _sub_range_end;
         advance();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
         _sub_range_end = _sub_range_begin;
         auto prev = --_sub_range_begin;
 
@@ -117,7 +121,7 @@ public:
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
-    constexpr bool eq(default_sentinel) const {
+    constexpr bool eq(default_sentinel_t) const {
         return _sub_range_begin == std::end(_iterable);
     }
 };

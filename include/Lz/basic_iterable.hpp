@@ -137,6 +137,18 @@ using sized_iterable = detail::sized_iterable_impl<It, S>;
 template<class It, class S = It>
 using basic_iterable = detail::basic_iterable_impl<It, S>;
 
+/**
+ * @brief Creates a basic_iterable from an iterator and a sentinel. It can be used to create an iterable from a pair of iterators.
+ *
+ * @param begin The begin iterator.
+ * @param end The end sentinel.
+ * @return A basic_iterable object
+ */
+template<class I, class S>
+LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
+    return { std::move(begin), std::move(end) };
+}
+
 LZ_MODULE_EXPORT_SCOPE_END
 
 namespace detail {
@@ -336,14 +348,11 @@ copy_to_container(Iterable&& iterable, Container& container) {
 
 template<class Container>
 struct container_constructor {
-    template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
-    using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
-
 #ifdef LZ_HAS_CXX_17
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     [[nodiscard]] constexpr Container construct(Iterable&& iterable, Args&&... args) const {
-        if constexpr (can_construct<Iterable, Args...>::value) {
+        if constexpr (std::is_constructible_v<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>) {
             return Container(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                              std::forward<Args>(args)...);
         }
@@ -355,6 +364,9 @@ struct container_constructor {
     }
 
 #else
+
+    template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
+    using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
 
     template<LZ_CONCEPT_ITERABLE Iterable, class... Args>
     LZ_NODISCARD constexpr enable_if<can_construct<Iterable, Args...>::value, Container>

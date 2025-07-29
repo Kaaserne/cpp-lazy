@@ -15,7 +15,8 @@ class generate_iterator;
 template<class GeneratorFunc>
 class generate_iterator<GeneratorFunc, false>
     : public iterator<generate_iterator<GeneratorFunc, false>, func_ret_type<GeneratorFunc>,
-                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
+                      default_sentinel_t> {
 
     mutable GeneratorFunc _func;
     std::size_t _current{};
@@ -45,20 +46,22 @@ public:
         _current{ amount } {
     }
 
-    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel_t) noexcept {
         _current = 0;
         return *this;
     }
 
-    constexpr reference dereference() const {
+    LZ_CONSTEXPR_CXX_14 reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return _func();
     }
 
-    constexpr pointer arrow() const {
+    LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         --_current;
     }
 
@@ -66,7 +69,7 @@ public:
         return _current == b._current;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return _current == 0;
     }
 };
@@ -74,7 +77,8 @@ public:
 template<class GeneratorFunc>
 class generate_iterator<GeneratorFunc, true>
     : public iterator<generate_iterator<GeneratorFunc, true>, func_ret_type<GeneratorFunc>,
-                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel> {
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
+                      default_sentinel_t> {
 
     GeneratorFunc _func;
 
@@ -98,10 +102,10 @@ public:
 
 #endif
 
-    constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
+    explicit constexpr generate_iterator(GeneratorFunc generator_func) : _func{ std::move(generator_func) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel) noexcept {
+    LZ_CONSTEXPR_CXX_14 generate_iterator& operator=(default_sentinel_t) noexcept {
         return *this;
     }
 
@@ -120,7 +124,7 @@ public:
         return false;
     }
 
-    constexpr bool eq(default_sentinel) const noexcept {
+    constexpr bool eq(default_sentinel_t) const noexcept {
         return false;
     }
 };
