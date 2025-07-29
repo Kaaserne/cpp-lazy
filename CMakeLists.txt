@@ -162,6 +162,3 @@ if (CPP-LAZY_BUILD_ESSENTIALS_ZIP)
 	)
 	add_custom_target(${PROJECT_NAME}_package DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip")
 endif ()
-
-add_executable(test test.cpp)
-target_link_libraries(test PRIVATE cpp-lazy::cpp-lazy)
