@@ -63,7 +63,7 @@ public:
     }
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
+    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept(lz::size(*_iterable_ref_ptr)) {
         return static_cast<std::size_t>(lz::size(*_iterable_ref_ptr));
     }
 
@@ -122,7 +122,7 @@ public:
 
 #endif
 
-    constexpr ref_or_view_helper(it&& iterable) noexcept(std::is_move_constructible<it>::value) :
+    constexpr ref_or_view_helper(it&& iterable) noexcept(std::is_nothrow_move_constructible<it>::value) :
         _iterable_value{ std::move(iterable) } {
     }
 
@@ -130,7 +130,7 @@ public:
     }
 
     template<class I>
-    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) noexcept(std::is_move_constructible<it>::value) :
+    constexpr ref_or_view_helper(ref_or_view_helper<I, true>&& other) noexcept(std::is_nothrow_move_constructible<it>::value) :
         ref_or_view_helper{ std::move(other._iterable_value) } {
     }
 
