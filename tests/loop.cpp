@@ -74,7 +74,7 @@ TEST_CASE("Loop with non while true argument") {
     }
 
     SECTION("Size") {
-        auto looper = lz::loop(vec, 2);
+        auto looper = vec | lz::loop(2);
         CHECK(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
         CHECK(looper.size() == 8);
         looper = lz::loop(vec, 3);
