@@ -59,7 +59,7 @@ using lines_iterable = detail::lines_iterable<CharT, Iterable>;
  * ```
  */
 template<class CharT = char>
-using lines_iterable_sv = lines_iterable<lz::owned<lz::basic_string_view<CharT>>, CharT>;
+using lines_iterable_sv = lines_iterable<lz::copied<lz::basic_string_view<CharT>>, CharT>;
 
 /**
  * @brief As iterable helper alias

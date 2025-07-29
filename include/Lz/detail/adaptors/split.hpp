@@ -11,15 +11,15 @@
 namespace lz {
 
 /**
- * @brief Wrapper for lz::owned<lz::basic_string_view<CharT>>.
+ * @brief Wrapper for lz::copied<lz::basic_string_view<CharT>>.
  *
  * @tparam CharT The character type of the string view.
  */
 template<class CharT>
-using copied_basic_sv = lz::owned<lz::basic_string_view<CharT>>;
+using copied_basic_sv = lz::copied<lz::basic_string_view<CharT>>;
 
 /**
- * @brief Wrapper for lz::owned<lz::string_view>.
+ * @brief Wrapper for lz::copied<lz::string_view>.
  */
 using copied_sv = copied_basic_sv<char>;
 

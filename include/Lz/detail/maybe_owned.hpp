@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef LZ_maybe_owned_HPP
-#define LZ_maybe_owned_HPP
+#ifndef LZ_MAYBE_OWNED_HPP
+#define LZ_MAYBE_OWNED_HPP
 
 #include <Lz/detail/procs.hpp>
 
@@ -209,49 +209,49 @@ using detail::maybe_owned;
 
 /**
  * @brief This class can be useful for iterables that are not inherited from `lz::lazy_view`, but are still easy to copy. For
- * instance, you can also use `lz::owned<boost::iterator_range<int*>>` to hold a copy of the underlying range.
+ * instance, you can also use `lz::copied<boost::iterator_range<int*>>` to hold a copy of the underlying range.
  * Internally, this will only copy the pointers to the data, not the data itself.
  *
- * But, for instance, `lz::owned<std::vector<int>>` will hold a copy of the underlying vector. This of course will in
- * turn be slow because it needs to copy all the vector data into the owned iterable.
+ * But, for instance, `lz::copied<std::vector<int>>` will hold a copy of the underlying vector. This of course will in
+ * turn be slow because it needs to copy all the vector data into the copied iterable.
  * Example:
  * ```cpp
  * std::vector<int> vec{ 1, 2, 3 };
- * lz::owned<std::vector<int>> owned{ vec }; // will store a copy of the vector
+ * lz::copied<std::vector<int>> copied{ vec }; // will store a copy of the vector
  *
  * boost::iterator_range<int*> range{ vec.data(), vec.data() + vec.size() }); // Holds a copy to vector data
  * // lz::filter(range, [](int i) { return i > 1; }); // *CAREFUL* this will hold a reference because it is not a lazy view
  * // Instead, use:
- * lz::owned<boost::iterator_range<int*>> owned{ range }; // will store a copy of the range
+ * lz::copied<boost::iterator_range<int*>> copied{ range }; // will store a copy of the range
  * ```
  */
 template<class Iterable>
-using owned = detail::maybe_owned_impl<Iterable, true>;
+using copied = detail::maybe_owned_impl<Iterable, true>;
 
 /**
  * @brief This helper function can be useful for iterables that are not inherited from `lz::lazy_view`, but are still easy to
- * copy. For instance, you can use `lz::owned<boost::iterator_range<int*>>` to hold a copy of the underlying range,
+ * copy. For instance, you can use `lz::copied<boost::iterator_range<int*>>` to hold a copy of the underlying range,
  * instead of a reference (default behaviour, as it is not inherited from lazy_view). Internally, this will only copy the pointers
  * to the data, not the data itself.
  *
- * But, for instance, `lz::owned<std::vector<int>>` will also hold a copy of the underlying vector. This of course will
- * in turn be slow because it needs to copy all the vector data into the owned iterable. Example:
+ * But, for instance, `lz::copied<std::vector<int>>` will also hold a copy of the underlying vector. This of course will
+ * in turn be slow because it needs to copy all the vector data into the copied iterable. Example:
  * ```cpp
  * std::vector<int> vec{ 1, 2, 3 };
- * auto owned_vec = lz::as_copied(vec); // will store a copy of the vector, slow
- * auto owned_vec = lz::as_copied(std::move(vec)); // will store a copy of the vector, fast with std::move
+ * auto copied_vec = lz::as_copied(vec); // will store a copy of the vector, slow
+ * auto copied_vec = lz::as_copied(std::move(vec)); // will store a copy of the vector, fast with std::move
  *
  * boost::iterator_range<int*> range{ vec.data(), vec.data() + vec.size() });
  * // lz::filter(range, [](int i) { return i > 1; }); // *CAREFUL* this will hold a reference to `range` because range is *NOT*
  * inherited
  * // from `lazy_view`. Instead, use:
- * auto owned_range = lz::as_copied(range); // will store a copy of the range, cheap
+ * auto copied_range = lz::as_copied(range); // will store a copy of the range, cheap
  * ```
  */
 template<class Iterable>
-owned<detail::remove_ref<Iterable>> as_copied(Iterable&& iterable) {
-    return { std::forward<Iterable>(iterable) };
+copied<detail::remove_ref<Iterable>> as_copied(Iterable&& iterable) {
+    return copied<detail::remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
 }
 } // namespace lz
 
-#endif // LZ_maybe_owned_HPP
+#endif // LZ_MAYBE_OWNED_HPP

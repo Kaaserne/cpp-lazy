@@ -66,7 +66,7 @@ struct iterable {
     }
 };
 
-TEST_CASE("lz::owned") {
+TEST_CASE("lz::copied") {
     SECTION("Iterable that is inherited by lz::lazy_view") {
         std::vector<int> vec{ 1, 2, 3 };
         auto filter = lz::filter(vec, [](int i) { return i > 1; });
@@ -83,7 +83,7 @@ TEST_CASE("lz::owned") {
     SECTION("Custom iterable") {
         int arr[] = { 1, 2, 3 };
         iterable it{ arr, arr + lz::size(arr) };
-        auto copied = lz::as_copied(it);
+        lz::copied<iterable> copied = lz::as_copied(it);
         REQUIRE(&(*it.begin()) == &(*copied.begin()));
     }
 }
