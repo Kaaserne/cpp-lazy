@@ -49,7 +49,7 @@ struct group_by_adaptor {
      * @return An adaptor that can be used in pipe expressions
      */
     template<class BinaryPredicate>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, decay_t<BinaryPredicate>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, BinaryPredicate>
     operator()(BinaryPredicate binary_predicate) const {
         return { std::move(binary_predicate) };
     }
