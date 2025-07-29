@@ -227,11 +227,11 @@ struct has_push<Container, void_t<decltype(0, std::declval<Container>().push(std
  * };
  * ```
  */
-template<class Container, class = void>
+LZ_MODULE_EXPORT template<class Container, class = void>
 struct custom_copier_for;
 
 // std::array doesnt have push_back, insert, insert_after... etc, so just use copy
-template<class T, std::size_t N>
+LZ_MODULE_EXPORT template<class T, std::size_t N>
 struct custom_copier_for<std::array<T, N>> {
     template<class Iterable>
     LZ_CONSTEXPR_CXX_14 void copy(Iterable&& iterable, std::array<T, N>& container) const {

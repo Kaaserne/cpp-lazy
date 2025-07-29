@@ -23,7 +23,7 @@ constexpr diff_type<Iterator> distance(Iterator begin, S end);
 /**
  * This value is returned when index_of(_if) does not find the value specified.
  */
-constexpr static std::size_t npos = static_cast<std::size_t>(-1);
+constexpr std::size_t npos = static_cast<std::size_t>(-1);
 
 LZ_MODULE_EXPORT_SCOPE_END
 

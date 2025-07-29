@@ -31,11 +31,14 @@ endif()
 option(CPP-LAZY_DEBUG_ASSERTIONS "Debug assertions" ${CPP-LAZY_DEBUG_ASSERTIONS})
 
 if (CPP-LAZY_USE_MODULES)
+	message(STATUS "cpp-lazy: using C++20 modules")
+	set(CPP-LAZY_LIB_TYPE "STATIC")
 	set(CPP-LAZY_SOURCE_FILES "src/lz.cppm")
 	set(CPP-LAZY_LINK_VISIBILITY "PUBLIC")
 	set(CPP-LAZY_COMPILE_FEATURES_VISIBLITY "PUBLIC")
 	set(CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY "PRIVATE")
 	set(CPP-LAZY_COMPILE_INCLUDE_VISIBLITY "PUBLIC")
+	set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 else()
 	set(CPP-LAZY_LIB_TYPE "INTERFACE")
 	set(CPP-LAZY_LINK_VISIBILITY "INTERFACE")
@@ -73,6 +76,10 @@ message(STATUS "cpp-lazy: Debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
 add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
 add_library(cpp-lazy::cpp-lazy ALIAS cpp-lazy)
 
+if (CPP-LAZY_USE_MODULES)
+	target_sources(cpp-lazy PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES FILES "${CPP-LAZY_SOURCE_FILES}")
+endif()
+
 # Link lib stacktrace if debug assertions are enabled, on Linux with C++23 or later
 set(IS_CXX_23 $<VERSION_GREATER_EQUAL:${CMAKE_CXX_STANDARD},23>)
 set(IS_LINUX_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
@@ -89,25 +96,6 @@ target_compile_definitions(cpp-lazy
 		$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
 		$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
-if (CPP-LAZY_USE_MODULES)
-	set(FMT_MODULE "ON" CACHE STRING "")
-	if (MSVC)
-		set(BMI "${CMAKE_CURRENT_BINARY_DIR}/lz.ifc")
-		target_compile_options(cpp-lazy
-			PRIVATE
-				/interface /ifcOutput "${BMI}"
-			INTERFACE
-				/reference lz="${BMI}"
-		)
-	endif()
-	set_target_properties(cpp-lazy 
-		PROPERTIES 
-			ADDITIONAL_CLEAN_FILES "${BMI}"
-		DEBUG_POSTFIX
-			"d"
-	)
-	set_source_files_properties("${BMI}" PROPERTIES GENERATED ON)
-endif()
 
 target_compile_features(cpp-lazy 
 	${CPP-LAZY_COMPILE_FEATURES_VISIBLITY} 
@@ -127,10 +115,19 @@ set(cpp-lazy_directory "cpp-lazy")
 set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${cpp-lazy_directory}")
 set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cpp-lazy_directory}")
 
-install(TARGETS cpp-lazy
+if (CPP-LAZY_USE_MODULES)
+	install(TARGETS cpp-lazy
         EXPORT cpp-lazyTargets
         INCLUDES
-        DESTINATION "${cpp-lazy_include_directory}")
+        DESTINATION "${cpp-lazy_include_directory}"
+        FILE_SET cxx_modules DESTINATION "${cpp-lazy_include_directory}"
+)
+else ()
+	install(TARGETS cpp-lazy
+			EXPORT cpp-lazyTargets
+			INCLUDES
+			DESTINATION "${cpp-lazy_include_directory}")
+endif ()
 
 write_basic_package_version_file(
         cpp-lazyConfigVersion.cmake
@@ -165,3 +162,6 @@ if (CPP-LAZY_BUILD_ESSENTIALS_ZIP)
 	)
 	add_custom_target(${PROJECT_NAME}_package DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip")
 endif ()
+
+add_executable(test test.cpp)
+target_link_libraries(test PRIVATE cpp-lazy::cpp-lazy)
