@@ -25,7 +25,8 @@ struct loop_adaptor {
      * @return A loop_iterable that will loop over the input iterable infinitely.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr enable_if<!std::is_integral<remove_cvref<Iterable>>::value, loop_iterable<remove_ref<Iterable>, true>>
+    operator()(Iterable&& iterable) const {
         return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }
 
