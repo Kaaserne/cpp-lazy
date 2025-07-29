@@ -46,7 +46,7 @@ struct inclusive_scan_adaptor {
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr 
-    enable_if<is_invocable<BinaryOp, decay_t<T>, decay_t<T>>::value, inclusive_scan_iterable<remove_ref<Iterable>, decay_t<T>, BinaryOp>>
+    enable_if<is_invocable<BinaryOp, T, T>::value, inclusive_scan_iterable<remove_ref<Iterable>, T, BinaryOp>>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const {
         return { std::forward<Iterable>(iterable), std::move(init), std::move(binary_op) };
     }
