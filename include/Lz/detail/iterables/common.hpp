@@ -4,14 +4,14 @@
 #define LZ_COMMON_ITERABLE_HPP
 
 #include <Lz/detail/iterators/common.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable>
 class common_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
 public:
     using iterator = common_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
@@ -21,7 +21,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr common_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

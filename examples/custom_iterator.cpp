@@ -181,13 +181,13 @@ public:
 };
 
 // If you want to create your own iterable, you can use the following code:
-// It is important you inherit from lz::lazy_view if you use lz::ref_or_view as a member variable.
+// It is important you inherit from lz::lazy_view if you use lz::maybe_owned as a member variable.
 
 template<class Iterable>
 class custom_iterable : public lz::lazy_view {
     // Holds a reference or a copy of the iterable, depending whether Iterable is inherited from lazy_view
     // So std::vector<int> will be hold by reference, but lz::range(0, 10) will be copied
-    lz::ref_or_view<Iterable> _iterable;
+    lz::maybe_owned<Iterable> _iterable;
 
 public:
     custom_iterable(Iterable& iterable) : _iterable(iterable) {

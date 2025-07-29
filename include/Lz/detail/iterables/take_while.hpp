@@ -5,20 +5,20 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/take_while.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable, class UnaryPredicate>
 class take_while_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     func_container<UnaryPredicate> _unary_predicate;
 
     using it = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;
 
 public:
-    using iterator = take_while_iterator<ref_or_view<Iterable>, func_container<UnaryPredicate>>;
+    using iterator = take_while_iterator<maybe_owned<Iterable>, func_container<UnaryPredicate>>;
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_while_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<UnaryPredicate>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>
     = default;
 
 #else

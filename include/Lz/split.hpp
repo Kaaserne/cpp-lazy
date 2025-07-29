@@ -162,7 +162,7 @@ using s_single_split_iterable = split_iterable<std::basic_string<val_iterable_t<
  */
 template<class Iterable>
 using s_multiple_split_iterable = split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable,
-                                                 lz::copied_iterable<lz::basic_string_view<val_iterable_t<Iterable>>>>;
+                                                 lz::owned<lz::basic_string_view<val_iterable_t<Iterable>>>>;
 
 /**
  * @brief Split iterable helper alias for single character delimiter. Returns lz::basic_string_view as value type.
@@ -186,7 +186,7 @@ using sv_single_split_iterable =
  */
 template<class Iterable>
 using sv_multiple_split_iterable = split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable,
-                                                  lz::copied_iterable<lz::basic_string_view<val_iterable_t<Iterable>>>>;
+                                                  lz::owned<lz::basic_string_view<val_iterable_t<Iterable>>>>;
 
 LZ_MODULE_EXPORT_SCOPE_END
 

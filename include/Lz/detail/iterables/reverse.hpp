@@ -5,14 +5,14 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterators/cached_reverse.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, bool Cached>
 class reverse_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
     using inner_iter = iter_t<Iterable>;
     using inner_sent = sentinel_t<Iterable>;
@@ -25,7 +25,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr reverse_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

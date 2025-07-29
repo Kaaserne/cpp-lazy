@@ -4,7 +4,7 @@
 #define LZ_CARTESIAN_PRODUCT_ITERABLE_HPP
 
 #include <Lz/detail/iterators/cartesian_product.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <numeric>
 
@@ -12,7 +12,7 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class cartesian_product_iterable : public lazy_view {
-    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
+    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
 
     template<std::size_t... Is>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<Is...>) const {
@@ -70,7 +70,7 @@ class cartesian_product_iterable : public lazy_view {
     using is = make_index_sequence<tuple_size>;
 
 public:
-    using iterator = cartesian_product_iterator<maybe_homogeneous<ref_or_view<Iterables>...>>;
+    using iterator = cartesian_product_iterator<maybe_homogeneous<maybe_owned<Iterables>...>>;
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
@@ -83,7 +83,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterable()
-        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
+        requires(std::default_initializable<maybe_owned<Iterables>> && ...)
     = default;
 
 #else

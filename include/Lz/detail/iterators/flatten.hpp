@@ -5,7 +5,7 @@
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/iterator_base.hpp>
 #include <iterator>
 
@@ -70,7 +70,7 @@ class flatten_wrapper
     using iter = iter_t<Iterable>;
 
     iter _iterator{};
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
     using traits = std::iterator_traits<iter>;
 
@@ -87,15 +87,15 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_wrapper()
-        requires std::default_initializable<iter> && std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<iter> && std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
 
     template<class I = iter, class = enable_if<std::is_default_constructible<I>::value &&
-                                               std::is_default_constructible<ref_or_view<Iterable>>::value>>
+                                               std::is_default_constructible<maybe_owned<Iterable>>::value>>
     constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value) {
+                                         std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value) {
     }
 
 #endif

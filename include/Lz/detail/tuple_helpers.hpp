@@ -4,7 +4,7 @@
 #define LZ_TUPLE_HELPERS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/traits.hpp>
 #include <tuple>
 

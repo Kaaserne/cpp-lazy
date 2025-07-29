@@ -4,13 +4,13 @@
 #define LZ_EXCLUDE_ITERABLE_HPP
 
 #include <Lz/detail/iterators/exclude.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable>
 class exclude_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     diff_iterable_t<Iterable> _from{};
     diff_iterable_t<Iterable> _to{};
 
@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

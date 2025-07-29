@@ -61,9 +61,9 @@ add_executable(cpp-lazy-tests
 	join_where.cpp
 	loop.cpp
 	map.cpp
+	maybe_owned.cpp
 	random.cpp
 	range.cpp
-	ref_or_view.cpp
 	regex_split.cpp
 	repeat.cpp
 	reverse.cpp

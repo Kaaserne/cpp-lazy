@@ -4,7 +4,7 @@
 #define LZ_DROP_ITERABLE_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/traits.hpp>
 #include <limits>
 
@@ -21,14 +21,14 @@ public:
 private:
     using diff = diff_type<iterator>;
 
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     std::size_t _n{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr drop_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

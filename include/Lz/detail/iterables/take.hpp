@@ -4,7 +4,7 @@
 #define LZ_TAKE_ITERABLE_HPP
 
 #include <Lz/detail/iterators/take.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
@@ -81,7 +81,7 @@ public:
 
 template<class Iterable>
 class take_iterable<Iterable, enable_if<is_iterable<Iterable>::value>> : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     std::size_t _n{};
 
     using inner_sentinel = sentinel_t<Iterable>;
@@ -94,7 +94,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

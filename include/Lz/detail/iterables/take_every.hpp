@@ -4,7 +4,7 @@
 #define LZ_TAKE_EVERY_ITERABLE_HPP
 
 #include <Lz/detail/iterators/take_every.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
@@ -25,12 +25,12 @@ class take_every_iterable : public lazy_view {
     using sent = sentinel_t<Iterable>;
 
 public:
-    using iterator = take_every_iterator<ref_or_view<Iterable>>;
+    using iterator = take_every_iterator<maybe_owned<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
 private:
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     std::size_t _offset{};
     std::size_t _start{};
 
@@ -43,7 +43,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else

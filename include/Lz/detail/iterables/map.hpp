@@ -5,13 +5,13 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/map.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable, class UnaryOp>
 class map_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     func_container<UnaryOp> _unary_op;
 
     using iter = iter_t<Iterable>;
@@ -31,14 +31,14 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr map_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<UnaryOp>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryOp>
     = default;
 
 #else
 
     template<class I = decltype(_iterable),
              class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
-    constexpr map_iterable() noexcept(std::is_nothrow_default_constructible<ref_or_view<Iterable>>::value &&
+    constexpr map_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
                                       std::is_nothrow_default_constructible<UnaryOp>::value) {
     }
 

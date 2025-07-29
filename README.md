@@ -112,7 +112,7 @@ int main() {
 ```
 
 ## Ownership
-`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::ref_or_view`. This can be altered using `lz::copied_iterable` or `lz::as_copied_iterable`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
+`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::owned` or `lz::as_owned`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
 
 ```cpp
 #include <Lz/lz.hpp>
@@ -143,18 +143,18 @@ int main() {
   // str will *not* hold a reference to random, because random is a lazy iterable and is trivial to copy
   auto str = lz::map(random, [](int i) { return std::to_string(i); });
 
-  lz::ref_or_view<std::vector<int>> ref(vec); // Holds a reference to vec
+  lz::maybe_owned<std::vector<int>> ref(vec); // Holds a reference to vec
 
   using random_iterable = decltype(random);
-  lz::ref_or_view<random_iterable> ref2(random); // Does NOT hold a reference to random
+  lz::maybe_owned<random_iterable> ref2(random); // Does NOT hold a reference to random
 
   non_lz_iterable non_lz(vec.data(), vec.data() + vec.size());
-  lz::ref_or_view<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
+  lz::maybe_owned<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
 
-  // Instead, if you don't want this behaviour, you can use lz::copied_iterable:
-  lz::copied_iterable<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
+  // Instead, if you don't want this behaviour, you can use lz::owned:
+  lz::owned<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
   // Or use the helper function:
-  copied = lz::as_copied_iterable(non_lz); // Holds a copy of non_lz = cheap to copy
+  copied = lz::as_owned(non_lz); // Holds a copy of non_lz = cheap to copy
 }
 ```
 

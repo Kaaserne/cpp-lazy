@@ -5,14 +5,14 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/chunk_if.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class ValueType, class Iterable, class UnaryPredicate>
 class chunk_if_iterable : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     func_container<UnaryPredicate> _predicate;
 
 public:
@@ -23,7 +23,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunk_if_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>> && std::default_initializable<UnaryPredicate>
+        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>
     = default;
 
 #else

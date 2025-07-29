@@ -4,7 +4,7 @@
 #define LZ_CONCATENATE_ITERABLE_HPP
 
 #include <Lz/detail/iterators/concatenate.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
@@ -12,7 +12,7 @@ namespace detail {
 
 template<class... Iterables>
 class concatenate_iterable : public lazy_view {
-    using iterables = maybe_homogeneous<ref_or_view<Iterables>...>;
+    using iterables = maybe_homogeneous<maybe_owned<Iterables>...>;
     iterables _iterables;
 
     template<std::size_t... I>
@@ -48,7 +48,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr concatenate_iterable()
-        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
+        requires(std::default_initializable<maybe_owned<Iterables>> && ...)
     = default;
 
 #else

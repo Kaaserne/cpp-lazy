@@ -4,14 +4,14 @@
 #define LZ_ZIP_LONGEST_ITERABLE_HPP
 
 #include <Lz/detail/iterators/zip_longest.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_longest_iterable : public lazy_view {
-    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
+    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
 
     using iterators = maybe_homogeneous<iter_t<Iterables>...>;
     using sentinels = maybe_homogeneous<sentinel_t<Iterables>...>;
@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterable()
-        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
+        requires(std::default_initializable<maybe_owned<Iterables>> && ...)
     = default;
 
 #else

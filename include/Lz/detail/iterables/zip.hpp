@@ -4,7 +4,7 @@
 #define LZ_ZIP_ITERABLE_HPP
 
 #include <Lz/detail/iterators/zip.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
@@ -14,7 +14,7 @@ class zip_iterable : public lazy_view {
     using iter_tuple = maybe_homogeneous<iter_t<Iterables>...>;
     using sentinel_tuple = maybe_homogeneous<sentinel_t<Iterables>...>;
 
-    maybe_homogeneous<ref_or_view<Iterables>...> _iterables;
+    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
 
     template<std::size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
@@ -48,7 +48,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_iterable()
-        requires(std::default_initializable<ref_or_view<Iterables>> && ...)
+        requires(std::default_initializable<maybe_owned<Iterables>> && ...)
     = default;
 
 #else

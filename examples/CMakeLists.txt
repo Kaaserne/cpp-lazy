@@ -38,11 +38,11 @@ set(examples
     join_where
     loop
     map
+    maybe_owned
     pipe
     print_and_format
     random
     range
-    ref_or_view
     regex_split
     repeat
     rotate

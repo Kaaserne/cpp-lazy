@@ -4,7 +4,7 @@
 #define LZ_LOOP_ITERALBE_HPP
 
 #include <Lz/detail/iterators/loop.hpp>
-#include <Lz/detail/ref_or_view.hpp>
+#include <Lz/detail/maybe_owned.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,11 +13,11 @@ class loop_iterable;
 
 template<class Iterable>
 class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
     std::size_t _amount{};
 
 public:
-    using iterator = loop_iterator<ref_or_view<Iterable>, false>;
+    using iterator = loop_iterator<maybe_owned<Iterable>, false>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -29,7 +29,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
@@ -96,17 +96,17 @@ public:
 
 template<class Iterable>
 class loop_iterable<Iterable, true /* is inf loop */> : public lazy_view {
-    ref_or_view<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable;
 
 public:
-    using iterator = loop_iterator<ref_or_view<Iterable>, true>;
+    using iterator = loop_iterator<maybe_owned<Iterable>, true>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterable()
-        requires std::default_initializable<ref_or_view<Iterable>>
+        requires std::default_initializable<maybe_owned<Iterable>>
     = default;
 
 #else
