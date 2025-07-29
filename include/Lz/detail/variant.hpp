@@ -175,7 +175,7 @@ public:
         return static_cast<std::int_least8_t>(_state);
     }
 
-    ~variant() {
+    ~variant() noexcept(noexcept(std::is_nothrow_destructible<T>::value) && noexcept(std::is_nothrow_destructible<T2>::value)) {
         switch (_state) {
         case state::t:
             _variant._t.~T();
@@ -190,12 +190,12 @@ public:
 };
 
 template<std::size_t I, class T, class T2>
-LZ_CONSTEXPR_CXX_14 auto get(const variant<T, T2>& v) -> decltype(v.template get<I>()) {
+LZ_CONSTEXPR_CXX_14 auto get(const variant<T, T2>& v) noexcept -> decltype(v.template get<I>()) {
     return v.template get<I>();
 }
 
 template<std::size_t I, class T, class T2>
-LZ_CONSTEXPR_CXX_14 auto get(variant<T, T2>& v) -> decltype(v.template get<I>()) {
+LZ_CONSTEXPR_CXX_14 auto get(variant<T, T2>& v) noexcept -> decltype(v.template get<I>()) {
     return v.template get<I>();
 }
 
