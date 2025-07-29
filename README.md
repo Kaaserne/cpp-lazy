@@ -103,11 +103,13 @@ int main() {
   // the sequence will be traversed to get the size using lz::eager_size. The iterable will be documented
   // appropriately if this requires a sized iterable. Example:
   auto zipper1 = lz::zip(lz::c_string("ab"), lz::c_string("cd")); // Calling .end() will take O(n) time
-  auto zipper2 = lz::zip(sized, sized); // Takes O(1) time
+  auto zipper2 = lz::zip(sized, sized); // Calling .end() will take O(1) time
 
-  // You can cache the size if you need to (more about when to do that in the appropriate iterable documentation):
-  auto cached_sizes = lz::zip(lz::c_string("ab") | lz::cache_size, lz::c_string("cd") | lz::cache_size); // Takes O(n) time
-  // However cached_sizes.end() will now take O(1) time
+  // You can cache the size if you need to.
+  // More about when to do that in the appropriate iterable documentation
+  // lz:c_string isn't sized, so in order to make it sized, we can use lz::cache_size:
+  auto cached_sizes = lz::zip(lz::c_string("ab") | lz::cache_size, lz::c_string("cd") | lz::cache_size);
+  // cached_sizes.end() will now take O(1) time, instead of zipper1's O(n) time.
 }
 ```
 
