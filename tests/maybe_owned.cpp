@@ -70,20 +70,20 @@ TEST_CASE("lz::owned") {
     SECTION("Iterable that is inherited by lz::lazy_view") {
         std::vector<int> vec{ 1, 2, 3 };
         auto filter = lz::filter(vec, [](int i) { return i > 1; });
-        auto copied = lz::as_owned(filter);
+        auto copied = lz::as_copied(filter);
         REQUIRE(&(*filter.begin()) == &(*copied.begin()));
     }
 
     SECTION("Iterable that is not inherited by lz::lazy_view") {
         std::vector<int> vec{ 1, 2, 3 };
-        auto copied = lz::as_owned(vec);
+        auto copied = lz::as_copied(vec);
         REQUIRE(&(*vec.begin()) != &(*copied.begin()));
     }
 
     SECTION("Custom iterable") {
         int arr[] = { 1, 2, 3 };
         iterable it{ arr, arr + lz::size(arr) };
-        auto copied = lz::as_owned(it);
+        auto copied = lz::as_copied(it);
         REQUIRE(&(*it.begin()) == &(*copied.begin()));
     }
 }

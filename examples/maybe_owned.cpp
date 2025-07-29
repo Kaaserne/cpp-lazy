@@ -36,12 +36,12 @@ int main() {
     static_assert(lz::maybe_owned<non_lz_iterable>::holds_reference, "Iterable should hold a reference");
 
     // Sometimes, you don't want this behaviour, for example for other cheap to copy, non lz iterables (like `non_lz_iterable`).
-    // In this case, you can use lz::owned/lz::as_owned to store a copy of the iterable, instead of a
+    // In this case, you can use lz::owned/lz::as_copied to store a copy of the iterable, instead of a
     // reference.
     lz::owned<non_lz_iterable> copied{ it }; // will *not* store a reference to the non lz iterable!
     static_assert(!lz::owned<non_lz_iterable>::holds_reference, "Iterable should hold a reference");
 
     // You can also use the helper function
-    copied = lz::as_owned(it); // will *not* store a copy of the non lz iterable
+    copied = lz::as_copied(it); // will *not* store a copy of the non lz iterable
     static_assert(!lz::maybe_owned<decltype(copied)>::holds_reference, "Iterable should hold a reference");
 }

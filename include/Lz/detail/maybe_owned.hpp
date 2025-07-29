@@ -238,18 +238,18 @@ using owned = detail::maybe_owned_impl<Iterable, true>;
  * in turn be slow because it needs to copy all the vector data into the owned iterable. Example:
  * ```cpp
  * std::vector<int> vec{ 1, 2, 3 };
- * auto owned_vec = lz::as_owned(vec); // will store a copy of the vector, slow
- * auto owned_vec = lz::as_owned(std::move(vec)); // will store a copy of the vector, fast with std::move
+ * auto owned_vec = lz::as_copied(vec); // will store a copy of the vector, slow
+ * auto owned_vec = lz::as_copied(std::move(vec)); // will store a copy of the vector, fast with std::move
  *
  * boost::iterator_range<int*> range{ vec.data(), vec.data() + vec.size() });
  * // lz::filter(range, [](int i) { return i > 1; }); // *CAREFUL* this will hold a reference to `range` because range is *NOT*
  * inherited
  * // from `lazy_view`. Instead, use:
- * auto owned_range = lz::as_owned(range); // will store a copy of the range, cheap
+ * auto owned_range = lz::as_copied(range); // will store a copy of the range, cheap
  * ```
  */
 template<class Iterable>
-owned<detail::remove_ref<Iterable>> as_owned(Iterable&& iterable) {
+owned<detail::remove_ref<Iterable>> as_copied(Iterable&& iterable) {
     return { std::forward<Iterable>(iterable) };
 }
 } // namespace lz

@@ -112,7 +112,7 @@ int main() {
 ```
 
 ## Ownership
-`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::owned` or `lz::as_owned`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
+`lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::owned` or `lz::as_copied`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
 
 ```cpp
 #include <Lz/lz.hpp>
@@ -154,7 +154,7 @@ int main() {
   // Instead, if you don't want this behaviour, you can use lz::owned:
   lz::owned<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
   // Or use the helper function:
-  copied = lz::as_owned(non_lz); // Holds a copy of non_lz = cheap to copy
+  copied = lz::as_copied(non_lz); // Holds a copy of non_lz = cheap to copy
 }
 ```
 
