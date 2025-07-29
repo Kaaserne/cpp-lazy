@@ -292,6 +292,8 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
 }
 } // namespace detail
 
+LZ_MODULE_EXPORT_SCOPE_BEGIN
+
 #ifdef LZ_HAS_CXX_17
 
 /**
@@ -429,12 +431,14 @@ using ptr_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::pointer;
 template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
 
+LZ_MODULE_EXPORT_SCOPE_END
+
 namespace detail {
 
-template<class T, class = void>
+LZ_MODULE_EXPORT template<class T, class = void>
 struct sized : std::false_type {};
 
-template<class T>
+LZ_MODULE_EXPORT template<class T>
 struct sized<T, void_t<decltype(lz::size(std::declval<T>()))>> : std::true_type {};
 
 template<class, class = void>
