@@ -102,14 +102,14 @@ class maybe_owned_impl<Iterable, true> : public lazy_view {
     it _iterable_value;
 
     template<class, bool>
-    friend class maybe_owned_impl_helper;
+    friend class maybe_owned_impl;
 
 public:
     static constexpr bool holds_reference = false;
 
 #ifdef LZ_HAS_CONCEPTS
 
-    constexpr maybe_owned_impl_helper()
+    constexpr maybe_owned_impl()
         requires std::default_initializable<it>
     = default;
 
