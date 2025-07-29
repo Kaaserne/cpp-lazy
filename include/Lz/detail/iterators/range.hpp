@@ -8,6 +8,7 @@
 #include <Lz/detail/traits.hpp>
 #include <Lz/iterator_base.hpp>
 #include <cmath>
+#include <limits>
 
 namespace lz {
 namespace detail {
@@ -90,9 +91,8 @@ public:
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& b) const noexcept {
-        LZ_ASSERT(_step == b._step, "Incompatible iterators");
-        constexpr Arithmetic epsilon = std::numeric_limits<Arithmetic>::epsilon();
-        LZ_ASSERT(std::abs(_step) > epsilon, "Division by zero in range size calculation");
+        LZ_ASSERT(almost_equal(_step, b._step), "Division by zero in range size calculation");
+        LZ_ASSERT(std::abs(_step) > std::numeric_limits<Arithmetic>::epsilon(), "Division by zero in range size calculation");
 
         const auto current_size = (_index - b._index) / _step;
         const auto int_part = static_cast<difference_type>(current_size);

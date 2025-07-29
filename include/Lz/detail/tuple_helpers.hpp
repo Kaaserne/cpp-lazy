@@ -148,13 +148,11 @@ using copy_cv = typename copy_cv_helper<T, U>::type;
 
 template<class T, class U>
 struct common_reference2_helper {
-private:
     template<class X, class Y>
     static typename std::add_lvalue_reference<copy_cv<remove_ref<X>, remove_ref<Y>>>::type test(X&, Y&);
 
     static decay_t<decltype(true ? std::declval<T>() : std::declval<U>())> test(...);
 
-public:
     using type = decltype(test(std::declval<T>(), std::declval<U>()));
 };
 

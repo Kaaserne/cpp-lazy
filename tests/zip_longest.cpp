@@ -79,16 +79,14 @@ TEST_CASE("Zip longest bidi and not sized") {
 
 TEST_CASE("zip_longest_iterable binary operations") {
     std::vector<int> a = { 1, 2, 3, 4 };
-    std::vector<float> b = { 1.f, 2.f, 3.f, 4.f, 5.f };
+    std::vector<unsigned> b = { 1, 2, 3, 4, 5 };
     std::array<short, 2> c = { 1, 2 };
     auto zipper = a | lz::zip_longest(b, c);
 
-    using tuple = std::tuple<lz::optional<int>, lz::optional<float>, lz::optional<short>>;
-    auto expected = std::vector<tuple>{ { 1, 1.f, short{ 1 } },
-                                        { 2, 2.f, short{ 2 } },
-                                        { 3, 3.f, lz::nullopt },
-                                        { 4, 4.f, lz::nullopt },
-                                        { lz::nullopt, 5.f, lz::nullopt } };
+    using tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<short>>;
+    auto expected = std::vector<tuple>{
+        { 1, 1, short{ 1 } }, { 2, 2, short{ 2 } }, { 3, 3, lz::nullopt }, { 4, 4, lz::nullopt }, { lz::nullopt, 5, lz::nullopt }
+    };
 
     SECTION("Operator++") {
         REQUIRE(lz::equal(zipper, expected));
@@ -143,7 +141,7 @@ TEST_CASE("Empty and one element zip longest") {
 
     SECTION("One element 2") {
         std::vector<int> a;
-        std::vector<float> b = { 1.f };
+        std::vector<float> b = { 1 };
         auto zipper = lz::zip_longest(a, b);
         REQUIRE_FALSE(lz::empty(zipper));
         REQUIRE(lz::has_one(zipper));
@@ -153,59 +151,59 @@ TEST_CASE("Empty and one element zip longest") {
 
 TEST_CASE("Zip longest iterable to container") {
     std::array<int, 4> a = { 1, 2, 3, 4 };
-    std::list<float> b = { 1.f, 2.f, 3.f, 4.f, 5.f };
+    std::list<unsigned> b = { 1, 2, 3, 4, 5 };
     std::vector<char> c = { 'a', 'b', 'c', 'd', 'f', 'g' };
     auto zipper = lz::zip_longest(a, b, c);
 
     SECTION("To array") {
-        using optional_tuple = std::tuple<lz::optional<int>, lz::optional<float>, lz::optional<char>>;
+        using optional_tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<char>>;
         auto to_arr = zipper | lz::to<std::array<optional_tuple, 6>>();
         std::array<optional_tuple, 6> expected = {
-            std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
-            std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
+            std::make_tuple(1, 1, 'a'), std::make_tuple(2, 2, 'b'),           std::make_tuple(3, 3, 'c'),
+            std::make_tuple(4, 4, 'd'), std::make_tuple(lz::nullopt, 5, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
         REQUIRE(lz::equal(to_arr, expected));
     }
 
     SECTION("To vector") {
-        using optional_tuple = std::tuple<lz::optional<int>, lz::optional<float>, lz::optional<char>>;
+        using optional_tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<char>>;
         auto to_vec = zipper | lz::to<std::vector<optional_tuple>>();
         std::vector<optional_tuple> expected = {
-            std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
-            std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
+            std::make_tuple(1, 1, 'a'), std::make_tuple(2, 2, 'b'),           std::make_tuple(3, 3, 'c'),
+            std::make_tuple(4, 4, 'd'), std::make_tuple(lz::nullopt, 5, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
         REQUIRE(lz::equal(to_vec, expected));
     }
 
     SECTION("To other container using to<>()") {
-        using optional_tuple = std::tuple<lz::optional<int>, lz::optional<float>, lz::optional<char>>;
+        using optional_tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<char>>;
         auto to_list = zipper | lz::to<std::list<optional_tuple>>();
         std::list<optional_tuple> expected = {
-            std::make_tuple(1, 1.f, 'a'), std::make_tuple(2, 2.f, 'b'),           std::make_tuple(3, 3.f, 'c'),
-            std::make_tuple(4, 4.f, 'd'), std::make_tuple(lz::nullopt, 5.f, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
+            std::make_tuple(1, 1, 'a'), std::make_tuple(2, 2, 'b'),           std::make_tuple(3, 3, 'c'),
+            std::make_tuple(4, 4, 'd'), std::make_tuple(lz::nullopt, 5, 'f'), std::make_tuple(lz::nullopt, lz::nullopt, 'g')
         };
         REQUIRE(lz::equal(to_list, expected));
     }
 
     SECTION("To map") {
         using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
-        using map_type = std::map<char, lz::optional<float>>;
+        using map_type = std::map<char, lz::optional<unsigned>>;
 
         auto to_map = zipper |
                       lz::map([](const tuple_ref& tup) { return std::make_pair(std::get<2>(tup).value(), std::get<1>(tup)); }) |
                       lz::to<map_type>();
-        map_type expected = { { 'a', 1.f }, { 'b', 2.f }, { 'c', 3.f }, { 'd', 4.f }, { 'f', 5.f }, { 'g', lz::nullopt } };
+        map_type expected = { { 'a', 1 }, { 'b', 2 }, { 'c', 3 }, { 'd', 4 }, { 'f', 5 }, { 'g', lz::nullopt } };
         REQUIRE(to_map == expected);
     }
 
     SECTION("To unordered map") {
         using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
-        using map_type = std::unordered_map<char, lz::optional<float>>;
+        using map_type = std::unordered_map<char, lz::optional<unsigned>>;
 
         auto to_unordered =
             zipper | lz::map([](const tuple_ref& tup) { return std::make_pair(std::get<2>(tup).value(), std::get<1>(tup)); }) |
             lz::to<map_type>();
-        map_type expected = { { 'a', 1.f }, { 'b', 2.f }, { 'c', 3.f }, { 'd', 4.f }, { 'f', 5.f }, { 'g', lz::nullopt } };
+        map_type expected = { { 'a', 1 }, { 'b', 2 }, { 'c', 3 }, { 'd', 4 }, { 'f', 5 }, { 'g', lz::nullopt } };
         REQUIRE(to_unordered == expected);
     }
 }

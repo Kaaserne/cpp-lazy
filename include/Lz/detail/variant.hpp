@@ -21,6 +21,9 @@ using variant = std::variant<T, T2>;
 
 #else
 
+#include <cstdint>
+#include <type_traits>
+
 namespace lz {
 namespace detail {
 
