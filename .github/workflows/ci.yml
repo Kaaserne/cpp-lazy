@@ -243,7 +243,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
-        run: cmake -S tests/module_test -B build/module_test/tests -G Ninja
+        run: cmake -S tests/module_tests -B tests/module_tests/build -G Ninja
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
           -D CPP-LAZY_USE_MODULES=ON
           -D CMAKE_CXX_COMPILER=clang++-18
