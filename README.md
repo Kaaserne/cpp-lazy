@@ -13,8 +13,8 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 
 # Features
 - C++11/14/17/20 compatible
+- C++20's module compatible
 - Easy printing/formatting using `lz::format`, `fmt::print` or `std::cout`
-- Tested with `-Wpedantic -Wextra -Wall -Wshadow -Wno-unused-function -Werror -Wconversion` and `/WX` for MSVC
 - One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP-LAZY_USE_STANDALONE=TRUE`/`set(CPP-LAZY_USE_STANDALONE TRUE)` in CMake
 - STL compatible (if the input iterable is not sentinelled, otherwise use `lz::*` equivalents)
 - Little overhead, as little data usage as possible
@@ -22,6 +22,14 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
+<details>
+<summary>Tested with GCC's warning flags</summary>
+
+```
+-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings
+```
+
+</details>
 
 # What is lazy?
 Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could write a for loop:
