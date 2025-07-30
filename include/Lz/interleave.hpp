@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/interleave.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Interleave the elements of the given iterables. This means it returns the element of the first iterable, then the
@@ -59,8 +57,6 @@ LZ_INLINE_VAR constexpr detail::interleave_adaptor interleave{};
 */
 template<class... Iterables>
 using interleave_iterable = detail::interleave_iterable<Iterables...>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

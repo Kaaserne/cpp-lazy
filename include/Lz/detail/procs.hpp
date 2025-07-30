@@ -24,7 +24,7 @@
 
 // clang-format on
 
-namespace lz {
+LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_17
 
@@ -135,6 +135,9 @@ LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
 
 #endif
 
+} // namespace lz
+
+namespace lz {
 namespace detail {
 
 #if defined(LZ_USE_DEBUG_ASSERTIONS)
@@ -303,8 +306,9 @@ constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(I
 #endif
 
 } // namespace detail
+} // namespace lz
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Gets the distance of an iterator pair. If iterator is not random access, the operation will be O(n), otherwise O(1).
@@ -427,7 +431,6 @@ LZ_NODISCARD constexpr diff_iterable_t<Iterable> eager_ssize(Iterable&& c) {
     return static_cast<diff_iterable_t<Iterable>>(eager_size(std::forward<Iterable>(c)));
 }
 
-LZ_MODULE_EXPORT_SCOPE_END
-
 } // namespace lz
+
 #endif // LZ_DETAIL_PROCS_HPP

@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/zip_longest.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Zips two or more iterables together. If one of the iterables is shorter than the others, it will return an empty
@@ -60,8 +58,6 @@ LZ_INLINE_VAR constexpr detail::zip_longest_adaptor zip_longest{};
  */
 template<class... Iterables>
 using zip_longest_iterable = detail::zip_longest_iterable<Iterables...>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

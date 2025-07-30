@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/random.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Creates n random numbers in the range [min, max]. It contains a .size() method, is random access and has a sentinel. The
@@ -106,8 +104,6 @@ using default_random_iterable = decltype(std::declval<detail::random_adaptor<tru
 template<class Arithmetic>
 using common_default_random_iterable =
     decltype(std::declval<detail::random_adaptor<false>>()(Arithmetic{}, Arithmetic{}, std::size_t{}));
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/reverse.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Reverses the iterable. Contains a size method if the iterable has a size method. Example:
@@ -48,8 +46,6 @@ using reverse_iterable = detail::reverse_iterable<Iterable, false>;
 
 template<class Iterable>
 using cached_reverse_iterable = detail::reverse_iterable<Iterable, true>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

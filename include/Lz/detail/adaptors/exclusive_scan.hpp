@@ -82,16 +82,12 @@ struct exclusive_scan_adaptor {
 } // namespace detail
 } // namespace lz
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-template<class Iterable, class Adaptor>
+LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
 constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
     -> lz::detail::enable_if<lz::detail::is_iterable<Iterable>::value,
                              decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable)))> {
     return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
                                                 MAKE_BIN_PRED(plus){});
 }
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 #endif

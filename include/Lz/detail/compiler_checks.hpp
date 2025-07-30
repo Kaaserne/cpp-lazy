@@ -89,6 +89,7 @@
 #endif // __cpp_if_constexpr
 
 #ifndef LZ_MODULE_EXPORT
+  #define LZ_MODULE_EXPORT
   #define LZ_MODULE_EXPORT_SCOPE_BEGIN
   #define LZ_MODULE_EXPORT_SCOPE_END
 #endif

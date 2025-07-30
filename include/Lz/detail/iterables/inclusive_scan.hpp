@@ -9,7 +9,6 @@
 
 namespace lz {
 namespace detail {
-LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 template<class Iterable, class T, class BinaryOp>
 class inclusive_scan_iterable : public lazy_view {

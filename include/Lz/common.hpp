@@ -5,9 +5,7 @@
 
 #include <Lz/detail/adaptors/common.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
@@ -46,8 +44,6 @@ LZ_INLINE_VAR constexpr detail::common_adaptor common{};
  */
 template<class Iterable>
 using common_iterable = detail::common_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/filter.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Drops elements based on a condition predicate. If it returns `false`, the element in question is dropped. If it returns
@@ -35,8 +33,6 @@ LZ_INLINE_VAR constexpr detail::filter_adaptor filter{};
  */
 template<class Iterable, class UnaryPredicate>
 using filter_iterable = detail::filter_iterable<Iterable, UnaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

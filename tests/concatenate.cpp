@@ -2,7 +2,7 @@
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>

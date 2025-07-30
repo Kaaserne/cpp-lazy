@@ -1,6 +1,6 @@
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("With sentinels") {
     SECTION("Equal to c_string") {

@@ -13,9 +13,7 @@
 
 #include <algorithm>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S>
 constexpr diff_type<Iterator> distance(Iterator begin, S end);
@@ -23,11 +21,12 @@ constexpr diff_type<Iterator> distance(Iterator begin, S end);
 /**
  * This value is returned when index_of(_if) does not find the value specified.
  */
-constexpr static std::size_t npos = static_cast<std::size_t>(-1);
+constexpr std::size_t npos = static_cast<std::size_t>(-1);
+}
 
-LZ_MODULE_EXPORT_SCOPE_END
-
+namespace lz {
 namespace detail {
+
 template<class Iterator, class S>
 constexpr bool empty(Iterator begin, S end) {
     return begin == end;

@@ -13,8 +13,8 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 
 # Features
 - C++11/14/17/20 compatible
+- C++20's module compatible
 - Easy printing/formatting using `lz::format`, `fmt::print` or `std::cout`
-- Tested with `-Wpedantic -Wextra -Wall -Wshadow -Wno-unused-function -Werror -Wconversion` and `/WX` for MSVC
 - One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP-LAZY_USE_STANDALONE=TRUE`/`set(CPP-LAZY_USE_STANDALONE TRUE)` in CMake
 - STL compatible (if the input iterable is not sentinelled, otherwise use `lz::*` equivalents)
 - Little overhead, as little data usage as possible
@@ -22,6 +22,14 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
+<details>
+<summary>Tested with GCC's warning flags</summary>
+
+```
+-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings
+```
+
+</details>
 
 # What is lazy?
 Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could write a for loop:
@@ -103,11 +111,13 @@ int main() {
   // the sequence will be traversed to get the size using lz::eager_size. The iterable will be documented
   // appropriately if this requires a sized iterable. Example:
   auto zipper1 = lz::zip(lz::c_string("ab"), lz::c_string("cd")); // Calling .end() will take O(n) time
-  auto zipper2 = lz::zip(sized, sized); // Takes O(1) time
+  auto zipper2 = lz::zip(sized, sized); // Calling .end() will take O(1) time
 
-  // You can cache the size if you need to (more about when to do that in the appropriate iterable documentation):
-  auto cached_sizes = lz::zip(lz::c_string("ab") | lz::cache_size, lz::c_string("cd") | lz::cache_size); // Takes O(n) time
-  // However cached_sizes.end() will now take O(1) time
+  // You can cache the size if you need to.
+  // More about when to do that in the appropriate iterable documentation
+  // lz:c_string isn't sized, so in order to make it sized, we can use lz::cache_size:
+  auto cached_sizes = lz::zip(lz::c_string("ab") | lz::cache_size, lz::c_string("cd") | lz::cache_size);
+  // cached_sizes.end() will now take O(1) time, instead of zipper1's O(n) time.
 }
 ```
 

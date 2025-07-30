@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 env:
-  CATCH_VERSION: '2.13.10'
+  CATCH_VERSION: '3.9.0'
 
 jobs:
   analyze:

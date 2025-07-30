@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/map.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief This adaptor is used to apply a function to each element in an iterable. The iterator category is the same as the input
@@ -34,8 +32,6 @@ LZ_INLINE_VAR constexpr detail::map_adaptor map{};
  */
 template<class Iterable, class UnaryOp>
 using map_iterable = detail::map_iterable<Iterable, UnaryOp>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

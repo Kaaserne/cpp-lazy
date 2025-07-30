@@ -5,9 +5,7 @@
 
 #include <Lz/detail/adaptors/range.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Creates n amount of numbers starting from 0 (or specified otherwise). It is a forward iterable. It contains a .size()
@@ -42,8 +40,6 @@ using stepwise_range_iterable = detail::range_iterable<Arithmetic, true>;
  */
 template<class Arithmetic>
 using range_iterable = detail::range_iterable<Arithmetic, false>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

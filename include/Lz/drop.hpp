@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/drop.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief This adaptor is used to drop the first n elements of an iterable. The iterator category is the same as the input
@@ -35,8 +33,6 @@ LZ_INLINE_VAR constexpr detail::drop_adaptor drop{};
  */
 template<class Iterable>
 using drop_iterable = detail::drop_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

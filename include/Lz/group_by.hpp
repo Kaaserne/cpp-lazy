@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/group_by.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Creates chunks of elements of which the predicate returns true. Input iterable must be sorted first before using this
@@ -37,8 +35,6 @@ LZ_INLINE_VAR constexpr detail::group_by_adaptor group_by{};
  */
 template<class Iterable, class BinaryPredicate>
 using group_by_iterable = detail::group_by_iterable<Iterable, BinaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

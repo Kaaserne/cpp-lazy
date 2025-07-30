@@ -1,7 +1,8 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <list>
@@ -47,8 +48,8 @@ TEST_CASE("zip_iterable changing and creating elements") {
         auto zipper = ints | lz::zip(floats);
         static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, double&>>::value,
                       "should be tuple ref");
-        std::array<std::tuple<int, Approx>, 2> expected = { std::make_tuple(2, Approx{ 3.3f }),
-                                                            std::make_tuple(1, Approx{ 1.2f }) };
+        std::array<std::tuple<int, Catch::Approx>, 2> expected = { std::make_tuple(2, Catch::Approx{ 3.3f }),
+                                                                   std::make_tuple(1, Catch::Approx{ 1.2f }) };
         REQUIRE(lz::equal(lz::reverse(zipper), expected));
         REQUIRE(lz::equal(zipper, expected | lz::reverse));
     }
@@ -100,10 +101,10 @@ TEST_CASE("zip_iterable binary operations") {
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
-    std::vector<std::tuple<int, Approx, short>> expected = { std::make_tuple(1, Approx{ 1.f }, short(1)),
-                                                             std::make_tuple(2, Approx{ 2.f }, short(2)),
-                                                             std::make_tuple(3, Approx{ 3.f }, short(3)),
-                                                             std::make_tuple(4, Approx{ 4.f }, short(4)) };
+    std::vector<std::tuple<int, Catch::Approx, short>> expected = { std::make_tuple(1, Catch::Approx{ 1.f }, short(1)),
+                                                                    std::make_tuple(2, Catch::Approx{ 2.f }, short(2)),
+                                                                    std::make_tuple(3, Catch::Approx{ 3.f }, short(3)),
+                                                                    std::make_tuple(4, Catch::Approx{ 4.f }, short(4)) };
 
     auto zipper = lz::zip(a, b, c);
     auto begin = zipper.begin();

@@ -2,7 +2,7 @@
 
 #include <Lz/split.hpp>
 #include <Lz/stream.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <iostream>
 
 TEST_CASE("Formatting and compile tests") {

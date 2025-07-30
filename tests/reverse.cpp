@@ -1,7 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/common.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <test_procs.hpp>
 

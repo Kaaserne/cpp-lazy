@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/inclusive_scan.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Performs an inclusive scan on a container. The first element will be the result of the binary operation with init value
@@ -49,8 +47,6 @@ constexpr detail::inclusive_scan_adaptor inclusive_scan{};
 */
 template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
 using inclusive_scan_iterable = detail::inclusive_scan_iterable<Iterable, T, BinaryOp>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

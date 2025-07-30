@@ -5,7 +5,7 @@
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <array>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <list>
 #include <map>

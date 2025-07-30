@@ -6,10 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/c_string.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
+LZ_MODULE_EXPORT namespace lz {
 /**
  * @brief This adaptor is used to create a c forward iterable cstring iterable object. Its end() function will return a sentinel,
  * rather than an actual iterator. This iterable does not contain a .size() method. Example:
@@ -33,8 +30,6 @@ LZ_INLINE_VAR constexpr detail::c_string_adaptor c_string{};
 */
 template<class CharT>
 using c_string_iterable = detail::c_string_iterable<CharT>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

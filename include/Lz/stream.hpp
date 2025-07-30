@@ -290,8 +290,9 @@ struct iterable_formatter {
 #endif // !defined(LZ_STANDALONE)
 };
 } // namespace detail
+} // namespace lz
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Streams any iterable to an output stream. For printing, `std::cout << <lz_iterable>` can also be used. Example:
@@ -329,11 +330,7 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  */
 LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
 
-LZ_MODULE_EXPORT_SCOPE_END
-
 } // namespace lz
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
 
 /**
  * @brief Streams a `lz` iterable to an output stream. Example:
@@ -346,12 +343,10 @@ LZ_MODULE_EXPORT_SCOPE_BEGIN
  * @param stream The stream to output to
  * @param iterable The `lz` iterable to output
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
+LZ_MODULE_EXPORT template<LZ_CONCEPT_ITERABLE Iterable>
 lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
 operator<<(std::ostream& stream, const Iterable& iterable) {
     return lz::format(iterable, stream);
 }
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 #endif

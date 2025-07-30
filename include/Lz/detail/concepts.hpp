@@ -9,9 +9,7 @@
 
 #include <iterator>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 template<class I>
 concept iterable = requires(I i) {
@@ -21,8 +19,6 @@ concept iterable = requires(I i) {
 template<class I>
 concept bidirectional_iterable =
     requires(std::remove_cvref_t<I> i) { requires std::bidirectional_iterator<decltype(std::begin(i))>; };
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // End namespace lz
 

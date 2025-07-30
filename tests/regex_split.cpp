@@ -1,5 +1,5 @@
 #include <Lz/regex_split.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <list>
 #include <regex>
 

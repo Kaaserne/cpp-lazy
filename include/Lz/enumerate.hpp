@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/enumerate.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Returns an iterable that enumerates the elements of the input iterable, meaning it returns a std::pair<IntType,
@@ -74,8 +72,6 @@ LZ_INLINE_VAR constexpr detail::enumerate_adaptor enumerate{};
  */
 template<class Iterable, class IntType = int>
 using enumerate_iterable = detail::enumerate_iterable<Iterable, IntType>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

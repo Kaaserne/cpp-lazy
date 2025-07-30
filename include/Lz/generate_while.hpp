@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/generate_while.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Generates elements while the predicate returns true. The predicate must return an object that is compatible with
@@ -45,8 +43,6 @@ LZ_INLINE_VAR constexpr detail::generate_while_adaptor generate_while{};
  */
 template<class GeneratorFunc>
 using generate_while_iterable = detail::generate_while_iterable<GeneratorFunc>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

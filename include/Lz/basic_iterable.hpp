@@ -114,9 +114,9 @@ public:
     }
 };
 } // namespace detail
+} // namespace lz
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
+LZ_MODULE_EXPORT namespace lz {
 /**
  * @brief A class that can be converted to any container. It only contains the iterators and
  * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
@@ -148,10 +148,11 @@ template<class I, class S>
 LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
     return { std::move(begin), std::move(end) };
 }
+}
 
-LZ_MODULE_EXPORT_SCOPE_END
-
+namespace lz {
 namespace detail {
+
 template<LZ_CONCEPT_ITERABLE Iterable, class Container, class = void>
 struct prealloc_container {
     LZ_CONSTEXPR_CXX_14 void try_reserve(const Iterable&, const Container&) const noexcept {
@@ -227,11 +228,11 @@ struct has_push<Container, void_t<decltype(0, std::declval<Container>().push(std
  * };
  * ```
  */
-template<class Container, class = void>
+LZ_MODULE_EXPORT template<class Container, class = void>
 struct custom_copier_for;
 
 // std::array doesnt have push_back, insert, insert_after... etc, so just use copy
-template<class T, std::size_t N>
+LZ_MODULE_EXPORT template<class T, std::size_t N>
 struct custom_copier_for<std::array<T, N>> {
     template<class Iterable>
     LZ_CONSTEXPR_CXX_14 void copy(Iterable&& iterable, std::array<T, N>& container) const {
@@ -409,8 +410,9 @@ struct template_combiner {
     }
 };
 } // namespace detail
+} // namespace lz
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 // clang-format off
 
@@ -623,20 +625,14 @@ to(Iterable&& iterable, Args&&... args) {
  */
 using detail::custom_copier_for;
 
-LZ_MODULE_EXPORT_SCOPE_END
-
 } // namespace lz
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
-template<class Iterable, class Adaptor>
+LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
 constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
     -> lz::detail::enable_if<lz::detail::is_adaptor<lz::detail::remove_cvref<Adaptor>>::value &&
                                  lz::detail::is_iterable<Iterable>::value,
                              decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable)))> {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
 }
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 #endif // LZ_BASIC_ITERATOR_VIEW_HPP

@@ -1,8 +1,9 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/iter_tools.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <functional>
 #include <list>
 
 TEST_CASE("Chunk if custom value type") {
