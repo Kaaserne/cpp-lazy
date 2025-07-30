@@ -6,8 +6,7 @@
 #if !defined(LZ_HAS_STRING_VIEW)
 
 #include <Lz/string_view.hpp>
-
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("String view basic functionality") {
     constexpr const char* cstr = "Hello world!";

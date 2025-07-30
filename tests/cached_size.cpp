@@ -1,9 +1,9 @@
-#include <catch2/catch.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/chunks.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/range.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Correct size") {
     auto to_filter = lz::range(10);

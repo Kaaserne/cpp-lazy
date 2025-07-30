@@ -2,9 +2,10 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take_while.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <forward_list>
+#include <functional>
 #include <list>
 #include <map>
 #include <unordered_map>

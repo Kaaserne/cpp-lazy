@@ -1,6 +1,6 @@
 #include <Lz/detail/maybe_owned.hpp>
 #include <Lz/filter.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <vector>
 
 TEST_CASE("maybe_owned basic tests") {

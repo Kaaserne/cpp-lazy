@@ -1,6 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/stream.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <deque>
@@ -1485,19 +1486,19 @@ TEST_CASE("Mean") {
     SECTION("With non-empty c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::mean(iterable, std::plus<int>()) == Approx(('H' + 'e' + 'l' + 'l' + 'o') / 5.0));
+        REQUIRE(lz::mean(iterable, std::plus<int>()) == Catch::Approx(('H' + 'e' + 'l' + 'l' + 'o') / 5.0));
     }
 
     SECTION("With one element") {
         const char* str = "H";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::mean(iterable, std::plus<int>()) == Approx(static_cast<double>('H')));
+        REQUIRE(lz::mean(iterable, std::plus<int>()) == Catch::Approx(static_cast<double>('H')));
     }
 
     SECTION("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::mean(iterable, std::plus<int>()) == Approx(0.0));
+        REQUIRE(lz::mean(iterable, std::plus<int>()) == Catch::Approx(0.0));
     }
 }
 

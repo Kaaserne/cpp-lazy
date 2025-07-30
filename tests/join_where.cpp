@@ -1,7 +1,8 @@
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <functional>
 #include <list>
 #include <map>
 #include <unordered_map>
