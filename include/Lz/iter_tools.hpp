@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/iter_tools.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Zip with iterable helper alias
@@ -508,8 +506,6 @@ LZ_INLINE_VAR constexpr detail::trim_adaptor trim{};
  * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
  */
 LZ_INLINE_VAR constexpr detail::iter_decay iter_decay{};
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // End namespace lz
 

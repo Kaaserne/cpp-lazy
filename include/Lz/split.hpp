@@ -8,9 +8,7 @@
 #include <Lz/string_view.hpp>
 #include <string>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_11
 
@@ -187,8 +185,6 @@ using sv_single_split_iterable =
 template<class Iterable>
 using sv_multiple_split_iterable = split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable,
                                                   lz::copied<lz::basic_string_view<val_iterable_t<Iterable>>>>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

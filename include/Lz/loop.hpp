@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/loop.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Loops over an iterable. Can be finite or infinite.
@@ -55,8 +53,6 @@ using loop_iterable_inf = detail::loop_iterable<Iterable, true>;
  */
 template<class Iterable>
 using loop_iterable = detail::loop_iterable<Iterable, false>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

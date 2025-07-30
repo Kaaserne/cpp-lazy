@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/drop_while.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief This adaptor is used to make an iterable where the iterator keeps dropping elements as long as the predicate returns
@@ -35,8 +33,6 @@ LZ_INLINE_VAR constexpr detail::drop_while_adaptor drop_while{};
  */
 template<class Iterable, class UnaryPredicate>
 using drop_while_iterable = detail::drop_while_iterable<Iterable, UnaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

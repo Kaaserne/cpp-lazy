@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/unique.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Makes the input iterable unique. Every element therefore only occurs once. The input iterable must be sorted beforehand.
@@ -40,8 +38,6 @@ LZ_INLINE_VAR constexpr detail::unique_adaptor unique{};
  */
 template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
 using unique_iterable = detail::unique_iterable<Iterable, BinaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // end namespace lz
 

@@ -9,7 +9,7 @@
 #include <iterator>
 #include <type_traits>
 
-namespace lz {
+LZ_MODULE_EXPORT namespace lz {
 struct default_sentinel_t {
     LZ_NODISCARD friend constexpr bool operator==(default_sentinel_t, default_sentinel_t) noexcept {
         return true;
@@ -45,7 +45,7 @@ struct default_sentinel_t {
  * }
  * ```
  */
-LZ_INLINE_VAR static constexpr default_sentinel_t default_sentinel{};
+LZ_INLINE_VAR constexpr default_sentinel_t default_sentinel{};
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
 struct iterator;
@@ -292,8 +292,6 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
 }
 } // namespace detail
 
-LZ_MODULE_EXPORT_SCOPE_BEGIN
-
 #ifdef LZ_HAS_CXX_17
 
 /**
@@ -430,9 +428,9 @@ using ptr_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::pointer;
  */
 template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
+}
 
-LZ_MODULE_EXPORT_SCOPE_END
-
+namespace lz {
 namespace detail {
 
 LZ_MODULE_EXPORT template<class T, class = void>

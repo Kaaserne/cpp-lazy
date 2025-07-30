@@ -13,9 +13,7 @@
 #include <numeric> // std::accumulate
 #endif             // LZ_HAS_CXX_20
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * Checks whether [begin, end) is empty.
@@ -738,8 +736,6 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterable&& iterable, BinaryPredi
     return is_sorted(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                      std::forward<BinaryPredicate>(binary_predicate));
 }
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

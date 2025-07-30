@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/cached_size.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Creates an iterable with a size method. Gets the size eagerly (using `lz::eager_size`). Some iterables will traverse
@@ -56,8 +54,6 @@ LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
  */
 template<class Iterable>
 using cached_size_iterable = detail::cached_size_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

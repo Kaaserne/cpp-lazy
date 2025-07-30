@@ -6,7 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/intersection.hpp>
 
-namespace lz {
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Intersects the first iterable with the second iterable. The result is a new iterable containing the elements that are in
@@ -47,8 +47,6 @@ LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
 using intersection_iterable = detail::intersection_iterable<Iterable, Iterable2, BinaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

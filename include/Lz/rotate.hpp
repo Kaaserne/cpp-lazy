@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/rotate.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Rotates the input iterable by n elements. If `n` is greater than or equal to its size then the iterable will be empty.
@@ -38,8 +36,6 @@ LZ_INLINE_VAR constexpr detail::rotate_adaptor rotate{};
  */
 template<class Iterable>
 using rotate_iterable = detail::rotate_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

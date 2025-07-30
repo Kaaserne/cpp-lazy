@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/generate.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Generates n amount of elements using a generator function. Is a forward iterable, contains a .size() function and
@@ -40,8 +38,6 @@ using generate_iterable_inf = detail::generate_iterable<GeneratorFunc, true>;
  */
 template<class GeneratorFunc>
 using generate_iterable = detail::generate_iterable<GeneratorFunc, false>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

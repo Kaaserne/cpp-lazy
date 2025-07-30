@@ -6,8 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/join_where.hpp>
 
-namespace lz {
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Performs an SQL-like join on two iterables where the join condition is specified by the selectors. Its end() function
@@ -60,8 +59,6 @@ LZ_INLINE_VAR constexpr detail::join_where_adaptor join_where{};
  */
 template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
 using join_where_iterable = detail::join_where_iterable<IterableA, IterableB, SelectorA, SelectorB, ResultSelector>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

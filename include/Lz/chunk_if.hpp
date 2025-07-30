@@ -7,9 +7,7 @@
 #include <Lz/detail/adaptors/chunk_if.hpp>
 #include <Lz/string_view.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_11
 
@@ -133,8 +131,6 @@ using chunk_if_iterable = detail::chunk_if_iterable<basic_iterable<iter_t<Iterab
  */
 template<class ValueType, class Iterable, class UnaryPredicate>
 using t_chunk_if_iterable = detail::chunk_if_iterable<ValueType, Iterable, UnaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

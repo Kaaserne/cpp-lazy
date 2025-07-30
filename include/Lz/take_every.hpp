@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/take_every.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Takes every `offset` element from the iterable, starting from `start`. Returns the same iterator category as the input
@@ -53,8 +51,6 @@ LZ_INLINE_VAR constexpr detail::take_every_adaptor take_every{};
  */
 template<class Iterable>
 using take_every_iterable = detail::take_every_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

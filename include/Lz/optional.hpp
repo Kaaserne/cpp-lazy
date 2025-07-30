@@ -18,9 +18,7 @@
 
 #endif // LZ_HAS_CXX_17
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_17
 
@@ -212,8 +210,6 @@ constexpr bool operator!=(const optional<T>& lhs, const optional<U>& rhs) noexce
 }
 
 #endif // __cpp_lib_optional
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

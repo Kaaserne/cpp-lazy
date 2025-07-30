@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/cartesian_product.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Performs a cartesian product on the given iterables. This means that it will return all possible combinations
@@ -37,8 +35,6 @@ LZ_INLINE_VAR constexpr detail::cartesian_product_adaptor cartesian_product{};
  */
 template<class... Iterables>
 using cartesian_product_iterable = detail::cartesian_product_iterable<Iterables...>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

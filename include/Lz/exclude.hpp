@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/exclude.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Excludes elements from a container, using two indexes. The first index is means the start index, the second index means
@@ -52,8 +50,6 @@ LZ_INLINE_VAR constexpr detail::exclude_adaptor exclude{};
  */
 template<class Iterable>
 using exclude_iterable = detail::exclude_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

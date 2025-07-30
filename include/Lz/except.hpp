@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/except.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Excepts an iterable with another iterable. This means that it returns every item that is not in the second iterable
@@ -44,8 +42,6 @@ LZ_INLINE_VAR constexpr detail::except_adaptor except{};
  */
 template<class Iterable1, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
 using except_iterable = detail::except_iterable<Iterable1, Iterable2, BinaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // end namespace lz
 

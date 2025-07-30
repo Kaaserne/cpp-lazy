@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/exclusive_scan.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Performs an exclusive scan on a container. The first element will be the init value, the second element will be the
@@ -46,8 +44,6 @@ LZ_INLINE_VAR constexpr detail::exclusive_scan_adaptor exclusive_scan{};
  */
 template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
 using exclusive_scan_iterable = detail::exclusive_scan_iterable<Iterable, T, BinaryOp>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/regex_split.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Splits a string based on a regex. The regex must be by reference. The `begin()` and `end()` types are different, but
@@ -43,8 +41,6 @@ LZ_INLINE_VAR constexpr detail::regex_split_adaptor regex_split{};
  */
 template<class RegexTokenIter, class RegexTokenSentinel = RegexTokenIter>
 using regex_split_iterable = detail::regex_split_iterable<RegexTokenIter, RegexTokenSentinel>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

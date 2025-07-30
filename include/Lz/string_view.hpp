@@ -19,9 +19,7 @@
 
 #endif
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 #if defined(LZ_HAS_STRING_VIEW)
 
@@ -114,8 +112,6 @@ private:
 using string_view = basic_string_view<char>;
 
 #endif
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

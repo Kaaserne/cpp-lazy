@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/zip.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Zips two or more iterables together. If the sizes of the iterables are different, the shortest one will be used. It
@@ -59,8 +57,6 @@ LZ_INLINE_VAR constexpr detail::zip_adaptor zip{};
  */
 template<class... Iterables>
 using zip_iterable = detail::zip_iterable<Iterables...>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

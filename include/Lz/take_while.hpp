@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/take_while.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Takes elements from an iterable while the given predicte returns `true`. Will return a bidirectional iterable if the
@@ -35,8 +33,6 @@ LZ_INLINE_VAR constexpr detail::take_while_adaptor take_while{};
  */
 template<class Iterable, class UnaryPredicate>
 using take_while_iterable = detail::take_while_iterable<Iterable, UnaryPredicate>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

@@ -47,9 +47,6 @@ public:
         return _end;
     }
 };
-
-LZ_MODULE_EXPORT_SCOPE_END
-
 } // namespace detail
 } // namespace lz
 

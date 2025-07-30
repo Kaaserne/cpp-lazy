@@ -6,25 +6,37 @@ module;
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include <fmt/format.h>
-#include <fmt/ranges.h>
+#include <format>
 #include <functional>
 #include <iterator>
 #include <limits>
 #include <numeric>
 #include <optional>
 #include <random>
+#include <regex>
+#include <sstream>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <variant>
 
+// clang-format off
+
+#ifndef LZ_STANDALONE
+  #include <fmt/format.h>
+  #include <fmt/ostream.h>
+#endif
+
+// clang-format on
+
 export module lz;
 
+#ifndef LZ_MODULE_EXPORT
 #define LZ_MODULE_EXPORT export
 #define LZ_MODULE_EXPORT_SCOPE_BEGIN export {
 #define LZ_MODULE_EXPORT_SCOPE_END }
+#endif
 
 #include "Lz/algorithm.hpp"
 #include "Lz/any_iterable.hpp"
@@ -63,6 +75,7 @@ export module lz;
 #include "Lz/rotate.hpp"
 #include "Lz/slice.hpp"
 #include "Lz/split.hpp"
+#include "Lz/stream.hpp"
 #include "Lz/string_view.hpp"
 #include "Lz/take.hpp"
 #include "Lz/take_every.hpp"

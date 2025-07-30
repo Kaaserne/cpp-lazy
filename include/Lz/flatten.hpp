@@ -4,9 +4,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/flatten.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Flattens a nested iterable. For instance a vector of vectors will be flattened to a single iterable. Returns a
@@ -31,8 +29,6 @@ LZ_INLINE_VAR constexpr detail::flatten_adaptor flatten{};
  */
 template<class Iterable>
 using flatten_iterable = detail::flatten_iterable<Iterable, dimensions<Iterable>::value - !std::is_array<Iterable>::value>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

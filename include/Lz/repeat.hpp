@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/repeat.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Returns an element n (or infinite) times. It returns a sentinel as its end() iterator. It contains a .size() method
@@ -41,8 +39,6 @@ using repeat_iterable_inf = detail::repeat_iterable<true, T>;
  */
 template<class T>
 using repeat_iterable = detail::repeat_iterable<false, T>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

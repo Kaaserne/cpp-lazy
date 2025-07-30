@@ -6,8 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/slice.hpp>
 
-namespace lz {
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief This adaptor is used to slice an iterable from `from` to `to`. The iterator category is the same as the input
@@ -32,8 +31,6 @@ LZ_INLINE_VAR constexpr detail::slice_adaptor slice{};
  */
 template<class Iterable>
 using slice_iterable = detail::slice_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

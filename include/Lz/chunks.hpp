@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/chunks.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on chunk size. The iterator
@@ -53,8 +51,6 @@ LZ_INLINE_VAR constexpr detail::chunks_adaptor chunks{};
  */
 template<class Iterable>
 using chunks_iterable = detail::chunks_iterable<Iterable>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 

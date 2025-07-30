@@ -6,9 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/concatenate.hpp>
 
-namespace lz {
-
-LZ_MODULE_EXPORT_SCOPE_BEGIN
+LZ_MODULE_EXPORT namespace lz {
 
 /**
  * @brief Concatenates multiple iterables into one iterable. The reference type returned by operator* will:
@@ -41,8 +39,6 @@ LZ_INLINE_VAR constexpr detail::concatenate_adaptor concat{};
  */
 template<class... Iterables>
 using concatenate_iterable = detail::concatenate_iterable<Iterables...>;
-
-LZ_MODULE_EXPORT_SCOPE_END
 
 } // namespace lz
 
