@@ -253,5 +253,5 @@ jobs:
         run: cmake --build tests/module_tests/build
       
       - name: Run tests
-        working-directory: tests/module_test/build
+        working-directory: tests/module_tests/build
         run: ./module_test
