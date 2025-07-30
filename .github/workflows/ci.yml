@@ -250,7 +250,7 @@ jobs:
           -D CMAKE_C_COMPILER=clang-18
 
       - name: Build
-        run: cmake --build build/module_tests
+        run: cmake --build tests/module_tests/build
       
       - name: Run tests
         working-directory: tests/module_test/build
