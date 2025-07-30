@@ -13,7 +13,7 @@ target("cpp-lazy")
     add_includedirs("include", { public = true })
     add_packages("fmt", { public = true })
     if has_config("cpp-lazy-use-modules") then
-        add_files("src/lz.cpp")
+        add_files("src/lz.cppm")
         set_languages("c++20")
         set_kind("static")
     else 
