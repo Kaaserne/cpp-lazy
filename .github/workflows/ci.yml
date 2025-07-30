@@ -16,6 +16,7 @@ on:
 
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
+  CATCH_VERSION: '3.9.0'
 
 jobs:
   gcc:
