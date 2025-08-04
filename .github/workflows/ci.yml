@@ -75,7 +75,7 @@ jobs:
 
       - name: Run tests
         working-directory: build/tests
-        run: ctest --output-on-failure -VV
+        run: ctest --output-on-failure -VV -j $(nproc)
 
   clang:
     strategy:
@@ -150,7 +150,7 @@ jobs:
 
       - name: Run tests
         working-directory: build/tests
-        run: ctest -VV --output-on-failure
+        run: ctest -VV --output-on-failure -j $(nproc)
 
   msvc:
     strategy:
@@ -197,7 +197,7 @@ jobs:
 
       - name: Run tests
         working-directory: build/tests
-        run: ctest -C Release --output-on-failure -VV
+        run: ctest -C Release --output-on-failure -VV -j $(nproc)
 
   examples:
     runs-on: ubuntu-latest
