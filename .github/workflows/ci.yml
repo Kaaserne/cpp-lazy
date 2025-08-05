@@ -166,6 +166,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v1
 
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
       - name: Run sccache-cache
         uses: mozilla/sccache-action@main
         with:
@@ -185,7 +188,7 @@ jobs:
         run: cmake --install build/install --config Release
 
       - name: Configure tests
-        run: cmake -S tests -B build/tests
+        run: cmake -S tests -B build/tests -G Ninja
           -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
           -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ env.DOCTEST_VERSION }}
           -D TEST_INSTALLED_VERSION:BOOL=YES
