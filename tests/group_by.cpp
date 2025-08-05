@@ -2,8 +2,8 @@
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <functional>
 #include <list>
 #include <map>
@@ -28,7 +28,7 @@ TEST_CASE("Group by with sentinels") {
 
     REQUIRE(lz::equal(grouper, expected, eq_pair{}));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = grouper.begin();
         REQUIRE(it == grouper.begin());
         REQUIRE(it != grouper.end());
@@ -44,14 +44,14 @@ TEST_CASE("Group by with sentinels") {
 }
 
 TEST_CASE("Empty or one element group by") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         auto grouper = lz::group_by(lz::c_string(""), [](char a, char b) { return a == b; });
         REQUIRE(lz::empty(grouper));
         REQUIRE_FALSE(lz::has_one(grouper));
         REQUIRE_FALSE(lz::has_many(grouper));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         auto grouper = lz::group_by(lz::c_string("a"), [](char a, char b) { return a == b; });
         static_assert(!lz::detail::is_bidi<decltype(grouper.begin())>::value, "Should not be bidirectional iterator");
         REQUIRE_FALSE(lz::empty(grouper));
@@ -67,7 +67,7 @@ TEST_CASE("group_by changing and creating elements") {
     auto grouper = vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); });
     static_assert(lz::detail::is_bidi<decltype(grouper.begin())>::value, "Should be bidirectional iterator");
 
-    SECTION("Should be correct chunks") {
+    SUBCASE("Should be correct chunks") {
         std::size_t str_len = 3;
 
         using value_type = lz::val_iterable_t<decltype(grouper)>;
@@ -80,7 +80,7 @@ TEST_CASE("group_by changing and creating elements") {
         });
     }
 
-    SECTION("Should be by ref") {
+    SUBCASE("Should be by ref") {
         auto begin = grouper.begin();
         *(begin->second.begin()) = "imm";
         REQUIRE(vec[0] == "imm");
@@ -91,7 +91,7 @@ TEST_CASE("group_by binary operations") {
     std::vector<std::string> vec = { "a", "bb", "ccc", "ccc", "dddd", "dddd" };
     auto grouper = lz::group_by(vec, [](const std::string& a, const std::string& b) { return a.length() == b.length(); });
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         std::vector<std::pair<std::string, std::vector<std::string>>> expected = {
             std::make_pair("a", std::vector<std::string>{ "a" }), std::make_pair("bb", std::vector<std::string>{ "bb" }),
             std::make_pair("ccc", std::vector<std::string>{ "ccc", "ccc" }),
@@ -107,7 +107,7 @@ TEST_CASE("group_by binary operations") {
         REQUIRE(lz::equal(grouper2, expected, eq_pair{}));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         std::vector<std::pair<std::string, std::vector<std::string>>> expected = {
             std::make_pair("dddd", std::vector<std::string>{ "dddd", "dddd" }),
             std::make_pair("ccc", std::vector<std::string>{ "ccc", "ccc" }),
@@ -131,7 +131,7 @@ TEST_CASE("To containers group by") {
     using value_type = lz::val_iterable_t<decltype(grouper)>;
     using pair_type = std::pair<std::string, std::vector<std::string>>;
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto arr = grouper |
                    lz::map([](const value_type& v) { return std::make_pair(v.first, v.second | lz::to<std::vector>()); }) |
                    lz::to<std::array<pair_type, 4>>();
@@ -144,7 +144,7 @@ TEST_CASE("To containers group by") {
         REQUIRE(arr == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vec2 = grouper |
                     lz::map([](const value_type& v) { return std::make_pair(v.first, v.second | lz::to<std::vector>()); }) |
                     lz::to<std::vector>();
@@ -157,7 +157,7 @@ TEST_CASE("To containers group by") {
         REQUIRE(vec2 == expected);
     }
 
-    SECTION("To list") {
+    SUBCASE("To list") {
         auto lst = grouper |
                    lz::map([](const value_type& v) { return std::make_pair(v.first, v.second | lz::to<std::vector>()); }) |
                    lz::to<std::list>();
@@ -170,7 +170,7 @@ TEST_CASE("To containers group by") {
         REQUIRE(lst == expected);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto map = grouper |
                    lz::map([](const value_type& v) { return std::make_pair(v.first, v.second | lz::to<std::vector>()); }) |
                    lz::to<std::map<std::string, std::vector<std::string>>>();
@@ -183,7 +183,7 @@ TEST_CASE("To containers group by") {
         REQUIRE(map == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto map = grouper |
                    lz::map([](const value_type& v) { return std::make_pair(v.first, v.second | lz::to<std::vector>()); }) |
                    lz::to<std::unordered_map<std::string, std::vector<std::string>>>();

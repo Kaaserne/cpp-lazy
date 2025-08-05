@@ -1,13 +1,13 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <forward_list>
 #include <functional>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
 #include <unordered_map>
 
 struct TestStruct {
@@ -22,7 +22,7 @@ TEST_CASE("Map with sentinels") {
     auto c_str_expected = lz::c_string("HELLO, WORLD!");
     REQUIRE(lz::equal(map, c_str_expected));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto begin = map.begin();
         REQUIRE(begin == map.begin());
         begin = map.end();
@@ -34,7 +34,7 @@ TEST_CASE("Map changing and creating elements") {
     constexpr std::size_t size = 3;
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
 
-    SECTION("Should map out element") {
+    SUBCASE("Should map out element") {
         auto map = lz::map(array, [](const TestStruct& t) { return t.test_field_str; });
         REQUIRE(map.size() == size);
         static_assert(std::is_same<decltype(map.end()), decltype(map.begin())>::value, "Should not be sentinels");
@@ -46,7 +46,7 @@ TEST_CASE("Map changing and creating elements") {
         REQUIRE(*(++it) == "FieldC");
     }
 
-    SECTION("Should be by reference") {
+    SUBCASE("Should be by reference") {
         std::size_t count = 0;
         std::function<std::string&(TestStruct&)> f = [&count, &array](TestStruct& t) -> std::string& {
             REQUIRE(&t == &array[count++]);
@@ -70,32 +70,32 @@ TEST_CASE("Map binary operations") {
     auto map = lz::map(array, std::move(f));
     auto it = map.begin();
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto expected = std::vector<std::string>{ "FieldA", "FieldB", "FieldC" };
         REQUIRE(lz::equal(map, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto expecetd = std::vector<std::string>{ "FieldC", "FieldB", "FieldA" };
         REQUIRE(lz::equal(lz::reverse(map), expecetd));
     }
 
-    SECTION("Operator== & operator!=") {
+    SUBCASE("Operator== & operator!=") {
         REQUIRE(it != map.end());
         it = map.end();
         REQUIRE(it == map.end());
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         auto expected = std::vector<std::string>{ "FieldA", "FieldB", "FieldC" };
         test_procs::test_operator_plus(map, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(map);
     }
 
-    SECTION("Operator- sentinel") {
+    SUBCASE("Operator- sentinel") {
         auto repeater = lz::repeat(20, 5);
         auto map_sentinel = lz::map(repeater, [](int i) { return i; });
         test_procs::test_operator_minus(map_sentinel);
@@ -103,13 +103,13 @@ TEST_CASE("Map binary operations") {
 }
 
 TEST_CASE("Empty or one element map") {
-    SECTION("Empty map") {
+    SUBCASE("Empty map") {
         std::vector<int> vec;
         auto map = lz::map(vec, [](int i) { return i; });
         REQUIRE(lz::empty(map));
     }
 
-    SECTION("One element map") {
+    SUBCASE("One element map") {
         std::vector<int> vec = { 1 };
         auto map = lz::map(vec, [](int i) { return i; });
         REQUIRE_FALSE(lz::empty(map));
@@ -123,7 +123,7 @@ TEST_CASE("Map to containers") {
     std::array<TestStruct, size> array = { TestStruct{ "FieldA", 1 }, TestStruct{ "FieldB", 2 }, TestStruct{ "FieldC", 3 } };
     auto map = lz::map(array, [](const TestStruct& t) { return t.test_field_str; });
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto str_array = map | lz::to<std::array<std::string, size>>();
 
         for (std::size_t i = 0; i < array.size(); i++) {
@@ -131,7 +131,7 @@ TEST_CASE("Map to containers") {
         }
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto str_vec = map | lz::to<std::vector>();
 
         for (std::size_t i = 0; i < array.size(); i++) {
@@ -139,7 +139,7 @@ TEST_CASE("Map to containers") {
         }
     }
 
-    SECTION("To other container using to()") {
+    SUBCASE("To other container using to()") {
         auto str_list = map | lz::to<std::list<std::string>>();
         auto list_iter = str_list.begin();
 
@@ -148,7 +148,7 @@ TEST_CASE("Map to containers") {
         }
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         std::map<std::string, std::string> actual = map | lz::map([](const std::string& s) { return std::make_pair(s, s); }) |
                                                     lz::to<std::map<std::string, std::string>>();
 
@@ -161,7 +161,7 @@ TEST_CASE("Map to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         std::unordered_map<std::string, std::string> actual = map |
                                                               lz::map([](const std::string& s) { return std::make_pair(s, s); }) |
                                                               lz::to<std::unordered_map<std::string, std::string>>();

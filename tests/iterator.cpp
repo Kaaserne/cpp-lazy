@@ -1,31 +1,31 @@
 #include <Lz/iterator_base.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <doctest/doctest.h>
 #include <list>
 
 TEST_CASE("Sentinel operators") {
-    SECTION("Operator==") {
+    SUBCASE("Operator==") {
         static_assert(lz::default_sentinel == lz::default_sentinel, "");
     }
 
-    SECTION("Operator!=") {
+    SUBCASE("Operator!=") {
         static_assert(!(lz::default_sentinel != lz::default_sentinel), "");
     }
 
-    SECTION("Operator<") {
+    SUBCASE("Operator<") {
         static_assert(!(lz::default_sentinel < lz::default_sentinel), "");
     }
 
-    SECTION("Operator>") {
+    SUBCASE("Operator>") {
         static_assert(!(lz::default_sentinel > lz::default_sentinel), "");
     }
 
-    SECTION("Operator<=") {
+    SUBCASE("Operator<=") {
         static_assert(lz::default_sentinel <= lz::default_sentinel, "");
     }
 
-    SECTION("Operator>=") {
+    SUBCASE("Operator>=") {
         static_assert(lz::default_sentinel >= lz::default_sentinel, "");
     }
 }
@@ -33,7 +33,7 @@ TEST_CASE("Sentinel operators") {
 TEST_CASE("default_sentinel with iterator operators") {
     auto repeater = lz::repeat(20, 5);
 
-    SECTION("Operator== with iterator") {
+    SUBCASE("Operator== with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE(last == lz::default_sentinel);
         REQUIRE(last.operator==(lz::default_sentinel));
@@ -45,7 +45,7 @@ TEST_CASE("default_sentinel with iterator operators") {
         REQUIRE_FALSE(lz::default_sentinel == last);
     }
 
-    SECTION("Operator!= with iterator") {
+    SUBCASE("Operator!= with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE_FALSE(last != lz::default_sentinel);
         REQUIRE_FALSE(last.operator!=(lz::default_sentinel));
@@ -57,7 +57,7 @@ TEST_CASE("default_sentinel with iterator operators") {
         REQUIRE(lz::default_sentinel != last);
     }
 
-    SECTION("Operator> with iterator") {
+    SUBCASE("Operator> with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE_FALSE(last > lz::default_sentinel);
         REQUIRE_FALSE(last.operator>(lz::default_sentinel));
@@ -69,7 +69,7 @@ TEST_CASE("default_sentinel with iterator operators") {
         REQUIRE(lz::default_sentinel > last);
     }
 
-    SECTION("Operator< with iterator") {
+    SUBCASE("Operator< with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE_FALSE(last < lz::default_sentinel);
         REQUIRE_FALSE(last.operator<(lz::default_sentinel));
@@ -81,7 +81,7 @@ TEST_CASE("default_sentinel with iterator operators") {
         REQUIRE_FALSE(lz::default_sentinel < last);
     }
 
-    SECTION("Operator>= with iterator") {
+    SUBCASE("Operator>= with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE(last >= lz::default_sentinel);
         REQUIRE(last.operator>=(lz::default_sentinel));
@@ -93,7 +93,7 @@ TEST_CASE("default_sentinel with iterator operators") {
         REQUIRE(lz::default_sentinel >= last);
     }
 
-    SECTION("Operator<= with iterator") {
+    SUBCASE("Operator<= with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE(last <= lz::default_sentinel);
         REQUIRE(last.operator<=(lz::default_sentinel));
@@ -105,7 +105,7 @@ TEST_CASE("default_sentinel with iterator operators") {
         REQUIRE_FALSE(lz::default_sentinel <= last);
     }
 
-    SECTION("Operator- with iterator") {
+    SUBCASE("Operator- with iterator") {
         auto last = repeater.begin() + lz::ssize(repeater);
         REQUIRE(last - lz::default_sentinel == 0);
         REQUIRE(last.operator-(lz::default_sentinel) == 0);
@@ -119,7 +119,7 @@ TEST_CASE("default_sentinel with iterator operators") {
 }
 
 TEST_CASE("Helper functions") {
-    SECTION("next_fast ra") {
+    SUBCASE("next_fast ra") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto next = lz::detail::next_fast(vec, 2);
         REQUIRE(next == std::next(vec.begin(), 2));
@@ -130,7 +130,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(*next == 5);
     }
 
-    SECTION("next_fast ra sentinel") {
+    SUBCASE("next_fast ra sentinel") {
         auto repeat = lz::repeat(1, 5);
         auto next = lz::detail::next_fast(repeat, 2);
         REQUIRE(next == std::next(repeat.begin(), 2));
@@ -140,7 +140,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(next == std::end(repeat));
     }
 
-    SECTION("next_fast bidi") {
+    SUBCASE("next_fast bidi") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         auto next = lz::detail::next_fast(lst, 2);
         REQUIRE(next == std::next(lst.begin(), 2));
@@ -151,7 +151,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(*next == 5);
     }
 
-    SECTION("next_fast fwd") {
+    SUBCASE("next_fast fwd") {
         auto cstr = lz::c_string("Hello");
         auto next = lz::detail::next_fast(cstr, 2);
         REQUIRE(next == std::next(cstr.begin(), 2));
@@ -162,7 +162,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(*next == 'o');
     }
 
-    SECTION("next_fast_safe ra") {
+    SUBCASE("next_fast_safe ra") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto next = lz::detail::next_fast_safe(vec, 2);
         REQUIRE(next == std::next(vec.begin(), 2));
@@ -172,7 +172,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(next == std::end(vec));
     }
 
-    SECTION("next_fast_safe ra sentinel") {
+    SUBCASE("next_fast_safe ra sentinel") {
         auto repeat = lz::repeat(1, 5);
         auto next = lz::detail::next_fast_safe(repeat, 2);
         REQUIRE(next == std::next(repeat.begin(), 2));
@@ -182,7 +182,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(next == std::end(repeat));
     }
 
-    SECTION("next_fast_safe bidi") {
+    SUBCASE("next_fast_safe bidi") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         auto next = lz::detail::next_fast_safe(lst, 2);
         REQUIRE(next == std::next(lst.begin(), 2));
@@ -192,7 +192,7 @@ TEST_CASE("Helper functions") {
         REQUIRE(next == std::end(lst));
     }
 
-    SECTION("next_fast_safe fwd") {
+    SUBCASE("next_fast_safe fwd") {
         auto cstr = lz::c_string("Hel1o");
         auto next = lz::detail::next_fast_safe(cstr, 2);
         REQUIRE(next == std::next(cstr.begin(), 2));

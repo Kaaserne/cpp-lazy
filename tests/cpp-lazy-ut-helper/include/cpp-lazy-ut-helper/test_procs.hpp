@@ -5,7 +5,7 @@
 
 #include <Lz/detail/procs.hpp>
 #include <Lz/stream.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <doctest/doctest.h>
 #include <sstream>
 
 namespace test_procs {

@@ -2,12 +2,12 @@
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Concatenate with sentinels") {
@@ -73,7 +73,7 @@ TEST_CASE("Reference tests") {
 }
 
 TEST_CASE("Empty or one element concatenate") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::string a;
         std::string b;
         auto concat = lz::concat(a, b);
@@ -83,7 +83,7 @@ TEST_CASE("Empty or one element concatenate") {
         REQUIRE_FALSE(lz::has_many(concat));
     }
 
-    SECTION("One element 1") {
+    SUBCASE("One element 1") {
         std::string a = "h";
         std::string b;
         auto concat = lz::concat(a, b);
@@ -93,7 +93,7 @@ TEST_CASE("Empty or one element concatenate") {
         REQUIRE_FALSE(lz::has_many(concat));
     }
 
-    SECTION("One element 2") {
+    SUBCASE("One element 2") {
         std::string a;
         std::string b = "w";
         auto concat = lz::concat(a, b);
@@ -103,7 +103,7 @@ TEST_CASE("Empty or one element concatenate") {
         REQUIRE_FALSE(lz::has_many(concat));
     }
 
-    SECTION("One element both") {
+    SUBCASE("One element both") {
         std::string a = "h";
         std::string b = "w";
         auto concat = lz::concat(a, b);
@@ -118,17 +118,17 @@ TEST_CASE("Concat binary operations") {
     std::string a = "hello ", b = "world";
     auto concat = lz::concat(a, b);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         lz::string_view expected = "hello world";
         REQUIRE(lz::equal(concat, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         lz::string_view expected = "hello world";
         REQUIRE(lz::equal(lz::reverse(concat), lz::reverse(expected)));
     }
 
-    SECTION("Operator== & operator!=") {
+    SUBCASE("Operator== & operator!=") {
         auto it = concat.begin();
         REQUIRE(it == concat.begin());
         REQUIRE(it != concat.end());
@@ -141,16 +141,16 @@ TEST_CASE("Concat binary operations") {
         REQUIRE(concat.begin() != it);
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         lz::string_view expected = "hello world";
         test_procs::test_operator_plus(concat, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(concat);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto rep1 = lz::repeat(42, 5);
         auto rep2 = lz::repeat(43, 5);
         auto concat_rep = lz::concat(rep1, rep2);
@@ -163,27 +163,27 @@ TEST_CASE("Concatenate to containers") {
     std::vector<int> v2 = { 4, 5, 6 };
     auto concat = lz::concat(v1, v2);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         constexpr std::size_t size = 3 + 3;
         REQUIRE((concat | lz::to<std::array<int, size>>()) == std::array<int, size>{ 1, 2, 3, 4, 5, 6 });
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         REQUIRE((concat | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4, 5, 6 });
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         REQUIRE((concat | lz::to<std::list<int>>()) == std::list<int>{ 1, 2, 3, 4, 5, 6 });
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto map = concat | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
         std::map<int, int> expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3),
                                         std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6) };
         REQUIRE(map == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto map = concat | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         std::unordered_map<int, int> expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3),
                                                   std::make_pair(4, 4), std::make_pair(5, 5), std::make_pair(6, 6) };

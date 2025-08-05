@@ -1,8 +1,8 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/iter_tools.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <functional>
 #include <list>
 
@@ -63,7 +63,7 @@ TEST_CASE("Non string literal test") {
 }
 
 TEST_CASE("Empty or one element chunk_if") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::string s;
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
         REQUIRE(lz::empty(chunked));
@@ -71,7 +71,7 @@ TEST_CASE("Empty or one element chunk_if") {
         REQUIRE_FALSE(lz::has_many(chunked));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::string s = ";";
         auto chunked = s | lz::chunk_if([](char c) { return c == ';'; });
         REQUIRE_FALSE(lz::empty(chunked));
@@ -79,7 +79,7 @@ TEST_CASE("Empty or one element chunk_if") {
         REQUIRE(lz::has_many(chunked));
     }
 
-    SECTION("One element that does not satisfy predicate") {
+    SUBCASE("One element that does not satisfy predicate") {
         std::string s = "h";
         auto chunked = lz::chunk_if(s, [](char c) { return c == ';'; });
         REQUIRE_FALSE(lz::empty(chunked));
@@ -89,7 +89,7 @@ TEST_CASE("Empty or one element chunk_if") {
 }
 
 TEST_CASE("chunk_if variations") {
-    SECTION("Ending and starting with delimiter") {
+    SUBCASE("Ending and starting with delimiter") {
         std::string s = ";hello world;; this is a message;;; testing;;";
         auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
         auto vec = chunked | lz::to<std::vector<lz::string_view>>();
@@ -97,7 +97,7 @@ TEST_CASE("chunk_if variations") {
         REQUIRE(vec == expected);
     }
 
-    SECTION("Ending with delimiters") {
+    SUBCASE("Ending with delimiters") {
         std::string s = "hello world; this is a message;;";
         auto chunked = s | lz::s_chunk_if([](const char c) { return c == ';'; });
         auto vec = chunked | lz::to<std::vector>();
@@ -105,7 +105,7 @@ TEST_CASE("chunk_if variations") {
         REQUIRE(vec == expected);
     }
 
-    SECTION("Ending with two one delimiter") {
+    SUBCASE("Ending with two one delimiter") {
         std::string s = "hello world; this is a message;";
         auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
         auto vec = chunked | lz::to<std::vector>();
@@ -113,7 +113,7 @@ TEST_CASE("chunk_if variations") {
         REQUIRE(lz::equal(vec, expected));
     }
 
-    SECTION("No delimiters") {
+    SUBCASE("No delimiters") {
         std::string s = "hello world this is a message";
         auto chunked = lz::s_chunk_if(s, [](const char c) { return c == ';'; });
         auto vec = chunked | lz::to<std::vector>();
@@ -128,7 +128,7 @@ TEST_CASE("chunk_if binary operations") {
     static_assert(!std::is_same<decltype(chunked.begin()), decltype(chunked.end())>::value, "Must be sentinel");
     REQUIRE(*chunked.begin() == "");
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         std::vector<lz::string_view> expected = { "", "hello world", "", " this is a message", "", "", " testing", "", "" };
         REQUIRE(lz::equal(chunked, expected, [](lz::string_view a, lz::string_view b) { return lz::equal(a, b); }));
     }
@@ -138,20 +138,20 @@ TEST_CASE("chunk_if to containers") {
     std::string s = "hello world; this is a message;;";
     auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         REQUIRE(lz::distance(chunked) == 4);
         auto arr = chunked | lz::to<std::array<lz::string_view, 4>>();
         REQUIRE(arr == decltype(arr){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
                                       lz::string_view{}, lz::string_view{} });
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vec = chunked | lz::to<std::vector>();
         REQUIRE(vec == decltype(vec){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
                                       lz::string_view{}, lz::string_view{} });
     }
 
-    SECTION("To other container") {
+    SUBCASE("To other container") {
         auto list = chunked | lz::to<std::list>();
         REQUIRE(list == decltype(list){ lz::string_view{ "hello world" }, lz::string_view{ " this is a message" },
                                         lz::string_view{}, lz::string_view{} });

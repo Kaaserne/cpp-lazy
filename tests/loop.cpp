@@ -1,8 +1,8 @@
 #include <Lz/loop.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
-#include <test_procs.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -20,7 +20,7 @@ TEST_CASE("loop_iterable tests with sentinels") {
         }
     }
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         looper_it = looper.begin();
         // inf never stops
         REQUIRE(looper_it != looper.begin());
@@ -47,12 +47,12 @@ TEST_CASE("Basic functionality loop") {
     auto looper = lz::loop(vec);
     static_assert(!std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should be sentinel");
 
-    SECTION("Always true") {
+    SUBCASE("Always true") {
         REQUIRE(looper.begin() != looper.end());
         REQUIRE(looper.begin() != looper.begin());
     }
 
-    SECTION("Always false") {
+    SUBCASE("Always false") {
         REQUIRE_FALSE(looper.begin() == looper.end());
         REQUIRE_FALSE(looper.begin() == looper.begin());
     }
@@ -61,7 +61,7 @@ TEST_CASE("Basic functionality loop") {
 TEST_CASE("Loop with non while true argument") {
     std::vector<int> vec = { 1, 2, 3, 4 };
 
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         lz::loop_iterable<std::vector<int>> looper = lz::loop(vec, 0);
         static_assert(std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should not be sentinel");
         REQUIRE(looper.size() == 0);
@@ -73,7 +73,7 @@ TEST_CASE("Loop with non while true argument") {
         REQUIRE(lz::empty(looper2));
     }
 
-    SECTION("Size") {
+    SUBCASE("Size") {
         auto looper = vec | lz::loop(2);
         CHECK(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
         CHECK(looper.size() == 8);
@@ -82,7 +82,7 @@ TEST_CASE("Loop with non while true argument") {
         CHECK(looper.size() == 12);
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         auto looper = lz::loop(vec, 2);
         std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
         test_procs::test_operator_plus(looper, expected);
@@ -96,7 +96,7 @@ TEST_CASE("Loop with non while true argument") {
         test_procs::test_operator_plus(looper, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         auto looper = lz::loop(vec, 2);
         test_procs::test_operator_minus(looper);
 
@@ -107,7 +107,7 @@ TEST_CASE("Loop with non while true argument") {
         test_procs::test_operator_minus(looper);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto l = lz::loop(lz::repeat(0, 5), 2);
         test_procs::test_operator_minus(l);
 

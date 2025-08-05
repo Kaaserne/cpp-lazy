@@ -1,17 +1,17 @@
 #include <Lz/map.hpp>
 #include <Lz/random.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cstddef>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
 #include <random>
-#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("random_iterable should be random") {
     constexpr std::size_t size = 5;
 
-    SECTION("random_iterable doubles") {
+    SUBCASE("random_iterable doubles") {
         constexpr long double start = 0;
         constexpr long double end = 1;
         const auto random_array = lz::random(start, end, size) | lz::to<std::array<long double, size>>();
@@ -23,7 +23,7 @@ TEST_CASE("random_iterable should be random") {
         REQUIRE(random_array != randomArray2);
     }
 
-    SECTION("random_iterable ints") {
+    SUBCASE("random_iterable ints") {
         const auto random_array =
             lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
         const auto randomArray2 =
@@ -31,7 +31,7 @@ TEST_CASE("random_iterable should be random") {
         REQUIRE(random_array != randomArray2);
     }
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto random = lz::random(0., 1., size);
         auto it = random.begin();
         REQUIRE(it != random.end());
@@ -57,12 +57,12 @@ TEST_CASE("random_iterable with custom distro's and custom engine") {
 }
 
 TEST_CASE("Empty or one element random") {
-    SECTION("Empty random") {
+    SUBCASE("Empty random") {
         lz::random_iterable<int, std::uniform_int_distribution<>, std::mt19937> r = lz::random(0, 0, 0);
         REQUIRE(lz::empty(r));
     }
 
-    SECTION("One element random") {
+    SUBCASE("One element random") {
         auto r = lz::random(0, 0, 1);
         REQUIRE_FALSE(lz::empty(r));
         REQUIRE(lz::has_one(r));
@@ -75,7 +75,7 @@ TEST_CASE("random_iterable binary operations") {
     lz::common_random_iterable<double, std::uniform_real_distribution<>, std::mt19937> random = lz::common_random(0., 1., size);
     static_assert(std::is_same<decltype(random.begin()), decltype(random.end())>::value, "Should be the same");
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto it = random.begin();
         REQUIRE(lz::distance(it, random.end()) == 5);
         ++it;
@@ -84,7 +84,7 @@ TEST_CASE("random_iterable binary operations") {
         REQUIRE(lz::distance(it, random.end()) == 4);
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto it = random.end();
         REQUIRE(-lz::distance(it, random.begin()) == 5);
         --it;
@@ -93,7 +93,7 @@ TEST_CASE("random_iterable binary operations") {
         REQUIRE(lz::distance(random.begin(), it) == 4);
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         auto it = random.begin();
         REQUIRE(it != random.end());
         REQUIRE(it == random.begin());
@@ -110,22 +110,22 @@ TEST_CASE("random_iterable binary operations") {
         REQUIRE(random.begin() != it);
     }
 
-    SECTION("Operator*") {
+    SUBCASE("Operator*") {
         auto it = random.begin();
         REQUIRE(*it >= 0.);
         REQUIRE(*it <= 1.);
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         std::vector<double> dummy = { 1., 1., 1., 1., 1. };
         test_procs::test_operator_plus(random, dummy, [](double a, double) { return a >= 0. && a <= 1.; });
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(random);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto rand = lz::random(0., 1., size);
         test_procs::test_operator_minus(rand);
     }
@@ -135,25 +135,25 @@ TEST_CASE("random_iterable to containers") {
     constexpr std::size_t size = 10;
     lz::default_random_iterable<double> range = lz::random(0., 1., size);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         REQUIRE((range | lz::to<std::array<double, size>>()).size() == size);
         REQUIRE(lz::all_of(range, [](double val) { return val >= 0. && val <= 1.; }));
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         REQUIRE((range | lz::to<std::vector>()).size() == size);
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         REQUIRE((range | lz::to<std::list>()).size() == size);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto actual = range | lz::map([](const double i) { return std::make_pair(i, i); }) | lz::to<std::map<double, double>>();
         REQUIRE(actual.size() == size);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto actual =
             range | lz::map([](const double i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<double, double>>();
         REQUIRE(actual.size() == size);

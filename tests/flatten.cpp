@@ -4,13 +4,13 @@
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <forward_list>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Dimensions & sized") {
@@ -55,7 +55,7 @@ TEST_CASE("Flatten with sentinels") {
     lz::flatten_iterable<decltype(lst)> flattened = lz::flatten(lst);
     static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
 
-    SECTION("Operator= 2D forward") {
+    SUBCASE("Operator= 2D forward") {
         auto it = flattened.begin();
         REQUIRE(it == flattened.begin());
         it = flattened.end();
@@ -68,7 +68,7 @@ TEST_CASE("Flatten with sentinels") {
     auto flatten_one = lz::flatten(lz::c_string("hello, world"));
     REQUIRE((flatten_one | lz::to<std::string>()) == "hello, world");
 
-    SECTION("Operator= 1D") {
+    SUBCASE("Operator= 1D") {
         auto it = flatten_one.begin();
         REQUIRE(it == flatten_one.begin());
         it = flatten_one.end();
@@ -79,7 +79,7 @@ TEST_CASE("Flatten with sentinels") {
     auto flattened_array = lz::flatten(arr);
     static_assert(lz::detail::is_fwd<decltype(flattened_array.begin())>::value, "Flattened should be fwd");
 
-    SECTION("Operator= 2D random access") {
+    SUBCASE("Operator= 2D random access") {
         auto it = flattened_array.begin();
         REQUIRE(it == flattened_array.begin());
         it = flattened_array.end();
@@ -94,7 +94,7 @@ TEST_CASE("Flatten with sentinels") {
     auto expected = std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 };
     REQUIRE(lz::equal(flattened_lst, expected));
 
-    SECTION("Operator= 2D fwd with std vector") {
+    SUBCASE("Operator= 2D fwd with std vector") {
         auto it = flattened_lst.begin();
         REQUIRE(it == flattened_lst.begin());
         it = flattened_lst.end();
@@ -103,7 +103,7 @@ TEST_CASE("Flatten with sentinels") {
 }
 
 TEST_CASE("Empty or one element flatten") {
-    SECTION("Empty 1D") {
+    SUBCASE("Empty 1D") {
         std::vector<std::vector<int>> empty;
         auto empty_flattened = lz::flatten(empty);
         REQUIRE(lz::empty(empty_flattened));
@@ -112,7 +112,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(empty_flattened.size() == 0);
     }
 
-    SECTION("Empty 2D") {
+    SUBCASE("Empty 2D") {
         std::vector<std::vector<int>> empty;
         auto empty_flattened = lz::flatten(empty);
         REQUIRE(lz::empty(empty_flattened));
@@ -121,7 +121,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(empty_flattened.size() == 0);
     }
 
-    SECTION("Empty 3D") {
+    SUBCASE("Empty 3D") {
         std::vector<std::vector<std::vector<int>>> empty;
         auto empty_flattened = lz::flatten(empty);
         REQUIRE(lz::empty(empty_flattened));
@@ -130,7 +130,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(empty_flattened.size() == 0);
     }
 
-    SECTION("Empty 4D") {
+    SUBCASE("Empty 4D") {
         std::vector<std::vector<std::vector<std::vector<int>>>> empty;
         auto empty_flattened = lz::flatten(empty);
         REQUIRE(lz::empty(empty_flattened));
@@ -139,7 +139,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(empty_flattened.size() == 0);
     }
 
-    SECTION("One element 1D") {
+    SUBCASE("One element 1D") {
         std::vector<int> one_element = { 1 };
         auto one_elm_flattened = lz::flatten(one_element);
         REQUIRE_FALSE(lz::empty(one_elm_flattened));
@@ -148,7 +148,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(one_elm_flattened.size() == 1);
     }
 
-    SECTION("One element 2D") {
+    SUBCASE("One element 2D") {
         std::vector<std::vector<int>> one_element = { { 1 } };
         auto one_elm_flattened = lz::flatten(one_element);
         REQUIRE_FALSE(lz::empty(one_elm_flattened));
@@ -157,7 +157,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(one_elm_flattened.size() == 1);
     }
 
-    SECTION("One element 3D") {
+    SUBCASE("One element 3D") {
         std::vector<std::vector<std::vector<int>>> one_element = { { { 1 } } };
         auto one_elm_flattened = lz::flatten(one_element);
         REQUIRE_FALSE(lz::empty(one_elm_flattened));
@@ -166,7 +166,7 @@ TEST_CASE("Empty or one element flatten") {
         REQUIRE(one_elm_flattened.size() == 1);
     }
 
-    SECTION("One element 4D") {
+    SUBCASE("One element 4D") {
         std::vector<std::vector<std::vector<std::vector<int>>>> one_element = { { { { 1 } } } };
         auto one_elm_flattened = lz::flatten(one_element);
         REQUIRE_FALSE(lz::empty(one_elm_flattened));
@@ -188,7 +188,7 @@ void test_flatten_operators_mm_and_pp(const FlattenIterable& flattened, const Ex
 } // namespace
 
 TEST_CASE("Should flatten permutations") {
-    SECTION("Flatten 1D") {
+    SUBCASE("Flatten 1D") {
         std::vector<int> vec = { 1, 2, 3, 4 };
         auto flattened = lz::flatten(vec);
         REQUIRE((flattened | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4 });
@@ -196,7 +196,7 @@ TEST_CASE("Should flatten permutations") {
         REQUIRE(flattened.size() == 4);
     }
 
-    SECTION("Flatten 2D") {
+    SUBCASE("Flatten 2D") {
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7 };
 
         std::vector<std::vector<int>> vec = { { 1, 2, 3 }, { 4, 5 }, { 6, 7 } };
@@ -252,7 +252,7 @@ TEST_CASE("Should flatten permutations") {
         test_procs::test_operator_minus(f);
     }
 
-    SECTION("Flatten 3D") {
+    SUBCASE("Flatten 3D") {
         std::vector<int> expected = { 1, 4, 5, 6, 7, 8, 9 };
 
         std::vector<std::vector<std::vector<int>>> vec = { { { 1 }, { 4, 5 } }, { { 6, 7, 8, 9 } } };
@@ -292,7 +292,7 @@ TEST_CASE("Should flatten permutations") {
         test_flatten_operators_mm_and_pp(f, expected);
     }
 
-    SECTION("Flatten 4D") {
+    SUBCASE("Flatten 4D") {
         std::vector<int> expected = { 1, 4, 5, 6, 7, 8, 9 };
 
         std::vector<std::vector<std::vector<std::vector<int>>>> vec = { { { { 1 }, { 4, 5 } } }, { { { 6, 7, 8, 9 } } } };
@@ -322,14 +322,14 @@ TEST_CASE("Should flatten permutations") {
         test_flatten_operators_mm_and_pp(f, expected);
     }
 
-    SECTION("Flatten with 1D sentinels") {
+    SUBCASE("Flatten with 1D sentinels") {
         auto f = lz::flatten(lz::repeat(1, 10));
         test_procs::test_operator_minus(f);
         f = lz::flatten(lz::repeat(1, 0));
         test_procs::test_operator_minus(f);
     }
 
-    SECTION("Flatten with 2D sentinels") {
+    SUBCASE("Flatten with 2D sentinels") {
         auto f = lz::flatten(lz::repeat(lz::repeat(5, 3), 3));
         test_procs::test_operator_minus(f);
         f = lz::flatten(lz::repeat(lz::repeat(5, 3), 0));
@@ -337,7 +337,7 @@ TEST_CASE("Should flatten permutations") {
         f = lz::flatten(lz::repeat(lz::repeat(5, 0), 3));
     }
 
-    SECTION("Flatten with 3D sentinels") {
+    SUBCASE("Flatten with 3D sentinels") {
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 3), 3));
         test_procs::test_operator_minus(f);
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 3), 0));
@@ -348,7 +348,7 @@ TEST_CASE("Should flatten permutations") {
         test_procs::test_operator_minus(f);
     }
 
-    SECTION("Flatten with 4D sentinels") {
+    SUBCASE("Flatten with 4D sentinels") {
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 1), 2));
         test_procs::test_operator_minus(f);
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 2), 0));
@@ -361,7 +361,7 @@ TEST_CASE("Should flatten permutations") {
         test_procs::test_operator_minus(f);
     }
 
-    SECTION("Should be by ref") {
+    SUBCASE("Should be by ref") {
         std::vector<std::vector<std::vector<int>>> vectors = {
             { { 0 }, { 1, 2, 3 }, {}, { 4 } }, { {} }, { { 5, 6 }, { 7 }, {} }, { {} }, { {} }
         };
@@ -377,19 +377,19 @@ TEST_CASE("Flatten to container") {
     auto flattened = lz::flatten(vecs);
     REQUIRE(flattened.size() == 7);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         REQUIRE((flattened | lz::to<std::array<int, 7>>()) == std::array<int, 7>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         REQUIRE((flattened | lz::to<std::vector>()) == std::vector<int>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         REQUIRE((flattened | lz::to<std::list<int>>()) == std::list<int>{ 1, 2, 3, 4, 5, 6, 7 });
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto actual = flattened | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
 
         std::map<int, int> expected = {
@@ -400,7 +400,7 @@ TEST_CASE("Flatten to container") {
         REQUIRE(expected == actual);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto actual =
             flattened | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
 

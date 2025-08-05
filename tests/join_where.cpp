@@ -1,7 +1,7 @@
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <functional>
 #include <list>
 #include <map>
@@ -38,7 +38,7 @@ TEST_CASE("Join where with sentinels") {
     auto vec = joined | lz::to<std::vector>();
     REQUIRE(vec == expected);
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto begin = joined.begin();
         REQUIRE(begin == joined.begin());
         REQUIRE(begin != joined.end());
@@ -65,7 +65,7 @@ TEST_CASE("Join changing and creating elements") {
         customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
         [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
 
-    SECTION("Should initialized with first match") {
+    SUBCASE("Should initialized with first match") {
         std::tuple<customer, payment_bill> match = *joined.begin();
         customer& customer = std::get<0>(match);
         payment_bill& payment_bill = std::get<1>(match);
@@ -77,7 +77,7 @@ TEST_CASE("Join changing and creating elements") {
 }
 
 TEST_CASE("Empty or one element join where") {
-    SECTION("Empty join") {
+    SUBCASE("Empty join") {
         std::vector<customer> customers;
         std::vector<payment_bill> payment_bills;
         auto joined = lz::join_where(
@@ -88,7 +88,7 @@ TEST_CASE("Empty or one element join where") {
         REQUIRE_FALSE(lz::has_one(joined));
     }
 
-    SECTION("One element join 1") {
+    SUBCASE("One element join 1") {
         std::vector<customer> customers{ customer{ 25 } };
         std::vector<payment_bill> payment_bills;
         auto joined = lz::join_where(
@@ -97,7 +97,7 @@ TEST_CASE("Empty or one element join where") {
         REQUIRE(lz::empty(joined));
     }
 
-    SECTION("One element join 2") {
+    SUBCASE("One element join 2") {
         std::vector<customer> customers;
         std::vector<payment_bill> payment_bills{ payment_bill{ 25, 0 } };
         auto joined = lz::join_where(
@@ -106,7 +106,7 @@ TEST_CASE("Empty or one element join where") {
         REQUIRE(lz::empty(joined));
     }
 
-    SECTION("One element join 3") {
+    SUBCASE("One element join 3") {
         std::vector<customer> customers{ customer{ 25 } };
         std::vector<payment_bill> payment_bills{ payment_bill{ 25, 0 } };
         auto joined = lz::join_where(
@@ -136,7 +136,7 @@ TEST_CASE("Left join binary operations") {
                                                                      std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
                                                                      std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
                                                                      std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) };
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(joined, expected,
                           [](const std::tuple<customer, payment_bill>& a, const std::tuple<customer, payment_bill>& b) {
                               auto& a_fst = std::get<0>(a);
@@ -161,7 +161,7 @@ TEST_CASE("join_where_iterable to containers") {
         customers, payment_bills, [](const customer& p) { return p.id; }, [](const payment_bill& c) { return c.customer_id; },
         [](const customer& p, const payment_bill& c) { return std::make_tuple(p, c); });
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         std::array<std::tuple<customer, payment_bill>, 4> expected = { std::make_tuple(customer{ 25 }, payment_bill{ 25, 0 }),
                                                                        std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
                                                                        std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
@@ -178,7 +178,7 @@ TEST_CASE("join_where_iterable to containers") {
                           }));
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         std::vector<std::tuple<customer, payment_bill>> expected = { std::make_tuple(customer{ 25 }, payment_bill{ 25, 0 }),
                                                                      std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
                                                                      std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
@@ -195,7 +195,7 @@ TEST_CASE("join_where_iterable to containers") {
                           }));
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         std::list<std::tuple<customer, payment_bill>> expected = { std::make_tuple(customer{ 25 }, payment_bill{ 25, 0 }),
                                                                    std::make_tuple(customer{ 25 }, payment_bill{ 25, 2 }),
                                                                    std::make_tuple(customer{ 25 }, payment_bill{ 25, 3 }),
@@ -212,7 +212,7 @@ TEST_CASE("join_where_iterable to containers") {
                           }));
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         using pair = std::pair<int, std::tuple<customer, payment_bill>>;
 
         std::map<int, std::tuple<customer, payment_bill>> expected = {
@@ -233,7 +233,7 @@ TEST_CASE("join_where_iterable to containers") {
         }));
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         using pair = std::pair<int, std::tuple<customer, payment_bill>>;
 
         std::unordered_map<int, std::tuple<customer, payment_bill>> expected = {

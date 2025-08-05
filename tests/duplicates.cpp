@@ -1,8 +1,8 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/duplicates.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <vector>
 
@@ -14,7 +14,7 @@ struct equal_pair {
 };
 
 TEST_CASE("Equal to different category of iterables") {
-    SECTION("With random access iterator") {
+    SUBCASE("With random access iterator") {
         std::vector<int> input{ 1, 2, 2, 3, 4, 4, 5 };
         std::vector<std::pair<int, std::size_t>> expected = { { 1, 1 }, { 2, 2 }, { 3, 1 }, { 4, 2 }, { 5, 1 } };
 
@@ -43,7 +43,7 @@ TEST_CASE("Equal to different category of iterables") {
         REQUIRE(lz::equal(input | lz::duplicates | lz::reverse, expected | lz::reverse, equal_pair{}));
     }
 
-    SECTION("With bidi access iterator") {
+    SUBCASE("With bidi access iterator") {
         std::list<int> input{ 1, 2, 2, 3, 4, 4, 5 };
         std::vector<std::pair<int, std::size_t>> expected = { { 1, 1 }, { 2, 2 }, { 3, 1 }, { 4, 2 }, { 5, 1 } };
 
@@ -71,7 +71,7 @@ TEST_CASE("Equal to different category of iterables") {
         REQUIRE(lz::equal(input | lz::duplicates | lz::reverse, expected | lz::reverse, equal_pair{}));
     }
 
-    SECTION("With (sentinelled) forward only") {
+    SUBCASE("With (sentinelled) forward only") {
         auto input = lz::c_string("abbcdde");
         std::vector<std::pair<char, std::size_t>> expected = { { 'a', 1 }, { 'b', 2 }, { 'c', 1 }, { 'd', 2 }, { 'e', 1 } };
 

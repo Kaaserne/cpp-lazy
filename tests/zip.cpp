@@ -1,13 +1,12 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip.hpp>
-#include <catch2/catch_approx.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("Zip with sentinels") {
@@ -20,7 +19,7 @@ TEST_CASE("Zip with sentinels") {
     REQUIRE(lz::equal(zip, expected));
     static_assert(!std::is_same<decltype(zip.begin()), decltype(zip.end())>::value, "Should be sentinel-like");
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = zip.begin();
         REQUIRE(it == zip.begin());
         using sentinel = decltype(zip.end());
@@ -41,22 +40,22 @@ TEST_CASE("zip_iterable changing and creating elements") {
     std::vector<int> a = { 1, 2, 3, 4 };
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
 
-    SECTION("Unequal lengths") {
+    SUBCASE("Unequal lengths") {
         std::vector<int> ints = { 1, 2, 3, 4, 5 };
         std::vector<double> floats = { 1.2, 3.3 };
 
         auto zipper = ints | lz::zip(floats);
         static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, double&>>::value,
                       "should be tuple ref");
-        std::array<std::tuple<int, Catch::Approx>, 2> expected = { std::make_tuple(2, Catch::Approx{ 3.3f }),
-                                                                   std::make_tuple(1, Catch::Approx{ 1.2f }) };
+        std::array<std::tuple<int, doctest::Approx>, 2> expected = { std::make_tuple(2, doctest::Approx(3.3)),
+                                                                     std::make_tuple(1, doctest::Approx(1.2)) };
         REQUIRE(lz::equal(lz::reverse(zipper), expected));
         REQUIRE(lz::equal(zipper, expected | lz::reverse));
     }
 }
 
 TEST_CASE("Empty or one element zip") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> empty;
         auto empty2 = lz::c_string("");
         auto zipper = lz::zip(empty, empty2);
@@ -67,7 +66,7 @@ TEST_CASE("Empty or one element zip") {
         REQUIRE_FALSE(lz::has_one(zipper));
     }
 
-    SECTION("One element 1") {
+    SUBCASE("One element 1") {
         std::vector<int> one = { 1 };
         std::vector<int> empty;
         auto zipper = lz::zip(one, empty);
@@ -76,7 +75,7 @@ TEST_CASE("Empty or one element zip") {
         REQUIRE_FALSE(lz::has_one(zipper));
     }
 
-    SECTION("One element 2") {
+    SUBCASE("One element 2") {
         std::vector<int> empty;
         std::vector<int> one = { 1 };
         auto zipper = lz::zip(empty, one);
@@ -85,7 +84,7 @@ TEST_CASE("Empty or one element zip") {
         REQUIRE_FALSE(lz::has_one(zipper));
     }
 
-    SECTION("One element 3") {
+    SUBCASE("One element 3") {
         std::vector<int> one = { 1 };
         std::vector<int> one2 = { 1 };
         auto zipper = lz::zip(one, one2);
@@ -101,23 +100,23 @@ TEST_CASE("zip_iterable binary operations") {
     std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
-    std::vector<std::tuple<int, Catch::Approx, short>> expected = { std::make_tuple(1, Catch::Approx{ 1.f }, short(1)),
-                                                                    std::make_tuple(2, Catch::Approx{ 2.f }, short(2)),
-                                                                    std::make_tuple(3, Catch::Approx{ 3.f }, short(3)),
-                                                                    std::make_tuple(4, Catch::Approx{ 4.f }, short(4)) };
+    std::vector<std::tuple<int, doctest::Approx, short>> expected = { std::make_tuple(1, doctest::Approx(1.), short(1)),
+                                                                      std::make_tuple(2, doctest::Approx(2.), short(2)),
+                                                                      std::make_tuple(3, doctest::Approx(3.), short(3)),
+                                                                      std::make_tuple(4, doctest::Approx(4.), short(4)) };
 
     auto zipper = lz::zip(a, b, c);
     auto begin = zipper.begin();
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(zipper, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         REQUIRE(lz::equal(zipper | lz::reverse, expected | lz::reverse));
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         REQUIRE(begin != zipper.end());
         REQUIRE(zipper.end() != begin);
         begin = zipper.end();
@@ -125,15 +124,15 @@ TEST_CASE("zip_iterable binary operations") {
         REQUIRE(zipper.end() == begin);
     }
 
-    SECTION("Operator+(int)") {
+    SUBCASE("Operator+(int)") {
         test_procs::test_operator_plus(zipper, expected);
     }
 
-    SECTION("Operator-(Iterator)") {
+    SUBCASE("Operator-(Iterator)") {
         test_procs::test_operator_minus(zipper);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto first = lz::repeat(1, 5), second = lz::repeat(2, 5);
         test_procs::test_operator_minus(lz::zip(first, second));
         second = lz::repeat(2, 3);
@@ -149,7 +148,7 @@ TEST_CASE("zip_iterable to containers") {
 
     using tup = std::tuple<int, float, short>;
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto array = lz::zip(a, b, c) | lz::to<std::array<tup, size>>();
         std::array<tup, size> expected = { std::make_tuple(1, 1.f, static_cast<short>(1)),
                                            std::make_tuple(2, 2.f, static_cast<short>(2)),
@@ -158,7 +157,7 @@ TEST_CASE("zip_iterable to containers") {
         REQUIRE(array == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vector = lz::zip(a, b, c) | lz::to<std::vector>();
         std::vector<tup> expected = { std::make_tuple(1, 1.f, static_cast<short>(1)),
                                       std::make_tuple(2, 2.f, static_cast<short>(2)),
@@ -167,7 +166,7 @@ TEST_CASE("zip_iterable to containers") {
         REQUIRE(vector == expected);
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         auto list = lz::zip(a, b, c) | lz::to<std::list<tup>>();
         std::list<tup> expected = { std::make_tuple(1, 1.f, static_cast<short>(1)),
                                     std::make_tuple(2, 2.f, static_cast<short>(2)),
@@ -176,7 +175,7 @@ TEST_CASE("zip_iterable to containers") {
         REQUIRE(list == expected);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto actual = lz::zip(a, b, c) | lz::map([](const tup& t) { return std::make_pair(std::get<0>(t), t); }) |
                       lz::to<std::map<int, tup>>();
 
@@ -188,7 +187,7 @@ TEST_CASE("zip_iterable to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto actual = lz::zip(a, b, c) | lz::map([](const tup& t) { return std::make_pair(std::get<0>(t), t); }) |
                       lz::to<std::unordered_map<int, tup>>();
 

@@ -2,13 +2,13 @@
 #include <Lz/cartesian_product.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cstddef>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
 #include <unordered_map>
 
 TEST_CASE("with sentinel") {
@@ -26,7 +26,7 @@ TEST_CASE("with sentinel") {
                       std::make_tuple('c', 'd'), std::make_tuple('c', 'e'), std::make_tuple('c', 'f') };
     REQUIRE(lz::equal(cart, expected));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = cart.begin();
         REQUIRE(it == cart.begin());
         REQUIRE(it != cart.end());
@@ -42,7 +42,7 @@ TEST_CASE("with sentinel") {
 }
 
 TEST_CASE("Empty or one element cartesian product") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> vec;
         lz::cartesian_product_iterable<std::vector<int>, std::vector<int>> cart = lz::cartesian_product(vec, vec);
         REQUIRE(lz::empty(cart));
@@ -51,7 +51,7 @@ TEST_CASE("Empty or one element cartesian product") {
         REQUIRE(cart.size() == 0);
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::vector<int> vec = { 1 };
         auto cart = lz::cartesian_product(vec, vec);
         REQUIRE_FALSE(lz::empty(cart));
@@ -60,7 +60,7 @@ TEST_CASE("Empty or one element cartesian product") {
         REQUIRE(cart.size() == 1);
     }
 
-    SECTION("One element and zero elements combined") {
+    SUBCASE("One element and zero elements combined") {
         std::vector<int> vec = { 1 };
         std::vector<int> vec2;
         auto cart = lz::cartesian_product(vec, vec2);
@@ -76,7 +76,7 @@ TEST_CASE("Empty or one element cartesian product") {
         REQUIRE(cart.size() == 0);
     }
 
-    SECTION("One element and zero elements combined with sentinels") {
+    SUBCASE("One element and zero elements combined with sentinels") {
         auto cstr = lz::c_string("H");
         auto cstr2 = lz::c_string("");
         auto cart = lz::cartesian_product(cstr, cstr2);
@@ -106,23 +106,23 @@ TEST_CASE("Cartesian product binary operations") {
         std::make_tuple(2, 'b', 'a'), std::make_tuple(2, 'b', 'b'), std::make_tuple(2, 'c', 'a'), std::make_tuple(2, 'c', 'b')
     };
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(cartesian, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         REQUIRE(lz::equal(lz::reverse(cartesian), lz::reverse(expected)));
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         test_procs::test_operator_plus(cartesian, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(cartesian);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto repeat1 = lz::repeat(1, 3);
         auto repeat2 = lz::repeat(2, 4);
         auto cartesian2 = repeat1 | lz::cartesian_product(repeat2);
@@ -137,7 +137,7 @@ TEST_CASE("CartesianProduct to containers") {
     std::vector<char> chars2 = { 'a', 'b' };
     auto cartesian = lz::cartesian_product(vec, chars, chars2);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto actual = cartesian | lz::to<std::array<std::tuple<int, char, char>, 18>>();
         std::array<std::tuple<int, char, char>, 18> expected = {
             std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'),
@@ -150,7 +150,7 @@ TEST_CASE("CartesianProduct to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To vector reversed") {
+    SUBCASE("To vector reversed") {
         auto actual = lz::reverse(cartesian) | lz::to<std::vector>();
         std::vector<std::tuple<int, char, char>> expected = {
             std::make_tuple(3, 'c', 'b'), std::make_tuple(3, 'c', 'a'), std::make_tuple(3, 'b', 'b'),
@@ -163,7 +163,7 @@ TEST_CASE("CartesianProduct to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To list") {
+    SUBCASE("To list") {
         auto actual = cartesian | lz::to<std::list>();
         std::list<std::tuple<int, char, char>> expected = {
             std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'),
@@ -176,7 +176,7 @@ TEST_CASE("CartesianProduct to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto actual = cartesian | lz::to<std::vector>();
         std::vector<std::tuple<int, char, char>> expected = {
             std::make_tuple(1, 'a', 'a'), std::make_tuple(1, 'a', 'b'), std::make_tuple(1, 'b', 'a'),
@@ -189,7 +189,7 @@ TEST_CASE("CartesianProduct to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         using elm_type = std::tuple<int, char, char>;
         auto actual = cartesian | lz::map([](const elm_type& elm) {
                           return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));
@@ -204,7 +204,7 @@ TEST_CASE("CartesianProduct to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         using elm_type = std::tuple<int, char, char>;
         auto actual = cartesian | lz::map([](const elm_type& elm) {
                           return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));

@@ -1,8 +1,8 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/unique.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -14,7 +14,7 @@ TEST_CASE("Unique using sentinels") {
     auto expected = lz::c_string("abcdefghj");
     REQUIRE(lz::equal(unique, expected));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = unique.begin();
         REQUIRE(it == unique.begin());
         it = unique.end();
@@ -32,12 +32,12 @@ TEST_CASE("Unique changing and creating elements") {
     REQUIRE(*beg == 1);
     REQUIRE(static_cast<std::size_t>(std::distance(beg, unique.end())) == size);
 
-    SECTION("Should be unique") {
+    SUBCASE("Should be unique") {
         std::array<int, size> expected = { 1, 2, 3 };
         REQUIRE(expected == (unique | lz::to<std::array<int, size>>()));
     }
 
-    SECTION("Should be unique too, using >") {
+    SUBCASE("Should be unique too, using >") {
         std::array<int, size> expected = { 3, 2, 1 };
         auto unique_greater = expected | lz::unique(std::greater<int>());
         REQUIRE(expected == (unique_greater | lz::to<std::array<int, size>>()));
@@ -49,15 +49,15 @@ TEST_CASE("Unique binary operations") {
     std::array<int, 5> arr = { 1, 2, 2, 3, 3 };
     auto expected = { 1, 2, 3 };
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(lz::unique(arr), expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         REQUIRE(lz::equal(arr | lz::unique | lz::reverse, expected | lz::reverse));
     }
 
-    SECTION("Operator==, operator!=") {
+    SUBCASE("Operator==, operator!=") {
         auto unique = lz::unique(arr);
         auto beg = unique.begin();
         REQUIRE(beg != unique.end());
@@ -67,7 +67,7 @@ TEST_CASE("Unique binary operations") {
 }
 
 TEST_CASE("Empty or one element unique") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> vec;
         auto unique = lz::unique(vec);
         REQUIRE(lz::empty(unique));
@@ -75,7 +75,7 @@ TEST_CASE("Empty or one element unique") {
         REQUIRE_FALSE(lz::has_one(unique));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::vector<int> vec = { 1 };
         auto unique = lz::unique(vec);
         REQUIRE(lz::has_one(unique));
@@ -90,25 +90,25 @@ TEST_CASE("Unique to container") {
     constexpr std::size_t size = 3;
     auto unique = lz::unique(arr);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto unique_array = unique | lz::to<std::array<int, size>>();
         std::array<int, size> expected = { 1, 2, 3 };
         REQUIRE(unique_array == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto unique_vec = unique | lz::to<std::vector>();
         std::vector<int> expected = { 1, 2, 3 };
         REQUIRE(unique_vec == expected);
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         auto unique_list = unique | lz::to<std::list<int>>();
         std::list<int> expected = { 1, 2, 3 };
         REQUIRE(unique_list == expected);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto actual = unique | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::map<int, int>>();
 
         std::map<int, int> expected = {
@@ -120,7 +120,7 @@ TEST_CASE("Unique to container") {
         REQUIRE(expected == actual);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto actual = unique | lz::map([](const int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
 
         std::unordered_map<int, int> expected = {

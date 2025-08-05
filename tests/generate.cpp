@@ -1,6 +1,6 @@
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <doctest/doctest.h>
 #include <functional>
 #include <list>
 #include <map>
@@ -24,7 +24,7 @@ TEST_CASE("Generate infinite") {
     REQUIRE(begin != generator.end());
     REQUIRE(begin != generator.begin());
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         REQUIRE(begin != generator.end());
         begin = generator.end();
         // Inf never reaches end
@@ -42,7 +42,7 @@ TEST_CASE("Generate changing and creating elements") {
         },
         amount);
 
-    SECTION("Should be 0, 1, 2, 3") {
+    SUBCASE("Should be 0, 1, 2, 3") {
         std::size_t expected = 0;
         lz::for_each(generator, [&expected](std::size_t i) {
             REQUIRE(i == expected);
@@ -50,7 +50,7 @@ TEST_CASE("Generate changing and creating elements") {
         });
     }
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto begin = generator.begin();
         REQUIRE(begin != generator.end());
         begin = generator.end();
@@ -68,12 +68,12 @@ TEST_CASE("Generate binary operations") {
     lz::generate_iterable<decltype(func)> generator = lz::generate(std::move(func), amount);
     auto begin = generator.begin();
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         std::size_t expected[] = { 0, 1, 2, 3 };
         REQUIRE(lz::equal(generator, expected));
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         REQUIRE(begin != generator.end());
         while (begin != generator.end()) {
             ++begin;
@@ -83,14 +83,14 @@ TEST_CASE("Generate binary operations") {
 }
 
 TEST_CASE("Empty or one element generate") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         auto generator = lz::generate([]() { return 0; }, 0);
         REQUIRE(lz::empty(generator));
         REQUIRE_FALSE(lz::has_one(generator));
         REQUIRE_FALSE(lz::has_many(generator));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         auto generator = lz::generate([]() { return 0; }, 1);
         REQUIRE_FALSE(lz::empty(generator));
         REQUIRE(lz::has_one(generator));
@@ -109,28 +109,28 @@ TEST_CASE("Generate to containers") {
         },
         amount);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto array = generator | lz::to<std::array<std::size_t, amount>>();
         std::array<std::size_t, amount> expected = { 0, 1, 2, 3 };
 
         REQUIRE(array == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vector = generator | lz::to<std::vector>();
         std::vector<std::size_t> expected = { 0, 1, 2, 3 };
 
         REQUIRE(vector == expected);
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         auto vector = generator | lz::to<std::list>();
         std::list<std::size_t> expected = { 0, 1, 2, 3 };
 
         REQUIRE(vector == expected);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto map = generator | lz::map([](const std::size_t elm) { return std::make_pair(elm * 10, elm); }) |
                    lz::to<std::map<std::size_t, std::size_t>>();
 
@@ -139,7 +139,7 @@ TEST_CASE("Generate to containers") {
         REQUIRE(map == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto map = generator | lz::map([](const std::size_t elm) { return std::make_pair(elm * 10, elm); }) |
                    lz::to<std::unordered_map<std::size_t, std::size_t>>();
 

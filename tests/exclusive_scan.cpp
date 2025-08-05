@@ -1,7 +1,7 @@
 #include <Lz/exclusive_scan.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
 #include <unordered_map>
@@ -13,7 +13,7 @@ TEST_CASE("Exclusive scan with sentinels") {
     std::vector<int> expected = { 0, 0, 1, 3, 6, 10 };
     REQUIRE(lz::equal(scan, expected));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = scan.begin();
         REQUIRE(it == scan.begin());
         it = scan.end();
@@ -38,7 +38,7 @@ TEST_CASE("exclusive_scan basic functionality") {
 }
 
 TEST_CASE("Empty or one element exclusive scan") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> empty;
         auto scan = empty | lz::exclusive_scan(0, MAKE_BIN_PRED(equal_to){});
         REQUIRE(lz::empty(scan));
@@ -47,7 +47,7 @@ TEST_CASE("Empty or one element exclusive scan") {
         REQUIRE(lz::size(scan) == empty.size());
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::vector<int> one_element = { 1 };
         auto scan = lz::exclusive_scan(one_element);
         REQUIRE_FALSE(lz::empty(scan));
@@ -65,12 +65,12 @@ TEST_CASE("Exclusive scan binary operations") {
 
     REQUIRE(*scan.begin() == 0);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto expected = { 0, 3, 4, 8, 9, 14, 23, 25 };
         REQUIRE(lz::equal(scan, expected));
     }
 
-    SECTION("Operator== & operator!=") {
+    SUBCASE("Operator== & operator!=") {
         REQUIRE(scan.begin() != scan.end());
         auto begin = scan.begin();
         while (begin != scan.end()) {
@@ -89,32 +89,32 @@ TEST_CASE("Exclusive scan to container") {
     auto scanner = lz::exclusive_scan(to_scan, 0);
     REQUIRE(scanner.size() == lz::size(to_scan) + 1);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         std::array<int, 9> expected = { 0, 2, 7, 13, 17, 104, 112, 157, 164 };
         auto actual = scanner | lz::to<std::array<int, expected.size()>>();
         REQUIRE(actual == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         std::vector<int> expected = { 0, 2, 7, 13, 17, 104, 112, 157, 164 };
         auto actual = scanner | lz::to<std::vector>();
         REQUIRE(expected == actual);
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         std::list<int> expected = { 0, 2, 7, 13, 17, 104, 112, 157, 164 };
         auto actual = scanner | lz::to<std::list>();
         REQUIRE(expected == actual);
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         std::map<int, int> expected = { { 0, 0 },     { 4, 2 },     { 14, 7 },    { 26, 13 },  { 34, 17 },
                                         { 208, 104 }, { 224, 112 }, { 314, 157 }, { 328, 164 } };
         auto actual = scanner | lz::map([](int i) { return std::make_pair(i + i, i); }) | lz::to<std::map<int, int>>();
         REQUIRE(expected == actual);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         std::unordered_map<int, int> expected = { { 0, 0 },     { 4, 2 },     { 14, 7 },    { 26, 13 },  { 34, 17 },
                                                   { 208, 104 }, { 224, 112 }, { 314, 157 }, { 328, 164 } };
         auto actual = scanner | lz::map([](int i) { return std::make_pair(i + i, i); }) | lz::to<std::unordered_map<int, int>>();

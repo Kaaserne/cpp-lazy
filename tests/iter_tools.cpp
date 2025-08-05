@@ -1,7 +1,7 @@
 #include <Lz/iter_tools.hpp>
 #include <Lz/zip.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <functional>
 #include <map>
 
@@ -27,7 +27,7 @@ TEST_CASE("Lines") {
 }
 
 TEST_CASE("As") {
-    SECTION("Without sentinel") {
+    SUBCASE("Without sentinel") {
         const lz::basic_string_view<char> actual = "hello world";
         const lz::basic_string_view<unsigned char> expected = reinterpret_cast<const unsigned char*>("hello world");
 #ifdef LZ_HAS_CXX_11
@@ -37,10 +37,9 @@ TEST_CASE("As") {
         REQUIRE(lz::equal(lz::as<unsigned char>(actual), expected));
         REQUIRE(lz::equal(actual | lz::as<unsigned char>, expected));
 #endif
-
     }
 
-    SECTION("With sentinel") {
+    SUBCASE("With sentinel") {
         const auto actual = lz::c_string("hello world");
         const auto expected = lz::c_string(reinterpret_cast<const unsigned char*>("hello world"));
 #ifdef LZ_HAS_CXX_11
@@ -54,7 +53,7 @@ TEST_CASE("As") {
 }
 
 TEST_CASE("Zip with") {
-    SECTION("Without sentinel") {
+    SUBCASE("Without sentinel") {
         const std::vector<int> v1 = { 1, 2, 3, 4, 5 };
         const std::vector<int> v2 = { 6, 7, 8, 9, 10 };
         const std::vector<int> v3 = { 11, 12, 13, 14, 15 };
@@ -67,7 +66,7 @@ TEST_CASE("Zip with") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SECTION("With sentinel") {
+    SUBCASE("With sentinel") {
         const auto v1 = lz::c_string("hello");
         const auto v2 = lz::c_string("world");
         const auto v3 = lz::c_string("12345");
@@ -89,7 +88,7 @@ TEST_CASE("Unzip with") {
 }
 
 TEST_CASE("Pairwise") {
-    SECTION("With sentinel") {
+    SUBCASE("With sentinel") {
         const auto actual = lz::c_string("hello");
         const std::vector<std::tuple<char, char>> expected = { std::make_tuple('h', 'e'), std::make_tuple('e', 'l'),
                                                                std::make_tuple('l', 'l'), std::make_tuple('l', 'o') };
@@ -101,7 +100,7 @@ TEST_CASE("Pairwise") {
         REQUIRE(lz::equal(actual_pairwise, expected));
     }
 
-    SECTION("Without sentinels") {
+    SUBCASE("Without sentinels") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<std::tuple<int, int>> expected = { std::make_tuple(1, 2), std::make_tuple(2, 3), std::make_tuple(3, 4),
                                                              std::make_tuple(4, 5) };
@@ -115,7 +114,7 @@ TEST_CASE("Pairwise") {
         static_assert(lz::sized<decltype(actual_pairwise)>::value, "Pairwise should be sized");
     }
 
-    SECTION("With sentinels, three adjacent elements") {
+    SUBCASE("With sentinels, three adjacent elements") {
         const auto actual = lz::c_string("hello");
         const std::vector<std::tuple<char, char, char>> expected = { std::make_tuple('h', 'e', 'l'),
                                                                      std::make_tuple('e', 'l', 'l'),
@@ -133,7 +132,7 @@ TEST_CASE("Pairwise") {
 #endif
     }
 
-    SECTION("Without sentinels, three adjacent elements") {
+    SUBCASE("Without sentinels, three adjacent elements") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<std::tuple<int, int, int>> expected = { std::make_tuple(1, 2, 3), std::make_tuple(2, 3, 4),
                                                                   std::make_tuple(3, 4, 5) };
@@ -160,7 +159,7 @@ TEST_CASE("Keys & values") {
     const std::vector<int> expected_keys = { 1, 2, 3 };
     const std::vector<std::string> expected_values = { "hello", "world", "!" };
 
-    SECTION("Key & value") {
+    SUBCASE("Key & value") {
         lz::keys_iterable<decltype(m)> keys = lz::keys(m);
         lz::values_iterable<decltype(m)> values = lz::values(m);
         REQUIRE(lz::equal(keys, expected_keys));
@@ -171,7 +170,7 @@ TEST_CASE("Keys & values") {
         REQUIRE(lz::equal(values, expected_values));
     }
 
-    SECTION("Get nth") {
+    SUBCASE("Get nth") {
         const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
         const std::vector<int> expected = { 3, 6, 9 };
 #ifdef LZ_HAS_CXX_11
@@ -187,7 +186,7 @@ TEST_CASE("Keys & values") {
 #endif
     }
 
-    SECTION("Get nths") {
+    SUBCASE("Get nths") {
         const std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
         const std::vector<std::tuple<int, int>> expected = { { 1, 3 }, { 4, 6 }, { 7, 9 } };
 #ifdef LZ_HAS_CXX_11
@@ -200,7 +199,7 @@ TEST_CASE("Keys & values") {
 }
 
 TEST_CASE("Filtermap") {
-    SECTION("With sentinels") {
+    SUBCASE("With sentinels") {
         std::function<bool(char)> filter_fun = [](char c) {
             return c == 'o' || c == 'e';
         };
@@ -217,7 +216,7 @@ TEST_CASE("Filtermap") {
         REQUIRE(lz::equal(actual_filter_map, expected));
     }
 
-    SECTION("Without sentinels") {
+    SUBCASE("Without sentinels") {
         std::function<bool(int)> filter_fun = [](int i) {
             return i % 2 == 0;
         };
@@ -245,7 +244,7 @@ TEST_CASE("Select") {
 }
 
 TEST_CASE("Trim variants") {
-    SECTION("Drop back while") {
+    SUBCASE("Drop back while") {
         std::function<bool(int)> pred = [](int i) {
             return i > 3;
         };
@@ -257,7 +256,7 @@ TEST_CASE("Trim variants") {
         REQUIRE(lz::equal(actual_trim_back, expected));
     }
 
-    SECTION("Trim vec") {
+    SUBCASE("Trim vec") {
         const std::vector<int> actual = { 1, 2, 3, 4, 5 };
         const std::vector<int> expected = { 3, 4 };
         std::function<bool(int)> first_pred = [](int i) {
@@ -271,7 +270,7 @@ TEST_CASE("Trim variants") {
         REQUIRE(lz::equal(actual_trim, expected));
     }
 
-    SECTION("Trim string") {
+    SUBCASE("Trim string") {
         const std::string actual = "   hello world   ";
         const std::string expected = "hello world";
         lz::trim_string_iterable<const std::string> actual_trim = lz::trim(actual);
