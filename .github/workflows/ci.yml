@@ -180,6 +180,8 @@ jobs:
           -D CMAKE_BUILD_TYPE:STRING=Release
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+          -D CMAKE_C_COMPILER:STRING=cl.exe
+          -D CMAKE_CXX_COMPILER:STRING=cl.exe
 
       - name: Build (install)
         run: cmake --build build/install --config Release -j $env:NUMBER_OF_PROCESSORS
@@ -194,6 +196,8 @@ jobs:
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+          -D CMAKE_C_COMPILER:STRING=cl.exe
+          -D CMAKE_CXX_COMPILER:STRING=cl.exe
 
       - name: Build tests
         run: cmake --build build/tests --config Release -j $env:NUMBER_OF_PROCESSORS
