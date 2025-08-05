@@ -3,6 +3,7 @@
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
+#include <vector>
 #include <functional>
 #include <list>
 #include <map>

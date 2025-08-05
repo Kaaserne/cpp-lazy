@@ -6,6 +6,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Unique using sentinels") {
     auto str = lz::c_string("aabbcccddefgghhj");

@@ -9,6 +9,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");

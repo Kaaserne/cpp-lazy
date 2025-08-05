@@ -6,6 +6,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 struct customer {
     int id;

@@ -1,5 +1,6 @@
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
+#include <vector>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>

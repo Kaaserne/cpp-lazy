@@ -3,6 +3,7 @@
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <doctest/doctest.h>
 #include <list>
+#include <vector>
 
 TEST_CASE("Sentinel operators") {
     SUBCASE("Operator==") {

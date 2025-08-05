@@ -8,6 +8,7 @@
 #include <doctest/doctest.h>
 #include <list>
 #include <map>
+#include <vector>
 #include <unordered_map>
 
 struct equal_fn {

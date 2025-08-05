@@ -4,6 +4,7 @@
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
 #include <list>
+#include <vector>
 #include <map>
 #include <unordered_map>
 

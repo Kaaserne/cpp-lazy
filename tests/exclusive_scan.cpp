@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Exclusive scan with sentinels") {
     int i = 0;

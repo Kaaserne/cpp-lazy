@@ -5,6 +5,7 @@
 #include <doctest/doctest.h>
 #include <functional>
 #include <list>
+#include <vector>
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");

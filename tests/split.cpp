@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Split with custom container") {
     std::string to_split = "Hello world test 123";

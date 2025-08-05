@@ -3,6 +3,7 @@
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
+#include <vector>
 
 TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");

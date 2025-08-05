@@ -6,6 +6,7 @@
 #include <map>
 #include <numeric>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Inclusive scan with sentinels") {
     int x = 1;

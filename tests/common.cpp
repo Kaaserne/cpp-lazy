@@ -6,6 +6,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Basic common_iterable test") {
     const char* s = "hello, world!";

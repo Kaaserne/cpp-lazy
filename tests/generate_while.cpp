@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Generate while changing and creating elements") {
     const auto compile_test1 = lz::generate_while([]() { return std::make_pair(false, false); });

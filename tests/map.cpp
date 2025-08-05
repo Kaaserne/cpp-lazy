@@ -8,6 +8,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <vector>
 #include <unordered_map>
 
 struct TestStruct {

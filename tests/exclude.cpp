@@ -9,6 +9,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");

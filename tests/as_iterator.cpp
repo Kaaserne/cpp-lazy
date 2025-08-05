@@ -1,6 +1,7 @@
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
 #include <doctest/doctest.h>
+#include <vector>
 
 TEST_CASE("With sentinels") {
     SUBCASE("Equal to c_string") {

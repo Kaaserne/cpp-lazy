@@ -4,6 +4,7 @@
 #include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
+#include <vector>
 
 TEST_CASE("Non cached reverse") {
     SUBCASE("Non sentinelled reverse") {

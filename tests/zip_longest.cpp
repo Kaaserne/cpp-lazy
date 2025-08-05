@@ -10,6 +10,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Zip longest with sentinels") {
     auto cstr = lz::c_string("Hello");

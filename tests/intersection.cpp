@@ -6,6 +6,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Intersection tests with sentinels") {
     auto str = lz::c_string("aaaabbcccddee");

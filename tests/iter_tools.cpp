@@ -3,11 +3,8 @@
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
 #include <functional>
+#include <vector>
 #include <map>
-
-#ifdef LZ_HAS_CXX_11
-#include <Lz/common.hpp>
-#endif
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };

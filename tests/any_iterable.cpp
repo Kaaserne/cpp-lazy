@@ -6,6 +6,7 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <list>
+#include <vector>
 
 TEST_CASE("Any iterable with sentinels") {
     lz::any_iterable<char, const char&> iterable = "Hello, World!" | lz::c_string;

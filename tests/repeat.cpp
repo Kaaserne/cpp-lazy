@@ -7,6 +7,7 @@
 #include <doctest/doctest.h>
 #include <list>
 #include <map>
+#include <vector>
 #include <unordered_map>
 
 TEST_CASE("repeat_iterable binary operations") {

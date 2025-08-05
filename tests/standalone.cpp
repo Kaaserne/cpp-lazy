@@ -4,6 +4,7 @@
 #include <Lz/stream.hpp>
 #include <doctest/doctest.h>
 #include <iostream>
+#include <vector>
 
 TEST_CASE("Formatting and compile tests") {
     SUBCASE("Compile test") {

@@ -12,6 +12,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("take_every_iterable with sentinels") {
     auto cstr = lz::c_string("Hello");

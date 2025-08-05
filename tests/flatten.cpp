@@ -12,6 +12,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Dimensions & sized") {
     int arr[3];

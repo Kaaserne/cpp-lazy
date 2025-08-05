@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Generate infinite") {
     std::function<int()> func = []() {
