@@ -40,7 +40,6 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterable>
 LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i)) {
-    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
     return std::size(i);
 }
 
@@ -58,7 +57,6 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(
  */
 template<class Iterable>
 LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size())) -> decltype(i.size()) {
-    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
     return i.size();
 }
 
@@ -93,7 +91,6 @@ LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
  */
 template<class Iterable>
 LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i))) -> decltype(std::ssize(i)) {
-    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
     return std::ssize(i);
 }
 
@@ -110,10 +107,9 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssiz
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(
-    static_cast<detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>>(lz::size(i))))
-    -> detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type> {
-    static_assert(sized<Iterable>::value, "Iterable must be sized/contain a .size() method");
+LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(
+    noexcept(static_cast<detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>>(
+        lz::size(i)))) -> detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type> {
     using T = detail::common_type<std::ptrdiff_t, typename std::make_signed<decltype(lz::size(i))>::type>;
     return static_cast<T>(lz::size(i));
 }
