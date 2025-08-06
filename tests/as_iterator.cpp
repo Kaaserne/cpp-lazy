@@ -1,9 +1,10 @@
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <doctest/doctest.h>
+#include <vector>
 
 TEST_CASE("With sentinels") {
-    SECTION("Equal to c_string") {
+    SUBCASE("Equal to c_string") {
         auto cstr = lz::c_string("Hello, World!");
         lz::string_view expected = "Hello, World!";
         auto it = lz::as_iterator(cstr);
@@ -12,7 +13,7 @@ TEST_CASE("With sentinels") {
         REQUIRE(lz::equal(it, expected, [](iterator iter, char c) { return *iter == c; }));
     }
 
-    SECTION("Equal to random access iterable") {
+    SUBCASE("Equal to random access iterable") {
         const std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto expected = { 1, 2, 3, 4, 5 };
         auto it = vec | lz::as_iterator(std::random_access_iterator_tag{});
@@ -27,7 +28,7 @@ TEST_CASE("With sentinels") {
                       "as_iterator_iterable should return a random access iterator");
     }
 
-    SECTION("Operator minus basics") {
+    SUBCASE("Operator minus basics") {
         const std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto it = vec | lz::as_iterator;
         auto first = it.begin();
@@ -36,7 +37,7 @@ TEST_CASE("With sentinels") {
         REQUIRE(first - last == -5);
     }
 
-    SECTION("operator minus with number") {
+    SUBCASE("operator minus with number") {
         const std::vector<int> vec = { 1, 2, 3, 4, 5 };
         auto it = lz::as_iterator(vec);
         auto first = it.begin();

@@ -5,11 +5,12 @@
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <array>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Except tests with sentinels") {
     const char* str = "Hello, World!";
@@ -20,7 +21,7 @@ TEST_CASE("Except tests with sentinels") {
     static_assert(!std::is_same<decltype(except.begin()), decltype(except.end())>::value, "Must be sentinel");
     REQUIRE((except | lz::to<std::string>()) == "Hll, Wrld!");
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = except.begin();
         REQUIRE(it == except.begin());
         REQUIRE(it != except.end());
@@ -35,7 +36,7 @@ TEST_CASE("Except tests with sentinels") {
 }
 
 TEST_CASE("Empty or one element except") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::string a;
         std::string b;
         auto except = lz::except(a, b);
@@ -44,7 +45,7 @@ TEST_CASE("Empty or one element except") {
         REQUIRE_FALSE(lz::has_many(except));
     }
 
-    SECTION("One element 1") {
+    SUBCASE("One element 1") {
         std::string a = "h";
         std::string b;
         auto except = lz::except(a, b);
@@ -53,7 +54,7 @@ TEST_CASE("Empty or one element except") {
         REQUIRE_FALSE(lz::has_many(except));
     }
 
-    SECTION("One element 2") {
+    SUBCASE("One element 2") {
         std::string a;
         std::string b = "w";
         auto except = lz::except(a, b);
@@ -62,7 +63,7 @@ TEST_CASE("Empty or one element except") {
         REQUIRE_FALSE(lz::has_many(except));
     }
 
-    SECTION("One element both") {
+    SUBCASE("One element both") {
         std::string a = "h";
         std::string b = "w";
         auto except = lz::except(a, b);
@@ -71,7 +72,7 @@ TEST_CASE("Empty or one element except") {
         REQUIRE_FALSE(lz::has_many(except));
     }
 
-    SECTION("One element both 2") {
+    SUBCASE("One element both 2") {
         std::string a = "h";
         std::string b = "h";
         auto except = lz::except(a, b);
@@ -87,12 +88,12 @@ TEST_CASE("Except binary operations") {
 
     auto except = lz::except(a, b);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto expected = { 1, 4, 5 };
         REQUIRE(lz::equal(except, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto expected = { 5, 4, 1 };
         REQUIRE(lz::equal(except | lz::cached_reverse, expected));
     }
@@ -103,22 +104,22 @@ TEST_CASE("Except to containers") {
     std::vector<int> b = { 1, 3 };
     auto except = lz::except(a, b);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto excepted = except | lz::to<std::array<int, 2>>();
         REQUIRE(excepted == std::array<int, 2>{ 2, 4 });
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto excepted = except | lz::to<std::vector>();
         REQUIRE(excepted == std::vector<int>{ 2, 4 });
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         auto excepted = except | lz::to<std::list>();
         REQUIRE(excepted == std::list<int>{ 2, 4 });
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto actual = except | lz::map([](const int i) { return std::make_pair(i, i); }) |
                       lz::to<std::map<int, int>>();
 
@@ -130,7 +131,7 @@ TEST_CASE("Except to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto actual = except | lz::map([](const int i) { return std::make_pair(i, i); }) |
                       lz::to<std::unordered_map<int, int>>();
 

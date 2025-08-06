@@ -1,11 +1,12 @@
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Basic common_iterable test") {
     const char* s = "hello, world!";
@@ -22,11 +23,11 @@ TEST_CASE("common_iterable binary operations fwd") {
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(common, c_string_view));
     }
 
-    SECTION("Operator== & operator!=") {
+    SUBCASE("Operator== & operator!=") {
         auto it = common.begin();
         REQUIRE(it != common.end());
         REQUIRE(common.end() != it);
@@ -42,13 +43,13 @@ TEST_CASE("common_iterable random access") {
     static_assert(std::is_same<decltype(common), lz::basic_iterable<lz::iter_t<decltype(repeater)>>>::value, "");
     static_assert(lz::detail::is_ra<lz::iter_t<decltype(repeater)>>::value, "");
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(common, repeater));
     }
 }
 
 TEST_CASE("common_iterable empty or one element") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         auto c_str = lz::c_string("");
         auto common = lz::common(c_str);
         REQUIRE(lz::empty(common));
@@ -56,7 +57,7 @@ TEST_CASE("common_iterable empty or one element") {
         REQUIRE_FALSE(lz::has_many(common));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         auto c_str = lz::c_string("a");
         auto common = lz::common(c_str);
         REQUIRE_FALSE(lz::empty(common));
@@ -70,25 +71,25 @@ TEST_CASE("common_iterable to containers") {
     auto c_string_view = lz::c_string(a);
     auto common = lz::common(c_string_view);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         REQUIRE((common | lz::to<std::array<char, 6>>()) == std::array<char, 6>{ 'h', 'e', 'l', 'l', 'o', ' ' });
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         REQUIRE((common | lz::to<std::vector>()) == std::vector<char>{ 'h', 'e', 'l', 'l', 'o', ' ' });
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         REQUIRE((common | lz::to<std::list<char>>()) == std::list<char>{ 'h', 'e', 'l', 'l', 'o', ' ' });
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         REQUIRE((c_string_view | lz::map([](char c) { return std::make_pair(c, c); }) | lz::common |
                  lz::to<std::map<char, char>>()) ==
                 std::map<char, char>{ { 'h', 'h' }, { 'e', 'e' }, { 'l', 'l' }, { 'o', 'o' }, { ' ', ' ' } });
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         REQUIRE((c_string_view | lz::map([](char c) { return std::make_pair(c, c); }) | lz::common |
                  lz::to<std::unordered_map<char, char>>()) ==
                 std::unordered_map<char, char>{ { 'h', 'h' }, { 'e', 'e' }, { 'l', 'l' }, { 'o', 'o' }, { ' ', ' ' } });

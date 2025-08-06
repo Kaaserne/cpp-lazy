@@ -4,7 +4,7 @@ option("cpp-lazy-use-modules", { default = false, description = "Use cpp-lazy wi
 add_requires("fmt >=5")
 
 if has_config("tests") then
-    add_requires("catch2 v2.13.10")
+    add_requires("doctest v2.4.12")
 end
 
 add_rules("mode.debug", "mode.release")
@@ -32,7 +32,7 @@ if has_config("tests") then
         set_kind("binary")
         add_files("tests/*.cpp")
         add_deps("cpp-lazy")
-        add_packages("catch2")
+        add_packages("doctest")
         add_cxxflags("-Wpedantic -Wextra -Wall -Wshadow -Wno-unused-function -Werror -Wconversion", { tools = { "gcc", "clang" } })
         add_cxxflags("/W4 /permissive- /WX", { tools = { "clang-cl", "msvc" } })
 end

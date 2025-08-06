@@ -2,12 +2,11 @@
 #include <Lz/stream.hpp>
 #include <algorithm>
 #include <array>
-#include <catch2/catch_test_macros.hpp>
 #include <cctype>
-
+#include <doctest/doctest.h>
 
 TEST_CASE("Iterator chaining") {
-    SECTION("test 1") {
+    SUBCASE("test 1") {
         int dummy = 0;
         auto iterable = lz::range(10) | lz::map([dummy](int i) mutable {
                             ++dummy;
@@ -18,7 +17,7 @@ TEST_CASE("Iterator chaining") {
         REQUIRE(lz::equal(iterable, expected));
     }
 
-    SECTION("test 2") {
+    SUBCASE("test 2") {
         int dummy = 0;
         auto chunk_iterable = lz::range(10) | lz::chunk_if([dummy](int i) mutable {
                                   ++dummy;
@@ -30,7 +29,7 @@ TEST_CASE("Iterator chaining") {
         REQUIRE(lz::equal(mapped_chunk, expected));
     }
 
-    SECTION("test 3, with to<>") {
+    SUBCASE("test 3, with to<>") {
         int dummy = 0;
         auto iterable = lz::range(10) | lz::map([dummy](int i) mutable {
                             ++dummy;
@@ -42,7 +41,7 @@ TEST_CASE("Iterator chaining") {
         REQUIRE(lz::equal(iterable, expected));
     }
 
-    SECTION("test 4, with to<>") {
+    SUBCASE("test 4, with to<>") {
         auto chunk_iterable = lz::range(10) | lz::chunk_if([](int i) { return i % 2 == 0; });
         int dummy = 0;
 

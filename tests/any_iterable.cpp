@@ -2,10 +2,11 @@
 #include <Lz/enumerate.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/take.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
-#include <test_procs.hpp>
+#include <vector>
 
 TEST_CASE("Any iterable with sentinels") {
     lz::any_iterable<char, const char&> iterable = "Hello, World!" | lz::c_string;
@@ -14,7 +15,7 @@ TEST_CASE("Any iterable with sentinels") {
 }
 
 TEST_CASE("Empty or one element any iterable") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> vec;
         lz::any_iterable<int, int&> iterable = vec;
         REQUIRE(lz::empty(iterable));
@@ -22,7 +23,7 @@ TEST_CASE("Empty or one element any iterable") {
         REQUIRE_FALSE(lz::has_many(iterable));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::vector<int> vec = { 1 };
         lz::any_iterable<int, int&> iterable = vec;
         REQUIRE_FALSE(lz::empty(iterable));
@@ -113,7 +114,7 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
 }
 
 TEST_CASE("Any iterable with different SBO sizes") {
-    SECTION("Both fit") {
+    SUBCASE("Both fit") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
         static_assert(sizeof(vec.begin()) <= 64, "");
         static_assert(sizeof(vec.end()) <= 64, "");
@@ -125,7 +126,7 @@ TEST_CASE("Any iterable with different SBO sizes") {
         test_procs::test_operator_minus(view);
     }
 
-    SECTION("Both do not fit") {
+    SUBCASE("Both do not fit") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
 
         std::array<char, 64> buf{};
@@ -144,7 +145,7 @@ TEST_CASE("Any iterable with different SBO sizes") {
         test_procs::test_operator_minus(view);
     }
 
-    SECTION("Iter does not fit, sentinel does fit") {
+    SUBCASE("Iter does not fit, sentinel does fit") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
 
         std::array<char, 64> buf{};

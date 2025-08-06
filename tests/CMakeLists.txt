@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.14)
 
 project(LazyTests LANGUAGES CXX)
 
-set(CPP-LAZY_CATCH_VERSION "3.9.0" CACHE STRING "Version of Catch2 to use for testing")
+set(CPP-LAZY_DOCTEST_VERSION "2.4.12" CACHE STRING "Version of doctest to use for testing")
 Include(FetchContent)
-FetchContent_Declare(Catch2 
-	URL https://github.com/catchorg/Catch2/archive/refs/tags/v${CPP-LAZY_CATCH_VERSION}.tar.gz 
+FetchContent_Declare(doctest 
+	URL https://github.com/doctest/doctest/archive/refs/tags/v${CPP-LAZY_DOCTEST_VERSION}.tar.gz
 	DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
-FetchContent_MakeAvailable(Catch2)
+FetchContent_MakeAvailable(doctest)
 
 set(CPP-LAZY_DEBUG_ASSERTIONS ON CACHE BOOL "Enable debug assertions in cpp-lazy" FORCE)
 
@@ -29,7 +29,7 @@ include(CTest)
 add_subdirectory(cpp-lazy-ut-helper)
 
 # ---- Tests ----
-set(tests
+add_executable(tests
 	algorithm.cpp
 	any_iterable.cpp
 	as_iterator.cpp
@@ -52,6 +52,7 @@ set(tests
 	generate_while.cpp
 	group_by.cpp
 	inclusive_scan.cpp
+	init.cpp
 	interleave.cpp
 	intersection.cpp
 	iter_tools.cpp
@@ -77,29 +78,25 @@ set(tests
 	zip.cpp
 )
 
-foreach(test_file IN LISTS tests)
-	get_filename_component(test_name "${test_file}" NAME_WE)
-	add_executable(${test_name} init.cpp "${test_file}")
-	target_link_libraries(${test_name}
-		PRIVATE
-			cpp-lazy::cpp-lazy
-			Catch2::Catch2WithMain
-			cpp-lazy-ut-helper
-	)
-	target_include_directories(${test_name}
-		PRIVATE
-			"${CMAKE_CURRENT_LIST_DIR}"
-	)
-	add_test(
-		NAME ${test_name}
-		COMMAND $<TARGET_FILE:${test_name}>
-	)
-	target_compile_options(${test_name}
-		PRIVATE
-			$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
+target_link_libraries(tests
+	PRIVATE
+		cpp-lazy::cpp-lazy
+		cpp-lazy-ut-helper::cpp-lazy-ut-helper
+		doctest::doctest
+)
+target_include_directories(tests
+	PRIVATE
+		"${CMAKE_CURRENT_LIST_DIR}"
+)
+add_test(
+	NAME tests
+	COMMAND $<TARGET_FILE:tests>
+)
+target_compile_options(tests
+	PRIVATE
+		$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
 
-			$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings>
+		$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings>
 
-			$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion  -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow -Wformat=2 -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings>
-	)
-endforeach()
+		$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion  -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow -Wformat=2 -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings>
+)

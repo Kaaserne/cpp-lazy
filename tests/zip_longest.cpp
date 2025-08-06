@@ -3,13 +3,14 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("Zip longest with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -29,7 +30,7 @@ TEST_CASE("Zip longest with sentinels") {
 
     REQUIRE(lz::equal(longest, expected));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = longest.begin();
         REQUIRE(it == longest.begin());
         it = longest.end();
@@ -49,14 +50,14 @@ TEST_CASE("zip_longest_iterable changing and creating elements") {
     REQUIRE(ra.size() == v.size());
     REQUIRE(bidi.size() == v.size());
 
-    SECTION("Unequal lengths") {
+    SUBCASE("Unequal lengths") {
         REQUIRE(std::distance(bidi.begin(), bidi.end()) == 7);
         REQUIRE(std::distance(ra.begin(), ra.end()) == 7);
         REQUIRE(bidi.size() == 7);
         REQUIRE(ra.size() == 7);
     }
 
-    SECTION("Should be by ref") {
+    SUBCASE("Should be by ref") {
         auto begin = ra.begin();
         std::reference_wrapper<int> ref_wrapper = std::get<0>(*begin).value();
         ref_wrapper.get() = 2000;
@@ -88,30 +89,30 @@ TEST_CASE("zip_longest_iterable binary operations") {
         { 1, 1, short{ 1 } }, { 2, 2, short{ 2 } }, { 3, 3, lz::nullopt }, { 4, 4, lz::nullopt }, { lz::nullopt, 5, lz::nullopt }
     };
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         REQUIRE(lz::equal(zipper, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         REQUIRE(lz::equal(zipper | lz::reverse, expected | lz::reverse));
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         auto begin = zipper.begin();
         REQUIRE(begin != zipper.end());
         begin = zipper.end();
         REQUIRE(begin == zipper.end());
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         test_procs::test_operator_plus(zipper, expected);
     }
 
-    SECTION("Operator-(Iterator)") {
+    SUBCASE("Operator-(Iterator)") {
         test_procs::test_operator_minus(zipper);
     }
 
-    SECTION("Operator-(default_sentinel)") {
+    SUBCASE("Operator-(default_sentinel)") {
         auto first = lz::repeat(1, 5), second = lz::repeat(1, 4);
         auto l = lz::zip_longest(first, second);
         REQUIRE(lz::size(l) == 5);
@@ -120,7 +121,7 @@ TEST_CASE("zip_longest_iterable binary operations") {
 }
 
 TEST_CASE("Empty and one element zip longest") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> a;
         auto b = lz::c_string("");
         auto zipper = lz::zip_longest(a, b);
@@ -130,7 +131,7 @@ TEST_CASE("Empty and one element zip longest") {
         REQUIRE_FALSE(lz::has_many(zipper));
     }
 
-    SECTION("One element 1") {
+    SUBCASE("One element 1") {
         std::vector<int> a = { 1 };
         std::vector<float> b;
         auto zipper = lz::zip_longest(a, b);
@@ -139,7 +140,7 @@ TEST_CASE("Empty and one element zip longest") {
         REQUIRE_FALSE(lz::has_many(zipper));
     }
 
-    SECTION("One element 2") {
+    SUBCASE("One element 2") {
         std::vector<int> a;
         std::vector<float> b = { 1 };
         auto zipper = lz::zip_longest(a, b);
@@ -155,7 +156,7 @@ TEST_CASE("Zip longest iterable to container") {
     std::vector<char> c = { 'a', 'b', 'c', 'd', 'f', 'g' };
     auto zipper = lz::zip_longest(a, b, c);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         using optional_tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<char>>;
         auto to_arr = zipper | lz::to<std::array<optional_tuple, 6>>();
         std::array<optional_tuple, 6> expected = {
@@ -165,7 +166,7 @@ TEST_CASE("Zip longest iterable to container") {
         REQUIRE(lz::equal(to_arr, expected));
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         using optional_tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<char>>;
         auto to_vec = zipper | lz::to<std::vector<optional_tuple>>();
         std::vector<optional_tuple> expected = {
@@ -175,7 +176,7 @@ TEST_CASE("Zip longest iterable to container") {
         REQUIRE(lz::equal(to_vec, expected));
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         using optional_tuple = std::tuple<lz::optional<int>, lz::optional<unsigned>, lz::optional<char>>;
         auto to_list = zipper | lz::to<std::list<optional_tuple>>();
         std::list<optional_tuple> expected = {
@@ -185,7 +186,7 @@ TEST_CASE("Zip longest iterable to container") {
         REQUIRE(lz::equal(to_list, expected));
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
         using map_type = std::map<char, lz::optional<unsigned>>;
 
@@ -196,7 +197,7 @@ TEST_CASE("Zip longest iterable to container") {
         REQUIRE(to_map == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
         using map_type = std::unordered_map<char, lz::optional<unsigned>>;
 

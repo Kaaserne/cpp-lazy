@@ -3,12 +3,13 @@
 #include <Lz/reverse.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
+#include <vector>
 #include <unordered_map>
 
 TEST_CASE("Take with sentinels") {
@@ -21,14 +22,14 @@ TEST_CASE("Take with sentinels") {
     auto vec = take | lz::to<std::vector<char>>();
     REQUIRE(lz::equal(vec, expected));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = take.begin();
         REQUIRE(it == take.begin());
         it = take.end();
         REQUIRE(it == take.end());
     }
 
-    SECTION("Operator= for with iterator") {
+    SUBCASE("Operator= for with iterator") {
         auto t = lz::take(c_string.begin(), 5);
         auto it = t.begin();
         REQUIRE(it == t.begin());
@@ -53,17 +54,17 @@ TEST_CASE("Take binary operations where n is smaller than size") {
     auto take = lz::take(array, 4);
     REQUIRE(take.size() == 4);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto expected = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(take, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto expected = { 4, 3, 2, 1 };
         REQUIRE(lz::equal(take | lz::reverse, expected));
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         REQUIRE(take.begin() != take.end());
         REQUIRE(take.end() != take.begin());
         REQUIRE_FALSE(take.begin() == take.end());
@@ -76,16 +77,16 @@ TEST_CASE("Take binary operations where n is smaller than size") {
         REQUIRE_FALSE(take.end() != it);
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         std::vector<int> expected = { 1, 2, 3, 4 };
         test_procs::test_operator_plus(take, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(take);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto r = lz::repeat(1, 5) | lz::take(3);
         test_procs::test_operator_minus(r);
 
@@ -100,19 +101,19 @@ TEST_CASE("Take binary operations where n is larger than size") {
     auto take = lz::take(array, 20);
     REQUIRE(take.size() == 10);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto begin = take.begin();
         ++begin;
         REQUIRE(*begin == 2);
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto end = take.end();
         --end;
         REQUIRE(*end == 10);
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         REQUIRE(take.begin() != take.end());
         REQUIRE_FALSE(take.begin() == take.end());
         auto it = take.begin();
@@ -120,20 +121,20 @@ TEST_CASE("Take binary operations where n is larger than size") {
         REQUIRE(it == take.end());
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         INFO("Operator+");
         std::vector<int> expected = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         test_procs::test_operator_plus(take, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         INFO("Operator-");
         test_procs::test_operator_minus(take);
     }
 }
 
 TEST_CASE("Empty or one element take") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> vec;
         auto take = lz::take(vec, 0);
         REQUIRE(take.size() == 0);
@@ -142,7 +143,7 @@ TEST_CASE("Empty or one element take") {
         REQUIRE_FALSE(lz::has_many(take));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::vector<int> vec = { 1 };
         auto take = lz::take(vec, 1);
         REQUIRE(take.size() == 1);
@@ -151,7 +152,7 @@ TEST_CASE("Empty or one element take") {
         REQUIRE_FALSE(lz::has_many(take));
     }
 
-    SECTION("Empty iterator") {
+    SUBCASE("Empty iterator") {
         std::vector<int> vec;
         auto take = lz::take(vec.begin(), 0);
         REQUIRE(take.size() == 0);
@@ -160,7 +161,7 @@ TEST_CASE("Empty or one element take") {
         REQUIRE_FALSE(lz::has_many(take));
     }
 
-    SECTION("One element iterator") {
+    SUBCASE("One element iterator") {
         std::vector<int> vec = { 1 };
         auto take = lz::take(vec.begin(), 1);
         REQUIRE(take.size() == 1);
@@ -185,22 +186,22 @@ TEST_CASE("Take to containers") {
     auto take = lz::take(array, 4);
     REQUIRE(take.size() == 4);
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto arr = take | lz::to<std::array<int, 4>>();
         REQUIRE(lz::equal(arr, take));
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vec = take | lz::to<std::vector>(std::allocator<int>());
         REQUIRE(lz::equal(vec, take));
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         auto lst = take | lz::to<std::list<int>>(std::allocator<int>());
         REQUIRE(lz::equal(lst, take));
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto map_obj = take | lz::map([](int i) { return std::make_pair(i, i); });
         auto map = lz::to<std::map<int, int>>(map_obj);
         REQUIRE(map.size() == 4);
@@ -208,7 +209,7 @@ TEST_CASE("Take to containers") {
         REQUIRE(map == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto map = take | lz::map([](int i) { return std::make_pair(i, i); }) | lz::to<std::unordered_map<int, int>>();
         REQUIRE(map.size() == 4);
         std::unordered_map<int, int> expected = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 4, 4 } };
@@ -217,7 +218,7 @@ TEST_CASE("Take to containers") {
 }
 
 TEST_CASE("Drop & slice") {
-    SECTION("Drop iterator") {
+    SUBCASE("Drop iterator") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
         auto drop = vec | lz::drop(4);
         REQUIRE(drop.size() == 4);
@@ -225,7 +226,7 @@ TEST_CASE("Drop & slice") {
         REQUIRE(lz::equal(drop, expected));
     }
 
-    SECTION("Empty drop") {
+    SUBCASE("Empty drop") {
         std::vector<int> vec;
         auto drop = vec | lz::drop(3);
         REQUIRE(drop.size() == 0);
@@ -234,7 +235,7 @@ TEST_CASE("Drop & slice") {
         REQUIRE(!lz::has_many(drop));
     }
 
-    SECTION("Drop where n is larger than size") {
+    SUBCASE("Drop where n is larger than size") {
         std::vector<int> vec = { 1, 2, 3 };
         auto drop = vec | lz::drop(10);
         REQUIRE(drop.size() == 0);
@@ -243,7 +244,7 @@ TEST_CASE("Drop & slice") {
         REQUIRE(!lz::has_many(drop));
     }
 
-    SECTION("Drop where n is larger than size / 2, sized & random access") {
+    SUBCASE("Drop where n is larger than size / 2, sized & random access") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
         auto drop = vec | lz::drop(6);
         REQUIRE(drop.size() == 2);
@@ -251,7 +252,7 @@ TEST_CASE("Drop & slice") {
         REQUIRE(lz::equal(drop, expected));
     }
 
-    SECTION("Drop where n is larger than size / 2, sized & bidirectional") {
+    SUBCASE("Drop where n is larger than size / 2, sized & bidirectional") {
         std::list<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
         auto drop = vec | lz::drop(6);
         REQUIRE(drop.size() == 2);
@@ -259,14 +260,14 @@ TEST_CASE("Drop & slice") {
         REQUIRE(lz::equal(drop, expected));
     }
 
-    SECTION("Drop where n is larger than size / 2, not sized & forward") {
+    SUBCASE("Drop where n is larger than size / 2, not sized & forward") {
         auto cstr = lz::c_string("Hello, world!");
         auto drop = cstr | lz::drop(7);
         std::vector<char> expected = { 'w', 'o', 'r', 'l', 'd', '!' };
         REQUIRE(lz::equal(drop, expected));
     }
 
-    SECTION("Slice iterable") {
+    SUBCASE("Slice iterable") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
         auto slice = vec | lz::slice(2, 6);
         REQUIRE(slice.size() == 4);
@@ -281,22 +282,22 @@ TEST_CASE("Take with iterator only") {
     auto take = lz::take(vec.begin(), 4);
     REQUIRE(take.size() == 4);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto expected = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(take, expected));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto expected = { 4, 3, 2, 1 };
         REQUIRE(lz::equal(take | lz::reverse, expected));
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         auto expected = { 1, 2, 3, 4 };
         test_procs::test_operator_plus(take, expected);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(take);
     }
 }

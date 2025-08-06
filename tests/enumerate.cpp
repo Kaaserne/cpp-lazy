@@ -2,12 +2,13 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <test_procs.hpp>
+#include <vector>
 #include <unordered_map>
 
 struct equal_fn {
@@ -28,7 +29,7 @@ TEST_CASE("Enumerate with sentinels") {
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
     REQUIRE(lz::equal(taken, expected, equal_fn{}));
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = enumerated.begin();
         REQUIRE(it == enumerated.begin());
         REQUIRE(enumerated.begin() == it);
@@ -43,7 +44,7 @@ TEST_CASE("Enumerate with sentinels") {
 }
 
 TEST_CASE("Empty or one element enumerate") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::string a;
         auto enumerate = lz::enumerate(a);
         REQUIRE(lz::empty(enumerate));
@@ -51,7 +52,7 @@ TEST_CASE("Empty or one element enumerate") {
         REQUIRE_FALSE(lz::has_many(enumerate));
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::string a = "h";
         auto enumerate = lz::enumerate(a);
         REQUIRE_FALSE(lz::empty(enumerate));
@@ -65,17 +66,17 @@ TEST_CASE("Enumerate binary operations") {
     std::array<int, size> array = { 1, 2, 3 };
     auto enumerate = lz::enumerate(array, 2);
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         auto expected = std::vector<std::pair<int, int>>{ { 2, 1 }, { 3, 2 }, { 4, 3 } };
         REQUIRE(lz::equal(enumerate, expected, equal_fn{}));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         auto reverse_expected = std::vector<std::pair<int, int>>{ { 4, 3 }, { 3, 2 }, { 2, 1 } };
         REQUIRE(lz::equal(lz::reverse(enumerate), reverse_expected, equal_fn{}));
     }
 
-    SECTION("Operator== & operator!=") {
+    SUBCASE("Operator== & operator!=") {
         auto it = enumerate.begin();
         REQUIRE(it != enumerate.end());
         REQUIRE(it == enumerate.begin());
@@ -88,16 +89,16 @@ TEST_CASE("Enumerate binary operations") {
         REQUIRE(enumerate.begin() != it);
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         std::vector<std::pair<int, int>> expected = { { 2, 1 }, { 3, 2 }, { 4, 3 } };
         test_procs::test_operator_plus(enumerate, expected, equal_fn{});
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(enumerate);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto repeat = lz::repeat(1, 5);
         test_procs::test_operator_minus(repeat);
     }
@@ -108,25 +109,25 @@ TEST_CASE("Enumerate to containers") {
     std::array<int, size> array = { 1, 2, 3 };
     std::vector<int> vec = { 1, 2, 3 };
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto actual_array = array | lz::enumerate | lz::to<std::array<std::pair<int, int>, size>>();
         auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
         REQUIRE(lz::equal(actual_array, expected, equal_fn{}));
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto actual_vec = lz::enumerate(vec) | lz::to<std::vector>();
         auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
         REQUIRE(lz::equal(actual_vec, expected, equal_fn{}));
     }
 
-    SECTION("To other container using to<>()") {
+    SUBCASE("To other container using to<>()") {
         auto actual_list = lz::enumerate(vec) | lz::to<std::list>();
         auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
         REQUIRE(lz::equal(actual_list, expected, equal_fn{}));
     }
 
-    SECTION("To map") {
+    SUBCASE("To map") {
         auto enumerator = lz::enumerate(array);
         auto actual =
             enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
@@ -141,7 +142,7 @@ TEST_CASE("Enumerate to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("To unordered map") {
+    SUBCASE("To unordered map") {
         auto enumerator = lz::enumerate(array);
         auto actual =
             enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
@@ -156,7 +157,7 @@ TEST_CASE("Enumerate to containers") {
         REQUIRE(actual == expected);
     }
 
-    SECTION("Bidirectional to container") {
+    SUBCASE("Bidirectional to container") {
         std::list<int> to_enumerate = { 1, 2, 3 };
         auto enumerated = lz::enumerate(to_enumerate);
         std::array<std::pair<int, int>, 3> expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };

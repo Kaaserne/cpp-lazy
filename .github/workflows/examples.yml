@@ -1,0 +1,24 @@
+on:
+  workflow_call:
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Configure
+        run: cmake -S examples -B build/examples -G Ninja
+          -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -D CMAKE_BUILD_TYPE:STRING=Release
+
+      - name: Build
+        run: cmake --build build/examples -j $(nproc)

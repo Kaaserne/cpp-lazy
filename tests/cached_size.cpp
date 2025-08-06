@@ -3,7 +3,8 @@
 #include <Lz/enumerate.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/range.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <vector>
+#include <doctest/doctest.h>
 
 TEST_CASE("Correct size") {
     auto to_filter = lz::range(10);

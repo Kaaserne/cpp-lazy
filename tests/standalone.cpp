@@ -2,17 +2,18 @@
 
 #include <Lz/split.hpp>
 #include <Lz/stream.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <doctest/doctest.h>
 #include <iostream>
+#include <vector>
 
 TEST_CASE("Formatting and compile tests") {
-    SECTION("Compile test") {
+    SUBCASE("Compile test") {
         std::string to_split = "Hello, World!";
         auto split = lz::sv_split(to_split, ", ");
         static_assert(std::is_same<decltype(*split.begin()), lz::string_view>::value, "Should be string_view");
     }
 
-    SECTION("Format test non empty") {
+    SUBCASE("Format test non empty") {
         std::vector<int> vec = { 1, 2, 3, 4 };
         REQUIRE((vec | lz::format) == "1, 2, 3, 4");
         REQUIRE(lz::format(vec) == "1, 2, 3, 4");
@@ -54,7 +55,7 @@ TEST_CASE("Formatting and compile tests") {
 #endif
     }
 
-    SECTION("Format empty") {
+    SUBCASE("Format empty") {
         std::vector<int> vec = {};
         REQUIRE((vec | lz::format) == "");
         REQUIRE(lz::format(vec) == "");
@@ -70,7 +71,7 @@ TEST_CASE("Formatting and compile tests") {
 #endif
     }
 
-    SECTION("Format one") {
+    SUBCASE("Format one") {
         std::vector<int> vec = { 1 };
         REQUIRE((vec | lz::format) == "1");
         REQUIRE(lz::format(vec) == "1");
@@ -86,7 +87,7 @@ TEST_CASE("Formatting and compile tests") {
 #endif
     }
 
-    SECTION("Ostream test non empty") {
+    SUBCASE("Ostream test non empty") {
         std::array<int, 4> arr = { 1, 2, 3, 4 };
         lz::basic_iterable<std::array<int, 4>::iterator> iterable(arr);
         std::ostringstream oss;
@@ -94,7 +95,7 @@ TEST_CASE("Formatting and compile tests") {
         REQUIRE(oss.str() == "1, 2, 3, 4");
     }
 
-    SECTION("Ostream test empty") {
+    SUBCASE("Ostream test empty") {
         std::array<int, 0> arr = {};
         lz::basic_iterable<std::array<int, 0>::iterator> iterable(arr);
         std::ostringstream oss;
@@ -102,7 +103,7 @@ TEST_CASE("Formatting and compile tests") {
         REQUIRE(oss.str() == "");
     }
 
-    SECTION("Ostream test one element") {
+    SUBCASE("Ostream test one element") {
         std::array<int, 1> arr = { 1 };
         lz::basic_iterable<std::array<int, 1>::iterator> iterable(arr);
         std::ostringstream oss;
@@ -110,7 +111,7 @@ TEST_CASE("Formatting and compile tests") {
         REQUIRE(oss.str() == "1");
     }
 
-    SECTION("std::cout test non empty") {
+    SUBCASE("std::cout test non empty") {
         std::streambuf* old_cout = std::cout.rdbuf();
         std::ostringstream oss;
         std::cout.rdbuf(oss.rdbuf());
@@ -123,7 +124,7 @@ TEST_CASE("Formatting and compile tests") {
         std::cout.rdbuf(old_cout);
     }
 
-    SECTION("std::cout test empty") {
+    SUBCASE("std::cout test empty") {
         std::streambuf* old_cout = std::cout.rdbuf();
         std::ostringstream oss;
         std::cout.rdbuf(oss.rdbuf());
@@ -136,7 +137,7 @@ TEST_CASE("Formatting and compile tests") {
         std::cout.rdbuf(old_cout);
     }
 
-    SECTION("std::cout test one element") {
+    SUBCASE("std::cout test one element") {
         std::cout.flush();
         std::streambuf* old_cout = std::cout.rdbuf();
         std::ostringstream oss;

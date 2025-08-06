@@ -1,12 +1,12 @@
 #include <Lz/regex_split.hpp>
-#include <catch2/catch_test_macros.hpp>
+#include <doctest/doctest.h>
 #include <list>
 #include <regex>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {
     std::regex r1(R"(\s+)");
 
-    SECTION("Empty string") {
+    SUBCASE("Empty string") {
         std::string s = "";
         lz::regex_split_iterable<std::sregex_token_iterator> splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
@@ -14,7 +14,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SECTION("Starting with delimiter") {
+    SUBCASE("Starting with delimiter") {
         std::string s = "    Hello, world! How are you?";
         auto splitter = s | lz::regex_split(r1);
         auto actual = splitter | lz::to<std::vector>();
@@ -22,7 +22,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SECTION("Ending with delimiter") {
+    SUBCASE("Ending with delimiter") {
         std::string s = "Hello, world! How are you?    ";
         auto splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
@@ -30,7 +30,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SECTION("Starting and ending with delimiter") {
+    SUBCASE("Starting and ending with delimiter") {
         std::string s = "    Hello, world! How are you?    ";
         auto splitter = lz::regex_split(s, r1);
         auto actual = splitter | lz::to<std::vector>();
@@ -38,7 +38,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         std::string s = "Hello, world! How are you?";
         auto splitter = lz::regex_split(s, r1);
         auto it = splitter.begin();
@@ -49,7 +49,7 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
 }
 
 TEST_CASE("Empty or one element regex split") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::regex r1(R"(\s+)");
         std::string s;
         auto splitter = lz::regex_split(s, r1);
@@ -58,7 +58,7 @@ TEST_CASE("Empty or one element regex split") {
         REQUIRE_FALSE(lz::has_many(splitter));
     }
 
-    SECTION("One element with result") {
+    SUBCASE("One element with result") {
         std::regex r1(R"(\s+)");
         std::string s = "Hello ";
         auto splitter = lz::regex_split(s, r1);
@@ -67,7 +67,7 @@ TEST_CASE("Empty or one element regex split") {
         REQUIRE_FALSE(lz::has_many(splitter));
     }
 
-    SECTION("One element without result") {
+    SUBCASE("One element without result") {
         std::regex r1(R"(\s+)");
         std::string s = "Hello";
         auto splitter = lz::regex_split(s, r1);
@@ -83,12 +83,12 @@ TEST_CASE("regex_split_iterable binary operations") {
     auto splitter = lz::regex_split(s, r1);
     auto begin = splitter.begin();
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         ++begin;
         REQUIRE(lz::distance(begin, splitter.end()) == 4);
     }
 
-    SECTION("Operator== & Operator!=") {
+    SUBCASE("Operator== & Operator!=") {
         REQUIRE(begin != splitter.end());
         while (begin != splitter.end()) {
             ++begin;
@@ -102,13 +102,13 @@ TEST_CASE("regex_split_iterable to containers") {
     std::string s = "    Hello, world! How are you?    ";
     auto splitter = lz::regex_split(s, r1);
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vec = splitter | lz::to<std::vector>();
         std::vector<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
         REQUIRE(lz::equal(vec, expected));
     }
 
-    SECTION("To list") {
+    SUBCASE("To list") {
         auto list = splitter | lz::to<std::list>();
         std::list<std::string> expected = { "Hello,", "world!", "How", "are", "you?" };
         REQUIRE(lz::equal(list, expected));

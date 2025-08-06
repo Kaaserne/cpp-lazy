@@ -2,15 +2,15 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/stream.hpp>
-#include <catch2/catch_test_macros.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/repeat.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <doctest/doctest.h>
 #include <list>
-#include <test_procs.hpp>
 #include <vector>
 
 TEST_CASE("empty or one element chunks") {
-    SECTION("Empty") {
+    SUBCASE("Empty") {
         std::vector<int> vec;
         auto chunked = lz::chunks(vec, 3);
         REQUIRE(lz::empty(chunked));
@@ -19,7 +19,7 @@ TEST_CASE("empty or one element chunks") {
         REQUIRE(chunked.size() == 0);
     }
 
-    SECTION("One element") {
+    SUBCASE("One element") {
         std::vector<int> vec = { 1 };
         auto chunked = lz::chunks(vec, 3);
         REQUIRE_FALSE(lz::empty(chunked));
@@ -52,7 +52,7 @@ TEST_CASE("Chunks binary operations random access") {
         return lz::equal(a, b);
     };
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
         REQUIRE(lz::equal(uneven_chunksize_even_size, expected, equal_fn));
 
@@ -66,7 +66,7 @@ TEST_CASE("Chunks binary operations random access") {
         REQUIRE(lz::equal(even_chunksize_uneven_size, expected, equal_fn));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
         REQUIRE(lz::equal(uneven_chunksize_even_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
@@ -80,7 +80,7 @@ TEST_CASE("Chunks binary operations random access") {
         REQUIRE(lz::equal(even_chunksize_uneven_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
     }
 
-    SECTION("Operator+") {
+    SUBCASE("Operator+") {
         std::vector<std::vector<int>> expected;
 
         expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
@@ -96,14 +96,14 @@ TEST_CASE("Chunks binary operations random access") {
         test_procs::test_operator_plus(even_chunksize_uneven_size, expected, equal_fn);
     }
 
-    SECTION("Operator-") {
+    SUBCASE("Operator-") {
         test_procs::test_operator_minus(uneven_chunksize_even_size);
         test_procs::test_operator_minus(even_chunksize_even_size);
         test_procs::test_operator_minus(uneven_chunksize_uneven_size);
         test_procs::test_operator_minus(even_chunksize_uneven_size);
     }
 
-    SECTION("Operator-(default_sentinel_t)") {
+    SUBCASE("Operator-(default_sentinel_t)") {
         auto uneven_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 3), 3);
         auto even_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 3), 2);
         auto uneven_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 2), 3);
@@ -142,7 +142,7 @@ TEST_CASE("Chunks binary operations bidirectional access") {
         return lz::equal(a, b);
     };
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
         REQUIRE(lz::equal(uneven_chunksize_even_size, expected, equal_fn));
 
@@ -156,7 +156,7 @@ TEST_CASE("Chunks binary operations bidirectional access") {
         REQUIRE(lz::equal(even_chunksize_uneven_size, expected, equal_fn));
     }
 
-    SECTION("Operator--") {
+    SUBCASE("Operator--") {
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8 } };
         REQUIRE(lz::equal(uneven_chunksize_even_size | lz::cached_reverse, expected | lz::reverse, equal_fn));
 
@@ -181,7 +181,7 @@ TEST_CASE("Chunks with sentinels / fwd") {
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
 
-    SECTION("Operator=") {
+    SUBCASE("Operator=") {
         auto it = even_size.begin();
         REQUIRE(it == even_size.begin());
         REQUIRE(it != even_size.end());
@@ -203,7 +203,7 @@ TEST_CASE("Chunks with sentinels / fwd") {
         return lz::equal(a, b);
     };
 
-    SECTION("Operator++") {
+    SUBCASE("Operator++") {
         std::vector<std::vector<char>> expected = { { '1', '2', '3' }, { '4', '5', '6' }, { '7', '8' } };
         REQUIRE(lz::equal(uneven_chunksize_even_size, expected, equal_fn));
 
@@ -223,7 +223,7 @@ TEST_CASE("Chunks to containers") {
     auto chunked = lz::chunks(v, 3);
     using value_type_t = decltype(chunked.begin())::value_type;
 
-    SECTION("To array") {
+    SUBCASE("To array") {
         auto arrays = chunked | lz::map([](value_type_t chunk) { return chunk | lz::to<std::array<int, 3>>(); }) |
                       lz::to<std::array<std::array<int, 3>, 3>>();
 
@@ -233,7 +233,7 @@ TEST_CASE("Chunks to containers") {
         REQUIRE(arrays == expected);
     }
 
-    SECTION("To vector") {
+    SUBCASE("To vector") {
         auto vectors =
             chunked | lz::map([](value_type_t chunk) { return chunk | lz::to<std::vector>(); }) | lz::to<std::vector>();
 
@@ -243,7 +243,7 @@ TEST_CASE("Chunks to containers") {
         REQUIRE(vectors == expected);
     }
 
-    SECTION("To other container using to()") {
+    SUBCASE("To other container using to()") {
         auto lists = chunked | lz::map([](value_type_t chunk) { return chunk | lz::to<std::list>(); }) | lz::to<std::list>();
 
         std::list<std::list<int>> expected = { std::list<int>{ 1, 2, 3 }, std::list<int>{ 4, 5, 6 }, std::list<int>{ 7, 8 } };

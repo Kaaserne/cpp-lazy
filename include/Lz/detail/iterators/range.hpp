@@ -170,9 +170,7 @@ public:
     constexpr difference_type difference(const range_iterator& b) const noexcept {
         const auto current_size = _index - b._index;
         if constexpr (std::is_floating_point_v<Arithmetic>) {
-            const auto int_part = static_cast<difference_type>(current_size);
-            const auto arithmetic_int_part = static_cast<Arithmetic>(int_part);
-            return !almost_equal(current_size, arithmetic_int_part) ? int_part + 1 : int_part;
+            return static_cast<difference_type>(current_size + (current_size < 0 ? -0.5 : 0.5));
         }
         else {
             return static_cast<difference_type>(current_size);
@@ -193,10 +191,8 @@ public:
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& b) const noexcept {
-        const auto current_size = _index - b._index;
-        const auto int_part = static_cast<difference_type>(current_size);
-        const auto arithmetic_int_part = static_cast<Arithmetic>(int_part);
-        return !almost_equal(current_size, arithmetic_int_part) ? int_part + 1 : int_part;
+        const auto diff = _index - b._index;
+        return static_cast<difference_type>(diff + (diff < 0 ? -0.5 : 0.5));
     }
 
     template<class A = Arithmetic>

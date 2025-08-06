@@ -1,4 +1,6 @@
-#include <catch2/catch_test_macros.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-TEST_CASE("1: All test cases reside in other .cpp files (empty)", "[multi-file:1]") {
+#include <doctest/doctest.h>
+
+TEST_CASE("") {
 }
