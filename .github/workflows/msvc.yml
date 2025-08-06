@@ -1,0 +1,58 @@
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+on:
+  workflow_call:
+    inputs:
+      doctest_version:
+        required: true
+        type: string
+
+jobs:
+  msvc:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-2022, windows-2025 ]
+        standard: [11, 14, 17, 20, 23]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
+      - name: Run sccache-cache
+        uses: mozilla/sccache-action@main
+        with:
+          version: "v0.8.1"
+
+      - name: Configure (install)
+        run: cmake -S . -B build/install
+          -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
+          -D CMAKE_BUILD_TYPE:STRING=Release
+          -D CMAKE_INSTALL_PREFIX=build/prefix
+          -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+          -D CMAKE_CXX_COMPILER:STRING=cl.exe
+
+      - name: Build (install)
+        run: cmake --build build/install --config Release -j $env:NUMBER_OF_PROCESSORS
+
+      - name: Install
+        run: cmake --install build/install --config Release
+
+      - name: Configure tests
+        run: cmake -S tests -B build/tests
+          -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
+          -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ inputs.doctest_version }}
+          -D TEST_INSTALLED_VERSION:BOOL=YES
+          -D CMAKE_INSTALL_PREFIX=build/prefix
+          -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+          -D CMAKE_CXX_COMPILER:STRING=cl.exe
+
+      - name: Build tests
+        run: cmake --build build/tests --config Release -j $env:NUMBER_OF_PROCESSORS
+
+      - name: Run tests
+        working-directory: build/tests
+        run: ctest -C Release --output-on-failure -VV -j $(nproc)

@@ -1,0 +1,35 @@
+jobs:
+  module_tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+      
+      - name: Add LLVM apt repo and install Clang 18
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget lsb-release gnupg
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+          clang++-18 --version
+
+      - name: Configure tests
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: cmake -S tests/module_tests -B tests/module_tests/build -G Ninja
+          -D CMAKE_CXX_STANDARD:STRING=20
+          -D CPP-LAZY_USE_MODULES=ON
+          -D CMAKE_CXX_COMPILER=clang++-18
+
+      - name: Build
+        run: cmake --build tests/module_tests/build
+      
+      - name: Run tests
+        working-directory: tests/module_tests/build
+        run: ./module_test

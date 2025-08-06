@@ -1,0 +1,81 @@
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+on:
+  workflow_call:
+    inputs:
+      doctest_version:
+        required: true
+        type: string
+
+jobs:
+  clang:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [17]
+        standard: [11, 14, 17, 20, 23]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+    
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Install Clang ${{ matrix.version }}
+        run: sudo apt-get install -y clang-${{ matrix.version }}
+      
+      - name: Install libc++ Clang ${{ matrix.version }}
+        if: matrix.standard == '20'
+        run: sudo apt-get install -y libc++-${{ matrix.version }}-dev libc++abi-${{ matrix.version }}-dev
+
+      - name: Configure (install)
+        env:
+          CC: clang-${{ matrix.version }}
+          CXX: clang-${{ matrix.version }}
+        run: |
+          if [ "${{ matrix.standard }}" = "20" ]; then
+            CXX_FLAGS='-stdlib=libc++'
+          else
+            CXX_FLAGS=''
+          fi
+          cmake -S . -B build/install -G Ninja \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }} \
+            -D CMAKE_CXX_FLAGS=$CXX_FLAGS \
+            -D CMAKE_BUILD_TYPE:STRING=Release \
+            -D CMAKE_INSTALL_PREFIX=build/prefix \
+            -D CMAKE_CXX_COMPILER=clang++ \
+            -D "CMAKE_PROJECT_FMT_INCLUDE_BEFORE=$(pwd)/cmake/fmtPICFix.cmake"
+
+      - name: Build (install)
+        run: cmake --build build/install -j $(nproc)
+
+      - name: Install
+        run: cmake --install build/install
+
+      - name: Configure tests
+        run: |
+          CXX_FLAGS=$([ "${{ matrix.standard }}" == "20" ] && echo "-stdlib=libc++")
+          cmake -S tests -B build/tests -G Ninja \
+            -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -D CMAKE_BUILD_TYPE:STRING=Release \
+            -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
+            -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ inputs.doctest_version }} \
+            -D TEST_INSTALLED_VERSION:BOOL=YES \
+            -D CMAKE_CXX_COMPILER=clang++ \
+            -D CMAKE_INSTALL_PREFIX=build/prefix \
+            -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+
+      - name: Build tests
+        run: cmake --build build/tests -j $(nproc)
+
+      - name: Run tests
+        working-directory: build/tests
+        run: ctest -VV --output-on-failure -j $(nproc)
