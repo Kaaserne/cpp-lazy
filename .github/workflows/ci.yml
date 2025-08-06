@@ -14,25 +14,21 @@ on:
   schedule:
     - cron: '0 8 * * 1'
 
-env:
-  CTEST_OUTPUT_ON_FAILURE: 1
-  DOCTEST_VERSION: '2.4.12'
-
 jobs:
   gcc:
     uses: ./.github/workflows/gcc.yml
     with:
-      doctest_version: ${{ env.DOCTEST_VERSION }}
+      doctest_version: ${{ vars.DOCTEST_VERSION }}
 
   clang:
     uses: ./.github/workflows/clang.yml
     with:
-      doctest_version: ${{ env.DOCTEST_VERSION }}
+      doctest_version: ${{ vars.DOCTEST_VERSION }}
 
   msvc:
     uses: ./.github/workflows/msvc.yml
     with:
-      doctest_version: ${{ env.DOCTEST_VERSION }}
+      doctest_version: ${{ vars.DOCTEST_VERSION }}
 
   examples:
     uses: ./.github/workflows/examples.yml
