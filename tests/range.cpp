@@ -42,7 +42,7 @@ TEST_CASE("Range permutations") {
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
 
-    SUBCASE("1 step float") {
+    SUBCASE("1 step double") {
         auto range = lz::range(0., 10., 1.);
         std::vector<doctest::Approx> expected = { doctest::Approx(0), doctest::Approx(1), doctest::Approx(2), doctest::Approx(3),
                                                   doctest::Approx(4), doctest::Approx(5), doctest::Approx(6), doctest::Approx(7),
@@ -57,7 +57,7 @@ TEST_CASE("Range permutations") {
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
 
-    SUBCASE("0.5 step float") {
+    SUBCASE("0.5 step double") {
         auto range = lz::range(0., 5.6, 0.5);
         std::vector<doctest::Approx> expected = { doctest::Approx(0),   doctest::Approx(0.5), doctest::Approx(1),
                                                   doctest::Approx(1.5), doctest::Approx(2),   doctest::Approx(2.5),
@@ -74,7 +74,7 @@ TEST_CASE("Range permutations") {
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
 
-    SUBCASE("2.5 step float") {
+    SUBCASE("2.5 step double") {
         auto range = lz::range(0., 5.5, 2.5);
         std::vector<doctest::Approx> expected = { doctest::Approx(0), doctest::Approx(2.5), doctest::Approx(5) };
         REQUIRE(lz::equal(range, expected));
@@ -98,7 +98,7 @@ TEST_CASE("Range permutations") {
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
 
-    SUBCASE("No step specified float") {
+    SUBCASE("No step specified double") {
         auto range = lz::range(10.5);
         std::vector<doctest::Approx> expected = { doctest::Approx(0), doctest::Approx(1), doctest::Approx(2), doctest::Approx(3),
                                                   doctest::Approx(4), doctest::Approx(5), doctest::Approx(6), doctest::Approx(7),
@@ -143,7 +143,7 @@ TEST_CASE("Binary operations") {
         test_procs::test_operator_minus(range);
     }
 
-    SUBCASE("With step, float") {
+    SUBCASE("With step, double") {
         auto range = lz::range(0., 5.5, 0.5);
         std::vector<doctest::Approx> expected = { doctest::Approx(0),   doctest::Approx(0.5), doctest::Approx(1),
                                                   doctest::Approx(1.5), doctest::Approx(2),   doctest::Approx(2.5),
@@ -160,7 +160,7 @@ TEST_CASE("Binary operations") {
         test_procs::test_operator_minus(range);
     }
 
-    SUBCASE("Without step, float") {
+    SUBCASE("Without step, double") {
         auto range = lz::range(10.);
         std::vector<doctest::Approx> expected = { doctest::Approx(0), doctest::Approx(1), doctest::Approx(2), doctest::Approx(3),
                                                   doctest::Approx(4), doctest::Approx(5), doctest::Approx(6), doctest::Approx(7),
@@ -183,7 +183,7 @@ TEST_CASE("Binary operations") {
         test_procs::test_operator_minus(range);
     }
 
-    SUBCASE("Without step, float, with start") {
+    SUBCASE("Without step, double, with start") {
         auto range = lz::range(2.3, 10.5);
         std::vector<doctest::Approx> expected = { doctest::Approx(2.3), doctest::Approx(3.3), doctest::Approx(4.3),
                                                   doctest::Approx(5.3), doctest::Approx(6.3), doctest::Approx(7.3),
