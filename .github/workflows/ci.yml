@@ -162,12 +162,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      # Using Ninja causes the test to fail on Github Actions
       - name: Checkout repo
         uses: actions/checkout@v1
-
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Run sccache-cache
         uses: mozilla/sccache-action@main
@@ -180,7 +176,6 @@ jobs:
           -D CMAKE_BUILD_TYPE:STRING=Release
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
-          -D CMAKE_C_COMPILER:STRING=cl.exe
           -D CMAKE_CXX_COMPILER:STRING=cl.exe
 
       - name: Build (install)
@@ -190,13 +185,12 @@ jobs:
         run: cmake --install build/install --config Release
 
       - name: Configure tests
-        run: cmake -S tests -B build/tests -G Ninja
+        run: cmake -S tests -B build/tests
           -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
           -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ env.DOCTEST_VERSION }}
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
-          -D CMAKE_C_COMPILER:STRING=cl.exe
           -D CMAKE_CXX_COMPILER:STRING=cl.exe
 
       - name: Build tests
