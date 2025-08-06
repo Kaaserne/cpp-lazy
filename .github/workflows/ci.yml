@@ -248,7 +248,6 @@ jobs:
           -D CMAKE_CXX_STANDARD:STRING=20
           -D CPP-LAZY_USE_MODULES=ON
           -D CMAKE_CXX_COMPILER=clang++-18
-          -D CMAKE_C_COMPILER=clang-18
 
       - name: Build
         run: cmake --build tests/module_tests/build
