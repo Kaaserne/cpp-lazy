@@ -3,10 +3,6 @@ env:
 
 on:
   workflow_call:
-    inputs:
-      doctest_version:
-        required: true
-        type: string
 
 jobs:
   clang:
@@ -62,12 +58,16 @@ jobs:
 
       - name: Configure tests
         run: |
-          CXX_FLAGS=$([ "${{ matrix.standard }}" == "20" ] && echo "-stdlib=libc++")
+          if [ "${{ matrix.standard }}" == "20" ]; then
+            CXX_FLAGS="-stdlib=libc++"
+          else
+            CXX_FLAGS=""
+          fi
           cmake -S tests -B build/tests -G Ninja \
             -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
-            -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ inputs.doctest_version }} \
+            -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }} \
             -D TEST_INSTALLED_VERSION:BOOL=YES \
             -D CMAKE_CXX_COMPILER=clang++ \
             -D CMAKE_INSTALL_PREFIX=build/prefix \

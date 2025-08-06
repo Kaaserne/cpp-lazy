@@ -17,18 +17,12 @@ on:
 jobs:
   gcc:
     uses: ./.github/workflows/gcc.yml
-    with:
-      doctest_version: ${{ vars.DOCTEST_VERSION }}
 
   clang:
     uses: ./.github/workflows/clang.yml
-    with:
-      doctest_version: ${{ vars.DOCTEST_VERSION }}
 
   msvc:
     uses: ./.github/workflows/msvc.yml
-    with:
-      doctest_version: ${{ vars.DOCTEST_VERSION }}
 
   examples:
     uses: ./.github/workflows/examples.yml
