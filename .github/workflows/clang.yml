@@ -6,6 +6,8 @@ on:
 
 jobs:
   clang:
+    name: clang-${{ matrix.version }} (C++${{ matrix.standard }})
+
     strategy:
       fail-fast: false
       matrix:
