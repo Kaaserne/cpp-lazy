@@ -507,6 +507,20 @@ LZ_INLINE_VAR constexpr detail::trim_adaptor trim{};
  */
 LZ_INLINE_VAR constexpr detail::iter_decay iter_decay{};
 
+/**
+ * @brief Pads the given iterable to a certain size, using `lz::concatenate` and `lz::repeat`. A size is needed to be provided
+ * to pad it to a certain size. It will return the most suitable reference type. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3 };
+ * auto padded = lz::pad(vec, 0, 2); // {1, 2, 3, 0, 0} by value
+ * auto to_pad = 3;
+ * auto padded = lz::pad(vec, to_pad, 0); // {1, 2, 3, 0, 0} by ref
+ * auto padded = lz::pad(vec, std::ref(to_pad), 0); // {1, 2, 3, 0, 0} by ref for more flexibility (copy ctors etc.)
+ * auto padded = vec | lz::pad(0, 2); // {1, 2, 3, 0, 0} by value
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::pad_adaptor pad{};
+
 } // End namespace lz
 
 #endif // LZ_ITER_TOOLS_HPP

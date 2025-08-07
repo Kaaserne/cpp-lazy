@@ -15,16 +15,16 @@ template<bool /* is infinite loop */, class>
 class repeat_iterator;
 
 template<class T>
-class repeat_iterator<false, T> : public iterator<repeat_iterator<false, T>, T, decltype(std::addressof(std::declval<T&>())),
-                                                  std::ptrdiff_t, std::random_access_iterator_tag, default_sentinel_t> {
-    mutable T _to_repeat;
+class repeat_iterator<false, T> : public iterator<repeat_iterator<false, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
+                                                  std::random_access_iterator_tag, default_sentinel_t> {
+    T _to_repeat;
     std::size_t _amount{};
 
 public:
     using iterator_category = std::random_access_iterator_tag;
-    using value_type = T;
+    using value_type = remove_cvref<T>;
     using difference_type = std::ptrdiff_t;
-    using pointer = decltype(std::addressof(std::declval<T&>()));
+    using pointer = fake_ptr_proxy<T>;
     using reference = T;
 
 #ifdef LZ_HAS_CONCEPTS
@@ -41,7 +41,7 @@ public:
 
 #endif
 
-    constexpr repeat_iterator(T to_repeat, const std::size_t start) : _to_repeat{ std::move(to_repeat) }, _amount{ start } {
+    constexpr repeat_iterator(T to_repeat, const std::size_t start) : _to_repeat{ std::forward<T>(to_repeat) }, _amount{ start } {
     }
 
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel_t) {
@@ -55,7 +55,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const noexcept {
-        return std::addressof(_to_repeat);
+        return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
@@ -90,16 +90,16 @@ public:
 };
 
 template<class T>
-class repeat_iterator<true, T>
-    : public iterator<repeat_iterator<true, T>, T&, T*, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
-    mutable T _to_repeat;
+class repeat_iterator<true, T> : public iterator<repeat_iterator<true, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
+                                                 std::forward_iterator_tag, default_sentinel_t> {
+    T _to_repeat;
 
 public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = T;
+    using value_type = remove_cvref<T>;
     using difference_type = std::ptrdiff_t;
-    using pointer = T*;
-    using reference = T&;
+    using pointer = fake_ptr_proxy<T>;
+    using reference = T;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -115,7 +115,7 @@ public:
 
 #endif
 
-    explicit constexpr repeat_iterator(T to_repeat) : _to_repeat{ std::move(to_repeat) } {
+    explicit constexpr repeat_iterator(const T& to_repeat) : _to_repeat{ to_repeat } {
     }
 
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel_t) {
@@ -127,7 +127,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_17 pointer arrow() const noexcept {
-        return std::addressof(_to_repeat);
+        return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() const noexcept {

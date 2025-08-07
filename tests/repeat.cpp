@@ -1,18 +1,18 @@
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <array>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("repeat_iterable binary operations") {
     const int amount = 5;
-    auto repeater = lz::repeat(20, amount);
+    lz::repeat_iterable<int> repeater = lz::repeat(20, amount);
     auto expected = { 20, 20, 20, 20, 20 };
 
     SUBCASE("Operator++") {
@@ -56,7 +56,10 @@ TEST_CASE("Empty or one element repeat") {
 TEST_CASE("repeat_iterable to containers") {
     constexpr auto times = 5;
     const int to_repeat = 20;
-    auto repeater = lz::repeat(to_repeat, times);
+    lz::repeat_iterable<const int&> repeater = lz::repeat(to_repeat, times);
+    REQUIRE(&(*repeater.begin()) == &to_repeat); // Ensure it is by reference
+    static_assert(std::is_const<typename std::remove_reference<decltype(*repeater.begin())>::type>::value,
+                  "Should be const reference");
 
     SUBCASE("To array") {
         std::array<int, times> array = repeater | lz::to<std::array<int, times>>();
@@ -92,7 +95,7 @@ TEST_CASE("repeat_iterable to containers") {
 
 TEST_CASE("repeat_iterable infinite") {
     int to_repeat = 20;
-    lz::repeat_iterable_inf<int> repeater = lz::repeat(to_repeat);
+    lz::repeat_iterable_inf<int&> repeater = lz::repeat(to_repeat);
 
     SUBCASE("Should be infinite") {
         std::size_t counter = 0;
@@ -107,9 +110,9 @@ TEST_CASE("repeat_iterable infinite") {
         REQUIRE(counter == 100);
     }
 
-    SUBCASE("Should not be by reference") {
+    SUBCASE("Should be by reference") {
         auto start = repeater.begin();
-        REQUIRE(&(*start) != &to_repeat);
+        REQUIRE(&(*start) == &to_repeat);
     }
 }
 

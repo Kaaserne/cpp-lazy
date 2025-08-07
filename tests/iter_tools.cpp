@@ -300,3 +300,18 @@ TEST_CASE("iter_decay") {
     auto expeted = { std::make_tuple(2, 6), std::make_tuple(4, 8) };
     REQUIRE(lz::equal(zipped, expeted));
 }
+
+TEST_CASE("Pad") {
+    std::vector<int> v1 = { 1, 2, 3 };
+    int value = 0;
+    std::size_t amount = 3;
+    auto padded = lz::pad(v1, std::ref(value), amount);
+    std::vector<int> expected = { 1, 2, 3, 0, 0, 0 };
+
+    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::equal(padded, expected));
+
+    padded = v1 | lz::pad(std::ref(value), amount);
+    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::equal(padded, expected));
+}

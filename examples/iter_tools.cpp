@@ -223,4 +223,30 @@ int main() {
     // 1 2 3 4 5
     std::cout << '\n';
 #endif
+
+    // ------------------------------------- pad ----------------------------------------------------------
+    std::vector<int> pad_numbers = { 1, 2, 3 };
+    auto padded = pad_numbers | lz::pad(0, 2); // {1, 2, 3, 0, 0} by value
+
+#ifdef LZ_HAS_CXX_11
+    lz::for_each(padded, [](int p) { std::cout << p << ' '; });
+#else
+    for (const auto d : padded) {
+        std::cout << d << ' ';
+    }
+    // 1 2 3 4 5
+    std::cout << '\n';
+#endif
+
+    auto to_pad = 3;
+    auto padded_ref = pad_numbers | lz::pad(std::ref(to_pad), 2); // {1, 2, 3, 3, 3} by reference
+#ifdef LZ_HAS_CXX_11
+    lz::for_each(padded_ref, [](int& p) { std::cout << p << ' '; });
+#else
+    for (auto& p : padded_ref) {
+        std::cout << p << ' ';
+    }
+#endif
+    // 1 2 3 3 3
+    std::cout << '\n';
 }

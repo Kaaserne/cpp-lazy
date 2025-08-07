@@ -4,12 +4,14 @@
 #define LZ_ITER_TOOLS_ADAPTORS_HPP
 
 #include <Lz/as_iterator.hpp>
+#include <Lz/concatenate.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/split.hpp>
 #include <Lz/string_view.hpp>
@@ -531,6 +533,48 @@ struct iter_decay {
     template<class IteratorTag>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, IteratorTag> operator()(IteratorTag) const {
         return {};
+    }
+};
+
+template<class Iterable, class T>
+using pad_iterable = concatenate_iterable<Iterable, lz::repeat_iterable<T>>;
+
+struct pad_adaptor {
+    using adaptor = pad_adaptor;
+
+    /**
+     * @brief Pads the given iterable to a certain size, using `lz::concatenate` and `lz::repeat`. A size is needed to be provided
+     * to pad it to a certain size. It will return the most suitable reference type. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3 };
+     * auto padded = lz::pad(vec, 0, 2); // {1, 2, 3, 0, 0} by value
+     * auto to_pad = 3;
+     * auto padded = lz::pad(vec, to_pad, 0); // {1, 2, 3, 0, 0} by ref
+     * auto padded = lz::pad(vec, std::ref(to_pad), 0); // {1, 2, 3, 0, 0} by ref for more flexibility (copy ctors etc.)
+     * ```
+     * @param iterable The iterable to pad.
+     * @param value The value to pad the iterable with.
+     * @param amount The amount of times to repeat the value.
+     */
+    template<LZ_CONCEPT_ITERABLE Iterable, class T>
+    pad_iterable<remove_ref<Iterable>, remove_rvalue_reference_t<T>>
+    operator()(Iterable&& iterable, T&& value, const std::size_t amount) const {
+        return lz::concat(std::forward<Iterable>(iterable), lz::repeat(std::forward<T>(value), amount));
+    }
+
+    /**
+     * @brief Pads the given iterable to a certain size, using `lz::concatenate` and `lz::repeat`. A size is needed to be provided
+     * to pad it to a certain size. It will return the most suitable reference type. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3 };
+     * auto padded = vec | lz::pad(0, 2); // {1, 2, 3, 0, 0} by value
+     * ```
+     * @param value The value to pad the iterable with.
+     * @param amount The amount of times to repeat the value.
+     */
+    template<class T>
+    fn_args_holder<adaptor, T, std::size_t> operator()(T&& value, const std::size_t amount) const {
+        return { std::forward<T>(value), amount };
     }
 };
 } // namespace detail

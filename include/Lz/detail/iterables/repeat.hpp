@@ -5,9 +5,22 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/repeat.hpp>
-
+// todo add extra tests for references
 namespace lz {
 namespace detail {
+
+template<class T>
+struct remove_rvalue_reference {
+    using type = T;
+};
+
+template<class T>
+struct remove_rvalue_reference<T&&> {
+    using type = T;
+};
+
+template<class T>
+using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 
 template<bool /* is infinite loop */, class>
 class repeat_iterable;
@@ -20,12 +33,12 @@ class repeat_iterable<false, T> : public lazy_view {
 public:
     using iterator = repeat_iterator<false, T>;
     using const_iterator = iterator;
-    using value_type = T;
+    using value_type = typename iterator::value_type;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr repeat_iterable()
-        requires std::default_initializable<T>
+        requires std::default_initializable<rvalue_remove_t>
     = default;
 
 #else
@@ -36,7 +49,7 @@ public:
 
 #endif
 
-    constexpr repeat_iterable(T value, const std::size_t amount) : _value{ std::move(value) }, _amount{ amount } {
+    constexpr repeat_iterable(T value, const std::size_t amount) : _value{ std::forward<T>(value) }, _amount{ amount } {
     }
 
     LZ_NODISCARD constexpr std::size_t size() const noexcept {
@@ -68,7 +81,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr repeat_iterable()
-        requires std::default_initializable<T>
+        requires std::default_initializable<rvalue_removed>
     = default;
 
 #else
@@ -79,7 +92,7 @@ public:
 
 #endif
 
-    explicit constexpr repeat_iterable(T value) : _value{ std::move(value) } {
+    explicit constexpr repeat_iterable(T value) : _value{ std::forward<T>(value) } {
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
