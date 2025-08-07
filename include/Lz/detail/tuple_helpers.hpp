@@ -151,7 +151,7 @@ struct common_reference2_helper {
     template<class X, class Y>
     static typename std::add_lvalue_reference<copy_cv<remove_ref<X>, remove_ref<Y>>>::type test(X&, Y&);
 
-    static decay_t<decltype(true ? std::declval<T>() : std::declval<U>())> test(...);
+    static typename std::common_type<T, U>::type test(...);
 
     using type = decltype(test(std::declval<T>(), std::declval<U>()));
 };
