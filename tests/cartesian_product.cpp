@@ -1,16 +1,16 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/cartesian_product.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cstddef>
 #include <doctest/doctest.h>
 #include <list>
 #include <map>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 TEST_CASE("with sentinel") {
     const char* str = "abc";

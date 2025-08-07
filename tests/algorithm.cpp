@@ -1,7 +1,7 @@
 #include <Lz/algorithm.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <deque>
 #include <doctest/doctest.h>
 #include <forward_list>

@@ -1,9 +1,9 @@
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <list>

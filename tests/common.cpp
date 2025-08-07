@@ -1,7 +1,7 @@
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <doctest/doctest.h>
 #include <list>
 #include <map>
