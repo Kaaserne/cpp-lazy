@@ -79,7 +79,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const exclusive_scan_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == b._end);
         return _iterator == b._iterator && _reached_end == b._reached_end;
     }
 

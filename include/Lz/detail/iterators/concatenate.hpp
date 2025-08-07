@@ -108,7 +108,7 @@ private:
             }
         }
         else {
-            LZ_ASSERT(std::get<0>(_iterators) != std::begin(std::get<0>(_iterables)), "Cannot decrement begin iterator");
+            LZ_ASSERT_DECREMENTABLE(std::get<0>(_iterators) != std::begin(std::get<0>(_iterables)));
             --std::get<0>(_iterators);
         }
     }
@@ -218,7 +218,7 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> minus_minus() {
-        LZ_ASSERT(std::begin(std::get<0>(_iterables)) != std::end(std::get<0>(_iterables)), "Cannot decrement end iterator");
+        LZ_ASSERT_DECREMENTABLE(std::begin(std::get<0>(_iterables)) != std::end(std::get<0>(_iterables)));
         --std::get<0>(_iterators);
     }
 
@@ -330,9 +330,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const concatenate_iterator& other) const {
-        LZ_ASSERT(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
-                      end_maybe_homo(_iterables) == end_maybe_homo(other._iterables),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
+                            end_maybe_homo(_iterables) == end_maybe_homo(other._iterables));
         return minus(make_index_sequence<tuple_size>(), other);
     }
 
@@ -341,9 +340,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& other) const {
-        LZ_ASSERT(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
-                      end_maybe_homo(_iterables) == end_maybe_homo(other._iterables),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
+                            end_maybe_homo(_iterables) == end_maybe_homo(other._iterables));
         return iter_equal_to<0>(other._iterators);
     }
 

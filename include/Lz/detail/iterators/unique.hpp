@@ -83,7 +83,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != std::begin(_iterable));
         --_iterator;
         if (_iterator == std::begin(_iterable)) {
             return;

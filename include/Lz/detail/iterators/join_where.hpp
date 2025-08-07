@@ -122,7 +122,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const join_where_iterator& b) const {
-        LZ_ASSERT(std::end(_iterable_a) == std::end(b._iterable_a), "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::end(_iterable_a) == std::end(b._iterable_a));
         return _iter_a == b._iter_a;
     }
 

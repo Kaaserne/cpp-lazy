@@ -79,7 +79,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
-        LZ_ASSERT(_end == b._end && _offset == b._offset, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == b._end && _offset == b._offset);
         return _iterator == b._iterator;
     }
 
@@ -163,7 +163,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
-        LZ_ASSERT(_end == b._end && _offset == b._offset, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == b._end && _offset == b._offset);
         return _iterator == b._iterator;
     }
 
@@ -251,7 +251,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != std::begin(_iterable));
         const auto remaining = static_cast<std::size_t>(_iterator - std::begin(_iterable));
         const auto rem = remaining % _offset;
         _iterator -= rem == 0 ? static_cast<difference_type>(_offset) : static_cast<difference_type>(rem);
@@ -284,9 +284,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
-                      std::begin(_iterable) == std::begin(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
+                            std::begin(_iterable) == std::begin(other._iterable));
         return difference_impl(other._iterator);
     }
 
@@ -295,9 +294,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& other) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
-                      std::begin(_iterable) == std::begin(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
+                            std::begin(_iterable) == std::begin(other._iterable));
         return _iterator == other._iterator;
     }
 

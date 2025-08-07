@@ -88,7 +88,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const exclude_iterator& other) const {
-        LZ_ASSERT(_from == other._from && _to == other._to, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_from == other._from && _to == other._to);
         const auto diff = _index - other._index;
 
         if (_iterator > other._iterator) {
@@ -120,7 +120,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const exclude_iterator& b) const {
-        LZ_ASSERT(_from == b._from && _to == b._to, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_from == b._from && _to == b._to);
         return _iterator == b._iterator;
     }
 

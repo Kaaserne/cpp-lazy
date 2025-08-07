@@ -95,7 +95,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& b) const noexcept {
-        LZ_ASSERT(_generator == b._generator, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_generator == b._generator);
         return _current == b._current;
     }
 

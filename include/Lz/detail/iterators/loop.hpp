@@ -110,8 +110,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& other) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
+                            std::end(_iterable) == std::end(other._iterable));
         const auto rotations_left_diff =
             static_cast<difference_type>(other._rotations_left) - static_cast<difference_type>(_rotations_left);
         return (_iterator - other._iterator) + rotations_left_diff * (std::end(_iterable) - std::begin(_iterable));
@@ -123,8 +123,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const loop_iterator& other) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
+                            std::end(_iterable) == std::end(other._iterable));
         return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
 

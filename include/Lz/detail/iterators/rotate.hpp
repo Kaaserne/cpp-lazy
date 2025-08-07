@@ -80,7 +80,7 @@ public:
         if (_iterator == std::begin(_iterable)) {
             _iterator = std::end(_iterable);
         }
-        LZ_ASSERT(_offset != 0 && _iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_offset != 0 && _iterator != std::begin(_iterable));
         --_iterator;
         --_offset;
     }
@@ -106,8 +106,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
+                            std::end(_iterable) == std::end(other._iterable));
         return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
@@ -116,8 +116,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& b) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable));
         return _offset == b._offset || (_iterator == std::end(_iterable) && b._iterator == std::end(b._iterable));
     }
 

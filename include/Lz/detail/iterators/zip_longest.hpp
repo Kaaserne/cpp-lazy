@@ -185,7 +185,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_17 bool eq(const zip_longest_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == b._end);
         return eq(b, is{});
     }
 
@@ -253,7 +253,7 @@ private:
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
         const auto longest = std::max({ std::get<I>(_distances)... });
-        LZ_ASSERT(longest > 0, "Cannot decrement before begin");
+        LZ_ASSERT_DECREMENTABLE(longest > 0);
 #ifdef LZ_HAS_CXX_17
         ((std::get<I>(_distances) == longest ? static_cast<void>(--std::get<I>(_iterators), --std::get<I>(_distances))
                                              : (void)(0)),
@@ -411,7 +411,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const zip_longest_iterator& other) const {
-        LZ_ASSERT(_end == other._end, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == other._end);
         return minus(other, is{});
     }
 
@@ -420,7 +420,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == b._end);
         return eq(b, is{});
     }
 

@@ -85,7 +85,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const cached_reverse_iterator& other) const {
-        LZ_ASSERT(other._begin == _begin, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(other._begin == _begin);
         return static_cast<difference_type>(other._iterator - _iterator);
     }
 

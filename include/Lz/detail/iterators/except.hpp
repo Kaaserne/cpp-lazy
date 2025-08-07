@@ -97,7 +97,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != std::begin(_iterable));
         do {
             --_iterator;
             const auto it = sized_lower_bound(std::begin(_to_except), *_iterator, _predicate,
@@ -109,9 +109,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const except_iterator& b) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(b._iterable) && std::begin(_iterable) == std::begin(b._iterable) &&
-                      std::begin(_to_except) == std::begin(b._to_except) && std::end(_to_except) == std::end(b._to_except),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::end(_iterable) == std::end(b._iterable) && std::begin(_iterable) == std::begin(b._iterable) &&
+                            std::begin(_to_except) == std::begin(b._to_except) && std::end(_to_except) == std::end(b._to_except));
         return _iterator == b._iterator;
     }
 

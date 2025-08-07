@@ -155,23 +155,27 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
     
     std::terminate();
 }
-
+// TODO do all incompatible
 #define LZ_ASSERT(CONDITION, MSG)                                                                                                \
     ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
 #define LZ_ASSERT_INCREMENTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot increment after end")
+#define LZ_ASSERT_DECREMENTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot decrement after end")
 #define LZ_ASSERT_DEREFERENCABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot dereference end")
 #define LZ_ASSERT_ADDABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot add after end")
 #define LZ_ASSERT_SUBTRACTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot subtract after end")
 #define LZ_ASSERT_SUB_ADDABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot add after end/cannot subtract before begin")
+#define LZ_ASSERT_COMPTABLE(CONDITION) LZ_ASSERT(CONDITION, "Incompatible iterators")
 
 #else // ^^ defined(LZ_USE_DEBUG_ASSERTIONS) vv !defined(LZ_USE_DEBUG_ASSERTIONS)
 
 #define LZ_ASSERT(CONDITION, MSG)
 #define LZ_ASSERT_INCREMENTABLE(CONDITION)
+#define LZ_ASSERT_DECREMENTABLE(CONDITION)
 #define LZ_ASSERT_DEREFERENCABLE(CONDITION)
 #define LZ_ASSERT_ADDABLE(CONDITION)
 #define LZ_ASSERT_SUBTRACTABLE(CONDITION)
 #define LZ_ASSERT_SUB_ADDABLE(CONDITION)
+#define LZ_ASSERT_COMPTABLE(CONDITION)
 
 #endif // defined(LZ_USE_DEBUG_ASSERTIONS)
 

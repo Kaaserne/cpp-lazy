@@ -109,8 +109,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator1 != std::begin(_iterable1) && _iterator2 != std::begin(_iterable2),
-                  "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator1 != std::begin(_iterable1) && _iterator2 != std::begin(_iterable2));
         --_iterator2, --_iterator1;
 
         while (_iterator2 != std::begin(_iterable2) && _iterator1 != std::begin(_iterable1)) {
@@ -129,10 +128,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const intersection_iterator& other) const {
-        LZ_ASSERT(std::begin(_iterable1) == std::begin(other._iterable1) && std::end(_iterable1) == std::end(other._iterable1) &&
-                      std::begin(_iterable2) == std::begin(other._iterable2) &&
-                      std::end(_iterable2) == std::end(other._iterable2),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(
+            std::begin(_iterable1) == std::begin(other._iterable1) && std::end(_iterable1) == std::end(other._iterable1) &&
+            std::begin(_iterable2) == std::begin(other._iterable2) && std::end(_iterable2) == std::end(other._iterable2));
         return _iterator1 == other._iterator1;
     }
 

@@ -146,8 +146,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& b) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable));
         return _iterator == b._iterator;
     }
 
@@ -170,7 +169,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != std::begin(_iterable));
         --_iterator;
     }
 
@@ -180,8 +179,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
+                            std::end(_iterable) == std::end(other._iterable));
         return _iterator - other._iterator;
     }
 

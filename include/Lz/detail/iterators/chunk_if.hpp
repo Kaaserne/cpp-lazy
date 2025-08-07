@@ -114,7 +114,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunk_if_iterator& rhs) const {
-        LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_end == rhs._end);
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _ends_with_trailing == rhs._ends_with_trailing;
     }

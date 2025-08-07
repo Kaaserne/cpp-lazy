@@ -89,7 +89,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_first != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_first != std::begin(_iterable));
         _last = _first;
 
         for (--_first; _first != std::begin(_iterable); --_first) {
@@ -101,8 +101,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
+                            std::end(_iterable) == std::end(other._iterable));
         return _first == other._first;
     }
 
@@ -197,7 +197,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_first != std::begin(_iterable), "Cannot decrement before beginning of iterable");
+        LZ_ASSERT_DECREMENTABLE(_first != std::begin(_iterable));
         _last_distance = 1;
         _last = _first;
 
@@ -210,8 +210,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const duplicates_iterator& other) const {
-        LZ_ASSERT(std::begin(_iterable) == std::begin(other._iterable) && std::end(_iterable) == std::end(other._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
+                            std::end(_iterable) == std::end(other._iterable));
         return _first == other._first;
     }
 

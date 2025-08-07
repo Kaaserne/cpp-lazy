@@ -99,7 +99,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_sub_range_begin != std::begin(_iterable));
         _sub_range_end = _sub_range_begin;
         auto prev = --_sub_range_begin;
 
@@ -116,8 +116,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& rhs) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(rhs._iterable) && std::begin(_iterable) == std::begin(rhs._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::end(_iterable) == std::end(rhs._iterable) && std::begin(_iterable) == std::begin(rhs._iterable));
         return _sub_range_begin == rhs._sub_range_begin;
     }
 

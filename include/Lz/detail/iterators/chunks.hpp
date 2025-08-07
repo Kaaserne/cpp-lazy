@@ -81,7 +81,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_chunk_size == rhs._chunk_size);
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -161,7 +161,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_distance != 0, "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_distance != 0);
         _sub_range_end = _sub_range_begin;
 
         auto start_pos = _distance % _chunk_size;
@@ -172,7 +172,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size && _end == rhs._end, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_chunk_size == rhs._chunk_size && _end == rhs._end);
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -250,7 +250,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_sub_range_begin != std::begin(_iterable));
         const auto remaining = static_cast<std::size_t>(_sub_range_begin - std::begin(_iterable));
         const auto offset = remaining % _chunk_size;
 
@@ -263,7 +263,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_chunk_size == rhs._chunk_size);
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -298,9 +298,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size && std::begin(_iterable) == std::begin(rhs._iterable) &&
-                      std::end(_iterable) == std::end(rhs._iterable),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(_chunk_size == rhs._chunk_size && std::begin(_iterable) == std::begin(rhs._iterable) &&
+                            std::end(_iterable) == std::end(rhs._iterable));
         const auto left = _sub_range_begin - rhs._sub_range_begin;
         const auto remainder = left % static_cast<difference_type>(_chunk_size);
         const auto quotient = left / static_cast<difference_type>(_chunk_size);

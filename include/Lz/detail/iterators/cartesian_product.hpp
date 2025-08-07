@@ -69,7 +69,7 @@ private:
                 previous<I - 1>();
             }
         }
-        LZ_ASSERT(std::get<I>(_iterators) != std::begin(std::get<I>(_iterables)), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(std::get<I>(_iterators) != std::begin(std::get<I>(_iterables)));
         --std::get<I>(_iterators);
     }
 
@@ -121,7 +121,7 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> previous() {
-        LZ_ASSERT(std::get<0>(_iterators) != std::begin(std::get<0>(_iterables)), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(std::get<0>(_iterators) != std::begin(std::get<0>(_iterables)));
         --std::get<0>(_iterators);
     }
 
@@ -131,7 +131,7 @@ private:
             std::get<I>(_iterators) = std::end(std::get<I>(_iterables));
             previous<I - 1>();
         }
-        LZ_ASSERT(std::get<I>(_iterators) != std::begin(std::get<I>(_iterables)), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(std::get<I>(_iterators) != std::begin(std::get<I>(_iterables)));
         --std::get<I>(_iterators);
     }
 
@@ -175,9 +175,8 @@ private:
     template<std::ptrdiff_t I>
     constexpr void iter_compat(const cartesian_product_iterator& other) const {
         if constexpr (I >= 0) {
-            LZ_ASSERT(std::begin(std::get<I>(_iterables)) == std::begin(std::get<I>(other._iterables)) &&
-                          std::end(std::get<I>(_iterables)) == std::end(std::get<I>(other._iterables)),
-                      "Incompatible iterators");
+            LZ_ASSERT_COMPTABLE(std::begin(std::get<I>(_iterables)) == std::begin(std::get<I>(other._iterables)) &&
+                                std::end(std::get<I>(_iterables)) == std::end(std::get<I>(other._iterables)));
             iter_compat<I - 1>(other);
         }
     }
@@ -210,9 +209,8 @@ private:
 
     template<std::ptrdiff_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)> iter_compat(const cartesian_product_iterator& other) const {
-        LZ_ASSERT(std::begin(std::get<I>(_iterables)) == std::begin(std::get<I>(other._iterables)) &&
-                      std::end(std::get<I>(_iterables)) == std::end(std::get<I>(other._iterables)),
-                  "Incompatible iterators");
+        LZ_ASSERT_COMPTABLE(std::begin(std::get<I>(_iterables)) == std::begin(std::get<I>(other._iterables)) &&
+                            std::end(std::get<I>(_iterables)) == std::end(std::get<I>(other._iterables)));
         iter_compat<I - 1>(other);
     }
 
