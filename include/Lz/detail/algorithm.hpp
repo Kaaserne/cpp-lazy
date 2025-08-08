@@ -6,6 +6,7 @@
 #include <Lz/detail/iterables/reverse.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
+#include <Lz/optional.hpp>
 
 #if defined(LZ_HAS_CXX_17)
 #include <functional> // std::not_fn
@@ -44,6 +45,47 @@ LZ_CONSTEXPR_CXX_14 bool has_one(Iterator begin, S end) {
 template<class Iterator, class S>
 LZ_CONSTEXPR_CXX_14 bool has_many(Iterator begin, S end) {
     return !detail::empty(begin, end) && !detail::has_one(begin, end);
+}
+
+#ifdef LZ_HAS_CXX_17
+
+template<class Iterator>
+constexpr auto get_value_or_reference(Iterator begin) {
+    if constexpr (std::is_lvalue_reference<ref_t<Iterator>>::value) {
+        return optional<std::reference_wrapper<remove_ref<ref_t<Iterator>>>>{ *begin };
+    }
+    else {
+        return optional<val_t<Iterator>>{ *begin };
+    }
+}
+
+#else
+
+template<class Iterator>
+LZ_CONSTEXPR_CXX_14
+    enable_if<std::is_lvalue_reference<ref_t<Iterator>>::value, optional<std::reference_wrapper<remove_ref<ref_t<Iterator>>>>>
+    get_value_or_reference(Iterator begin) {
+    return std::reference_wrapper<remove_ref<ref_t<Iterator>>>{ *begin };
+}
+
+template<class Iterator>
+LZ_CONSTEXPR_CXX_14 enable_if<!std::is_lvalue_reference<ref_t<Iterator>>::value, optional<val_t<Iterator>>>
+get_value_or_reference(Iterator begin) {
+    return *begin;
+}
+
+#endif
+
+template<class Iterator, class S>
+LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(get_value_or_reference(begin)) {
+    if (begin == end) {
+        return nullopt;
+    }
+    ++begin;
+    if (begin == end) {
+        return nullopt;
+    }
+    return get_value_or_reference(begin);
 }
 
 template<class Iterator, class S>

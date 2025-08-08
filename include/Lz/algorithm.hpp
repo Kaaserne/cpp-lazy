@@ -47,6 +47,31 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
 }
 
 /**
+ * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the sequence.
+ * If the iterable is already at end, an empty optional is returned.
+ *
+ * @param iterable
+ * @return A (std::)optional of reference wrapper if the sequence is a reference, value if it is not.
+ * detail::end(std::forward<Iterable>(iterable))))
+ */
+template<class Iterator, class S>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(detail::peek(begin, end)) {
+    return detail::peek(begin, end);
+}
+
+/**
+ * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the sequence.
+ * If the iterable is already at end, an empty optional is returned.
+ * @param iterable
+ * @return A (std::)optional of reference wrapper if the sequence is a reference, value if it is not.
+ */
+template<class Iterable>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterable&& iterable)
+    -> decltype(lz::peek(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)))) {
+    return lz::peek(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
+}
+
+/**
  * @brief Gets the first element of the sequence. The sequence cannot be empty.
  *
  * @param iterable The iterable to get the first value of.
