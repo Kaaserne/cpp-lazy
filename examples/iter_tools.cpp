@@ -230,23 +230,26 @@ int main() {
 
 #ifdef LZ_HAS_CXX_11
     lz::for_each(padded, [](int p) { std::cout << p << ' '; });
+    // 1 2 3 0 0
 #else
     for (const auto d : padded) {
         std::cout << d << ' ';
     }
-    // 1 2 3 4 5
-    std::cout << '\n';
+    // 1 2 3 0 0
 #endif
+    std::cout << '\n';
 
     auto to_pad = 3;
     auto padded_ref = pad_numbers | lz::pad(std::ref(to_pad), 2); // {1, 2, 3, 3, 3} by reference
 #ifdef LZ_HAS_CXX_11
     lz::for_each(padded_ref, [](int& p) { std::cout << p << ' '; });
+    // 1 2 3 3 3
 #else
     for (auto& p : padded_ref) {
         std::cout << p << ' ';
     }
 #endif
-    // 1 2 3 3 3
     std::cout << '\n';
+
+    // 1 2 3 3 3
 }
