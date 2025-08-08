@@ -26,7 +26,7 @@ struct drop_adaptor {
      * @param n The amount of elements to drop
      * @return A drop_iterable that will drop the first n elements of the input iterable
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, const std::size_t n) const {
         return { iterable, n };
     }

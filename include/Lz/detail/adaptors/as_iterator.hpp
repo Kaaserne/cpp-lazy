@@ -33,7 +33,7 @@ struct as_iterator_adaptor {
      * @param iterable
      * @return An `as_iterator_iterable` that contains the iterators of the iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr as_iterator_iterable<remove_ref<Iterable>, iter_cat_iterable_t<Iterable>>
     operator()(Iterable&& iterable) const {
         return as_iterator_iterable<remove_ref<Iterable>, iter_cat_iterable_t<Iterable>>{ std::forward<Iterable>(iterable) };
@@ -56,7 +56,7 @@ struct as_iterator_adaptor {
      * @param IterCat The iterator category to decay the iterable to
      * @return An `as_iterator_iterable` that contains the iterators of the iterable decayed to the iterator category `IterCat`.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class IterCat>
+    template<class Iterable, class IterCat>
     LZ_NODISCARD constexpr as_iterator_iterable<remove_ref<Iterable>, IterCat> operator()(Iterable&& iterable, IterCat) const {
         return as_iterator_iterable<remove_ref<Iterable>, IterCat>{ std::forward<Iterable>(iterable) };
     }

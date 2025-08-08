@@ -24,7 +24,7 @@ struct map_adaptor {
      * @param function The function to apply to each element in the iterable
      * @return A map_iterable that applies the function to each element in the iterable
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class Function>
+    template<class Iterable, class Function>
     constexpr map_iterable<remove_ref<Iterable>, Function> operator()(Iterable&& iterable, Function function) const {
         return { std::forward<Iterable>(iterable), std::move(function) };
     }

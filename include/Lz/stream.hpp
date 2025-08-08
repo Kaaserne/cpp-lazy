@@ -51,7 +51,7 @@ struct iterable_formatter {
      * @param format The format to use for each element. Default is "{}"
      * @return The stream object
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     std::ostream&
     operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
         auto it = std::begin(iterable);
@@ -108,7 +108,7 @@ struct iterable_formatter {
      * @param separator The separator to use between elements. Default is ", "
      * @return The stream object
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     std::ostream& operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
         auto it = std::begin(iterable);
         auto end = std::end(iterable);
@@ -213,7 +213,7 @@ struct iterable_formatter {
      * @param format The format to use for each element. Default is "{}"
      * @return The string representation of the iterable, with the given separator and format.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
 #if FMT_VERSION >= 80000
 
@@ -243,7 +243,7 @@ struct iterable_formatter {
      * @param format The format to use for each element. Default is "{}"
      * @return The string representation of the iterable, with the given separator and format.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
         auto it = std::begin(iterable);
         auto end = std::end(iterable);
@@ -280,7 +280,7 @@ struct iterable_formatter {
      * @param separator The separator to use between elements. Default is ", "
      * @return The string representation of the iterable, with the given separator.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ") const {
         std::ostringstream oss;
         (*this)(iterable, oss, separator);
@@ -343,7 +343,7 @@ LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
  * @param stream The stream to output to
  * @param iterable The `lz` iterable to output
  */
-LZ_MODULE_EXPORT template<LZ_CONCEPT_ITERABLE Iterable>
+LZ_MODULE_EXPORT template<class Iterable>
 lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
 operator<<(std::ostream& stream, const Iterable& iterable) {
     return lz::format(iterable, stream);

@@ -40,7 +40,7 @@ struct common_adaptor {
      * @param iterable The iterable to create a common view from.
      * @return A common iterable that can be used with algorithms that require a common iterator.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     [[nodiscard]] constexpr auto operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
 
@@ -76,7 +76,7 @@ struct common_adaptor {
      * @param iterable The iterable to create a common view from.
      * @return A common iterable that can be used with algorithms that require a common iterator.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr enable_if<!is_ra<iter_t<Iterable>>::value, common_iterable<remove_ref<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
@@ -104,7 +104,7 @@ struct common_adaptor {
      * @param iterable The iterable to create a common view from.
      * @return A common iterable/basic_iterable that can be used with algorithms that require a common iterator.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr enable_if<is_ra<iter_t<Iterable>>::value, basic_iterable<iter_t<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");

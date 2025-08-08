@@ -25,7 +25,7 @@ struct take_while_adaptor {
      * @param unary_predicate The predicate that indicates while to take elements.
      * @return A take_while_iterable that will yield elements from the input iterable while the predicate returns true.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr take_while_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(unary_predicate) };

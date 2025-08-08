@@ -45,7 +45,7 @@ struct exclude_adaptor {
      * @param to The end index to exclude.
      * @return An iterable that excludes the elements from the specified range.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class DiffType>
+    template<class Iterable, class DiffType>
     LZ_NODISCARD constexpr exclude_iterable<remove_ref<Iterable>>
     operator()(Iterable&& iterable, DiffType from, DiffType to) const {
         return { std::forward<Iterable>(iterable), from, to };

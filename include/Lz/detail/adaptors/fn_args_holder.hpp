@@ -22,7 +22,7 @@ public:
     }
 
 private:
-    template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
+    template<class Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
                index_sequence<I...>) const& -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
@@ -30,7 +30,7 @@ private:
         return Adaptor{}(std::forward<Iterable>(iterable), std::get<I>(_data)...);
     }
 
-    template<LZ_CONCEPT_ITERABLE Iterable, std::size_t... I>
+    template<class Iterable, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
                index_sequence<I...>) && -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
@@ -39,13 +39,13 @@ private:
     }
 
 public:
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_CONSTEXPR_CXX_14 auto operator()(Iterable&& iterable) const& -> decltype((*this)(std::forward<Iterable>(iterable),
                                                                                         make_index_sequence<sizeof...(Ts)>{})) {
         return (*this)(std::forward<Iterable>(iterable), make_index_sequence<sizeof...(Ts)>{});
     }
 
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable) && -> decltype(std::move(*this)(std::forward<Iterable>(iterable),
                                                                     make_index_sequence<sizeof...(Ts)>{})) {

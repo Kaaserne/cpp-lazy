@@ -45,7 +45,7 @@ struct chunks_adaptor {
      * @param chunk_size The size of the chunks
      * @return An iterable of iterables, where each inner iterable is a chunk of the original iterable
      **/
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     constexpr chunks_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, std::size_t chunk_size) const {
         return { std::forward<Iterable>(iterable), chunk_size };
     }

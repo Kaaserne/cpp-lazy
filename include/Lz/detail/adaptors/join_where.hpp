@@ -35,7 +35,7 @@ struct join_where_adaptor {
      * b(*iter_b)`) is met
      * @return A join_where_iterable that can be used to iterate over the joined elements
      */
-    template<LZ_CONCEPT_ITERABLE IterableA, LZ_CONCEPT_ITERABLE IterableB, class SelectorA, class SelectorB, class ResultSelector>
+    template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
     LZ_NODISCARD constexpr join_where_iterable<remove_ref<IterableA>, remove_ref<IterableB>, SelectorA, SelectorB, ResultSelector>
     operator()(IterableA&& iterable_a, IterableB&& iterable_b, SelectorA a, SelectorB b, ResultSelector result_selector) const {
         return { std::forward<IterableA>(iterable_a), std::forward<IterableB>(iterable_b), std::move(a), std::move(b),
@@ -64,9 +64,8 @@ struct join_where_adaptor {
      * b(*iter_b)`) is met
      * @return An adaptor that can be used in pipe expressions
      */
-    template<LZ_CONCEPT_ITERABLE IterableB, class SelectorA, class SelectorB, class ResultSelector>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    fn_args_holder<adaptor, IterableB, SelectorA, SelectorB, ResultSelector>
+    template<class IterableB, class SelectorA, class SelectorB, class ResultSelector>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, IterableB, SelectorA, SelectorB, ResultSelector>
     operator()(IterableB&& iterable_b, SelectorA a, SelectorB b, ResultSelector result_selector) const {
         return { std::forward<IterableB>(iterable_b), std::move(a), std::move(b), std::move(result_selector) };
     }

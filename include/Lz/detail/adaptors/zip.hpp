@@ -51,7 +51,7 @@ struct zip_adaptor {
      * @param iterables The iterables to zip together
      * @return A zip_iterable containing the zipped iterables
      */
-    template<LZ_CONCEPT_ITERABLE... Iterables>
+    template<class... Iterables>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {
         return { std::forward<Iterables>(iterables)... };
     }

@@ -115,7 +115,7 @@ struct lines_adaptor {
      * @param string The string to split on "\n".
      * @return A lines_iterable that can be iterated over, containing the substrings.
      */
-    template<LZ_CONCEPT_ITERABLE String>
+    template<class String>
     LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref<String>> operator()(String&& string) const {
         using char_type = val_iterable_t<String>;
         return lz::sv_split(std::forward<String>(string), static_cast<char_type>('\n'));
@@ -196,7 +196,7 @@ public:
      * @param iterable The iterable to iterate over.
      * @return A pairwise_n_iterable that can be iterated over, containing tuples of adjacent elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr auto
     operator()(Iterable&& iterable) const -> decltype(pairwise_n_construct(std::forward<Iterable>(iterable),
                                                                            make_index_sequence<Neighbours>())) {
@@ -226,7 +226,7 @@ struct get_n_adaptor {
      * @param iterable The iterable to get the nth element from.
      * @return A map iterable that can be iterated over, containing the nth elements of the tuples in the iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr get_nth_iterable<remove_ref<Iterable>, N> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), get_fn<N>{});
     }
@@ -251,7 +251,7 @@ struct get_nths_adaptor {
      * @param iterable The iterable to get the nth elements from.
      * @return A zip iterable that can be iterated over, containing the nth elements of the tuples in the iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 get_nths_iterable<remove_ref<Iterable>, N...> operator()(Iterable&& iterable) const {
         return lz::zip(get_n_adaptor<N>{}(std::forward<Iterable>(iterable))...);
     }
@@ -275,7 +275,7 @@ struct filter_map_adaptor {
      * @param unary_op The function to map the filtered elements with.
      * @return A filter_map_iterable that can be iterated over, containing the mapped elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryFilterPredicate, class UnaryMapOp>
+    template<class Iterable, class UnaryFilterPredicate, class UnaryMapOp>
     LZ_NODISCARD constexpr filter_map_iterable<remove_ref<Iterable>, UnaryFilterPredicate, UnaryMapOp>
     operator()(Iterable&& iterable, UnaryFilterPredicate predicate, UnaryMapOp unary_op) const {
         return lz::map(lz::filter(std::forward<Iterable>(iterable), std::move(predicate)), std::move(unary_op));
@@ -317,7 +317,7 @@ struct select_adaptor {
      * @param selectors The iterable of selectors (booleans).
      * @return A select_iterable that can be iterated over, containing the selected elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE SelectorIterable>
+    template<class Iterable, class SelectorIterable>
     LZ_NODISCARD constexpr select_iterable<remove_ref<Iterable>, remove_ref<SelectorIterable>>
     operator()(Iterable&& iterable, SelectorIterable&& selectors) const {
         return filter_map_adaptor{}(lz::zip(std::forward<Iterable>(iterable), std::forward<SelectorIterable>(selectors)),
@@ -359,7 +359,7 @@ struct drop_back_while_adaptor {
      * @param predicate The predicate to determine which elements to drop from the back.
      * @return A drop_back_iterable that can be iterated over, containing the elements
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr drop_back_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return lz::reverse(lz::drop_while(lz::reverse(std::forward<Iterable>(iterable)), std::move(predicate)));
@@ -400,7 +400,7 @@ struct trim_adaptor {
      * @param last The predicate to determine which elements to drop from the back.
      * @return A trim_iterable that can be iterated over, containing the trimmed elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
+    template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
     LZ_NODISCARD constexpr trim_iterable<remove_ref<Iterable>, UnaryPredicateFirst, UnaryPredicateLast>
     operator()(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) const {
         return drop_back_while_adaptor{}(lz::drop_while(std::forward<Iterable>(iterable), std::move(first)), std::move(last));
@@ -493,7 +493,7 @@ struct iter_decay {
      * @param IteratorTag The tag that specifies the iterator category to decay to.
      * @return An iterable with the iterator category of the given tag @p IteratorTag.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class IteratorTag>
+    template<class Iterable, class IteratorTag>
     LZ_NODISCARD constexpr map_iterable<as_iterator_iterable<remove_ref<Iterable>, IteratorTag>, deref_fn>
     operator()(Iterable&& iterable, IteratorTag) const {
         return lz::map(lz::as_iterator(std::forward<Iterable>(iterable), IteratorTag{}), deref_fn{});
@@ -556,7 +556,7 @@ struct pad_adaptor {
      * @param value The value to pad the iterable with.
      * @param amount The amount of times to repeat the value.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class T>
+    template<class Iterable, class T>
     pad_iterable<remove_ref<Iterable>, remove_rvalue_reference_t<T>>
     operator()(Iterable&& iterable, T&& value, const std::size_t amount) const {
         return lz::concat(std::forward<Iterable>(iterable), lz::repeat(std::forward<T>(value), amount));

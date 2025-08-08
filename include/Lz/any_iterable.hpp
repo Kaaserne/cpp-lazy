@@ -79,7 +79,7 @@ public:
      *
      * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     any_iterable(Iterable&& iterable) : any_iterable(std::forward<Iterable>(iterable), 0) {
     }
 
@@ -112,7 +112,7 @@ public:
  * @param iterable The iterable to create an any_iterable from.
  * @return The any_iterable object.
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
+template<class Iterable>
 any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>, diff_iterable_t<Iterable>>
 make_any_iterable(Iterable&& iterable) {
     return any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>,

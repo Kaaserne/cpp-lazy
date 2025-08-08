@@ -22,12 +22,9 @@ LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_17
 
-template<class T>
-using optional = std::optional<T>;
-
-using nullopt_t = std::nullopt_t;
-
-constexpr inline nullopt_t nullopt = std::nullopt;
+using std::optional;
+using std::nullopt_t;
+using std::nullopt;
 
 #else
 

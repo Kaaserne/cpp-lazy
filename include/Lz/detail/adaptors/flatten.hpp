@@ -73,7 +73,7 @@ struct flatten_adaptor {
      * @param iterable The iterable(s) to flatten
      * @return An iterable that is flattened, with the same type as the input iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     flatten_iterable<remove_ref<Iterable>, dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>
     operator()(Iterable&& iterable) const {
