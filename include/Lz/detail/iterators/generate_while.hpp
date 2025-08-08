@@ -38,7 +38,7 @@ public:
 #endif
 
     using reference = tup_element<1, fn_return_type>;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 

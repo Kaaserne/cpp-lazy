@@ -44,7 +44,7 @@ class group_by_iterator
     }
 
 public:
-    using value_type = std::pair<decay_t<ref_type>, basic_iterable<it>>;
+    using value_type = std::pair<remove_cvref<ref_type>, basic_iterable<it>>;
     using reference = std::pair<ref_type, basic_iterable<it>>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;

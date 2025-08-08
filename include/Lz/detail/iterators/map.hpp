@@ -22,7 +22,7 @@ class map_iterator
 
 public:
     using reference = decltype(_unary_op(*_iterator));
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using iterator_category = typename traits::iterator_category;
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;

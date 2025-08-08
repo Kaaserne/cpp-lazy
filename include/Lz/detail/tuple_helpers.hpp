@@ -234,15 +234,17 @@ private:
 
 public:
     template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Tuple&& tuple)
-        -> decltype(call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{});
+    LZ_CONSTEXPR_CXX_14 auto
+    operator()(Tuple&& tuple) -> decltype(call(std::forward<Tuple>(tuple),
+                                               make_index_sequence<std::tuple_size<remove_cvref<Tuple>>::value>{})) {
+        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<remove_cvref<Tuple>>::value>{});
     }
 
     template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Tuple&& tuple) const
-        -> decltype(call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<decay_t<Tuple>>::value>{});
+    LZ_CONSTEXPR_CXX_14 auto
+    operator()(Tuple&& tuple) const -> decltype(call(std::forward<Tuple>(tuple),
+                                                     make_index_sequence<std::tuple_size<remove_cvref<Tuple>>::value>{})) {
+        return call(std::forward<Tuple>(tuple), make_index_sequence<std::tuple_size<remove_cvref<Tuple>>::value>{});
     }
 };
 

@@ -23,7 +23,7 @@ class generate_iterator<GeneratorFunc, false>
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
@@ -84,7 +84,7 @@ class generate_iterator<GeneratorFunc, true>
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 

@@ -24,7 +24,7 @@ private:
     using value_type_b = typename traits_b::value_type;
     using ref_type_a = typename traits_a::reference;
 
-    using selector_a_ret_val = decay_t<func_ret_type<SelectorA, ref_type_a>>;
+    using selector_a_ret_val = remove_cvref<func_ret_type<SelectorA, ref_type_a>>;
 
     basic_iterable<IterB, SB> _iterable_b;
     iter_a _iter_a;
@@ -56,7 +56,7 @@ private:
 
 public:
     using reference = decltype(_result_selector(*_iter_a, *std::begin(_iterable_b)));
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 

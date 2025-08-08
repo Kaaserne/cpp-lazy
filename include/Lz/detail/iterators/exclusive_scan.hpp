@@ -21,7 +21,7 @@ class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator
 
 public:
     using reference = T&;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
