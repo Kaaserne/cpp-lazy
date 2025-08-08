@@ -78,7 +78,6 @@ public:
     LZ_CONSTEXPR_CXX_14 optional(optional<T>&& that) noexcept(std::is_nothrow_move_constructible<T>::value) {
         if (that) {
             construct(std::move(*that));
-            that._has_value = false;
         }
     }
 
@@ -92,7 +91,6 @@ public:
     LZ_CONSTEXPR_CXX_14 optional(optional<U>&& that) noexcept(std::is_nothrow_constructible<T, U>::value) {
         if (that) {
             construct(std::move(*that));
-            that._has_value = false;
         }
     }
 
