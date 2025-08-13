@@ -34,7 +34,7 @@ auto get_error_expr(const T& lhs, const U& rhs) {
 
 template<class Iterable>
 void test_operator_minus(const Iterable& it) {
-    if constexpr (lz::detail::has_sentinel<Iterable>::value) {
+    if constexpr (lz::detail::has_sentinel_v<Iterable>) {
         auto begin = it.begin();
         auto end = it.end();
 
@@ -69,7 +69,7 @@ void test_operator_minus(const Iterable& it) {
 template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
 void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
-    if constexpr (lz::detail::has_sentinel<Iterable>::value) {
+    if constexpr (lz::detail::has_sentinel_v<Iterable>) {
         auto begin = it.begin();
 
         for (std::ptrdiff_t i = 0; i < lz::ssize(it) - 1; ++i) {

@@ -28,8 +28,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclusive_scan_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T> &&
-                     std::default_initializable<BinaryOp>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T> &&
+                 std::default_initializable<BinaryOp>)
     = default;
 
 #else
@@ -78,9 +78,9 @@ public:
         ++_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const exclusive_scan_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(_end == b._end);
-        return _iterator == b._iterator && _reached_end == b._reached_end;
+    LZ_CONSTEXPR_CXX_14 bool eq(const exclusive_scan_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end);
+        return _iterator == other._iterator && _reached_end == other._reached_end;
     }
 
     constexpr bool eq(default_sentinel_t) const {

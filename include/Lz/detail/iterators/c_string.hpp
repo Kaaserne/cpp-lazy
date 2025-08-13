@@ -45,8 +45,8 @@ public:
         ++_it;
     }
 
-    constexpr bool eq(const c_string_iterator& b) const noexcept {
-        return b._it == nullptr ? _it == nullptr || *_it == '\0' : _it == b._it;
+    constexpr bool eq(const c_string_iterator& other) const noexcept {
+        return other._it == nullptr ? _it == nullptr || *_it == '\0' : _it == other._it;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {

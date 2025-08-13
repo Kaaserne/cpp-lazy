@@ -21,7 +21,7 @@ class interleave_iterator
                       fake_ptr_proxy<iter_tuple_common_ref_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
                       iter_tuple_iter_cat_t<IterMaybeHomo>, SMaybeHomo> {
 
-    using traits = std::iterator_traits<first_it<IterMaybeHomo>>;
+    using traits = std::iterator_traits<first_it_t<IterMaybeHomo>>;
 
 public:
     using value_type = typename traits::value_type;
@@ -182,7 +182,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr interleave_iterator()
-        requires std::default_initializable<IterMaybeHomo>
+        requires(std::default_initializable<IterMaybeHomo>)
     = default;
 
 #else

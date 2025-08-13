@@ -29,7 +29,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cached_reverse_iterator()
-        requires std::default_initializable<Iterator>
+        requires(std::default_initializable<Iterator>)
     = default;
 
 #else
@@ -85,7 +85,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const cached_reverse_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(other._begin == _begin);
+        LZ_ASSERT_COMPATIBLE(other._begin == _begin);
         return static_cast<difference_type>(other._iterator - _iterator);
     }
 

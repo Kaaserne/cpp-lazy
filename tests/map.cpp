@@ -77,8 +77,8 @@ TEST_CASE("Map binary operations") {
     }
 
     SUBCASE("Operator--") {
-        auto expecetd = std::vector<std::string>{ "FieldC", "FieldB", "FieldA" };
-        REQUIRE(lz::equal(lz::reverse(map), expecetd));
+        auto expected = std::vector<std::string>{ "FieldC", "FieldB", "FieldA" };
+        REQUIRE(lz::equal(map | lz::reverse, expected));
     }
 
     SUBCASE("Operator== & operator!=") {

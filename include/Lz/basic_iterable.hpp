@@ -6,7 +6,6 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterators/take.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
@@ -32,6 +31,22 @@ public:
     using value_type = val_t<iterator_type>;
     using sentinel = sentinel_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr basic_iterable_impl()
+        requires(std::default_initializable<iterator_type> && std::default_initializable<sentinel_type>)
+    = default;
+
+#else
+
+    template<class B = decltype(_begin),
+             class = enable_if<std::is_default_constructible<B>::value && std::is_default_constructible<sentinel_type>::value>>
+    constexpr basic_iterable_impl() noexcept(std::is_nothrow_default_constructible<B>::value &&
+                                             std::is_nothrow_default_constructible<sentinel_type>::value) {
+    }
+
+#endif
+
     template<class Iterable>
     constexpr basic_iterable_impl(Iterable&& iterable) :
         basic_iterable_impl{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) } {
@@ -40,11 +55,24 @@ public:
     constexpr basic_iterable_impl(I begin, S end) : _begin{ std::move(begin) }, _end{ std::move(end) } {
     }
 
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(is_ra_tag<typename traits::iterator_category>::value)
+    {
+        LZ_ASSERT(_end - _begin >= 0, "Incompatible iterator");
+        return static_cast<std::size_t>(_end - _begin);
+    }
+
+#else
+
     template<class Tag = typename traits::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<Tag>::value, std::size_t> size() const {
         LZ_ASSERT(_end - _begin >= 0, "Incompatible iterator");
         return static_cast<std::size_t>(_end - _begin);
     }
+
+#endif
 
     LZ_NODISCARD constexpr iterator begin() const& {
         return _begin;
@@ -80,6 +108,22 @@ public:
     using sentinel = S;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr sized_iterable_impl()
+        requires(std::default_initializable<iterator_type> && std::default_initializable<sentinel_type>)
+    = default;
+
+#else
+
+    template<class B = decltype(_begin),
+             class = enable_if<std::is_default_constructible<B>::value && std::is_default_constructible<sentinel_type>::value>>
+    constexpr sized_iterable_impl() noexcept(std::is_nothrow_default_constructible<B>::value &&
+                                             std::is_nothrow_default_constructible<sentinel_type>::value) {
+    }
+
+#endif
+
     constexpr sized_iterable_impl(iterator_type begin, S end) :
         _begin{ std::move(begin) },
         _end{ std::move(end) },
@@ -117,37 +161,38 @@ public:
 } // namespace lz
 
 LZ_MODULE_EXPORT namespace lz {
-/**
- * @brief A class that can be converted to any container. It only contains the iterators and
- * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
- * It contains the size of the iterable.
- * @tparam It The iterator type.
- * @tparam S The sentinel type.
- */
-template<class It, class S = It>
-using sized_iterable = detail::sized_iterable_impl<It, S>;
+    /**
+     * @brief A class that can be converted to any container. It only contains the iterators and
+     * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
+     * etc... It contains the size of the iterable.
+     * @tparam It The iterator type.
+     * @tparam S The sentinel type.
+     */
+    template<class It, class S = It>
+    using sized_iterable = detail::sized_iterable_impl<It, S>;
 
-/**
- * @brief A class that can be converted to any container. It only contains the iterators and
- * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops, etc...
- * It *may* contain the size of the iterable, depending on the iterator category (needs to be random access).
- * @tparam It The iterator type.
- * @tparam S The sentinel type.
- */
-template<class It, class S = It>
-using basic_iterable = detail::basic_iterable_impl<It, S>;
+    /**
+     * @brief A class that can be converted to any container. It only contains the iterators and
+     * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
+     * etc... It *may* contain the size of the iterable, depending on the iterator category (needs to be random access).
+     * @tparam It The iterator type.
+     * @tparam S The sentinel type.
+     */
+    template<class It, class S = It>
+    using basic_iterable = detail::basic_iterable_impl<It, S>;
 
-/**
- * @brief Creates a basic_iterable from an iterator and a sentinel. It can be used to create an iterable from a pair of iterators.
- *
- * @param begin The begin iterator.
- * @param end The end sentinel.
- * @return A basic_iterable object
- */
-template<class I, class S>
-LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
-    return { std::move(begin), std::move(end) };
-}
+    /**
+     * @brief Creates a basic_iterable from an iterator and a sentinel. It can be used to create an iterable from a pair of
+     * iterators.
+     *
+     * @param begin The begin iterator.
+     * @param end The end sentinel.
+     * @return A basic_iterable object
+     */
+    template<class I, class S>
+    LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
+        return { std::move(begin), std::move(end) };
+    }
 }
 
 namespace lz {
@@ -200,6 +245,22 @@ template<class Container>
 struct has_push<Container, void_t<decltype(0, std::declval<Container>().push(std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
+#ifdef LZ_HAS_CXX_17
+
+template<class T>
+inline constexpr bool has_push_back_v = has_push_back<T>::value;
+
+template<class T>
+inline constexpr bool has_insert_v = has_insert<T>::value;
+
+template<class T>
+inline constexpr bool has_insert_after_v = has_insert_after<T>::value;
+
+template<class T>
+inline constexpr bool has_push_v = has_push<T>::value;
+
+#endif
+
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be specialized for custom containers.
  * Example:
@@ -244,21 +305,21 @@ struct custom_copier_for<std::array<T, N>> {
 
 template<class Iterable, class Container>
 LZ_CONSTEXPR_CXX_20 void copy_to_container(Iterable&& iterable, Container& container) {
-    if constexpr (has_push_back<Container>::value) {
+    if constexpr (has_push_back_v<Container>) {
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container));
     }
-    else if constexpr (has_insert<Container>::value) {
+    else if constexpr (has_insert_v<Container>) {
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         lz::copy(std::forward<Iterable>(iterable), std::inserter(container, container.begin()));
     }
-    else if constexpr (has_insert_after<Container>::value) {
+    else if constexpr (has_insert_after_v<Container>) {
         using ref = ref_iterable_t<Iterable>;
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         auto it = container.before_begin();
         lz::for_each(iterable, [&container, it](ref value) mutable { it = container.insert_after(it, value); });
     }
-    else if constexpr (has_push<Container>::value) {
+    else if constexpr (has_push_v<Container>) {
         using ref = ref_iterable_t<Iterable>;
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         lz::for_each(iterable, [&container](ref value) { container.push(value); });
@@ -414,7 +475,191 @@ struct template_combiner {
 
 LZ_MODULE_EXPORT namespace lz {
 
-// clang-format off
+    // clang-format off
+
+#ifdef LZ_HAS_CONCEPTS
+
+/**
+ * @brief Converts an iterable to a container, given template parameter `Container`. Can be used in a pipe expression.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto list = vec | lz::to<std::list>(); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = vec | lz::to<std::list>>(std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = vec | lz::to<std::list<int>>(); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = vec | lz::to<std::list<int>>(std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // etc...
+ * ```
+ * @attention Containers like `std::array `cannot be passed as `to<std::array>` since it requires a size. Instead just use
+ * `to<std::array<T, N>>(iterable)` or `iterable | to<std::array<T, N>>()`
+ * @tparam Container The container to convert to
+ * @param args Args passed directly to the constructor of Container, except begin and end
+ * @return The `Container`
+ */
+template<class Container, class... Args>
+[[nodiscard]] constexpr detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>
+to(Args&&... args)
+    requires(!detail::is_iterable<detail::first_arg_t<Args...>>::value)
+{
+    using Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>;
+    return Closure{ std::forward<Args>(args)... };
+}
+
+/**
+ * @brief Converts an iterable to a container, given template parameter `Container`. Can be used in a pipe expression.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto list = vec | lz::to<std::list>(); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = vec | lz::to<std::list>>(std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = vec | lz::to<std::list<int>>(); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = vec | lz::to<std::list<int>>(std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // etc...
+ * ```
+ * @attention Containers like `std::array `cannot be passed as `to<std::array>` since it requires a size. Instead just use
+ * `to<std::array<T, N>>(iterable)` or `iterable | to<std::array<T, N>>()`
+ * @tparam Container The container to convert to
+ * @param args Args passed directly to the constructor of Container, except begin and end
+ * @return The `Container`
+ */
+template<template<class...> class Container, class... Args>
+[[nodiscard]] constexpr detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>
+to(Args&&... args)
+    requires(!detail::is_iterable<detail::first_arg_t<Args...>>::value)
+{
+    using Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>;
+    return Closure{ std::forward<Args>(args)... };
+}
+
+/**
+ * @brief Converts an iterable to a container, given template parameter `Container`.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto list = lz::to<std::list>(vec); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = lz::to<std::list>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = lz::to<std::list<int>>(vec); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = lz::to<std::list<int>>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // etc...
+ * ```
+ * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
+ * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
+ * `lz::custom_copier_for` for your custom container if all of the following are true:
+ * - Your custom container does not have a `push_back` method
+ * - Your custom container does not have an `insert` method
+ * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
+ * - Your custom container does not have a `push` method
+ * - Your custom container is not std::array
+ * ```cpp
+ * template<class T>
+ * class custom_container {
+ *    std::vector<T> _vec;
+ *  public:
+ *      void reserve(std::size_t size) {
+ *         _vec.reserve(size);
+ *      }
+ *
+ *      std::vector<T>& vec() {
+ *         return _vec;
+ *      }
+ * };
+ *
+ * // Specialize `lz::custom_copier_for` for your custom container
+ * template<class T>
+ * struct lz::custom_copier_for<custom_container<T>> {
+ *    template<class Iterable>
+ *    void copy(Iterable&& iterable, custom_container<T>& container) const {
+ *      // Copy the contents of the iterable to the container. Container is not reserved
+ *      // if it contains a reserve member
+ *      lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
+ *    }
+ * ```
+ * @attention Containers like `std::array `cannot be passed as `to<std::array>` since it requires a size. Instead just use
+ * `to<std::array<T, N>>(iterable)` or `iterable | to<std::array<T, N>>()`
+ * @tparam Container The container to convert to
+ * @param iterable The iterable to convert to a container
+ * @param args Args passed directly to the constructor of Container, except begin and end
+ * @return The `Container`
+ */
+template<class Container, class... Args, class Iterable>
+[[nodiscard]] constexpr Container to(Iterable&& iterable, Args&&... args)
+    requires(detail::is_iterable<Iterable>::value)
+{
+    return detail::to_adaptor<Container>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+}
+
+/**
+ * @brief Converts an iterable to a container, given template parameter `Container`.
+ * Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto list = lz::to<std::list>(vec); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = lz::to<std::list>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = lz::to<std::list<int>>(vec); // { 1, 2, 3, 4, 5 }
+ * // or
+ * auto list = lz::to<std::list<int>>(vec, std::allocator<int>{}); // { 1, 2, 3, 4, 5 }
+ * // etc...
+ * ```
+ * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
+ * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
+ * `lz::custom_copier_for` for your custom container if all of the following are true:
+ * - Your custom container does not have a `push_back` method
+ * - Your custom container does not have an `insert` method
+ * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
+ * - Your custom container does not have a `push` method
+ * - Your custom container is not std::array
+ * ```cpp
+ * template<class T>
+ * class custom_container {
+ *    std::vector<T> _vec;
+ *  public:
+ *      void reserve(std::size_t size) {
+ *         _vec.reserve(size);
+ *      }
+ *
+ *      std::vector<T>& vec() {
+ *         return _vec;
+ *      }
+ * };
+ *
+ * // Specialize `lz::custom_copier_for` for your custom container
+ * template<class T>
+ * struct lz::custom_copier_for<custom_container<T>> {
+ *    template<class Iterable>
+ *    void copy(Iterable&& iterable, custom_container<T>& container) const {
+ *      // Copy the contents of the iterable to the container. Container is not reserved
+ *      // if it contains a reserve member
+ *      lz::copy(std::forward<Iterable>(iterable), std::back_inserter(container.vec()));
+ *    }
+ * ```
+ * @attention Containers like `std::array `cannot be passed as `to<std::array>` since it requires a size. Instead just use
+ * `to<std::array<T, N>>(iterable)` or `iterable | to<std::array<T, N>>()`
+ * @tparam Container The container to convert to
+ * @param iterable The iterable to convert to a container
+ * @param args Args passed directly to the constructor of Container, except begin and end
+ * @return The `Container`
+ */
+template<template<class...> class Container, class... Args, class Iterable>
+[[nodiscard]] constexpr Container<val_iterable_t<Iterable>, Args...>
+to(Iterable&& iterable, Args&&... args)
+    requires(detail::is_iterable<Iterable>::value)
+{
+    using Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>;
+    return to<Cont>(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
+}
+
+#else
 
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be used in a pipe expression.
@@ -438,7 +683,7 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Container, class... Args>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value,
+detail::enable_if<!detail::is_iterable<detail::first_arg_t<Args...>>::value,
     detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>>
 to(Args&&... args) {
     using Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>;
@@ -467,7 +712,7 @@ to(Args&&... args) {
  */
 template<template<class...> class Container, class... Args>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-detail::enable_if<!detail::is_iterable<detail::first_arg<Args...>>::value, 
+detail::enable_if<!detail::is_iterable<detail::first_arg_t<Args...>>::value, 
     detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>> 
 to(Args&&... args) {
     using Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>;
@@ -593,46 +838,62 @@ to(Iterable&& iterable, Args&&... args) {
     return to<Cont>(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
 
-// clang-format on
+#endif
 
-/**
- * @brief Converts an iterable to a container, given template parameter `Container`. Can be specialized for custom containers.
- * Example:
- * ```cpp
- * template<class T>
- * class my_container {
- *     void my_inserter(T t) { ... }
- * };
- *
- * template<class T>
- * lz::custom_copier_for<my_container<T>> {
- *     template<class Iterable>
- *     void copy(Iterable&& iterable, my_container<T>& container) {
- *         // Copy the iterable to the container, for example:
- *         // Container is not reserved if it contains a reserve member
- *         for (auto&& i : iterable) {
- *             container.my_inserter(i);
- *         }
- *     }
- * };
- *
- * // or you can use enable if
- * template<class T>
- * lz::custom_copier_for<my_container<T>, std::enable_if_t<...>> {
- *     // Same as above
- * };
- * ```
- */
-using detail::custom_copier_for;
+    // clang-format on
+
+    /**
+     * @brief Converts an iterable to a container, given template parameter `Container`. Can be specialized for custom containers.
+     * Example:
+     * ```cpp
+     * template<class T>
+     * class my_container {
+     *     void my_inserter(T t) { ... }
+     * };
+     *
+     * template<class T>
+     * lz::custom_copier_for<my_container<T>> {
+     *     template<class Iterable>
+     *     void copy(Iterable&& iterable, my_container<T>& container) {
+     *         // Copy the iterable to the container, for example:
+     *         // Container is not reserved if it contains a reserve member
+     *         for (auto&& i : iterable) {
+     *             container.my_inserter(i);
+     *         }
+     *     }
+     * };
+     *
+     * // or you can use enable if
+     * template<class T>
+     * lz::custom_copier_for<my_container<T>, std::enable_if_t<...>> {
+     *     // Same as above
+     * };
+     * ```
+     */
+    using detail::custom_copier_for;
 
 } // namespace lz
 
+#ifdef LZ_HAS_CONCEPTS
+
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
-constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
-    -> lz::detail::enable_if<lz::detail::is_adaptor<lz::detail::remove_cvref<Adaptor>>::value &&
-                                 lz::detail::is_iterable<Iterable>::value,
+    requires(lz::detail::is_adaptor<lz::detail::remove_cref_t<Adaptor>>::value &&
+             lz::detail::is_iterable<lz::detail::remove_ref<Iterable>>::value)
+[[nodiscard]] constexpr auto
+operator|(Iterable&& iterable, Adaptor&& adaptor) -> decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable))) {
+    return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
+}
+
+#else
+
+LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
+LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
+    -> lz::detail::enable_if<lz::detail::is_adaptor<lz::detail::remove_cref_t<Adaptor>>::value &&
+                                 lz::detail::is_iterable<lz::detail::remove_ref<Iterable>>::value,
                              decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable)))> {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
 }
+
+#endif
 
 #endif // LZ_BASIC_ITERATOR_VIEW_HPP

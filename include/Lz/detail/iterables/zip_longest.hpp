@@ -11,12 +11,14 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_longest_iterable : public lazy_view {
-    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
+    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables;
 
-    using iterators = maybe_homogeneous<iter_t<Iterables>...>;
-    using sentinels = maybe_homogeneous<sentinel_t<Iterables>...>;
+    using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
+    using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;
 
     static constexpr bool bidi = is_bidi_tag<iter_tuple_iter_cat_t<iterators>>::value;
+
+    static constexpr bool return_sentinel = !bidi || disjunction<has_sentinel<Iterables>...>::value;
 
 public:
     using iterator = zip_longest_iterator<bidi, iterators, sentinels>;
@@ -24,8 +26,6 @@ public:
     using value_type = typename iterator::value_type;
 
     using is = make_index_sequence<sizeof...(Iterables)>;
-
-    static constexpr bool return_sentinel = !bidi || disjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -64,10 +64,22 @@ public:
     LZ_CONSTEXPR_CXX_14 zip_longest_iterable(I&&... iterables) : _iterables{ std::forward<I>(iterables)... } {
     }
 
-    template<bool AllSized = conjunction<sized<Iterables>...>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<AllSized, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size() const
+        requires(sized<Iterables> && ...)
+    {
         return size(is{});
     }
+
+#else
+
+    template<bool S = conjunction<is_sized<Iterables>...>::value>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, std::size_t> size() const {
+        return size(is{});
+    }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -96,10 +108,22 @@ public:
 
 #endif
 
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr iterator begin() &&
+        requires(return_sentinel)
+    {
+        return { begin_maybe_homo(std::move(_iterables)), end_maybe_homo(std::move(_iterables)) };
+    }
+
+#else
+
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
         return { begin_maybe_homo(std::move(_iterables)), end_maybe_homo(std::move(_iterables)) };
     }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 

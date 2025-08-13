@@ -126,6 +126,20 @@ TEST_CASE("Range permutations") {
         REQUIRE(lz::equal(range, expected));
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
     }
+
+    SUBCASE("Empty range") {
+        auto range = lz::range(0, 0, 10);
+        REQUIRE(lz::empty(range));
+        REQUIRE(lz::size(range) == 0);
+        REQUIRE(!lz::has_many(range));
+        REQUIRE(!lz::has_one(range));
+
+        auto range2 = lz::range(0, 0);
+        REQUIRE(lz::empty(range2));
+        REQUIRE(lz::size(range2) == 0);
+        REQUIRE(!lz::has_many(range2));
+        REQUIRE(!lz::has_one(range2));
+    }
 }
 
 TEST_CASE("Binary operations") {

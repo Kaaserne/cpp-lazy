@@ -3,7 +3,6 @@
 #ifndef LZ_REVERSE_ADAPTOR_HPP
 #define LZ_REVERSE_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/reverse.hpp>
 
 namespace lz {

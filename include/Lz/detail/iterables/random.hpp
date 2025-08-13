@@ -21,7 +21,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr random_iterable()
-        requires std::default_initializable<Distribution>
+        requires(std::default_initializable<Distribution>)
     = default;
 
 #else
@@ -73,6 +73,5 @@ public:
 };
 } // namespace detail
 } // namespace lz
-
 
 #endif // LZ_RANDOM_ITERABLE_HPP

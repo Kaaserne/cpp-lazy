@@ -26,7 +26,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<maybe_owned<Iterable2>>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<maybe_owned<Iterable2>>)
     = default;
 
 #else
@@ -46,7 +46,7 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        return { std::begin(_iterable), std::end(_iterable), std::begin(_delimiter), std::end(_delimiter) };
+        return { _iterable.begin(), _iterable.end(), _delimiter.begin(), _delimiter.end() };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
@@ -67,7 +67,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<T>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<T>)
     = default;
 
 #else
@@ -87,7 +87,7 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), std::end(_iterable), _delimiter };
+        return { _iterable.begin(), _iterable.end(), _delimiter };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {

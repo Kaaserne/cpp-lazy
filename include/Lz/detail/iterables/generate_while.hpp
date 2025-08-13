@@ -23,7 +23,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_while_iterable()
-        requires std::default_initializable<GeneratorFunc> && std::is_default_constructible_v<fn_return_type>
+        requires(std::default_initializable<GeneratorFunc> && std::is_default_constructible_v<fn_return_type>)
     = default;
 
 #else

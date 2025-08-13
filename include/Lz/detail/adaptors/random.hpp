@@ -3,7 +3,6 @@
 #ifndef LZ_RANDOM_ADAPTOR_HPP
 #define LZ_RANDOM_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/random.hpp>
 #include <algorithm>
 #include <random>

@@ -24,7 +24,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_while_iterator()
-        requires std::default_initializable<GeneratorFunc> && std::default_initializable<fn_return_type>
+        requires(std::default_initializable<GeneratorFunc> && std::default_initializable<fn_return_type>)
     = default;
 
 #else

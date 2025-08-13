@@ -4,13 +4,35 @@
 #define LZ_LOOP_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/loop.hpp>
 
 namespace lz {
 namespace detail {
 struct loop_adaptor {
     using adaptor = loop_adaptor;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    /**
+     * @brief Loops over an iterable infinitely. Does not contain a .size() method. Loop infinitely over the input iterable. Its
+     * input iterator category will always be forward. It also returns a default_sentinel_t. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3, 4 };
+     * auto looper = lz::loop(vec); // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+     * // or
+     * auto looper = vec | lz::loop; // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+     * ```
+     * @param iterable The iterable to loop over
+     * @return A loop_iterable that will loop over the input iterable infinitely.
+     */
+    template<class Iterable>
+    [[nodiscard]] constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const
+        requires(!std::is_integral<remove_cvref<Iterable>>::value)
+    {
+        return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
+    }
+
+#else
 
     /**
      * @brief Loops over an iterable infinitely. Does not contain a .size() method. Loop infinitely over the input iterable. Its
@@ -29,6 +51,8 @@ struct loop_adaptor {
     operator()(Iterable&& iterable) const {
         return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }
+
+#endif
 
     /**
      * @brief Loops n times over an iterable. Contains a .size() method if the input iterable has a .size()

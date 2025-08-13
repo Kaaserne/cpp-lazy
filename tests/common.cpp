@@ -39,6 +39,7 @@ TEST_CASE("common_iterable binary operations fwd") {
 
 TEST_CASE("common_iterable random access") {
     auto repeater = lz::repeat(20, 5);
+    REQUIRE(repeater.size() == 5);
     auto common = lz::common(repeater);
     static_assert(std::is_same<decltype(common), lz::basic_iterable<lz::iter_t<decltype(repeater)>>>::value, "");
     static_assert(lz::detail::is_ra<lz::iter_t<decltype(repeater)>>::value, "");

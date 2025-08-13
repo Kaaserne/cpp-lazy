@@ -3,7 +3,6 @@
 #ifndef LZ_ZIP_LONGEST_ADAPTOR_HPP
 #define LZ_ZIP_LONGEST_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/zip_longest.hpp>
 
 namespace lz {

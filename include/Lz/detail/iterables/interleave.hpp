@@ -11,10 +11,10 @@ namespace detail {
 
 template<class... Iterables>
 class interleave_iterable {
-    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
+    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables;
 
-    using iterators = maybe_homogeneous<iter_t<Iterables>...>;
-    using sentinels = maybe_homogeneous<sentinel_t<Iterables>...>;
+    using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
+    using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
@@ -41,8 +41,8 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    static constexpr bool return_sentinel = !is_bidi_tag<typename iterator::iterator_category>::value ||
-                                            conjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || disjunction<has_sentinel<Iterables>...>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -63,10 +63,22 @@ public:
     constexpr interleave_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }
 
-    template<class T = conjunction<sized<Iterables>...>>
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(sized<Iterables> && ...)
+    {
+        return size(is{});
+    }
+
+#else
+
+    template<class T = conjunction<is_sized<Iterables>...>>
     LZ_NODISCARD constexpr enable_if<T::value, std::size_t> size() const {
         return size(is{});
     }
+
+#endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { begin_maybe_homo(_iterables) };

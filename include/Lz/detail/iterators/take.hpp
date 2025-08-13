@@ -27,7 +27,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr n_take_iterator()
-        requires std::default_initializable<Iterator>
+        requires(std::default_initializable<Iterator>)
     = default;
 
 #else
@@ -71,16 +71,16 @@ public:
         _n -= static_cast<std::size_t>(offset);
     }
 
-    constexpr difference_type difference(const n_take_iterator& b) const {
-        return static_cast<difference_type>(b._n) - static_cast<difference_type>(_n);
+    constexpr difference_type difference(const n_take_iterator& other) const {
+        return static_cast<difference_type>(other._n) - static_cast<difference_type>(_n);
     }
 
     constexpr difference_type difference(default_sentinel_t) const {
         return -static_cast<difference_type>(_n);
     }
 
-    constexpr bool eq(const n_take_iterator& b) const {
-        return _n == b._n;
+    constexpr bool eq(const n_take_iterator& other) const {
+        return _n == other._n;
     }
 
     constexpr bool eq(default_sentinel_t) const {

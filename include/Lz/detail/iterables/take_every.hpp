@@ -43,7 +43,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -55,14 +55,18 @@ public:
 #endif
 
     template<class I>
-    constexpr take_every_iterable(I&& iterable, const std::size_t offset, const std::size_t start) :
+    LZ_CONSTEXPR_CXX_14 take_every_iterable(I&& iterable, const std::size_t offset, const std::size_t start) :
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset },
         _start{ start } {
+        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(sized<Iterable>)
+    {
         const auto cur_size = static_cast<std::size_t>(lz::size(_iterable));
         if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
             return 0;
@@ -75,18 +79,36 @@ public:
         return static_cast<std::size_t>(quot) + static_cast<std::size_t>(rem == 0 ? 0 : 1);
     }
 
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, std::size_t> size() const {
+        const auto cur_size = static_cast<std::size_t>(lz::size(_iterable));
+        if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
+            return 0;
+        }
+
+        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size - _start));
+        const auto rem = actual_size % static_cast<diff>(_offset);
+        const auto quot = actual_size / static_cast<diff>(_offset);
+
+        return static_cast<std::size_t>(quot) + static_cast<std::size_t>(rem == 0 ? 0 : 1);
+    }
+
+#endif
+
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const& {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
-        if constexpr (is_ra_tag<typename iterator::iterator_category>::value) {
+        if constexpr (is_ra_tag_v<typename iterator::iterator_category>) {
             return { _iterable, start_pos, _offset };
         }
-        else if constexpr (is_bidi_tag<typename iterator::iterator_category>::value) {
-            return { start_pos, std::end(_iterable), _offset, _start };
+        else if constexpr (is_bidi_tag_v<typename iterator::iterator_category>) {
+            return { start_pos, _iterable.end(), _offset, _start };
         }
         else {
-            return { start_pos, std::end(_iterable), _offset };
+            return { start_pos, _iterable.end(), _offset };
         }
     }
 
@@ -95,13 +117,13 @@ public:
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
-        return { start_pos, std::end(_iterable), _offset };
+        return { start_pos, _iterable.end(), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator> begin() const& {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
-        return { start_pos, std::end(_iterable), _offset, _start };
+        return { start_pos, _iterable.end(), _offset, _start };
     }
 
     template<class I = typename iterator::iterator_category>
@@ -113,13 +135,28 @@ public:
 
 #endif
 
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr iterator begin() &&
+        requires(!is_bidi_tag<typename iterator::iterator_category>::value)
+    {
         // forward iterator can only go forward, so next_fast_safe is not needed
-        auto end = std::end(_iterable);
+        auto end = _iterable.end();
         auto start_pos = next_fast_safe(std::move(_iterable), static_cast<typename iterator::difference_type>(_start));
         return { start_pos, end, _offset };
     }
+
+#else
+
+    template<class I = typename iterator::iterator_category>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+        // forward iterator can only go forward, so next_fast_safe is not needed
+        auto end = _iterable.end();
+        auto start_pos = next_fast_safe(std::move(_iterable), static_cast<typename iterator::difference_type>(_start));
+        return { start_pos, end, _offset };
+    }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -127,11 +164,11 @@ public:
         if constexpr (return_sentinel) {
             return lz::default_sentinel;
         }
-        else if constexpr (!is_ra_tag<typename iterator::iterator_category>::value) {
-            return iterator{ std::end(_iterable), std::end(_iterable), _offset, lz::eager_size(_iterable) - _start };
+        else if constexpr (!is_ra_tag_v<typename iterator::iterator_category>) {
+            return iterator{ _iterable.end(), _iterable.end(), _offset, lz::eager_size(_iterable) - _start };
         }
         else {
-            return iterator{ _iterable, std::end(_iterable), _offset };
+            return iterator{ _iterable, _iterable.end(), _offset };
         }
     }
 
@@ -139,7 +176,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() const {
-        return { _iterable, std::end(_iterable), _offset };
+        return { _iterable, _iterable.end(), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
@@ -147,7 +184,7 @@ public:
         // std::is_same is not the same as is_bidi_tag, explicitly check for bidirectional iterator tag
         enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value && !is_sentinel<iter, sent>::value, iterator>
         end() const {
-        return { std::end(_iterable), std::end(_iterable), _offset, lz::eager_size(_iterable) - _start };
+        return { _iterable.end(), _iterable.end(), _offset, lz::eager_size(_iterable) - _start };
     }
 
     template<bool R = return_sentinel> // checks for not bidirectional or if is sentinel

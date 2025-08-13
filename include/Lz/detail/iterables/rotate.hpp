@@ -33,7 +33,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr rotate_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<inner_iter>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<inner_iter>)
     = default;
 
 #else
@@ -53,19 +53,43 @@ public:
         _start_index{ static_cast<std::size_t>(start) } {
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(sized<Iterable>)
+    {
         return static_cast<std::size_t>(lz::size(_iterable));
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { _iterable, _start_iter, _start_iter == std::end(_iterable) ? _start_index : 0 };
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(lz::size(_iterable));
     }
+
+#endif
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+        return { _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : 0 };
+    }
+
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr iterator begin() const
+        requires(return_sentinel)
+    {
+        return { std::move(_iterable), std::move(_start_iter), _start_iter == _iterable.end() ? _start_index : 0 };
+    }
+
+#else
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { std::move(_iterable), std::move(_start_iter), _start_iter == std::end(_iterable) ? _start_index : 0 };
+        return { std::move(_iterable), std::move(_start_iter), _start_iter == _iterable.end() ? _start_index : 0 };
     }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 

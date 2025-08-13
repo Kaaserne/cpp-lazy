@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterator()
-        requires std::default_initializable<Iterator>
+        requires(std::default_initializable<Iterator>)
     = default;
 
 #else
@@ -88,7 +88,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const exclude_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(_from == other._from && _to == other._to);
+        LZ_ASSERT_COMPATIBLE(_from == other._from && _to == other._to);
         const auto diff = _index - other._index;
 
         if (_iterator > other._iterator) {
@@ -119,9 +119,9 @@ public:
         _index += is_positive_offset ? to_skip : -to_skip;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const exclude_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(_from == b._from && _to == b._to);
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const exclude_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_from == other._from && _to == other._to);
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(const S& s) const {

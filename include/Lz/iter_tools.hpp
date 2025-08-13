@@ -75,34 +75,6 @@ template<class Iterable, class T>
 using as_iterable = detail::as_iterable<Iterable, T>;
 
 /**
- * @brief Pairwise iterable helper alias
- *
- * @tparam Iterable The iterable to iterate over.
- * @tparam N The number of adjacent elements to return in a tuple.
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * // c++ 11
- * lz::pairwise_n_iterable<std::vector<int>, 2> iterable = lz::pairwise_n<2>{}(vec);
- * // c++ 14 and later
- * lz::pairwise_n_iterable<std::vector<int>, 2> iterable = lz::pairwise_n<2>(vec);
- * ```
- */
-template<class Iterable, std::size_t N>
-using pairwise_n_iterable = detail::pairwise_n_iterable<Iterable, N>;
-
-/**
- * @brief Pairwise iterable helper alias
- *
- * @tparam Iterable The iterable to iterate over.
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * lz::pairwise_iterable<std::vector<int>> iterable = lz::pairwise(vec);
- * ```
- */
-template<class Iterable, std::size_t N>
-using pairwise_iterable = pairwise_n_iterable<Iterable, 2>;
-
-/**
  * @brief Keys, values and get_nth iterable helper alias
  *
  * @tparam Iterable The iterable to get the nth element from.
@@ -241,20 +213,6 @@ template<class T>
 using as = detail::as_adaptor<T>;
 
 /**
- * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip` and
- * `lz::drop`. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise_n<2>{}(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * // or
- * auto iterable = vec | lz::pairwise_n<2>{}; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * ```
- * @tparam N The amount of adjacent elements to return.
- */
-template<std::size_t N>
-using pairwise_n = detail::pairwise_n_adaptor<N>;
-
-/**
  * @brief Gets the nth element from a std::get-able container, using `std::get` and `lz::map`. Example:
  * ```cpp
  * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
@@ -296,20 +254,6 @@ using get_nths = detail::get_nths_adaptor<N...>;
  */
 template<class T>
 LZ_INLINE_VAR constexpr detail::as_adaptor<T> as{};
-
-/**
- * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip` and
- * `lz::drop`. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * // or
- * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * ```
- * @tparam N The amount of adjacent elements to return.
- */
-template<std::size_t N>
-LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
 
 /**
  * @brief Gets the nth element from a std::get-able container, using `std::get` and `lz::map`. Example:
@@ -389,18 +333,6 @@ LZ_INLINE_VAR constexpr detail::unzip_with_adaptor unzip_with{};
  * ```
  */
 LZ_INLINE_VAR constexpr detail::lines_adaptor lines{};
-
-/**
- * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip` and
- * `lz::drop`. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * // or
- * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * ```
- */
-LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<2> pairwise{};
 
 /**
  * @brief Gets the keys from a std::get-able container, using `std::get<0>` and `lz::map`. Example:

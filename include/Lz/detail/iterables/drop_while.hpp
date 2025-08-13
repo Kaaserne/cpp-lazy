@@ -26,13 +26,13 @@ public:
     using value_type = val_iterable_t<Iterable>;
 
 private:
-    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || is_sentinel<iterator, sentinel>::value;
+    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || has_sentinel<Iterable>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr drop_while_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>)
     = default;
 
 #else
@@ -63,7 +63,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return std::end(_iterable);
+            return _iterable.end();
         }
         else {
             return lz::default_sentinel;
@@ -74,7 +74,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, sentinel> end() const {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
     template<bool R = return_sentinel>
@@ -96,16 +96,44 @@ public:
     using const_iterator = iterator;
     using value_type = val_iterable_t<Iterable>;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr drop_while_iterable()
+        requires(std::default_initializable<iter_t<Iterable>> && std::default_initializable<sentinel>)
+    = default;
+
+#else
+
+    template<class I = decltype(_begin),
+             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sentinel>::value>>
+    constexpr drop_while_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                             std::is_nothrow_default_constructible<sentinel>::value) {
+    }
+
+#endif
+
     template<class I>
     LZ_CONSTEXPR_CXX_14 drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _begin{ lz::find_if_not(iterable, std::move(unary_predicate)) },
         _end{ std::forward<I>(iterable).end() } {
     }
 
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(is_ra<iterator>::value)
+    {
+        return static_cast<std::size_t>(_end - _begin);
+    }
+
+#else
+
     template<class I = iter_t<Iterable>>
     LZ_NODISCARD constexpr enable_if<is_ra<I>::value, std::size_t> size() const {
         return static_cast<std::size_t>(_end - _begin);
     }
+
+#endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return std::move(_begin);

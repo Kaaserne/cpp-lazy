@@ -12,30 +12,30 @@ namespace lz {
 namespace detail {
 
 template<class... Iterables>
-struct iter_t_maybe_homogeneous_helper;
+struct iter_maybe_homogeneous;
 
 template<class... Iterables>
-struct iter_t_maybe_homogeneous_helper<std::tuple<Iterables...>> {
+struct iter_maybe_homogeneous<std::tuple<Iterables...>> {
     using type = std::tuple<iter_t<Iterables>...>;
 };
 
 template<class Iterable, std::size_t N>
-struct iter_t_maybe_homogeneous_helper<std::array<Iterable, N>> {
+struct iter_maybe_homogeneous<std::array<Iterable, N>> {
     using type = std::array<iter_t<Iterable>, N>;
 };
 
 template<class Iterables>
-using iter_t_maybe_homogeneous = typename iter_t_maybe_homogeneous_helper<Iterables>::type;
+using iter_t_maybe_homogeneous_t = typename iter_maybe_homogeneous<Iterables>::type;
 
 template<class IterablesMaybeHomo>
 class cartesian_product_iterator
     : public iterator<cartesian_product_iterator<IterablesMaybeHomo>,
-                      iter_tuple_ref_type_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>,
-                      fake_ptr_proxy<iter_tuple_ref_type_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>>,
-                      iter_tuple_diff_type_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>,
-                      iter_tuple_iter_cat_t<iter_t_maybe_homogeneous<IterablesMaybeHomo>>, default_sentinel_t> {
+                      iter_tuple_ref_type_t<iter_t_maybe_homogeneous_t<IterablesMaybeHomo>>,
+                      fake_ptr_proxy<iter_tuple_ref_type_t<iter_t_maybe_homogeneous_t<IterablesMaybeHomo>>>,
+                      iter_tuple_diff_type_t<iter_t_maybe_homogeneous_t<IterablesMaybeHomo>>,
+                      iter_tuple_iter_cat_t<iter_t_maybe_homogeneous_t<IterablesMaybeHomo>>, default_sentinel_t> {
 
-    using iterators = iter_t_maybe_homogeneous<IterablesMaybeHomo>;
+    using iterators = iter_t_maybe_homogeneous_t<IterablesMaybeHomo>;
     static constexpr std::size_t tup_size = std::tuple_size<iterators>::value;
 
 public:
@@ -54,8 +54,8 @@ private:
     constexpr void next() {
         ++std::get<I>(_iterators);
         if constexpr (I > 0) {
-            if (std::get<I>(_iterators) == std::end(std::get<I>(_iterables))) {
-                std::get<I>(_iterators) = std::begin(std::get<I>(_iterables));
+            if (std::get<I>(_iterators) == std::get<I>(_iterables).end()) {
+                std::get<I>(_iterators) = std::get<I>(_iterables).begin();
                 next<I - 1>();
             }
         }
@@ -64,20 +64,20 @@ private:
     template<std::size_t I>
     constexpr void previous() {
         if constexpr (I > 0) {
-            if (std::get<I>(_iterators) == std::begin(std::get<I>(_iterables))) {
-                std::get<I>(_iterators) = std::end(std::get<I>(_iterables));
+            if (std::get<I>(_iterators) == std::get<I>(_iterables).begin()) {
+                std::get<I>(_iterators) = std::get<I>(_iterables).end();
                 previous<I - 1>();
             }
         }
-        LZ_ASSERT_DECREMENTABLE(std::get<I>(_iterators) != std::begin(std::get<I>(_iterables)));
+        LZ_ASSERT_DECREMENTABLE(std::get<I>(_iterators) != std::get<I>(_iterables).begin());
         --std::get<I>(_iterators);
     }
 
     template<std::size_t I>
     constexpr void operator_plus_impl(const difference_type offset) {
         if constexpr (I == 0) {
-            LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables))
-                                             : offset <= std::end(std::get<0>(_iterables)) - std::get<0>(_iterators));
+            LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= std::get<0>(_iterators) - std::get<0>(_iterables).begin()
+                                             : offset <= std::get<0>(_iterables).end() - std::get<0>(_iterators));
             std::get<0>(_iterators) += offset;
         }
         else {
@@ -85,20 +85,18 @@ private:
                 return;
             }
 
-            const auto size =
-                static_cast<difference_type>(std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables)));
-            const auto iterator_offset =
-                static_cast<difference_type>(std::get<I>(_iterators) - std::begin(std::get<I>(_iterables)));
+            const auto size = static_cast<difference_type>(std::get<I>(_iterables).end() - std::get<I>(_iterables).begin());
+            const auto iterator_offset = static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(_iterables).begin());
             const auto to_add_this = (iterator_offset + offset) % size;
             const auto to_add_next = (iterator_offset + offset) / size;
 
             if (to_add_this < 0) {
-                std::get<I>(_iterators) = std::begin(std::get<I>(_iterables)) + static_cast<difference_type>(to_add_this + size);
+                std::get<I>(_iterators) = std::get<I>(_iterables).begin() + static_cast<difference_type>(to_add_this + size);
                 operator_plus_impl<I - 1>(to_add_next - 1);
                 return;
             }
 
-            std::get<I>(_iterators) = std::begin(std::get<I>(_iterables)) + static_cast<difference_type>(to_add_this);
+            std::get<I>(_iterators) = std::get<I>(_iterables).begin() + static_cast<difference_type>(to_add_this);
             operator_plus_impl<I - 1>(to_add_next);
         }
     }
@@ -113,32 +111,32 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> next() {
         ++std::get<I>(_iterators);
-        if (std::get<I>(_iterators) == std::end(std::get<I>(_iterables))) {
-            std::get<I>(_iterators) = std::begin(std::get<I>(_iterables));
+        if (std::get<I>(_iterators) == std::get<I>(_iterables).end()) {
+            std::get<I>(_iterators) = std::get<I>(_iterables).begin();
             next<I - 1>();
         }
     }
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> previous() {
-        LZ_ASSERT_DECREMENTABLE(std::get<0>(_iterators) != std::begin(std::get<0>(_iterables)));
+        LZ_ASSERT_DECREMENTABLE(std::get<0>(_iterators) != std::get<0>(_iterables).begin());
         --std::get<0>(_iterators);
     }
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> previous() {
-        if (std::get<I>(_iterators) == std::begin(std::get<I>(_iterables))) {
-            std::get<I>(_iterators) = std::end(std::get<I>(_iterables));
+        if (std::get<I>(_iterators) == std::get<I>(_iterables).begin()) {
+            std::get<I>(_iterators) = std::get<I>(_iterables).end();
             previous<I - 1>();
         }
-        LZ_ASSERT_DECREMENTABLE(std::get<I>(_iterators) != std::begin(std::get<I>(_iterables)));
+        LZ_ASSERT_DECREMENTABLE(std::get<I>(_iterators) != std::get<I>(_iterables).begin());
         --std::get<I>(_iterators);
     }
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
-        LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= std::get<0>(_iterators) - std::begin(std::get<0>(_iterables))
-                                         : offset <= std::end(std::get<0>(_iterables)) - std::get<0>(_iterators));
+        LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= std::get<0>(_iterators) - std::get<0>(_iterables).begin()
+                                         : offset <= std::get<0>(_iterables).end() - std::get<0>(_iterators));
         std::get<0>(_iterators) += offset;
     }
 
@@ -148,18 +146,18 @@ private:
             return;
         }
 
-        const auto size = static_cast<difference_type>(std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables)));
-        const auto iterator_offset = static_cast<difference_type>(std::get<I>(_iterators) - std::begin(std::get<I>(_iterables)));
+        const auto size = static_cast<difference_type>(std::get<I>(_iterables).end() - std::get<I>(_iterables).begin());
+        const auto iterator_offset = static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(_iterables).begin());
         const auto to_add_this = (iterator_offset + offset) % size;
         const auto to_add_next = (iterator_offset + offset) / size;
 
         if (to_add_this < 0) {
-            std::get<I>(_iterators) = std::begin(std::get<I>(_iterables)) + static_cast<difference_type>(to_add_this + size);
+            std::get<I>(_iterators) = std::get<I>(_iterables).begin() + static_cast<difference_type>(to_add_this + size);
             operator_plus_impl<I - 1>(to_add_next - 1);
             return;
         }
 
-        std::get<I>(_iterators) = std::begin(std::get<I>(_iterables)) + static_cast<difference_type>(to_add_this);
+        std::get<I>(_iterators) = std::get<I>(_iterables).begin() + static_cast<difference_type>(to_add_this);
         operator_plus_impl<I - 1>(to_add_next);
     }
 
@@ -175,8 +173,8 @@ private:
     template<std::ptrdiff_t I>
     constexpr void iter_compat(const cartesian_product_iterator& other) const {
         if constexpr (I >= 0) {
-            LZ_ASSERT_COMPTABLE(std::begin(std::get<I>(_iterables)) == std::begin(std::get<I>(other._iterables)) &&
-                                std::end(std::get<I>(_iterables)) == std::end(std::get<I>(other._iterables)));
+            LZ_ASSERT_COMPATIBLE(std::get<I>(_iterables).begin() == std::get<I>(other._iterables).begin() &&
+                                 std::get<I>(_iterables).end() == std::get<I>(other._iterables).end());
             iter_compat<I - 1>(other);
         }
     }
@@ -185,7 +183,7 @@ private:
     constexpr difference_type difference(const cartesian_product_iterator& other) const {
         if constexpr (I > 0) {
             const auto distance = std::get<I>(_iterators) - std::get<I>(other._iterators);
-            const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
+            const auto size = std::get<I>(_iterables).end() - std::get<I>(_iterables).begin();
             return size * difference<I - 1>(other) + distance;
         }
         else {
@@ -196,12 +194,12 @@ private:
     template<std::size_t I>
     constexpr difference_type difference() const {
         if constexpr (I > 0) {
-            const auto distance = std::get<I>(_iterators) - std::begin(std::get<I>(_iterables));
-            const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
+            const auto distance = std::get<I>(_iterators) - std::get<I>(_iterables).begin();
+            const auto size = std::get<I>(_iterables).end() - std::get<I>(_iterables).begin();
             return size * difference<I - 1>() + distance;
         }
         else {
-            return std::get<I>(_iterators) - std::end(std::get<I>(_iterables));
+            return std::get<I>(_iterators) - std::get<I>(_iterables).end();
         }
     }
 
@@ -209,8 +207,8 @@ private:
 
     template<std::ptrdiff_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)> iter_compat(const cartesian_product_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(std::begin(std::get<I>(_iterables)) == std::begin(std::get<I>(other._iterables)) &&
-                            std::end(std::get<I>(_iterables)) == std::end(std::get<I>(other._iterables)));
+        LZ_ASSERT_COMPATIBLE(std::get<I>(_iterables).begin() == std::get<I>(other._iterables).begin() &&
+                             std::get<I>(_iterables).end() == std::get<I>(other._iterables).end());
         iter_compat<I - 1>(other);
     }
 
@@ -221,7 +219,7 @@ private:
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I > 0), difference_type> difference(const cartesian_product_iterator& other) const {
         const auto distance = std::get<I>(_iterators) - std::get<I>(other._iterators);
-        const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
+        const auto size = std::get<I>(_iterables).end() - std::get<I>(_iterables).begin();
         const auto result = size * difference<I - 1>(other) + distance;
         return result;
     }
@@ -233,14 +231,14 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<(I > 0), difference_type> difference() const {
-        const auto distance = std::get<I>(_iterators) - std::begin(std::get<I>(_iterables));
-        const auto size = std::end(std::get<I>(_iterables)) - std::begin(std::get<I>(_iterables));
+        const auto distance = std::get<I>(_iterators) - std::get<I>(_iterables).begin();
+        const auto size = std::get<I>(_iterables).end() - std::get<I>(_iterables).begin();
         return size * difference<I - 1>() + distance;
     }
 
     template<std::size_t I>
     constexpr enable_if<I == 0, difference_type> difference() const {
-        return std::get<I>(_iterators) - std::end(std::get<I>(_iterables));
+        return std::get<I>(_iterators) - std::get<I>(_iterables).end();
     }
 
 #endif
@@ -250,9 +248,9 @@ private:
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
 #ifdef LZ_HAS_CXX_17
-        ((std::get<I>(_iterators) = std::end(std::get<I>(_iterables))), ...);
+        ((std::get<I>(_iterators) = std::get<I>(_iterables).end()), ...);
 #else
-        decompose(std::get<I>(_iterators) = std::end(std::get<I>(_iterables))...);
+        decompose(std::get<I>(_iterators) = std::get<I>(_iterables).end()...);
 #endif
     }
 
@@ -260,7 +258,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cartesian_product_iterator()
-        requires std::default_initializable<iterators> && std::default_initializable<IterablesMaybeHomo>
+        requires(std::default_initializable<iterators> && std::default_initializable<IterablesMaybeHomo>)
     = default;
 
 #else
@@ -312,7 +310,7 @@ public:
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return std::get<0>(_iterators) == std::end(std::get<0>(_iterables));
+        return std::get<0>(_iterators) == std::get<0>(_iterables).end();
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const cartesian_product_iterator& other) const {

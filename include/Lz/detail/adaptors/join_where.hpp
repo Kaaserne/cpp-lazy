@@ -4,7 +4,6 @@
 #define LZ_JOIN_WHERE_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/join_where.hpp>
 
 namespace lz {

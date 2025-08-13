@@ -4,7 +4,6 @@
 #define LZ_CARTESIAN_PRODUCT_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/cartesian_product.hpp>
 
 namespace lz {

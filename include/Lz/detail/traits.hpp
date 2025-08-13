@@ -94,7 +94,11 @@ operator-(const Sentinel& sent, const iterator<Derived, Reference, Pointer, Diff
 
 struct lazy_view {};
 
+} // namespace lz
+
+namespace lz {
 namespace detail {
+
 template<class>
 using void_t = void;
 
@@ -128,11 +132,20 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
+#ifdef LZ_HAS_CXX_17
+
+template<class... Ts>
+struct conjunction : std::bool_constant<(Ts::value && ...)> {};
+
+#else
+
 template<class... Ts>
 struct conjunction : std::true_type {};
 
 template<class T, class... Ts>
 struct conjunction<T, Ts...> : conditional<T::value, conjunction<Ts...>, std::false_type> {};
+
+#endif
 
 #ifdef LZ_HAS_CXX_11
 
@@ -256,6 +269,9 @@ using is_invocable = conditional<sizeof...(Args) == 0, is_invocable_impl_no_args
 
 #endif
 
+template<class T>
+using remove_cref_t = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+
 #ifdef LZ_HAS_CXX_20
 
 template<class T>
@@ -267,6 +283,7 @@ template<class T>
 using remove_cvref = typename std::remove_cv<remove_ref<T>>::type;
 
 #endif // LZ_HAS_CXX_20
+
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
     -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
@@ -291,6 +308,9 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
     return std::end(c);
 }
 } // namespace detail
+} // namespace lz
+
+LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_17
 
@@ -301,7 +321,7 @@ LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i));
+[[nodiscard]] constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i));
 
 #else
 
@@ -428,16 +448,30 @@ using ptr_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::pointer;
  */
 template<class Iterable>
 using iter_cat_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::iterator_category;
-}
+
+} // namespace lz
 
 namespace lz {
 namespace detail {
 
+template<class T>
+struct remove_rvalue_reference {
+    using type = T;
+};
+
+template<class T>
+struct remove_rvalue_reference<T&&> {
+    using type = T;
+};
+
+template<class T>
+using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
+
 LZ_MODULE_EXPORT template<class T, class = void>
-struct sized : std::false_type {};
+struct is_sized : std::false_type {};
 
 LZ_MODULE_EXPORT template<class T>
-struct sized<T, void_t<decltype(lz::size(std::declval<T>()))>> : std::true_type {};
+struct is_sized<T, void_t<decltype(lz::size(std::declval<T>()))>> : std::true_type {};
 
 template<class, class = void>
 struct is_iterable : std::false_type {};
@@ -455,20 +489,20 @@ template<class T>
 struct is_adaptor<T, void_t<typename T::adaptor>> : std::true_type {};
 
 template<class... Args>
-struct first_arg_helper {};
+struct first_arg {};
 
 template<class Arg, class... Rest>
-struct first_arg_helper<Arg, Rest...> {
+struct first_arg<Arg, Rest...> {
     using type = Arg;
 };
 
 template<>
-struct first_arg_helper<> {
+struct first_arg<> {
     using type = void;
 };
 
 template<class... Args>
-using first_arg = typename first_arg_helper<Args...>::type;
+using first_arg_t = typename first_arg<Args...>::type;
 
 template<class Function, class... Args>
 using func_ret_type = decltype(std::declval<Function>()(std::declval<Args>()...));
@@ -505,21 +539,112 @@ using is_sentinel = std::integral_constant<bool, !std::is_same<Iterator, S>::val
 
 template<class Iterable>
 using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value>;
+
+#ifdef LZ_HAS_CXX_14
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_ra_v = is_ra<T>::value;
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_ra_tag_v = is_ra_tag<T>::value;
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_bidi_tag_v = is_bidi_tag<T>::value;
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_bidi_v = is_bidi<T>::value;
+
+template<class T>
+LZ_INLINE_VAR constexpr bool has_sentinel_v = has_sentinel<T>::value;
+
+template<class I, class S>
+LZ_INLINE_VAR constexpr bool is_sentinel_v = is_sentinel<I, S>::value;
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_iterable_v = is_iterable<T>::value;
+
+#endif
+
+#ifdef LZ_HAS_CONCEPTS
+
+} // namespace detail
+} // namespace lz
+
+// clang-format off
+
+LZ_MODULE_EXPORT namespace lz {
+
+/**
+ * @brief Concept that can be used to check whether a type is bidirectional iterable, i.e. has a begin()
+ * and end() method and can reverse
+ * 
+ * @tparam I The iterable to check
+ */
+template<class I>
+concept bidirectional_iterable =
+    requires(I&& i) { requires std::bidirectional_iterator<decltype(std::begin(i))>; };
+
+/**
+ * @brief Concept that can be used to check whether T is sized, i.e. has a .size() method or is an array.
+ * 
+ * @tparam T The iterable to check.
+ */
+template<class T>
+concept sized = requires(T&& c) {
+    { std::size(c) };
+};
+
+/**
+ * @brief Concept that can be used to check whether a type is iterable, i.e. has a begin() and end() method.
+ * 
+ * @tparam T The type to check.
+ */
+template<class T>
+concept iterable = requires(T&& c) {
+    { std::begin(c) };
+    { std::end(c) };
+};
+
+} // End namespace lz
+
+// clang-format on
+
+namespace lz {
+namespace detail {
+
+#endif
+
 } // namespace detail
 
 /**
  * @brief Helper to check whether a type is sized i.e. contains a .size() method. Example:
  * ```cpp
  * std::vector<int> v;
- * static_assert(lz::sized<decltype(v)>::value, "Vector is sized");
+ * static_assert(lz::is_sized<decltype(v)>::value, "Vector is sized");
  *
  * auto not_sized = lz::cstring("Hello");
- * static_assert(!lz::sized<decltype(not_sized)>::value, "C string is not sized"); // C strings are not sized
+ * static_assert(!lz::is_sized<decltype(not_sized)>::value, "C string is not sized"); // C strings are not sized
  * ```
  * @tparam T The type to check.
  */
 template<class T>
-using sized = detail::sized<T>;
+using is_sized = detail::is_sized<T>;
+
+#ifdef LZ_HAS_CXX_14
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_sized_v = is_sized<T>::value;
+
+#endif
+
 } // namespace lz
+
+// clang-format off
+#ifdef LZ_HAS_CONCEPTS
+  #define LZ_CONCEPT_BIDIRECTIONAL_ITERABLE lz::bidirectional_iterable
+#else
+  #define LZ_CONCEPT_BIDIRECTIONAL_ITERABLE class
+#endif
+// endif
 
 #endif // LZ_TRAITS_HPP

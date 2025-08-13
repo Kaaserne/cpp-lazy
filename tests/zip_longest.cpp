@@ -70,7 +70,7 @@ TEST_CASE("Zip longest bidi and not sized") {
     auto filter = v | lz::filter([](int i) { return i % 2 == 0; });
     auto zip = lz::zip_longest(v, filter);
     static_assert(lz::detail::is_bidi<decltype(zip.begin())>::value, "Should not be bidi");
-    static_assert(!lz::detail::sized<decltype(zip.begin())>::value, "Should not be sized");
+    static_assert(!lz::detail::is_sized<decltype(zip.begin())>::value, "Should not be sized");
 
     std::tuple<lz::optional<int>, lz::optional<int>> expected[] = { { 1, 2 },           { 2, 4 },           { 3, 6 },
                                                                     { 4, lz::nullopt }, { 5, lz::nullopt }, { 6, lz::nullopt },

@@ -25,7 +25,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr reverse_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -40,37 +40,49 @@ public:
     explicit constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(sized<Iterable>)
+    {
         return static_cast<std::size_t>(lz::size(_iterable));
     }
+
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(lz::size(_iterable));
+    }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const {
         if constexpr (Cached && std::is_same_v<inner_iter, inner_sent>) {
-            return { std::end(_iterable), std::begin(_iterable), std::end(_iterable) };
+            return { _iterable.end(), _iterable.begin(), _iterable.end() };
         }
         else if constexpr (Cached && !std::is_same_v<inner_iter, inner_sent>) {
-            const auto size = std::end(_iterable) - std::begin(_iterable);
-            return { std::begin(_iterable) + size, std::begin(_iterable), std::end(_iterable) };
+            const auto size = _iterable.end() - _iterable.begin();
+            return { _iterable.begin() + size, _iterable.begin(), _iterable.end() };
         }
         else if constexpr (std::is_same_v<inner_iter, inner_sent>) {
-            return iterator{ std::end(_iterable) };
+            return iterator{ _iterable.end() };
         }
         else {
             static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-            const auto size = std::end(_iterable) - std::begin(_iterable);
-            return iterator{ std::begin(_iterable) + size };
+            const auto size = _iterable.end() - _iterable.begin();
+            return iterator{ _iterable.begin() + size };
         }
     }
 
     [[nodiscard]] constexpr iterator end() const {
         if constexpr (Cached) {
-            return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable) };
+            return { _iterable.begin(), _iterable.begin(), _iterable.end() };
         }
         else {
-            return iterator{ std::begin(_iterable) };
+            return iterator{ _iterable.begin() };
         }
     }
 
@@ -78,37 +90,36 @@ public:
 
     template<bool C = Cached>
     LZ_NODISCARD constexpr enable_if<C && std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
-        return { std::end(_iterable), std::begin(_iterable), std::end(_iterable) };
+        return { _iterable.end(), _iterable.begin(), _iterable.end() };
     }
 
     template<bool C = Cached>
     LZ_NODISCARD constexpr enable_if<C && !std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
         static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-        return { std::begin(_iterable) + (std::end(_iterable) - std::begin(_iterable)), std::begin(_iterable),
-                 std::end(_iterable) };
+        return { _iterable.begin() + (_iterable.end() - _iterable.begin()), _iterable.begin(), _iterable.end() };
     }
 
     // Using constexpr 17 here because cxx 17 has constexpr reverse_iterator
     template<bool C = Cached>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if<!C && std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
-        return iterator{ std::end(_iterable) };
+        return iterator{ _iterable.end() };
     }
 
     template<bool C = Cached>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if<!C && !std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
         static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-        const auto size = std::end(_iterable) - std::begin(_iterable);
+        const auto size = _iterable.end() - _iterable.begin();
         return iterator{ detail::begin(_iterable) + size };
     }
 
     template<bool C = Cached>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if<!C, iterator> end() const {
-        return iterator{ std::begin(_iterable) };
+        return iterator{ _iterable.begin() };
     }
 
     template<bool C = Cached>
     LZ_NODISCARD constexpr enable_if<C, iterator> end() const {
-        return { std::begin(_iterable), std::begin(_iterable), std::end(_iterable) };
+        return { _iterable.begin(), _iterable.begin(), _iterable.end() };
     }
 
 #endif

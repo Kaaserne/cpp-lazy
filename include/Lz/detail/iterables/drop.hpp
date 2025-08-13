@@ -28,7 +28,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr drop_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -43,10 +43,22 @@ public:
     constexpr drop_iterable(I&& iterable, const std::size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
-    template<bool Sized = sized<Iterable>::value>
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const
+        requires(sized<Iterable>)
+    {
+        return lz::size(_iterable) > _n ? lz::size(_iterable) - _n : 0;
+    }
+
+#else
+
+    template<bool Sized = is_sized<Iterable>::value>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
         return lz::size(_iterable) > _n ? lz::size(_iterable) - _n : 0;
     }
+
+#endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return next_fast_safe(std::move(_iterable), static_cast<diff>(_n));
@@ -57,7 +69,7 @@ public:
     }
 
     LZ_NODISCARD constexpr sentinel end() const& {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {

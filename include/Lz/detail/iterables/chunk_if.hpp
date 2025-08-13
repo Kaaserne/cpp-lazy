@@ -23,7 +23,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunk_if_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryPredicate>)
     = default;
 
 #else
@@ -50,8 +50,8 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        const auto is_end = std::end(_iterable) == std::begin(_iterable);
-        return { std::begin(_iterable), std::end(_iterable), _predicate, is_end };
+        const auto is_end = _iterable.end() == _iterable.begin();
+        return { _iterable.begin(), _iterable.end(), _predicate, is_end };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

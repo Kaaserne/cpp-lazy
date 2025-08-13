@@ -75,32 +75,6 @@ int main() {
     // 1.0 2.0 3.0 4.0 5.0
     std::cout << '\n';
 
-    // ------------------------------- Pairwise_n ----------------------------------------------------
-    std::vector<int> pairwise_numbers = { 1, 2, 3, 4, 5 };
-#ifdef LZ_HAS_CXX_11
-
-    auto pairwise_iterable = lz::pairwise_n<3>{}(pairwise_numbers); // or: `pairwise_numbers | lz::pairwise_n<3>{};`
-
-#else
-
-    auto pairwise_iterable = lz::pairwise_n<3>(pairwise_numbers); // or: `pairwise_numbers | lz::pairwise_n<3>;`
-
-#endif
-
-    for (const auto& tup : pairwise_iterable) {
-        std::cout << '(' << std::get<0>(tup) << ", " << std::get<1>(tup) << ", " << std::get<2>(tup) << ") ";
-    }
-    // (1, 2, 3) (2, 3, 4) (3, 4, 5)
-    std::cout << '\n';
-
-    // ----------------------------------- Pairwise --------------------------------------------
-    auto pairwise_iterable2 = lz::pairwise(pairwise_numbers); // or: `pairwise_numbers | lz::pairwise;`
-    for (const auto& tup : pairwise_iterable2) {
-        std::cout << '(' << std::get<0>(tup) << ", " << std::get<1>(tup) << ") ";
-    }
-    // (1, 2) (2, 3) (3, 4) (4, 5)
-    std::cout << '\n';
-
     // --------------------------------- Get_nth ----------------------------------------------------
     std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
 #ifdef LZ_HAS_CXX_11

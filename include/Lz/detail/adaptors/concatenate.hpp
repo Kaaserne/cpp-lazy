@@ -3,7 +3,6 @@
 #ifndef LZ_CONCATENATE_ADAPTOR_HPP
 #define LZ_CONCATENATE_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/concatenate.hpp>
 
 namespace lz {

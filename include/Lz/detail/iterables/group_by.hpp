@@ -28,7 +28,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr group_by_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<BinaryPredicate>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<BinaryPredicate>)
     = default;
 
 #else
@@ -48,19 +48,31 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { _iterable, std::begin(_iterable), _binary_predicate };
+        return { _iterable, _iterable.begin(), _binary_predicate };
     }
+
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr iterator begin() &&
+        requires(return_sentinel)
+    {
+        return { _iterable, _iterable.begin(), std::move(_binary_predicate) };
+    }
+
+#else
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { _iterable, std::begin(_iterable), std::move(_binary_predicate) };
+        return { _iterable, _iterable.begin(), std::move(_binary_predicate) };
     }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable, std::end(_iterable), _binary_predicate };
+            return iterator{ _iterable, _iterable.end(), _binary_predicate };
         }
         else {
             return lz::default_sentinel;
@@ -71,7 +83,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
-        return { _iterable, std::end(_iterable), _binary_predicate };
+        return { _iterable, _iterable.end(), _binary_predicate };
     }
 
     template<bool R = return_sentinel>

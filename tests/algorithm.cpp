@@ -210,7 +210,7 @@ TEST_CASE("To iterable") {
     SUBCASE("To iterable begin end bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         lz::basic_iterable<std::list<int>::iterator> iterable(lst.begin(), lst.end());
-        static_assert(!lz::sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
+        static_assert(!lz::is_sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
     }
 }
 

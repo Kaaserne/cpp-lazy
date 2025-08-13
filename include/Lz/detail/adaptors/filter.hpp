@@ -4,7 +4,6 @@
 #define LZ_FILTER_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/filter.hpp>
 
 namespace lz {

@@ -4,7 +4,6 @@
 #define LZ_MAP_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/map.hpp>
 
 namespace lz {

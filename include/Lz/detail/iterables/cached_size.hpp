@@ -20,7 +20,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cached_size_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -42,11 +42,11 @@ public:
     }
 
     LZ_NODISCARD constexpr iterator begin() const& {
-        return std::begin(_iterable);
+        return _iterable.begin();
     }
 
     LZ_NODISCARD constexpr sentinel end() const& {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {

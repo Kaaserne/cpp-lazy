@@ -6,7 +6,6 @@
 #include <Lz/basic_iterable.hpp> // for operator|
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/traits.hpp>
 #include <string>
 
@@ -52,12 +51,12 @@ struct iterable_formatter {
      * @return The stream object
      */
     template<class Iterable>
-    std::ostream&
+    void
     operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ", const char* format = "{}") const {
-        auto it = std::begin(iterable);
-        auto end = std::end(iterable);
+        auto it = iterable.begin();
+        auto end = iterable.end();
         if (it == end) {
-            return stream;
+            return;
         }
 
 #ifndef LZ_STANDALONE
@@ -91,8 +90,6 @@ struct iterable_formatter {
         }
 
 #endif // !LZ_STANDALONE
-
-        return stream;
     }
 
 #else
@@ -109,18 +106,16 @@ struct iterable_formatter {
      * @return The stream object
      */
     template<class Iterable>
-    std::ostream& operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
-        auto it = std::begin(iterable);
-        auto end = std::end(iterable);
+    void operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
+        auto it = iterable.begin();
+        auto end = iterable.end();
         if (it == end) {
-            return stream;
+            return;
         }
         stream << *it;
         for (++it; it != end; ++it) {
             stream << separator << *it;
         }
-
-        return stream;
     }
 
 #endif // !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
@@ -245,8 +240,8 @@ struct iterable_formatter {
      */
     template<class Iterable>
     LZ_NODISCARD std::string operator()(const Iterable& iterable, const char* separator = ", ", const char* format = "{}") const {
-        auto it = std::begin(iterable);
-        auto end = std::end(iterable);
+        auto it = iterable.begin();
+        auto end = iterable.end();
         if (it == end) {
             return "";
         }
@@ -332,6 +327,29 @@ LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
 
 } // namespace lz
 
+#ifdef LZ_HAS_CONCEPTS
+
+/**
+ * @brief Streams a `lz` iterable to an output stream. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3, 4, 5 };
+ * auto filter = lz::filter(vec, [](int i) { return i % 2 == 0; });
+ * std::cout << filter; // 2, 4
+ * ```
+ *
+ * @param stream The stream to output to
+ * @param iterable The `lz` iterable to output
+ */
+LZ_MODULE_EXPORT template<class Iterable>
+std::ostream& operator<<(std::ostream& stream, const Iterable& iterable)
+    requires(std::is_base_of_v<lz::lazy_view, Iterable>)
+{
+    lz::format(iterable, stream);
+    return stream;
+}
+
+#else
+
 /**
  * @brief Streams a `lz` iterable to an output stream. Example:
  * ```cpp
@@ -346,7 +364,10 @@ LZ_INLINE_VAR constexpr detail::iterable_formatter format{};
 LZ_MODULE_EXPORT template<class Iterable>
 lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
 operator<<(std::ostream& stream, const Iterable& iterable) {
-    return lz::format(iterable, stream);
+    lz::format(iterable, stream);
+    return stream;
 }
+
+#endif
 
 #endif

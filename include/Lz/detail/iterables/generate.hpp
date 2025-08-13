@@ -24,7 +24,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_iterable()
-        requires std::default_initializable<GeneratorFunc>
+        requires(std::default_initializable<GeneratorFunc>)
     = default;
 
 #else
@@ -67,7 +67,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_iterable()
-        requires std::default_initializable<GeneratorFunc>
+        requires(std::default_initializable<GeneratorFunc>)
     = default;
 
 #else

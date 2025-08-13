@@ -3,7 +3,6 @@
 #ifndef LZ_INTERLEAVED_ADAPTOR_HPP
 #define LZ_INTERLEAVED_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/interleave.hpp>
 
 namespace lz {

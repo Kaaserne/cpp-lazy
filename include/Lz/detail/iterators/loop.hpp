@@ -33,7 +33,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterator()
-        requires std::default_initializable<it> && std::default_initializable<Iterable>
+        requires(std::default_initializable<it> && std::default_initializable<Iterable>)
     = default;
 
 #else
@@ -72,64 +72,62 @@ public:
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator;
 
-        if (_iterator == std::end(_iterable)) {
+        if (_iterator == _iterable.end()) {
             --_rotations_left;
-            _iterator = std::begin(_iterable);
+            _iterator = _iterable.begin();
         }
         if (static_cast<difference_type>(_rotations_left) == -1) {
-            _iterator = std::end(_iterable);
+            _iterator = _iterable.end();
             _rotations_left = 0;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         --_iterator;
-        if (_iterator == std::begin(_iterable)) {
-            _iterator = std::end(_iterable);
+        if (_iterator == _iterable.begin()) {
+            _iterator = _iterable.end();
             ++_rotations_left;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
-        const auto iter_length = std::end(_iterable) - std::begin(_iterable);
+        const auto iter_length = _iterable.end() - _iterable.begin();
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
         _rotations_left -= static_cast<std::size_t>(offset / iter_length);
 
         LZ_ASSERT_ADDABLE(static_cast<difference_type>(_rotations_left) >= -1);
 
-        if (_iterator == std::begin(_iterable) && static_cast<difference_type>(_rotations_left) == -1) {
+        if (_iterator == _iterable.begin() && static_cast<difference_type>(_rotations_left) == -1) {
             // We are exactly at end (rotations left is unsigned)
-            _iterator = std::end(_iterable);
+            _iterator = _iterable.end();
             _rotations_left = 0;
         }
-        else if (_iterator == std::end(_iterable) && offset < 0 && remainder == 0) {
-            _iterator = std::begin(_iterable);
+        else if (_iterator == _iterable.end() && offset < 0 && remainder == 0) {
+            _iterator = _iterable.begin();
             --_rotations_left;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const loop_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
-                            std::end(_iterable) == std::end(other._iterable));
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
         const auto rotations_left_diff =
             static_cast<difference_type>(other._rotations_left) - static_cast<difference_type>(_rotations_left);
-        return (_iterator - other._iterator) + rotations_left_diff * (std::end(_iterable) - std::begin(_iterable));
+        return (_iterator - other._iterator) + rotations_left_diff * (_iterable.end() - _iterable.begin());
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
         const auto rotations_left_diff = static_cast<difference_type>(_rotations_left);
-        return -((std::end(_iterable) - _iterator) + rotations_left_diff * (std::end(_iterable) - std::begin(_iterable)));
+        return -((_iterable.end() - _iterator) + rotations_left_diff * (_iterable.end() - _iterable.begin()));
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const loop_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
-                            std::end(_iterable) == std::end(other._iterable));
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
         return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _rotations_left == 0 && _iterator == std::end(_iterable);
+        return _rotations_left == 0 && _iterator == _iterable.end();
     }
 };
 
@@ -154,7 +152,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr loop_iterator()
-        requires std::default_initializable<Iterable> && std::default_initializable<it>
+        requires(std::default_initializable<Iterable> && std::default_initializable<it>)
     = default;
 
 #else
@@ -185,8 +183,8 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         ++_iterator;
-        if (_iterator == std::end(_iterable)) {
-            _iterator = std::begin(_iterable);
+        if (_iterator == _iterable.end()) {
+            _iterator = _iterable.begin();
         }
     }
 
@@ -200,7 +198,7 @@ public:
 #endif
 
     constexpr bool eq(default_sentinel_t) const {
-        return std::begin(_iterable) == std::end(_iterable);
+        return _iterable.begin() == _iterable.end();
     }
 
 #ifdef _MSC_VER

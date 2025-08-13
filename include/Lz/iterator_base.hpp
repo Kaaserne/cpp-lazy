@@ -36,20 +36,20 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         return static_cast<const Derived&>(*this).arrow();
     }
 
-    LZ_NODISCARD constexpr bool operator==(const sentinel& b) const {
-        return static_cast<const Derived&>(*this).eq(b);
+    LZ_NODISCARD constexpr bool operator==(const sentinel& s) const {
+        return static_cast<const Derived&>(*this).eq(s);
     }
 
-    LZ_NODISCARD constexpr bool operator!=(const sentinel& b) const {
-        return !(*this == b);
+    LZ_NODISCARD constexpr bool operator!=(const sentinel& s) const {
+        return !(*this == s);
     }
 
-    LZ_NODISCARD friend constexpr bool operator==(const Derived& a, const Derived& b) {
-        return a.eq(b);
+    LZ_NODISCARD friend constexpr bool operator==(const Derived& a, const Derived& d) {
+        return a.eq(d);
     }
 
-    LZ_NODISCARD friend constexpr bool operator!=(const Derived& a, const Derived& b) {
-        return !(a == b);
+    LZ_NODISCARD friend constexpr bool operator!=(const Derived& a, const Derived& d) {
+        return !(a == d);
     }
 };
 
@@ -88,12 +88,12 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return tmp;
     }
 
-    LZ_NODISCARD constexpr friend DifferenceType operator-(const Derived& a, const Derived& b) {
-        return a.difference(b);
+    LZ_NODISCARD constexpr friend DifferenceType operator-(const Derived& a, const Derived& d) {
+        return a.difference(d);
     }
 
-    LZ_NODISCARD constexpr DifferenceType operator-(const sentinel& b) const {
-        return static_cast<const Derived&>(*this).difference(b);
+    LZ_NODISCARD constexpr DifferenceType operator-(const sentinel& s) const {
+        return static_cast<const Derived&>(*this).difference(s);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Derived operator-(const DifferenceType n) const {
@@ -111,36 +111,36 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return *(*this + n);
     }
 
-    LZ_NODISCARD constexpr friend bool operator<(const Derived& a, const Derived& b) {
-        return b - a > 0;
+    LZ_NODISCARD constexpr friend bool operator<(const Derived& a, const Derived& d) {
+        return d - a > 0;
     }
 
-    LZ_NODISCARD constexpr friend bool operator>(const Derived& a, const Derived& b) {
-        return b < a;
+    LZ_NODISCARD constexpr friend bool operator>(const Derived& a, const Derived& d) {
+        return d < a;
     }
 
-    LZ_NODISCARD constexpr friend bool operator<=(const Derived& a, const Derived& b) {
-        return !(b < a);
+    LZ_NODISCARD constexpr friend bool operator<=(const Derived& a, const Derived& d) {
+        return !(d < a);
     }
 
-    LZ_NODISCARD constexpr friend bool operator>=(const Derived& a, const Derived& b) {
-        return !(a < b);
+    LZ_NODISCARD constexpr friend bool operator>=(const Derived& a, const Derived& d) {
+        return !(a < d);
     }
 
-    LZ_NODISCARD constexpr bool operator<(const sentinel& b) const {
-        return (*this - b) < 0;
+    LZ_NODISCARD constexpr bool operator<(const sentinel& s) const {
+        return (*this - s) < 0;
     }
 
-    LZ_NODISCARD constexpr bool operator>(const sentinel& b) const {
-        return b < *this;
+    LZ_NODISCARD constexpr bool operator>(const sentinel& s) const {
+        return s < *this;
     }
 
-    LZ_NODISCARD constexpr bool operator<=(const sentinel& b) const {
-        return !(b < *this);
+    LZ_NODISCARD constexpr bool operator<=(const sentinel& s) const {
+        return !(s < *this);
     }
 
-    LZ_NODISCARD constexpr bool operator>=(const sentinel& b) const {
-        return !(*this < b);
+    LZ_NODISCARD constexpr bool operator>=(const sentinel& s) const {
+        return !(*this < s);
     }
 };
 } // namespace lz

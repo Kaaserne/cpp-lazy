@@ -4,7 +4,6 @@
 #define LZ_COMMON_ADAPTOR_HPP
 
 #include <Lz/basic_iterable.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/common.hpp>
 
 namespace lz {
@@ -44,9 +43,9 @@ struct common_adaptor {
     [[nodiscard]] constexpr auto operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
 
-        if constexpr (is_ra<iter_t<Iterable>>::value) {
-            const auto size = detail::end(std::forward<Iterable>(iterable)) - std::begin(iterable);
-            return basic_iterable<iter_t<Iterable>>{ std::begin(iterable), std::begin(iterable) + size };
+        if constexpr (is_ra_v<iter_t<Iterable>>) {
+            const auto size = detail::end(std::forward<Iterable>(iterable)) - iterable.begin();
+            return basic_iterable<iter_t<Iterable>>{ iterable.begin(), iterable.begin() + size };
         }
         else {
             return common_iterable<remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
@@ -108,8 +107,7 @@ struct common_adaptor {
     LZ_NODISCARD constexpr enable_if<is_ra<iter_t<Iterable>>::value, basic_iterable<iter_t<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
-        return basic_iterable<iter_t<Iterable>>{ std::begin(iterable),
-                                                 std::begin(iterable) + (std::end(iterable) - std::begin(iterable)) };
+        return basic_iterable<iter_t<Iterable>>{ iterable.begin(), iterable.begin() + (iterable.end() - iterable.begin()) };
     }
 
 #endif

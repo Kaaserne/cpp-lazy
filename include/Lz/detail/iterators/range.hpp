@@ -64,7 +64,7 @@ public:
 
     constexpr difference_type difference(const range_iterator& other) const noexcept {
         if constexpr (std::is_floating_point_v<Arithmetic>) {
-            LZ_ASSSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<Arithmetic>::epsilon()));
+            LZ_ASSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<Arithmetic>::epsilon()));
 
             const auto current_size = (_index - other._index) / _step;
             const auto int_part = static_cast<difference_type>(current_size);
@@ -72,14 +72,13 @@ public:
             return !almost_equal(current_size, arithmetic_int_part) ? int_part + 1 : int_part;
         }
         else {
-            LZ_ASSERT(_step != 0, "Division by zero in range size calculation");
             return static_cast<difference_type>(_index - other._index) / static_cast<difference_type>(_step);
         }
     }
 
     constexpr bool eq(const range_iterator& other) const noexcept {
         if constexpr (std::is_floating_point_v<Arithmetic>) {
-            LZ_ASSSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<Arithmetic>::epsilon()));
+            LZ_ASSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<Arithmetic>::epsilon()));
             return almost_equal(_index, other._index);
         }
         else {
@@ -91,25 +90,24 @@ public:
 
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
-    difference(const range_iterator& b) const noexcept {
-        LZ_ASSERT(almost_equal(_step, b._step), "Division by zero in range size calculation");
+    difference(const range_iterator& other) const noexcept {
+        LZ_ASSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<Arithmetic>::epsilon()));
 
-        const auto current_size = (_index - b._index) / _step;
+        const auto current_size = (_index - other._index) / _step;
         const auto int_part = static_cast<difference_type>(current_size);
         return (current_size > static_cast<A>(int_part)) ? int_part + 1 : int_part;
     }
 
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, difference_type>
-    difference(const range_iterator& b) const noexcept {
-        LZ_ASSERT_COMPTABLE(_step == b._step);
-        LZ_ASSERT(_step != 0, "Division by zero in range difference calculation");
-        return static_cast<difference_type>(_index - b._index) / static_cast<difference_type>(_step);
+    difference(const range_iterator& other) const noexcept {
+        LZ_ASSERT_COMPATIBLE(_step == other._step);
+        return static_cast<difference_type>(_index - other._index) / static_cast<difference_type>(_step);
     }
 
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
-        LZ_ASSERT_COMPTABLE(almost_equal(_step, other._step, std::numeric_limits<A>::epsilon()));
+        LZ_ASSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<A>::epsilon()));
         return almost_equal(_index, other._index);
     }
 
@@ -168,8 +166,8 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    constexpr difference_type difference(const range_iterator& b) const noexcept {
-        const auto current_size = _index - b._index;
+    constexpr difference_type difference(const range_iterator& other) const noexcept {
+        const auto current_size = _index - other._index;
         if constexpr (std::is_floating_point_v<Arithmetic>) {
             return static_cast<difference_type>(current_size + (current_size < 0 ? -0.5 : 0.5));
         }
@@ -191,15 +189,15 @@ public:
 
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
-    difference(const range_iterator& b) const noexcept {
-        const auto diff = _index - b._index;
+    difference(const range_iterator& other) const noexcept {
+        const auto diff = _index - other._index;
         return static_cast<difference_type>(diff + (diff < 0 ? -0.5 : 0.5));
     }
 
     template<class A = Arithmetic>
     LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, difference_type>
-    difference(const range_iterator& b) const noexcept {
-        return static_cast<difference_type>(_index - b._index);
+    difference(const range_iterator& other) const noexcept {
+        return static_cast<difference_type>(_index - other._index);
     }
 
     template<class A = Arithmetic>

@@ -14,71 +14,70 @@ namespace lz {
 namespace detail {
 
 template<class>
-struct optional_iter_tuple_value_type_helper;
+struct optional_iter_tuple_value_type;
 
 template<class... Iterators>
-struct optional_iter_tuple_value_type_helper<std::tuple<Iterators...>> {
+struct optional_iter_tuple_value_type<std::tuple<Iterators...>> {
     using type = std::tuple<optional<val_t<Iterators>>...>;
 };
 
 template<class Iterator, std::size_t N>
-struct optional_iter_tuple_value_type_helper<std::array<Iterator, N>> {
+struct optional_iter_tuple_value_type<std::array<Iterator, N>> {
     using optional_value_type = optional<val_t<Iterator>>;
     using type = decltype(tuple_of<optional_value_type>(make_index_sequence<N>()));
 };
 
 template<class IterTuple>
-using optional_value_type_iter_tuple_t = typename optional_iter_tuple_value_type_helper<IterTuple>::type;
+using optional_value_type_iter_tuple_t = typename optional_iter_tuple_value_type<IterTuple>::type;
 
 template<bool>
-struct reference_or_value_type_helper;
+struct reference_or_value_type;
 
 template<>
-struct reference_or_value_type_helper<true /* is lvalue reference */> {
+struct reference_or_value_type<true /* is lvalue reference */> {
     template<class Ref, class>
     using type = std::reference_wrapper<remove_ref<Ref>>;
 };
 
 template<>
-struct reference_or_value_type_helper<false /* is lvalue reference */> {
+struct reference_or_value_type<false /* is lvalue reference */> {
     template<class, class Val>
     using type = Val;
 };
 
 template<class Ref, class Val>
-using reference_or_value_type =
-    typename reference_or_value_type_helper<std::is_lvalue_reference<Ref>::value>::template type<Ref, Val>;
+using reference_or_value_type_t = typename reference_or_value_type<std::is_lvalue_reference<Ref>::value>::template type<Ref, Val>;
 
 template<class>
-struct optional_iter_tuple_ref_type_helper;
+struct optional_iter_tuple_ref_type;
 
 template<class... Iterators>
-struct optional_iter_tuple_ref_type_helper<std::tuple<Iterators...>> {
-    using type = std::tuple<optional<reference_or_value_type<ref_t<Iterators>, val_t<Iterators>>>...>;
+struct optional_iter_tuple_ref_type<std::tuple<Iterators...>> {
+    using type = std::tuple<optional<reference_or_value_type_t<ref_t<Iterators>, val_t<Iterators>>>...>;
 };
 
 template<class Iterator, std::size_t N>
-struct optional_iter_tuple_ref_type_helper<std::array<Iterator, N>> {
-    using optional_ref_or_value_type = optional<reference_or_value_type<ref_t<Iterator>, val_t<Iterator>>>;
+struct optional_iter_tuple_ref_type<std::array<Iterator, N>> {
+    using optional_ref_or_value_type = optional<reference_or_value_type_t<ref_t<Iterator>, val_t<Iterator>>>;
     using type = decltype(tuple_of<optional_ref_or_value_type>(make_index_sequence<N>()));
 };
 
 template<class IterTuple>
-using optional_iter_tuple_ref_type = typename optional_iter_tuple_ref_type_helper<IterTuple>::type;
+using optional_iter_tuple_ref_type_t = typename optional_iter_tuple_ref_type<IterTuple>::type;
 
 template<bool, class, class>
 class zip_longest_iterator;
 
 template<class IterMaybeHomo, class SMaybeHomo>
 class zip_longest_iterator<false /* bidi */, IterMaybeHomo, SMaybeHomo>
-    : public iterator<zip_longest_iterator<false, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
-                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
+    : public iterator<zip_longest_iterator<false, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type_t<IterMaybeHomo>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
                       iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
     using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
     using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
-    using reference = optional_iter_tuple_ref_type<IterMaybeHomo>;
+    using reference = optional_iter_tuple_ref_type_t<IterMaybeHomo>;
     using pointer = fake_ptr_proxy<value_type>;
 
 private:
@@ -89,11 +88,11 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 auto
-    deref_one() const -> optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
-                                                          val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>> {
+    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
+                                                            val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>> {
 
         using iter_type = remove_cvref<decltype(std::get<I>(_iterators))>;
-        using ref_or_value_type = optional<reference_or_value_type<ref_t<iter_type>, val_t<iter_type>>>;
+        using ref_or_value_type = optional<reference_or_value_type_t<ref_t<iter_type>, val_t<iter_type>>>;
 
         if (std::get<I>(_iterators) == std::get<I>(_end)) {
             return lz::nullopt;
@@ -148,7 +147,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>
+        requires(std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>)
     = default;
 
 #else
@@ -184,9 +183,9 @@ public:
         increment(is{});
     }
 
-    LZ_CONSTEXPR_CXX_17 bool eq(const zip_longest_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(_end == b._end);
-        return eq(b, is{});
+    LZ_CONSTEXPR_CXX_17 bool eq(const zip_longest_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end);
+        return eq(other, is{});
     }
 
     LZ_CONSTEXPR_CXX_17 bool eq(default_sentinel_t) const {
@@ -196,14 +195,14 @@ public:
 
 template<class IterMaybeHomo, class SMaybeHomo>
 class zip_longest_iterator<true /* bidi */, IterMaybeHomo, SMaybeHomo>
-    : public iterator<zip_longest_iterator<true, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type<IterMaybeHomo>,
-                      fake_ptr_proxy<optional_iter_tuple_ref_type<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
+    : public iterator<zip_longest_iterator<true, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type_t<IterMaybeHomo>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
                       iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
 public:
     using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
     using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
     using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
-    using reference = optional_iter_tuple_ref_type<IterMaybeHomo>;
+    using reference = optional_iter_tuple_ref_type_t<IterMaybeHomo>;
     using pointer = fake_ptr_proxy<value_type>;
 
     static constexpr std::size_t tuple_size = std::tuple_size<IterMaybeHomo>::value;
@@ -218,11 +217,11 @@ private:
 
     template<std::size_t I>
     LZ_CONSTEXPR_CXX_14 auto
-    deref_one() const -> optional<reference_or_value_type<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
-                                                          val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>> {
+    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref<decltype(std::get<I>(_iterators))>>,
+                                                            val_t<remove_cvref<decltype(std::get<I>(_iterators))>>>> {
 
         using iter_type = remove_cvref<decltype(std::get<I>(_iterators))>;
-        using ref_or_value_type = optional<reference_or_value_type<ref_t<iter_type>, val_t<iter_type>>>;
+        using ref_or_value_type = optional<reference_or_value_type_t<ref_t<iter_type>, val_t<iter_type>>>;
 
         if (std::get<I>(_iterators) == std::get<I>(_end)) {
             return lz::nullopt;
@@ -357,7 +356,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>
+        requires(std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>)
     = default;
 
 #else
@@ -411,7 +410,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const zip_longest_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(_end == other._end);
+        LZ_ASSERT_COMPATIBLE(_end == other._end);
         return minus(other, is{});
     }
 
@@ -419,9 +418,9 @@ public:
         return minus(is{});
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(_end == b._end);
-        return eq(b, is{});
+    LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end);
+        return eq(other, is{});
     }
 
     LZ_CONSTEXPR_CXX_20 bool eq(default_sentinel_t) const {

@@ -5,7 +5,6 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/chunk_if.hpp>
 
 namespace lz {

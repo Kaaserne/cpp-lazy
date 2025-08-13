@@ -4,7 +4,6 @@
 #define LZ_DROP_WHILE_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/drop_while.hpp>
 
 namespace lz {

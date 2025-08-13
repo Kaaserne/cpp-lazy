@@ -38,8 +38,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunk_if_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> &&
-                     std::default_initializable<UnaryPredicate>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S> &&
+                 std::default_initializable<UnaryPredicate>)
     = default;
 
 #else
@@ -73,6 +73,20 @@ public:
         return *this;
     }
 
+#ifdef LZ_HAS_CXX_17
+
+    constexpr reference dereference() const {
+        LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
+        if constexpr (std::is_constructible_v<ValueType, Iterator, Iterator>) {
+            return { _sub_range_begin, _sub_range_end };
+        }
+        else {
+            return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
+        }
+    }
+
+#else
+
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
@@ -86,6 +100,8 @@ public:
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
     }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const {
         return fake_ptr_proxy<decltype(**this)>(**this);
@@ -114,7 +130,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunk_if_iterator& rhs) const {
-        LZ_ASSERT_COMPTABLE(_end == rhs._end);
+        LZ_ASSERT_COMPATIBLE(_end == rhs._end);
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _ends_with_trailing == rhs._ends_with_trailing;
     }

@@ -80,6 +80,23 @@ void chunk_if_lz(benchmark::State& state) {
     }
 }
 
+#if defined(__cpp_lib_ranges_chunk_by) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+void chunk_if_std(benchmark::State& state) {
+    auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    constexpr static auto half = static_cast<int>(size_policy / 2);
+
+    for (auto _ : state) {
+        for (auto&& x : std::ranges::chunk_by(a, [](int i) noexcept { return i == half; })) {
+            for (int y : x) {
+                benchmark::DoNotOptimize(y);
+            }
+        }
+    }
+}
+
+#endif
+
 void chunks_lz(benchmark::State& state) {
     auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
     for (auto _ : state) {
@@ -90,6 +107,21 @@ void chunks_lz(benchmark::State& state) {
         }
     }
 }
+
+#if defined(__cpp_lib_ranges_chunk) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+void chunks_std(benchmark::State& state) {
+    auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+    for (auto _ : state) {
+        for (auto&& chunk : std::views::chunks(a, 8)) {
+            for (int x : chunk) {
+                benchmark::DoNotOptimize(x);
+            }
+        }
+    }
+}
+
+#endif
 
 void common_lz(benchmark::State& state) {
     auto a = lz::generate([]() noexcept { return 0; }, size_policy);
@@ -480,6 +512,21 @@ void take_every_lz(benchmark::State& state) {
     }
 }
 
+#if defined(__cpp_lib_ranges_stride) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+void take_every_std(benchmark::State& state) {
+    constexpr size_t offset = 2;
+    std::array<int, size_policy * offset> array;
+
+    for (auto _ : state) {
+        for (int taken : lz::ranges::stride(array, offset)) {
+            benchmark::DoNotOptimize(taken);
+        }
+    }
+}
+
+#endif
+
 void take_while_lz(benchmark::State& state) {
     auto array = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
 
@@ -657,6 +704,21 @@ void split_multiple_std(benchmark::State& state) {
     }
 }
 
+#if defined(__cpp_lib_ranges_cartesian_product) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
+
+void cartesian_product_std(benchmark::State& state) {
+    std::array<int, size_policy / 8> a;
+    std::array<char, size_policy / 4> b;
+
+    for (auto _ : state) {
+        for (auto&& tup : std::views::cartesian_product(a, b)) {
+            benchmark::DoNotOptimize(tup);
+        }
+    }
+}
+
+#endif
+
 #if defined(__cpp_lib_ranges_repeat) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
 
 void repeat_std(benchmark::State& state) {
@@ -778,6 +840,24 @@ BENCHMARK(zip4_lz);
 BENCHMARK(zip3_lz);
 BENCHMARK(zip2_lz);
 
+#if defined(__cpp_lib_ranges_cartesian_product) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+BENCHMARK(cartesian_product_std);
+
+#endif
+
+#if defined(__cpp_lib_ranges_chunk) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+BENCHMARK(chunks_std);
+
+#endif
+
+#if defined(__cpp_lib_ranges_chunk_by) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+BENCHMARK(chunk_if_std);
+
+#endif
+
 #if LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
 
 BENCHMARK(common_std);
@@ -791,13 +871,19 @@ BENCHMARK(split_multiple_std);
 
 #endif
 
-#if defined(__cpp_lib_ranges_repeat) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
+#if defined(__cpp_lib_ranges_stride) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+BENCHMARK(take_every_std);
+
+#endif
+
+#if defined(__cpp_lib_ranges_repeat) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
 
 BENCHMARK(repeat_std);
 
 #endif
 
-#if defined(__cpp_lib_ranges_zip) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
+#if defined(__cpp_lib_ranges_zip) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
 
 BENCHMARK(zip4_std);
 BENCHMARK(zip3_std);

@@ -38,7 +38,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
-        requires std::default_initializable<it> && std::default_initializable<sent>
+        requires(std::default_initializable<it> && std::default_initializable<sent>)
     = default;
 
 #else
@@ -51,11 +51,10 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(it iter, sent end, const std::size_t offset) :
+    constexpr take_every_iterator(it iter, sent end, const std::size_t offset) :
         _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset } {
-        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
@@ -78,9 +77,9 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(_end == b._end && _offset == b._offset);
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end && _offset == other._offset);
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
@@ -112,7 +111,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
-        requires std::default_initializable<it> && std::default_initializable<sent>
+        requires(std::default_initializable<it> && std::default_initializable<sent>)
     = default;
 
 #else
@@ -125,12 +124,11 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(it iter, sent end, const std::size_t offset, const std::size_t distance) :
+    constexpr take_every_iterator(it iter, sent end, const std::size_t offset, const std::size_t distance) :
         _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset },
         _distance{ distance } {
-        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
@@ -154,7 +152,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_distance != 0, "Out of bounds");
+        LZ_ASSERT_DECREMENTABLE(_distance != 0);
         const auto start_pos = _distance % _offset;
         const auto adjusted_start_pos = start_pos == 0 ? _offset : start_pos;
 
@@ -162,9 +160,9 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(_end == b._end && _offset == b._offset);
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end && _offset == other._offset);
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
@@ -204,7 +202,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
-        requires std::default_initializable<it> && std::default_initializable<sent>
+        requires(std::default_initializable<it> && std::default_initializable<sent>)
     = default;
 
 #else
@@ -218,15 +216,14 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 take_every_iterator(I&& iterable, it iter, const std::size_t offset) :
+    constexpr take_every_iterator(I&& iterable, it iter, const std::size_t offset) :
         _iterable{ std::forward<I>(iterable) },
         _iterator{ std::move(iter) },
         _offset{ offset } {
-        LZ_ASSERT(_offset != 0, "Cannot increment by 0");
     }
 
     LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(default_sentinel_t) {
-        _iterator = std::end(_iterable);
+        _iterator = _iterable.end();
         return *this;
     }
 
@@ -241,9 +238,9 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
-        const auto distance = static_cast<std::size_t>(std::end(_iterable) - _iterator);
+        const auto distance = static_cast<std::size_t>(_iterable.end() - _iterator);
         if (_offset >= distance) {
-            _iterator = std::end(_iterable);
+            _iterator = _iterable.end();
         }
         else {
             _iterator += static_cast<difference_type>(_offset);
@@ -251,8 +248,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT_DECREMENTABLE(_iterator != std::begin(_iterable));
-        const auto remaining = static_cast<std::size_t>(_iterator - std::begin(_iterable));
+        LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
+        const auto remaining = static_cast<std::size_t>(_iterator - _iterable.begin());
         const auto rem = remaining % _offset;
         _iterator -= rem == 0 ? static_cast<difference_type>(_offset) : static_cast<difference_type>(rem);
     }
@@ -262,20 +259,20 @@ public:
         const auto to_add = offset * s_offset;
 
         if (to_add >= 0) {
-            const auto current_distance = std::end(_iterable) - _iterator;
+            const auto current_distance = _iterable.end() - _iterator;
             if (to_add <= current_distance) {
                 _iterator += to_add;
                 return;
             }
             LZ_ASSERT_ADDABLE(to_add - current_distance < s_offset);
-            _iterator = std::end(_iterable);
+            _iterator = _iterable.end();
             return;
         }
 
-        const auto current_distance = _iterator - std::begin(_iterable);
+        const auto current_distance = _iterator - _iterable.begin();
         const auto remainder = current_distance % s_offset;
         if (remainder == 0) {
-            LZ_ASSERT(-to_add <= current_distance, "Cannot add before begin");
+            LZ_ASSERT_SUBTRACTABLE(-to_add <= current_distance);
             _iterator += to_add;
             return;
         }
@@ -284,23 +281,23 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
-                            std::begin(_iterable) == std::begin(other._iterable));
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end() && _offset == other._offset &&
+                             _iterable.begin() == other._iterable.begin());
         return difference_impl(other._iterator);
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
-        return difference_impl(std::end(_iterable));
+        return difference_impl(_iterable.end());
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const take_every_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(std::end(_iterable) == std::end(other._iterable) && _offset == other._offset &&
-                            std::begin(_iterable) == std::begin(other._iterable));
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end() && _offset == other._offset &&
+                             _iterable.begin() == other._iterable.begin());
         return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator == std::end(_iterable);
+        return _iterator == _iterable.end();
     }
 };
 } // namespace detail

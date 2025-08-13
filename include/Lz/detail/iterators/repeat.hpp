@@ -30,7 +30,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr repeat_iterator()
-        requires std::default_initializable<T>
+        requires(std::default_initializable<T>)
     = default;
 
 #else
@@ -67,8 +67,8 @@ public:
         ++_amount;
     }
 
-    constexpr bool eq(const repeat_iterator& b) const noexcept {
-        return _amount == b._amount;
+    constexpr bool eq(const repeat_iterator& other) const noexcept {
+        return _amount == other._amount;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {
@@ -80,8 +80,8 @@ public:
         _amount -= static_cast<std::size_t>(value);
     }
 
-    constexpr difference_type difference(const repeat_iterator& b) const noexcept {
-        return static_cast<difference_type>(b._amount) - static_cast<difference_type>(_amount);
+    constexpr difference_type difference(const repeat_iterator& other) const noexcept {
+        return static_cast<difference_type>(other._amount) - static_cast<difference_type>(_amount);
     }
 
     constexpr difference_type difference(default_sentinel_t) const noexcept {
@@ -104,7 +104,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr repeat_iterator()
-        requires std::default_initializable<T>
+        requires(std::default_initializable<T>)
     = default;
 
 #else

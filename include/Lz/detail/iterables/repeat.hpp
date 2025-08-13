@@ -9,19 +9,6 @@
 namespace lz {
 namespace detail {
 
-template<class T>
-struct remove_rvalue_reference {
-    using type = T;
-};
-
-template<class T>
-struct remove_rvalue_reference<T&&> {
-    using type = T;
-};
-
-template<class T>
-using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
-
 template<bool /* is infinite loop */, class>
 class repeat_iterable;
 
@@ -38,7 +25,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr repeat_iterable()
-        requires std::default_initializable<rvalue_remove_t>
+        requires(std::default_initializable<T>)
     = default;
 
 #else
@@ -81,7 +68,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr repeat_iterable()
-        requires std::default_initializable<rvalue_removed>
+        requires(std::default_initializable<T>)
     = default;
 
 #else

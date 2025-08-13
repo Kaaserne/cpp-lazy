@@ -24,8 +24,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr inclusive_scan_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<T> &&
-                     std::default_initializable<BinaryOp>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<T> &&
+                 std::default_initializable<BinaryOp>)
     = default;
 
 #else
@@ -47,20 +47,32 @@ public:
         _binary_op{ std::move(binary_op) } {
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    LZ_NODISCARD constexpr std::size_t size() const
+        requires(sized<Iterable>)
+    {
         return static_cast<std::size_t>(lz::size(_iterable));
     }
 
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const {
+        return static_cast<std::size_t>(lz::size(_iterable));
+    }
+
+#endif
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        auto begin = std::begin(_iterable);
-        auto end = std::end(_iterable);
+        auto begin = _iterable.begin();
+        auto end = _iterable.end();
 
         if (begin != end) {
             auto new_init = _binary_op(_init, *begin);
             return { begin, end, new_init, _binary_op };
         }
-        return { std::begin(_iterable), std::end(_iterable), _init, _binary_op };
+        return { _iterable.begin(), _iterable.end(), _init, _binary_op };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {

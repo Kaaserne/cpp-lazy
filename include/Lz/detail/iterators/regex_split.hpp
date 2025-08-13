@@ -34,7 +34,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr regex_split_iterator()
-        requires std::default_initializable<RegexTokenIter>
+        requires(std::default_initializable<RegexTokenIter>)
     = default;
 
 #else

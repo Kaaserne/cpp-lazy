@@ -21,7 +21,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr regex_split_iterable()
-        requires std::default_initializable<RegexTokenIter> && std::default_initializable<RegexTokenSentinel>
+        requires(std::default_initializable<RegexTokenIter> && std::default_initializable<RegexTokenSentinel>)
     = default;
 
 #else

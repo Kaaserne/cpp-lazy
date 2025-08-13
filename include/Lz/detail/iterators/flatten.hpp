@@ -11,11 +11,27 @@
 
 namespace lz {
 namespace detail {
+
+#ifdef LZ_HAS_CXX_17
+
+template<class T>
+[[nodiscard]] constexpr std::size_t count_dims_fn() {
+    if constexpr (is_iterable_v<T>) {
+        using inner = decltype(*std::begin(std::declval<T>()));
+        return 1 + count_dims_fn<inner>();
+    }
+    else {
+        return 0;
+    }
+}
+
+#else
+
 template<bool>
-struct count_dims_helper;
+struct count_dims;
 
 template<>
-struct count_dims_helper<false> {
+struct count_dims<false> {
 #ifdef LZ_HAS_CXX_11
 
     template<class>
@@ -30,34 +46,41 @@ struct count_dims_helper<false> {
 };
 
 template<>
-struct count_dims_helper<true> {
+struct count_dims<true> {
     template<class T>
     using iterable_type = decltype(*std::begin(std::declval<T>()));
 
 #ifdef LZ_HAS_CXX_11
 
     template<class T>
-    using type = std::integral_constant<
-        std::size_t, 1 + count_dims_helper<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
+    using type =
+        std::integral_constant<std::size_t,
+                               1 + count_dims<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
 
 #else
 
     template<class T>
-    static constexpr std::size_t value =
-        1 + count_dims_helper<is_iterable<iterable_type<T>>::value>::template value<iterable_type<T>>;
+    static constexpr std::size_t value = 1 + count_dims<is_iterable_v<iterable_type<T>>>::template value<iterable_type<T>>;
 
 #endif
 };
 
+#endif
+
 #ifdef LZ_HAS_CXX_11
 
 template<class T>
-using count_dims = typename count_dims_helper<is_iterable<T>::value>::template type<T>;
+using count_dims = typename count_dims<is_iterable<T>::value>::template type<T>;
+
+#elif !defined(LZ_HAS_CXX_17)
+
+template<class T>
+using count_dims = std::integral_constant<std::size_t, count_dims<is_iterable_v<T>>::template value<T>>;
 
 #else
 
 template<class T>
-using count_dims = std::integral_constant<std::size_t, count_dims_helper<is_iterable<T>::value>::template value<T>>;
+using count_dims = std::integral_constant<std::size_t, count_dims_fn<T>()>;
 
 #endif
 
@@ -87,7 +110,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_wrapper()
-        requires std::default_initializable<iter> && std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<iter> && std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -106,11 +129,11 @@ public:
     }
 
     constexpr bool has_next() const {
-        return _iterator != std::end(_iterable);
+        return _iterator != _iterable.end();
     }
 
     constexpr bool has_prev() const {
-        return _iterator != std::begin(_iterable);
+        return _iterator != _iterable.begin();
     }
 
     constexpr bool has_prev_inner() const {
@@ -130,28 +153,28 @@ public:
     }
 
     constexpr sentinel_t<Iterable> end() const {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
     LZ_CONSTEXPR_CXX_14 void initialize_last() {
-        _iterator = std::end(_iterable);
+        _iterator = _iterable.end();
     }
 
     constexpr difference_type current_to_begin() const {
-        return _iterator - std::begin(_iterable);
+        return _iterator - _iterable.begin();
     }
 
     constexpr difference_type end_to_current() const {
-        return std::end(_iterable) - _iterator;
+        return _iterable.end() - _iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& b) const {
-        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable));
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator == std::end(_iterable);
+        return _iterator == _iterable.end();
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
@@ -169,23 +192,22 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT_DECREMENTABLE(_iterator != std::begin(_iterable));
+        LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
         --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
-        LZ_ASSERT_SUB_ADDABLE(n < 0 ? -n <= _iterator - std::begin(_iterable) : n <= std::end(_iterable) - _iterator);
+        LZ_ASSERT_SUB_ADDABLE(n < 0 ? -n <= _iterator - _iterable.begin() : n <= _iterable.end() - _iterator);
         _iterator += n;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const flatten_wrapper& other) const {
-        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
-                            std::end(_iterable) == std::end(other._iterable));
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
         return _iterator - other._iterator;
     }
 
     constexpr difference_type difference(default_sentinel_t) const {
-        return _iterator - std::end(_iterable);
+        return _iterator - _iterable.end();
     }
 };
 
@@ -213,7 +235,7 @@ class flatten_iterator
 
         ++_outer_iter;
         _outer_iter.iterator(find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
-            _inner_iter = this_inner(inner, std::begin(inner));
+            _inner_iter = this_inner(inner, inner.begin());
             return _inner_iter.has_next();
         }));
 
@@ -251,13 +273,11 @@ private:
 
     constexpr void previous_outer() {
         --_outer_iter;
-        if constexpr (!is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value) {
-            _inner_iter = this_inner(*_outer_iter, std::end(*_outer_iter));
+        if constexpr (!is_sentinel_v<iter_t<Iterable>, sentinel_t<Iterable>>) {
+            _inner_iter = this_inner(*_outer_iter, (*_outer_iter).end());
         }
         else {
-            --_outer_iter;
-            _inner_iter =
-                this_inner(*_outer_iter, std::begin(*_outer_iter) + (std::end(*_outer_iter) - std::begin(*_outer_iter)));
+            _inner_iter = this_inner(*_outer_iter, (*_outer_iter).begin() + ((*_outer_iter).end() - (*_outer_iter).begin()));
         }
     }
 
@@ -266,23 +286,16 @@ private:
     template<class I = iter_t<Iterable>>
     LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
-        _inner_iter = this_inner(*_outer_iter, std::end(*_outer_iter));
+        _inner_iter = this_inner(*_outer_iter, (*_outer_iter).end());
     }
 
     template<class I = iter_t<Iterable>>
     LZ_CONSTEXPR_CXX_14 enable_if<is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
-        _inner_iter = this_inner(*_outer_iter, std::begin(*_outer_iter) + (std::end(*_outer_iter) - std::begin(*_outer_iter)));
+        _inner_iter = this_inner(*_outer_iter, (*_outer_iter).begin() + ((*_outer_iter).end() - (*_outer_iter).begin()));
     }
 
 #endif
-
-    LZ_CONSTEXPR_CXX_14 void try_previous_inner() {
-        previous_outer();
-        if (_inner_iter.has_prev()) {
-            --_inner_iter;
-        }
-    }
 
     flatten_wrapper<Iterable> _outer_iter;
     this_inner _inner_iter;
@@ -291,7 +304,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterator()
-        requires std::default_initializable<flatten_wrapper<Iterable>> && std::default_initializable<this_inner>
+        requires(std::default_initializable<flatten_wrapper<Iterable>> && std::default_initializable<this_inner>)
     = default;
 
 #else
@@ -307,7 +320,7 @@ public:
     template<class I>
     LZ_CONSTEXPR_CXX_14 flatten_iterator(I&& iterable, iter it) : _outer_iter{ std::forward<I>(iterable), std::move(it) } {
         if (_outer_iter.has_next()) {
-            _inner_iter = this_inner(*_outer_iter, std::begin(*_outer_iter));
+            _inner_iter = this_inner(*_outer_iter, (*_outer_iter).begin());
             this->advance();
         }
     }
@@ -344,8 +357,8 @@ public:
         return _inner_iter.end_to_current();
     }
 
-    constexpr bool eq(const flatten_iterator& b) const {
-        return _outer_iter == b._outer_iter && _inner_iter == b._inner_iter;
+    constexpr bool eq(const flatten_iterator& other) const {
+        return _outer_iter == other._outer_iter && _inner_iter == other._inner_iter;
     }
 
     constexpr bool eq(default_sentinel_t) const {
@@ -468,16 +481,14 @@ public:
 
         if (outer_iter.has_next()) {
             // If the first outer iterator has next, we need to subtract the distance from the inner iterator
-            total -= this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
-                     _inner_iter;
+            total -= this_inner(*outer_iter, (*outer_iter).begin() + ((*outer_iter).end() - (*outer_iter).begin())) - _inner_iter;
+            for (++outer_iter; outer_iter != other._outer_iter; ++outer_iter) {
+                total -= (this_inner(*outer_iter, (*outer_iter).begin() + ((*outer_iter).end() - (*outer_iter).begin())) -
+                          this_inner(*outer_iter, (*outer_iter).begin()));
+            }
         }
         if (other._outer_iter.has_next()) {
-            total += this_inner(*other._outer_iter, std::begin(*other._outer_iter)) - other._inner_iter;
-        }
-
-        for (++outer_iter; outer_iter != other._outer_iter; ++outer_iter) {
-            total -= (this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
-                      this_inner(*outer_iter, std::begin(*outer_iter)));
+            total += this_inner(*other._outer_iter, (*other._outer_iter).begin()) - other._inner_iter;
         }
 
         return total;
@@ -488,12 +499,11 @@ public:
         auto outer_iter = _outer_iter;
 
         if (outer_iter.has_next()) {
-            total -= this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
-                     _inner_iter;
-        }
-        for (++outer_iter; outer_iter.has_next(); ++outer_iter) {
-            total -= (this_inner(*outer_iter, std::begin(*outer_iter) + (std::end(*outer_iter) - std::begin(*outer_iter))) -
-                      this_inner(*outer_iter, std::begin(*outer_iter)));
+            total -= this_inner(*outer_iter, (*outer_iter).begin() + ((*outer_iter).end() - (*outer_iter).begin())) - _inner_iter;
+            for (++outer_iter; outer_iter.has_next(); ++outer_iter) {
+                total -= (this_inner(*outer_iter, (*outer_iter).begin() + ((*outer_iter).end() - (*outer_iter).begin())) -
+                          this_inner(*outer_iter, (*outer_iter).begin()));
+            }
         }
 
         return total;
@@ -520,7 +530,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr flatten_iterator()
-        requires std::default_initializable<flatten_wrapper<Iterable>>
+        requires(std::default_initializable<flatten_wrapper<Iterable>>)
     = default;
 
 #else
@@ -576,8 +586,8 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    constexpr bool eq(const flatten_iterator& b) const {
-        return _iterator == b._iterator;
+    constexpr bool eq(const flatten_iterator& other) const {
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {

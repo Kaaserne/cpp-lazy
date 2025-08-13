@@ -32,7 +32,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr rotate_iterator()
-        requires std::default_initializable<iter> && std::default_initializable<Iterable>
+        requires(std::default_initializable<iter> && std::default_initializable<Iterable>)
     = default;
 
 #else
@@ -59,7 +59,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT_DEREFERENCABLE(_iterator != std::end(_iterable));
+        LZ_ASSERT_DEREFERENCABLE(_iterator != _iterable.end());
         return *_iterator;
     }
 
@@ -68,37 +68,37 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT_INCREMENTABLE(_iterator != std::end(_iterable));
+        LZ_ASSERT_INCREMENTABLE(_iterator != _iterable.end());
         ++_iterator;
         ++_offset;
-        if (_iterator == std::end(_iterable)) {
-            _iterator = std::begin(_iterable);
+        if (_iterator == _iterable.end()) {
+            _iterator = _iterable.begin();
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        if (_iterator == std::begin(_iterable)) {
-            _iterator = std::end(_iterable);
+        if (_iterator == _iterable.begin()) {
+            _iterator = _iterable.end();
         }
-        LZ_ASSERT_DECREMENTABLE(_offset != 0 && _iterator != std::begin(_iterable));
+        LZ_ASSERT_DECREMENTABLE(_offset != 0 && _iterator != _iterable.begin());
         --_iterator;
         --_offset;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
-        LZ_ASSERT_SUB_ADDABLE((n < 0 ? -n : n) <= (std::end(_iterable) - std::begin(_iterable)));
+        LZ_ASSERT_SUB_ADDABLE((n < 0 ? -n : n) <= (_iterable.end() - _iterable.begin()));
         _offset += static_cast<std::size_t>(n);
         if (n < 0) {
             n = -n;
-            if (n > _iterator - std::begin(_iterable)) {
-                _iterator = std::end(_iterable) - (n - (_iterator - std::begin(_iterable)));
+            if (n > _iterator - _iterable.begin()) {
+                _iterator = _iterable.end() - (n - (_iterator - _iterable.begin()));
             }
             else {
                 _iterator += -n;
             }
         }
-        else if (n >= std::end(_iterable) - _iterator) {
-            _iterator = std::begin(_iterable) + (n - (std::end(_iterable) - _iterator));
+        else if (n >= _iterable.end() - _iterator) {
+            _iterator = _iterable.begin() + (n - (_iterable.end() - _iterator));
         }
         else {
             _iterator += n;
@@ -106,8 +106,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(other._iterable) &&
-                            std::end(_iterable) == std::end(other._iterable));
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
         return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
@@ -115,13 +114,13 @@ public:
         return -static_cast<difference_type>(_offset);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& b) const {
-        LZ_ASSERT_COMPTABLE(std::begin(_iterable) == std::begin(b._iterable) && std::end(_iterable) == std::end(b._iterable));
-        return _offset == b._offset || (_iterator == std::end(_iterable) && b._iterator == std::end(b._iterable));
+    LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
+        return _offset == other._offset || (_iterator == _iterable.end() && other._iterator == other._iterable.end());
     }
 
-    constexpr bool eq(const iter& b) const {
-        return (_offset != 0 || _iterator == std::end(_iterable)) && _iterator == b;
+    constexpr bool eq(const iter& other) const {
+        return (_offset != 0 || _iterator == _iterable.end()) && _iterator == other;
     }
 };
 } // namespace detail

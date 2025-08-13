@@ -3,7 +3,6 @@
 #ifndef LZ_FN_ARGS_HOLDER_ADAPTOR_HPP
 #define LZ_FN_ARGS_HOLDER_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/traits.hpp>
 #include <tuple>
 

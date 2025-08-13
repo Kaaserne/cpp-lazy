@@ -32,7 +32,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr random_iterator()
-        requires std::default_initializable<Distribution>
+        requires(std::default_initializable<Distribution>)
     = default;
 
 #else
@@ -86,17 +86,17 @@ public:
         LZ_ASSERT_ADDABLE(static_cast<difference_type>(_current) >= 0);
     }
 
-    constexpr difference_type difference(const random_iterator& b) const noexcept {
-        return static_cast<difference_type>(b._current) - static_cast<difference_type>(_current);
+    constexpr difference_type difference(const random_iterator& other) const noexcept {
+        return static_cast<difference_type>(other._current) - static_cast<difference_type>(_current);
     }
 
     constexpr difference_type difference(default_sentinel_t) const noexcept {
         return -static_cast<difference_type>(_current);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& b) const noexcept {
-        LZ_ASSERT_COMPTABLE(_generator == b._generator);
-        return _current == b._current;
+    LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& other) const noexcept {
+        LZ_ASSERT_COMPATIBLE(_generator == other._generator);
+        return _current == other._current;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {

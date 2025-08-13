@@ -97,6 +97,7 @@ TEST_CASE("Cartesian product binary operations") {
     std::vector<char> chars = { 'a', 'b', 'c' };
     std::vector<char> chars2 = { 'a', 'b' };
     auto cartesian = vec | lz::cartesian_product(chars, chars2);
+
     REQUIRE(cartesian.size() == vec.size() * chars.size() * chars2.size());
 
     static_assert(std::is_same<decltype(cartesian.begin()), decltype(cartesian.end())>::value, "Should be the same");

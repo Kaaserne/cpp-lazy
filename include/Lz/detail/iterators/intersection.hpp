@@ -35,8 +35,8 @@ class intersection_iterator
 
         using ref_type = typename iter_traits::reference;
 
-        _iterator1 = find_if(std::move(_iterator1), std::end(_iterable1), [this](ref_type value) {
-            while (_iterator2 != std::end(_iterable2)) {
+        _iterator1 = find_if(std::move(_iterator1), _iterable1.end(), [this](ref_type value) {
+            while (_iterator2 != _iterable2.end()) {
                 if (_compare(value, *_iterator2)) {
                     return false;
                 }
@@ -58,8 +58,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr intersection_iterator()
-        requires std::default_initializable<it1> && std::default_initializable<it2> && std::default_initializable<Iterable1> &&
-                     std::default_initializable<Iterable2> && std::default_initializable<BinaryPredicate>
+        requires(std::default_initializable<it1> && std::default_initializable<it2> && std::default_initializable<Iterable1> &&
+                 std::default_initializable<Iterable2> && std::default_initializable<BinaryPredicate>)
     = default;
 
 #else
@@ -89,7 +89,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(default_sentinel_t) {
-        _iterator1 = std::end(_iterable1);
+        _iterator1 = _iterable1.end();
         return *this;
     }
 
@@ -109,10 +109,10 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT_DECREMENTABLE(_iterator1 != std::begin(_iterable1) && _iterator2 != std::begin(_iterable2));
+        LZ_ASSERT_DECREMENTABLE(_iterator1 != _iterable1.begin() && _iterator2 != _iterable2.begin());
         --_iterator2, --_iterator1;
 
-        while (_iterator2 != std::begin(_iterable2) && _iterator1 != std::begin(_iterable1)) {
+        while (_iterator2 != _iterable2.begin() && _iterator1 != _iterable1.begin()) {
             if (_compare(*_iterator1, *_iterator2)) {
                 --_iterator2;
                 continue;
@@ -122,20 +122,19 @@ public:
             }
             --_iterator1;
         }
-        if (_iterator2 == std::begin(_iterable2)) {
-            _iterator1 = std::begin(_iterable1);
+        if (_iterator2 == _iterable2.begin()) {
+            _iterator1 = _iterable1.begin();
         }
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const intersection_iterator& other) const {
-        LZ_ASSERT_COMPTABLE(
-            std::begin(_iterable1) == std::begin(other._iterable1) && std::end(_iterable1) == std::end(other._iterable1) &&
-            std::begin(_iterable2) == std::begin(other._iterable2) && std::end(_iterable2) == std::end(other._iterable2));
+        LZ_ASSERT_COMPATIBLE(_iterable1.begin() == other._iterable1.begin() && _iterable1.end() == other._iterable1.end() &&
+                             _iterable2.begin() == other._iterable2.begin() && _iterable2.end() == other._iterable2.end());
         return _iterator1 == other._iterator1;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator1 == std::end(_iterable1);
+        return _iterator1 == _iterable1.end();
     }
 };
 } // namespace detail

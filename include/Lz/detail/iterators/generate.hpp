@@ -30,7 +30,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_iterator()
-        requires std::default_initializable<GeneratorFunc>
+        requires(std::default_initializable<GeneratorFunc>)
     = default;
 
 #else
@@ -65,8 +65,8 @@ public:
         --_current;
     }
 
-    constexpr bool eq(const generate_iterator& b) const noexcept {
-        return _current == b._current;
+    constexpr bool eq(const generate_iterator& other) const noexcept {
+        return _current == other._current;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {
@@ -91,7 +91,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_iterator()
-        requires std::default_initializable<GeneratorFunc>
+        requires(std::default_initializable<GeneratorFunc>)
     = default;
 
 #else

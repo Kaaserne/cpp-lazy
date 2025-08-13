@@ -165,48 +165,6 @@ struct as_adaptor {
     }
 };
 
-template<std::size_t Neighbours>
-struct pairwise_n_adaptor {
-    using adaptor = pairwise_n_adaptor<Neighbours>;
-
-private:
-    template<class Iterable, std::size_t... N>
-    using pairwise_n_object = zip_iterable<drop_iterable<remove_ref<decltype(N, std::declval<Iterable>())>>...>;
-
-    template<class Iterable, std::size_t... N>
-    LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence<N...>) const {
-        return lz::zip(lz::drop(std::forward<Iterable>(iterable), N)...);
-    }
-
-public:
-    /**
-     * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`.
-     * Example:
-     * ```cpp
-     * std::vector<int> vec = { 1, 2, 3, 4, 5 };
-     * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * // or
-     * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * auto iterable = lz::pairwise_n<2>{}(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} } (for cxx11)
-     * // or
-     * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * // or
-     * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * ```
-     * @param iterable The iterable to iterate over.
-     * @return A pairwise_n_iterable that can be iterated over, containing tuples of adjacent elements.
-     */
-    template<class Iterable>
-    LZ_NODISCARD constexpr auto
-    operator()(Iterable&& iterable) const -> decltype(pairwise_n_construct(std::forward<Iterable>(iterable),
-                                                                           make_index_sequence<Neighbours>())) {
-        return pairwise_n_construct(std::forward<Iterable>(iterable), make_index_sequence<Neighbours>());
-    }
-};
-
-template<class Iterable, std::size_t N>
-using pairwise_n_iterable = decltype(std::declval<pairwise_n_adaptor<N>>()(std::declval<Iterable>()));
-
 template<class Iterable, std::size_t N>
 using get_nth_iterable = map_iterable<Iterable, get_fn<N>>;
 

@@ -65,7 +65,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr func_container()
-        requires std::default_initializable<Func>
+        requires(std::default_initializable<Func>)
     = default;
 
 #else

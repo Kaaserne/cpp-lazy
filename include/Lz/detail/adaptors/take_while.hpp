@@ -6,7 +6,6 @@
 
 #include <Lz/detail/iterables/take_while.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 
 namespace lz {
 namespace detail {

@@ -61,10 +61,23 @@ public:
         return *this;
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr)))
+        requires(sized<Iterable>)
+    {
         return static_cast<std::size_t>(lz::size(*_iterable_ref_ptr));
     }
+
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const
+        noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
+        return static_cast<std::size_t>(lz::size(*_iterable_ref_ptr));
+    }
+
+#endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
         if (!_iterable_ref_ptr) {
@@ -110,7 +123,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr maybe_owned_impl()
-        requires std::default_initializable<it>
+        requires(std::default_initializable<it>)
     = default;
 
 #else
@@ -155,17 +168,29 @@ public:
         return *this;
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr std::size_t size() const noexcept(noexcept(lz::size(_iterable_value)))
+        requires(sized<Iterable>)
+    {
         return static_cast<std::size_t>(lz::size(_iterable_value));
     }
 
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
+        return static_cast<std::size_t>(lz::size(_iterable_value));
+    }
+
+#endif
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() & {
-        return std::begin(_iterable_value);
+        return _iterable_value.begin();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
-        return std::begin(_iterable_value);
+        return _iterable_value.begin();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
@@ -173,11 +198,11 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() & {
-        return std::end(_iterable_value);
+        return _iterable_value.end();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
-        return std::end(_iterable_value);
+        return _iterable_value.end();
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
