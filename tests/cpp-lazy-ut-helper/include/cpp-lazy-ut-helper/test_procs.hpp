@@ -14,14 +14,17 @@ template<class T, class = void>
 struct has_stream_operator : std::false_type {};
 
 template<class T>
-struct has_stream_operator<T, lz::detail::void_t<decltype(std::declval<std::ostream&>() << std::declval<T>())>> : std::true_type {
-};
+struct has_stream_operator<T, lz::detail::void_t<decltype(std::declval<std::ostream&>() << std::declval<T>())>>
+    : std::true_type {};
 
 #ifdef LZ_HAS_CXX_17
 
+template<class T>
+constexpr bool has_stream_operator_v = has_stream_operator<T>::value;
+
 template<class T, class U>
 auto get_error_expr(const T& lhs, const U& rhs) {
-    if constexpr (has_stream_operator<T>::value && has_stream_operator<U>::value) {
+    if constexpr (has_stream_operator_v<T> && has_stream_operator_v<U>) {
         std::ostringstream oss;
         oss << lhs << " != " << rhs;
         return oss.str();
