@@ -1,10 +1,7 @@
-#include <Lz/iter_tools.hpp>
-#include <Lz/zip.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <functional>
-#include <vector>
-#include <map>
+#include <pch.hpp>
+#include <Lz/iter_tools.hpp>
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };

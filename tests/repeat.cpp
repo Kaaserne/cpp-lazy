@@ -1,14 +1,10 @@
-#include <Lz/common.hpp>
-#include <Lz/map.hpp>
-#include <Lz/repeat.hpp>
-#include <Lz/reverse.hpp>
-#include <array>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
+#include <Lz/repeat.hpp>
+#include <Lz/common.hpp>
+#include <Lz/reverse.hpp>
+#include <Lz/map.hpp>
 
 TEST_CASE("repeat_iterable binary operations") {
     const int amount = 5;

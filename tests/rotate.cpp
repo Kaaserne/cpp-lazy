@@ -1,4 +1,3 @@
-#include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
@@ -6,10 +5,7 @@
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");
@@ -167,6 +163,20 @@ TEST_CASE("rotate_iterable binary operations") {
 
         r = lz::repeat(1, 1);
         test_procs::test_operator_minus(r);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto r = lz::repeat(0, 5);
+        std::vector<int> expected = { 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(r, expected);
+
+        r = lz::repeat(0, 1);
+        expected = { 0 };
+        test_procs::test_operator_plus(r, expected);
+
+        r = lz::repeat(0, 0);
+        expected = {};
+        test_procs::test_operator_plus(r, expected);
     }
 }
 

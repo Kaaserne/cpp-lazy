@@ -1,7 +1,8 @@
 #include <Lz/as_iterator.hpp>
-#include <Lz/c_string.hpp>
+#include <Lz/pairwise.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("With sentinels") {
     SUBCASE("Equal to c_string") {

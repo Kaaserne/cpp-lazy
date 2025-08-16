@@ -4,12 +4,7 @@
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <functional>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 struct TestStruct {
     std::string test_field_str;
@@ -100,6 +95,13 @@ TEST_CASE("Map binary operations") {
         auto repeater = lz::repeat(20, 5);
         auto map_sentinel = lz::map(repeater, [](int i) { return i; });
         test_procs::test_operator_minus(map_sentinel);
+    }
+
+    SUBCASE("Operator+ sentinel") {
+        auto repeater = lz::repeat(20, 5);
+        auto map_sentinel = lz::map(repeater, [](int i) { return i; });
+        std::vector<int> expected = { 20, 20, 20, 20, 20 };
+        test_procs::test_operator_plus(map_sentinel, expected);
     }
 }
 

@@ -3,8 +3,8 @@
 #include <Lz/enumerate.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/range.hpp>
-#include <vector>
 #include <doctest/doctest.h>
+#include <pch.hpp>
 
 TEST_CASE("Correct size") {
     auto to_filter = lz::range(10);

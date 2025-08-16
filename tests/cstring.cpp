@@ -1,12 +1,7 @@
-#include <Lz/algorithm.hpp>
-#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <vector>
-#include <map>
-#include <unordered_map>
+#include <pch.hpp>
 
 TEST_CASE("Empty or one element c_string") {
     SUBCASE("Empty") {

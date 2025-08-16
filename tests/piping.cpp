@@ -1,9 +1,12 @@
-#include <Lz/lz.hpp>
-#include <Lz/stream.hpp>
-#include <algorithm>
-#include <array>
-#include <cctype>
 #include <doctest/doctest.h>
+#include <Lz/range.hpp>
+#include <Lz/map.hpp>
+#include <Lz/drop.hpp>
+#include <Lz/take.hpp>
+#include <Lz/filter.hpp>
+#include <Lz/chunk_if.hpp>
+#include <Lz/stream.hpp>
+#include <pch.hpp>
 
 TEST_CASE("Iterator chaining") {
     SUBCASE("test 1") {

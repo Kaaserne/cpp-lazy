@@ -1,8 +1,7 @@
 #include <Lz/detail/maybe_owned.hpp>
 #include <Lz/filter.hpp>
 #include <doctest/doctest.h>
-#include <iostream>
-#include <vector>
+#include <pch.hpp>
 
 namespace doctest {
 namespace detail {

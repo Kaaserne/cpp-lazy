@@ -1,12 +1,8 @@
-#include <Lz/generate.hpp>
-#include <Lz/inclusive_scan.hpp>
-#include <Lz/map.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <numeric>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
+#include <Lz/inclusive_scan.hpp>
+#include <Lz/generate.hpp>
+#include <Lz/map.hpp>
 
 TEST_CASE("Inclusive scan with sentinels") {
     int x = 1;

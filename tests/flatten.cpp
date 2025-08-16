@@ -1,19 +1,12 @@
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
-#include <Lz/generate.hpp>
 #include <Lz/map.hpp>
-#include <Lz/range.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <iostream>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Dimensions & sized") {
     int arr[3];
@@ -38,16 +31,16 @@ TEST_CASE("Dimensions & sized") {
     static_assert(lz::dimensions<decltype(arr6)>::value == 3, "Dimensions of array should be 3");
 
     auto str = lz::c_string("Hello, World!");
-    static_assert(!lz::detail::all_sized_t<decltype(str)>::value, "c_string should not be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(str)>::value, "c_string should not be sized");
     std::array<decltype(lz::c_string("")), 2> arr_of_cstr = { lz::c_string(""), lz::c_string("") };
-    static_assert(!lz::detail::all_sized_t<decltype(arr_of_cstr)>::value, "Array of c_string should not all be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(arr_of_cstr)>::value, "Array of c_string should not all be sized");
 
     std::vector<int> v;
     auto filter = lz::filter(v, [](int) { return true; });
-    static_assert(!lz::detail::all_sized_t<decltype(filter)>::value, "Filter should not be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(filter)>::value, "Filter should not be sized");
 
     std::array<std::array<decltype(lz::c_string("")), 1>, 1> arr_of_arr_of_cstr = { { { lz::c_string("") } } };
-    static_assert(!lz::detail::all_sized_t<decltype(arr_of_arr_of_cstr)>::value, "Array of array of c_string should be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(arr_of_arr_of_cstr)>::value, "Array of array of c_string should be sized");
 }
 
 TEST_CASE("Flatten with sentinels") {

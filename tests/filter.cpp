@@ -2,12 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <vector>
-#include <functional>
-#include <list>
-#include <map>
-#include <unordered_map>
+#include <pch.hpp>
 
 TEST_CASE("Filter with sentinels") {
     const char* str = "Hello, World!";

@@ -1,16 +1,9 @@
-#include <Lz/algorithm.hpp>
-#include <Lz/common.hpp>
 #include <Lz/except.hpp>
 #include <Lz/map.hpp>
-#include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
-#include <array>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Except tests with sentinels") {
     const char* str = "Hello, World!";

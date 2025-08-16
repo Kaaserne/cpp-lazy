@@ -1,11 +1,7 @@
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <doctest/doctest.h>
-#include <functional>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Generate infinite") {
     std::function<int()> func = []() {

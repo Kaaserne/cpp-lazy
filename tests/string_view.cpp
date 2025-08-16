@@ -1,7 +1,8 @@
 #define LZ_STANDALONE
 
-#include <Lz/algorithm.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <doctest/doctest.h>
+#include <pch.hpp>
+#include <Lz/string_view.hpp>
 
 #if !defined(LZ_HAS_STRING_VIEW)
 

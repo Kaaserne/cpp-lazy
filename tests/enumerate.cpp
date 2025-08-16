@@ -1,15 +1,12 @@
 #include <Lz/enumerate.hpp>
-#include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
+#include <Lz/map.hpp>
 #include <Lz/take.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 struct equal_fn {
     template<typename T, typename U>
@@ -100,7 +97,13 @@ TEST_CASE("Enumerate binary operations") {
 
     SUBCASE("Operator-(default_sentinel_t)") {
         auto repeat = lz::repeat(1, 5);
-        test_procs::test_operator_minus(repeat);
+        test_procs::test_operator_minus(repeat | lz::enumerate);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto repeat = lz::repeat(1, 5);
+        std::vector<std::pair<int, int>> expected = { { 2, 1 }, { 3, 1 }, { 4, 1 }, { 5, 1 }, { 6, 1 } };
+        test_procs::test_operator_plus(repeat | lz::enumerate(2), expected, equal_fn{});
     }
 }
 

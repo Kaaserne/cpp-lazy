@@ -1,6 +1,6 @@
-#include <Lz/regex_split.hpp>
 #include <doctest/doctest.h>
-#include <list>
+#include <pch.hpp>
+#include <Lz/regex_split.hpp>
 #include <regex>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {

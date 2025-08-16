@@ -1,13 +1,11 @@
-#include <Lz/map.hpp>
-#include <Lz/random.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
-#include <cstddef>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
+#include <pch.hpp>
+#include <Lz/random.hpp>
+#include <Lz/map.hpp>
+#include <Lz/reverse.hpp>
 #include <random>
-#include <unordered_map>
-
+// TODO reverse
 TEST_CASE("random_iterable should be random") {
     constexpr std::size_t size = 5;
 
@@ -26,9 +24,9 @@ TEST_CASE("random_iterable should be random") {
     SUBCASE("random_iterable ints") {
         const auto random_array =
             lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
-        const auto randomArray2 =
+        const auto random_array_2 =
             lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
-        REQUIRE(random_array != randomArray2);
+        REQUIRE(random_array != random_array_2);
     }
 
     SUBCASE("Operator=") {
@@ -128,6 +126,12 @@ TEST_CASE("random_iterable binary operations") {
     SUBCASE("Operator-(default_sentinel_t)") {
         auto rand = lz::random(0., 1., size);
         test_procs::test_operator_minus(rand);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto rand = lz::random(0., 1., size);
+        std::vector<double> dummy(size, 0.);
+        test_procs::test_operator_plus(rand, dummy, [](double a, double) { return a >= 0. && a <= 1.; });
     }
 }
 

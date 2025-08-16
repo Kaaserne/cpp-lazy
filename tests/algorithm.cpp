@@ -3,15 +3,8 @@
 #include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <deque>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <iostream>
-#include <list>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <unordered_set>
+#include <pch.hpp>
 
 template<class T>
 class custom_container {

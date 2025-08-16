@@ -1,11 +1,7 @@
-#include <Lz/basic_iterable.hpp>
-#include <Lz/chunk_if.hpp>
-#include <Lz/iter_tools.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <pch.hpp>
 #include <doctest/doctest.h>
-#include <functional>
-#include <list>
-#include <vector>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <Lz/chunk_if.hpp>
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");
