@@ -43,7 +43,7 @@ struct exclusive_scan_adaptor {
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     [[nodiscard]] constexpr exclusive_scan_iterable<remove_ref<Iterable>, remove_cvref<T>, BinaryOp>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const
-        requires(is_invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref<T>>::value)
+        requires(std::invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref<T>>)
     {
         return { std::forward<Iterable>(iterable), std::forward<T>(init), std::move(binary_op) };
     }
@@ -74,7 +74,7 @@ struct exclusive_scan_adaptor {
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref<T>, BinaryOp> operator()(T&& init, BinaryOp binary_op = {}) const
-        requires(is_invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>::value)
+        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>)
     {
         return { std::forward<T>(init), std::move(binary_op) };
     }
@@ -155,7 +155,7 @@ struct exclusive_scan_adaptor {
 #ifdef LZ_HAS_CONCEPTS
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
-    requires(lz::detail::is_iterable<Iterable>::value)
+    requires(lz::iterable<Iterable>)
 [[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
     -> decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
                                                      MAKE_BIN_PRED(plus){})) {

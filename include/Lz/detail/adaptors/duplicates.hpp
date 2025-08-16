@@ -46,7 +46,7 @@ struct duplicates_adaptor {
      */
     template<class BinaryPredicate = MAKE_BIN_PRED(less)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, BinaryPredicate> operator()(BinaryPredicate compare = {}) const
-        requires(!is_iterable<BinaryPredicate>::value)
+        requires(!iterable<BinaryPredicate>)
     {
         return { std::move(compare) };
     }

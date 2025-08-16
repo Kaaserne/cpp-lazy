@@ -50,14 +50,14 @@ using maybe_homogeneous_t = typename maybe_homogenous<Ts...>::type;
 
 // To create either a tuple or a an array of values. Canonicalize to prevent rvalue references
 template<class T, std::size_t... Is>
-maybe_homogeneous_t<remove_rvalue_reference_t<decltype((void)Is, std::declval<T>())>...>
+constexpr maybe_homogeneous_t<remove_rvalue_reference_t<decltype((void)Is, std::declval<T>())>...>
 make_homogeneous_of(index_sequence<Is...>) {
     return { decltype((void)Is, T{}){}... };
 }
 
 // To prevent rvalue references from happening in a tuple, use canonicalize_reference
 template<class T, std::size_t... Is>
-std::tuple<remove_rvalue_reference_t<decltype((void)Is, std::declval<T>())>...> tuple_of(index_sequence<Is...>);
+constexpr std::tuple<remove_rvalue_reference_t<decltype((void)Is, std::declval<T>())>...> tuple_of(index_sequence<Is...>);
 
 template<class>
 struct iter_tuple_diff_type;
@@ -141,8 +141,8 @@ struct disjunction<T, Ts...> : conditional<T::value, std::true_type, disjunction
 
 template<class T, class U>
 struct copy_cv {
-    using const_applied = conditional<std::is_const<T>::value, typename std::add_const<U>::type, U>;
-    using type = conditional<std::is_volatile<T>::value, typename std::add_volatile<const_applied>, const_applied>;
+    using const_applied = conditional<std::is_const<T>::value, const U, U>;
+    using type = conditional<std::is_volatile<T>::value, volatile const_applied, const_applied>;
 };
 
 template<class T, class U>
@@ -150,48 +150,22 @@ using copy_cv_t = typename copy_cv<T, U>::type;
 
 template<class T, class U>
 struct common_reference2 {
-    template<class V>
-    using add_lvalue_reference_t = typename std::add_lvalue_reference<V>::type;
+    using pure_t = remove_cvref<T>;
+    using pure_u = remove_cvref<U>;
 
-    template<class X, class Y>
-    static add_lvalue_reference_t<copy_cv_t<remove_ref<X>, remove_ref<Y>>> test(X&, Y&);
-
-    static common_type<T, U> test(...);
-
-    using type = decltype(test(std::declval<T>(), std::declval<U>()));
+    using type = conditional<std::is_lvalue_reference<T>::value && std::is_lvalue_reference<U>::value &&
+                                 std::is_same<pure_t, pure_u>::value,
+                             copy_cv_t<remove_ref<T>, remove_ref<U>>&, common_type<pure_t, pure_u>>;
 };
-
-template<class From, class To>
-struct reference_wrapper_cv_qualifier_copier {
-    using type = To;
-};
-
-template<class From, class To>
-struct reference_wrapper_cv_qualifier_copier<const From, To> {
-    using type = const To;
-};
-
-template<class From, class To>
-struct reference_wrapper_cv_qualifier_copier<volatile From, To> {
-    using type = volatile To;
-};
-
-template<class From, class To>
-struct reference_wrapper_cv_qualifier_copier<const volatile From, To> {
-    using type = const volatile To;
-};
-
-template<class From, class To>
-using reference_wrapper_cv_qualifier_copier_t = typename reference_wrapper_cv_qualifier_copier<From, To>::type;
 
 template<class T, class U>
 struct common_reference2<T&, std::reference_wrapper<U>> {
-    using type = std::reference_wrapper<reference_wrapper_cv_qualifier_copier_t<T, U>>;
+    using type = std::reference_wrapper<copy_cv_t<T, U>>;
 };
 
 template<class T, class U>
 struct common_reference2<std::reference_wrapper<U>, T&> {
-    using type = std::reference_wrapper<reference_wrapper_cv_qualifier_copier_t<T, U>>;
+    using type = std::reference_wrapper<copy_cv_t<T, U>>;
 };
 
 template<class T, class U>
@@ -320,21 +294,21 @@ LZ_CONSTEXPR_CXX_14 auto end_maybe_homo_impl(IterableTuple&& iterable_tuple, ind
     return { detail::end(std::get<I>(std::forward<IterableTuple>(iterable_tuple)))... };
 }
 
-template<class IterableTuple>
-LZ_CONSTEXPR_CXX_14 auto begin_maybe_homo(IterableTuple&& iterable_tuple)
-    -> decltype(begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                      make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{})) {
-    return begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                 make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{});
-}
+    template<class IterableTuple>
+    LZ_CONSTEXPR_CXX_14 auto begin_maybe_homo(IterableTuple&& iterable_tuple)
+        -> decltype(begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
+                                          make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{})) {
+        return begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
+                                     make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{});
+    }
 
-template<class IterableTuple>
-LZ_CONSTEXPR_CXX_14 auto end_maybe_homo(IterableTuple&& iterable_tuple)
-    -> decltype(end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                    make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{})) {
-    return end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                               make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{});
-}
+    template<class IterableTuple>
+    LZ_CONSTEXPR_CXX_14 auto end_maybe_homo(IterableTuple&& iterable_tuple)
+        -> decltype(end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
+                                        make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{})) {
+        return end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
+                                   make_index_sequence<std::tuple_size<remove_cvref<IterableTuple>>::value>{});
+    }
 } // namespace detail
 } // namespace lz
 

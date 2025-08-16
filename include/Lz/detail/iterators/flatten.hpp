@@ -28,10 +28,10 @@ template<class T>
 #else
 
 template<bool>
-struct count_dims;
+struct count_dims_impl;
 
 template<>
-struct count_dims<false> {
+struct count_dims_impl<false> {
 #ifdef LZ_HAS_CXX_11
 
     template<class>
@@ -46,7 +46,7 @@ struct count_dims<false> {
 };
 
 template<>
-struct count_dims<true> {
+struct count_dims_impl<true> {
     template<class T>
     using iterable_type = decltype(*std::begin(std::declval<T>()));
 
@@ -55,12 +55,12 @@ struct count_dims<true> {
     template<class T>
     using type =
         std::integral_constant<std::size_t,
-                               1 + count_dims<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
+                               1 + count_dims_impl<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
 
 #else
 
     template<class T>
-    static constexpr std::size_t value = 1 + count_dims<is_iterable_v<iterable_type<T>>>::template value<iterable_type<T>>;
+    static constexpr std::size_t value = 1 + count_dims_impl<is_iterable_v<iterable_type<T>>>::template value<iterable_type<T>>;
 
 #endif
 };
@@ -70,12 +70,12 @@ struct count_dims<true> {
 #ifdef LZ_HAS_CXX_11
 
 template<class T>
-using count_dims = typename count_dims<is_iterable<T>::value>::template type<T>;
+using count_dims = typename count_dims_impl<is_iterable<T>::value>::template type<T>;
 
 #elif !defined(LZ_HAS_CXX_17)
 
 template<class T>
-using count_dims = std::integral_constant<std::size_t, count_dims<is_iterable_v<T>>::template value<T>>;
+using count_dims = std::integral_constant<std::size_t, count_dims_impl<is_iterable_v<T>>::template value<T>>;
 
 #else
 

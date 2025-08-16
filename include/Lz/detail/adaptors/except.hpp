@@ -62,7 +62,7 @@ struct except_adaptor {
     template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, Iterable2, BinaryPredicate>
     operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const
-        requires(!is_iterable<BinaryPredicate>::value)
+        requires(!lz::iterable<BinaryPredicate>)
     {
         return { std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }

@@ -244,7 +244,7 @@ using tup_element = std::tuple_element_t<I, T>;
 
 #endif // LZ_HAS_CXX_11
 
-#ifdef __cpp_lib_is_invocable
+#if defined(LZ_HAS_CXX_17)
 
 template<class Function, class... Args>
 using is_invocable = std::is_invocable<Function, Args...>;
@@ -467,10 +467,10 @@ struct remove_rvalue_reference<T&&> {
 template<class T>
 using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 
-LZ_MODULE_EXPORT template<class T, class = void>
+template<class T, class = void>
 struct is_sized : std::false_type {};
 
-LZ_MODULE_EXPORT template<class T>
+template<class T>
 struct is_sized<T, void_t<decltype(lz::size(std::declval<T>()))>> : std::true_type {};
 
 template<class, class = void>
@@ -482,7 +482,7 @@ struct is_iterable<T, void_t<decltype(std::begin(std::declval<T>()), std::end(st
 template<class T, std::size_t N>
 struct is_iterable<T[N]> : std::true_type {};
 
-template<class, class = void>
+template<class T, class = void>
 struct is_adaptor : std::false_type {};
 
 template<class T>
@@ -540,6 +540,9 @@ using is_sentinel = std::integral_constant<bool, !std::is_same<Iterator, S>::val
 template<class Iterable>
 using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value>;
 
+template<class Iterable>
+using is_sentinel_assignable = std::is_assignable<iter_t<Iterable>, sentinel_t<Iterable>>;
+
 #ifdef LZ_HAS_CXX_14
 
 template<class T>
@@ -550,6 +553,9 @@ LZ_INLINE_VAR constexpr bool is_ra_tag_v = is_ra_tag<T>::value;
 
 template<class T>
 LZ_INLINE_VAR constexpr bool is_bidi_tag_v = is_bidi_tag<T>::value;
+
+template<class T>
+LZ_INLINE_VAR constexpr bool is_fwd_tag_v = is_fwd_tag<T>::value;
 
 template<class T>
 LZ_INLINE_VAR constexpr bool is_bidi_v = is_bidi<T>::value;
@@ -563,7 +569,7 @@ LZ_INLINE_VAR constexpr bool is_sentinel_v = is_sentinel<I, S>::value;
 template<class T>
 LZ_INLINE_VAR constexpr bool is_iterable_v = is_iterable<T>::value;
 
-#endif
+#endif // LZ_HAS_CXX_14
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -603,6 +609,11 @@ template<class T>
 concept iterable = requires(T&& c) {
     { std::begin(c) };
     { std::end(c) };
+};
+
+template<class T>
+concept adaptor = requires(T) {
+    typename T::adaptor;
 };
 
 } // End namespace lz

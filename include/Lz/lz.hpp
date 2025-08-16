@@ -34,6 +34,7 @@
 #include <Lz/loop.hpp>
 #include <Lz/map.hpp>
 #include <Lz/optional.hpp>
+#include <Lz/pairwise.hpp>
 #include <Lz/random.hpp>
 #include <Lz/range.hpp>
 #include <Lz/regex_split.hpp>
@@ -42,6 +43,7 @@
 #include <Lz/rotate.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/split.hpp>
+#include <Lz/stream.hpp>
 #include <Lz/string_view.hpp>
 #include <Lz/take.hpp>
 #include <Lz/take_every.hpp>

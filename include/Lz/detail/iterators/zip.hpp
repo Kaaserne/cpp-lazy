@@ -77,13 +77,9 @@ private:
     template<class EndIter, std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const EndIter& other, index_sequence<I...>) const {
 #ifdef LZ_HAS_CXX_17
-
         return ((std::get<I>(_iterators) == std::get<I>(other)) || ...);
-
 #else
-
         return std::max({ (std::get<I>(_iterators) == std::get<I>(other))... });
-
 #endif
     }
 

@@ -27,7 +27,7 @@ struct loop_adaptor {
      */
     template<class Iterable>
     [[nodiscard]] constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const
-        requires(!std::is_integral<remove_cvref<Iterable>>::value)
+        requires(!std::is_integral_v<remove_cvref<Iterable>>)
     {
         return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }

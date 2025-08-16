@@ -101,7 +101,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
     // clang-format off
     [[nodiscard]] constexpr iterator end() &&
-        requires(is_bidi_tag<typename iterator::iterator_category>::value && !is_sentinel<iter, sent>::value)
+        requires(is_bidi_tag_v<typename iterator::iterator_category> && !is_sentinel_v<iter, sent>)
     {
         return { detail::end(std::move(_iterable)), get_last_index() };
     }

@@ -52,13 +52,13 @@ public:
         basic_iterable_impl{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) } {
     }
 
-    constexpr basic_iterable_impl(I begin, S end) : _begin{ std::move(begin) }, _end{ std::move(end) } {
+    constexpr basic_iterable_impl(iterator_type begin, sentinel_type end) : _begin{ std::move(begin) }, _end{ std::move(end) } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr std::size_t size() const
-        requires(is_ra_tag<typename traits::iterator_category>::value)
+        requires(is_ra_tag_v<typename traits::iterator_category>)
     {
         LZ_ASSERT(_end - _begin >= 0, "Incompatible iterator");
         return static_cast<std::size_t>(_end - _begin);
@@ -133,7 +133,7 @@ public:
     template<class Iterable>
     constexpr sized_iterable_impl(Iterable&& iterable) :
         _begin{ detail::begin(std::forward<Iterable>(iterable)) },
-        _end{ detail::end(iterable) },
+        _end{ detail::end(std::forward<Iterable>(iterable)) },
         _size{ lz::size(iterable) } {
     }
 
@@ -502,7 +502,7 @@ LZ_MODULE_EXPORT namespace lz {
 template<class Container, class... Args>
 [[nodiscard]] constexpr detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>
 to(Args&&... args)
-    requires(!detail::is_iterable<detail::first_arg_t<Args...>>::value)
+    requires(!lz::iterable<detail::first_arg_t<Args...>>)
 {
     using Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>;
     return Closure{ std::forward<Args>(args)... };
@@ -531,7 +531,7 @@ to(Args&&... args)
 template<template<class...> class Container, class... Args>
 [[nodiscard]] constexpr detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>
 to(Args&&... args)
-    requires(!detail::is_iterable<detail::first_arg_t<Args...>>::value)
+    requires(!lz::iterable<detail::first_arg_t<Args...>>)
 {
     using Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>;
     return Closure{ std::forward<Args>(args)... };
@@ -592,7 +592,7 @@ to(Args&&... args)
  */
 template<class Container, class... Args, class Iterable>
 [[nodiscard]] constexpr Container to(Iterable&& iterable, Args&&... args)
-    requires(detail::is_iterable<Iterable>::value)
+    requires(lz::iterable<Iterable>)
 {
     return detail::to_adaptor<Container>{}(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
@@ -653,7 +653,7 @@ template<class Container, class... Args, class Iterable>
 template<template<class...> class Container, class... Args, class Iterable>
 [[nodiscard]] constexpr Container<val_iterable_t<Iterable>, Args...>
 to(Iterable&& iterable, Args&&... args)
-    requires(detail::is_iterable<Iterable>::value)
+    requires(lz::iterable<Iterable>)
 {
     using Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>;
     return to<Cont>(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
@@ -877,8 +877,7 @@ to(Iterable&& iterable, Args&&... args) {
 #ifdef LZ_HAS_CONCEPTS
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
-    requires(lz::detail::is_adaptor<lz::detail::remove_cref_t<Adaptor>>::value &&
-             lz::detail::is_iterable<lz::detail::remove_ref<Iterable>>::value)
+    requires(lz::adaptor<lz::detail::remove_cref_t<Adaptor>> && lz::iterable<lz::detail::remove_ref<Iterable>>)
 [[nodiscard]] constexpr auto
 operator|(Iterable&& iterable, Adaptor&& adaptor) -> decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable))) {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));

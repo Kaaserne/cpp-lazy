@@ -12,9 +12,7 @@ class maybe_owned_impl;
 
 template<class Iterable>
 class maybe_owned_impl<Iterable, false> : public lazy_view {
-    using pointer = conditional<std::is_array<Iterable>::value, Iterable*, decltype(std::addressof(std::declval<Iterable&>()))>;
-
-    pointer _iterable_ref_ptr{};
+    Iterable* _iterable_ref_ptr{};
 
 public:
     static constexpr bool holds_reference = true;

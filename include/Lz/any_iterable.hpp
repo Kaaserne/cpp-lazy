@@ -134,7 +134,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr std::size_t size() const
-        requires(detail::is_ra_tag<IterCat>::value)
+        requires(detail::is_ra_tag_v<IterCat>)
     {
         return static_cast<std::size_t>(std::distance(_begin, _end));
     }

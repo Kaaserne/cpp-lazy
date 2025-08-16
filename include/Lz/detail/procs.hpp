@@ -428,7 +428,7 @@ LZ_NODISCARD constexpr detail::enable_if<!detail::is_sized<Iterable>::value, std
  * @return The size of the iterable.
  */
 template<class Iterable>
-[[nodiscard]] constexpr diff_iterable_t<Iterable> eager_ssize(Iterable&& c) {
+LZ_NODISCARD constexpr diff_iterable_t<Iterable> eager_ssize(Iterable && c) {
     return static_cast<diff_iterable_t<Iterable>>(eager_size(std::forward<Iterable>(c)));
 }
 

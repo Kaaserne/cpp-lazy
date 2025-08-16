@@ -47,7 +47,7 @@ struct inclusive_scan_adaptor {
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     [[nodiscard]] constexpr inclusive_scan_iterable<remove_ref<Iterable>, T, BinaryOp>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const
-        requires(is_invocable<BinaryOp, T, T>::value)
+        requires(std::invocable<BinaryOp, T, T>)
     {
         return { std::forward<Iterable>(iterable), std::move(init), std::move(binary_op) };
     }
@@ -81,7 +81,7 @@ struct inclusive_scan_adaptor {
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref<T>, BinaryOp> operator()(T&& init, BinaryOp binary_op = {}) const
-        requires(is_invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>::value)
+        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>)
     {
         return { std::forward<T>(init), std::move(binary_op) };
     }
@@ -169,7 +169,7 @@ struct inclusive_scan_adaptor {
 #ifdef LZ_HAS_CONCEPTS
 
 LZ_MODULE_EXPORT template<class Iterable>
-    requires(lz::detail::is_iterable<Iterable>::value)
+    requires(lz::iterable<Iterable>)
 [[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::inclusive_scan_adaptor)
     -> decltype(lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
                                                      MAKE_BIN_PRED(plus){})) {

@@ -84,7 +84,7 @@ public:
 
 #endif
 };
-
+// TODO remove this specialization, also edit docs
 template<class Iterable, class UnaryPredicate>
 class drop_while_iterable<Iterable, UnaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>> : public lazy_view {
     iter_t<Iterable> _begin;
@@ -121,7 +121,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr std::size_t size() const
-        requires(is_ra<iterator>::value)
+        requires(is_ra_v<iterator>)
     {
         return static_cast<std::size_t>(_end - _begin);
     }

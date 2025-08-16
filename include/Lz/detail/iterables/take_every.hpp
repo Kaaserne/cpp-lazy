@@ -138,7 +138,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr iterator begin() &&
-        requires(!is_bidi_tag<typename iterator::iterator_category>::value)
+        requires(!is_bidi_tag_v<typename iterator::iterator_category>)
     {
         // forward iterator can only go forward, so next_fast_safe is not needed
         auto end = _iterable.end();

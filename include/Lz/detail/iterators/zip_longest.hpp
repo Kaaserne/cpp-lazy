@@ -335,7 +335,11 @@ private:
 
     template<std::size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
-        return _iterators == _end;
+#ifdef LZ_HAS_CXX_17
+        return ((std::get<I>(_iterators) == std::get<I>(_end)) && ...);
+#else
+        return std::min({ std::get<I>(_iterators) == std::get<I>(_end)... });
+#endif
     }
 
     template<std::size_t... I>

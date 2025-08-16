@@ -9,14 +9,32 @@
 
 namespace lz {
 namespace detail {
+
+#ifdef LZ_HAS_CXX_17
+
+template<class T>
+[[nodiscard]] constexpr bool all_sized_fn() {
+    if constexpr (is_iterable_v<T>) {
+        return is_sized_v<T> && all_sized_fn<val_iterable_t<T>>();
+    }
+    else {
+        return true;
+    }
+}
+
+template<class Iterable>
+using is_all_sized = std::bool_constant<all_sized_fn<Iterable>()>;
+
+#else
+
 template<bool SizedIterable>
-struct all_sized {
+struct all_sized_impl {
     template<class>
     using type = std::integral_constant<bool, SizedIterable>;
 };
 
 template<>
-struct all_sized<true> {
+struct all_sized_impl<true> {
     template<class Iterable>
     using inner = val_iterable_t<Iterable>;
 
@@ -28,18 +46,20 @@ struct all_sized<true> {
         // If the inner is another iterable
         is_iterable<inner<Iterable>>::value,
         // Check whether the inner is also sized
-        typename all_sized<is_inner_sized<Iterable>::value>::template type<inner<Iterable>>,
+        typename all_sized_impl<is_inner_sized<Iterable>::value>::template type<inner<Iterable>>,
         // Otherwise return true
         std::true_type>;
 };
 
 template<class Iterable>
-using all_sized_t = typename all_sized<is_sized<Iterable>::value && is_iterable<Iterable>::value>::template type<Iterable>;
+using is_all_sized = typename all_sized_impl<is_sized<Iterable>::value && is_iterable<Iterable>::value>::template type<Iterable>;
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
 template<std::size_t I, class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size_all(Iterable&& iterable) {
+[[nodiscard]] constexpr std::size_t size_all(Iterable&& iterable) {
     if constexpr (I == 1) {
         return static_cast<std::size_t>(lz::size(iterable));
     }
@@ -106,14 +126,14 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr std::size_t size() const
-        requires(all_sized_t<Iterable>::value)
+        requires(is_all_sized<Iterable>::value)
     {
         return size_all<Dims + 1>(_iterable);
     }
 
 #else
 
-    template<class T = all_sized_t<Iterable>>
+    template<class T = is_all_sized<Iterable>>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
         return size_all<Dims + 1>(_iterable);
     }

@@ -95,8 +95,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
     // clang-format off
     [[nodiscard]] constexpr iterator begin() &&
-        requires(is_fwd_tag<typename iterator::iterator_category>::value &&
-                 !is_bidi_tag<typename iterator::iterator_category>::value) {
+        requires(is_fwd_tag_v<typename iterator::iterator_category> &&
+                 !is_bidi_tag_v<typename iterator::iterator_category>) {
         return { detail::begin(std::forward<Iterable>(_iterable)), detail::end(std::forward<Iterable>(_iterable)),
                 _chunk_size };
     }

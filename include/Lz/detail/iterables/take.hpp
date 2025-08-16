@@ -51,7 +51,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr iterator begin() &&
-        requires(!is_bidi_tag<typename iterator::iterator_category>::value)
+        requires(!is_bidi_tag_v<typename iterator::iterator_category>)
     {
         return { std::move(_iterator), _n };
     }
