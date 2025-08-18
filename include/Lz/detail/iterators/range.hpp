@@ -7,7 +7,6 @@
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
-#include <cmath>
 #include <limits>
 
 namespace lz {
@@ -15,7 +14,8 @@ namespace detail {
 
 template<class Floating>
 constexpr bool almost_equal(const Floating a, const Floating b, const Floating epsilon = static_cast<Floating>(1e-6)) {
-    return std::fabs(a - b) < epsilon;
+    const auto abs_a = a - b;
+    return (abs_a < 0 ? -abs_a : abs_a) < epsilon;
 }
 
 template<class Arithmetic, bool /* step wise */>

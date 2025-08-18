@@ -7,6 +7,7 @@
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/traits.hpp>
+#include <ostream>
 #include <string>
 
 #if !defined(LZ_STANDALONE)
@@ -17,11 +18,6 @@
 #elif defined(LZ_HAS_FORMAT)
 
 #include <format>
-#include <sstream>
-
-#else
-
-#include <sstream>
 
 #endif // !defined(LZ_STANDALONE)
 
