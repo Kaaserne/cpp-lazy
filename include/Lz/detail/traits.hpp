@@ -56,12 +56,12 @@ struct iterator;
 }
 } // namespace lz
 
-LZ_MODULE_EXPORT namespace lz{
+LZ_MODULE_EXPORT namespace lz {
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
 constexpr bool
 operator==(const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
-    return it == sent;
+    return it.operator==(sent);
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
