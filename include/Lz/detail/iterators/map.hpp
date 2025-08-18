@@ -7,7 +7,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {

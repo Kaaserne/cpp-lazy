@@ -6,9 +6,9 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/iterators/common.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {

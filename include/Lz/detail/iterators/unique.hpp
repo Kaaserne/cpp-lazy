@@ -6,7 +6,7 @@
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <algorithm>
 
 namespace lz {

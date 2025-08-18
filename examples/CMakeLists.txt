@@ -19,7 +19,6 @@ set(examples
     chunks
     common
     concatenate
-    custom_iterator
     drop_while
     drop
     enumerate
@@ -60,4 +59,5 @@ set(examples
 foreach(name IN LISTS examples)
     add_executable(example_${name} ${name}.cpp)
     target_link_libraries(example_${name} PRIVATE cpp-lazy::cpp-lazy)
+    target_compile_options(example_${name} PRIVATE -ftemplate-backtrace-limit=0)
 endforeach()

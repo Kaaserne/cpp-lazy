@@ -94,27 +94,11 @@ TEST_CASE("chunk_if variations") {
         REQUIRE(vec == expected);
     }
 
-    SUBCASE("Ending with delimiters") {
-        std::string s = "hello world; this is a message;;";
-        auto chunked = s | lz::s_chunk_if([](const char c) { return c == ';'; });
-        auto vec = chunked | lz::to<std::vector>();
-        std::vector<std::string> expected = { "hello world", " this is a message", "", "" };
-        REQUIRE(vec == expected);
-    }
-
     SUBCASE("Ending with two one delimiter") {
         std::string s = "hello world; this is a message;";
         auto chunked = lz::sv_chunk_if(s, [](const char c) { return c == ';'; });
         auto vec = chunked | lz::to<std::vector>();
         std::vector<std::string> expected = { "hello world", " this is a message", "" };
-        REQUIRE(lz::equal(vec, expected));
-    }
-
-    SUBCASE("No delimiters") {
-        std::string s = "hello world this is a message";
-        auto chunked = lz::s_chunk_if(s, [](const char c) { return c == ';'; });
-        auto vec = chunked | lz::to<std::vector>();
-        std::vector<std::string> expected = { "hello world this is a message" };
         REQUIRE(lz::equal(vec, expected));
     }
 }

@@ -4,9 +4,9 @@
 #define LZ_ZIP_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
-#include <Lz/iterator_base.hpp>
 #include <algorithm>
 
 namespace lz {

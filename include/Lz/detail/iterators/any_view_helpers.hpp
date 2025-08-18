@@ -3,10 +3,10 @@
 #ifndef LZ_ANY_VIEW_HELPERS_HPP
 #define LZ_ANY_VIEW_HELPERS_HPP
 
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/iterators/any_iterable/iterator_base.hpp>
 #include <Lz/detail/unique_ptr.hpp>
 #include <Lz/detail/variant.hpp>
-#include <Lz/iterator_base.hpp>
 #include <cstddef>
 #include <cstring> // max_align_t
 

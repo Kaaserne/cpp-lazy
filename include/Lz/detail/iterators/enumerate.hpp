@@ -4,8 +4,8 @@
 #define LZ_ENUMERATE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {

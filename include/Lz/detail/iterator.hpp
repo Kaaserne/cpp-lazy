@@ -8,6 +8,11 @@
 
 namespace lz {
 
+namespace detail {
+
+template<class T>
+using const_reference = detail::conditional<std::is_lvalue_reference<T>::value, const T&, detail::remove_cvref<T>>;
+
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::forward_iterator_tag;
@@ -143,5 +148,6 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return !(*this < s);
     }
 };
+} // namespace detail
 } // namespace lz
 #endif // LZ_ITERATOR_HPP

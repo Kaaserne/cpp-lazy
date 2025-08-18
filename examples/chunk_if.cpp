@@ -42,15 +42,6 @@ int main() {
     // hello world
     //  this is a message
 
-    auto chunked_s = s | lz::s_chunk_if([](const char c) { return c == ';'; });
-    for (auto chunk : chunked_s) {
-        std::cout << chunk << '\n';
-        // or use fmt::print("{}\n", chunk);
-    }
-    // Output:
-    // hello world
-    //  this is a message
-
     // with custom types
     auto chunked_vector = s | lz::t_chunk_if<std::vector<char>>([](const char c) { return c == ';'; });
     for (auto vec_chunk : chunked_vector) {
@@ -89,14 +80,6 @@ int main() {
     lz::for_each(s | lz::sv_chunk_if([](const char c) { return c == ';'; }), [](const lz::string_view chunk) {
         std::cout.write(chunk.data(), static_cast<std::streamsize>(chunk.size()));
         std::cout << '\n';
-    });
-    // Output:
-    // hello world
-    //  this is a message
-
-    lz::for_each(s | lz::s_chunk_if([](const char c) { return c == ';'; }), [](const std::string& chunk) {
-        std::cout << chunk << '\n';
-        // or use fmt::print("{}\n", chunk);
     });
     // Output:
     // hello world

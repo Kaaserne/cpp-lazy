@@ -588,7 +588,7 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class I>
 concept bidirectional_iterable =
-    requires(I&& i) { requires std::bidirectional_iterator<decltype(std::begin(i))>; };
+    requires(I i) { requires std::bidirectional_iterator<decltype(std::begin(i))>; };
 
 /**
  * @brief Concept that can be used to check whether T is sized, i.e. has a .size() method or is an array.

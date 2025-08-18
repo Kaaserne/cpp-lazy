@@ -5,8 +5,8 @@
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/iterator_base.hpp>
 #include <iterator>
 
 namespace lz {

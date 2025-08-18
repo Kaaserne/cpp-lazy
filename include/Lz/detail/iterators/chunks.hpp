@@ -5,7 +5,7 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {

@@ -1,8 +1,8 @@
 #include <Lz/concatenate.hpp>
 #include <Lz/range.hpp>
+#include <array>
 #include <iostream>
 #include <vector>
-
 
 int main() {
     std::array<int, 4> a{1, 2, 3, 4};
@@ -46,4 +46,5 @@ int main() {
     }
     // Output: 21 22 23 24 0 1 2 3 4
     std::cout << '\n';
+    // TODO add reference wrapper
 }

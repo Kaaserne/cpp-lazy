@@ -13,6 +13,7 @@
 #include <Lz/chunks.hpp>
 #include <Lz/common.hpp>
 #include <Lz/concatenate.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/duplicates.hpp>
@@ -29,7 +30,6 @@
 #include <Lz/interleave.hpp>
 #include <Lz/intersection.hpp>
 #include <Lz/iter_tools.hpp>
-#include <Lz/iterator_base.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/loop.hpp>
 #include <Lz/map.hpp>

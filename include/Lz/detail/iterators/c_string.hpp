@@ -3,8 +3,8 @@
 #ifndef LZ_C_STRING_ITERATOR_HPP
 #define LZ_C_STRING_ITERATOR_HPP
 
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {

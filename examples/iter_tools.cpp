@@ -216,10 +216,10 @@ int main() {
     auto to_pad = 3;
     auto padded_ref = pad_numbers | lz::pad(std::ref(to_pad), 2); // {1, 2, 3, 3, 3} by reference
 #ifdef LZ_HAS_CXX_11
-    lz::for_each(padded_ref, [](int& p) { std::cout << p << ' '; });
+    lz::for_each(padded_ref, [](std::reference_wrapper<int> p) { std::cout << p << ' '; });
     // 1 2 3 3 3
 #else
-    for (auto& p : padded_ref) {
+    for (std::reference_wrapper<int> p : padded_ref) {
         std::cout << p << ' ';
     }
 #endif

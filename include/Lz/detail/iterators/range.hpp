@@ -4,9 +4,9 @@
 #define LZ_RANGE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 #include <cmath>
 #include <limits>
 
