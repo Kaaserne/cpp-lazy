@@ -1,16 +1,12 @@
-#include <Lz/concatenate.hpp>
 #include <Lz/filter.hpp>
-#include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
+#include <Lz/map.hpp>
 
 TEST_CASE("Zip longest with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -58,10 +54,11 @@ TEST_CASE("zip_longest_iterable changing and creating elements") {
     }
 
     SUBCASE("Should be by ref") {
-        auto begin = ra.begin();
-        std::reference_wrapper<int> ref_wrapper = std::get<0>(*begin).value();
-        ref_wrapper.get() = 2000;
-        REQUIRE(v[0] == ref_wrapper.get());
+        static_assert(
+            std::is_same<decltype(*bidi.begin()),
+                         std::tuple<lz::optional<std::reference_wrapper<int>>, lz::optional<std::reference_wrapper<const char>>,
+                                    lz::optional<std::reference_wrapper<char>>>>::value,
+            "");
     }
 }
 
@@ -70,7 +67,7 @@ TEST_CASE("Zip longest bidi and not sized") {
     auto filter = v | lz::filter([](int i) { return i % 2 == 0; });
     auto zip = lz::zip_longest(v, filter);
     static_assert(lz::detail::is_bidi<decltype(zip.begin())>::value, "Should not be bidi");
-    static_assert(!lz::detail::sized<decltype(zip.begin())>::value, "Should not be sized");
+    static_assert(!lz::detail::is_sized<decltype(zip.begin())>::value, "Should not be sized");
 
     std::tuple<lz::optional<int>, lz::optional<int>> expected[] = { { 1, 2 },           { 2, 4 },           { 3, 6 },
                                                                     { 4, lz::nullopt }, { 5, lz::nullopt }, { 6, lz::nullopt },
@@ -117,6 +114,15 @@ TEST_CASE("zip_longest_iterable binary operations") {
         auto l = lz::zip_longest(first, second);
         REQUIRE(lz::size(l) == 5);
         test_procs::test_operator_minus(l);
+    }
+
+    SUBCASE("Operator+(default_sentinel)") {
+        auto first = lz::repeat(1, 5), second = lz::repeat(1, 4);
+        auto l = lz::zip_longest(first, second);
+        std::vector<std::tuple<lz::optional<int>, lz::optional<int>>> expected2 = {
+            { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, 1 }, { 1, lz::nullopt }
+        };
+        test_procs::test_operator_plus(l, expected2);
     }
 }
 

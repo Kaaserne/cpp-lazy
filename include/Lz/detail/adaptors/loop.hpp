@@ -4,13 +4,35 @@
 #define LZ_LOOP_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/loop.hpp>
 
 namespace lz {
 namespace detail {
 struct loop_adaptor {
     using adaptor = loop_adaptor;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    /**
+     * @brief Loops over an iterable infinitely. Does not contain a .size() method. Loop infinitely over the input iterable. Its
+     * input iterator category will always be forward. It also returns a default_sentinel_t. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3, 4 };
+     * auto looper = lz::loop(vec); // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+     * // or
+     * auto looper = vec | lz::loop; // {1, 2, 3, 4, 1, 2, 3, 4, 1, 2, ...}
+     * ```
+     * @param iterable The iterable to loop over
+     * @return A loop_iterable that will loop over the input iterable infinitely.
+     */
+    template<class Iterable>
+    [[nodiscard]] constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const
+        requires(!std::is_integral_v<remove_cvref<Iterable>>)
+    {
+        return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
+    }
+
+#else
 
     /**
      * @brief Loops over an iterable infinitely. Does not contain a .size() method. Loop infinitely over the input iterable. Its
@@ -30,6 +52,8 @@ struct loop_adaptor {
         return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }
 
+#endif
+
     /**
      * @brief Loops n times over an iterable. Contains a .size() method if the input iterable has a .size()
      * method. Will return an actual iterator if the input iterable is at least bidirectional and isn't sentinelled. Otherwise it
@@ -45,8 +69,7 @@ struct loop_adaptor {
      * @return A loop_iterable that will loop over the input iterable n times.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, false>
-    operator()(Iterable&& iterable, const std::size_t amount) const {
+    LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, false> operator()(Iterable&& iterable, const size_t amount) const {
         return { std::forward<Iterable>(iterable), amount };
     }
 
@@ -63,7 +86,7 @@ struct loop_adaptor {
      * @param amount The amount of times to loop over the iterable
      * @return An adaptor that can be used in pipe expressions
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t amount) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t amount) const {
         return { amount };
     }
 };

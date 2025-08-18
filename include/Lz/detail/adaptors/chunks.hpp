@@ -4,7 +4,6 @@
 #define LZ_CHUNKS_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/chunks.hpp>
 
 namespace lz {
@@ -45,8 +44,8 @@ struct chunks_adaptor {
      * @param chunk_size The size of the chunks
      * @return An iterable of iterables, where each inner iterable is a chunk of the original iterable
      **/
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    constexpr chunks_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, std::size_t chunk_size) const {
+    template<class Iterable>
+    constexpr chunks_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, size_t chunk_size) const {
         return { std::forward<Iterable>(iterable), chunk_size };
     }
 
@@ -80,7 +79,7 @@ struct chunks_adaptor {
      * @param chunk_size The size of the chunks
      * @return An adaptor that can be used to chunk the iterable
      **/
-    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t chunk_size) const {
+    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t chunk_size) const {
         return { chunk_size };
     }
 };

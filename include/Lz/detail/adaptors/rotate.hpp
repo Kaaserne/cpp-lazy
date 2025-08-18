@@ -3,7 +3,6 @@
 #ifndef LZ_ROTATE_ADAPTOR_HPP
 #define LZ_ROTATE_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/rotate.hpp>
 
 namespace lz {
@@ -30,7 +29,7 @@ struct rotate_adaptor {
      * @param start The amount of elements to rotate the input iterable by.
      * @return A rotate_iterable that can be used to iterate over the rotated elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr rotate_iterable<remove_ref<Iterable>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> start) const {
         return { std::forward<Iterable>(iterable), start };

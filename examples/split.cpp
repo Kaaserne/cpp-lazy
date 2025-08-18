@@ -3,6 +3,7 @@
 #include <Lz/split.hpp>
 #include <iostream>
 #include <vector>
+#include <array>
 
 int main() {
     // With split you can split an iterable on a delimiter or an iterable delimiter (multiple delimiters)

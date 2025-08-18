@@ -6,7 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -24,7 +24,7 @@ private:
     using value_type_b = typename traits_b::value_type;
     using ref_type_a = typename traits_a::reference;
 
-    using selector_a_ret_val = decay_t<func_ret_type<SelectorA, ref_type_a>>;
+    using selector_a_ret_val = remove_cvref<func_ret_type<SelectorA, ref_type_a>>;
 
     basic_iterable<IterB, SB> _iterable_b;
     iter_a _iter_a;
@@ -39,34 +39,33 @@ private:
         using detail::find_if;
         using std::find_if;
 
-        _iter_a = find_if(std::move(_iter_a), std::end(_iterable_a), [this](ref_t<iter_a> a) {
+        _iter_a = find_if(std::move(_iter_a), _iterable_a.end(), [this](ref_t<iter_a> a) {
             auto&& to_find = _selector_a(a);
 
             auto pos = lz::lower_bound(_iterable_b, to_find,
                                        [this](ref_t<IterB> b, const selector_a_ret_val& val) { return _selector_b(b) < val; });
 
-            if (pos != std::end(_iterable_b) && !(to_find < _selector_b(*pos))) {
-                _iterable_b = lz::basic_iterable<IterB, SB>{ std::move(pos), std::end(_iterable_b) };
+            if (pos != _iterable_b.end() && !(to_find < _selector_b(*pos))) {
+                _iterable_b = lz::basic_iterable<IterB, SB>{ std::move(pos), _iterable_b.end() };
                 return true;
             }
-            _iterable_b = lz::basic_iterable<IterB, SB>{ _begin_b, std::end(_iterable_b) };
+            _iterable_b = lz::basic_iterable<IterB, SB>{ _begin_b, _iterable_b.end() };
             return false;
         });
     }
 
 public:
-    using reference = decltype(_result_selector(*_iter_a, *std::begin(_iterable_b)));
-    using value_type = decay_t<reference>;
+    using reference = decltype(_result_selector(*_iter_a, *_iterable_b.begin()));
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr join_where_iterator()
-        requires std::default_initializable<IterableA> && std::default_initializable<iter_a> &&
-                     std::default_initializable<IterB> && std::default_initializable<SB> &&
-                     std::default_initializable<SelectorA> && std::default_initializable<SelectorB> &&
-                     std::default_initializable<ResultSelector>
+        requires(std::default_initializable<IterableA> && std::default_initializable<iter_a> &&
+                 std::default_initializable<IterB> && std::default_initializable<SB> && std::default_initializable<SelectorA> &&
+                 std::default_initializable<SelectorB> && std::default_initializable<ResultSelector>)
     = default;
 
 #else
@@ -93,7 +92,7 @@ public:
                                             ResultSelector result_selector) :
         _iterable_b{ std::move(it_b), std::move(end_b) },
         _iter_a{ std::move(it_a) },
-        _begin_b{ std::begin(_iterable_b) },
+        _begin_b{ _iterable_b.begin() },
         _iterable_a{ std::forward<I>(iterable) },
         _selector_a{ std::move(a) },
         _selector_b{ std::move(b) },
@@ -102,13 +101,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(default_sentinel_t) {
-        _iter_a = std::end(_iterable_a);
+        _iter_a = _iterable_a.end();
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
-        return _result_selector(*_iter_a, *std::begin(_iterable_b));
+        return _result_selector(*_iter_a, *_iterable_b.begin());
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const {
@@ -117,17 +116,17 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
-        _iterable_b = lz::basic_iterable<IterB, SB>{ std::next(std::begin(_iterable_b)), std::end(_iterable_b) };
+        _iterable_b = lz::basic_iterable<IterB, SB>{ std::next(_iterable_b.begin()), _iterable_b.end() };
         find_next();
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const join_where_iterator& b) const {
-        LZ_ASSERT(std::end(_iterable_a) == std::end(b._iterable_a), "Incompatible iterators");
-        return _iter_a == b._iter_a;
+    LZ_CONSTEXPR_CXX_14 bool eq(const join_where_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable_a.end() == other._iterable_a.end());
+        return _iter_a == other._iter_a;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iter_a == std::end(_iterable_a);
+        return _iter_a == _iterable_a.end();
     }
 };
 

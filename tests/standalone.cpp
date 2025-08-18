@@ -1,10 +1,10 @@
 #define LZ_STANDALONE
 
-#include <Lz/split.hpp>
-#include <Lz/stream.hpp>
 #include <doctest/doctest.h>
-#include <iostream>
-#include <vector>
+#include <pch.hpp>
+#include <Lz/stream.hpp>
+#include <Lz/split.hpp>
+
 
 TEST_CASE("Formatting and compile tests") {
     SUBCASE("Compile test") {

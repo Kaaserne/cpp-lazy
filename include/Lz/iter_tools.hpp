@@ -75,34 +75,6 @@ template<class Iterable, class T>
 using as_iterable = detail::as_iterable<Iterable, T>;
 
 /**
- * @brief Pairwise iterable helper alias
- *
- * @tparam Iterable The iterable to iterate over.
- * @tparam N The number of adjacent elements to return in a tuple.
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * // c++ 11
- * lz::pairwise_n_iterable<std::vector<int>, 2> iterable = lz::pairwise_n<2>{}(vec);
- * // c++ 14 and later
- * lz::pairwise_n_iterable<std::vector<int>, 2> iterable = lz::pairwise_n<2>(vec);
- * ```
- */
-template<class Iterable, std::size_t N>
-using pairwise_n_iterable = detail::pairwise_n_iterable<Iterable, N>;
-
-/**
- * @brief Pairwise iterable helper alias
- *
- * @tparam Iterable The iterable to iterate over.
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * lz::pairwise_iterable<std::vector<int>> iterable = lz::pairwise(vec);
- * ```
- */
-template<class Iterable, std::size_t N>
-using pairwise_iterable = pairwise_n_iterable<Iterable, 2>;
-
-/**
  * @brief Keys, values and get_nth iterable helper alias
  *
  * @tparam Iterable The iterable to get the nth element from.
@@ -114,7 +86,7 @@ using pairwise_iterable = pairwise_n_iterable<Iterable, 2>;
  * lz::get_nth_iterable<std::vector<std::tuple<int, int, int>>, 0> keys_iterable = lz::keys(three_tuple_vec);
  * ```
  */
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 using get_nth_iterable = detail::get_nth_iterable<Iterable, N>;
 
 /**
@@ -153,7 +125,7 @@ using values_iterable = get_nth_iterable<Iterable, 1>;
  * lz::get_nths_iterable<std::vector<std::tuple<int, int, int>>, 0, 2> iterable = three_tuple_vec | lz::get_nths<0, 2>;
  * ```
  */
-template<class Iterable, std::size_t... N>
+template<class Iterable, size_t... N>
 using get_nths_iterable = detail::get_nths_iterable<Iterable, N...>;
 
 /**
@@ -241,20 +213,6 @@ template<class T>
 using as = detail::as_adaptor<T>;
 
 /**
- * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip` and
- * `lz::drop`. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise_n<2>{}(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * // or
- * auto iterable = vec | lz::pairwise_n<2>{}; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * ```
- * @tparam N The amount of adjacent elements to return.
- */
-template<std::size_t N>
-using pairwise_n = detail::pairwise_n_adaptor<N>;
-
-/**
  * @brief Gets the nth element from a std::get-able container, using `std::get` and `lz::map`. Example:
  * ```cpp
  * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
@@ -264,7 +222,7 @@ using pairwise_n = detail::pairwise_n_adaptor<N>;
  * ```
  * @tparam I The index to get from the std::get-able container.
  */
-template<std::size_t I>
+template<size_t I>
 using get_nth = detail::get_n_adaptor<I>;
 
 /**
@@ -278,7 +236,7 @@ using get_nth = detail::get_n_adaptor<I>;
  * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
  * from each tuple in the iterable.
  */
-template<std::size_t... N>
+template<size_t... N>
 using get_nths = detail::get_nths_adaptor<N...>;
 
 #else
@@ -298,20 +256,6 @@ template<class T>
 LZ_INLINE_VAR constexpr detail::as_adaptor<T> as{};
 
 /**
- * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip` and
- * `lz::drop`. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * // or
- * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * ```
- * @tparam N The amount of adjacent elements to return.
- */
-template<std::size_t N>
-LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
-
-/**
  * @brief Gets the nth element from a std::get-able container, using `std::get` and `lz::map`. Example:
  * ```cpp
  * std::vector<std::tuple<int, int, int>> three_tuple_vec = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
@@ -321,7 +265,7 @@ LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<N> pairwise_n{};
  * ```
  * @tparam I The index to get from the std::get-able container.
  */
-template<std::size_t I>
+template<size_t I>
 LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
 
 /**
@@ -335,7 +279,7 @@ LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
  * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
  * from each tuple in the iterable.
  */
-template<std::size_t... N>
+template<size_t... N>
 LZ_INLINE_VAR constexpr detail::get_nths_adaptor<N...> get_nths{};
 
 #endif
@@ -389,18 +333,6 @@ LZ_INLINE_VAR constexpr detail::unzip_with_adaptor unzip_with{};
  * ```
  */
 LZ_INLINE_VAR constexpr detail::lines_adaptor lines{};
-
-/**
- * @brief Iterates over the elements in the given iterable and returns a tuple of 2 adjacent elements using `lz::zip` and
- * `lz::drop`. Example:
- * ```cpp
- * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * // or
- * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
- * ```
- */
-LZ_INLINE_VAR constexpr detail::pairwise_n_adaptor<2> pairwise{};
 
 /**
  * @brief Gets the keys from a std::get-able container, using `std::get<0>` and `lz::map`. Example:
@@ -506,6 +438,20 @@ LZ_INLINE_VAR constexpr detail::trim_adaptor trim{};
  * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
  */
 LZ_INLINE_VAR constexpr detail::iter_decay iter_decay{};
+
+/**
+ * @brief Pads the given iterable to a certain size, using `lz::concatenate` and `lz::repeat`. A size is needed to be provided
+ * to pad it to a certain size. It will return the most suitable reference type. Example:
+ * ```cpp
+ * std::vector<int> vec = { 1, 2, 3 };
+ * auto padded = lz::pad(vec, 0, 2); // {1, 2, 3, 0, 0} by value
+ * auto to_pad = 3;
+ * auto padded = lz::pad(vec, to_pad, 0); // {1, 2, 3, 0, 0} by ref
+ * auto padded = lz::pad(vec, std::ref(to_pad), 0); // {1, 2, 3, 0, 0} by ref for more flexibility (copy ctors etc.)
+ * auto padded = vec | lz::pad(0, 2); // {1, 2, 3, 0, 0} by value
+ * ```
+ */
+LZ_INLINE_VAR constexpr detail::pad_adaptor pad{};
 
 } // End namespace lz
 

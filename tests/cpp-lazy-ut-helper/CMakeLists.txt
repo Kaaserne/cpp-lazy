@@ -1,6 +1,5 @@
 add_library(cpp-lazy-ut-helper 
   src/c_string.cpp
-  src/repeat.cpp
 )
 add_library(cpp-lazy-ut-helper::cpp-lazy-ut-helper ALIAS cpp-lazy-ut-helper)
 

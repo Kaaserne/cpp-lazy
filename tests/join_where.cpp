@@ -2,11 +2,7 @@
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
-#include <functional>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 struct customer {
     int id;

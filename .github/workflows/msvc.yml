@@ -6,7 +6,7 @@ on:
 
 jobs:
   msvc:
-    name: msvc-${{ matrix.standard }} (C++${{ matrix.standard }})
+    name: msvc-${{ matrix.os }} (C++${{ matrix.standard }})
 
     strategy:
       fail-fast: false

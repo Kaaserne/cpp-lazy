@@ -3,8 +3,8 @@
 #ifndef LZ_C_STRING_ITERATOR_HPP
 #define LZ_C_STRING_ITERATOR_HPP
 
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -45,8 +45,8 @@ public:
         ++_it;
     }
 
-    constexpr bool eq(const c_string_iterator& b) const noexcept {
-        return b._it == nullptr ? _it == nullptr || *_it == '\0' : _it == b._it;
+    constexpr bool eq(const c_string_iterator& other) const noexcept {
+        return other._it == nullptr ? _it == nullptr || *_it == '\0' : _it == other._it;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {

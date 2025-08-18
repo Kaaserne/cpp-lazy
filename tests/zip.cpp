@@ -1,14 +1,11 @@
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Zip with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -138,6 +135,18 @@ TEST_CASE("zip_iterable binary operations") {
         test_procs::test_operator_minus(lz::zip(first, second));
         second = lz::repeat(2, 3);
         test_procs::test_operator_minus(lz::zip(first, second));
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto first = lz::repeat(1, 4), second = lz::repeat(2, 5);
+        std::vector<std::tuple<int, int>> expected2 = {
+            std::make_tuple(1, 2),
+            std::make_tuple(1, 2),
+            std::make_tuple(1, 2),
+            std::make_tuple(1, 2),
+        };
+
+        test_procs::test_operator_plus(lz::zip(first, second), expected2);
     }
 }
 

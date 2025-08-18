@@ -4,9 +4,9 @@
 #define LZ_ZIP_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
-#include <Lz/iterator_base.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -25,74 +25,78 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    using is = make_index_sequence<std::tuple_size<IterTuple>::value>;
+    using is = make_index_sequence<tuple_size<IterTuple>::value>;
     IterTuple _iterators;
 
-    template<std::size_t... I>
+    template<size_t... I>
     constexpr reference dereference(index_sequence<I...>) const {
-        return reference{ *std::get<I>(_iterators)... };
+        using std::get;
+        return reference{ *get<I>(_iterators)... };
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
+        using std::get;
 #ifdef LZ_HAS_CXX_17
-        (++std::get<I>(_iterators), ...);
+        (++get<I>(_iterators), ...);
 #else
-        decompose(++std::get<I>(_iterators)...);
+        decompose(++get<I>(_iterators)...);
 #endif
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
+        using std::get;
 #ifdef LZ_HAS_CXX_17
-        (--std::get<I>(_iterators), ...);
+        (--get<I>(_iterators), ...);
 #else
-        decompose(--std::get<I>(_iterators)...);
+        decompose(--get<I>(_iterators)...);
 #endif
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset, index_sequence<I...>) {
+        using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((std::get<I>(_iterators) += offset), ...);
+        ((get<I>(_iterators) += offset), ...);
 #else
-        decompose(std::get<I>(_iterators) += offset...);
+        decompose(get<I>(_iterators) += offset...);
 #endif
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
-        const auto max = std::max({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        using std::get;
+        const auto max = std::max({ (get<I>(_iterators) - get<I>(other._iterators))... });
         if (max > 0) {
             return max;
         }
-        return std::min({ (std::get<I>(_iterators) - std::get<I>(other._iterators))... });
+        return std::min({ (get<I>(_iterators) - get<I>(other._iterators))... });
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(const SMaybeHomo& other, index_sequence<I...>) const {
-        return std::max({ (std::get<I>(_iterators) - std::get<I>(other))... });
+        using std::get;
+        return std::max({ (get<I>(_iterators) - get<I>(other))... });
     }
 
-    template<class EndIter, std::size_t... I>
+    template<class EndIter, size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const EndIter& other, index_sequence<I...>) const {
+        using std::get;
 #ifdef LZ_HAS_CXX_17
-
-        return ((std::get<I>(_iterators) == std::get<I>(other)) || ...);
-
+        return ((get<I>(_iterators) == get<I>(other)) || ...);
 #else
-
-        return std::max({ (std::get<I>(_iterators) == std::get<I>(other))... });
-
+        return std::max({ (get<I>(_iterators) == get<I>(other))... });
 #endif
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& other, const index_sequence<I...>&) {
+        using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((std::get<I>(_iterators) = std::get<I>(other)), ...);
+        ((get<I>(_iterators) = get<I>(other)), ...);
 #else
-        decompose(std::get<I>(_iterators) = std::get<I>(other)...);
+        decompose(get<I>(_iterators) = get<I>(other)...);
 #endif
     }
 
@@ -100,7 +104,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_iterator()
-        requires std::default_initializable<IterTuple>
+        requires(std::default_initializable<IterTuple>)
     = default;
 
 #else
@@ -112,7 +116,7 @@ public:
 #endif
 
     LZ_CONSTEXPR_CXX_14 zip_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
-        static_assert(std::tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
+        static_assert(tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
     LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SMaybeHomo& end) {

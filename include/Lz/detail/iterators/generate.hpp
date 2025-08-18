@@ -4,8 +4,8 @@
 #define LZ_GENERATE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -19,18 +19,18 @@ class generate_iterator<GeneratorFunc, false>
                       default_sentinel_t> {
 
     mutable GeneratorFunc _func;
-    std::size_t _current{};
+    size_t _current{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_iterator()
-        requires std::default_initializable<GeneratorFunc>
+        requires(std::default_initializable<GeneratorFunc>)
     = default;
 
 #else
@@ -41,7 +41,7 @@ public:
 
 #endif
 
-    constexpr generate_iterator(GeneratorFunc generator_func, const std::size_t amount) :
+    constexpr generate_iterator(GeneratorFunc generator_func, const size_t amount) :
         _func{ std::move(generator_func) },
         _current{ amount } {
     }
@@ -65,8 +65,8 @@ public:
         --_current;
     }
 
-    constexpr bool eq(const generate_iterator& b) const noexcept {
-        return _current == b._current;
+    constexpr bool eq(const generate_iterator& other) const noexcept {
+        return _current == other._current;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {
@@ -84,14 +84,14 @@ class generate_iterator<GeneratorFunc, true>
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_iterator()
-        requires std::default_initializable<GeneratorFunc>
+        requires(std::default_initializable<GeneratorFunc>)
     = default;
 
 #else

@@ -1,12 +1,9 @@
-#include <Lz/map.hpp>
-#include <Lz/reverse.hpp>
+#include <doctest/doctest.h>
+#include <pch.hpp>
 #include <Lz/unique.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <Lz/reverse.hpp>
+#include <Lz/map.hpp>
 
 TEST_CASE("Unique using sentinels") {
     auto str = lz::c_string("aabbcccddefgghhj");

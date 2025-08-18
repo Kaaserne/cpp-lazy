@@ -1,9 +1,8 @@
-#include <Lz/algorithm.hpp>
-#include <Lz/range.hpp>
-#include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <vector>
+#include <pch.hpp>
+#include <Lz/reverse.hpp>
+#include <Lz/range.hpp>
 
 TEST_CASE("Range permutations") {
     SUBCASE("1 step, int") {
@@ -125,6 +124,20 @@ TEST_CASE("Range permutations") {
                      doctest::Approx(7),   doctest::Approx(8), doctest::Approx(9) };
         REQUIRE(lz::equal(range, expected));
         REQUIRE(lz::equal(range | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("Empty range") {
+        auto range = lz::range(0, 0, 10);
+        REQUIRE(lz::empty(range));
+        REQUIRE(lz::size(range) == 0);
+        REQUIRE(!lz::has_many(range));
+        REQUIRE(!lz::has_one(range));
+
+        auto range2 = lz::range(0, 0);
+        REQUIRE(lz::empty(range2));
+        REQUIRE(lz::size(range2) == 0);
+        REQUIRE(!lz::has_many(range2));
+        REQUIRE(!lz::has_one(range2));
     }
 }
 

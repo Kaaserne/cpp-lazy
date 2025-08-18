@@ -3,7 +3,6 @@
 #ifndef LZ_FLATTEN_ADAPTOR_HPP
 #define LZ_FLATTEN_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/flatten.hpp>
 
 namespace lz {
@@ -34,9 +33,9 @@ struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> 
  */
 template<class Iterable>
 struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
-    : std::integral_constant<std::size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
+    : std::integral_constant<size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
 
-#ifdef LZ_HAS_CXX_17
+#ifdef LZ_HAS_CXX_14
 
 /**
  * @brief Gets the number of dimensions of an iterable. For instance, a vector of vectors will return 2, a vector of vectors of
@@ -50,7 +49,7 @@ struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
  * @tparam Iterable The iterable type to get the dimensions of.
  */
 template<class Iterable>
-inline constexpr std::size_t dimensions_v = dimensions<Iterable>::value;
+LZ_INLINE_VAR constexpr size_t dimensions_v = dimensions<Iterable>::value;
 
 #endif
 
@@ -73,7 +72,7 @@ struct flatten_adaptor {
      * @param iterable The iterable(s) to flatten
      * @return An iterable that is flattened, with the same type as the input iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     flatten_iterable<remove_ref<Iterable>, dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>
     operator()(Iterable&& iterable) const {

@@ -5,8 +5,8 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
-#include <Lz/iterator_base.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <limits>
@@ -21,7 +21,7 @@ class interleave_iterator
                       fake_ptr_proxy<iter_tuple_common_ref_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
                       iter_tuple_iter_cat_t<IterMaybeHomo>, SMaybeHomo> {
 
-    using traits = std::iterator_traits<first_it<IterMaybeHomo>>;
+    using traits = std::iterator_traits<first_it_t<IterMaybeHomo>>;
 
 public:
     using value_type = typename traits::value_type;
@@ -30,86 +30,94 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    static_assert(std::tuple_size<IterMaybeHomo>::value <= std::numeric_limits<std::uint_least8_t>::max(),
+    static_assert(tuple_size<IterMaybeHomo>::value <= std::numeric_limits<std::uint_least8_t>::max(),
                   "interleave_iterator tuple size exceeds uint_least8_t. This is not supported.");
 
-    static constexpr auto tuple_size = static_cast<std::uint_least8_t>(std::tuple_size<IterMaybeHomo>::value);
+    static constexpr auto tup_size = static_cast<std::uint_least8_t>(tuple_size<IterMaybeHomo>::value);
 
     IterMaybeHomo _iterators;
     // Using uint_least8_t because generally the max number of function parameters is 256
     std::uint_least8_t _index{};
 
-    using is = make_index_sequence<tuple_size>;
+    using is = make_index_sequence<tup_size>;
 
 #ifdef LZ_HAS_CXX_17
 
-    template<std::size_t I>
+    template<size_t I>
     constexpr bool eq(const SMaybeHomo& other) const {
-        if constexpr (I != tuple_size - 1) {
-            return std::get<I>(_iterators) == std::get<I>(other) ? _index == 0 : eq<I + 1>(other);
+        using std::get;
+        if constexpr (I != tup_size - 1) {
+            return get<I>(_iterators) == get<I>(other) ? _index == 0 : eq<I + 1>(other);
         }
         else {
-            return std::get<I>(_iterators) == std::get<I>(other);
+            return get<I>(_iterators) == get<I>(other);
         }
     }
 
-    template<std::size_t I>
+    template<size_t I>
     constexpr bool eq(const interleave_iterator& other) const {
-        if constexpr (I != tuple_size - 1) {
-            return std::get<I>(_iterators) == std::get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
+        using std::get;
+        if constexpr (I != tup_size - 1) {
+            return get<I>(_iterators) == get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
         }
         else {
-            return std::get<I>(_iterators) == std::get<I>(other._iterators) && _index == other._index;
+            return get<I>(_iterators) == get<I>(other._iterators) && _index == other._index;
         }
     }
 
 #else
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, bool> eq(const SMaybeHomo& other) const {
-        return std::get<I>(_iterators) == std::get<I>(other) ? _index == 0 : eq<I + 1>(other);
+    template<size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, bool> eq(const SMaybeHomo& other) const {
+        using std::get;
+        return get<I>(_iterators) == get<I>(other) ? _index == 0 : eq<I + 1>(other);
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, bool> eq(const SMaybeHomo& other) const {
-        return std::get<I>(_iterators) == std::get<I>(other);
+    template<size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, bool> eq(const SMaybeHomo& other) const {
+        using std::get;
+        return get<I>(_iterators) == get<I>(other);
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, bool> eq(const interleave_iterator& other) const {
-        return std::get<I>(_iterators) == std::get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
+    template<size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, bool> eq(const interleave_iterator& other) const {
+        using std::get;
+        return get<I>(_iterators) == get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, bool> eq(const interleave_iterator& other) const {
-        return std::get<I>(_iterators) == std::get<I>(other._iterators) && _index == other._index;
+    template<size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, bool> eq(const interleave_iterator& other) const {
+        using std::get;
+        return get<I>(_iterators) == get<I>(other._iterators) && _index == other._index;
     }
 
 #endif
 
-    template<std::size_t... Is>
+    template<size_t... Is>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<Is...>) {
+        using std::get;
         ++_index;
-        if (_index != tuple_size) {
+        if (_index != tup_size) {
             return;
         }
 #ifdef LZ_HAS_CXX_17
-        (++std::get<Is>(_iterators), ...);
+        (++get<Is>(_iterators), ...);
 #else
-        decompose(++std::get<Is>(_iterators)...);
+        decompose(++get<Is>(_iterators)...);
 #endif
         _index = 0;
     }
 
-    template<std::size_t... Is>
+    template<size_t... Is>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<Is...>) {
+        using std::get;
         if (_index == 0) {
 #ifdef LZ_HAS_CXX_17
-            (--std::get<Is>(_iterators), ...);
+            (--get<Is>(_iterators), ...);
 #else
-            decompose(--std::get<Is>(_iterators)...);
+            decompose(--get<Is>(_iterators)...);
 #endif
-            _index = tuple_size - 1;
+            _index = tup_size - 1;
             return;
         }
         --_index;
@@ -117,64 +125,71 @@ private:
 
 #ifdef LZ_HAS_CXX_17
 
-    template<std::size_t I>
+    template<size_t I>
     constexpr reference dereference() const {
-        if constexpr (I != tuple_size - 1) {
-            return _index == I ? *std::get<I>(_iterators) : dereference<I + 1>();
+        using std::get;
+        if constexpr (I != tup_size - 1) {
+            return _index == I ? *get<I>(_iterators) : dereference<I + 1>();
         }
         else {
-            return *std::get<I>(_iterators);
+            return *get<I>(_iterators);
         }
     }
 
 #else
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size - 1, reference> dereference() const {
-        return _index == I ? *std::get<I>(_iterators) : dereference<I + 1>();
+    template<size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, reference> dereference() const {
+        using std::get;
+        return _index == I ? *get<I>(_iterators) : dereference<I + 1>();
     }
 
-    template<std::size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size - 1, reference> dereference() const noexcept {
-        return *std::get<I>(_iterators);
+    template<size_t I>
+    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, reference> dereference() const noexcept {
+        using std::get;
+        return *get<I>(_iterators);
     }
 
 #endif
 
-    template<std::size_t... Is>
+    template<size_t... Is>
     LZ_CONSTEXPR_CXX_20 difference_type difference(const interleave_iterator& other, index_sequence<Is...>) const {
-        const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterators) -
-                                                                           std::get<Is>(other._iterators))... };
+        using std::get;
+        const difference_type distances[] = { static_cast<difference_type>(get<Is>(_iterators) -
+                                                                           get<Is>(other._iterators))... };
         const auto sum =
             std::accumulate(std::begin(distances), std::end(distances), difference_type{ 0 }, std::plus<difference_type>{});
         return sum + (static_cast<difference_type>(_index) - static_cast<difference_type>(other._index));
     }
 
-    template<std::size_t... Is>
+    template<size_t... Is>
     LZ_CONSTEXPR_CXX_20 difference_type difference(const SMaybeHomo& other, index_sequence<Is...>) const {
-        const difference_type distances[] = { static_cast<difference_type>(std::get<Is>(_iterators) - std::get<Is>(other))... };
-        const auto sum = std::max({ distances[Is]... }) * static_cast<difference_type>(tuple_size);
+        using std::get;
+        const difference_type distances[] = { static_cast<difference_type>(get<Is>(_iterators) - get<Is>(other))... };
+        const auto sum = std::max({ distances[Is]... }) * static_cast<difference_type>(tup_size);
         return sum + static_cast<difference_type>(_index);
     }
 
-    template<std::size_t... Is>
+    template<size_t... Is>
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n, index_sequence<Is...>) {
+        using std::get;
         if (n == 0) {
             return;
         }
 #ifdef LZ_HAS_CXX_17
-        ((std::get<Is>(_iterators) += n), ...);
+        ((get<Is>(_iterators) += n), ...);
 #else
-        decompose(std::get<Is>(_iterators) += n...);
+        decompose(get<Is>(_iterators) += n...);
 #endif
     }
 
-    template<std::size_t... I>
+    template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& end, index_sequence<I...>) {
+        using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((std::get<I>(_iterators) = std::get<I>(end)), ...);
+        ((get<I>(_iterators) = get<I>(end)), ...);
 #else
-        decompose(std::get<I>(_iterators) = std::get<I>(end)...);
+        decompose(get<I>(_iterators) = get<I>(end)...);
 #endif
     }
 
@@ -182,7 +197,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr interleave_iterator()
-        requires std::default_initializable<IterMaybeHomo>
+        requires(std::default_initializable<IterMaybeHomo>)
     = default;
 
 #else
@@ -194,7 +209,7 @@ public:
 #endif
 
     LZ_CONSTEXPR_CXX_14 interleave_iterator(IterMaybeHomo iterators) : _iterators{ std::move(iterators) } {
-        static_assert(tuple_size > 1, "interleaved_iterator must have at least two iterators");
+        static_assert(tup_size > 1, "interleaved_iterator must have at least two iterators");
     }
 
     LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const SMaybeHomo& end) {
@@ -233,25 +248,25 @@ public:
         }
 
         using unsigned_diff = typename std::make_unsigned<difference_type>::type;
-        constexpr auto u_tup_size = static_cast<unsigned_diff>(tuple_size);
+        constexpr auto u_tup_size = static_cast<unsigned_diff>(tup_size);
         const auto n_plus_index = static_cast<difference_type>(_index) + n;
 
         if (n > 0) {
             const auto u_n = static_cast<unsigned_diff>(n);
-            plus_is(n_plus_index / static_cast<difference_type>(tuple_size), is{});
+            plus_is(n_plus_index / static_cast<difference_type>(tup_size), is{});
             // clang-format off
-            _index = u_tup_size * (u_n / tuple_size) == u_n
+            _index = u_tup_size * (u_n / tup_size) == u_n
                          ? 0 : static_cast<std::uint_least8_t>(static_cast<unsigned_diff>(n_plus_index) % u_tup_size);
             // clang-format on
             return;
         }
 
         const auto u_n = static_cast<unsigned_diff>(-n);
-        constexpr auto s_tuple_size = static_cast<difference_type>(tuple_size);
-        plus_is((n_plus_index - s_tuple_size + 1) / s_tuple_size, is{});
+        constexpr auto s_tup_size = static_cast<difference_type>(tup_size);
+        plus_is((n_plus_index - s_tup_size + 1) / s_tup_size, is{});
         // clang-format off
-        _index = u_tup_size * (u_n / tuple_size) == u_n ? 
-            0 : static_cast<std::uint_least8_t>((tuple_size + n_plus_index % s_tuple_size) % tuple_size);
+        _index = u_tup_size * (u_n / tup_size) == u_n ? 
+            0 : static_cast<std::uint_least8_t>((tup_size + n_plus_index % s_tup_size) % tup_size);
         // clang-format on
     }
 

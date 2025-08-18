@@ -5,10 +5,10 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/traits.hpp>
-#include <cstddef>
-#include <iterator>
 
 // clang-format off
+
+#include <iterator>
 
 #if defined(LZ_DEBUG_ASSERTIONS)
   #define LZ_USE_DEBUG_ASSERTIONS
@@ -39,7 +39,7 @@ LZ_MODULE_EXPORT namespace lz {
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i)) {
+[[nodiscard]] constexpr auto size(const Iterable& i) noexcept(noexcept(std::size(i))) -> decltype(std::size(i)) {
     return std::size(i);
 }
 
@@ -71,7 +71,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
+LZ_NODISCARD constexpr size_t size(const T(&)[N]) noexcept {
     return N;
 }
 
@@ -90,7 +90,7 @@ LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
  * @return The size of the container.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i))) -> decltype(std::ssize(i)) {
+[[nodiscard]] constexpr auto ssize(const Iterable& i) noexcept(noexcept(std::ssize(i))) -> decltype(std::ssize(i)) {
     return std::ssize(i);
 }
 
@@ -136,6 +136,16 @@ LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
 namespace lz {
 namespace detail {
 
+template<class T>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if<std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+    return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(arg)));
+}
+
+template<class T>
+LZ_NODISCARD constexpr enable_if<!std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+    return &arg;
+}
+
 #if defined(LZ_USE_DEBUG_ASSERTIONS)
 
 [[noreturn]] inline void
@@ -159,19 +169,23 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
 #define LZ_ASSERT(CONDITION, MSG)                                                                                                \
     ((CONDITION) ? (static_cast<void>(0)) : (lz::detail::assertion_fail(__FILE__, __LINE__, __func__, MSG, #CONDITION)))
 #define LZ_ASSERT_INCREMENTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot increment after end")
+#define LZ_ASSERT_DECREMENTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot decrement after end")
 #define LZ_ASSERT_DEREFERENCABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot dereference end")
 #define LZ_ASSERT_ADDABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot add after end")
-#define LZ_ASSERT_SUBTRACTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot subtract after end")
+#define LZ_ASSERT_SUBTRACTABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot subtract before end")
 #define LZ_ASSERT_SUB_ADDABLE(CONDITION) LZ_ASSERT(CONDITION, "Cannot add after end/cannot subtract before begin")
+#define LZ_ASSERT_COMPATIBLE(CONDITION) LZ_ASSERT(CONDITION, "Incompatible iterators")
 
 #else // ^^ defined(LZ_USE_DEBUG_ASSERTIONS) vv !defined(LZ_USE_DEBUG_ASSERTIONS)
 
 #define LZ_ASSERT(CONDITION, MSG)
 #define LZ_ASSERT_INCREMENTABLE(CONDITION)
+#define LZ_ASSERT_DECREMENTABLE(CONDITION)
 #define LZ_ASSERT_DEREFERENCABLE(CONDITION)
 #define LZ_ASSERT_ADDABLE(CONDITION)
 #define LZ_ASSERT_SUBTRACTABLE(CONDITION)
 #define LZ_ASSERT_SUB_ADDABLE(CONDITION)
+#define LZ_ASSERT_COMPATIBLE(CONDITION)
 
 #endif // defined(LZ_USE_DEBUG_ASSERTIONS)
 
@@ -195,7 +209,7 @@ template<class I>
 [[nodiscard]] constexpr iter_t<I> next_fast(I&& iterable, diff_iterable_t<I> n) {
     using iter = iter_t<I>;
 
-    if constexpr (sized<I>::value && !is_sentinel<iter, sentinel_t<I>>::value && is_bidi<iter>::value) {
+    if constexpr (is_sized_v<I> && !is_sentinel_v<iter, sentinel_t<I>> && is_bidi_v<iter>) {
         const auto size = lz::ssize(iterable);
         if (n > size / 2) {
             return std::prev(detail::end(std::forward<I>(iterable)), size - n);
@@ -208,10 +222,10 @@ template<class I>
 [[nodiscard]] constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
     using diff_type = diff_iterable_t<I>;
 
-    auto begin = std::begin(iterable);
-    auto end = std::end(iterable);
+    auto begin = iterable.begin();
+    auto end = iterable.end();
 
-    if constexpr (sized<I>::value && is_bidi<iter_t<I>>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value) {
+    if constexpr (is_sized_v<I> && is_bidi_v<iter_t<I>> && !is_sentinel_v<iter_t<I>, sentinel_t<I>>) {
         const auto size = lz::ssize(iterable);
         if (n >= size) {
             return end;
@@ -226,8 +240,8 @@ template<class I>
 }
 
 template<class Iterator, class S>
-constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
-    if constexpr (!is_ra<Iterator>::value) {
+[[nodiscard]] constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
+    if constexpr (!is_ra_v<Iterator>) {
         diff_type<Iterator> dist = 0;
         for (; begin != end; ++begin, ++dist) {
         }
@@ -241,8 +255,8 @@ constexpr diff_type<Iterator> distance_impl(Iterator begin, S end) {
 #else
 
 template<class I>
-LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_17 enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17
+    enable_if<is_sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, const diff_iterable_t<I> n) {
 
     const auto size = lz::ssize(iterable);
@@ -253,15 +267,15 @@ LZ_NODISCARD
 }
 
 template<class I>
-LZ_NODISCARD
-    LZ_CONSTEXPR_CXX_17 enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17
+    enable_if<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, diff_iterable_t<I> n) {
     return std::next(detail::begin(std::forward<I>(iterable)), n);
 }
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17
-    enable_if<sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    enable_if<is_sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
     const auto size = lz::ssize(iterable);
@@ -273,7 +287,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<!sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    enable_if<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
     using diff_type = diff_iterable_t<I>;
@@ -327,7 +341,7 @@ LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
 template<class Iterable>
 LZ_NODISCARD constexpr diff_iterable_t<detail::decay_t<Iterable>> distance(const Iterable& iterable) {
     using std::distance;
-    return distance(std::begin(iterable), std::end(iterable));
+    return distance(iterable.begin(), iterable.end());
 }
 
 #ifdef LZ_HAS_CXX_17
@@ -349,13 +363,13 @@ LZ_NODISCARD constexpr diff_iterable_t<detail::decay_t<Iterable>> distance(const
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto eager_size(Iterable&& c) {
-    if constexpr (detail::sized<Iterable>::value) {
+[[nodiscard]] constexpr auto eager_size(Iterable&& c) {
+    if constexpr (is_sized_v<Iterable>) {
         return lz::size(c);
     }
     else {
         using std::distance;
-        return static_cast<std::size_t>(distance(std::begin(c), std::end(c)));
+        return static_cast<size_t>(distance(c.begin(), c.end()));
     }
 }
 
@@ -378,7 +392,8 @@ LZ_NODISCARD constexpr auto eager_size(Iterable&& c) {
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr auto eager_size(Iterable&& c) -> detail::enable_if<detail::sized<Iterable>::value, decltype(lz::size(c))> {
+LZ_NODISCARD constexpr auto eager_size(Iterable &&
+                                       c) -> detail::enable_if<detail::is_sized<Iterable>::value, decltype(lz::size(c))> {
     return lz::size(c);
 }
 
@@ -399,9 +414,9 @@ LZ_NODISCARD constexpr auto eager_size(Iterable&& c) -> detail::enable_if<detail
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, std::size_t> eager_size(Iterable&& c) {
+LZ_NODISCARD constexpr detail::enable_if<!detail::is_sized<Iterable>::value, size_t> eager_size(Iterable && c) {
     using std::distance;
-    return static_cast<std::size_t>(distance(std::begin(c), std::end(c)));
+    return static_cast<size_t>(distance(c.begin(), c.end()));
 }
 
 #endif
@@ -423,7 +438,7 @@ LZ_NODISCARD constexpr detail::enable_if<!detail::sized<Iterable>::value, std::s
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr diff_iterable_t<Iterable> eager_ssize(Iterable&& c) {
+LZ_NODISCARD constexpr diff_iterable_t<Iterable> eager_ssize(Iterable && c) {
     return static_cast<diff_iterable_t<Iterable>>(eager_size(std::forward<Iterable>(c)));
 }
 

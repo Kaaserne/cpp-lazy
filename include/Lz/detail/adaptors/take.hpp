@@ -4,7 +4,6 @@
 #define LZ_TAKE_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/take.hpp>
 
 namespace lz {
@@ -62,7 +61,7 @@ struct take_adaptor {
      * @param n The amount of elements to take.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr take_iterable<remove_ref<Iterable>> operator()(Iterable&& iter, const std::size_t n) const {
+    LZ_NODISCARD constexpr take_iterable<remove_ref<Iterable>> operator()(Iterable&& iter, const size_t n) const {
         return { std::forward<Iterable>(iter), n };
     }
 
@@ -103,7 +102,7 @@ struct take_adaptor {
      * @param n The amount of elements to take. Piping only works for iterables, not for iterators such as
      * `std::vector<int>::iterator`.
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t n) const {
         return { n };
     }
 };

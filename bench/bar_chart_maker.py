@@ -127,11 +127,21 @@ def make_chart(cxx_version: str, path: str):
 
 
 async def main():
+    cxx_version = None
     try:
         cxx_version = sys.argv[1]
     except IndexError:
-        print('Usage: python bar_chart_maker.py <cxx_version>')
-        sys.exit(1)
+        print('No CXX version provided, using CMakeCache.txt.')
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build', 'CMakeCache.txt'), 'r') as cmake_cache:
+            for line in cmake_cache:
+                if not line.startswith('CMAKE_CXX_STANDARD:'):
+                    continue
+                cxx_version = line.split('=')[1].strip()
+                break
+        if cxx_version is None:
+            print('No CXX version provided and CMakeCache.txt does not contain CMAKE_CXX_STANDARD.')
+            sys.exit(1)
+        print('Found CXX version in CMakeCache.txt:', cxx_version)
 
     make_chart(cxx_version, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build'))
     

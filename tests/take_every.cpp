@@ -2,17 +2,11 @@
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take_every.hpp>
-#include <array>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
-#include <cstddef>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <Lz/repeat.hpp>
+#include <pch.hpp>
 
 TEST_CASE("take_every_iterable with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -204,16 +198,16 @@ TEST_CASE("take_every_iterable binary operations") {
         auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
 
         std::vector<int> expected = { 1, 3 };
-        test_procs::test_operator_plus(std::move(expected), even_sized_even_take);
+        test_procs::test_operator_plus(expected, even_sized_even_take);
 
         expected = { 1, 4 };
-        test_procs::test_operator_plus(std::move(expected), even_sized_odd_take);
+        test_procs::test_operator_plus(expected, even_sized_odd_take);
 
         expected = { 1, 3, 5 };
-        test_procs::test_operator_plus(std::move(expected), uneven_sized_even_take);
+        test_procs::test_operator_plus(expected, uneven_sized_even_take);
 
         expected = { 1, 4 };
-        test_procs::test_operator_plus(std::move(expected), uneven_sized_odd_take);
+        test_procs::test_operator_plus(expected, uneven_sized_odd_take);
     }
 
     SUBCASE("Operator-") {
@@ -242,6 +236,27 @@ TEST_CASE("take_every_iterable binary operations") {
         test_procs::test_operator_minus(even_sized_odd_take);
         test_procs::test_operator_minus(uneven_sized_even_take);
         test_procs::test_operator_minus(uneven_sized_odd_take);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto even_sized = lz::repeat(1, 4);
+        auto odd_sized = lz::repeat(1, 5);
+        auto even_sized_even_take = lz::take_every(even_sized, 2);
+        auto even_sized_odd_take = lz::take_every(even_sized, 3);
+        auto uneven_sized_even_take = lz::take_every(odd_sized, 2);
+        auto uneven_sized_odd_take = lz::take_every(odd_sized, 3);
+
+        std::vector<int> expected = { 1, 1 };
+        test_procs::test_operator_plus(even_sized_even_take, expected);
+
+        expected = { 1, 1 };
+        test_procs::test_operator_plus(even_sized_odd_take, expected);
+
+        expected = { 1, 1, 1 };
+        test_procs::test_operator_plus(uneven_sized_even_take, expected);
+
+        expected = { 1, 1 };
+        test_procs::test_operator_plus(uneven_sized_odd_take, expected);
     }
 }
 

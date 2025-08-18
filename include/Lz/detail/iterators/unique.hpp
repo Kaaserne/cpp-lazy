@@ -6,7 +6,7 @@
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -34,8 +34,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr unique_iterator()
-        requires std::default_initializable<iter> && std::default_initializable<Iterable> &&
-                     std::default_initializable<BinaryPredicate>
+        requires(std::default_initializable<iter> && std::default_initializable<Iterable> &&
+                 std::default_initializable<BinaryPredicate>)
     = default;
 
 #else
@@ -58,7 +58,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(default_sentinel_t) {
-        _iterator = std::end(_iterable);
+        _iterator = _iterable.end();
         return *this;
     }
 
@@ -75,22 +75,22 @@ public:
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
 
         using std::adjacent_find;
-        _iterator = adjacent_find(std::move(_iterator), std::end(_iterable), _predicate);
+        _iterator = adjacent_find(std::move(_iterator), _iterable.end(), _predicate);
 
-        if (_iterator != std::end(_iterable)) {
+        if (_iterator != _iterable.end()) {
             ++_iterator;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
         --_iterator;
-        if (_iterator == std::begin(_iterable)) {
+        if (_iterator == _iterable.begin()) {
             return;
         }
 
         auto next = _iterator;
-        for (--next; next != std::begin(_iterable); --next, --_iterator) {
+        for (--next; next != _iterable.begin(); --next, --_iterator) {
             if (!_predicate(*next, *_iterator)) {
                 return;
             }
@@ -98,13 +98,13 @@ public:
         _iterator = std::move(next);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const unique_iterator& b) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(b._iterable), "unique_iterators are not compatible");
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const unique_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end());
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator == std::end(_iterable);
+        return _iterator == _iterable.end();
     }
 };
 

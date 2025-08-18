@@ -33,7 +33,7 @@ public:
 #ifdef LZ_HAS_CXX_20
 
     constexpr any_iterator_impl()
-        requires std::default_initializable<iter_type>
+        requires(std::default_initializable<iter_type>)
     = default;
 
 #else
@@ -47,6 +47,20 @@ public:
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterator_impl(S s)
+        requires(is_sent)
+        : _iter{ std::move(s) } {
+    }
+
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter)
+        requires(is_sent)
+        : _iter{ std::move(iter) } {
+    }
+
+#else
+
     template<bool I = is_sent, class = enable_if<I>>
     constexpr any_iterator_impl(S s) : _iter{ std::move(s) } {
     }
@@ -54,6 +68,8 @@ public:
     template<bool I = is_sent, class = enable_if<I>>
     constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
+
+#endif
 
     ~any_iterator_impl() override = default;
 
@@ -106,7 +122,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr any_iterator_impl()
-        requires std::default_initializable<iter_type>
+        requires(std::default_initializable<iter_type>)
     = default;
 
 #else
@@ -120,6 +136,20 @@ public:
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterator_impl(S s)
+        requires(is_sent)
+        : _iter{ std::move(s) } {
+    }
+
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter)
+        requires(is_sent)
+        : _iter{ std::move(iter) } {
+    }
+
+#else
+
     template<bool I = is_sent, class = enable_if<I>>
     constexpr any_iterator_impl(S iter) : _iter{ std::move(iter) } {
     }
@@ -127,6 +157,8 @@ public:
     template<bool I = is_sent, class = enable_if<I>>
     constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
+
+#endif
 
     ~any_iterator_impl() override = default;
 
@@ -183,7 +215,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr any_iterator_impl()
-        requires std::default_initializable<iter_type>
+        requires(std::default_initializable<iter_type>)
     = default;
 
 #else
@@ -197,6 +229,20 @@ public:
     constexpr any_iterator_impl(Iter iter) : _iter{ std::move(iter) } {
     }
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr any_iterator_impl(S s)
+        requires(is_sent)
+        : _iter{ std::move(s) } {
+    }
+
+    constexpr any_iterator_impl(common_iterator<Iter, S> iter)
+        requires(is_sent)
+        : _iter{ std::move(iter) } {
+    }
+
+#else
+
     template<bool I = is_sent, class = enable_if<I>>
     constexpr any_iterator_impl(S iter) : _iter{ std::move(iter) } {
     }
@@ -204,6 +250,8 @@ public:
     template<bool I = is_sent, class = enable_if<I>>
     constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
+
+#endif
 
     ~any_iterator_impl() override = default;
 

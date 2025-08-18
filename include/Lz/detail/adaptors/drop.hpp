@@ -4,7 +4,6 @@
 #define LZ_DROP_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/drop.hpp>
 
 namespace lz {
@@ -26,8 +25,8 @@ struct drop_adaptor {
      * @param n The amount of elements to drop
      * @return A drop_iterable that will drop the first n elements of the input iterable
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, const std::size_t n) const {
+    template<class Iterable>
+    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, const size_t n) const {
         return { iterable, n };
     }
 
@@ -44,7 +43,7 @@ struct drop_adaptor {
      * @param n The amount of elements to drop
      * @return An adaptor that can be used with pipe expressions
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t n) const {
         return { n };
     }
 };

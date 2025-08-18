@@ -4,8 +4,8 @@
 #define LZ_GENERATE_WHILE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -24,7 +24,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_while_iterator()
-        requires std::default_initializable<GeneratorFunc> && std::default_initializable<fn_return_type>
+        requires(std::default_initializable<GeneratorFunc> && std::default_initializable<fn_return_type>)
     = default;
 
 #else
@@ -38,7 +38,7 @@ public:
 #endif
 
     using reference = tup_element<1, fn_return_type>;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 

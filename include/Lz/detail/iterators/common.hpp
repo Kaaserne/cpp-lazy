@@ -4,8 +4,8 @@
 #define LZ_DETAIL_COMMON_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/variant.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -62,7 +62,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        LZ_ASSERT(_data.index() == 0, "Dereferencing a sentinel/end");
+        LZ_ASSERT(_data.index() == 0, "Cannot dereference a sentinel");
 #ifdef __cpp_lib_variant
         using std::get;
 #endif
@@ -74,7 +74,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT(_data.index() == 0, "Incrementing a sentinel/past the end");
+        LZ_ASSERT(_data.index() == 0, "Cannot increment a sentinel");
 #ifdef __cpp_lib_variant
         using std::get;
 #endif
@@ -82,7 +82,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_data.index() == 0, "Incrementing a sentinel/past the end");
+        LZ_ASSERT(_data.index() == 0, "Cannot decrement a sentinel");
 #ifdef __cpp_lib_variant
         using std::get;
 #endif

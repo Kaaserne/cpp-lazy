@@ -3,7 +3,6 @@
 #ifndef LZ_ENUMERATE_ITERABLE_HPP
 #define LZ_ENUMERATE_ITERABLE_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterators/enumerate.hpp>
 #include <Lz/detail/maybe_owned.hpp>
 
@@ -28,13 +27,13 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || is_sentinel<iter, sent>::value;
+    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || has_sentinel<Iterable>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr enumerate_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -49,13 +48,25 @@ public:
     constexpr enumerate_iterable(I&& iterable, const IntType start = 0) : _iterable{ iterable }, _start{ start } {
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<sized<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable));
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr size_t size() const
+        requires(sized<Iterable>)
+    {
+        return static_cast<size_t>(lz::eager_size(_iterable));
     }
 
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, size_t> size() const {
+        return static_cast<size_t>(lz::size(_iterable));
+    }
+
+#endif
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), _start };
+        return { _iterable.begin(), _start };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
@@ -66,10 +77,10 @@ public:
 
     [[nodiscard]] constexpr auto end() const& {
         if constexpr (!return_sentinel) {
-            return iterator{ std::end(_iterable), get_last_index() };
+            return iterator{ _iterable.end(), get_last_index() };
         }
         else {
-            return std::end(_iterable);
+            return _iterable.end();
         }
     }
 
@@ -77,20 +88,32 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
-        return { std::end(_iterable), get_last_index() };
+        return { _iterable.end(), get_last_index() };
     }
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const& {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
 #endif
+
+#ifdef LZ_HAS_CONCEPTS
+    // clang-format off
+    [[nodiscard]] constexpr iterator end() &&
+        requires(is_bidi_tag_v<typename iterator::iterator_category> && !is_sentinel_v<iter, sent>)
+    {
+        return { detail::end(std::move(_iterable)), get_last_index() };
+    }
+    // clang-format on
+#else
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() && {
         return { detail::end(std::move(_iterable)), get_last_index() };
     }
+
+#endif
 };
 } // namespace detail
 } // namespace lz

@@ -5,7 +5,7 @@
 
 #include <Lz/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -35,10 +35,10 @@ private:
         using detail::find_if;
         using std::find_if;
 
-        _iterator = find_if(std::move(_iterator), std::end(_iterable), [this](reference value) {
+        _iterator = find_if(std::move(_iterator), _iterable.end(), [this](reference value) {
             const auto it =
-                sized_lower_bound(std::begin(_to_except), value, _predicate, static_cast<difference_type>(lz::size(_to_except)));
-            return it == std::end(_to_except) || _predicate(value, *it);
+                sized_lower_bound(_to_except.begin(), value, _predicate, static_cast<difference_type>(lz::size(_to_except)));
+            return it == _to_except.end() || _predicate(value, *it);
         });
     }
 
@@ -46,8 +46,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr except_iterator()
-        requires std::default_initializable<Iterable> && std::default_initializable<Iterable2> &&
-                     std::default_initializable<BinaryPredicate> && std::default_initializable<iter>
+        requires(std::default_initializable<Iterable> && std::default_initializable<Iterable2> &&
+                 std::default_initializable<BinaryPredicate> && std::default_initializable<iter>)
     = default;
 
 #else
@@ -70,14 +70,14 @@ public:
         _to_except{ std::forward<I2>(to_except) },
         _iterator{ std::move(it) },
         _predicate{ std::move(compare) } {
-        if (std::begin(_to_except) == std::end(_to_except)) {
+        if (_to_except.begin() == _to_except.end()) {
             return;
         }
         find_next();
     }
 
     LZ_CONSTEXPR_CXX_14 except_iterator& operator=(default_sentinel_t) {
-        _iterator = std::end(_iterable);
+        _iterator = _iterable.end();
         return *this;
     }
 
@@ -97,26 +97,25 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
         do {
             --_iterator;
-            const auto it = sized_lower_bound(std::begin(_to_except), *_iterator, _predicate,
-                                              static_cast<difference_type>(lz::size(_to_except)));
-            if (it == std::end(_to_except) || _predicate(*_iterator, *it)) {
+            const auto it =
+                sized_lower_bound(_to_except.begin(), *_iterator, _predicate, static_cast<difference_type>(lz::size(_to_except)));
+            if (it == _to_except.end() || _predicate(*_iterator, *it)) {
                 return;
             }
-        } while (_iterator != std::begin(_iterable));
+        } while (_iterator != _iterable.begin());
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const except_iterator& b) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(b._iterable) && std::begin(_iterable) == std::begin(b._iterable) &&
-                      std::begin(_to_except) == std::begin(b._to_except) && std::end(_to_except) == std::end(b._to_except),
-                  "Incompatible iterators");
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const except_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end() && _iterable.begin() == other._iterable.begin() &&
+                             _to_except.begin() == other._to_except.begin() && _to_except.end() == other._to_except.end());
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator == std::end(_iterable);
+        return _iterator == _iterable.end();
     }
 };
 } // namespace detail

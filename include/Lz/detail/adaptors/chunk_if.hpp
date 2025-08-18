@@ -5,7 +5,6 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/chunk_if.hpp>
 
 namespace lz {
@@ -35,7 +34,7 @@ struct chunk_if_adaptor {
      * @param predicate The predicate to chunk on.
      * @return An iterable of type T, where T is constructible from the begin and end iterators of the input iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     constexpr chunk_if_iterable<ValueType, remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
@@ -83,7 +82,7 @@ struct chunk_if_adaptor<void> {
      * @param predicate The predicate to chunk on.
      * @return An iterable of iterables, where each inner iterable is a chunk based on the predicate.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>, iter_t<Iterable>>, remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::move(iterable), std::move(predicate) };

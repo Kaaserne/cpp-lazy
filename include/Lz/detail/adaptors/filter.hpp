@@ -4,7 +4,6 @@
 #define LZ_FILTER_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/filter.hpp>
 
 namespace lz {
@@ -25,7 +24,7 @@ struct filter_adaptor {
      * @param predicate The predicate to filter on
      * @return A filter_iterable that will yield the filtered elements
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr filter_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };

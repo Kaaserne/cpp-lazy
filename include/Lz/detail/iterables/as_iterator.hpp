@@ -23,7 +23,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr as_iterator_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -38,23 +38,34 @@ public:
     explicit constexpr as_iterator_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
-    template<class T = sized<Iterable>>
-    LZ_NODISCARD constexpr enable_if<T::value, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable));
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr size_t size() const
+        requires(sized<Iterable>)
+    {
+        return static_cast<size_t>(lz::size(_iterable));
+    }
+#else
+
+    template<class T = is_sized<Iterable>>
+    LZ_NODISCARD constexpr enable_if<T::value, size_t> size() const {
+        return static_cast<size_t>(lz::size(_iterable));
     }
 
+#endif
+
     LZ_NODISCARD constexpr iterator begin() const {
-        return iterator{ std::begin(_iterable) };
+        return iterator{ _iterable.begin() };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     LZ_NODISCARD constexpr auto end() const {
-        if constexpr (!is_sentinel<value_type, sentinel>::value) {
-            return iterator{ std::end(_iterable) };
+        if constexpr (!is_sentinel_v<value_type, sentinel>) {
+            return iterator{ _iterable.end() };
         }
         else {
-            return std::end(_iterable);
+            return _iterable.end();
         }
     }
 
@@ -62,12 +73,12 @@ public:
 
     template<class I = value_type>
     LZ_NODISCARD constexpr enable_if<!is_sentinel<I, sentinel>::value, iterator> end() const& {
-        return iterator{ std::end(_iterable) };
+        return iterator{ _iterable.end() };
     }
 
     template<class I = value_type>
     LZ_NODISCARD constexpr enable_if<is_sentinel<I, sentinel>::value, sentinel> end() const& {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
 #endif // LZ_HAS_CXX_17

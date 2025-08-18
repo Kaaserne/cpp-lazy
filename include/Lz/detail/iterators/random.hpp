@@ -5,8 +5,8 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -25,14 +25,14 @@ public:
 
 private:
     mutable Distribution _distribution;
-    decltype(std::addressof(std::declval<Generator&>())) _generator{ nullptr };
-    std::size_t _current{};
+    decltype(detail::addressof(std::declval<Generator&>())) _generator{ nullptr };
+    size_t _current{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr random_iterator()
-        requires std::default_initializable<Distribution>
+        requires(std::default_initializable<Distribution>)
     = default;
 
 #else
@@ -43,9 +43,9 @@ public:
 
 #endif
 
-    constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::size_t current) :
+    constexpr random_iterator(const Distribution& distribution, Generator& generator, const size_t current) :
         _distribution{ distribution },
-        _generator{ std::addressof(generator) },
+        _generator{ detail::addressof(generator) },
         _current{ current } {
     }
 
@@ -82,21 +82,21 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) noexcept {
-        _current -= static_cast<std::size_t>(n);
+        _current -= static_cast<size_t>(n);
         LZ_ASSERT_ADDABLE(static_cast<difference_type>(_current) >= 0);
     }
 
-    constexpr difference_type difference(const random_iterator& b) const noexcept {
-        return static_cast<difference_type>(b._current) - static_cast<difference_type>(_current);
+    constexpr difference_type difference(const random_iterator& other) const noexcept {
+        return static_cast<difference_type>(other._current) - static_cast<difference_type>(_current);
     }
 
     constexpr difference_type difference(default_sentinel_t) const noexcept {
         return -static_cast<difference_type>(_current);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& b) const noexcept {
-        LZ_ASSERT(_generator == b._generator, "Incompatible iterators");
-        return _current == b._current;
+    LZ_CONSTEXPR_CXX_14 bool eq(const random_iterator& other) const noexcept {
+        LZ_ASSERT_COMPATIBLE(_generator == other._generator);
+        return _current == other._current;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {

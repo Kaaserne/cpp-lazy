@@ -1,10 +1,10 @@
-#include <Lz/algorithm.hpp>
-#include <Lz/common.hpp>
-#include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
-#include <vector>
+#include <pch.hpp>
+#include <Lz/reverse.hpp>
+#include <Lz/cached_size.hpp>
+#include <Lz/repeat.hpp>
 
 TEST_CASE("Non cached reverse") {
     SUBCASE("Non sentinelled reverse") {
@@ -48,6 +48,9 @@ TEST_CASE("Cached reverse") {
         REQUIRE(r.end() == it);
 
         test_procs::test_operator_minus(r);
+
+        std::vector<int> expected2 = { 20, 20, 20, 20, 20 };
+        test_procs::test_operator_plus(r, expected2);
     }
 
     const std::vector<int> v = { 1, 2, 3, 4, 5 };

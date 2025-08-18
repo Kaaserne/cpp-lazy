@@ -3,8 +3,7 @@
 #ifndef LZ_FAKE_POINTER_PROXY_HPP
 #define LZ_FAKE_POINTER_PROXY_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
-#include <memory>
+#include <Lz/detail/procs.hpp>
 #include <type_traits>
 
 namespace lz {
@@ -14,18 +13,18 @@ template<class T>
 class fake_ptr_proxy {
     T _t;
 
-    using ptr = decltype(std::addressof(_t));
+    using ptr = decltype(detail::addressof(_t));
 
 public:
-    constexpr explicit fake_ptr_proxy(const T& t) noexcept(std::is_copy_constructible<T>::value) : _t{ t } {
+    constexpr explicit fake_ptr_proxy(const T& t) noexcept(std::is_nothrow_copy_constructible<T>::value) : _t{ t } {
     }
 
-    LZ_CONSTEXPR_CXX_17 ptr operator->() const noexcept {
-        return std::addressof(_t);
+    LZ_NODISCARD constexpr ptr operator->() const noexcept {
+        return detail::addressof(_t);
     }
 
-    LZ_CONSTEXPR_CXX_17 ptr operator->() noexcept {
-        return std::addressof(_t);
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 ptr operator->() noexcept {
+        return detail::addressof(_t);
     }
 };
 } // namespace detail

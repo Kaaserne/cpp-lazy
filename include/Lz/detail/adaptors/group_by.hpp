@@ -4,7 +4,6 @@
 #define LZ_GROUP_BY_ADAPTORS_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/group_by.hpp>
 
 namespace lz {
@@ -18,7 +17,7 @@ struct group_by_adaptor {
      * not contain a .size() method. Its iterator category is bidirectional if possible. Example:
      * ```cpp
      * char str[] = "aaabbccccd";
-     * // normally, use std::sort(std::begin(str), std::end(str)) before using this function, if it isn't sorted already
+     * // normally, use std::sort(str.begin(), str.end()) before using this function, if it isn't sorted already
      * auto grouper = lz::group_by(cstr, [](char a, char b) { return a == b; });
      * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
      * // or
@@ -29,7 +28,7 @@ struct group_by_adaptor {
      * @param binary_predicate The predicate to group by
      * @return An iterable that groups elements by the given predicate
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class BinaryPredicate>
+    template<class Iterable, class BinaryPredicate>
     LZ_NODISCARD constexpr group_by_iterable<remove_ref<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate binary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(binary_predicate) };
@@ -41,7 +40,7 @@ struct group_by_adaptor {
      * not contain a .size() method. Its iterator category is bidirectional if possible. Example:
      * ```cpp
      * char str[] = "aaabbccccd";
-     * // normally, use std::sort(std::begin(str), std::end(str)) before using this function, if it isn't sorted already
+     * // normally, use std::sort(str.begin(), str.end()) before using this function, if it isn't sorted already
      * auto grouper = cstr | lz::group_by([](char a, char b) { return a == b; });
      * // grouper = {{'a', 'a', 'a'}, {'b', 'b'}, {'c', 'c', 'c', 'c'}, {'d'}}
      * ```

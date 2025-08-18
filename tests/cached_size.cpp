@@ -3,13 +3,13 @@
 #include <Lz/enumerate.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/range.hpp>
-#include <vector>
 #include <doctest/doctest.h>
+#include <pch.hpp>
 
 TEST_CASE("Correct size") {
     auto to_filter = lz::range(10);
     auto filtered = to_filter | lz::filter([](int i) { return i % 2 == 0; });
-    static_assert(!lz::sized<decltype(filtered)>::value, "Filtered should not be sized");
+    static_assert(!lz::is_sized<decltype(filtered)>::value, "Filtered should not be sized");
     lz::cached_size_iterable<decltype(filtered)> cached = filtered | lz::cache_size;
 
     REQUIRE(cached.size() == 5);

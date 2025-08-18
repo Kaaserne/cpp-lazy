@@ -22,7 +22,7 @@ struct generate_adaptor {
      */
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_iterable<GeneratorFunc, false>
-    operator()(GeneratorFunc generator_func, const std::size_t amount) const {
+    operator()(GeneratorFunc generator_func, const size_t amount) const {
         return { std::move(generator_func), amount };
     }
 

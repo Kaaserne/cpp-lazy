@@ -4,7 +4,7 @@
 #define LZ_INCLUSIVE_SCAN_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -28,8 +28,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr inclusive_scan_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<T> && std::default_initializable<BinaryOp> &&
-                     std::default_initializable<S>
+        requires(std::default_initializable<Iterator> && std::default_initializable<T> && std::default_initializable<BinaryOp> &&
+                 std::default_initializable<S>)
     = default;
 
 #else
@@ -74,9 +74,9 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const inclusive_scan_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const inclusive_scan_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end);
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {

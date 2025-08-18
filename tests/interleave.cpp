@@ -1,12 +1,11 @@
-#include <Lz/algorithm.hpp>
 #include <Lz/interleave.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/range.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Interleaved with sentinels permutations") {
     auto str3 = lz::c_string("abc");

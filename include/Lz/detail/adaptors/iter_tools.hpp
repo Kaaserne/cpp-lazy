@@ -4,12 +4,14 @@
 #define LZ_ITER_TOOLS_ADAPTORS_HPP
 
 #include <Lz/as_iterator.hpp>
+#include <Lz/concatenate.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/split.hpp>
 #include <Lz/string_view.hpp>
@@ -26,7 +28,7 @@ struct convert_fn {
     }
 };
 
-template<std::size_t N>
+template<size_t N>
 struct get_fn {
     template<class T>
     LZ_NODISCARD constexpr auto operator()(T&& gettable) const noexcept -> decltype(std::get<N>(std::forward<T>(gettable))) {
@@ -113,7 +115,7 @@ struct lines_adaptor {
      * @param string The string to split on "\n".
      * @return A lines_iterable that can be iterated over, containing the substrings.
      */
-    template<LZ_CONCEPT_ITERABLE String>
+    template<class String>
     LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref<String>> operator()(String&& string) const {
         using char_type = val_iterable_t<String>;
         return lz::sv_split(std::forward<String>(string), static_cast<char_type>('\n'));
@@ -163,52 +165,10 @@ struct as_adaptor {
     }
 };
 
-template<std::size_t Neighbours>
-struct pairwise_n_adaptor {
-    using adaptor = pairwise_n_adaptor<Neighbours>;
-
-private:
-    template<class Iterable, std::size_t... N>
-    using pairwise_n_object = zip_iterable<drop_iterable<remove_ref<decltype(N, std::declval<Iterable>())>>...>;
-
-    template<class Iterable, std::size_t... N>
-    LZ_CONSTEXPR_CXX_14 pairwise_n_object<Iterable, N...> pairwise_n_construct(Iterable&& iterable, index_sequence<N...>) const {
-        return lz::zip(lz::drop(std::forward<Iterable>(iterable), N)...);
-    }
-
-public:
-    /**
-     * @brief Iterates over the elements in the given iterable and returns a tuple of `N` adjacent elements using `lz::zip`.
-     * Example:
-     * ```cpp
-     * std::vector<int> vec = { 1, 2, 3, 4, 5 };
-     * auto iterable = lz::pairwise_n<2>(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * // or
-     * auto iterable = vec | lz::pairwise_n<2>; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * auto iterable = lz::pairwise_n<2>{}(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} } (for cxx11)
-     * // or
-     * auto iterable = lz::pairwise(vec); // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * // or
-     * auto iterable = vec | lz::pairwise; // { {1, 2}, {2, 3}, {3, 4}, {4, 5} }
-     * ```
-     * @param iterable The iterable to iterate over.
-     * @return A pairwise_n_iterable that can be iterated over, containing tuples of adjacent elements.
-     */
-    template<LZ_CONCEPT_ITERABLE Iterable>
-    LZ_NODISCARD constexpr auto
-    operator()(Iterable&& iterable) const -> decltype(pairwise_n_construct(std::forward<Iterable>(iterable),
-                                                                           make_index_sequence<Neighbours>())) {
-        return pairwise_n_construct(std::forward<Iterable>(iterable), make_index_sequence<Neighbours>());
-    }
-};
-
-template<class Iterable, std::size_t N>
-using pairwise_n_iterable = decltype(std::declval<pairwise_n_adaptor<N>>()(std::declval<Iterable>()));
-
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 using get_nth_iterable = map_iterable<Iterable, get_fn<N>>;
 
-template<std::size_t N>
+template<size_t N>
 struct get_n_adaptor {
     using adaptor = get_n_adaptor<N>;
 
@@ -224,16 +184,16 @@ struct get_n_adaptor {
      * @param iterable The iterable to get the nth element from.
      * @return A map iterable that can be iterated over, containing the nth elements of the tuples in the iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr get_nth_iterable<remove_ref<Iterable>, N> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), get_fn<N>{});
     }
 };
 
-template<class Iterable, std::size_t... N>
+template<class Iterable, size_t... N>
 using get_nths_iterable = zip_iterable<get_nth_iterable<Iterable, N>...>;
 
-template<std::size_t... N>
+template<size_t... N>
 struct get_nths_adaptor {
     using adaptor = get_nths_adaptor<N...>;
 
@@ -249,7 +209,7 @@ struct get_nths_adaptor {
      * @param iterable The iterable to get the nth elements from.
      * @return A zip iterable that can be iterated over, containing the nth elements of the tuples in the iterable.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 get_nths_iterable<remove_ref<Iterable>, N...> operator()(Iterable&& iterable) const {
         return lz::zip(get_n_adaptor<N>{}(std::forward<Iterable>(iterable))...);
     }
@@ -273,7 +233,7 @@ struct filter_map_adaptor {
      * @param unary_op The function to map the filtered elements with.
      * @return A filter_map_iterable that can be iterated over, containing the mapped elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryFilterPredicate, class UnaryMapOp>
+    template<class Iterable, class UnaryFilterPredicate, class UnaryMapOp>
     LZ_NODISCARD constexpr filter_map_iterable<remove_ref<Iterable>, UnaryFilterPredicate, UnaryMapOp>
     operator()(Iterable&& iterable, UnaryFilterPredicate predicate, UnaryMapOp unary_op) const {
         return lz::map(lz::filter(std::forward<Iterable>(iterable), std::move(predicate)), std::move(unary_op));
@@ -315,7 +275,7 @@ struct select_adaptor {
      * @param selectors The iterable of selectors (booleans).
      * @return A select_iterable that can be iterated over, containing the selected elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE SelectorIterable>
+    template<class Iterable, class SelectorIterable>
     LZ_NODISCARD constexpr select_iterable<remove_ref<Iterable>, remove_ref<SelectorIterable>>
     operator()(Iterable&& iterable, SelectorIterable&& selectors) const {
         return filter_map_adaptor{}(lz::zip(std::forward<Iterable>(iterable), std::forward<SelectorIterable>(selectors)),
@@ -357,7 +317,7 @@ struct drop_back_while_adaptor {
      * @param predicate The predicate to determine which elements to drop from the back.
      * @return A drop_back_iterable that can be iterated over, containing the elements
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr drop_back_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return lz::reverse(lz::drop_while(lz::reverse(std::forward<Iterable>(iterable)), std::move(predicate)));
@@ -398,7 +358,7 @@ struct trim_adaptor {
      * @param last The predicate to determine which elements to drop from the back.
      * @return A trim_iterable that can be iterated over, containing the trimmed elements.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
+    template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
     LZ_NODISCARD constexpr trim_iterable<remove_ref<Iterable>, UnaryPredicateFirst, UnaryPredicateLast>
     operator()(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) const {
         return drop_back_while_adaptor{}(lz::drop_while(std::forward<Iterable>(iterable), std::move(first)), std::move(last));
@@ -491,7 +451,7 @@ struct iter_decay {
      * @param IteratorTag The tag that specifies the iterator category to decay to.
      * @return An iterable with the iterator category of the given tag @p IteratorTag.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class IteratorTag>
+    template<class Iterable, class IteratorTag>
     LZ_NODISCARD constexpr map_iterable<as_iterator_iterable<remove_ref<Iterable>, IteratorTag>, deref_fn>
     operator()(Iterable&& iterable, IteratorTag) const {
         return lz::map(lz::as_iterator(std::forward<Iterable>(iterable), IteratorTag{}), deref_fn{});
@@ -531,6 +491,48 @@ struct iter_decay {
     template<class IteratorTag>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, IteratorTag> operator()(IteratorTag) const {
         return {};
+    }
+};
+
+template<class Iterable, class T>
+using pad_iterable = concatenate_iterable<Iterable, lz::repeat_iterable<T>>;
+
+struct pad_adaptor {
+    using adaptor = pad_adaptor;
+
+    /**
+     * @brief Pads the given iterable to a certain size, using `lz::concatenate` and `lz::repeat`. A size is needed to be provided
+     * to pad it to a certain size. It will return the most suitable reference type. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3 };
+     * auto padded = lz::pad(vec, 0, 2); // {1, 2, 3, 0, 0} by value
+     * auto to_pad = 3;
+     * auto padded = lz::pad(vec, to_pad, 0); // {1, 2, 3, 0, 0} by ref
+     * auto padded = lz::pad(vec, std::ref(to_pad), 0); // {1, 2, 3, 0, 0} by ref for more flexibility (copy ctors etc.)
+     * ```
+     * @param iterable The iterable to pad.
+     * @param value The value to pad the iterable with.
+     * @param amount The amount of times to repeat the value.
+     */
+    template<class Iterable, class T>
+    pad_iterable<remove_ref<Iterable>, remove_rvalue_reference_t<T>>
+    operator()(Iterable&& iterable, T&& value, const size_t amount) const {
+        return lz::concat(std::forward<Iterable>(iterable), lz::repeat(std::forward<T>(value), amount));
+    }
+
+    /**
+     * @brief Pads the given iterable to a certain size, using `lz::concatenate` and `lz::repeat`. A size is needed to be provided
+     * to pad it to a certain size. It will return the most suitable reference type. Example:
+     * ```cpp
+     * std::vector<int> vec = { 1, 2, 3 };
+     * auto padded = vec | lz::pad(0, 2); // {1, 2, 3, 0, 0} by value
+     * ```
+     * @param value The value to pad the iterable with.
+     * @param amount The amount of times to repeat the value.
+     */
+    template<class T>
+    fn_args_holder<adaptor, T, size_t> operator()(T&& value, const size_t amount) const {
+        return { std::forward<T>(value), amount };
     }
 };
 } // namespace detail

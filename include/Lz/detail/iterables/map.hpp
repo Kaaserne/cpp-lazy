@@ -31,7 +31,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr map_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryOp>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<UnaryOp>)
     = default;
 
 #else
@@ -50,10 +50,22 @@ public:
         _unary_op{ std::move(unary_op) } {
     }
 
-    template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<sized<I>::value, std::size_t> size() const noexcept {
-        return static_cast<std::size_t>(lz::size(_iterable));
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr size_t size() const
+        requires(sized<Iterable>)
+    {
+        return static_cast<size_t>(lz::size(_iterable));
     }
+
+#else
+
+    template<class I = Iterable>
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept {
+        return static_cast<size_t>(lz::size(_iterable));
+    }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -81,22 +93,34 @@ public:
 #endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { std::begin(_iterable), _unary_op };
+        return { _iterable.begin(), _unary_op };
     }
+
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr iterator end() &&
+        requires(!return_sentinel)
+    {
+        return { detail::end(std::move(_iterable)), _unary_op };
+    }
+
+#else
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() && {
         return { detail::end(std::move(_iterable)), _unary_op };
     }
 
+#endif
+
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const& {
         if constexpr (!return_sentinel) {
-            return iterator{ std::end(_iterable), _unary_op };
+            return iterator{ _iterable.end(), _unary_op };
         }
         else {
-            return std::end(_iterable);
+            return _iterable.end();
         }
     }
 
@@ -104,12 +128,12 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
-        return { std::end(_iterable), _unary_op };
+        return { _iterable.end(), _unary_op };
     }
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const& {
-        return std::end(_iterable);
+        return _iterable.end();
     }
 
 #endif

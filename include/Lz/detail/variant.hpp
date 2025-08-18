@@ -4,7 +4,6 @@
 #define LZ_DETAIL_VARIANT_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/traits.hpp>
 
 #ifdef LZ_HAS_CXX_17
 
@@ -21,8 +20,8 @@ using variant = std::variant<T, T2>;
 
 #else
 
+#include <Lz/detail/procs.hpp>
 #include <cstdint>
-#include <type_traits>
 
 namespace lz {
 namespace detail {
@@ -52,17 +51,17 @@ class variant {
     void reconstruct(state s, U&& this_variant, V&& other_variant_type) {
         this->~variant();
         _state = s;
-        ::new (std::addressof(this_variant)) decay_t<U>(std::forward<V>(other_variant_type));
+        ::new (detail::addressof(this_variant)) decay_t<U>(std::forward<V>(other_variant_type));
     }
 
     template<class V, class V2>
     void construct(V&& other_variant_type, V2&& other_variant_type2) {
         switch (_state) {
         case state::t:
-            ::new (std::addressof(_variant._t)) T(std::forward<V>(other_variant_type));
+            ::new (detail::addressof(_variant._t)) T(std::forward<V>(other_variant_type));
             break;
         case state::t2:
-            ::new (std::addressof(_variant._t2)) T2(std::forward<V2>(other_variant_type2));
+            ::new (detail::addressof(_variant._t2)) T2(std::forward<V2>(other_variant_type2));
             break;
         default:
             break;
@@ -73,19 +72,19 @@ public:
     constexpr variant() noexcept = default;
 
     variant(const T& t) : _state{ state::t } {
-        ::new (std::addressof(_variant._t)) T(t);
+        ::new (detail::addressof(_variant._t)) T(t);
     }
 
     variant(const T2& t2) : _state{ state::t } {
-        ::new (std::addressof(_variant._t2)) T2(t2);
+        ::new (detail::addressof(_variant._t2)) T2(t2);
     }
 
     variant(T&& t) noexcept(std::is_nothrow_move_constructible<T>::value) : _state{ state::t } {
-        ::new (std::addressof(_variant._t)) T(std::move(t));
+        ::new (detail::addressof(_variant._t)) T(std::move(t));
     }
 
     variant(T2&& t2) noexcept(std::is_nothrow_move_constructible<T2>::value) : _state{ state::t2 } {
-        ::new (std::addressof(_variant._t2)) T2(std::move(t2));
+        ::new (detail::addressof(_variant._t2)) T2(std::move(t2));
     }
 
     LZ_CONSTEXPR_CXX_14 variant(const variant& other) : _state{ other._state } {
@@ -133,39 +132,39 @@ public:
         return *this;
     }
 
-    template<std::size_t I, class... Args>
+    template<size_t I, class... Args>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value) {
         this->~variant();
-        ::new (std::addressof(_variant._t)) T(std::forward<Args>(args)...);
+        ::new (detail::addressof(_variant._t)) T(std::forward<Args>(args)...);
         _state = state::t;
     }
 
-    template<std::size_t I, class... Args>
+    template<size_t I, class... Args>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 1> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T2, Args...>::value) {
         this->~variant();
-        ::new (std::addressof(_variant._t2)) T2(std::forward<Args>(args)...);
+        ::new (detail::addressof(_variant._t2)) T2(std::forward<Args>(args)...);
         _state = state::t2;
     }
 
-    template<std::size_t I>
+    template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0, const T&> get() const noexcept {
         LZ_ASSERT(_state == state::t, "Invalid variant access");
         return _variant._t;
     }
 
-    template<std::size_t I>
+    template<size_t I>
     LZ_CONSTEXPR_CXX_14 const enable_if<I == 1, const T2&> get() const noexcept {
         LZ_ASSERT(_state == state::t2, "Invalid variant access");
         return _variant._t2;
     }
 
-    template<std::size_t I>
+    template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 0, T&> get() noexcept {
         LZ_ASSERT(_state == state::t, "Invalid variant access");
         return _variant._t;
     }
 
-    template<std::size_t I>
+    template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if<I == 1, T2&> get() noexcept {
         LZ_ASSERT(_state == state::t2, "Invalid variant access");
         return _variant._t2;
@@ -189,12 +188,12 @@ public:
     }
 };
 
-template<std::size_t I, class T, class T2>
+template<size_t I, class T, class T2>
 LZ_CONSTEXPR_CXX_14 auto get(const variant<T, T2>& v) noexcept -> decltype(v.template get<I>()) {
     return v.template get<I>();
 }
 
-template<std::size_t I, class T, class T2>
+template<size_t I, class T, class T2>
 LZ_CONSTEXPR_CXX_14 auto get(variant<T, T2>& v) noexcept -> decltype(v.template get<I>()) {
     return v.template get<I>();
 }

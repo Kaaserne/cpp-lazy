@@ -4,8 +4,8 @@
 #define LZ_CACHED_REVERSE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -29,7 +29,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr cached_reverse_iterator()
-        requires std::default_initializable<Iterator>
+        requires(std::default_initializable<Iterator>)
     = default;
 
 #else
@@ -85,7 +85,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const cached_reverse_iterator& other) const {
-        LZ_ASSERT(other._begin == _begin, "Incompatible iterators");
+        LZ_ASSERT_COMPATIBLE(other._begin == _begin);
         return static_cast<difference_type>(other._iterator - _iterator);
     }
 

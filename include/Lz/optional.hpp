@@ -22,12 +22,9 @@ LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_17
 
-template<class T>
-using optional = std::optional<T>;
-
-using nullopt_t = std::nullopt_t;
-
-constexpr inline nullopt_t nullopt = std::nullopt;
+using std::optional;
+using std::nullopt_t;
+using std::nullopt;
 
 #else
 
@@ -51,7 +48,7 @@ class optional {
 
     template<class U>
     void construct(U&& obj) noexcept(std::is_nothrow_constructible<T, U>::value) {
-        ::new (static_cast<void*>(std::addressof(_value))) T(std::forward<U>(obj));
+        ::new (static_cast<void*>(detail::addressof(_value))) T(std::forward<U>(obj));
         _has_value = true;
     }
 
@@ -78,7 +75,6 @@ public:
     LZ_CONSTEXPR_CXX_14 optional(optional<T>&& that) noexcept(std::is_nothrow_move_constructible<T>::value) {
         if (that) {
             construct(std::move(*that));
-            that._has_value = false;
         }
     }
 
@@ -92,7 +88,6 @@ public:
     LZ_CONSTEXPR_CXX_14 optional(optional<U>&& that) noexcept(std::is_nothrow_constructible<T, U>::value) {
         if (that) {
             construct(std::move(*that));
-            that._has_value = false;
         }
     }
 

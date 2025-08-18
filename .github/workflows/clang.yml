@@ -1,5 +1,6 @@
 env:
   CTEST_OUTPUT_ON_FAILURE: 1
+  LIBCXX_STANDARDS_JSON: '["20","23"]'
 
 on:
   workflow_call:
@@ -30,7 +31,7 @@ jobs:
         run: sudo apt-get install -y clang-${{ matrix.version }}
       
       - name: Install libc++ Clang ${{ matrix.version }}
-        if: matrix.standard == '20'
+        if: contains(fromJson(env.LIBCXX_STANDARDS_JSON), matrix.standard)
         run: sudo apt-get install -y libc++-${{ matrix.version }}-dev libc++abi-${{ matrix.version }}-dev
 
       - name: Configure (install)
@@ -38,7 +39,9 @@ jobs:
           CC: clang-${{ matrix.version }}
           CXX: clang-${{ matrix.version }}
         run: |
-          if [ "${{ matrix.standard }}" = "20" ]; then
+          sudo apt-get update && sudo apt-get install -y jq
+          STDS=$(echo '${{ env.LIBCXX_STANDARDS_JSON }}' | jq -r '.[]' | xargs)
+          if echo "$STDS" | grep -wq "${{ matrix.standard }}"; then
             CXX_FLAGS='-stdlib=libc++'
           else
             CXX_FLAGS=''
@@ -60,10 +63,12 @@ jobs:
 
       - name: Configure tests
         run: |
-          if [ "${{ matrix.standard }}" == "20" ]; then
-            CXX_FLAGS="-stdlib=libc++"
+          sudo apt-get update && sudo apt-get install -y jq
+          STDS=$(echo '${{ env.LIBCXX_STANDARDS_JSON }}' | jq -r '.[]' | xargs)
+          if echo "$STDS" | grep -wq "${{ matrix.standard }}"; then
+            CXX_FLAGS='-stdlib=libc++'
           else
-            CXX_FLAGS=""
+            CXX_FLAGS=''
           fi
           cmake -S tests -B build/tests -G Ninja \
             -D CMAKE_CXX_COMPILER_LAUNCHER=ccache \

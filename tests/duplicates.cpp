@@ -1,10 +1,8 @@
-#include <Lz/algorithm.hpp>
 #include <Lz/duplicates.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <vector>
+#include <pch.hpp>
 
 struct equal_pair {
     template<class T1, class T2>

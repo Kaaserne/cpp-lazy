@@ -1,6 +1,6 @@
-[![Build status](https://github.com/MarcDirven/cpp-lazy/workflows/Continuous%20Integration/badge.svg)](https://github.com/MarcDirven/cpp-lazy/actions)
+[![Build status](https://github.com/Kaaserne/cpp-lazy/workflows/Continuous%20Integration/badge.svg)](https://github.com/Kaaserne/cpp-lazy/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CodeQL](https://github.com/MarcDirven/cpp-lazy/actions/workflows/codeql.yml/badge.svg)](https://github.com/MarcDirven/cpp-lazy/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/Kaaserne/cpp-lazy/actions/workflows/codeql.yml/badge.svg)](https://github.com/Kaaserne/cpp-lazy/actions/workflows/codeql.yml)
 
 ![](https://i.ibb.co/ccn2V8N/Screenshot-2021-05-05-Make-A-High-Quality-Logo-In-Just-5-Minutes-For-Under-30-v1-cropped.png)
 
@@ -230,7 +230,7 @@ The following way is recommended (cpp-lazy version >= 5.0.1). Note that you choo
 
 include(FetchContent)
 FetchContent_Declare(cpp-lazy
-        URL https://github.com/MarcDirven/cpp-lazy/releases/download/<TAG_HERE E.G. v9.0.0>/cpp-lazy-src.zip
+        URL https://github.com/Kaaserne/cpp-lazy/releases/download/<TAG_HERE E.G. v9.0.0>/cpp-lazy-src.zip
         # Below is optional
         # URL_MD5 <MD5 HASH OF cpp-lazy-src.zip>
         # If using CMake >= 3.24, preferably set <bool> to TRUE
@@ -249,7 +249,7 @@ An alternative ('less' recommended), add to your `CMakeLists.txt` the following:
 
 include(FetchContent)
 FetchContent_Declare(cpp-lazy
-        GIT_REPOSITORY https://github.com/MarcDirven/cpp-lazy
+        GIT_REPOSITORY https://github.com/Kaaserne/cpp-lazy
         GIT_TAG ... # Commit hash
         # If using CMake >= 3.24, preferably set <bool> to TRUE
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
@@ -311,7 +311,7 @@ int main() {
 ```
 
 ### Using `git clone`
-Clone the repository using `git clone https://github.com/MarcDirven/cpp-lazy/` and add to `CMakeLists.txt` the following:
+Clone the repository using `git clone https://github.com/Kaaserne/cpp-lazy/` and add to `CMakeLists.txt` the following:
 ```cmake
 add_subdirectory(cpp-lazy)
 add_executable(${PROJECT_NAME} main.cpp)
@@ -320,19 +320,6 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ```
 
 # Benchmarks
-The time is equal to one iteration. One iteration includes the creation of the iterable and one iteration of that iterable. Compiled with: gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04).
+The time is equal to one iteration. One iteration includes the creation of the iterable and one iteration of that iterable. Compiled with: gcc version 13.3.0.
 
-C++11
-![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-11.png?raw=true)
-
-C++14
-
-![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-14.png?raw=true)
-
-C++17
-
-![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-17.png?raw=true)
-
-C++20
-
-![](https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-20.png?raw=true)
+<div style="text-align:center"><img src="https://raw.githubusercontent.com/Kaaserne/cpp-lazy/master/bench/benchmarks-iterators-C%2B%2B23.png" /></div>

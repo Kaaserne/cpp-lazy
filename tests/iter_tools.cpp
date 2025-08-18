@@ -1,10 +1,7 @@
-#include <Lz/iter_tools.hpp>
-#include <Lz/zip.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <functional>
-#include <vector>
-#include <map>
+#include <pch.hpp>
+#include <Lz/iter_tools.hpp>
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
@@ -82,73 +79,6 @@ TEST_CASE("Unzip with") {
     lz::unzip_with_iterable<decltype(zipped), std::function<int(int, int)>> actual = zipped | lz::unzip_with(std::move(unzip_fn));
     const std::vector<int> expected = { 7, 9, 11, 13, 15 };
     REQUIRE(lz::equal(actual, expected));
-}
-
-TEST_CASE("Pairwise") {
-    SUBCASE("With sentinel") {
-        const auto actual = lz::c_string("hello");
-        const std::vector<std::tuple<char, char>> expected = { std::make_tuple('h', 'e'), std::make_tuple('e', 'l'),
-                                                               std::make_tuple('l', 'l'), std::make_tuple('l', 'o') };
-        auto actual_pairwise = lz::pairwise(actual);
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        static_assert(!lz::sized<decltype(actual_pairwise)>::value, "Pairwise should not be sized");
-        actual_pairwise = actual | lz::pairwise;
-        static_assert(!lz::sized<decltype(actual_pairwise)>::value, "Pairwise should not be sized");
-        REQUIRE(lz::equal(actual_pairwise, expected));
-    }
-
-    SUBCASE("Without sentinels") {
-        const std::vector<int> actual = { 1, 2, 3, 4, 5 };
-        const std::vector<std::tuple<int, int>> expected = { std::make_tuple(1, 2), std::make_tuple(2, 3), std::make_tuple(3, 4),
-                                                             std::make_tuple(4, 5) };
-        auto actual_pairwise = lz::pairwise(actual);
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        REQUIRE(lz::size(actual_pairwise) == 4);
-        static_assert(lz::sized<decltype(actual_pairwise)>::value, "Pairwise should be sized");
-        actual_pairwise = actual | lz::pairwise;
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        REQUIRE(lz::size(actual_pairwise) == 4);
-        static_assert(lz::sized<decltype(actual_pairwise)>::value, "Pairwise should be sized");
-    }
-
-    SUBCASE("With sentinels, three adjacent elements") {
-        const auto actual = lz::c_string("hello");
-        const std::vector<std::tuple<char, char, char>> expected = { std::make_tuple('h', 'e', 'l'),
-                                                                     std::make_tuple('e', 'l', 'l'),
-                                                                     std::make_tuple('l', 'l', 'o') };
-#ifdef LZ_HAS_CXX_11
-        auto actual_pairwise = lz::pairwise_n<3>{}(actual);
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        actual_pairwise = actual | lz::pairwise_n<3>{};
-        REQUIRE(lz::equal(actual_pairwise, expected));
-#else
-        auto actual_pairwise = lz::pairwise_n<3>(actual);
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        actual_pairwise = actual | lz::pairwise_n<3>;
-        REQUIRE(lz::equal(actual_pairwise, expected));
-#endif
-    }
-
-    SUBCASE("Without sentinels, three adjacent elements") {
-        const std::vector<int> actual = { 1, 2, 3, 4, 5 };
-        const std::vector<std::tuple<int, int, int>> expected = { std::make_tuple(1, 2, 3), std::make_tuple(2, 3, 4),
-                                                                  std::make_tuple(3, 4, 5) };
-#ifdef LZ_HAS_CXX_11
-        auto actual_pairwise = lz::pairwise_n<3>{}(actual);
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        REQUIRE(lz::size(actual_pairwise) == 3);
-        actual_pairwise = actual | lz::pairwise_n<3>{};
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        REQUIRE(lz::size(actual_pairwise) == 3);
-#else
-        auto actual_pairwise = lz::pairwise_n<3>(actual);
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        REQUIRE(lz::size(actual_pairwise) == 3);
-        actual_pairwise = actual | lz::pairwise_n<3>;
-        REQUIRE(lz::equal(actual_pairwise, expected));
-        REQUIRE(lz::size(actual_pairwise) == 3);
-#endif
-    }
 }
 
 TEST_CASE("Keys & values") {
@@ -299,4 +229,71 @@ TEST_CASE("iter_decay") {
     static_assert(std::is_same<lz::iter_cat_iterable_t<decltype(zipped)>, std::forward_iterator_tag>::value, "must be forward");
     auto expeted = { std::make_tuple(2, 6), std::make_tuple(4, 8) };
     REQUIRE(lz::equal(zipped, expeted));
+}
+
+TEST_CASE("Pad") {
+    std::vector<int> v1 = { 1, 2, 3 };
+    int value = 0;
+    std::size_t amount = 3;
+    auto padded = lz::pad(v1, std::ref(value), amount);
+    static_assert(std::is_same<decltype(*padded.begin()), std::reference_wrapper<int>>::value, "");
+    std::vector<int> expected = { 1, 2, 3, 0, 0, 0 };
+
+    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::equal(padded, expected));
+
+    padded = v1 | lz::pad(std::ref(value), amount);
+    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::equal(padded, expected));
+
+    SUBCASE("reference types") {
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>, std::reference_wrapper<int>>,
+                                   std::reference_wrapper<int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<const int>, std::reference_wrapper<int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>, std::reference_wrapper<const int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>, int>, int>::value, "");
+        static_assert(std::is_same<lz::detail::common_reference_t<int, std::reference_wrapper<int>>, int>::value, "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>, const int>, int>::value, "");
+        static_assert(std::is_same<lz::detail::common_reference_t<const int, std::reference_wrapper<int>>, int>::value, "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<const int>, int>, int>::value, "");
+        static_assert(std::is_same<lz::detail::common_reference_t<int, std::reference_wrapper<const int>>, int>::value, "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<int, int>, int>::value, "");
+
+        static_assert(
+            std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>, int&>, std::reference_wrapper<int>>::value,
+            "");
+        static_assert(
+            std::is_same<lz::detail::common_reference_t<int&, std::reference_wrapper<int>>, std::reference_wrapper<int>>::value,
+            "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<const int>, const int&>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<const int&, std::reference_wrapper<const int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>, const int&>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<const int&, std::reference_wrapper<int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<std::reference_wrapper<const int>, int&>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<int&, std::reference_wrapper<const int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+    }
 }

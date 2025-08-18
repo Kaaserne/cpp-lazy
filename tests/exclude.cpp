@@ -1,15 +1,11 @@
 #include <Lz/exclude.hpp>
-#include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");
@@ -132,6 +128,21 @@ TEST_CASE("Exclude binary operations") {
         test_procs::test_operator_minus(excluded1_sent);
         test_procs::test_operator_minus(excluded2_sent);
         test_procs::test_operator_minus(excluded3_sent);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto excluded1_sent = lz::exclude(lz::repeat(0, 10), 3, 5);
+        auto excluded2_sent = lz::exclude(lz::repeat(0, 10), 0, 2);
+        auto excluded3_sent = lz::exclude(lz::repeat(0, 10), 8, 10);
+
+        std::vector<int> expected1 = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(excluded1_sent, expected1);
+
+        expected1 = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(excluded2_sent, expected1);
+
+        expected1 = { 0, 0, 0, 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(excluded3_sent, expected1);
     }
 }
 

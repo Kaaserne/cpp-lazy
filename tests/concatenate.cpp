@@ -1,15 +1,14 @@
+#include <Lz/algorithm.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
-#include <vector>
 #include <Lz/range.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
+#include <Lz/string_view.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
+#include <pch.hpp>
 
 TEST_CASE("Concatenate with sentinels") {
     const char* str = "hello, world!";
@@ -156,6 +155,14 @@ TEST_CASE("Concat binary operations") {
         auto rep2 = lz::repeat(43, 5);
         auto concat_rep = lz::concat(rep1, rep2);
         test_procs::test_operator_minus(concat_rep);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto rep1 = lz::repeat(42, 5);
+        auto rep2 = lz::repeat(43, 5);
+        auto concat_rep = lz::concat(rep1, rep2);
+        std::vector<int> expected = { 42, 42, 42, 42, 42, 43, 43, 43, 43, 43 };
+        test_procs::test_operator_plus(concat_rep, expected);
     }
 }
 

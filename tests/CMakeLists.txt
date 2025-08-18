@@ -61,6 +61,7 @@ add_executable(tests
 	loop.cpp
 	map.cpp
 	maybe_owned.cpp
+	pairwise.cpp
 	random.cpp
 	range.cpp
 	regex_split.cpp
@@ -100,3 +101,10 @@ target_compile_options(tests
 
 		$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion  -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow -Wformat=2 -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings>
 )
+
+if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	target_precompile_headers(tests
+		PUBLIC
+			pch.hpp
+	)
+endif()

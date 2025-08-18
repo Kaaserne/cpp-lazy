@@ -5,8 +5,8 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -30,12 +30,12 @@ class group_by_iterator
     LZ_CONSTEXPR_CXX_14 void find_next(ref_type last_seen) {
         using detail::find_if_not;
         using std::find_if;
-        _sub_range_end = find_if(std::move(_sub_range_end), std::end(_iterable),
+        _sub_range_end = find_if(std::move(_sub_range_end), _iterable.end(),
                                  [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
     }
 
     LZ_CONSTEXPR_CXX_14 void advance() {
-        if (_sub_range_end == std::end(_iterable)) {
+        if (_sub_range_end == _iterable.end()) {
             return;
         }
         ref_type last_seen = *_sub_range_end;
@@ -44,7 +44,7 @@ class group_by_iterator
     }
 
 public:
-    using value_type = std::pair<decay_t<ref_type>, basic_iterable<it>>;
+    using value_type = std::pair<remove_cvref<ref_type>, basic_iterable<it>>;
     using reference = std::pair<ref_type, basic_iterable<it>>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;
@@ -52,8 +52,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr group_by_iterator()
-        requires std::default_initializable<it> && std::default_initializable<Iterable> &&
-                     std::default_initializable<BinaryPredicate>
+        requires(std::default_initializable<it> && std::default_initializable<Iterable> &&
+                 std::default_initializable<BinaryPredicate>)
     = default;
 
 #else
@@ -79,7 +79,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(default_sentinel_t) {
-        _sub_range_begin = std::end(_iterable);
+        _sub_range_begin = _iterable.end();
         return *this;
     }
 
@@ -99,30 +99,29 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_sub_range_begin != _iterable.begin());
         _sub_range_end = _sub_range_begin;
         auto prev = --_sub_range_begin;
 
         ref_type last_seen = *_sub_range_begin;
-        while (_sub_range_begin != std::begin(_iterable) && _comparer(*_sub_range_begin, last_seen)) {
+        while (_sub_range_begin != _iterable.begin() && _comparer(*_sub_range_begin, last_seen)) {
             prev = _sub_range_begin;
             --_sub_range_begin;
         }
 
-        if (_sub_range_begin == std::begin(_iterable) && _comparer(*_sub_range_begin, last_seen)) {
+        if (_sub_range_begin == _iterable.begin() && _comparer(*_sub_range_begin, last_seen)) {
             return;
         }
         _sub_range_begin = std::move(prev);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& rhs) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(rhs._iterable) && std::begin(_iterable) == std::begin(rhs._iterable),
-                  "Incompatible iterators");
-        return _sub_range_begin == rhs._sub_range_begin;
+    LZ_CONSTEXPR_CXX_14 bool eq(const group_by_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end() && _iterable.begin() == other._iterable.begin());
+        return _sub_range_begin == other._sub_range_begin;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _sub_range_begin == std::end(_iterable);
+        return _sub_range_begin == _iterable.end();
     }
 };
 } // namespace detail

@@ -1,16 +1,10 @@
 #include <Lz/algorithm.hpp>
+#include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
-#include <deque>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <iostream>
-#include <list>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <unordered_set>
+#include <pch.hpp>
 
 template<class T>
 class custom_container {
@@ -209,7 +203,7 @@ TEST_CASE("To iterable") {
     SUBCASE("To iterable begin end bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         lz::basic_iterable<std::list<int>::iterator> iterable(lst.begin(), lst.end());
-        static_assert(!lz::sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
+        static_assert(!lz::is_sized<decltype(iterable)::iterator>::value, "Should not be a sized iterator");
     }
 }
 
@@ -443,6 +437,62 @@ TEST_CASE("Has many") {
         const char* str = "H";
         auto iterable = lz::c_string(str);
         REQUIRE_FALSE(lz::has_many(iterable));
+    }
+}
+
+TEST_CASE("Peek") {
+    SUBCASE("Two elements ref") {
+        auto iterable = lz::c_string("He");
+        static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
+
+        REQUIRE(lz::peek(iterable).has_value());
+        REQUIRE(lz::peek(iterable).value() == 'e');
+
+        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
+        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).value() == 'e');
+    }
+
+    SUBCASE("One element ref") {
+        auto iterable = lz::c_string("H");
+        static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
+
+        REQUIRE_FALSE(lz::peek(iterable).has_value());
+        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
+    }
+
+    SUBCASE("Empty ref") {
+        auto iterable = lz::c_string("");
+        static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
+
+        REQUIRE_FALSE(lz::peek(iterable).has_value());
+        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
+    }
+
+    SUBCASE("Two elements val") {
+        auto iterable = lz::c_string("He") | lz::map([](char c) { return c; });
+        static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
+
+        REQUIRE(lz::peek(iterable).has_value());
+        REQUIRE(lz::peek(iterable).value() == 'e');
+
+        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
+        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).value() == 'e');
+    }
+
+    SUBCASE("One element val") {
+        auto iterable = lz::c_string("H") | lz::map([](char c) { return c; });
+        static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
+        
+        REQUIRE_FALSE(lz::peek(iterable).has_value());
+        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
+    }
+
+    SUBCASE("Empty val") {
+        auto iterable = lz::c_string("") | lz::map([](char c) { return c; });
+        static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
+        
+        REQUIRE_FALSE(lz::peek(iterable).has_value());
+        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 }
 

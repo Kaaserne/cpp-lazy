@@ -5,7 +5,7 @@
 
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -29,7 +29,7 @@ public:
     LZ_CONSTEXPR_CXX_14 void find() {
         using detail::find_if;
         using std::find_if;
-        _iterator = find_if(std::move(_iterator), std::end(_iterable), _predicate);
+        _iterator = find_if(std::move(_iterator), _iterable.end(), _predicate);
     }
 
 private:
@@ -41,8 +41,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr filter_iterator()
-        requires std::default_initializable<Iterable> && std::default_initializable<it> &&
-                     std::default_initializable<UnaryPredicate>
+        requires(std::default_initializable<Iterable> && std::default_initializable<it> &&
+                 std::default_initializable<UnaryPredicate>)
     = default;
 
 #else
@@ -66,7 +66,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(default_sentinel_t) {
-        _iterator = std::end(_iterable);
+        _iterator = _iterable.end();
         return *this;
     }
 
@@ -86,20 +86,19 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
         do {
             --_iterator;
-        } while (!_predicate(*_iterator) && _iterator != std::begin(_iterable));
+        } while (!_predicate(*_iterator) && _iterator != _iterable.begin());
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const filter_iterator& b) const {
-        LZ_ASSERT(std::end(_iterable) == std::end(b._iterable) && std::begin(_iterable) == std::begin(b._iterable),
-                  "Incompatible iterators");
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const filter_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end() && _iterable.begin() == other._iterable.begin());
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator == std::end(_iterable);
+        return _iterator == _iterable.end();
     }
 };
 } // namespace detail

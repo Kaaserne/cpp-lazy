@@ -41,6 +41,8 @@ private:
     it _begin;
     it _end;
 
+#ifndef LZ_HAS_CONCEPTS
+
     // One of them fits, the other does not
     template<class Iterable>
     any_iterable(
@@ -59,12 +61,42 @@ private:
         _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
     }
 
+#endif
+
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr any_iterable()
-        requires std::default_initializable<it>
+        requires(std::default_initializable<it>)
     = default;
+
+    // One of them fits, the other does not
+
+    /**
+     * @brief Construct a new any_iterable object
+     *
+     * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
+     */
+    template<class Iterable>
+        requires((sizeof(iter_t<Iterable>) > it::SBO_SIZE) || (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE))
+    any_iterable(Iterable&& iterable) :
+        _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
+        _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
+    }
+
+    // Both fit
+
+    /**
+     * @brief Construct a new any_iterable object
+     *
+     * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
+     */
+    template<class Iterable>
+        requires((sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE))
+    any_iterable(Iterable&& iterable) :
+        _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
+        _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
+    }
 
 #else
 
@@ -72,16 +104,16 @@ public:
     constexpr any_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
-#endif
-
     /**
      * @brief Construct a new any_iterable object
      *
      * @param iterable Any iterable, like a vector, list, etc. Can also be another lz range/view
      */
-    template<LZ_CONCEPT_ITERABLE Iterable>
+    template<class Iterable>
     any_iterable(Iterable&& iterable) : any_iterable(std::forward<Iterable>(iterable), 0) {
     }
+
+#endif
 
     LZ_NODISCARD it begin() const& {
         return _begin;
@@ -99,10 +131,22 @@ public:
         return std::move(_end);
     }
 
-    template<class I = IterCat>
-    LZ_NODISCARD detail::enable_if<detail::is_ra_tag<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(std::distance(_begin, _end));
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr size_t size() const
+        requires(detail::is_ra_tag_v<IterCat>)
+    {
+        return static_cast<size_t>(std::distance(_begin, _end));
     }
+
+#else
+
+    template<class I = IterCat>
+    LZ_NODISCARD detail::enable_if<detail::is_ra_tag<I>::value, size_t> size() const {
+        return static_cast<size_t>(std::distance(_begin, _end));
+    }
+
+#endif
 };
 
 /**
@@ -112,7 +156,7 @@ public:
  * @param iterable The iterable to create an any_iterable from.
  * @return The any_iterable object.
  */
-template<LZ_CONCEPT_ITERABLE Iterable>
+template<class Iterable>
 any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>, diff_iterable_t<Iterable>>
 make_any_iterable(Iterable&& iterable) {
     return any_iterable<val_iterable_t<Iterable>, ref_iterable_t<Iterable>, iter_cat_iterable_t<Iterable>,

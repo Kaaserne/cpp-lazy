@@ -22,13 +22,13 @@ private:
     maybe_owned<Iterable> _iterable;
     func_container<BinaryPredicate> _compare;
 
-    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || is_sentinel<it, sent>::value;
+    static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || has_sentinel<Iterable>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<BinaryPredicate>
+        requires(std::default_initializable<maybe_owned<Iterable>> && std::default_initializable<BinaryPredicate>)
     = default;
 
 #else
@@ -48,19 +48,31 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { _iterable, std::begin(_iterable), _compare };
+        return { _iterable, _iterable.begin(), _compare };
     }
+
+#ifdef LZ_HAS_CONCEPTS
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() &&
+        requires(return_sentinel)
+    {
+        return { _iterable, _iterable.begin(), std::move(_compare) };
+    }
+
+#else
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { _iterable, std::begin(_iterable), std::move(_compare) };
+        return { _iterable, _iterable.begin(), std::move(_compare) };
     }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable, std::end(_iterable), _compare };
+            return iterator{ _iterable, _iterable.end(), _compare };
         }
         else {
             return lz::default_sentinel;
@@ -71,7 +83,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
-        return { _iterable, std::end(_iterable), _compare };
+        return { _iterable, _iterable.end(), _compare };
     }
 
     template<bool R = return_sentinel>

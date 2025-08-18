@@ -5,7 +5,7 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -29,10 +29,10 @@ private:
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
     S _end;
-    std::size_t _chunk_size{};
+    size_t _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
-        for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
+        for (size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
         }
     }
 
@@ -40,7 +40,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S>)
     = default;
 
 #else
@@ -53,7 +53,7 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const size_t chunk_size) :
         _sub_range_begin{ it },
         _sub_range_end{ std::move(it) },
         _end{ std::move(end) },
@@ -81,7 +81,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "Incompatible iterators");
+        LZ_ASSERT_COMPATIBLE(_chunk_size == rhs._chunk_size);
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -107,11 +107,11 @@ private:
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
     S _end;
-    std::size_t _chunk_size{};
-    std::size_t _distance{};
+    size_t _chunk_size{};
+    size_t _distance{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
-        for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
+        for (size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
         }
     }
 
@@ -119,7 +119,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S>)
     = default;
 
 #else
@@ -133,7 +133,7 @@ public:
 #endif
 
     LZ_CONSTEXPR_CXX_14
-    chunks_iterator(Iterator begin, S end, const std::size_t chunk_size, const std::size_t cur_distance) :
+    chunks_iterator(Iterator begin, S end, const size_t chunk_size, const size_t cur_distance) :
         _sub_range_begin{ begin },
         _sub_range_end{ std::move(begin) },
         _end{ std::move(end) },
@@ -161,18 +161,18 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_distance != 0, "Cannot decrement begin iterator");
+        LZ_ASSERT_DECREMENTABLE(_distance != 0);
         _sub_range_end = _sub_range_begin;
 
         auto start_pos = _distance % _chunk_size;
         const auto adjusted_start_pos = start_pos == 0 ? _chunk_size : start_pos;
 
-        for (std::size_t count = 0; count < adjusted_start_pos; count++, --_sub_range_begin, --_distance) {
+        for (size_t count = 0; count < adjusted_start_pos; count++, --_sub_range_begin, --_distance) {
         }
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size && _end == rhs._end, "Incompatible iterators");
+        LZ_ASSERT_COMPATIBLE(_chunk_size == rhs._chunk_size && _end == rhs._end);
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
@@ -197,13 +197,13 @@ public:
 private:
     Iterator _sub_range_begin;
     Iterable _iterable;
-    std::size_t _chunk_size{};
+    size_t _chunk_size{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<Iterable>
+        requires(std::default_initializable<Iterator> && std::default_initializable<Iterable>)
     = default;
 
 #else
@@ -217,7 +217,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const size_t chunk_size) :
         _sub_range_begin{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {
@@ -225,16 +225,15 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
-        _sub_range_begin = std::end(_iterable);
+        _sub_range_begin = _iterable.end();
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        using s = typename std::make_signed<std::size_t>::type;
-        LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != std::end(_iterable));
+        using s = typename std::make_signed<size_t>::type;
+        LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _iterable.end());
         auto sub_range_end =
-            _sub_range_begin +
-            static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
+            _sub_range_begin + static_cast<s>(std::min(_chunk_size, static_cast<size_t>(_iterable.end() - _sub_range_begin)));
         return { _sub_range_begin, sub_range_end };
     }
 
@@ -243,15 +242,14 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT_INCREMENTABLE(_sub_range_begin != std::end(_iterable));
-        using s = typename std::make_signed<std::size_t>::type;
-        _sub_range_begin +=
-            static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(std::end(_iterable) - _sub_range_begin)));
+        LZ_ASSERT_INCREMENTABLE(_sub_range_begin != _iterable.end());
+        using s = typename std::make_signed<size_t>::type;
+        _sub_range_begin += static_cast<s>(std::min(_chunk_size, static_cast<size_t>(_iterable.end() - _sub_range_begin)));
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_sub_range_begin != std::begin(_iterable), "Cannot decrement begin iterator");
-        const auto remaining = static_cast<std::size_t>(_sub_range_begin - std::begin(_iterable));
+        LZ_ASSERT_DECREMENTABLE(_sub_range_begin != _iterable.begin());
+        const auto remaining = static_cast<size_t>(_sub_range_begin - _iterable.begin());
         const auto offset = remaining % _chunk_size;
 
         if (offset == 0) {
@@ -263,12 +261,12 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size, "Incompatible iterators");
+        LZ_ASSERT_COMPATIBLE(_chunk_size == rhs._chunk_size);
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _sub_range_begin == std::end(_iterable);
+        return _sub_range_begin == _iterable.end();
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
@@ -276,17 +274,17 @@ public:
         const auto to_add = offset * s_chunk_size;
 
         if (to_add >= 0) {
-            const auto current_distance = std::end(_iterable) - _sub_range_begin;
+            const auto current_distance = _iterable.end() - _sub_range_begin;
             if (to_add <= current_distance) {
                 _sub_range_begin += to_add;
                 return;
             }
             LZ_ASSERT_ADDABLE(to_add - current_distance < s_chunk_size);
-            _sub_range_begin = std::end(_iterable);
+            _sub_range_begin = _iterable.end();
             return;
         }
 
-        const auto current_distance = _sub_range_begin - std::begin(_iterable);
+        const auto current_distance = _sub_range_begin - _iterable.begin();
         const auto remainder = current_distance % s_chunk_size;
         if (remainder == 0) {
             _sub_range_begin += to_add;
@@ -297,18 +295,17 @@ public:
         _sub_range_begin -= to_subtract;
     }
 
-    LZ_CONSTEXPR_CXX_14 difference_type difference(const chunks_iterator& rhs) const {
-        LZ_ASSERT(_chunk_size == rhs._chunk_size && std::begin(_iterable) == std::begin(rhs._iterable) &&
-                      std::end(_iterable) == std::end(rhs._iterable),
-                  "Incompatible iterators");
-        const auto left = _sub_range_begin - rhs._sub_range_begin;
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const chunks_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_chunk_size == other._chunk_size && _iterable.begin() == other._iterable.begin() &&
+                             _iterable.end() == other._iterable.end());
+        const auto left = _sub_range_begin - other._sub_range_begin;
         const auto remainder = left % static_cast<difference_type>(_chunk_size);
         const auto quotient = left / static_cast<difference_type>(_chunk_size);
         return remainder == 0 ? quotient : quotient + (left < 0 ? -1 : 1);
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
-        const auto total_distance = std::end(_iterable) - _sub_range_begin;
+        const auto total_distance = _iterable.end() - _sub_range_begin;
         const auto remainder = total_distance % static_cast<difference_type>(_chunk_size);
         const auto quotient = total_distance / static_cast<difference_type>(_chunk_size);
         return -(remainder == 0 ? quotient : quotient + (total_distance < 0 ? -1 : 1));

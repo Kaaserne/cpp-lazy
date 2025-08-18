@@ -6,7 +6,7 @@
 #include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -31,8 +31,8 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<Iterator2> &&
-                     std::default_initializable<S2>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<Iterator2> &&
+                 std::default_initializable<S2>)
     = default;
 
 #else
@@ -76,8 +76,8 @@ public:
             return { _sub_range_begin, _sub_range_end.first };
         }
         else {
-            return { std::addressof(*_sub_range_begin),
-                     static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
+            return { detail::addressof(*_sub_range_begin),
+                     static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
         }
     }
 
@@ -93,8 +93,8 @@ public:
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _end);
-        return { std::addressof(*_sub_range_begin),
-                 static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
+        return { detail::addressof(*_sub_range_begin),
+                 static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
     }
 
 #endif
@@ -125,7 +125,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const split_iterator& rhs) const {
-        LZ_ASSERT(_end == rhs._end && _to_search_end == rhs._to_search_end, "Incompatible iterators");
+        LZ_ASSERT_COMPATIBLE(_end == rhs._end && _to_search_end == rhs._to_search_end);
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end.first == rhs._sub_range_end.first &&
                _ends_with_trailing == rhs._ends_with_trailing;
     }
@@ -149,7 +149,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_single_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T>)
     = default;
 
 #else
@@ -197,8 +197,7 @@ public:
             return { _sub_range_begin, _sub_range_end };
         }
         else {
-            return { std::addressof(*_sub_range_begin),
-                     static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
+            return { detail::addressof(*_sub_range_begin), static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
         }
     }
 
@@ -214,7 +213,7 @@ public:
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
-        return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
+        return { detail::addressof(*_sub_range_begin), static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
     }
 
 #endif
@@ -244,7 +243,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const split_single_iterator& rhs) const {
-        LZ_ASSERT(_end == rhs._end, "Incompatible iterators");
+        LZ_ASSERT_COMPATIBLE(_end == rhs._end);
         return _sub_range_begin == rhs._sub_range_begin && _sub_range_end == rhs._sub_range_end &&
                _ends_with_trailing == rhs._ends_with_trailing;
     }

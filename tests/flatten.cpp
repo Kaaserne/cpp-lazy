@@ -1,18 +1,12 @@
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
-#include <Lz/generate.hpp>
 #include <Lz/map.hpp>
-#include <Lz/range.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Dimensions & sized") {
     int arr[3];
@@ -37,16 +31,16 @@ TEST_CASE("Dimensions & sized") {
     static_assert(lz::dimensions<decltype(arr6)>::value == 3, "Dimensions of array should be 3");
 
     auto str = lz::c_string("Hello, World!");
-    static_assert(!lz::detail::all_sized<decltype(str)>::value, "c_string should not be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(str)>::value, "c_string should not be sized");
     std::array<decltype(lz::c_string("")), 2> arr_of_cstr = { lz::c_string(""), lz::c_string("") };
-    static_assert(!lz::detail::all_sized<decltype(arr_of_cstr)>::value, "Array of c_string should not all be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(arr_of_cstr)>::value, "Array of c_string should not all be sized");
 
     std::vector<int> v;
     auto filter = lz::filter(v, [](int) { return true; });
-    static_assert(!lz::detail::all_sized<decltype(filter)>::value, "Filter should not be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(filter)>::value, "Filter should not be sized");
 
     std::array<std::array<decltype(lz::c_string("")), 1>, 1> arr_of_arr_of_cstr = { { { lz::c_string("") } } };
-    static_assert(!lz::detail::all_sized<decltype(arr_of_arr_of_cstr)>::value, "Array of array of c_string should be sized");
+    static_assert(!lz::detail::is_all_sized<decltype(arr_of_arr_of_cstr)>::value, "Array of array of c_string should be sized");
 }
 
 TEST_CASE("Flatten with sentinels") {
@@ -188,6 +182,8 @@ void test_flatten_operators_mm_and_pp(const FlattenIterable& flattened, const Ex
 
 } // namespace
 
+// TODO also write tests for operator-- for sentinels
+
 TEST_CASE("Should flatten permutations") {
     SUBCASE("Flatten 1D") {
         std::vector<int> vec = { 1, 2, 3, 4 };
@@ -325,51 +321,73 @@ TEST_CASE("Should flatten permutations") {
 
     SUBCASE("Flatten with 1D sentinels") {
         auto f = lz::flatten(lz::repeat(1, 10));
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(1, 10)));
         test_procs::test_operator_minus(f);
+
         f = lz::flatten(lz::repeat(1, 0));
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(1, 0)));
         test_procs::test_operator_minus(f);
     }
 
     SUBCASE("Flatten with 2D sentinels") {
         auto f = lz::flatten(lz::repeat(lz::repeat(5, 3), 3));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 3 * 3)));
+
         f = lz::flatten(lz::repeat(lz::repeat(5, 3), 0));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+
         f = lz::flatten(lz::repeat(lz::repeat(5, 0), 3));
+        test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
     }
 
     SUBCASE("Flatten with 3D sentinels") {
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 3), 3));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 3 * 3 * 3)));
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 3), 0));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 0), 3));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 0), 3), 3));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
     }
 
     SUBCASE("Flatten with 4D sentinels") {
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 1), 2));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 2 * 2 * 1 * 2)));
+        
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 2), 0));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 0), 2));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 0), 0), 2), 2));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 0), 2), 2), 2));
         test_procs::test_operator_minus(f);
+        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
     }
 
     SUBCASE("Should be by ref") {
         std::vector<std::vector<std::vector<int>>> vectors = {
             { { 0 }, { 1, 2, 3 }, {}, { 4 } }, { {} }, { { 5, 6 }, { 7 }, {} }, { {} }, { {} }
         };
-        auto flattened = lz::flatten(vectors);
-        REQUIRE(flattened.size() == 8);
-        *flattened.begin() = -382753;
-        REQUIRE(vectors[0][0][0] == -382753);
+        static_assert(std::is_lvalue_reference<decltype(*lz::flatten(vectors).begin())>::value, "");
     }
 }
 

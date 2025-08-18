@@ -7,7 +7,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -22,7 +22,7 @@ class map_iterator
 
 public:
     using reference = decltype(_unary_op(*_iterator));
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using iterator_category = typename traits::iterator_category;
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
@@ -30,7 +30,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr map_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<UnaryOp>
+        requires(std::default_initializable<Iterator> && std::default_initializable<UnaryOp>)
     = default;
 
 #else
@@ -43,9 +43,7 @@ public:
 
 #endif
 
-    constexpr map_iterator(Iterator it, UnaryOp unary_op) :
-        _iterator{ std::move(it) },
-        _unary_op{ std::move(unary_op) } {
+    constexpr map_iterator(Iterator it, UnaryOp unary_op) : _iterator{ std::move(it) }, _unary_op{ std::move(unary_op) } {
     }
 
     LZ_CONSTEXPR_CXX_14 map_iterator& operator=(const S& s) {
@@ -73,16 +71,16 @@ public:
         _iterator += offset;
     }
 
-    constexpr difference_type difference(const map_iterator& b) const {
-        return _iterator - b._iterator;
+    constexpr difference_type difference(const map_iterator& other) const {
+        return _iterator - other._iterator;
     }
 
-    constexpr difference_type difference(const S& b) const {
-        return _iterator - b;
+    constexpr difference_type difference(const S& other) const {
+        return _iterator - other;
     }
 
-    constexpr bool eq(const map_iterator& b) const {
-        return _iterator == b._iterator;
+    constexpr bool eq(const map_iterator& other) const {
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(const S& s) const {

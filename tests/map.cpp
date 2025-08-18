@@ -1,15 +1,10 @@
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <functional>
-#include <list>
-#include <map>
-#include <vector>
-#include <unordered_map>
+#include <pch.hpp>
 
 struct TestStruct {
     std::string test_field_str;
@@ -77,8 +72,8 @@ TEST_CASE("Map binary operations") {
     }
 
     SUBCASE("Operator--") {
-        auto expecetd = std::vector<std::string>{ "FieldC", "FieldB", "FieldA" };
-        REQUIRE(lz::equal(lz::reverse(map), expecetd));
+        auto expected = std::vector<std::string>{ "FieldC", "FieldB", "FieldA" };
+        REQUIRE(lz::equal(map | lz::reverse, expected));
     }
 
     SUBCASE("Operator== & operator!=") {
@@ -100,6 +95,13 @@ TEST_CASE("Map binary operations") {
         auto repeater = lz::repeat(20, 5);
         auto map_sentinel = lz::map(repeater, [](int i) { return i; });
         test_procs::test_operator_minus(map_sentinel);
+    }
+
+    SUBCASE("Operator+ sentinel") {
+        auto repeater = lz::repeat(20, 5);
+        auto map_sentinel = lz::map(repeater, [](int i) { return i; });
+        std::vector<int> expected = { 20, 20, 20, 20, 20 };
+        test_procs::test_operator_plus(map_sentinel, expected);
     }
 }
 

@@ -3,13 +3,9 @@
 #include <Lz/reverse.hpp>
 #include <Lz/take_while.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <forward_list>
-#include <functional>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 #ifdef __GNUC__
 

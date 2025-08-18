@@ -4,7 +4,6 @@
 #define LZ_DROP_WHILE_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/drop_while.hpp>
 
 namespace lz {
@@ -25,7 +24,7 @@ struct drop_while_adaptor {
      * @param unary_predicate The predicate to drop elements with
      * @return An iterable that drops elements while the predicate returns true
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, class UnaryPredicate>
+    template<class Iterable, class UnaryPredicate>
     LZ_NODISCARD constexpr drop_while_iterable<remove_ref<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(unary_predicate) };

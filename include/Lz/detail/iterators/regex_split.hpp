@@ -5,7 +5,7 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/string_view.hpp>
 
 namespace lz {
@@ -34,7 +34,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr regex_split_iterator()
-        requires std::default_initializable<RegexTokenIter>
+        requires(std::default_initializable<RegexTokenIter>)
     = default;
 
 #else
@@ -61,7 +61,7 @@ public:
     }
 
     constexpr value_type dereference() const {
-        return value_type(&*_current->first, static_cast<std::size_t>(_current->length()));
+        return value_type(&*_current->first, static_cast<size_t>(_current->length()));
     }
 
     constexpr pointer arrow() const {

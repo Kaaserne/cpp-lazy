@@ -1,13 +1,11 @@
 #include <Lz/chunks.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <Lz/stream.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("empty or one element chunks") {
     SUBCASE("Empty") {
@@ -108,10 +106,37 @@ TEST_CASE("Chunks binary operations random access") {
         auto even_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 3), 2);
         auto uneven_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 2), 3);
         auto even_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 2), 2);
+
         test_procs::test_operator_minus(uneven_chunksize_uneven_size_repeat);
         test_procs::test_operator_minus(even_chunksize_uneven_size_repeat);
         test_procs::test_operator_minus(uneven_chunksize_even_size_repeat);
         test_procs::test_operator_minus(even_chunksize_even_size_repeat);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto uneven_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 7), 3);
+        auto even_chunksize_uneven_size_repeat = lz::chunks(lz::repeat(0, 7), 2);
+        auto uneven_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 6), 3);
+        auto even_chunksize_even_size_repeat = lz::chunks(lz::repeat(0, 4), 2);
+
+        using value_type = typename decltype(uneven_chunksize_even_size_repeat)::value_type;
+        const auto equal_fn2 = [](value_type a, const std::vector<int>& b) {
+            return lz::equal(a, b);
+        };
+
+        std::vector<std::vector<int>> expected;
+
+        expected = { { 0, 0, 0 }, { 0, 0, 0 }, { 0 } };
+        test_procs::test_operator_plus(uneven_chunksize_uneven_size_repeat, expected, equal_fn2);
+
+        expected = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0 } };
+        test_procs::test_operator_plus(even_chunksize_uneven_size_repeat, expected, equal_fn2);
+
+        expected = { { 0, 0, 0 }, { 0, 0, 0 } };
+        test_procs::test_operator_plus(uneven_chunksize_even_size_repeat, expected, equal_fn2);
+
+        expected = { { 0, 0 }, { 0, 0 } };
+        test_procs::test_operator_plus(even_chunksize_even_size_repeat, expected, equal_fn2);
     }
 }
 

@@ -4,8 +4,8 @@
 #define LZ_ENUMERATE_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -28,7 +28,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr enumerate_iterator()
-        requires std::default_initializable<Iterator>
+        requires(std::default_initializable<Iterator>)
     = default;
 
 #else
@@ -39,9 +39,7 @@ public:
 
 #endif
 
-    constexpr enumerate_iterator(Iterator it, const Arithmetic start) : 
-        _iterator{ std::move(it) },
-        _index{ start } {
+    constexpr enumerate_iterator(Iterator it, const Arithmetic start) : _iterator{ std::move(it) }, _index{ start } {
     }
 
     LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(const S& end) {

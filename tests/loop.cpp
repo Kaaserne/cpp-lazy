@@ -1,9 +1,10 @@
-#include <Lz/loop.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <vector>
+#include <pch.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <Lz/loop.hpp>
+#include <Lz/reverse.hpp>
+#include <Lz/repeat.hpp>
 
 TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -117,5 +118,19 @@ TEST_CASE("Loop with non while true argument") {
 
         l = lz::loop(lz::repeat(0, 5), 3);
         test_procs::test_operator_minus(l);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto l = lz::loop(lz::repeat(0, 5), 2);
+        std::vector<int> expected = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(l, expected);
+
+        l = lz::loop(lz::repeat(0, 5), 1);
+        expected = { 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(l, expected);
+
+        l = lz::loop(lz::repeat(0, 5), 3);
+        expected = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(l, expected);
     }
 }

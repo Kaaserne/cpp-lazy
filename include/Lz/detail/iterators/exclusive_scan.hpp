@@ -4,7 +4,7 @@
 #define LZ_EXCLUSIVE_SCAN_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -21,15 +21,15 @@ class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator
 
 public:
     using reference = T&;
-    using value_type = decay_t<reference>;
+    using value_type = remove_cvref<reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclusive_scan_iterator()
-        requires std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T> &&
-                     std::default_initializable<BinaryOp>
+        requires(std::default_initializable<Iterator> && std::default_initializable<S> && std::default_initializable<T> &&
+                 std::default_initializable<BinaryOp>)
     = default;
 
 #else
@@ -78,9 +78,9 @@ public:
         ++_iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const exclusive_scan_iterator& b) const {
-        LZ_ASSERT(_end == b._end, "Incompatible iterators");
-        return _iterator == b._iterator && _reached_end == b._reached_end;
+    LZ_CONSTEXPR_CXX_14 bool eq(const exclusive_scan_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_end == other._end);
+        return _iterator == other._iterator && _reached_end == other._reached_end;
     }
 
     constexpr bool eq(default_sentinel_t) const {

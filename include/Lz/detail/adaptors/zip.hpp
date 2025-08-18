@@ -3,7 +3,6 @@
 #ifndef LZ_ZIP_ADAPTOR_HPP
 #define LZ_ZIP_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/zip.hpp>
 
 namespace lz {
@@ -51,7 +50,7 @@ struct zip_adaptor {
      * @param iterables The iterables to zip together
      * @return A zip_iterable containing the zipped iterables
      */
-    template<LZ_CONCEPT_ITERABLE... Iterables>
+    template<class... Iterables>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {
         return { std::forward<Iterables>(iterables)... };
     }

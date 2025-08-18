@@ -4,7 +4,6 @@
 #define LZ_SPLIT_ADAPTOR_HPP
 
 #include <Lz/c_string.hpp>
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/split.hpp>
 #include <Lz/string_view.hpp>
 
@@ -53,7 +52,7 @@ struct split_adaptor {
     constexpr auto operator()(Iterable&& iterable, T&& delimiter) const {
         using T2 = std::remove_cv_t<remove_ref<T>>;
 
-        if constexpr (is_iterable<T2>::value) {
+        if constexpr (is_iterable_v<T2>) {
             using splitter = split_iterable<ValueType, remove_ref<Iterable>, remove_ref<T>>;
             return splitter{ std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
         }
@@ -179,7 +178,7 @@ struct split_adaptor {
     LZ_CONSTEXPR_CXX_14 auto operator()(T&& delimiter) const {
         using T2 = std::remove_cv_t<remove_ref<T>>;
 
-        if constexpr (is_iterable<T2>::value) {
+        if constexpr (is_iterable_v<T2>) {
             return fn_args_holder<adaptor, T>{ std::forward<T>(delimiter) };
         }
         else {
@@ -295,7 +294,7 @@ struct split_adaptor<void> {
     LZ_NODISCARD constexpr auto operator()(Iterable&& iterable, T&& delimiter) const {
         using T2 = std::remove_cv_t<remove_ref<T>>;
 
-        if constexpr (is_iterable<T2>::value) {
+        if constexpr (is_iterable_v<T2>) {
             using a = split_adaptor<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>;
             return a{}(std::forward<Iterable>(iterable), std::forward<T>(delimiter));
         }
@@ -402,7 +401,7 @@ struct split_adaptor<void> {
      */
     template<class T>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(T&& delimiter) const {
-        if constexpr (is_iterable<T>::value) {
+        if constexpr (is_iterable_v<T>) {
             return fn_args_holder<adaptor, T>{ std::forward<T>(delimiter) };
         }
         else {

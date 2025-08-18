@@ -4,7 +4,7 @@
 #define LZ_AS_ITERATOR_ITERATOR_HPP
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
-#include <Lz/iterator_base.hpp>
+#include <Lz/detail/iterator.hpp>
 
 namespace lz {
 namespace detail {
@@ -20,9 +20,19 @@ public:
     using pointer = fake_ptr_proxy<Iterator>;
     using difference_type = typename std::iterator_traits<Iterator>::difference_type;
 
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr as_iterator_iterator()
+        requires(std::default_initializable<Iterator>)
+    = default;
+
+#else
+
     template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
     constexpr as_iterator_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
+
+#endif
 
     explicit constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {
     }

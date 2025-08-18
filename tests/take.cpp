@@ -1,16 +1,12 @@
-#include <Lz/drop.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <vector>
-#include <unordered_map>
+#include <pch.hpp>
 
 TEST_CASE("Take with sentinels") {
     const char* str = "Hello, world!";
@@ -48,7 +44,7 @@ TEST_CASE("Take changing and creating elements") {
     *take.begin() = 0;
     REQUIRE(array[0] == 0);
 }
-
+// TODO check enable ifs in adaptors for ambiguity
 TEST_CASE("Take binary operations where n is smaller than size") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto take = lz::take(array, 4);
@@ -93,6 +89,20 @@ TEST_CASE("Take binary operations where n is smaller than size") {
         auto rep = lz::repeat(0, 5);
         auto r2 = lz::take(rep.begin(), 3);
         test_procs::test_operator_minus(r2);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto r = lz::repeat(1, 5) | lz::take(3);
+        std::vector<int> expected = { 1, 1, 1 };
+        test_procs::test_operator_plus(r, expected);
+
+        r = lz::repeat(0, 5) | lz::take(3);
+        expected = { 0, 0, 0 };
+        test_procs::test_operator_plus(r, expected);
+
+        r = lz::repeat(0, 0) | lz::take(3);
+        expected = {};
+        test_procs::test_operator_plus(r, expected);
     }
 }
 

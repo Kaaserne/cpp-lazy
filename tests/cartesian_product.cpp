@@ -1,16 +1,11 @@
-#include <Lz/algorithm.hpp>
 #include <Lz/cartesian_product.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/repeat.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
-#include <cstddef>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <vector>
-#include <unordered_map>
+#include <pch.hpp>
 
 TEST_CASE("with sentinel") {
     const char* str = "abc";
@@ -97,6 +92,7 @@ TEST_CASE("Cartesian product binary operations") {
     std::vector<char> chars = { 'a', 'b', 'c' };
     std::vector<char> chars2 = { 'a', 'b' };
     auto cartesian = vec | lz::cartesian_product(chars, chars2);
+
     REQUIRE(cartesian.size() == vec.size() * chars.size() * chars2.size());
 
     static_assert(std::is_same<decltype(cartesian.begin()), decltype(cartesian.end())>::value, "Should be the same");
@@ -129,6 +125,17 @@ TEST_CASE("Cartesian product binary operations") {
         auto cartesian2 = repeat1 | lz::cartesian_product(repeat2);
         REQUIRE(lz::size(cartesian2) == 12);
         test_procs::test_operator_minus(cartesian2);
+    }
+
+    SUBCASE("Operator+(default_sentinel_t)") {
+        auto repeat1 = lz::repeat(1, 3);
+        auto repeat2 = lz::repeat(2, 4);
+        auto cartesian2 = repeat1 | lz::cartesian_product(repeat2);
+        std::vector<std::tuple<int, int>> expected2 = { std::make_tuple(1, 2), std::make_tuple(1, 2), std::make_tuple(1, 2),
+                                                        std::make_tuple(1, 2), std::make_tuple(1, 2), std::make_tuple(1, 2),
+                                                        std::make_tuple(1, 2), std::make_tuple(1, 2), std::make_tuple(1, 2),
+                                                        std::make_tuple(1, 2), std::make_tuple(1, 2), std::make_tuple(1, 2) };
+        test_procs::test_operator_plus(cartesian2, expected2);
     }
 }
 

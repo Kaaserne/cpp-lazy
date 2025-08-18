@@ -2,10 +2,7 @@
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <doctest/doctest.h>
-#include <list>
-#include <map>
-#include <unordered_map>
-#include <vector>
+#include <pch.hpp>
 
 TEST_CASE("Exclusive scan with sentinels") {
     int i = 0;

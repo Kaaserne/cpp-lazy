@@ -21,7 +21,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr common_iterable()
-        requires std::default_initializable<maybe_owned<Iterable>>
+        requires(std::default_initializable<maybe_owned<Iterable>>)
     = default;
 
 #else
@@ -36,12 +36,29 @@ public:
     explicit constexpr common_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
+#ifdef LZ_HAS_CONCEPTS
+
+    LZ_NODISCARD constexpr size_t size() const
+        requires(sized<Iterable>)
+    {
+        return lz::size(_iterable);
+    }
+
+#else
+
+    template<bool Sized = is_sized<Iterable>::value>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, size_t> size() const {
+        return lz::size(_iterable);
+    }
+
+#endif
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
         return iterator{ detail::begin(std::move(_iterable)) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return iterator{ std::begin(_iterable) };
+        return iterator{ _iterable.begin() };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
@@ -49,7 +66,7 @@ public:
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {
-        return iterator{ std::end(_iterable) };
+        return iterator{ _iterable.end() };
     }
 };
 } // namespace detail

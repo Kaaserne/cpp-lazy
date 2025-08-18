@@ -6,9 +6,9 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
+#include <Lz/detail/iterator.hpp>
 #include <Lz/detail/iterators/common.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/iterator_base.hpp>
 
 namespace lz {
 namespace detail {
@@ -28,8 +28,8 @@ class take_while_iterator
     using traits = std::iterator_traits<iter>;
 
     LZ_CONSTEXPR_CXX_14 void incremented_check() {
-        if (_iterator != std::end(_iterable) && !_unary_predicate(*_iterator)) {
-            _iterator = std::end(_iterable);
+        if (_iterator != _iterable.end() && !_unary_predicate(*_iterator)) {
+            _iterator = _iterable.end();
         }
     }
 
@@ -42,7 +42,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_while_iterator()
-        requires std::default_initializable<iter> && std::default_initializable<UnaryPredicate>
+        requires(std::default_initializable<iter> && std::default_initializable<UnaryPredicate>)
     = default;
 
 #else
@@ -62,13 +62,13 @@ public:
         _iterator{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _unary_predicate{ std::move(unary_predicate) } {
-        if (_iterator == std::begin(_iterable)) {
+        if (_iterator == _iterable.begin()) {
             incremented_check();
         }
     }
 
     LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(default_sentinel_t) {
-        _iterator = std::end(_iterable);
+        _iterator = _iterable.end();
         return *this;
     }
 
@@ -79,14 +79,14 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT(_iterator != std::begin(_iterable), "Cannot decrement begin iterator");
-        if (_iterator != std::end(_iterable)) {
+        LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
+        if (_iterator != _iterable.end()) {
             --_iterator;
             return;
         }
         do {
             --_iterator;
-        } while (_iterator != std::begin(_iterable) && !_unary_predicate(*_iterator));
+        } while (_iterator != _iterable.begin() && !_unary_predicate(*_iterator));
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
@@ -98,14 +98,13 @@ public:
         return fake_ptr_proxy<decltype(**this)>(**this);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const take_while_iterator& b) const noexcept {
-        LZ_ASSERT(std::end(_iterable) == std::end(b._iterable) && std::begin(_iterable) == std::begin(b._iterable),
-                  "Incompatible iterators");
-        return _iterator == b._iterator;
+    LZ_CONSTEXPR_CXX_14 bool eq(const take_while_iterator& other) const noexcept {
+        LZ_ASSERT_COMPATIBLE(_iterable.end() == other._iterable.end() && _iterable.begin() == other._iterable.begin());
+        return _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const noexcept {
-        return _iterator == std::end(_iterable);
+        return _iterator == _iterable.end();
     }
 };
 } // namespace detail

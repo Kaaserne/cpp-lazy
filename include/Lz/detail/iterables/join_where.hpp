@@ -24,16 +24,16 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    static constexpr bool return_sentinel = !std::is_same<iter_t<IterableA>, sentinel_t<IterableA>>::value ||
-                                            !is_bidi_tag<typename iterator::iterator_category>::value;
+    static constexpr bool return_sentinel =
+        !has_sentinel<IterableA>::value || !is_bidi_tag<typename iterator::iterator_category>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr join_where_iterable()
-        requires std::default_initializable<IterableA> && std::default_initializable<IterableB> &&
-                     std::default_initializable<SelectorA> && std::default_initializable<SelectorB> &&
-                     std::default_initializable<ResultSelector>
+        requires(std::default_initializable<IterableA> && std::default_initializable<IterableB> &&
+                 std::default_initializable<SelectorA> && std::default_initializable<SelectorB> &&
+                 std::default_initializable<ResultSelector>)
     = default;
 
 #else
@@ -62,12 +62,12 @@ public:
     }
 
     constexpr iterator begin() const& {
-        return { _iterable_a, std::begin(_iterable_a), std::begin(_iterable_b), std::end(_iterable_b), _a, _b, _result_selector };
+        return { _iterable_a, _iterable_a.begin(), _iterable_b.begin(), _iterable_b.end(), _a, _b, _result_selector };
     }
 
     LZ_CONSTEXPR_CXX_14 iterator begin() && {
         // clang-format off
-        return { _iterable_a, std::begin(_iterable_a), detail::begin(std::move(_iterable_b)),
+        return { _iterable_a, _iterable_a.begin(), detail::begin(std::move(_iterable_b)),
                  detail::end(std::move(_iterable_b)), std::move(_a), std::move(_b), std::move(_result_selector) };
         // clang-format on
     }

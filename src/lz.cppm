@@ -1,20 +1,14 @@
 module;
 
 #include <algorithm>
-#include <array>
-#include <cmath>
-#include <concepts>
-#include <cstddef>
-#include <cstdint>
 #include <format>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <numeric>
 #include <optional>
+#include <ostream>
 #include <random>
 #include <regex>
-#include <sstream>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
@@ -62,11 +56,11 @@ export module lz;
 #include "Lz/interleave.hpp"
 #include "Lz/intersection.hpp"
 #include "Lz/iter_tools.hpp"
-#include "Lz/iterator_base.hpp"
 #include "Lz/join_where.hpp"
 #include "Lz/loop.hpp"
 #include "Lz/map.hpp"
 #include "Lz/optional.hpp"
+#include "Lz/pairwise.hpp"
 #include "Lz/random.hpp"
 #include "Lz/range.hpp"
 #include "Lz/regex_split.hpp"

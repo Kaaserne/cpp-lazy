@@ -11,26 +11,29 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_iterable : public lazy_view {
-    using iter_tuple = maybe_homogeneous<iter_t<Iterables>...>;
-    using sentinel_tuple = maybe_homogeneous<sentinel_t<Iterables>...>;
+    using iter_tuple = maybe_homogeneous_t<iter_t<Iterables>...>;
+    using sentinel_tuple = maybe_homogeneous_t<sentinel_t<Iterables>...>;
 
-    maybe_homogeneous<maybe_owned<Iterables>...> _iterables;
+    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables;
 
-    template<std::size_t... I>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
-        return std::min({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
+    template<size_t... I>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
+        using std::get;
+        return std::min({ static_cast<size_t>(lz::size(get<I>(_iterables)))... });
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static zip_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, zip_iterable<Iterables...>&& zipper, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(zipper._iterables))... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(zipper._iterables))... };
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static zip_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const zip_iterable<Iterables...>& zipper, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::get<Is>(zipper._iterables)... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), get<Is>(zipper._iterables)... };
     }
 
 public:
@@ -41,8 +44,8 @@ public:
 private:
     using seq = make_index_sequence<sizeof...(Iterables)>;
 
-    static constexpr bool return_sentinel = !is_bidi_tag<typename iterator::iterator_category>::value ||
-                                            disjunction<is_sentinel<iter_t<Iterables>, sentinel_t<Iterables>>...>::value;
+    static constexpr bool return_sentinel =
+        !is_bidi_tag<typename iterator::iterator_category>::value || disjunction<has_sentinel<Iterables>...>::value;
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -63,10 +66,22 @@ public:
     LZ_CONSTEXPR_CXX_14 zip_iterable(Is&&... iterables) : _iterables{ std::forward<Is>(iterables)... } {
     }
 
-    template<class T = conjunction<sized<Iterables>...>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    [[nodiscard]] constexpr size_t size() const
+        requires(sized<Iterables> && ...)
+    {
         return size(seq{});
     }
+
+#else
+
+    template<class T = conjunction<is_sized<Iterables>...>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, size_t> size() const {
+        return size(seq{});
+    }
+
+#endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return { begin_maybe_homo(_iterables) };

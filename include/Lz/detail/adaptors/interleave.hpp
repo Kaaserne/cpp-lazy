@@ -3,7 +3,6 @@
 #ifndef LZ_INTERLEAVED_ADAPTOR_HPP
 #define LZ_INTERLEAVED_ADAPTOR_HPP
 
-#include <Lz/detail/concepts.hpp>
 #include <Lz/detail/iterables/interleave.hpp>
 
 namespace lz {
@@ -53,7 +52,7 @@ struct interleave_adaptor {
      * @param iterables The rest of the iterables to interleave.
      * @return An iterable that interleaves the elements of the given iterables.
      */
-    template<LZ_CONCEPT_ITERABLE Iterable, LZ_CONCEPT_ITERABLE... Iterables>
+    template<class Iterable, class... Iterables>
     LZ_NODISCARD constexpr interleave_iterable<remove_ref<Iterable>, remove_ref<Iterables>...>
     operator()(Iterable&& iterable, Iterables&&... iterables) const {
         return { std::forward<Iterable>(iterable), std::forward<Iterables>(iterables)... };

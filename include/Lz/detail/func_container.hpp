@@ -3,57 +3,117 @@
 #ifndef LZ_FUNCTION_CONTAINER_HPP
 #define LZ_FUNCTION_CONTAINER_HPP
 
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs.hpp>
 #include <type_traits>
-
-#ifdef LZ_HAS_CXX_17
-
-#include <functional> // std::invoke
-
-#endif
 
 namespace lz {
 namespace detail {
 
-#ifndef LZ_HAS_CXX_17
-
-template<class Fn, class... Args>
-constexpr auto invoke(Fn&& fn, Args&&... args)
-    -> enable_if<!std::is_member_pointer<decay_t<Fn>>::value, decltype(std::forward<Fn>(fn)(std::forward<Args>(args)...))> {
-    return std::forward<Fn>(fn)(std::forward<Args>(args)...);
-}
-
-template<class MemFn, class T, class... Args>
-constexpr auto
-invoke(MemFn T::*fn, T&& obj, Args&&... args) -> enable_if<std::is_member_function_pointer<MemFn T::*>::value,
-                                                           decltype((std::forward<T>(obj).*fn)(std::forward<Args>(args)...))> {
-    return (std::forward<T>(obj).*fn)(std::forward<Args>(args)...);
-}
-
-template<class MemFn, class T, class... Args>
-constexpr auto invoke(MemFn T::*fn, T* obj, Args&&... args)
-    -> enable_if<std::is_member_function_pointer<MemFn T::*>::value, decltype((obj->*fn)(std::forward<Args>(args)...))> {
-    return (obj->*fn)(std::forward<Args>(args)...);
-}
-
-template<class MemData, class T>
-constexpr auto
-invoke(MemData T::*md,
-       T&& obj) -> enable_if<std::is_member_object_pointer<MemData T::*>::value, decltype(std::forward<T>(obj).*md)> {
-    return std::forward<T>(obj).*md;
-}
-
-template<class MemData, class T>
-constexpr auto
-invoke(MemData T::*md, T* obj) -> enable_if<std::is_member_object_pointer<MemData T::*>::value, decltype(obj->*md)> {
-    return obj->*md;
-}
-
-#endif
-
 #ifdef LZ_HAS_CXX_17
 
-using std::invoke;
+template<class>
+constexpr bool is_reference_wrapper_v = false;
+
+template<class U>
+constexpr bool is_reference_wrapper_v<std::reference_wrapper<U>> = true;
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr decltype(auto) invoke(Pointed C::*member, Object&& object, Args&&... args) {
+    using object_t = remove_cvref<Object>;
+    constexpr bool is_wrapped = is_reference_wrapper_v<object_t>;
+    constexpr bool is_derived_object = std::is_same_v<C, object_t> || std::is_base_of_v<C, object_t>;
+
+    if constexpr (std::is_function_v<Pointed>) {
+        if constexpr (is_derived_object) {
+            return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
+        }
+        else if constexpr (is_wrapped) {
+            return (object.get().*member)(std::forward<Args>(args)...);
+        }
+        else {
+            return ((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...);
+        }
+    }
+    else {
+        static_assert(std::is_object_v<Pointed> && sizeof...(args) == 0);
+        if constexpr (is_derived_object) {
+            return std::forward<Object>(object).*member;
+        }
+        else if constexpr (is_wrapped) {
+            return object.get().*member;
+        }
+        else {
+            return (*std::forward<Object>(object)).*member;
+        }
+    }
+}
+
+#else
+// TODO write tests
+template<class T>
+struct is_reference_wrapper : std::false_type {};
+
+template<class T>
+struct is_reference_wrapper<std::reference_wrapper<T>> : std::true_type {};
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr auto
+invoke(Pointed C::*member, Object&& object,
+       Args&&... args) -> enable_if<std::is_function<Pointed>::value && (std::is_same<C, remove_cvref<Object>>::value ||
+                                                                         std::is_base_of<C, remove_cvref<Object>>::value),
+                                    decltype((std::forward<Object>(object).*member)(std::forward<Args>(args)...))> {
+
+    return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
+}
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr auto
+invoke(Pointed C::*member, Object&& object,
+       Args&&... args) -> enable_if<std::is_function<Pointed>::value && is_reference_wrapper<remove_cvref<Object>>::value,
+                                    decltype((object.get().*member)(std::forward<Args>(args)...))> {
+
+    return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
+}
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr auto invoke(Pointed C::*member, Object&& object, Args&&... args)
+    -> enable_if<std::is_function<Pointed>::value && !is_reference_wrapper<remove_cvref<Object>>::value &&
+                     !(std::is_same<C, remove_cvref<Object>>::value || std::is_base_of<C, remove_cvref<Object>>::value),
+                 decltype(((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...))> {
+
+    return ((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...);
+}
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr auto
+invoke(Pointed C::*member, Object&& object,
+       Args&&... args) -> enable_if<!std::is_function<Pointed>::value && (std::is_same<C, remove_cvref<Object>>::value ||
+                                                                          std::is_base_of<C, remove_cvref<Object>>::value),
+                                    decltype(std::forward<Object>(object).*member)> {
+
+    static_assert(std::is_object<Pointed>::value && sizeof...(args) == 0, "Member pointer must point to an object type");
+    return std::forward<Object>(object).*member;
+}
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr auto
+invoke(Pointed C::*member, Object&& object,
+       Args&&... args) -> enable_if<!std::is_function<Pointed>::value && is_reference_wrapper<remove_cvref<Object>>::value,
+                                    decltype(object.get().*member)> {
+
+    static_assert(std::is_object<Pointed>::value && sizeof...(args) == 0, "Member pointer must point to an object type");
+    return object.get().*member;
+}
+
+template<class C, class Pointed, class Object, class... Args>
+constexpr auto invoke(Pointed C::*member, Object&& object, Args&&... args)
+    -> enable_if<!std::is_function<Pointed>::value && !is_reference_wrapper<remove_cvref<Object>>::value &&
+                     !(std::is_same<C, remove_cvref<Object>>::value || std::is_base_of<C, remove_cvref<Object>>::value),
+                 decltype((*std::forward<Object>(object)).*member)> {
+
+    static_assert(std::is_object<Pointed>::value && sizeof...(args) == 0, "Member pointer must point to an object type");
+    return (*std::forward<Object>(object)).*member;
+}
 
 #endif
 
@@ -65,7 +125,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr func_container()
-        requires std::default_initializable<Func>
+        requires(std::default_initializable<Func>)
     = default;
 
 #else
@@ -90,30 +150,89 @@ public:
     }
 
     func_container& operator=(const func_container& other) {
-        ::new (static_cast<void*>(std::addressof(_func))) Func(other._func);
+        ::new (static_cast<void*>(detail::addressof(_func))) Func(other._func);
         return *this;
     }
 
     func_container& operator=(func_container&& other) noexcept(std::is_nothrow_move_assignable<Func>::value) {
         _func.~Func();
-        ::new (static_cast<void*>(std::addressof(_func))) Func(static_cast<Func&&>(other._func));
+        ::new (static_cast<void*>(detail::addressof(_func))) Func(static_cast<Func&&>(other._func));
         return *this;
     }
 
+#ifdef LZ_HAS_CXX_17
+
     template<class... Args>
-    constexpr auto operator()(Args&&... args) const& -> decltype(invoke(_func, std::forward<Args>(args)...)) {
-        return invoke(_func, std::forward<Args>(args)...);
+    [[nodiscard]] constexpr decltype(auto) operator()(Args&&... args) const& {
+        // return invoke(_func, std::forward<Args>(args)...);
+        if constexpr (std::is_member_pointer_v<Func>) {
+            return invoke(_func, std::forward<Args>(args)...);
+        }
+        else {
+            return _func(std::forward<Args>(args)...);
+        }
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) & -> decltype(invoke(_func, std::forward<Args>(args)...)) {
-        return invoke(_func, std::forward<Args>(args)...);
+    [[nodiscard]] constexpr decltype(auto) operator()(Args&&... args) & {
+        if constexpr (std::is_member_pointer_v<Func>) {
+            return invoke(_func, std::forward<Args>(args)...);
+        }
+        else {
+            return _func(std::forward<Args>(args)...);
+        }
     }
 
     template<class... Args>
-    LZ_CONSTEXPR_CXX_14 auto operator()(Args&&... args) && -> decltype(invoke(std::move(_func), std::forward<Args>(args)...)) {
-        return invoke(std::move(_func), std::forward<Args>(args)...);
+    [[nodiscard]] constexpr decltype(auto) operator()(Args&&... args) && {
+        if constexpr (std::is_member_pointer_v<Func>) {
+            return invoke(_func, std::forward<Args>(args)...);
+        }
+        else {
+            return std::move(_func)(std::forward<Args>(args)...);
+        }
     }
+
+#else
+
+    template<class F = Func, class... Args>
+    LZ_NODISCARD constexpr auto operator()(Args&&... args)
+        const& -> enable_if<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
+        return invoke(_func, std::forward<Args>(args)...);
+    }
+
+    template<class F = Func, class... Args>
+    LZ_NODISCARD constexpr auto operator()(
+        Args&&... args) const& -> enable_if<!std::is_member_pointer<F>::value, decltype(_func(std::forward<Args>(args)...))> {
+        return _func(std::forward<Args>(args)...);
+    }
+
+    template<class F = Func, class... Args>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(
+        Args&&... args) & -> enable_if<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
+        return invoke(_func, std::forward<Args>(args)...);
+    }
+
+    template<class F = Func, class... Args>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
+    operator()(Args&&... args) & -> enable_if<!std::is_member_pointer<F>::value, decltype(_func(std::forward<Args>(args)...))> {
+        return _func(std::forward<Args>(args)...);
+    }
+
+    template<class F = Func, class... Args>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(
+        Args&&... args) && -> enable_if<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
+        return invoke(_func, std::forward<Args>(args)...);
+    }
+
+    template<class F = Func, class... Args>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
+    operator()(Args&&... args) && -> enable_if<!std::is_member_pointer<F>::value,
+                                               decltype(std::move(_func)(std::forward<Args>(args)...))> {
+        return std::move(_func)(std::forward<Args>(args)...);
+    }
+
+#endif
 };
 } // namespace detail
 } // namespace lz
