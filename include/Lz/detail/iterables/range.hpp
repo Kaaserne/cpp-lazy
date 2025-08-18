@@ -25,7 +25,20 @@ public:
 
     constexpr range_iterable() noexcept = default;
 
-#ifdef LZ_USE_DEBUG_ASSERTIONS
+#if defined(LZ_USE_DEBUG_ASSERTIONS) && defined(LZ_HAS_CXX_17)
+
+    LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
+        _start{ start },
+        _end{ end },
+        _step{ step } {
+        if constexpr (!std::is_floating_point_v<Arithmetic>) {
+            LZ_ASSERT(step > std::numeric_limits<Arithmetic>::min(), "Step must be larger than the minimum representable value");
+            // The behavior (of std::abs) is undefined if the result cannot be represented by the return type
+            LZ_ASSERT(std::abs(_step) > 0, "Step cannot be zero");
+        }
+    }
+
+#elif defined(LZ_USE_DEBUG_ASSERTIONS)
 
     template<class A = Arithmetic, enable_if<!std::is_floating_point<A>::value, int> = 0>
     LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
