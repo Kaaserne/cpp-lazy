@@ -19,7 +19,7 @@ class generate_iterator<GeneratorFunc, false>
                       default_sentinel_t> {
 
     mutable GeneratorFunc _func;
-    std::size_t _current{};
+    size_t _current{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
@@ -41,7 +41,7 @@ public:
 
 #endif
 
-    constexpr generate_iterator(GeneratorFunc generator_func, const std::size_t amount) :
+    constexpr generate_iterator(GeneratorFunc generator_func, const size_t amount) :
         _func{ std::move(generator_func) },
         _current{ amount } {
     }

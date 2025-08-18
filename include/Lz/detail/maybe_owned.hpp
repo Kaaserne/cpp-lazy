@@ -20,17 +20,17 @@ public:
     constexpr maybe_owned_impl() noexcept = default;
 
     template<class I>
-    constexpr maybe_owned_impl(I&& iterable) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
+    constexpr maybe_owned_impl(I&& iterable) noexcept : _iterable_ref_ptr{ detail::addressof(iterable) } {
         static_assert(std::is_lvalue_reference<I>::value, "Can only bind to lvalues. Check if you are passing a temporary "
                                                           "object, or forgot to add/remove const/volatile qualifiers.");
     }
 
-    template<class T, std::size_t N>
-    constexpr maybe_owned_impl(const T (&iterable)[N]) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
+    template<class T, size_t N>
+    constexpr maybe_owned_impl(const T (&iterable)[N]) noexcept : _iterable_ref_ptr{ detail::addressof(iterable) } {
     }
 
-    template<class T, std::size_t N>
-    constexpr maybe_owned_impl(T (&iterable)[N]) noexcept : _iterable_ref_ptr{ std::addressof(iterable) } {
+    template<class T, size_t N>
+    constexpr maybe_owned_impl(T (&iterable)[N]) noexcept : _iterable_ref_ptr{ detail::addressof(iterable) } {
     }
 
     template<class I>
@@ -61,18 +61,17 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr)))
+    [[nodiscard]] constexpr size_t size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr)))
         requires(sized<Iterable>)
     {
-        return static_cast<std::size_t>(lz::size(*_iterable_ref_ptr));
+        return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const
-        noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
-        return static_cast<std::size_t>(lz::size(*_iterable_ref_ptr));
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
+        return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
     }
 
 #endif
@@ -168,17 +167,17 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const noexcept(noexcept(lz::size(_iterable_value)))
+    [[nodiscard]] constexpr size_t size() const noexcept(noexcept(lz::size(_iterable_value)))
         requires(sized<Iterable>)
     {
-        return static_cast<std::size_t>(lz::size(_iterable_value));
+        return static_cast<size_t>(lz::size(_iterable_value));
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
-        return static_cast<std::size_t>(lz::size(_iterable_value));
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
+        return static_cast<size_t>(lz::size(_iterable_value));
     }
 
 #endif

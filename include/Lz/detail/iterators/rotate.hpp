@@ -26,7 +26,7 @@ public:
 private:
     iter _iterator;
     Iterable _iterable;
-    std::size_t _offset{};
+    size_t _offset{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -46,7 +46,7 @@ public:
 #endif
 
     template<class I>
-    constexpr rotate_iterator(I&& iterable, iter start, const std::size_t offset) :
+    constexpr rotate_iterator(I&& iterable, iter start, const size_t offset) :
         _iterator{ std::move(start) },
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset } {
@@ -54,7 +54,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const iter& end) {
         _iterator = end;
-        _offset = std::numeric_limits<std::size_t>::max();
+        _offset = std::numeric_limits<size_t>::max();
         return *this;
     }
 
@@ -87,7 +87,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         LZ_ASSERT_SUB_ADDABLE((n < 0 ? -n : n) <= (_iterable.end() - _iterable.begin()));
-        _offset += static_cast<std::size_t>(n);
+        _offset += static_cast<size_t>(n);
         if (n < 0) {
             n = -n;
             if (n > _iterator - _iterable.begin()) {

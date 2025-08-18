@@ -14,7 +14,7 @@ class loop_iterable;
 template<class Iterable>
 class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
     maybe_owned<Iterable> _iterable;
-    std::size_t _amount{};
+    size_t _amount{};
 
 public:
     using iterator = loop_iterator<maybe_owned<Iterable>, false>;
@@ -41,22 +41,22 @@ public:
 #endif
 
     template<class I>
-    constexpr loop_iterable(I&& iterable, const std::size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
+    constexpr loop_iterable(I&& iterable, const size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return _amount * static_cast<std::size_t>(lz::size(_iterable));
+        return _amount * static_cast<size_t>(lz::size(_iterable));
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const {
-        return _amount * static_cast<std::size_t>(lz::size(_iterable));
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+        return _amount * static_cast<size_t>(lz::size(_iterable));
     }
 
 #endif

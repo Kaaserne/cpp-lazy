@@ -89,7 +89,7 @@ using random_iterable = detail::random_iterable<Arithmetic, Distribution, Genera
  * ```
  */
 template<class Arithmetic>
-using default_random_iterable = decltype(std::declval<detail::random_adaptor<true>>()(Arithmetic{}, Arithmetic{}, std::size_t{}));
+using default_random_iterable = decltype(std::declval<detail::random_adaptor<true>>()(Arithmetic{}, Arithmetic{}, size_t{}));
 
 /**
  * @brief The default common random iterable helper alias. Uses std::mt19937 as the default generator and
@@ -103,7 +103,7 @@ using default_random_iterable = decltype(std::declval<detail::random_adaptor<tru
  */
 template<class Arithmetic>
 using common_default_random_iterable =
-    decltype(std::declval<detail::random_adaptor<false>>()(Arithmetic{}, Arithmetic{}, std::size_t{}));
+    decltype(std::declval<detail::random_adaptor<false>>()(Arithmetic{}, Arithmetic{}, size_t{}));
 
 } // namespace lz
 

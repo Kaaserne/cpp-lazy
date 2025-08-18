@@ -10,7 +10,7 @@ namespace detail {
 template<class Iterable>
 class cached_size_iterable : public lazy_view {
     maybe_owned<Iterable> _iterable;
-    std::size_t _size{};
+    size_t _size{};
 
 public:
     using iterator = iter_t<Iterable>;
@@ -34,10 +34,10 @@ public:
     template<class I>
     explicit constexpr cached_size_iterable(I&& iterable) :
         _iterable{ std::forward<I>(iterable) },
-        _size{ static_cast<std::size_t>(lz::eager_size(_iterable)) } {
+        _size{ static_cast<size_t>(lz::eager_size(_iterable)) } {
     }
 
-    LZ_NODISCARD constexpr std::size_t size() const noexcept {
+    LZ_NODISCARD constexpr size_t size() const noexcept {
         return _size;
     }
 

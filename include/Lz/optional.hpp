@@ -48,7 +48,7 @@ class optional {
 
     template<class U>
     void construct(U&& obj) noexcept(std::is_nothrow_constructible<T, U>::value) {
-        ::new (static_cast<void*>(std::addressof(_value))) T(std::forward<U>(obj));
+        ::new (static_cast<void*>(detail::addressof(_value))) T(std::forward<U>(obj));
         _has_value = true;
     }
 

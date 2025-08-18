@@ -4,8 +4,6 @@
 #define LZ_TRAITS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
-#include <array>
-#include <cstddef>
 #include <iterator>
 #include <type_traits>
 
@@ -94,6 +92,8 @@ operator-(const Sentinel& sent, const iterator<Derived, Reference, Pointer, Diff
 
 struct lazy_view {};
 
+using size_t = decltype(sizeof(0));
+
 } // namespace lz
 
 namespace lz {
@@ -181,12 +181,12 @@ struct plus {
 template<class T>
 using remove_ref = typename std::remove_reference<T>::type;
 
-template<std::size_t... Is>
+template<size_t... Is>
 struct index_sequence {
     using type = index_sequence;
 };
 
-template<std::size_t N>
+template<size_t N>
 struct make_index_sequence_impl {
 private:
     using left = typename make_index_sequence_impl<N / 2>::type;
@@ -195,7 +195,7 @@ private:
     template<class L, class R>
     struct concat;
 
-    template<std::size_t... Ls, std::size_t... Rs>
+    template<size_t... Ls, size_t... Rs>
     struct concat<index_sequence<Ls...>, index_sequence<Rs...>> {
         using type = index_sequence<Ls..., (Rs + sizeof...(Ls))...>;
     };
@@ -214,13 +214,13 @@ struct make_index_sequence_impl<1> {
     using type = index_sequence<0>;
 };
 
-template<std::size_t N>
+template<size_t N>
 using make_index_sequence = typename make_index_sequence_impl<N>::type;
 
 template<class T>
 using decay_t = typename std::decay<T>::type;
 
-template<std::size_t I, class T>
+template<size_t I, class T>
 using tup_element = typename std::tuple_element<I, T>::type;
 
 #else // ^^^ has cxx 11 vvv cxx > 11
@@ -228,16 +228,16 @@ using tup_element = typename std::tuple_element<I, T>::type;
 template<class T>
 using remove_ref = std::remove_reference_t<T>;
 
-template<std::size_t... N>
+template<size_t... N>
 using index_sequence = std::index_sequence<N...>;
 
-template<std::size_t N>
+template<size_t N>
 using make_index_sequence = std::make_index_sequence<N>;
 
 template<class T>
 using decay_t = std::decay_t<T>;
 
-template<std::size_t I, class T>
+template<size_t I, class T>
 using tup_element = std::tuple_element_t<I, T>;
 
 #define MAKE_BIN_PRED(OP) std::OP<>
@@ -341,7 +341,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept;
+LZ_NODISCARD constexpr size_t size(const T(&)[N]) noexcept;
 
 #endif
 
@@ -479,7 +479,7 @@ struct is_iterable : std::false_type {};
 template<class T>
 struct is_iterable<T, void_t<decltype(std::begin(std::declval<T>()), std::end(std::declval<T>()))>> : std::true_type {};
 
-template<class T, std::size_t N>
+template<class T, size_t N>
 struct is_iterable<T[N]> : std::true_type {};
 
 template<class T, class = void>

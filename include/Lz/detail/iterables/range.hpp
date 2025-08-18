@@ -40,31 +40,31 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr std::size_t size() const noexcept {
+    [[nodiscard]] constexpr size_t size() const noexcept {
         if constexpr (std::is_floating_point_v<Arithmetic>) {
             const auto total_length = (_end - _start) / static_cast<Arithmetic>(_step);
-            const auto int_part = static_cast<std::size_t>(total_length);
+            const auto int_part = static_cast<size_t>(total_length);
             return (total_length > static_cast<Arithmetic>(int_part)) ? int_part + 1 : int_part;
         }
         else {
             const auto diff = _end - _start;
-            return static_cast<std::size_t>(std::abs((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step));
+            return static_cast<size_t>(std::abs((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step));
         }
     }
 
 #else
 
     template<class A = Arithmetic>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, std::size_t> size() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, size_t> size() const noexcept {
         const auto total_length = (_end - _start) / static_cast<Arithmetic>(_step);
-        const auto int_part = static_cast<std::size_t>(total_length);
+        const auto int_part = static_cast<size_t>(total_length);
         return (total_length > static_cast<A>(int_part)) ? int_part + 1 : int_part;
     }
 
     template<class A = Arithmetic>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, std::size_t> size() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, size_t> size() const noexcept {
         const auto diff = _end - _start;
-        return static_cast<std::size_t>(std::abs((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step));
+        return static_cast<size_t>(std::abs((diff + (_step > 0 ? _step - 1 : _step + 1)) / _step));
     }
 
 #endif
@@ -97,29 +97,29 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size() const noexcept {
         if constexpr (std::is_floating_point_v<Arithmetic>) {
             const auto total_length = (_end - _start);
-            const auto int_part = static_cast<std::size_t>(total_length);
+            const auto int_part = static_cast<size_t>(total_length);
             return (total_length > static_cast<Arithmetic>(int_part)) ? int_part + 1 : int_part;
         }
         else {
-            return static_cast<std::size_t>(_end - _start);
+            return static_cast<size_t>(_end - _start);
         }
     }
 
 #else
 
     template<class A = Arithmetic>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, std::size_t> size() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, size_t> size() const noexcept {
         const auto total_length = (_end - _start);
-        const auto int_part = static_cast<std::size_t>(total_length);
+        const auto int_part = static_cast<size_t>(total_length);
         return (total_length > static_cast<Arithmetic>(int_part)) ? int_part + 1 : int_part;
     }
 
     template<class A = Arithmetic>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, std::size_t> size() const noexcept {
-        return static_cast<std::size_t>(_end - _start);
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, size_t> size() const noexcept {
+        return static_cast<size_t>(_end - _start);
     }
 
 #endif

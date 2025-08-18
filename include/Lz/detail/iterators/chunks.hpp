@@ -29,10 +29,10 @@ private:
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
     S _end;
-    std::size_t _chunk_size{};
+    size_t _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
-        for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
+        for (size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end) {
         }
     }
 
@@ -53,7 +53,7 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const size_t chunk_size) :
         _sub_range_begin{ it },
         _sub_range_end{ std::move(it) },
         _end{ std::move(end) },
@@ -107,11 +107,11 @@ private:
     Iterator _sub_range_begin;
     Iterator _sub_range_end;
     S _end;
-    std::size_t _chunk_size{};
-    std::size_t _distance{};
+    size_t _chunk_size{};
+    size_t _distance{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
-        for (std::size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
+        for (size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
         }
     }
 
@@ -133,7 +133,7 @@ public:
 #endif
 
     LZ_CONSTEXPR_CXX_14
-    chunks_iterator(Iterator begin, S end, const std::size_t chunk_size, const std::size_t cur_distance) :
+    chunks_iterator(Iterator begin, S end, const size_t chunk_size, const size_t cur_distance) :
         _sub_range_begin{ begin },
         _sub_range_end{ std::move(begin) },
         _end{ std::move(end) },
@@ -167,7 +167,7 @@ public:
         auto start_pos = _distance % _chunk_size;
         const auto adjusted_start_pos = start_pos == 0 ? _chunk_size : start_pos;
 
-        for (std::size_t count = 0; count < adjusted_start_pos; count++, --_sub_range_begin, --_distance) {
+        for (size_t count = 0; count < adjusted_start_pos; count++, --_sub_range_begin, --_distance) {
         }
     }
 
@@ -197,7 +197,7 @@ public:
 private:
     Iterator _sub_range_begin;
     Iterable _iterable;
-    std::size_t _chunk_size{};
+    size_t _chunk_size{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -217,7 +217,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const std::size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const size_t chunk_size) :
         _sub_range_begin{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {
@@ -230,10 +230,10 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
-        using s = typename std::make_signed<std::size_t>::type;
+        using s = typename std::make_signed<size_t>::type;
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _iterable.end());
-        auto sub_range_end = _sub_range_begin +
-                             static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(_iterable.end() - _sub_range_begin)));
+        auto sub_range_end =
+            _sub_range_begin + static_cast<s>(std::min(_chunk_size, static_cast<size_t>(_iterable.end() - _sub_range_begin)));
         return { _sub_range_begin, sub_range_end };
     }
 
@@ -243,13 +243,13 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(_sub_range_begin != _iterable.end());
-        using s = typename std::make_signed<std::size_t>::type;
-        _sub_range_begin += static_cast<s>(std::min(_chunk_size, static_cast<std::size_t>(_iterable.end() - _sub_range_begin)));
+        using s = typename std::make_signed<size_t>::type;
+        _sub_range_begin += static_cast<s>(std::min(_chunk_size, static_cast<size_t>(_iterable.end() - _sub_range_begin)));
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         LZ_ASSERT_DECREMENTABLE(_sub_range_begin != _iterable.begin());
-        const auto remaining = static_cast<std::size_t>(_sub_range_begin - _iterable.begin());
+        const auto remaining = static_cast<size_t>(_sub_range_begin - _iterable.begin());
         const auto offset = remaining % _chunk_size;
 
         if (offset == 0) {

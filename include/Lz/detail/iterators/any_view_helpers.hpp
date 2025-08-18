@@ -7,7 +7,9 @@
 #include <Lz/detail/unique_ptr.hpp>
 #include <Lz/detail/variant.hpp>
 #include <Lz/iterator_base.hpp>
-#include <cstring>
+#include <cstddef>
+#include <cstring> // max_align_t
+
 // TODO rename file
 namespace lz {
 namespace detail {
@@ -32,7 +34,7 @@ class iterator_wrapper : public iterator<iterator_wrapper<T, Reference, IterCat,
     using any_iter_base = iterator_base<Reference, IterCat, DiffType>;
 
 public:
-    static constexpr std::size_t SBO_SIZE = 64;
+    static constexpr size_t SBO_SIZE = 64;
 
 private:
     struct alignas(std::max_align_t) storage {

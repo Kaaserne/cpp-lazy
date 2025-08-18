@@ -51,17 +51,17 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<std::size_t>(lz::size(_iterable) - static_cast<std::size_t>(_to - _from));
+        return static_cast<size_t>(lz::size(_iterable) - static_cast<size_t>(_to - _from));
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable) - static_cast<std::size_t>(_to - _from));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, size_t> size() const {
+        return static_cast<size_t>(lz::size(_iterable) - static_cast<size_t>(_to - _from));
     }
 #endif
 

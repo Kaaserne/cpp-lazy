@@ -12,7 +12,7 @@ namespace detail {
 template<class Iterable>
 class pairwise_iterable : public lazy_view {
     maybe_owned<Iterable> _iterable;
-    std::size_t _pair_size{};
+    size_t _pair_size{};
 
 public:
     using iterator = conditional<!is_ra<iter_t<Iterable>>::value, bidi_pairwise_iterator<maybe_owned<Iterable>>,
@@ -43,7 +43,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 pairwise_iterable(I&& iterable, const std::size_t pair_size) :
+    LZ_CONSTEXPR_CXX_14 pairwise_iterable(I&& iterable, const size_t pair_size) :
         _iterable{ std::forward<I>(iterable) },
         _pair_size{ pair_size } {
         LZ_ASSERT(_pair_size != 0, "Size must be greater than zero");
@@ -51,7 +51,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
         const auto it_size = lz::size(_iterable);
@@ -61,7 +61,7 @@ public:
 #else
 
     template<bool S = is_sized<Iterable>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, size_t> size() const {
         const auto it_size = lz::size(_iterable);
         return it_size < _pair_size ? 0 : it_size - _pair_size + 1;
     }
@@ -81,7 +81,7 @@ public:
             return { _iterable, _iterable.begin(), _pair_size };
         }
         else if constexpr (is_bidi_tag_v<it_cat> && !has_sentinel_v<Iterable>) {
-            std::size_t count = 0;
+            size_t count = 0;
             auto it = _iterable.end();
             for (; count < _pair_size && it != _iterable.begin(); --it, ++count) {
             }
@@ -90,7 +90,7 @@ public:
             }
         }
         else {
-            std::size_t count = 0;
+            size_t count = 0;
             auto it = _iterable.begin();
             for (; count < _pair_size && it != _iterable.end(); ++it, ++count) {
             }
@@ -137,7 +137,7 @@ public:
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     enable_if<!is_ra_tag<Cat>::value && !has_sentinel<Iterable>::value && !is_sized<Iterable>::value, iterator>
     begin() const {
-        std::size_t count = 0;
+        size_t count = 0;
         auto it = _iterable.end();
         for (; count < _pair_size && it != _iterable.begin(); --it, ++count) {
         }
@@ -151,7 +151,7 @@ public:
 
     template<class Cat = it_cat>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<Cat>::value, iterator> begin() const {
-        std::size_t count = 0;
+        size_t count = 0;
         auto it = _iterable.begin();
         for (; count < _pair_size && it != _iterable.end(); ++it, ++count) {
         }

@@ -58,37 +58,37 @@ using is_all_sized = typename all_sized_impl<is_sized<Iterable>::value && is_ite
 
 #ifdef LZ_HAS_CXX_17
 
-template<std::size_t I, class Iterable>
-[[nodiscard]] constexpr std::size_t size_all(Iterable&& iterable) {
+template<size_t I, class Iterable>
+[[nodiscard]] constexpr size_t size_all(Iterable&& iterable) {
     if constexpr (I == 1) {
-        return static_cast<std::size_t>(lz::size(iterable));
+        return static_cast<size_t>(lz::size(iterable));
     }
     else {
         using lz::detail::accumulate;
         using std::accumulate;
-        return accumulate(iterable.begin(), iterable.end(), std::size_t{ 0 },
-                          [](std::size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
+        return accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
+                          [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
     }
 }
 
 #else
 
-template<std::size_t I, class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<I == 1, std::size_t> size_all(Iterable&& iterable) {
-    return static_cast<std::size_t>(lz::size(iterable));
+template<size_t I, class Iterable>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<I == 1, size_t> size_all(Iterable&& iterable) {
+    return static_cast<size_t>(lz::size(iterable));
 }
 
-template<std::size_t I, class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<(I > 1), std::size_t> size_all(Iterable&& iterable) {
+template<size_t I, class Iterable>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<(I > 1), size_t> size_all(Iterable&& iterable) {
     using lz::detail::accumulate;
     using std::accumulate;
-    return accumulate(iterable.begin(), iterable.end(), std::size_t{ 0 },
-                      [](std::size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
+    return accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
+                      [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
 }
 
 #endif
 
-template<class Iterable, std::size_t Dims>
+template<class Iterable, size_t Dims>
 class flatten_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
     using inner_sentinel = sentinel_t<Iterable>;
@@ -125,7 +125,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(is_all_sized<Iterable>::value)
     {
         return size_all<Dims + 1>(_iterable);
@@ -134,7 +134,7 @@ public:
 #else
 
     template<class T = is_all_sized<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, size_t> size() const {
         return size_all<Dims + 1>(_iterable);
     }
 

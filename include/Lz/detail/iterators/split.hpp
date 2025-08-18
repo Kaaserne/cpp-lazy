@@ -76,8 +76,8 @@ public:
             return { _sub_range_begin, _sub_range_end.first };
         }
         else {
-            return { std::addressof(*_sub_range_begin),
-                     static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
+            return { detail::addressof(*_sub_range_begin),
+                     static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
         }
     }
 
@@ -93,8 +93,8 @@ public:
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _end);
-        return { std::addressof(*_sub_range_begin),
-                 static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
+        return { detail::addressof(*_sub_range_begin),
+                 static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
     }
 
 #endif
@@ -197,8 +197,7 @@ public:
             return { _sub_range_begin, _sub_range_end };
         }
         else {
-            return { std::addressof(*_sub_range_begin),
-                     static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
+            return { detail::addressof(*_sub_range_begin), static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
         }
     }
 
@@ -214,7 +213,7 @@ public:
     template<class V = ValueType>
     LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
-        return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
+        return { detail::addressof(*_sub_range_begin), static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
     }
 
 #endif

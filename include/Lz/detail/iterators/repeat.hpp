@@ -18,7 +18,7 @@ template<class T>
 class repeat_iterator<false, T> : public iterator<repeat_iterator<false, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
                                                   std::random_access_iterator_tag, default_sentinel_t> {
     T _to_repeat;
-    std::size_t _amount{};
+    size_t _amount{};
 
 public:
     using iterator_category = std::random_access_iterator_tag;
@@ -41,7 +41,7 @@ public:
 
 #endif
 
-    constexpr repeat_iterator(T to_repeat, const std::size_t start) : _to_repeat{ std::forward<T>(to_repeat) }, _amount{ start } {
+    constexpr repeat_iterator(T to_repeat, const size_t start) : _to_repeat{ std::forward<T>(to_repeat) }, _amount{ start } {
     }
 
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel_t) {
@@ -76,8 +76,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
-        LZ_ASSERT_ADDABLE(value > 0 ? _amount >= static_cast<std::size_t>(value) : true);
-        _amount -= static_cast<std::size_t>(value);
+        LZ_ASSERT_ADDABLE(value > 0 ? _amount >= static_cast<size_t>(value) : true);
+        _amount -= static_cast<size_t>(value);
     }
 
     constexpr difference_type difference(const repeat_iterator& other) const noexcept {

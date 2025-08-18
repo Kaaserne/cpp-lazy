@@ -81,7 +81,7 @@ public:
             return { _sub_range_begin, _sub_range_end };
         }
         else {
-            return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
+            return { detail::addressof(*_sub_range_begin), static_cast<size_t>(_sub_range_end - _sub_range_begin) };
         }
     }
 
@@ -98,7 +98,7 @@ public:
     LZ_CONSTEXPR_CXX_14 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         static_assert(is_ra<Iterator>::value, "Iterator must be a random access");
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
-        return { std::addressof(*_sub_range_begin), static_cast<std::size_t>(_sub_range_end - _sub_range_begin) };
+        return { detail::addressof(*_sub_range_begin), static_cast<size_t>(_sub_range_end - _sub_range_begin) };
     }
 
 #endif

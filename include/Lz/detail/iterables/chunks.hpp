@@ -11,7 +11,7 @@ namespace detail {
 template<class Iterable>
 class chunks_iterable : public lazy_view {
     maybe_owned<Iterable> _iterable;
-    std::size_t _chunk_size{};
+    size_t _chunk_size{};
 
     using inner = iter_t<Iterable>;
 
@@ -37,24 +37,24 @@ public:
 #endif
 
     template<class I>
-    constexpr chunks_iterable(I&& iterable, const std::size_t chunk_size) :
+    constexpr chunks_iterable(I&& iterable, const size_t chunk_size) :
         _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<std::size_t>(lz::size(_iterable) + (_chunk_size - 1)) / _chunk_size;
+        return static_cast<size_t>(lz::size(_iterable) + (_chunk_size - 1)) / _chunk_size;
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable) + (_chunk_size - 1)) / _chunk_size;
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+        return static_cast<size_t>(lz::size(_iterable) + (_chunk_size - 1)) / _chunk_size;
     }
 
 #endif

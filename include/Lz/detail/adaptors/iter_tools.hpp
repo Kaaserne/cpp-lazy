@@ -28,7 +28,7 @@ struct convert_fn {
     }
 };
 
-template<std::size_t N>
+template<size_t N>
 struct get_fn {
     template<class T>
     LZ_NODISCARD constexpr auto operator()(T&& gettable) const noexcept -> decltype(std::get<N>(std::forward<T>(gettable))) {
@@ -165,10 +165,10 @@ struct as_adaptor {
     }
 };
 
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 using get_nth_iterable = map_iterable<Iterable, get_fn<N>>;
 
-template<std::size_t N>
+template<size_t N>
 struct get_n_adaptor {
     using adaptor = get_n_adaptor<N>;
 
@@ -190,10 +190,10 @@ struct get_n_adaptor {
     }
 };
 
-template<class Iterable, std::size_t... N>
+template<class Iterable, size_t... N>
 using get_nths_iterable = zip_iterable<get_nth_iterable<Iterable, N>...>;
 
-template<std::size_t... N>
+template<size_t... N>
 struct get_nths_adaptor {
     using adaptor = get_nths_adaptor<N...>;
 
@@ -516,7 +516,7 @@ struct pad_adaptor {
      */
     template<class Iterable, class T>
     pad_iterable<remove_ref<Iterable>, remove_rvalue_reference_t<T>>
-    operator()(Iterable&& iterable, T&& value, const std::size_t amount) const {
+    operator()(Iterable&& iterable, T&& value, const size_t amount) const {
         return lz::concat(std::forward<Iterable>(iterable), lz::repeat(std::forward<T>(value), amount));
     }
 
@@ -531,7 +531,7 @@ struct pad_adaptor {
      * @param amount The amount of times to repeat the value.
      */
     template<class T>
-    fn_args_holder<adaptor, T, std::size_t> operator()(T&& value, const std::size_t amount) const {
+    fn_args_holder<adaptor, T, size_t> operator()(T&& value, const size_t amount) const {
         return { std::forward<T>(value), amount };
     }
 };

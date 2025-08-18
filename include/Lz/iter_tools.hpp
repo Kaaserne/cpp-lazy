@@ -86,7 +86,7 @@ using as_iterable = detail::as_iterable<Iterable, T>;
  * lz::get_nth_iterable<std::vector<std::tuple<int, int, int>>, 0> keys_iterable = lz::keys(three_tuple_vec);
  * ```
  */
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 using get_nth_iterable = detail::get_nth_iterable<Iterable, N>;
 
 /**
@@ -125,7 +125,7 @@ using values_iterable = get_nth_iterable<Iterable, 1>;
  * lz::get_nths_iterable<std::vector<std::tuple<int, int, int>>, 0, 2> iterable = three_tuple_vec | lz::get_nths<0, 2>;
  * ```
  */
-template<class Iterable, std::size_t... N>
+template<class Iterable, size_t... N>
 using get_nths_iterable = detail::get_nths_iterable<Iterable, N...>;
 
 /**
@@ -222,7 +222,7 @@ using as = detail::as_adaptor<T>;
  * ```
  * @tparam I The index to get from the std::get-able container.
  */
-template<std::size_t I>
+template<size_t I>
 using get_nth = detail::get_n_adaptor<I>;
 
 /**
@@ -236,7 +236,7 @@ using get_nth = detail::get_n_adaptor<I>;
  * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
  * from each tuple in the iterable.
  */
-template<std::size_t... N>
+template<size_t... N>
 using get_nths = detail::get_nths_adaptor<N...>;
 
 #else
@@ -265,7 +265,7 @@ LZ_INLINE_VAR constexpr detail::as_adaptor<T> as{};
  * ```
  * @tparam I The index to get from the std::get-able container.
  */
-template<std::size_t I>
+template<size_t I>
 LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
 
 /**
@@ -279,7 +279,7 @@ LZ_INLINE_VAR constexpr detail::get_n_adaptor<I> get_nth{};
  * @tparam N The indexes of the elements to get from the iterable. For example, `0, 2` will get the first and third elements
  * from each tuple in the iterable.
  */
-template<std::size_t... N>
+template<size_t... N>
 LZ_INLINE_VAR constexpr detail::get_nths_adaptor<N...> get_nths{};
 
 #endif

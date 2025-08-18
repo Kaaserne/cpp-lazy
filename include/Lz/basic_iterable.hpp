@@ -6,11 +6,8 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/iterators/take.hpp>
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
-#include <Lz/string_view.hpp>
-#include <array>
 
 namespace lz {
 namespace detail {
@@ -57,19 +54,19 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(is_ra_tag_v<typename traits::iterator_category>)
     {
         LZ_ASSERT(_end - _begin >= 0, "Incompatible iterator");
-        return static_cast<std::size_t>(_end - _begin);
+        return static_cast<size_t>(_end - _begin);
     }
 
 #else
 
     template<class Tag = typename traits::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<Tag>::value, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<Tag>::value, size_t> size() const {
         LZ_ASSERT(_end - _begin >= 0, "Incompatible iterator");
-        return static_cast<std::size_t>(_end - _begin);
+        return static_cast<size_t>(_end - _begin);
     }
 
 #endif
@@ -99,7 +96,7 @@ class sized_iterable_impl : public lazy_view {
 
     I _begin;
     S _end;
-    std::size_t _size{};
+    size_t _size{};
 
 public:
     using iterator = I;
@@ -127,7 +124,7 @@ public:
     constexpr sized_iterable_impl(iterator_type begin, S end) :
         _begin{ std::move(begin) },
         _end{ std::move(end) },
-        _size{ static_cast<std::size_t>(_end - _begin) } {
+        _size{ static_cast<size_t>(_end - _begin) } {
     }
 
     template<class Iterable>
@@ -137,7 +134,7 @@ public:
         _size{ lz::size(iterable) } {
     }
 
-    LZ_NODISCARD constexpr std::size_t size() const noexcept {
+    LZ_NODISCARD constexpr size_t size() const noexcept {
         return _size;
     }
 
@@ -216,18 +213,17 @@ template<class Container, class = void>
 struct has_insert_after : std::false_type {};
 
 template<class Container>
-struct has_insert_after<
-    Container, void_t<decltype(0, std::declval<Container>().insert_after(std::declval<typename Container::const_iterator>(),
-                                                                         std::declval<typename Container::value_type>()))>>
+struct has_insert_after<Container,
+                        void_t<decltype(std::declval<Container>().insert_after(std::declval<typename Container::const_iterator>(),
+                                                                               std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
 template<class Container, class = void>
 struct has_insert : std::false_type {};
 
 template<class Container>
-struct has_insert<Container,
-                  void_t<decltype(0, std::declval<Container>().insert(std::declval<typename Container::iterator>(),
-                                                                      std::declval<typename Container::value_type>()))>>
+struct has_insert<Container, void_t<decltype(std::declval<Container>().insert(std::declval<typename Container::iterator>(),
+                                                                              std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
 template<class Container, class = void>
@@ -235,14 +231,14 @@ struct has_push_back : std::false_type {};
 
 template<class Container>
 struct has_push_back<Container,
-                     void_t<decltype(0, std::declval<Container>().push_back(std::declval<typename Container::value_type>()))>>
+                     void_t<decltype(std::declval<Container>().push_back(std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
 template<class Container, class = void>
 struct has_push : std::false_type {};
 
 template<class Container>
-struct has_push<Container, void_t<decltype(0, std::declval<Container>().push(std::declval<typename Container::value_type>()))>>
+struct has_push<Container, void_t<decltype(std::declval<Container>().push(std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
 #ifdef LZ_HAS_CXX_17
@@ -290,13 +286,9 @@ inline constexpr bool has_push_v = has_push<T>::value;
  * ```
  */
 LZ_MODULE_EXPORT template<class Container, class = void>
-struct custom_copier_for;
-
-// std::array doesnt have push_back, insert, insert_after... etc, so just use copy
-LZ_MODULE_EXPORT template<class T, std::size_t N>
-struct custom_copier_for<std::array<T, N>> {
+struct custom_copier_for {
     template<class Iterable>
-    LZ_CONSTEXPR_CXX_14 void copy(Iterable&& iterable, std::array<T, N>& container) const {
+    LZ_CONSTEXPR_CXX_14 void copy(Iterable&& iterable, Container& container) const {
         lz::copy(std::forward<Iterable>(iterable), container.begin());
     }
 };
@@ -564,7 +556,7 @@ to(Args&&... args)
  * class custom_container {
  *    std::vector<T> _vec;
  *  public:
- *      void reserve(std::size_t size) {
+ *      void reserve(size_t size) {
  *         _vec.reserve(size);
  *      }
  *
@@ -624,7 +616,7 @@ template<class Container, class... Args, class Iterable>
  * class custom_container {
  *    std::vector<T> _vec;
  *  public:
- *      void reserve(std::size_t size) {
+ *      void reserve(size_t size) {
  *         _vec.reserve(size);
  *      }
  *
@@ -746,7 +738,7 @@ to(Args&&... args) {
  * class custom_container {
  *    std::vector<T> _vec;
  *  public:
- *      void reserve(std::size_t size) {
+ *      void reserve(size_t size) {
  *         _vec.reserve(size);
  *      }
  *
@@ -805,7 +797,7 @@ to(Iterable&& iterable, Args&&... args) {
  * class custom_container {
  *    std::vector<T> _vec;
  *  public:
- *      void reserve(std::size_t size) {
+ *      void reserve(size_t size) {
  *         _vec.reserve(size);
  *      }
  *

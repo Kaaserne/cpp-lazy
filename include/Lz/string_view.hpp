@@ -13,10 +13,6 @@
 
 #include <fmt/core.h>
 
-#else
-
-#include <cstddef>
-
 #endif
 
 LZ_MODULE_EXPORT namespace lz {
@@ -51,7 +47,7 @@ using string_view = fmt::string_view;
 
 namespace detail {
 template<class CharT>
-constexpr std::size_t constexpr_str_len(const CharT* str, std::size_t n = 0) noexcept {
+constexpr size_t constexpr_str_len(const CharT* str, size_t n = 0) noexcept {
     return str[n] == static_cast<CharT>(0) ? n : constexpr_str_len(str, n + 1);
 }
 } // namespace detail
@@ -66,7 +62,7 @@ public:
 
     constexpr basic_string_view() = default;
 
-    constexpr basic_string_view(const CharT* data, std::size_t size) noexcept : _data{ data }, _size{ size } {
+    constexpr basic_string_view(const CharT* data, size_t size) noexcept : _data{ data }, _size{ size } {
     }
 
     constexpr basic_string_view(const CharT* data) noexcept : basic_string_view(data, detail::constexpr_str_len(data)) {
@@ -74,14 +70,14 @@ public:
 
     constexpr basic_string_view(const CharT* begin, const CharT* end) noexcept :
         _data{ begin },
-        _size{ static_cast<std::size_t>(end - begin) } {
+        _size{ static_cast<size_t>(end - begin) } {
     }
 
     constexpr const CharT* data() const noexcept {
         return _data;
     }
 
-    constexpr std::size_t size() const noexcept {
+    constexpr size_t size() const noexcept {
         return _size;
     }
 
@@ -93,7 +89,7 @@ public:
         return _data == nullptr ? nullptr : _data + _size;
     }
 
-    constexpr std::size_t length() const noexcept {
+    constexpr size_t length() const noexcept {
         return size();
     }
 
@@ -103,7 +99,7 @@ public:
 
 private:
     const CharT* _data{};
-    std::size_t _size{};
+    size_t _size{};
 };
 
 /**

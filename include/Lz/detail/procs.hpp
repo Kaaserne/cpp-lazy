@@ -5,10 +5,10 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/traits.hpp>
-#include <cstddef>
-#include <iterator>
 
 // clang-format off
+
+#include <iterator>
 
 #if defined(LZ_DEBUG_ASSERTIONS)
   #define LZ_USE_DEBUG_ASSERTIONS
@@ -71,7 +71,7 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr std::size_t size(const T (&)[N]) noexcept {
+LZ_NODISCARD constexpr size_t size(const T(&)[N]) noexcept {
     return N;
 }
 
@@ -135,6 +135,16 @@ LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
 
 namespace lz {
 namespace detail {
+
+template<class T>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if<std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+    return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(arg)));
+}
+
+template<class T>
+LZ_NODISCARD constexpr enable_if<!std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+    return &arg;
+}
 
 #if defined(LZ_USE_DEBUG_ASSERTIONS)
 
@@ -359,7 +369,7 @@ template<class Iterable>
     }
     else {
         using std::distance;
-        return static_cast<std::size_t>(distance(c.begin(), c.end()));
+        return static_cast<size_t>(distance(c.begin(), c.end()));
     }
 }
 
@@ -404,9 +414,9 @@ LZ_NODISCARD constexpr auto eager_size(Iterable &&
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr detail::enable_if<!detail::is_sized<Iterable>::value, std::size_t> eager_size(Iterable && c) {
+LZ_NODISCARD constexpr detail::enable_if<!detail::is_sized<Iterable>::value, size_t> eager_size(Iterable && c) {
     using std::distance;
-    return static_cast<std::size_t>(distance(c.begin(), c.end()));
+    return static_cast<size_t>(distance(c.begin(), c.end()));
 }
 
 #endif

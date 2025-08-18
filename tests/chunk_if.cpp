@@ -1,7 +1,7 @@
-#include <pch.hpp>
-#include <doctest/doctest.h>
-#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <Lz/chunk_if.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <doctest/doctest.h>
+#include <pch.hpp>
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");

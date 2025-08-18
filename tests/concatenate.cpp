@@ -1,9 +1,10 @@
 #include <Lz/algorithm.hpp>
-#include <Lz/map.hpp>
 #include <Lz/concatenate.hpp>
+#include <Lz/map.hpp>
 #include <Lz/range.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
+#include <Lz/string_view.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>

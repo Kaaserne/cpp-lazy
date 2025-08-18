@@ -33,7 +33,7 @@ struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> 
  */
 template<class Iterable>
 struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
-    : std::integral_constant<std::size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
+    : std::integral_constant<size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
 
 #ifdef LZ_HAS_CXX_14
 
@@ -49,7 +49,7 @@ struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
  * @tparam Iterable The iterable type to get the dimensions of.
  */
 template<class Iterable>
-LZ_INLINE_VAR constexpr std::size_t dimensions_v = dimensions<Iterable>::value;
+LZ_INLINE_VAR constexpr size_t dimensions_v = dimensions<Iterable>::value;
 
 #endif
 

@@ -38,7 +38,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    LZ_NODISCARD constexpr std::size_t size() const
+    LZ_NODISCARD constexpr size_t size() const
         requires(sized<Iterable>)
     {
         return lz::size(_iterable);
@@ -47,7 +47,7 @@ public:
 #else
 
     template<bool Sized = is_sized<Iterable>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, size_t> size() const {
         return lz::size(_iterable);
     }
 

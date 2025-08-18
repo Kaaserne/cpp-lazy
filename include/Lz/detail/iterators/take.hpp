@@ -21,7 +21,7 @@ public:
 
 private:
     Iterator _iterator;
-    std::size_t _n{};
+    size_t _n{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -38,7 +38,7 @@ public:
 
 #endif
 
-    constexpr n_take_iterator(Iterator it, const std::size_t n) : _iterator{ std::move(it) }, _n{ n } {
+    constexpr n_take_iterator(Iterator it, const size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
     LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(default_sentinel_t) {
@@ -68,7 +68,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         _iterator += offset;
-        _n -= static_cast<std::size_t>(offset);
+        _n -= static_cast<size_t>(offset);
     }
 
     constexpr difference_type difference(const n_take_iterator& other) const {

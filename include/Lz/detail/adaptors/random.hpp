@@ -9,7 +9,7 @@
 
 namespace lz {
 namespace detail {
-template<std::size_t N>
+template<size_t N>
 class seed_sequence {
 public:
     using result_type = std::seed_seq::result_type;
@@ -57,20 +57,20 @@ public:
         using iter_value_type = val_t<Iter>;
 
         std::fill(begin, end, 0x8b8b8b8b);
-        const auto n = static_cast<std::size_t>(end - begin);
+        const auto n = static_cast<size_t>(end - begin);
         constexpr auto s = N;
-        const std::size_t m = std::max(s + 1, n);
-        const std::size_t t = (n >= 623) ? 11 : (n >= 68) ? 7 : (n >= 39) ? 5 : (n >= 7) ? 3 : (n - 1) / 2;
-        const std::size_t p = (n - t) / 2;
-        const std::size_t q = p + t;
+        const size_t m = std::max(s + 1, n);
+        const size_t t = (n >= 623) ? 11 : (n >= 68) ? 7 : (n >= 39) ? 5 : (n >= 7) ? 3 : (n - 1) / 2;
+        const size_t p = (n - t) / 2;
+        const size_t q = p + t;
 
         auto mask = static_cast<iter_value_type>(1) << 31;
         mask <<= 1;
         mask -= 1;
 
-        for (std::size_t k = 0; k < m - 1; k++) {
-            const std::size_t k_mod_n = k % n;
-            const std::size_t k_plus_mod_n = (k + p) % n;
+        for (size_t k = 0; k < m - 1; k++) {
+            const size_t k_mod_n = k % n;
+            const size_t k_plus_mod_n = (k + p) % n;
             const result_type r1 = 1664525 * T(begin[k_mod_n] ^ begin[k_plus_mod_n] ^ begin[(k - 1) % n]);
 
             result_type r2;
@@ -89,9 +89,9 @@ public:
             begin[k_mod_n] = r2;
         }
 
-        for (std::size_t k = m; k < m + n - 1; k++) {
-            const std::size_t k_mod_n = k % n;
-            const std::size_t k_plus_mod_n = (k + p) % n;
+        for (size_t k = m; k < m + n - 1; k++) {
+            const size_t k_mod_n = k % n;
+            const size_t k_plus_mod_n = (k + p) % n;
             const result_type r3 = 1566083941 * T(begin[k_mod_n] + begin[k_plus_mod_n] + begin[(k - 1) % n]);
             const auto r4 = static_cast<result_type>((r3 - k_mod_n) & mask);
 
@@ -106,7 +106,7 @@ public:
         std::copy(_seed.begin(), _seed.end(), output_iter);
     }
 
-    static constexpr std::size_t size() noexcept {
+    static constexpr size_t size() noexcept {
         return N;
     }
 };
@@ -138,7 +138,7 @@ struct random_adaptor {
      */
     template<class Distribution, class Generator>
     LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator, UseSentinel>
-    operator()(const Distribution& distribution, Generator& generator, const std::size_t amount) const {
+    operator()(const Distribution& distribution, Generator& generator, const size_t amount) const {
         return { distribution, generator, amount };
     }
 
@@ -162,7 +162,7 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class T>
-    [[nodiscard]] auto operator()(const T min, const T max, const std::size_t amount) const {
+    [[nodiscard]] auto operator()(const T min, const T max, const size_t amount) const {
         static auto gen = create_engine();
         if constexpr (std::is_integral_v<T>) {
             return (*this)(std::uniform_int_distribution<T>{ min, max }, gen, amount);
@@ -195,9 +195,9 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class Integral>
-    LZ_NODISCARD
-    enable_if<std::is_integral<Integral>::value, random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
-    operator()(const Integral min, const Integral max, const std::size_t amount) const {
+    LZ_NODISCARD enable_if<std::is_integral<Integral>::value,
+                           random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
+    operator()(const Integral min, const Integral max, const size_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_int_distribution<Integral>{ min, max }, gen, amount);
     }
@@ -219,9 +219,9 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class Floating>
-    LZ_NODISCARD
-    enable_if<std::is_floating_point<Floating>::value, random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
-    operator()(const Floating min, const Floating max, const std::size_t amount) const {
+    LZ_NODISCARD enable_if<std::is_floating_point<Floating>::value,
+                           random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
+    operator()(const Floating min, const Floating max, const size_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_real_distribution<Floating>{ min, max }, gen, amount);
     }

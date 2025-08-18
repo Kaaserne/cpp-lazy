@@ -22,7 +22,7 @@ class loop_iterator<Iterable, false>
 
     it _iterator;
     Iterable _iterable;
-    std::size_t _rotations_left{};
+    size_t _rotations_left{};
 
 public:
     using reference = typename traits::reference;
@@ -47,7 +47,7 @@ public:
 #endif
 
     template<class I>
-    constexpr loop_iterator(I&& iterable, it iter, std::size_t amount) :
+    constexpr loop_iterator(I&& iterable, it iter, size_t amount) :
         _iterator{ std::move(iter) },
         _iterable{ std::forward<I>(iterable) },
         _rotations_left{ amount } {
@@ -94,7 +94,7 @@ public:
         const auto iter_length = _iterable.end() - _iterable.begin();
         const auto remainder = offset % iter_length;
         _iterator += offset % iter_length;
-        _rotations_left -= static_cast<std::size_t>(offset / iter_length);
+        _rotations_left -= static_cast<size_t>(offset / iter_length);
 
         LZ_ASSERT_ADDABLE(static_cast<difference_type>(_rotations_left) >= -1);
 

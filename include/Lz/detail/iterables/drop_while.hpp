@@ -120,17 +120,17 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(is_ra_v<iterator>)
     {
-        return static_cast<std::size_t>(_end - _begin);
+        return static_cast<size_t>(_end - _begin);
     }
 
 #else
 
     template<class I = iter_t<Iterable>>
-    LZ_NODISCARD constexpr enable_if<is_ra<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(_end - _begin);
+    LZ_NODISCARD constexpr enable_if<is_ra<I>::value, size_t> size() const {
+        return static_cast<size_t>(_end - _begin);
     }
 
 #endif

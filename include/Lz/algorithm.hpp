@@ -387,7 +387,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_i
  * @return The index of the value in the range [begin(iterable), end(iterable)) or lz::npos if the value is not found
  */
 template<class Iterable, class T>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t index_of(Iterable&& iterable, const T& value) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t index_of(Iterable && iterable, const T& value) {
     return detail::index_of(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                             value);
 }
@@ -401,7 +401,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t index_of(Iterable&& iterable, const
  * lz::npos if the element is not found
  */
 template<class Iterable, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t index_of_if(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t index_of_if(Iterable && iterable, UnaryPredicate && unary_predicate) {
     return detail::index_of_if(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                                std::forward<UnaryPredicate>(unary_predicate));
 }
@@ -565,7 +565,7 @@ LZ_CONSTEXPR_CXX_14 void for_each_while(Iterable&& iterable, UnaryOp&& unary_op)
  * @param unary_op Predicate that must either return true or false
  */
 template<class Iterable, class UnaryOp>
-LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterable&& iterable, std::size_t n, UnaryOp&& unary_op) {
+LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterable && iterable, size_t n, UnaryOp && unary_op) {
     detail::for_each_while_n(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), n,
                              std::forward<UnaryOp>(unary_op));
 }

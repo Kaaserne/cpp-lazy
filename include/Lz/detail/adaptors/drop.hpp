@@ -26,7 +26,7 @@ struct drop_adaptor {
      * @return A drop_iterable that will drop the first n elements of the input iterable
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, const std::size_t n) const {
+    LZ_NODISCARD constexpr drop_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable, const size_t n) const {
         return { iterable, n };
     }
 
@@ -43,7 +43,7 @@ struct drop_adaptor {
      * @param n The amount of elements to drop
      * @return An adaptor that can be used with pipe expressions
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t> operator()(const std::size_t n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t n) const {
         return { n };
     }
 };

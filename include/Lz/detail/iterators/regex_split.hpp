@@ -61,7 +61,7 @@ public:
     }
 
     constexpr value_type dereference() const {
-        return value_type(&*_current->first, static_cast<std::size_t>(_current->length()));
+        return value_type(&*_current->first, static_cast<size_t>(_current->length()));
     }
 
     constexpr pointer arrow() const {

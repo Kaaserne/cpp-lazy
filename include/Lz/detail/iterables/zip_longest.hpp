@@ -42,21 +42,24 @@ public:
 
 #endif
 
-    template<std::size_t... I>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
-        return std::max({ static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... });
+    template<size_t... I>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
+        using std::get;
+        return std::max({ static_cast<size_t>(lz::size(get<I>(_iterables)))... });
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static zip_longest_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, zip_longest_iterable<Iterables...>&& zipper, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(zipper._iterables))... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(zipper._iterables))... };
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static zip_longest_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const zip_longest_iterable<Iterables...>& zipper, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::get<Is>(zipper._iterables)... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), get<Is>(zipper._iterables)... };
     }
 
 public:
@@ -66,7 +69,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size() const
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size() const
         requires(sized<Iterables> && ...)
     {
         return size(is{});
@@ -75,7 +78,7 @@ public:
 #else
 
     template<bool S = conjunction<is_sized<Iterables>...>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, size_t> size() const {
         return size(is{});
     }
 

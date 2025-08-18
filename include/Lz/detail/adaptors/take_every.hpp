@@ -46,7 +46,7 @@ struct take_every_adaptor {
      */
     template<class Iterable>
     [[nodiscard]] constexpr take_every_iterable<remove_ref<Iterable>>
-    operator()(Iterable&& iterable, const std::size_t offset, const std::size_t start = 0) const
+    operator()(Iterable&& iterable, const size_t offset, const size_t start = 0) const
         requires(lz::iterable<Iterable>)
     {
         return { std::forward<Iterable>(iterable), offset, start };
@@ -87,7 +87,7 @@ struct take_every_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, take_every_iterable<remove_ref<Iterable>>>
-    operator()(Iterable&& iterable, const std::size_t offset, const std::size_t start = 0) const {
+    operator()(Iterable&& iterable, const size_t offset, const size_t start = 0) const {
         return { std::forward<Iterable>(iterable), offset, start };
     }
 
@@ -122,8 +122,8 @@ struct take_every_adaptor {
      * @param start The start offset
      * @return An adaptor that can be used in pipe expressions
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, std::size_t, std::size_t>
-    operator()(const std::size_t offset, const std::size_t start = 0) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t, size_t>
+    operator()(const size_t offset, const size_t start = 0) const {
         return { offset, start };
     }
 };

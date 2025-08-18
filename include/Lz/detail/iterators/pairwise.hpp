@@ -22,7 +22,7 @@ class ra_pairwise_iterator : public iterator<ra_pairwise_iterator<Iterable>, bas
 
     iter _sub_begin;
     Iterable _iterable;
-    std::size_t _pair_size{};
+    size_t _pair_size{};
 
 public:
     using value_type = basic_iterable<iter>;
@@ -47,7 +47,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator(I&& iterable, iter it, const std::size_t pair_size) :
+    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator(I&& iterable, iter it, const size_t pair_size) :
         _sub_begin{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _pair_size{ pair_size } {
@@ -86,8 +86,8 @@ public:
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        const auto size = _iterable.end() - _iterable.begin();
-        return (_sub_begin + std::min(static_cast<difference_type>(_pair_size) - 1, size)) == std::end(_iterable);
+        return (_sub_begin + std::min(static_cast<difference_type>(_pair_size) - 1, _iterable.end() - _iterable.begin())) ==
+               std::end(_iterable);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
@@ -117,7 +117,7 @@ class bidi_pairwise_iterator : public iterator<bidi_pairwise_iterator<Iterable>,
     iter _sub_begin;
     iter _sub_end;
     Iterable _iterable;
-    std::size_t _pair_size{};
+    size_t _pair_size{};
 
 public:
     using value_type = basic_iterable<iter>;
@@ -142,7 +142,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator(I&& iterable, iter it, const std::size_t pair_size) :
+    LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator(I&& iterable, iter it, const size_t pair_size) :
         _sub_begin{ std::move(it) },
         _sub_end{ next_fast_safe(iterable, it == iterable.begin() ? static_cast<difference_type>(pair_size)
                                                                   : std::numeric_limits<difference_type>::max()) },

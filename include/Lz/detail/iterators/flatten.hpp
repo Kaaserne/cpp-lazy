@@ -15,7 +15,7 @@ namespace detail {
 #ifdef LZ_HAS_CXX_17
 
 template<class T>
-[[nodiscard]] constexpr std::size_t count_dims_fn() {
+[[nodiscard]] constexpr size_t count_dims_fn() {
     if constexpr (is_iterable_v<T>) {
         using inner = decltype(*std::begin(std::declval<T>()));
         return 1 + count_dims_fn<inner>();
@@ -35,12 +35,12 @@ struct count_dims_impl<false> {
 #ifdef LZ_HAS_CXX_11
 
     template<class>
-    using type = std::integral_constant<std::size_t, 0>;
+    using type = std::integral_constant<size_t, 0>;
 
 #else
 
     template<class>
-    static constexpr std::size_t value = 0;
+    static constexpr size_t value = 0;
 
 #endif
 };
@@ -54,13 +54,13 @@ struct count_dims_impl<true> {
 
     template<class T>
     using type =
-        std::integral_constant<std::size_t,
+        std::integral_constant<size_t,
                                1 + count_dims_impl<is_iterable<iterable_type<T>>::value>::template type<iterable_type<T>>::value>;
 
 #else
 
     template<class T>
-    static constexpr std::size_t value = 1 + count_dims_impl<is_iterable_v<iterable_type<T>>>::template value<iterable_type<T>>;
+    static constexpr size_t value = 1 + count_dims_impl<is_iterable_v<iterable_type<T>>>::template value<iterable_type<T>>;
 
 #endif
 };
@@ -75,12 +75,12 @@ using count_dims = typename count_dims_impl<is_iterable<T>::value>::template typ
 #elif !defined(LZ_HAS_CXX_17)
 
 template<class T>
-using count_dims = std::integral_constant<std::size_t, count_dims_impl<is_iterable_v<T>>::template value<T>>;
+using count_dims = std::integral_constant<size_t, count_dims_impl<is_iterable_v<T>>::template value<T>>;
 
 #else
 
 template<class T>
-using count_dims = std::integral_constant<std::size_t, count_dims_fn<T>()>;
+using count_dims = std::integral_constant<size_t, count_dims_fn<T>()>;
 
 #endif
 
@@ -211,16 +211,16 @@ public:
     }
 };
 
-template<class, std::size_t>
+template<class, size_t>
 class flatten_iterator;
 
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 using inner = flatten_iterator<remove_ref<ref_iterable_t<Iterable>>, N - 1>;
 
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 using iter_cat = common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>;
 
-template<class Iterable, std::size_t N>
+template<class Iterable, size_t N>
 class flatten_iterator
     : public iterator<flatten_iterator<Iterable, N>, ref_t<inner<Iterable, N>>, fake_ptr_proxy<ref_t<inner<Iterable, N>>>,
                       diff_type<inner<Iterable, N>>, iter_cat<Iterable, N>, default_sentinel_t> {

@@ -11,7 +11,7 @@ struct duplicates_adaptor {
 
     /**
      * @brief This iterable returns a pair of each element in the iterable and the number of times it appears in the iterable.
-     * `pair::first` is the element and `pair::second` is the count. The count is `std::size_t` and starts from 1. The input
+     * `pair::first` is the element and `pair::second` is the count. The count is `size_t` and starts from 1. The input
      * iterable needs to be sorted first in order to count the duplicates. The iterator category is min(bidirectional, <input
      * iterator category>). Its end() function will return a sentinel if the input iterable is forward or has a sentinel. This
      * iterable does not contain a .size() method. Example:
@@ -33,7 +33,7 @@ struct duplicates_adaptor {
 
     /**
      * @brief This iterable returns a pair of each element in the iterable and the number of times it appears in the iterable.
-     * `pair::first` is the element and `pair::second` is the count. The count is `std::size_t` and starts from 1. The input
+     * `pair::first` is the element and `pair::second` is the count. The count is `size_t` and starts from 1. The input
      * iterable needs to be sorted first in order to count the duplicates. The iterator category is min(bidirectional, <input
      * iterator category>). Its end() function will return a sentinel if the input iterable is forward or has a sentinel. This
      * iterable does not contain a .size() method. Example:
@@ -55,7 +55,7 @@ struct duplicates_adaptor {
 
     /**
      * @brief This iterable returns a pair of each element in the iterable and the number of times it appears in the iterable.
-     * `pair::first` is the element and `pair::second` is the count. The count is `std::size_t` and starts from 1. The input
+     * `pair::first` is the element and `pair::second` is the count. The count is `size_t` and starts from 1. The input
      * iterable needs to be sorted first in order to count the duplicates. The iterator category is min(bidirectional, <input
      * iterator category>). Its end() function will return a sentinel if the input iterable is forward or has a sentinel. This
      * iterable does not contain a .size() method. Example:

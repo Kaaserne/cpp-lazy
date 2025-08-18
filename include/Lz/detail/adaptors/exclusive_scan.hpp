@@ -74,7 +74,7 @@ struct exclusive_scan_adaptor {
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref<T>, BinaryOp> operator()(T&& init, BinaryOp binary_op = {}) const
-        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>)
+        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>)
     {
         return { std::forward<T>(init), std::move(binary_op) };
     }

@@ -17,7 +17,7 @@ class rotate_iterable : public lazy_view {
 
     maybe_owned<Iterable> _iterable;
     inner_iter _start_iter;
-    std::size_t _start_index{};
+    size_t _start_index{};
 
 public:
     using iterator = rotate_iterator<maybe_owned<Iterable>>;
@@ -50,22 +50,22 @@ public:
     LZ_CONSTEXPR_CXX_14 rotate_iterable(I&& iterable, const diff_t start) :
         _iterable{ std::forward<I>(iterable) },
         _start_iter{ next_fast_safe(_iterable, start) },
-        _start_index{ static_cast<std::size_t>(start) } {
+        _start_index{ static_cast<size_t>(start) } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<std::size_t>(lz::size(_iterable));
+        return static_cast<size_t>(lz::size(_iterable));
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(lz::size(_iterable));
+    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+        return static_cast<size_t>(lz::size(_iterable));
     }
 
 #endif

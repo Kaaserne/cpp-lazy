@@ -14,16 +14,16 @@ class duplicates_iterator;
 
 template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>>
-    : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, std::size_t>,
-                      fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, std::size_t>>, diff_type<iter_t<Iterable>>,
+    : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
+                      fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
                       common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
 
 public:
-    using value_type = std::pair<typename traits::value_type, std::size_t>;
-    using reference = std::pair<typename traits::reference, std::size_t>;
+    using value_type = std::pair<typename traits::value_type, size_t>;
+    using reference = std::pair<typename traits::reference, size_t>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
@@ -75,7 +75,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
-        return { *_first, static_cast<std::size_t>(_last - _first) };
+        return { *_first, static_cast<size_t>(_last - _first) };
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const {
@@ -112,16 +112,16 @@ public:
 
 template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>>
-    : public lz::iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, std::size_t>,
-                          fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, std::size_t>>, diff_type<iter_t<Iterable>>,
+    : public lz::iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
+                          fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
                           std::bidirectional_iterator_tag, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<iter_t<Iterable>>;
 
 public:
-    using value_type = std::pair<typename traits::value_type, std::size_t>;
-    using reference = std::pair<typename traits::reference, std::size_t>;
+    using value_type = std::pair<typename traits::value_type, size_t>;
+    using reference = std::pair<typename traits::reference, size_t>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
@@ -129,7 +129,7 @@ private:
     it _last;
     it _first;
     Iterable _iterable;
-    std::size_t _last_distance;
+    size_t _last_distance;
     mutable BinaryPredicate _compare;
 
     LZ_CONSTEXPR_CXX_14 void next() {

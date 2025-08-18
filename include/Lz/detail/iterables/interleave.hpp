@@ -16,23 +16,26 @@ class interleave_iterable {
     using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
     using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;
 
-    template<std::size_t... I>
-    LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
-        return std::min({ static_cast<std::size_t>(std::get<I>(_iterables).size())... }) * sizeof...(Iterables);
+    template<size_t... I>
+    LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
+        using std::get;
+        return std::min({ static_cast<size_t>(get<I>(_iterables).size())... }) * sizeof...(Iterables);
     }
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static interleave_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, interleave_iterable<Iterables...>&& interleaved, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(interleaved._iterables))... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(interleaved._iterables))... };
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static interleave_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const interleave_iterable<Iterables...>& interleaved, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::get<Is>(interleaved._iterables)... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), get<Is>(interleaved._iterables)... };
     }
 
 public:
@@ -65,7 +68,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterables> && ...)
     {
         return size(is{});
@@ -74,7 +77,7 @@ public:
 #else
 
     template<class T = conjunction<is_sized<Iterables>...>>
-    LZ_NODISCARD constexpr enable_if<T::value, std::size_t> size() const {
+    LZ_NODISCARD constexpr enable_if<T::value, size_t> size() const {
         return size(is{});
     }
 

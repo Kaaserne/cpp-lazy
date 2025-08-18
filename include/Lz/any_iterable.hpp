@@ -133,17 +133,17 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(detail::is_ra_tag_v<IterCat>)
     {
-        return static_cast<std::size_t>(std::distance(_begin, _end));
+        return static_cast<size_t>(std::distance(_begin, _end));
     }
 
 #else
 
     template<class I = IterCat>
-    LZ_NODISCARD detail::enable_if<detail::is_ra_tag<I>::value, std::size_t> size() const {
-        return static_cast<std::size_t>(std::distance(_begin, _end));
+    LZ_NODISCARD detail::enable_if<detail::is_ra_tag<I>::value, size_t> size() const {
+        return static_cast<size_t>(std::distance(_begin, _end));
     }
 
 #endif

@@ -25,8 +25,8 @@ public:
 
 private:
     mutable Distribution _distribution;
-    decltype(std::addressof(std::declval<Generator&>())) _generator{ nullptr };
-    std::size_t _current{};
+    decltype(detail::addressof(std::declval<Generator&>())) _generator{ nullptr };
+    size_t _current{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -43,9 +43,9 @@ public:
 
 #endif
 
-    constexpr random_iterator(const Distribution& distribution, Generator& generator, const std::size_t current) :
+    constexpr random_iterator(const Distribution& distribution, Generator& generator, const size_t current) :
         _distribution{ distribution },
-        _generator{ std::addressof(generator) },
+        _generator{ detail::addressof(generator) },
         _current{ current } {
     }
 
@@ -82,7 +82,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) noexcept {
-        _current -= static_cast<std::size_t>(n);
+        _current -= static_cast<size_t>(n);
         LZ_ASSERT_ADDABLE(static_cast<difference_type>(_current) >= 0);
     }
 

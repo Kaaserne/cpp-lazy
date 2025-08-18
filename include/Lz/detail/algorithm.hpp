@@ -7,11 +7,6 @@
 #include <Lz/detail/procs.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/optional.hpp>
-
-#if defined(LZ_HAS_CXX_17)
-#include <functional> // std::not_fn
-#endif
-
 #include <algorithm>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -22,7 +17,7 @@ constexpr diff_type<Iterator> distance(Iterator begin, S end);
 /**
  * This value is returned when index_of(_if) does not find the value specified.
  */
-constexpr std::size_t npos = static_cast<std::size_t>(-1);
+constexpr size_t npos = static_cast<size_t>(-1);
 }
 
 namespace lz {
@@ -123,16 +118,8 @@ template<class Iterator, class S, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 Iterator min_element(Iterator begin, S end, BinaryPredicate binary_predicate) {
     using detail::max_element;
     using std::max_element;
-#if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
-
-    return max_element(std::move(begin), std::move(end), std::not_fn(std::move(binary_predicate)));
-
-#else
-
     using rt = ref_t<Iterator>;
     return max_element(std::move(begin), std::move(end), [&binary_predicate](rt a, rt b) { return !binary_predicate(a, b); });
-
-#endif
 }
 
 template<class Iterator, class S, class UnaryPredicate>
@@ -331,29 +318,14 @@ template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 Iterator find_if_not(Iterator begin, S end, UnaryPredicate unary_predicate) {
     using detail::find_if;
     using std::find_if;
-#if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
-
-    return find_if(std::move(begin), std::move(end), std::not_fn(std::move(unary_predicate)));
-
-#else
-
     return find_if(std::move(begin), std::move(end),
                    [&unary_predicate](ref_t<Iterator> value) { return !unary_predicate(value); });
-#endif
 }
 
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& iterable, UnaryPredicate unary_predicate) {
-#if defined(__cpp_lib_not_fn) && defined(LZ_HAS_CXX_17)
-
-    return lz::detail::find_last_if(std::forward<Iterable>(iterable), std::not_fn(std::move(unary_predicate)));
-
-#else
-
     return lz::detail::find_last_if(std::forward<Iterable>(iterable),
                                     [&unary_predicate](ref_iterable_t<Iterable> value) { return !unary_predicate(value); });
-
-#endif
 }
 
 template<class Iterator, class S, class T, class U>
@@ -395,27 +367,19 @@ LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_not(Iterable&&
 template<class Iterable, class UnaryPredicate, class U>
 LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable>
 find_last_or_default_if_not(Iterable&& iterable, UnaryPredicate unary_predicate, U&& default_value) {
-#ifdef LZ_HAS_CXX_17
-
-    return lz::detail::find_last_or_default_if(std::forward<Iterable>(iterable), std::not_fn(std::move(unary_predicate)),
-                                               std::forward<U>(default_value));
-#else
-
     return lz::detail::find_last_or_default_if(
         std::forward<Iterable>(iterable), [&unary_predicate](ref_iterable_t<Iterable> val) { return !unary_predicate(val); },
         std::forward<U>(default_value));
-
-#endif
 }
 
 template<class Iterator, class S, class T>
-LZ_CONSTEXPR_CXX_14 std::size_t index_of(Iterator begin, S end, const T& value) {
+LZ_CONSTEXPR_CXX_14 size_t index_of(Iterator begin, S end, const T& value) {
     return index_of_if(std::move(begin), std::move(end), [&value](ref_t<Iterator> val) { return val == value; });
 }
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 std::size_t index_of_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    std::size_t index = 0;
+LZ_CONSTEXPR_CXX_14 size_t index_of_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
+    size_t index = 0;
     for (; begin != end; ++begin, ++index) {
         if (unary_predicate(*begin)) {
             return index;
@@ -473,7 +437,7 @@ LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate,
-                                   std::size_t size_of_iterable1, std::size_t size_of_iterable2) {
+                                   size_t size_of_iterable1, size_t size_of_iterable2) {
     if (size_of_iterable1 < size_of_iterable2) {
         return false;
     }
@@ -537,8 +501,8 @@ LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate un
 }
 
 template<class Iterator, class S, class UnaryOp>
-LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterator begin, S end, std::size_t n, UnaryOp unary_op) {
-    for (std::size_t count = 0; begin != end && count < n; ++begin, ++count) {
+LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterator begin, S end, size_t n, UnaryOp unary_op) {
+    for (size_t count = 0; begin != end && count < n; ++begin, ++count) {
         if (!unary_op(*begin)) {
             break;
         }

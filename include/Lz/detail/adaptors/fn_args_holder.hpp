@@ -21,7 +21,7 @@ public:
     }
 
 private:
-    template<class Iterable, std::size_t... I>
+    template<class Iterable, size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
                index_sequence<I...>) const& -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),
@@ -29,7 +29,7 @@ private:
         return Adaptor{}(std::forward<Iterable>(iterable), std::get<I>(_data)...);
     }
 
-    template<class Iterable, std::size_t... I>
+    template<class Iterable, size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Iterable&& iterable,
                index_sequence<I...>) && -> decltype(std::declval<Adaptor>()(std::forward<Iterable>(iterable),

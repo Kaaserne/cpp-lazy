@@ -12,51 +12,51 @@ LZ_MODULE_EXPORT namespace lz {
 
 #ifdef LZ_HAS_CXX_11
 
-/**
- * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
- * iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor must meet
- * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(<decltype(std::adressof(Iterator))>,
- * std::size_t)`. The distance between the iterators are calculated using std::distance, if the second constructor is used.
- * Example:
- * ```cpp
- * std::string to_split = "H d";
- * auto splitter = to_split | lz::t_split<std::vector<char>>{}(" "); // { vector{'H'}, vector{'d'} }
- * // or
- * auto splitter = lz::t_split<std::vector<char>>{}(to_split, " "); // { vector{'H'}, vector{'d'} }
- *
- * // or
- * auto splitter = lz::t_split<std::vector<char>>{}(to_split, ' '); // { vector{'H'}, vector{'d'} }
- * // or
- * auto splitter = to_split | lz::t_split<std::vector<char>>{}(' '); // { vector{'H'}, vector{'d'} }
- * ```
- * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
- */
-template<class ValueType>
-using t_split = detail::split_adaptor<ValueType>;
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
+     * the iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor
+     * must meet one of the following requirements: `ValueType(Iterator, Iterator)`,
+     * `ValueType(<decltype(std::adressof(Iterator))>, size_t)`. The distance between the iterators are calculated using
+     * std::distance, if the second constructor is used. Example:
+     * ```cpp
+     * std::string to_split = "H d";
+     * auto splitter = to_split | lz::t_split<std::vector<char>>{}(" "); // { vector{'H'}, vector{'d'} }
+     * // or
+     * auto splitter = lz::t_split<std::vector<char>>{}(to_split, " "); // { vector{'H'}, vector{'d'} }
+     *
+     * // or
+     * auto splitter = lz::t_split<std::vector<char>>{}(to_split, ' '); // { vector{'H'}, vector{'d'} }
+     * // or
+     * auto splitter = to_split | lz::t_split<std::vector<char>>{}(' '); // { vector{'H'}, vector{'d'} }
+     * ```
+     * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
+     */
+    template<class ValueType>
+    using t_split = detail::split_adaptor<ValueType>;
 
 #else
 
-/**
- * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and the
- * iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor must meet
- * one of the following requirements: `ValueType(Iterator, Iterator)`, `ValueType(<decltype(std::adressof(Iterator))>,
- * std::size_t)`. The distance between the iterators are calculated using std::distance, if the second constructor is used.
- * Example:
- * ```cpp
- * std::string to_split = "H d";
- * auto splitter = to_split | lz::t_split<std::vector<char>>(" "); // { vector{'H'}, vector{'d'} }
- * // or
- * auto splitter = lz::t_split<std::vector<char>>(to_split, " "); // { vector{'H'}, vector{'d'} }
- *
- * // or
- * auto splitter = lz::t_split<std::vector<char>>(to_split, ' '); // { vector{'H'}, vector{'d'} }
- * // or
- * auto splitter = to_split | lz::t_split<std::vector<char>>(' '); // { vector{'H'}, vector{'d'} }
- * ```
- * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
- */
-template<class ValueType>
-LZ_INLINE_VAR constexpr detail::split_adaptor<ValueType> t_split{};
+    /**
+     * @brief Splits an iterable on a delimiter. It returns a forward iterable, its end() method returns a default_sentinel_t and
+     * the iterable does not contain a .size() method. The value type is equal to that of `ValueType`. `ValueType` constructor
+     * must meet one of the following requirements: `ValueType(Iterator, Iterator)`,
+     * `ValueType(<decltype(std::adressof(Iterator))>, size_t)`. The distance between the iterators are calculated using
+     * std::distance, if the second constructor is used. Example:
+     * ```cpp
+     * std::string to_split = "H d";
+     * auto splitter = to_split | lz::t_split<std::vector<char>>(" "); // { vector{'H'}, vector{'d'} }
+     * // or
+     * auto splitter = lz::t_split<std::vector<char>>(to_split, " "); // { vector{'H'}, vector{'d'} }
+     *
+     * // or
+     * auto splitter = lz::t_split<std::vector<char>>(to_split, ' '); // { vector{'H'}, vector{'d'} }
+     * // or
+     * auto splitter = to_split | lz::t_split<std::vector<char>>(' '); // { vector{'H'}, vector{'d'} }
+     * ```
+     * @tparam ValueType The value type of the iterator to return, for example `std::vector<int>`.
+     */
+    template<class ValueType>
+    LZ_INLINE_VAR constexpr detail::split_adaptor<ValueType> t_split{};
 
 #endif
 

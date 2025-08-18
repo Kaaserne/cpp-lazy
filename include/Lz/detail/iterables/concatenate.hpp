@@ -15,22 +15,25 @@ class concatenate_iterable : public lazy_view {
     using iterables = maybe_homogeneous_t<maybe_owned<Iterables>...>;
     iterables _iterables;
 
-    template<std::size_t... I>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::size_t size(index_sequence<I...>) const {
-        const std::size_t sizes[] = { static_cast<std::size_t>(lz::size(std::get<I>(_iterables)))... };
-        return std::accumulate(std::begin(sizes), std::end(sizes), std::size_t{ 0 });
+    template<size_t... I>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
+        using std::get;
+        const size_t sizes[] = { static_cast<size_t>(lz::size(get<I>(_iterables)))... };
+        return std::accumulate(std::begin(sizes), std::end(sizes), size_t{ 0 });
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static concatenate_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...>&& cat, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(cat._iterables))... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(cat._iterables))... };
     }
 
-    template<class Iterable2, std::size_t... Is>
+    template<class Iterable2, size_t... Is>
     static concatenate_iterable<remove_ref<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const concatenate_iterable<Iterables...>& cat, index_sequence<Is...>) {
-        return { std::forward<Iterable2>(iterable2), std::get<Is>(cat._iterables)... };
+        using std::get;
+        return { std::forward<Iterable2>(iterable2), get<Is>(cat._iterables)... };
     }
 
     using is = make_index_sequence<sizeof...(Iterables)>;
@@ -65,7 +68,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterables> && ...)
     {
         return size(is{});
@@ -74,7 +77,7 @@ public:
 #else
 
     template<class T = conjunction<is_sized<Iterables>...>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, std::size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, size_t> size() const {
         return size(is{});
     }
 

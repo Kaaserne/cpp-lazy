@@ -63,8 +63,10 @@ struct enumerate_adaptor {
      */
     template<class Iterable, class IntType = int>
     LZ_NODISCARD constexpr enumerate_iterable<remove_ref<Iterable>, IntType>
-        requires(lz::iterable<Iterable>)
-    operator()(Iterable && iterable, const IntType start = 0) const {
+    operator()(Iterable&& iterable, const IntType start = 0) const
+        requires lz::iterable<Iterable>
+    {
+
         return { std::forward<Iterable>(iterable), start };
     }
 

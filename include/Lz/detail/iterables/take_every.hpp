@@ -31,8 +31,8 @@ public:
 
 private:
     maybe_owned<Iterable> _iterable;
-    std::size_t _offset{};
-    std::size_t _start{};
+    size_t _offset{};
+    size_t _start{};
 
     using diff = typename iterator::difference_type;
 
@@ -55,7 +55,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 take_every_iterable(I&& iterable, const std::size_t offset, const std::size_t start) :
+    LZ_CONSTEXPR_CXX_14 take_every_iterable(I&& iterable, const size_t offset, const size_t start) :
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset },
         _start{ start } {
@@ -64,10 +64,10 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr std::size_t size() const
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        const auto cur_size = static_cast<std::size_t>(lz::size(_iterable));
+        const auto cur_size = static_cast<size_t>(lz::size(_iterable));
         if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
             return 0;
         }
@@ -76,14 +76,14 @@ public:
         const auto rem = actual_size % static_cast<diff>(_offset);
         const auto quot = actual_size / static_cast<diff>(_offset);
 
-        return static_cast<std::size_t>(quot) + static_cast<std::size_t>(rem == 0 ? 0 : 1);
+        return static_cast<size_t>(quot) + static_cast<size_t>(rem == 0 ? 0 : 1);
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, std::size_t> size() const {
-        const auto cur_size = static_cast<std::size_t>(lz::size(_iterable));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, size_t> size() const {
+        const auto cur_size = static_cast<size_t>(lz::size(_iterable));
         if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
             return 0;
         }
@@ -92,7 +92,7 @@ public:
         const auto rem = actual_size % static_cast<diff>(_offset);
         const auto quot = actual_size / static_cast<diff>(_offset);
 
-        return static_cast<std::size_t>(quot) + static_cast<std::size_t>(rem == 0 ? 0 : 1);
+        return static_cast<size_t>(quot) + static_cast<size_t>(rem == 0 ? 0 : 1);
     }
 
 #endif
