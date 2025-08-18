@@ -15,13 +15,13 @@ public:
     using result_type = std::seed_seq::result_type;
 
 private:
-    using seed_array = std::array<result_type, N>;
+    using seed_array = result_type[N];
     seed_array _seed;
 
     template<class Iter>
     LZ_CONSTEXPR_CXX_20 void create(Iter begin, Iter end) {
         using value_type = val_t<Iter>;
-        std::transform(begin, end, _seed.begin(), [](const value_type val) { return static_cast<result_type>(val); });
+        std::transform(begin, end, std::begin(_seed), [](const value_type val) { return static_cast<result_type>(val); });
     }
 
     result_type T(const result_type x) const {
@@ -32,7 +32,7 @@ public:
     constexpr seed_sequence() = default;
 
     explicit seed_sequence(std::random_device& rd) {
-        std::generate(_seed.begin(), _seed.end(), [&rd]() { return static_cast<result_type>(rd()); });
+        std::generate(std::begin(_seed), std::end(_seed), [&rd]() { return static_cast<result_type>(rd()); });
     }
 
     template<class T>
