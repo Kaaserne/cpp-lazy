@@ -42,7 +42,7 @@ struct all_sized_impl<true> {
     using is_inner_sized = is_sized<inner<Iterable>>;
 
     template<class Iterable>
-    using type = conditional<
+    using type = conditional_t<
         // If the inner is another iterable
         is_iterable<inner<Iterable>>::value,
         // Check whether the inner is also sized
@@ -74,12 +74,12 @@ template<size_t I, class Iterable>
 #else
 
 template<size_t I, class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<I == 1, size_t> size_all(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<I == 1, size_t> size_all(Iterable&& iterable) {
     return static_cast<size_t>(lz::size(iterable));
 }
 
 template<size_t I, class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<(I > 1), size_t> size_all(Iterable&& iterable) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 1), size_t> size_all(Iterable&& iterable) {
     using lz::detail::accumulate;
     using std::accumulate;
     return accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
@@ -113,7 +113,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr flatten_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -134,7 +134,7 @@ public:
 #else
 
     template<class T = is_all_sized<Iterable>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<T::value, size_t> size() const {
         return size_all<Dims + 1>(_iterable);
     }
 
@@ -158,12 +158,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<!R, iterator> end() const {
+    LZ_NODISCARD constexpr enable_if_t<!R, iterator> end() const {
         return { _iterable, _iterable.end() };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const noexcept {
+    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

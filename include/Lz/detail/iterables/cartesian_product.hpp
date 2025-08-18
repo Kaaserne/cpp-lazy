@@ -40,7 +40,7 @@ class cartesian_product_iterable : public lazy_view {
 #else
 
     template<std::ptrdiff_t I, class Iterators>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)> init_iterators(Iterators& it, bool& first_at_end) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I >= 0)> init_iterators(Iterators& it, bool& first_at_end) const {
         using std::get;
         const bool this_at_end = get<I>(it) == get<I>(_iterables).end();
         if (this_at_end && !first_at_end) {
@@ -52,7 +52,7 @@ class cartesian_product_iterable : public lazy_view {
     }
 
     template<std::ptrdiff_t I, class Iterators>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I < 0)> init_iterators(Iterators&, bool&) const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I < 0)> init_iterators(Iterators&, bool&) const noexcept {
     }
 
 #endif
@@ -93,7 +93,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterables), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr cartesian_product_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -114,7 +114,7 @@ public:
 #else
 
     template<bool S = conjunction<is_sized<Iterables>...>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<S, size_t> size() const {
         return size(is{});
     }
 
@@ -145,7 +145,7 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
         using std::get;
         auto it = begin_maybe_homo(_iterables);
         auto end = end_maybe_homo(_iterables);
@@ -174,7 +174,7 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         using std::get;
         auto rest_it = begin_maybe_homo(_iterables);
         auto end = end_maybe_homo(_iterables);
@@ -183,7 +183,7 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const noexcept {
         return {};
     }
 

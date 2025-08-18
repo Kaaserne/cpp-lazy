@@ -59,8 +59,8 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<BinaryPredicate>::value>>
     constexpr group_by_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                            std::is_nothrow_default_constructible<Iterable>::value &&
                                            std::is_nothrow_default_constructible<BinaryPredicate>::value) {

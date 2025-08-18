@@ -13,7 +13,7 @@ template<class Iterable, class BinaryPredicate, class = void>
 class duplicates_iterator;
 
 template<class Iterable, class BinaryPredicate>
-class duplicates_iterator<Iterable, BinaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>>
+class duplicates_iterator<Iterable, BinaryPredicate, enable_if_t<is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
                       common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
@@ -51,8 +51,8 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<it>::value &&
                                              std::is_nothrow_default_constructible<Iterable>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {
@@ -111,7 +111,7 @@ public:
 };
 
 template<class Iterable, class BinaryPredicate>
-class duplicates_iterator<Iterable, BinaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>>
+class duplicates_iterator<Iterable, BinaryPredicate, enable_if_t<!is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
                       std::bidirectional_iterator_tag, default_sentinel_t> {
@@ -157,8 +157,8 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<Iterable>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {

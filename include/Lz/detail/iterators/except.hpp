@@ -54,8 +54,8 @@ public:
 
     template<
         class I = Iterable,
-        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
-                          std::is_default_constructible<BinaryPredicate>::value && std::is_default_constructible<iter>::value>>
+        class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable2>::value &&
+                            std::is_default_constructible<BinaryPredicate>::value && std::is_default_constructible<iter>::value>>
     constexpr except_iterator() noexcept(std::is_nothrow_default_constructible<Iterable2>::value &&
                                          std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<BinaryPredicate>::value &&

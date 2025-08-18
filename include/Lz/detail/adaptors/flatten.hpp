@@ -20,7 +20,7 @@ struct dimensions;
  * @tparam Iterable The iterable type to get the dimensions of.
  */
 template<class Iterable>
-struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> : detail::count_dims<Iterable> {};
+struct dimensions<Iterable, detail::enable_if_t<!std::is_array<Iterable>::value>> : detail::count_dims<Iterable> {};
 
 /**
  * @brief Gets the number of dimensions of an iterable. For instance, a vector of vectors will return 2, a vector of vectors of
@@ -32,7 +32,7 @@ struct dimensions<Iterable, detail::enable_if<!std::is_array<Iterable>::value>> 
  * @tparam Iterable The iterable type to get the dimensions of.
  */
 template<class Iterable>
-struct dimensions<Iterable, detail::enable_if<std::is_array<Iterable>::value>>
+struct dimensions<Iterable, detail::enable_if_t<std::is_array<Iterable>::value>>
     : std::integral_constant<size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
 
 #ifdef LZ_HAS_CXX_14

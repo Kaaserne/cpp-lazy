@@ -166,7 +166,7 @@ private:
 #else
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != 0> min_is_n(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != 0> min_is_n(const difference_type offset) {
         using std::get;
         auto& current = get<I>(_iterators);
         auto begin = get<I>(_iterables).begin();
@@ -187,7 +187,7 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> min_is_n(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> min_is_n(const difference_type offset) {
         using std::get;
         auto& current = get<0>(_iterators);
         LZ_ASSERT_SUBTRACTABLE(offset <= current - get<0>(_iterables).begin());
@@ -195,7 +195,7 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size> plus_is_n(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size> plus_is_n(const difference_type offset) {
         using std::get;
         auto& current = get<I>(_iterators);
         const auto& current_end = get<I>(_iterables).end();
@@ -212,12 +212,12 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size> plus_is_n(const difference_type offset) const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size> plus_is_n(const difference_type offset) const noexcept {
         LZ_ASSERT_ADDABLE(offset == 0);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != 0> minus_minus() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != 0> minus_minus() {
         using std::get;
         auto& current = get<I>(_iterators);
         if (current != get<I>(_iterables).begin()) {
@@ -229,20 +229,20 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> minus_minus() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> minus_minus() {
         using std::get;
         LZ_ASSERT_DECREMENTABLE(get<0>(_iterables).begin() != get<0>(_iterables).end());
         --get<0>(_iterators);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, reference> deref() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, reference> deref() const {
         using std::get;
         return *get<I>(_iterators);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, reference> deref() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, reference> deref() const {
         using std::get;
         if (get<I>(_iterators) != get<I>(_iterables).end()) {
             return *get<I>(_iterators);
@@ -253,7 +253,7 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size<Iterators>::value> plus_plus() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tuple_size<Iterators>::value> plus_plus() {
         using std::get;
         if (get<I>(_iterators) != get<I>(_iterables).end()) {
             ++get<I>(_iterators);
@@ -264,18 +264,18 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size<Iterators>::value> plus_plus() const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tuple_size<Iterators>::value> plus_plus() const noexcept {
     }
 
     template<size_t I, class EndIter>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         using std::get;
         const auto has_value = get<I>(_iterators) == get<I>(end);
         return has_value ? iter_equal_to<I + 1>(end) : has_value;
     }
 
     template<size_t I, class EndIter>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
         using std::get;
         return get<I>(_iterators) == get<I>(end);
     }
@@ -302,7 +302,7 @@ public:
 #else
 
     template<class I = Iterators,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterables>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterables>::value>>
     constexpr concatenate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                               std::is_nothrow_default_constructible<Iterables>::value) {
     }

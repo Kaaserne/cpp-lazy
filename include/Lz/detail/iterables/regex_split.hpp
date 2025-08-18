@@ -26,8 +26,8 @@ public:
 
 #else
 
-    template<class I = RegexTokenIter, class = enable_if<std::is_default_constructible<I>::value &&
-                                                         std::is_default_constructible<RegexTokenSentinel>::value>>
+    template<class I = RegexTokenIter, class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                           std::is_default_constructible<RegexTokenSentinel>::value>>
     constexpr regex_split_iterable() noexcept(std::is_nothrow_default_constructible<RegexTokenIter>::value &&
                                               std::is_nothrow_default_constructible<RegexTokenSentinel>::value) {
     }

@@ -18,7 +18,7 @@ class any_iterator_impl<Iter, S, T, Reference, std::forward_iterator_tag, DiffTy
     : public iterator_base<Reference, std::forward_iterator_tag, DiffType> {
 
     static constexpr bool is_sent = is_sentinel<S, Iter>::value;
-    using iter_type = conditional<!is_sent, Iter, common_iterator<Iter, S>>;
+    using iter_type = conditional_t<!is_sent, Iter, common_iterator<Iter, S>>;
     iter_type _iter{};
 
     using any_iter_base = iterator_base<Reference, std::forward_iterator_tag, DiffType>;
@@ -38,7 +38,7 @@ public:
 
 #else
 
-    template<class I = iter_type, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = iter_type, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -61,11 +61,11 @@ public:
 
 #else
 
-    template<bool I = is_sent, class = enable_if<I>>
+    template<bool I = is_sent, class = enable_if_t<I>>
     constexpr any_iterator_impl(S s) : _iter{ std::move(s) } {
     }
 
-    template<bool I = is_sent, class = enable_if<I>>
+    template<bool I = is_sent, class = enable_if_t<I>>
     constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 
@@ -107,7 +107,7 @@ class any_iterator_impl<Iter, S, T, Reference, std::bidirectional_iterator_tag, 
     : public iterator_base<Reference, std::bidirectional_iterator_tag, DiffType> {
 
     static constexpr bool is_sent = is_sentinel<S, Iter>::value;
-    using iter_type = conditional<!is_sent, Iter, common_iterator<Iter, S>>;
+    using iter_type = conditional_t<!is_sent, Iter, common_iterator<Iter, S>>;
     iter_type _iter{};
 
     using any_iter_base = iterator_base<Reference, std::bidirectional_iterator_tag, DiffType>;
@@ -127,7 +127,7 @@ public:
 
 #else
 
-    template<class I = iter_type, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = iter_type, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -150,11 +150,11 @@ public:
 
 #else
 
-    template<bool I = is_sent, class = enable_if<I>>
+    template<bool I = is_sent, class = enable_if_t<I>>
     constexpr any_iterator_impl(S iter) : _iter{ std::move(iter) } {
     }
 
-    template<bool I = is_sent, class = enable_if<I>>
+    template<bool I = is_sent, class = enable_if_t<I>>
     constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 
@@ -200,7 +200,7 @@ class any_iterator_impl<Iter, S, T, Reference, std::random_access_iterator_tag, 
     : public iterator_base<Reference, std::random_access_iterator_tag, DiffType> {
 
     static constexpr bool is_sent = is_sentinel<S, Iter>::value;
-    using iter_type = conditional<!is_sent, Iter, common_iterator<Iter, S>>;
+    using iter_type = conditional_t<!is_sent, Iter, common_iterator<Iter, S>>;
     iter_type _iter{};
 
     using any_iter_base = iterator_base<Reference, std::random_access_iterator_tag, DiffType>;
@@ -220,7 +220,7 @@ public:
 
 #else
 
-    template<class I = iter_type, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = iter_type, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr any_iterator_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -243,11 +243,11 @@ public:
 
 #else
 
-    template<bool I = is_sent, class = enable_if<I>>
+    template<bool I = is_sent, class = enable_if_t<I>>
     constexpr any_iterator_impl(S iter) : _iter{ std::move(iter) } {
     }
 
-    template<bool I = is_sent, class = enable_if<I>>
+    template<bool I = is_sent, class = enable_if_t<I>>
     constexpr any_iterator_impl(common_iterator<Iter, S> iter) : _iter{ std::move(iter) } {
     }
 

@@ -56,7 +56,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterables), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr concatenate_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -77,7 +77,7 @@ public:
 #else
 
     template<class T = conjunction<is_sized<Iterables>...>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<T::value, size_t> size() const {
         return size(is{});
     }
 
@@ -101,12 +101,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterables, end_maybe_homo(_iterables) };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, default_sentinel_t> end() const {
         return {};
     }
 

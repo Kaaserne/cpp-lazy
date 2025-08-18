@@ -12,7 +12,7 @@ template<class Iterable, class = void>
 class take_iterable;
 
 template<class Iterator>
-class take_iterable<Iterator, enable_if<!is_iterable<Iterator>::value>> : public lazy_view {
+class take_iterable<Iterator, enable_if_t<!is_iterable<Iterator>::value>> : public lazy_view {
 public:
     using iterator = n_take_iterator<Iterator>;
     using const_iterator = Iterator;
@@ -31,7 +31,7 @@ public:
 
 #else
 
-    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = Iterator, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr take_iterable() {
     }
 
@@ -59,7 +59,7 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() && {
         return { std::move(_iterator), _n };
     }
 
@@ -79,12 +79,12 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<is_bidi_tag<I>::value, iterator> end() const {
+    LZ_NODISCARD constexpr enable_if_t<is_bidi_tag<I>::value, iterator> end() const {
         return { std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD constexpr enable_if<!is_bidi_tag<I>::value, default_sentinel_t> end() const {
+    LZ_NODISCARD constexpr enable_if_t<!is_bidi_tag<I>::value, default_sentinel_t> end() const {
         return {};
     }
 
@@ -92,7 +92,7 @@ public:
 };
 
 template<class Iterable>
-class take_iterable<Iterable, enable_if<is_iterable<Iterable>::value>> : public lazy_view {
+class take_iterable<Iterable, enable_if_t<is_iterable<Iterable>::value>> : public lazy_view {
     maybe_owned<Iterable> _iterable;
     size_t _n{};
 
@@ -111,7 +111,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr take_iterable() {
     }
 
@@ -132,7 +132,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return std::min(_n, static_cast<size_t>(lz::size(_iterable)));
     }
 

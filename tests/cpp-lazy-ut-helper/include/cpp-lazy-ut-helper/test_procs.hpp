@@ -127,20 +127,21 @@ void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, Eq
 #else
 
 template<class T, class U>
-lz::detail::enable_if<has_stream_operator<T>::value && has_stream_operator<U>::value> get_error_expr(const T& lhs, const U& rhs) {
+lz::detail::enable_if_t<has_stream_operator<T>::value && has_stream_operator<U>::value>
+get_error_expr(const T& lhs, const U& rhs) {
     std::ostringstream oss;
     oss << lhs << " != " << rhs;
     return oss.str();
 }
 
 template<class T, class U>
-lz::detail::enable_if<!has_stream_operator<T>::value || !has_stream_operator<U>::value, const char*>
+lz::detail::enable_if_t<!has_stream_operator<T>::value || !has_stream_operator<U>::value, const char*>
 get_error_expr(const T&, const U&) {
     return "? != ?";
 }
 
 template<class Iterable>
-lz::detail::enable_if<!lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
+lz::detail::enable_if_t<!lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
     auto begin = it.begin();
     auto end = it.end();
 
@@ -161,7 +162,7 @@ lz::detail::enable_if<!lz::detail::has_sentinel<Iterable>::value> test_operator_
 }
 
 template<class Iterable>
-lz::detail::enable_if<lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
+lz::detail::enable_if_t<lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
     auto begin = it.begin();
     auto end = it.end();
 
@@ -174,7 +175,7 @@ lz::detail::enable_if<lz::detail::has_sentinel<Iterable>::value> test_operator_m
 }
 
 template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
-lz::detail::enable_if<!lz::detail::has_sentinel<Iterable>::value>
+lz::detail::enable_if_t<!lz::detail::has_sentinel<Iterable>::value>
 test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
 
@@ -211,7 +212,7 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
 }
 
 template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
-lz::detail::enable_if<lz::detail::has_sentinel<Iterable>::value>
+lz::detail::enable_if_t<lz::detail::has_sentinel<Iterable>::value>
 test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
 

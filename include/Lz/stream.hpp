@@ -358,7 +358,7 @@ std::ostream& operator<<(std::ostream& stream, const Iterable& iterable)
  * @param iterable The `lz` iterable to output
  */
 LZ_MODULE_EXPORT template<class Iterable>
-lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
+lz::detail::enable_if_t<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
 operator<<(std::ostream& stream, const Iterable& iterable) {
     lz::format(iterable, stream);
     return stream;

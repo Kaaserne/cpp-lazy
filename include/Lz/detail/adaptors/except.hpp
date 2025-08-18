@@ -91,9 +91,9 @@ struct except_adaptor {
      * @return An adaptor that can be used in pipe expressions
      */
     template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
-    operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
+    LZ_NODISCARD
+        LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
+        operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }
 

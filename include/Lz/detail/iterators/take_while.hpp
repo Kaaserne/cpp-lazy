@@ -48,8 +48,8 @@ public:
 #else
 
     template<class I = iter,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<UnaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<UnaryPredicate>::value>>
     constexpr take_while_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<Iterable>::value &&
                                              std::is_nothrow_default_constructible<UnaryPredicate>::value) {

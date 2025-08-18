@@ -15,7 +15,7 @@ class random_iterator
     : public iterator<
           random_iterator<Arithmetic, Distribution, Generator, UseSentinel>, Arithmetic, fake_ptr_proxy<Arithmetic>,
           std::ptrdiff_t, std::random_access_iterator_tag,
-          conditional<UseSentinel, default_sentinel_t, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
+          conditional_t<UseSentinel, default_sentinel_t, random_iterator<Arithmetic, Distribution, Generator, UseSentinel>>> {
 public:
     using value_type = Arithmetic;
     using difference_type = std::ptrdiff_t;
@@ -37,7 +37,7 @@ public:
 
 #else
 
-    template<class D = Distribution, class = enable_if<std::is_default_constructible<D>::value>>
+    template<class D = Distribution, class = enable_if_t<std::is_default_constructible<D>::value>>
     constexpr random_iterator() noexcept(std::is_nothrow_default_constructible<D>::value) {
     }
 

@@ -48,7 +48,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr take_every_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -82,7 +82,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_sized<I>::value, size_t> size() const {
         const auto cur_size = static_cast<size_t>(lz::size(_iterable));
         if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
             return 0;
@@ -115,19 +115,20 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() const& {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { start_pos, _iterable.end(), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator>
+    begin() const& {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { start_pos, _iterable.end(), _offset, _start };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<I>::value, iterator> begin() const& {
         // random access iterator can go both ways O(1), no need to use next_fast_safe
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { _iterable, start_pos, _offset };
@@ -149,7 +150,7 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_bidi_tag<I>::value, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() && {
         // forward iterator can only go forward, so next_fast_safe is not needed
         auto end = _iterable.end();
         auto start_pos = next_fast_safe(std::move(_iterable), static_cast<typename iterator::difference_type>(_start));
@@ -175,20 +176,20 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_ra_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() const {
         return { _iterable, _iterable.end(), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
         // std::is_same is not the same as is_bidi_tag, explicitly check for bidirectional iterator tag
-        enable_if<std::is_same<I, std::bidirectional_iterator_tag>::value && !is_sentinel<iter, sent>::value, iterator>
+        enable_if_t<std::is_same<I, std::bidirectional_iterator_tag>::value && !is_sentinel<iter, sent>::value, iterator>
         end() const {
         return { _iterable.end(), _iterable.end(), _offset, lz::eager_size(_iterable) - _start };
     }
 
     template<bool R = return_sentinel> // checks for not bidirectional or if is sentinel
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

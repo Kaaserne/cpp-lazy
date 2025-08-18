@@ -26,7 +26,7 @@ public:
 
 #else
 
-    template<class D = Distribution, class = enable_if<std::is_default_constructible<D>::value>>
+    template<class D = Distribution, class = enable_if_t<std::is_default_constructible<D>::value>>
     constexpr random_iterable() noexcept(std::is_nothrow_default_constructible<D>::value) {
     }
 
@@ -60,12 +60,12 @@ public:
 #else
 
     template<bool B = UseSentinel>
-    LZ_NODISCARD constexpr enable_if<!B, iterator> end() const {
+    LZ_NODISCARD constexpr enable_if_t<!B, iterator> end() const {
         return { _distribution, *_generator, 0 };
     }
 
     template<bool B = UseSentinel>
-    LZ_NODISCARD constexpr enable_if<B, default_sentinel_t> end() const {
+    LZ_NODISCARD constexpr enable_if_t<B, default_sentinel_t> end() const {
         return {};
     }
 

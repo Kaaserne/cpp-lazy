@@ -68,25 +68,25 @@ private:
 #else
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, bool> eq(const SMaybeHomo& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, bool> eq(const SMaybeHomo& other) const {
         using std::get;
         return get<I>(_iterators) == get<I>(other) ? _index == 0 : eq<I + 1>(other);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, bool> eq(const SMaybeHomo& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, bool> eq(const SMaybeHomo& other) const {
         using std::get;
         return get<I>(_iterators) == get<I>(other);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, bool> eq(const interleave_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, bool> eq(const interleave_iterator& other) const {
         using std::get;
         return get<I>(_iterators) == get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, bool> eq(const interleave_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, bool> eq(const interleave_iterator& other) const {
         using std::get;
         return get<I>(_iterators) == get<I>(other._iterators) && _index == other._index;
     }
@@ -139,13 +139,13 @@ private:
 #else
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, reference> dereference() const {
         using std::get;
         return _index == I ? *get<I>(_iterators) : dereference<I + 1>();
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, reference> dereference() const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, reference> dereference() const noexcept {
         using std::get;
         return *get<I>(_iterators);
     }
@@ -202,7 +202,7 @@ public:
 
 #else
 
-    template<class I = IterMaybeHomo, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = IterMaybeHomo, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr interleave_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 

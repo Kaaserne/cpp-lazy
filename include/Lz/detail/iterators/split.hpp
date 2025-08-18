@@ -38,8 +38,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
     constexpr split_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
                                         std::is_nothrow_default_constructible<S>::value &&
                                         std::is_nothrow_default_constructible<Iterator2>::value &&
@@ -84,14 +84,14 @@ public:
 #else
 
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _end);
         return { _sub_range_begin, _sub_range_end.first };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_17 enable_if_t<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _end);
         return { detail::addressof(*_sub_range_begin),
                  static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
@@ -155,8 +155,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<T>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<T>::value>>
     constexpr split_single_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
                                                std::is_nothrow_default_constructible<S>::value &&
                                                std::is_nothrow_default_constructible<T>::value) {
@@ -204,14 +204,14 @@ public:
 #else
 
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { _sub_range_begin, _sub_range_end };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_17 enable_if_t<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { detail::addressof(*_sub_range_begin), static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
     }

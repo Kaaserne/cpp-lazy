@@ -36,7 +36,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterables), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr zip_longest_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -78,7 +78,7 @@ public:
 #else
 
     template<bool S = conjunction<is_sized<Iterables>...>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<S, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<S, size_t> size() const {
         return size(is{});
     }
 
@@ -99,13 +99,13 @@ public:
 #else
 
     template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<IsBidi, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<IsBidi, iterator> begin() const& {
         using diff = typename iterator::difference_type;
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
     }
 
     template<bool IsBidi = bidi>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!IsBidi, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!IsBidi, iterator> begin() const& {
         return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
     }
 
@@ -122,7 +122,7 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
         return { begin_maybe_homo(std::move(_iterables)), end_maybe_homo(std::move(_iterables)) };
     }
 
@@ -144,14 +144,14 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         using diff = typename iterator::difference_type;
         return { end_maybe_homo(_iterables), end_maybe_homo(_iterables),
                  iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, default_sentinel_t> end() const noexcept {
         return {};
     }
 

@@ -59,9 +59,9 @@ struct is_reference_wrapper<std::reference_wrapper<T>> : std::true_type {};
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto
 invoke(Pointed C::*member, Object&& object,
-       Args&&... args) -> enable_if<std::is_function<Pointed>::value && (std::is_same<C, remove_cvref<Object>>::value ||
-                                                                         std::is_base_of<C, remove_cvref<Object>>::value),
-                                    decltype((std::forward<Object>(object).*member)(std::forward<Args>(args)...))> {
+       Args&&... args) -> enable_if_t<std::is_function<Pointed>::value && (std::is_same<C, remove_cvref<Object>>::value ||
+                                                                           std::is_base_of<C, remove_cvref<Object>>::value),
+                                      decltype((std::forward<Object>(object).*member)(std::forward<Args>(args)...))> {
 
     return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
 }
@@ -69,17 +69,17 @@ invoke(Pointed C::*member, Object&& object,
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto
 invoke(Pointed C::*member, Object&& object,
-       Args&&... args) -> enable_if<std::is_function<Pointed>::value && is_reference_wrapper<remove_cvref<Object>>::value,
-                                    decltype((object.get().*member)(std::forward<Args>(args)...))> {
+       Args&&... args) -> enable_if_t<std::is_function<Pointed>::value && is_reference_wrapper<remove_cvref<Object>>::value,
+                                      decltype((object.get().*member)(std::forward<Args>(args)...))> {
 
     return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
 }
 
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto invoke(Pointed C::*member, Object&& object, Args&&... args)
-    -> enable_if<std::is_function<Pointed>::value && !is_reference_wrapper<remove_cvref<Object>>::value &&
-                     !(std::is_same<C, remove_cvref<Object>>::value || std::is_base_of<C, remove_cvref<Object>>::value),
-                 decltype(((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...))> {
+    -> enable_if_t<std::is_function<Pointed>::value && !is_reference_wrapper<remove_cvref<Object>>::value &&
+                       !(std::is_same<C, remove_cvref<Object>>::value || std::is_base_of<C, remove_cvref<Object>>::value),
+                   decltype(((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...))> {
 
     return ((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...);
 }
@@ -87,9 +87,9 @@ constexpr auto invoke(Pointed C::*member, Object&& object, Args&&... args)
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto
 invoke(Pointed C::*member, Object&& object,
-       Args&&... args) -> enable_if<!std::is_function<Pointed>::value && (std::is_same<C, remove_cvref<Object>>::value ||
-                                                                          std::is_base_of<C, remove_cvref<Object>>::value),
-                                    decltype(std::forward<Object>(object).*member)> {
+       Args&&... args) -> enable_if_t<!std::is_function<Pointed>::value && (std::is_same<C, remove_cvref<Object>>::value ||
+                                                                            std::is_base_of<C, remove_cvref<Object>>::value),
+                                      decltype(std::forward<Object>(object).*member)> {
 
     static_assert(std::is_object<Pointed>::value && sizeof...(args) == 0, "Member pointer must point to an object type");
     return std::forward<Object>(object).*member;
@@ -98,8 +98,8 @@ invoke(Pointed C::*member, Object&& object,
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto
 invoke(Pointed C::*member, Object&& object,
-       Args&&... args) -> enable_if<!std::is_function<Pointed>::value && is_reference_wrapper<remove_cvref<Object>>::value,
-                                    decltype(object.get().*member)> {
+       Args&&... args) -> enable_if_t<!std::is_function<Pointed>::value && is_reference_wrapper<remove_cvref<Object>>::value,
+                                      decltype(object.get().*member)> {
 
     static_assert(std::is_object<Pointed>::value && sizeof...(args) == 0, "Member pointer must point to an object type");
     return object.get().*member;
@@ -107,9 +107,9 @@ invoke(Pointed C::*member, Object&& object,
 
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto invoke(Pointed C::*member, Object&& object, Args&&... args)
-    -> enable_if<!std::is_function<Pointed>::value && !is_reference_wrapper<remove_cvref<Object>>::value &&
-                     !(std::is_same<C, remove_cvref<Object>>::value || std::is_base_of<C, remove_cvref<Object>>::value),
-                 decltype((*std::forward<Object>(object)).*member)> {
+    -> enable_if_t<!std::is_function<Pointed>::value && !is_reference_wrapper<remove_cvref<Object>>::value &&
+                       !(std::is_same<C, remove_cvref<Object>>::value || std::is_base_of<C, remove_cvref<Object>>::value),
+                   decltype((*std::forward<Object>(object)).*member)> {
 
     static_assert(std::is_object<Pointed>::value && sizeof...(args) == 0, "Member pointer must point to an object type");
     return (*std::forward<Object>(object)).*member;
@@ -130,7 +130,7 @@ public:
 
 #else
 
-    template<class F = Func, class = enable_if<std::is_default_constructible<F>::value>>
+    template<class F = Func, class = enable_if_t<std::is_default_constructible<F>::value>>
     constexpr func_container() noexcept(std::is_nothrow_default_constructible<Func>::value) {
     }
 
@@ -197,38 +197,39 @@ public:
 
     template<class F = Func, class... Args>
     LZ_NODISCARD constexpr auto operator()(Args&&... args)
-        const& -> enable_if<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
+        const& -> enable_if_t<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
         return invoke(_func, std::forward<Args>(args)...);
     }
 
     template<class F = Func, class... Args>
     LZ_NODISCARD constexpr auto operator()(
-        Args&&... args) const& -> enable_if<!std::is_member_pointer<F>::value, decltype(_func(std::forward<Args>(args)...))> {
+        Args&&... args) const& -> enable_if_t<!std::is_member_pointer<F>::value, decltype(_func(std::forward<Args>(args)...))> {
         return _func(std::forward<Args>(args)...);
     }
 
     template<class F = Func, class... Args>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(
-        Args&&... args) & -> enable_if<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
+        Args&&... args) & -> enable_if_t<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
         return invoke(_func, std::forward<Args>(args)...);
     }
 
     template<class F = Func, class... Args>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
-    operator()(Args&&... args) & -> enable_if<!std::is_member_pointer<F>::value, decltype(_func(std::forward<Args>(args)...))> {
+    operator()(Args&&... args) & -> enable_if_t<!std::is_member_pointer<F>::value, decltype(_func(std::forward<Args>(args)...))> {
         return _func(std::forward<Args>(args)...);
     }
 
     template<class F = Func, class... Args>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto operator()(
-        Args&&... args) && -> enable_if<std::is_member_pointer<F>::value, decltype(invoke(_func, std::forward<Args>(args)...))> {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
+    operator()(Args&&... args) && -> enable_if_t<std::is_member_pointer<F>::value,
+                                                 decltype(invoke(_func, std::forward<Args>(args)...))> {
         return invoke(_func, std::forward<Args>(args)...);
     }
 
     template<class F = Func, class... Args>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
-    operator()(Args&&... args) && -> enable_if<!std::is_member_pointer<F>::value,
-                                               decltype(std::move(_func)(std::forward<Args>(args)...))> {
+    operator()(Args&&... args) && -> enable_if_t<!std::is_member_pointer<F>::value,
+                                                 decltype(std::move(_func)(std::forward<Args>(args)...))> {
         return std::move(_func)(std::forward<Args>(args)...);
     }
 

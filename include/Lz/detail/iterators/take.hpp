@@ -32,7 +32,7 @@ public:
 
 #else
 
-    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = Iterator, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr n_take_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 

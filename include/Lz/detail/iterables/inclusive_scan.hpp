@@ -31,8 +31,8 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
-                               std::is_default_constructible<BinaryOp>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
+                                 std::is_default_constructible<BinaryOp>::value>>
     constexpr inclusive_scan_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                  std::is_nothrow_default_constructible<T>::value &&
                                                  std::is_nothrow_default_constructible<BinaryOp>::value) {
@@ -58,7 +58,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable));
     }
 

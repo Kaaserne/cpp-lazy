@@ -115,8 +115,8 @@ public:
 
 #else
 
-    template<class I = iter, class = enable_if<std::is_default_constructible<I>::value &&
-                                               std::is_default_constructible<maybe_owned<Iterable>>::value>>
+    template<class I = iter, class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                 std::is_default_constructible<maybe_owned<Iterable>>::value>>
     constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value) {
     }
@@ -284,13 +284,13 @@ private:
 #else
 
     template<class I = iter_t<Iterable>>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
         _inner_iter = this_inner(*_outer_iter, (*_outer_iter).end());
     }
 
     template<class I = iter_t<Iterable>>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
         _inner_iter = this_inner(*_outer_iter, (*_outer_iter).begin() + ((*_outer_iter).end() - (*_outer_iter).begin()));
     }
@@ -310,7 +310,7 @@ public:
 #else
 
     template<class I = decltype(_outer_iter),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<this_inner>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<this_inner>::value>>
     constexpr flatten_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                           std::is_nothrow_default_constructible<this_inner>::value) {
     }
@@ -535,7 +535,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterator), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterator), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr flatten_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 

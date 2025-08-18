@@ -35,8 +35,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<T>::value && std::is_default_constructible<BinaryOp>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<T>::value && std::is_default_constructible<BinaryOp>::value>>
     constexpr exclusive_scan_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                  std::is_nothrow_default_constructible<S>::value &&
                                                  std::is_nothrow_default_constructible<T>::value &&

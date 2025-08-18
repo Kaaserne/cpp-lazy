@@ -38,7 +38,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr enumerate_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -59,7 +59,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_sized<I>::value, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable));
     }
 
@@ -87,12 +87,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const& {
         return { _iterable.end(), get_last_index() };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, sentinel> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const& {
         return _iterable.end();
     }
 
@@ -109,7 +109,7 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_bidi_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<I>::value && !is_sentinel<iter, sent>::value, iterator> end() && {
         return { detail::end(std::move(_iterable)), get_last_index() };
     }
 

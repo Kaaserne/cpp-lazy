@@ -106,7 +106,7 @@ struct as_iterator_adaptor {
      */
     template<class IterCat>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 
-    enable_if<is_input_tag<IterCat>::value || is_output_tag<IterCat>::value, fn_args_holder<adaptor, IterCat>>
+    enable_if_t<is_input_tag<IterCat>::value || is_output_tag<IterCat>::value, fn_args_holder<adaptor, IterCat>>
     operator()(IterCat) const {
         return {};
     }

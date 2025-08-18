@@ -33,7 +33,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr drop_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -54,7 +54,7 @@ public:
 #else
 
     template<bool Sized = is_sized<Iterable>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<Sized, size_t> size() const {
         return lz::size(_iterable) > _n ? lz::size(_iterable) - _n : 0;
     }
 

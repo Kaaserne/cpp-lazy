@@ -67,7 +67,7 @@ struct duplicates_adaptor {
      * @return An adaptor that can be used in pipe expressions
      */
     template<class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>
     operator()(BinaryPredicate compare = {}) const {
         return { std::move(compare) };
     }

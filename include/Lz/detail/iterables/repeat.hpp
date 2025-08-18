@@ -30,7 +30,7 @@ public:
 
 #else
 
-    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    template<class U = T, class = enable_if_t<std::is_default_constructible<U>::value>>
     constexpr repeat_iterable() noexcept(std::is_nothrow_default_constructible<U>::value) {
     }
 
@@ -73,7 +73,7 @@ public:
 
 #else
 
-    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    template<class U = T, class = enable_if_t<std::is_default_constructible<U>::value>>
     constexpr repeat_iterable() noexcept(std::is_nothrow_default_constructible<U>::value) {
     }
 

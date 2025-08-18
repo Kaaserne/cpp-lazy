@@ -15,7 +15,7 @@ template<class Iterable, class UnaryPredicate, class = void>
 class drop_while_iterable;
 
 template<class Iterable, class UnaryPredicate>
-class drop_while_iterable<Iterable, UnaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>> : public lazy_view {
+class drop_while_iterable<Iterable, UnaryPredicate, enable_if_t<!is_ra<iter_t<Iterable>>::value>> : public lazy_view {
     maybe_owned<Iterable> _iterable;
     func_container<UnaryPredicate> _unary_predicate;
 
@@ -38,7 +38,7 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
     constexpr drop_while_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
@@ -73,12 +73,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, sentinel> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, sentinel> end() const {
         return _iterable.end();
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const {
+    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const {
         return {};
     }
 
@@ -86,7 +86,7 @@ public:
 };
 // TODO remove this specialization, also edit docs
 template<class Iterable, class UnaryPredicate>
-class drop_while_iterable<Iterable, UnaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>> : public lazy_view {
+class drop_while_iterable<Iterable, UnaryPredicate, enable_if_t<is_ra<iter_t<Iterable>>::value>> : public lazy_view {
     iter_t<Iterable> _begin;
     sentinel_t<Iterable> _end;
 
@@ -105,7 +105,7 @@ public:
 #else
 
     template<class I = decltype(_begin),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sentinel>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sentinel>::value>>
     constexpr drop_while_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<sentinel>::value) {
     }
@@ -129,7 +129,7 @@ public:
 #else
 
     template<class I = iter_t<Iterable>>
-    LZ_NODISCARD constexpr enable_if<is_ra<I>::value, size_t> size() const {
+    LZ_NODISCARD constexpr enable_if_t<is_ra<I>::value, size_t> size() const {
         return static_cast<size_t>(_end - _begin);
     }
 

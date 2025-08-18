@@ -36,8 +36,8 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr unique_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
                                          std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
@@ -65,7 +65,7 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
         return { _iterable, _iterable.begin(), std::move(_predicate) };
     }
 
@@ -85,12 +85,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return iterator{ _iterable, _iterable.end(), _predicate };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const noexcept {
+    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const noexcept {
         return default_sentinel;
     }
 

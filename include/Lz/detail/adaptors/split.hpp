@@ -79,7 +79,7 @@ struct split_adaptor {
      * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class T>
-    constexpr enable_if<!is_iterable<T>::value, split_iterable<ValueType, remove_ref<Iterable>, T>>
+    constexpr enable_if_t<!is_iterable<T>::value, split_iterable<ValueType, remove_ref<Iterable>, T>>
     operator()(Iterable&& iterable, T delimiter) const {
         return { std::forward<Iterable>(iterable), std::forward<T>(delimiter) };
     }
@@ -104,7 +104,7 @@ struct split_adaptor {
      */
     template<class Iterable, class Iterable2>
     LZ_NODISCARD constexpr
-    enable_if<is_iterable<Iterable2>::value, split_iterable<ValueType, remove_ref<Iterable>, remove_ref<Iterable2>>>
+    enable_if_t<is_iterable<Iterable2>::value, split_iterable<ValueType, remove_ref<Iterable>, remove_ref<Iterable2>>>
     operator()(Iterable&& iterable, Iterable2&& delimiter) const {
         return { std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter) };
     }
@@ -204,7 +204,7 @@ struct split_adaptor {
      * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T&& delimiter) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T&& delimiter) const {
         return { std::forward<T>(delimiter) };
     }
 
@@ -222,7 +222,7 @@ struct split_adaptor {
      * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
         return { std::move(delimiter) };
     }
 
@@ -318,7 +318,7 @@ struct split_adaptor<void> {
      * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class T>
-    LZ_NODISCARD constexpr enable_if<!is_iterable<T>::value, splitter_t_iterable<Iterable, T>>
+    LZ_NODISCARD constexpr enable_if_t<!is_iterable<T>::value, splitter_t_iterable<Iterable, T>>
     operator()(Iterable&& iterable, T delimiter) const {
         return { std::forward<Iterable>(iterable), std::move(delimiter) };
     }
@@ -338,7 +338,7 @@ struct split_adaptor<void> {
      * @return A split_iterable that splits the iterable on the delimiter.
      */
     template<class Iterable, class Iterable2>
-    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable2>::value, splitter_iterable<Iterable, Iterable2>>
+    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable2>::value, splitter_iterable<Iterable, Iterable2>>
     operator()(Iterable&& iterable, Iterable2&& delimiter) const {
         using a = split_adaptor<basic_iterable<iter_t<Iterable>, sentinel_t<Iterable>>>;
         return a{}(std::forward<Iterable>(iterable), std::forward<Iterable2>(delimiter));
@@ -426,7 +426,7 @@ struct split_adaptor<void> {
      * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<is_iterable<Iterable>::value, fn_args_holder<adaptor, Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_iterable<Iterable>::value, fn_args_holder<adaptor, Iterable>>
     operator()(Iterable&& delimiter) const {
         return { std::forward<Iterable>(delimiter) };
     }
@@ -445,7 +445,8 @@ struct split_adaptor<void> {
      * @return A split_iterable adaptor that can be used in pipe expressions
      */
     template<class T>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<T>::value, fn_args_holder<adaptor, T>> operator()(T delimiter) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<T>::value, fn_args_holder<adaptor, T>>
+    operator()(T delimiter) const {
         return { std::move(delimiter) };
     }
 

@@ -473,8 +473,8 @@ template<class Iterable, class Iterable2, class BinaryPredicate = std::equal_to<
  * @return `true` if the value is found, `false` otherwise
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<detail::is_bidi<iter_t<Iterable>>::value, bool>
-ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_bidi<iter_t<Iterable>>::value, bool> ends_with(
+    Iterable && iterable, Iterable2 && iterable2, BinaryPredicate&& binary_predicate = {}) {
     return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                              iterable2.begin(), iterable2.end(), std::forward<BinaryPredicate>(binary_predicate));
 }
@@ -491,8 +491,8 @@ ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_p
  * @return `true` if the value is found, `false` otherwise
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if<!detail::is_bidi<iter_t<Iterable>>::value, bool>
-ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_bidi<iter_t<Iterable>>::value, bool> ends_with(
+    Iterable && iterable, Iterable2 && iterable2, BinaryPredicate&& binary_predicate = {}) {
     return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
                              iterable2.begin(), iterable2.end(), std::forward<BinaryPredicate>(binary_predicate),
                              lz::eager_size(iterable), lz::eager_size(iterable2));

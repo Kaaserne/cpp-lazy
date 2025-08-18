@@ -66,9 +66,9 @@ public:
 
     template<
         class I = it1,
-        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<it2>::value &&
-                          std::is_default_constructible<Iterable1>::value && std::is_default_constructible<Iterable2>::value &&
-                          std::is_default_constructible<BinaryPredicate>::value>>
+        class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<it2>::value &&
+                            std::is_default_constructible<Iterable1>::value && std::is_default_constructible<Iterable2>::value &&
+                            std::is_default_constructible<BinaryPredicate>::value>>
     constexpr intersection_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                std::is_nothrow_default_constructible<it2>::value &&
                                                std::is_nothrow_default_constructible<Iterable1>::value &&

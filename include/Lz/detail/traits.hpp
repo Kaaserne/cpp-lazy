@@ -113,16 +113,16 @@ template<class>
 using void_t = void;
 
 template<bool B>
-struct enable_if_impl {};
+struct enable_if {};
 
 template<>
-struct enable_if_impl<true> {
+struct enable_if<true> {
     template<class T>
     using type = T;
 };
 
 template<bool B, class T = void>
-using enable_if = typename enable_if_impl<B>::template type<T>;
+using enable_if_t = typename enable_if<B>::template type<T>;
 
 template<bool B>
 struct conditional_impl;
@@ -140,7 +140,7 @@ struct conditional_impl<false> {
 };
 
 template<bool B, class IfTrue, class IfFalse>
-using conditional = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
+using conditional_t = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
 #ifdef LZ_HAS_CXX_17
 
@@ -296,25 +296,25 @@ using remove_cvref = typename std::remove_cv<remove_ref<T>>::type;
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
+    -> enable_if_t<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
     return std::forward<Iterable>(c).begin();
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
+    -> enable_if_t<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
     return std::forward<Iterable>(c).end();
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
+    -> enable_if_t<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
     return std::begin(c);
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
+    -> enable_if_t<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
     return std::end(c);
 }
 } // namespace detail

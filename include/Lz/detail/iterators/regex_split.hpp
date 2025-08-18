@@ -39,7 +39,7 @@ public:
 
 #else
 
-    template<class R = RegexTokenIter, class = enable_if<std::is_default_constructible<R>::value>>
+    template<class R = RegexTokenIter, class = enable_if_t<std::is_default_constructible<R>::value>>
     constexpr regex_split_iterator() noexcept(std::is_nothrow_default_constructible<R>::value) {
     }
 

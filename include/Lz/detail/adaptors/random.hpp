@@ -195,8 +195,8 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class Integral>
-    LZ_NODISCARD enable_if<std::is_integral<Integral>::value,
-                           random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
+    LZ_NODISCARD enable_if_t<std::is_integral<Integral>::value,
+                             random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
     operator()(const Integral min, const Integral max, const size_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_int_distribution<Integral>{ min, max }, gen, amount);
@@ -219,8 +219,8 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class Floating>
-    LZ_NODISCARD enable_if<std::is_floating_point<Floating>::value,
-                           random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
+    LZ_NODISCARD enable_if_t<std::is_floating_point<Floating>::value,
+                             random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
     operator()(const Floating min, const Floating max, const size_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_real_distribution<Floating>{ min, max }, gen, amount);

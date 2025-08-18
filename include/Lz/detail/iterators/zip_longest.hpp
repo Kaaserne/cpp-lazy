@@ -154,7 +154,7 @@ public:
 #else
 
     template<class I = IterMaybeHomo,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
     constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                               std::is_nothrow_default_constructible<SMaybeHomo>::value) {
     }
@@ -360,7 +360,7 @@ public:
 #else
 
     template<class I = IterMaybeHomo,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
     constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                               std::is_nothrow_default_constructible<SMaybeHomo>::value) {
     }

@@ -47,7 +47,7 @@ private:
     template<class Iterable>
     any_iterable(
         Iterable&& iterable,
-        detail::enable_if<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) || (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
+        detail::enable_if_t<(sizeof(iter_t<Iterable>) > it::SBO_SIZE) || (sizeof(sentinel_t<Iterable>) > it::SBO_SIZE), int>) :
         _begin{ detail::make_unique<any_iter_impl<Iterable>>(detail::begin(std::forward<Iterable>(iterable))) },
         _end{ detail::make_unique<any_iter_impl<Iterable>>(detail::end(std::forward<Iterable>(iterable))) } {
     }
@@ -56,7 +56,7 @@ private:
     template<class Iterable>
     any_iterable(
         Iterable&& iterable,
-        detail::enable_if<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
+        detail::enable_if_t<(sizeof(iter_t<Iterable>) <= it::SBO_SIZE) && (sizeof(sentinel_t<Iterable>) <= it::SBO_SIZE), int>) :
         _begin{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::begin(std::forward<Iterable>(iterable)) },
         _end{ detail::in_place_type_t<any_iter_impl<Iterable>>{}, detail::end(std::forward<Iterable>(iterable)) } {
     }
@@ -100,7 +100,7 @@ public:
 
 #else
 
-    template<class I = it, class = detail::enable_if<std::is_default_constructible<I>::value>>
+    template<class I = it, class = detail::enable_if_t<std::is_default_constructible<I>::value>>
     constexpr any_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -142,7 +142,7 @@ public:
 #else
 
     template<class I = IterCat>
-    LZ_NODISCARD detail::enable_if<detail::is_ra_tag<I>::value, size_t> size() const {
+    LZ_NODISCARD detail::enable_if_t<detail::is_ra_tag<I>::value, size_t> size() const {
         return static_cast<size_t>(std::distance(_begin, _end));
     }
 

@@ -40,9 +40,9 @@ public:
 
     template<
         class I = decltype(_iterable_a),
-        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
-                          std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
-                          std::is_default_constructible<ResultSelector>::value>>
+        class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
+                            std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
+                            std::is_default_constructible<ResultSelector>::value>>
     constexpr join_where_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<maybe_owned<IterableB>>::value &&
                                              std::is_nothrow_default_constructible<SelectorA>::value &&

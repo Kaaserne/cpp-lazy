@@ -70,7 +70,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
         return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
     }
 
@@ -125,7 +125,7 @@ public:
 
 #else
 
-    template<class I = it, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = it, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr maybe_owned_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -176,7 +176,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
         return static_cast<size_t>(lz::size(_iterable_value));
     }
 

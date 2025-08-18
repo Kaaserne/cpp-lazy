@@ -76,7 +76,7 @@ struct common_adaptor {
      * @return A common iterable that can be used with algorithms that require a common iterator.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr enable_if<!is_ra<iter_t<Iterable>>::value, common_iterable<remove_ref<Iterable>>>
+    LZ_NODISCARD constexpr enable_if_t<!is_ra<iter_t<Iterable>>::value, common_iterable<remove_ref<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
         return common_iterable<remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
@@ -104,7 +104,7 @@ struct common_adaptor {
      * @return A common iterable/basic_iterable that can be used with algorithms that require a common iterator.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr enable_if<is_ra<iter_t<Iterable>>::value, basic_iterable<iter_t<Iterable>>>
+    LZ_NODISCARD constexpr enable_if_t<is_ra<iter_t<Iterable>>::value, basic_iterable<iter_t<Iterable>>>
     operator()(Iterable&& iterable) const {
         static_assert(has_sentinel<Iterable>::value, "Iterator and Sentinel must be different types");
         return basic_iterable<iter_t<Iterable>>{ iterable.begin(), iterable.begin() + (iterable.end() - iterable.begin()) };

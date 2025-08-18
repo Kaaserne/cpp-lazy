@@ -39,7 +39,7 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<inner_iter>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<inner_iter>::value>>
     constexpr rotate_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<inner_iter>::value) {
     }
@@ -64,7 +64,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable));
     }
 
@@ -85,7 +85,7 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
         return { std::move(_iterable), std::move(_start_iter), _start_iter == _iterable.end() ? _start_index : 0 };
     }
 
@@ -105,12 +105,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterable, _start_iter, lz::eager_size(_iterable) };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, inner_iter> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, inner_iter> end() const {
         return _start_iter;
     }
 

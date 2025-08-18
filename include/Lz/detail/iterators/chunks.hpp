@@ -13,7 +13,7 @@ template<class Iterator, class S, class = void>
 class chunks_iterator;
 
 template<class Iterator, class S>
-class chunks_iterator<Iterator, S, enable_if<is_fwd<Iterator>::value && !is_bidi<Iterator>::value>>
+class chunks_iterator<Iterator, S, enable_if_t<is_fwd<Iterator>::value && !is_bidi<Iterator>::value>>
     : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
                       diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
@@ -46,7 +46,7 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
     constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<S>::value) {
     }
@@ -91,7 +91,7 @@ public:
 };
 
 template<class Iterator, class S>
-class chunks_iterator<Iterator, S, enable_if<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
+class chunks_iterator<Iterator, S, enable_if_t<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
                       diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
@@ -125,7 +125,7 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
     constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<S>::value) {
     }
@@ -182,7 +182,7 @@ public:
 };
 
 template<class Iterable, class Iterator>
-class chunks_iterator<Iterable, Iterator, enable_if<is_ra<Iterator>::value>>
+class chunks_iterator<Iterable, Iterator, enable_if_t<is_ra<Iterator>::value>>
     : public iterator<chunks_iterator<Iterable, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
                       diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
 
@@ -209,7 +209,7 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
     constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<Iterable>::value) {
     }

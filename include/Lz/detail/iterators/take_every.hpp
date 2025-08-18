@@ -16,7 +16,7 @@ template<class Iterable, class = void>
 class take_every_iterator;
 
 template<class Iterable>
-class take_every_iterator<Iterable, enable_if<!is_bidi<iter_t<Iterable>>::value>>
+class take_every_iterator<Iterable, enable_if_t<!is_bidi<iter_t<Iterable>>::value>>
     : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
                       diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
     using it = iter_t<Iterable>;
@@ -44,7 +44,7 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
     constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<sent>::value) {
     }
@@ -88,7 +88,7 @@ public:
 };
 
 template<class Iterable>
-class take_every_iterator<Iterable, enable_if<is_bidi<iter_t<Iterable>>::value && !is_ra<iter_t<Iterable>>::value>>
+class take_every_iterator<Iterable, enable_if_t<is_bidi<iter_t<Iterable>>::value && !is_ra<iter_t<Iterable>>::value>>
     : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
                       diff_type<iter_t<Iterable>>, std::bidirectional_iterator_tag, default_sentinel_t> {
     using it = iter_t<Iterable>;
@@ -117,7 +117,7 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
     constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<sent>::value) {
     }
@@ -171,7 +171,7 @@ public:
 };
 
 template<class Iterable>
-class take_every_iterator<Iterable, enable_if<is_ra<iter_t<Iterable>>::value>>
+class take_every_iterator<Iterable, enable_if_t<is_ra<iter_t<Iterable>>::value>>
     : public iterator<take_every_iterator<Iterable>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
                       diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
 
@@ -208,7 +208,7 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
     constexpr take_every_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<sent>::value) {
     }

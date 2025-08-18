@@ -67,7 +67,7 @@ struct tuple_size<homogeneous_array<Iterator, N>> {
 template<class T, class... Ts>
 struct maybe_homogenous {
     using type =
-        conditional<conjunction<std::is_same<T, Ts>...>::value, homogeneous_array<T, sizeof...(Ts) + 1>, std::tuple<T, Ts...>>;
+        conditional_t<conjunction<std::is_same<T, Ts>...>::value, homogeneous_array<T, sizeof...(Ts) + 1>, std::tuple<T, Ts...>>;
 };
 
 template<class... Ts>
@@ -170,14 +170,14 @@ template<class... Ts>
 struct disjunction : std::false_type {};
 
 template<class T, class... Ts>
-struct disjunction<T, Ts...> : conditional<T::value, std::true_type, disjunction<Ts...>> {};
+struct disjunction<T, Ts...> : conditional_t<T::value, std::true_type, disjunction<Ts...>> {};
 
 #endif
 
 template<class T, class U>
 struct copy_cv {
-    using const_applied = conditional<std::is_const<T>::value, const U, U>;
-    using type = conditional<std::is_volatile<T>::value, volatile const_applied, const_applied>;
+    using const_applied = conditional_t<std::is_const<T>::value, const U, U>;
+    using type = conditional_t<std::is_volatile<T>::value, volatile const_applied, const_applied>;
 };
 
 template<class T, class U>
@@ -190,9 +190,9 @@ struct common_reference2 {
     using pure_t = typename std::remove_cv<ref_remove_t>::type;
     using pure_u = typename std::remove_cv<ref_remove_u>::type;
 
-    using type = conditional<std::is_lvalue_reference<T>::value && std::is_lvalue_reference<U>::value &&
-                                 std::is_same<pure_t, pure_u>::value,
-                             copy_cv_t<ref_remove_t, ref_remove_u>&, common_type<pure_t, pure_u>>;
+    using type = conditional_t<std::is_lvalue_reference<T>::value && std::is_lvalue_reference<U>::value &&
+                                   std::is_same<pure_t, pure_u>::value,
+                               copy_cv_t<ref_remove_t, ref_remove_u>&, common_type<pure_t, pure_u>>;
 };
 
 template<class T, class U>

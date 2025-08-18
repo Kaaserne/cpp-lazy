@@ -137,12 +137,12 @@ namespace lz {
 namespace detail {
 
 template<class T>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if<std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<std::is_object<T>::value, T*> addressof(T& arg) noexcept {
     return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(arg)));
 }
 
 template<class T>
-LZ_NODISCARD constexpr enable_if<!std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+LZ_NODISCARD constexpr enable_if_t<!std::is_object<T>::value, T*> addressof(T& arg) noexcept {
     return &arg;
 }
 
@@ -256,7 +256,7 @@ template<class Iterator, class S>
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17
-    enable_if<is_sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    enable_if_t<is_sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, const diff_iterable_t<I> n) {
 
     const auto size = lz::ssize(iterable);
@@ -268,14 +268,14 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17
-    enable_if<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    enable_if_t<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, diff_iterable_t<I> n) {
     return std::next(detail::begin(std::forward<I>(iterable)), n);
 }
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17
-    enable_if<is_sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
+    enable_if_t<is_sized<I>::value && !is_sentinel<iter_t<I>, sentinel_t<I>>::value && is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
     const auto size = lz::ssize(iterable);
@@ -287,7 +287,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
+    enable_if_t<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
     using diff_type = diff_iterable_t<I>;
@@ -301,7 +301,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14
 }
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     diff_type<Iterator> dist = 0;
     for (; begin != end; ++begin, ++dist) {
     }
@@ -309,7 +309,7 @@ LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, diff_type<Iterator>> dist
 }
 
 template<class Iterator, class S>
-constexpr enable_if<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
+constexpr enable_if_t<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
     return end - begin;
 }
 
@@ -393,7 +393,7 @@ template<class Iterable>
  */
 template<class Iterable>
 LZ_NODISCARD constexpr auto eager_size(Iterable &&
-                                       c) -> detail::enable_if<detail::is_sized<Iterable>::value, decltype(lz::size(c))> {
+                                       c) -> detail::enable_if_t<detail::is_sized<Iterable>::value, decltype(lz::size(c))> {
     return lz::size(c);
 }
 
@@ -414,7 +414,7 @@ LZ_NODISCARD constexpr auto eager_size(Iterable &&
  * @return The size of the iterable.
  */
 template<class Iterable>
-LZ_NODISCARD constexpr detail::enable_if<!detail::is_sized<Iterable>::value, size_t> eager_size(Iterable && c) {
+LZ_NODISCARD constexpr detail::enable_if_t<!detail::is_sized<Iterable>::value, size_t> eager_size(Iterable && c) {
     using std::distance;
     return static_cast<size_t>(distance(c.begin(), c.end()));
 }
