@@ -10,8 +10,8 @@ namespace lz {
 
 namespace detail {
 
-template<class T>
-using const_reference = detail::conditional<std::is_lvalue_reference<T>::value, const T&, detail::remove_cvref<T>>;
+template<class Derived, class Reference, class Pointer, class DifferenceType, class Cat, class S = Derived>
+struct iterator;
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {

@@ -45,48 +45,58 @@ struct default_sentinel_t {
  */
 LZ_INLINE_VAR constexpr default_sentinel_t default_sentinel{};
 
-template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S = Derived>
+} // namespace lz
+
+namespace lz {
+namespace detail {
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S>
 struct iterator;
+
+}
+} // namespace lz
+
+LZ_MODULE_EXPORT namespace lz{
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
 constexpr bool
-operator==(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+operator==(const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return it == sent;
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
-constexpr bool
-operator!=(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+constexpr bool operator!=(const Sentinel& sent,
+                          const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return !(it == sent);
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
-LZ_NODISCARD constexpr bool
-operator<(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+LZ_NODISCARD constexpr bool operator<(
+    const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return sent - it < 0;
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
-LZ_NODISCARD constexpr bool
-operator>(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+LZ_NODISCARD constexpr bool operator>(
+    const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return it < sent;
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
-LZ_NODISCARD constexpr bool
-operator<=(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+LZ_NODISCARD constexpr bool operator<=(
+    const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return !(it < sent);
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
-LZ_NODISCARD constexpr bool
-operator>=(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+LZ_NODISCARD constexpr bool operator>=(
+    const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return !(sent < it);
 }
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class Sentinel>
-LZ_NODISCARD constexpr typename Derived::difference_type
-operator-(const Sentinel& sent, const iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
+LZ_NODISCARD constexpr typename Derived::difference_type operator-(
+    const Sentinel& sent, const detail::iterator<Derived, Reference, Pointer, DifferenceType, IterCat, Sentinel>& it) {
     return -(it - sent);
 }
 
