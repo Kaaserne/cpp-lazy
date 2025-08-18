@@ -61,7 +61,6 @@ export module lz;
 #include "Lz/interleave.hpp"
 #include "Lz/intersection.hpp"
 #include "Lz/iter_tools.hpp"
-#include "Lz/iterator_base.hpp"
 #include "Lz/join_where.hpp"
 #include "Lz/loop.hpp"
 #include "Lz/map.hpp"
