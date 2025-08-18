@@ -25,18 +25,34 @@ public:
 
     constexpr range_iterable() noexcept = default;
 
+#ifdef LZ_USE_DEBUG_ASSERTIONS
+
+    template<class A = Arithmetic, enable_if<!std::is_floating_point<A>::value, int> = 0>
     LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
         _start{ start },
         _end{ end },
         _step{ step } {
-#ifdef LZ_ASSERT
-        if LZ_CONSTEXPR_IF (!std::is_unsigned<Arithmetic>::value && !std::is_floating_point<Arithmetic>::value) {
-            LZ_ASSERT(step > std::numeric_limits<Arithmetic>::min(), "Step must be larger than the minimum representable value");
-            // The behavior (of std::abs) is undefined if the result cannot be represented by the return type
-            LZ_ASSERT(std::abs(_step) > 0, "Step cannot be zero");
-        }
-#endif
+        LZ_ASSERT(step > std::numeric_limits<Arithmetic>::min(), "Step must be larger than the minimum representable value");
+        // The behavior (of std::abs) is undefined if the result cannot be represented by the return type
+        LZ_ASSERT(std::abs(_step) > 0, "Step cannot be zero");
     }
+
+    template<class A = Arithmetic, enable_if<std::is_floating_point<A>::value, int> = 0>
+    LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
+        _start{ start },
+        _end{ end },
+        _step{ step } {
+    }
+
+#else
+
+    LZ_CONSTEXPR_CXX_14 range_iterable(const Arithmetic start, const Arithmetic end, const Arithmetic step) noexcept :
+        _start{ start },
+        _end{ end },
+        _step{ step } {
+    }
+
+#endif
 
 #ifdef LZ_HAS_CXX_17
 

@@ -60,7 +60,7 @@ struct count_dims_impl<true> {
 #else
 
     template<class T>
-    static constexpr size_t value = 1 + count_dims_impl<is_iterable_v<iterable_type<T>>>::template value<iterable_type<T>>;
+    static constexpr size_t value = 1 + count_dims_impl<is_iterable<iterable_type<T>>::value>::template value<iterable_type<T>>;
 
 #endif
 };
@@ -75,7 +75,7 @@ using count_dims = typename count_dims_impl<is_iterable<T>::value>::template typ
 #elif !defined(LZ_HAS_CXX_17)
 
 template<class T>
-using count_dims = std::integral_constant<size_t, count_dims_impl<is_iterable_v<T>>::template value<T>>;
+using count_dims = std::integral_constant<size_t, count_dims_impl<is_iterable<T>::value>::template value<T>>;
 
 #else
 

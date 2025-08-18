@@ -543,7 +543,7 @@ using has_sentinel = std::integral_constant<bool, is_sentinel<iter_t<Iterable>, 
 template<class Iterable>
 using is_sentinel_assignable = std::is_assignable<iter_t<Iterable>, sentinel_t<Iterable>>;
 
-#ifdef LZ_HAS_CXX_14
+#ifdef LZ_HAS_CXX_17
 
 template<class T>
 LZ_INLINE_VAR constexpr bool is_ra_v = is_ra<T>::value;
