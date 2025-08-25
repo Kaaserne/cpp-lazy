@@ -20,8 +20,8 @@ class loop_iterator<Iterable, false>
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
 
-    it _iterator;
-    Iterable _iterable;
+    it _iterator{};
+    Iterable _iterable{};
     size_t _rotations_left{};
 
 public:
@@ -29,6 +29,9 @@ public:
     using value_type = typename traits::value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr loop_iterator(const loop_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(const loop_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -139,8 +142,8 @@ class loop_iterator<Iterable, true>
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
 
-    it _iterator;
-    Iterable _iterable;
+    it _iterator{};
+    Iterable _iterable{};
 
 public:
     using reference = typename traits::reference;
@@ -148,6 +151,9 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
     using iterator_category = typename traits::iterator_category;
+
+    constexpr loop_iterator(const loop_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(const loop_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

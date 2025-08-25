@@ -21,9 +21,9 @@ class take_while_iterator
 
     using iter = iter_t<Iterable>;
 
-    iter _iterator;
-    Iterable _iterable;
-    mutable UnaryPredicate _unary_predicate;
+    iter _iterator{};
+    Iterable _iterable{};
+    mutable UnaryPredicate _unary_predicate{};
 
     using traits = std::iterator_traits<iter>;
 
@@ -38,6 +38,9 @@ public:
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr take_while_iterator(const take_while_iterator&)  = default;
+    LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(const take_while_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

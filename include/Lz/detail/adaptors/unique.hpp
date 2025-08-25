@@ -30,7 +30,7 @@ struct unique_adaptor {
      * @return An iterable that contains only unique elements from the input iterable.
      */
     template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    [[nodiscard]] constexpr unique_iterable<remove_ref<Iterable>, BinaryPredicate>
+    [[nodiscard]] constexpr unique_iterable<remove_ref_t<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const
         requires(lz::iterable<Iterable>)
     {
@@ -79,7 +79,7 @@ struct unique_adaptor {
      * @return An iterable that contains only unique elements from the input iterable.
      */
     template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, unique_iterable<remove_ref<Iterable>, BinaryPredicate>>
+    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, unique_iterable<remove_ref_t<Iterable>, BinaryPredicate>>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
     }

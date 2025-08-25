@@ -26,6 +26,9 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+    constexpr filter_iterator(const filter_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(const filter_iterator&) = default;
+
     LZ_CONSTEXPR_CXX_14 void find() {
         using detail::find_if;
         using std::find_if;
@@ -33,9 +36,9 @@ public:
     }
 
 private:
-    it _iterator;
-    Iterable _iterable;
-    UnaryPredicate _predicate;
+    it _iterator{};
+    Iterable _iterable{};
+    mutable UnaryPredicate _predicate{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS

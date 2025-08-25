@@ -40,7 +40,7 @@ public:
     constexpr take_iterable(Iterator it, const size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
-    LZ_NODISCARD constexpr size_t size() const {
+    LZ_NODISCARD constexpr size_t size() const noexcept{
         return _n;
     }
 

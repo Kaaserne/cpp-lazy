@@ -142,6 +142,12 @@ struct conditional_impl<false> {
 template<bool B, class IfTrue, class IfFalse>
 using conditional_t = typename conditional_impl<B>::template type<IfTrue, IfFalse>;
 
+template<class T>
+struct is_reference_wrapper : std::false_type {};
+
+template<class T>
+struct is_reference_wrapper<std::reference_wrapper<T>> : std::true_type {};
+
 #ifdef LZ_HAS_CXX_17
 
 template<class... Ts>
@@ -153,7 +159,7 @@ template<class... Ts>
 struct conjunction : std::true_type {};
 
 template<class T, class... Ts>
-struct conjunction<T, Ts...> : conditional<T::value, conjunction<Ts...>, std::false_type> {};
+struct conjunction<T, Ts...> : conditional_t<T::value, conjunction<Ts...>, std::false_type> {};
 
 #endif
 
@@ -189,7 +195,7 @@ struct plus {
 #define MAKE_BIN_PRED(OP) lz::detail::OP
 
 template<class T>
-using remove_ref = typename std::remove_reference<T>::type;
+using remove_ref_t = typename std::remove_reference<T>::type;
 
 template<size_t... Is>
 struct index_sequence {
@@ -236,7 +242,7 @@ using tup_element = typename std::tuple_element<I, T>::type;
 #else // ^^^ has cxx 11 vvv cxx > 11
 
 template<class T>
-using remove_ref = std::remove_reference_t<T>;
+using remove_ref_t = std::remove_reference_t<T>;
 
 template<size_t... N>
 using index_sequence = std::index_sequence<N...>;
@@ -275,46 +281,47 @@ struct is_invocable_impl_n_args<void_t<decltype(std::declval<Function>()(std::de
     : std::true_type {};
 
 template<class F, class... Args>
-using is_invocable = conditional<sizeof...(Args) == 0, is_invocable_impl_no_args<F>, is_invocable_impl_n_args<void, F, Args...>>;
+using is_invocable =
+    conditional_t<sizeof...(Args) == 0, is_invocable_impl_no_args<F>, is_invocable_impl_n_args<void, F, Args...>>;
 
 #endif
 
 template<class T>
-using remove_cref_t = typename std::remove_const<typename std::remove_reference<T>::type>::type;
+using remove_cref_t = typename std::remove_const<remove_ref_t<T>>::type;
 
 #ifdef LZ_HAS_CXX_20
 
 template<class T>
-using remove_cvref = std::remove_cvref_t<T>;
+using remove_cvref_t = std::remove_cvref_t<T>;
 
 #else // ^^^ has cxx 20 vvv cxx < 20
 
 template<class T>
-using remove_cvref = typename std::remove_cv<remove_ref<T>>::type;
+using remove_cvref_t = typename std::remove_cv<remove_ref_t<T>>::type;
 
 #endif // LZ_HAS_CXX_20
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if_t<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
+    -> enable_if_t<!std::is_array<remove_ref_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
     return std::forward<Iterable>(c).begin();
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if_t<!std::is_array<remove_ref<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
+    -> enable_if_t<!std::is_array<remove_ref_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
     return std::forward<Iterable>(c).end();
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if_t<std::is_array<remove_ref<Iterable>>::value, decltype(std::begin(c))> {
+    -> enable_if_t<std::is_array<remove_ref_t<Iterable>>::value, decltype(std::begin(c))> {
     return std::begin(c);
 }
 
 template<class Iterable>
 LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if_t<std::is_array<remove_ref<Iterable>>::value, decltype(std::end(c))> {
+    -> enable_if_t<std::is_array<remove_ref_t<Iterable>>::value, decltype(std::end(c))> {
     return std::end(c);
 }
 } // namespace detail
@@ -327,7 +334,7 @@ LZ_MODULE_EXPORT namespace lz {
 /**
  * @brief Returns the size of a container.
  *
- * @param c The container to get the size from.
+ * @param i The container to get the size from.
  * @return The size of the container.
  */
 template<class Iterable>
@@ -338,7 +345,7 @@ template<class Iterable>
 /**
  * @brief Returns the size of a container.
  *
- * @param c The container to get the size from.
+ * @param i The container to get the size from.
  * @return The size of the container.
  */
 template<class Iterable>
@@ -347,7 +354,6 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
 /**
  * @brief Returns the size of a container.
  *
- * @param c The container to get the size from.
  * @return The size of the container.
  */
 template<class T, size_t N>
@@ -371,14 +377,14 @@ using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterab
  */
 template<class Iterable>
 using sentinel_t = decltype(detail::end(std::forward<Iterable>(std::declval<Iterable>())));
-
+// TODO remove remove_ref_t
 /**
  * @brief Can be used to get the value type of an iterator. Example: `lz::val_t<std::vector<int>::iterator>` will return `int`.
  *
  * @tparam Iterator The iterator to get the value type from.
  */
 template<class Iterator>
-using val_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::value_type;
+using val_t = typename std::iterator_traits<detail::remove_ref_t<Iterator>>::value_type;
 
 /**
  * @brief Can be used to get the reference type of an iterator. Example: `lz::ref_t<std::vector<int>::iterator>` will return
@@ -387,7 +393,7 @@ using val_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::value
  * @tparam Iterator The iterator to get the reference type from.
  */
 template<class Iterator>
-using ref_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::reference;
+using ref_t = typename std::iterator_traits<detail::remove_ref_t<Iterator>>::reference;
 
 /**
  * @brief Can be used to get the pointer type of an iterator. Example: `lz::ptr_t<std::vector<int>::iterator>` will return
@@ -396,7 +402,7 @@ using ref_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::refer
  * @tparam Iterator The iterator to get the pointer type from.
  */
 template<class Iterator>
-using ptr_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::pointer;
+using ptr_t = typename std::iterator_traits<detail::remove_ref_t<Iterator>>::pointer;
 
 /**
  * @brief Can be used to get the difference type of an iterator. Example: `lz::diff_t<std::vector<int>::iterator>` will return
@@ -405,7 +411,7 @@ using ptr_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::point
  * @tparam Iterator The iterator to get the difference type from.
  */
 template<class Iterator>
-using diff_type = typename std::iterator_traits<detail::remove_ref<Iterator>>::difference_type;
+using diff_type = typename std::iterator_traits<detail::remove_ref_t<Iterator>>::difference_type;
 
 /**
  * @brief Can be used to get the iterator category of an iterator. Example: `lz::iter_cat_t<std::vector<int>::iterator>` will
@@ -414,7 +420,7 @@ using diff_type = typename std::iterator_traits<detail::remove_ref<Iterator>>::d
  * @tparam Iterator The iterator to get the iterator category from.
  */
 template<class Iterator>
-using iter_cat_t = typename std::iterator_traits<detail::remove_ref<Iterator>>::iterator_category;
+using iter_cat_t = typename std::iterator_traits<detail::remove_ref_t<Iterator>>::iterator_category;
 
 /**
  * @brief Can be used to get the value type of an iterable. Example: `lz::val_iterable_t<std::vector<int>>` will return `int`.
@@ -428,7 +434,7 @@ using val_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::value_ty
  * @brief Can be used to get the difference type of an iterable. Example: `lz::diff_iterable_t<std::vector<int>>` will return
  * `std::ptrdiff_t`.
  *
- * @tparam Iterable
+ * @tparam Iterable The iterable to get the difference type from.
  */
 template<class Iterable>
 using diff_iterable_t = typename std::iterator_traits<iter_t<Iterable>>::difference_type;
@@ -579,7 +585,7 @@ LZ_INLINE_VAR constexpr bool is_sentinel_v = is_sentinel<I, S>::value;
 template<class T>
 LZ_INLINE_VAR constexpr bool is_iterable_v = is_iterable<T>::value;
 
-#endif // LZ_HAS_CXX_14
+#endif // LZ_HAS_CXX_17
 
 #ifdef LZ_HAS_CONCEPTS
 

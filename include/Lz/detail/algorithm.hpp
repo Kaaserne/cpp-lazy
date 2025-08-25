@@ -47,7 +47,7 @@ LZ_CONSTEXPR_CXX_14 bool has_many(Iterator begin, S end) {
 template<class Iterator>
 constexpr auto get_value_or_reference(Iterator begin) {
     if constexpr (std::is_lvalue_reference_v<ref_t<Iterator>>) {
-        return optional<std::reference_wrapper<remove_ref<ref_t<Iterator>>>>{ *begin };
+        return optional<std::reference_wrapper<remove_ref_t<ref_t<Iterator>>>>{ *begin };
     }
     else {
         return optional<val_t<Iterator>>{ *begin };
@@ -58,9 +58,9 @@ constexpr auto get_value_or_reference(Iterator begin) {
 
 template<class Iterator>
 LZ_CONSTEXPR_CXX_14
-    enable_if_t<std::is_lvalue_reference<ref_t<Iterator>>::value, optional<std::reference_wrapper<remove_ref<ref_t<Iterator>>>>>
+    enable_if_t<std::is_lvalue_reference<ref_t<Iterator>>::value, optional<std::reference_wrapper<remove_ref_t<ref_t<Iterator>>>>>
     get_value_or_reference(Iterator begin) {
-    return std::reference_wrapper<remove_ref<ref_t<Iterator>>>{ *begin };
+    return std::reference_wrapper<remove_ref_t<ref_t<Iterator>>>{ *begin };
 }
 
 template<class Iterator>
@@ -158,7 +158,7 @@ constexpr iter_t<Iterable> find_last_if(Iterable&& iterable, UnaryPredicate unar
         using detail::find_if;
         using std::find_if;
 
-        reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+        reverse_iterable<remove_ref_t<Iterable>, false> rev{ iterable };
         auto pos = find_if(rev.begin(), rev.end(), std::move(unary_predicate));
         return unwrap_reverse_iterator(std::move(pos), iterable.begin(), iterable.end());
     }
@@ -185,7 +185,7 @@ constexpr iter_t<Iterable> find_last(Iterable&& iterable, const T& value) {
         using detail::find;
         using std::find;
 
-        reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+        reverse_iterable<remove_ref_t<Iterable>, false> rev{ iterable };
         auto pos = find(rev.begin(), rev.end(), value);
         return unwrap_reverse_iterator(pos, iterable.begin(), iterable.end());
     }
@@ -240,7 +240,7 @@ find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
     using detail::find_if;
     using std::find_if;
 
-    reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+    reverse_iterable<remove_ref_t<Iterable>, false> rev{ iterable };
     auto pos = find_if(rev.begin(), rev.end(), std::move(unary_predicate));
     return unwrap_reverse_iterator(std::move(pos), iterable.begin(), iterable.end());
 }
@@ -270,7 +270,7 @@ find_last(Iterable&& iterable, const T& value) {
     using detail::find;
     using std::find;
 
-    reverse_iterable<remove_ref<Iterable>, false> rev{ iterable };
+    reverse_iterable<remove_ref_t<Iterable>, false> rev{ iterable };
     auto pos = find(rev.begin(), rev.end(), value);
     return unwrap_reverse_iterator(pos, iterable.begin(), iterable.end());
 }

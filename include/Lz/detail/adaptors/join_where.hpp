@@ -35,7 +35,8 @@ struct join_where_adaptor {
      * @return A join_where_iterable that can be used to iterate over the joined elements
      */
     template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
-    LZ_NODISCARD constexpr join_where_iterable<remove_ref<IterableA>, remove_ref<IterableB>, SelectorA, SelectorB, ResultSelector>
+    LZ_NODISCARD constexpr join_where_iterable<remove_ref_t<IterableA>, remove_ref_t<IterableB>, SelectorA, SelectorB,
+                                               ResultSelector>
     operator()(IterableA&& iterable_a, IterableB&& iterable_b, SelectorA a, SelectorB b, ResultSelector result_selector) const {
         return { std::forward<IterableA>(iterable_a), std::forward<IterableB>(iterable_b), std::move(a), std::move(b),
                  std::move(result_selector) };

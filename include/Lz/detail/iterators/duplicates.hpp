@@ -28,10 +28,10 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    it _last;
-    it _first;
-    Iterable _iterable;
-    mutable BinaryPredicate _compare;
+    it _last{};
+    it _first{};
+    Iterable _iterable{};
+    mutable BinaryPredicate _compare{};
 
     LZ_CONSTEXPR_CXX_14 void next() {
         using detail::find_if;
@@ -41,6 +41,9 @@ private:
     }
 
 public:
+    constexpr duplicates_iterator(const duplicates_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(const duplicates_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()
@@ -126,11 +129,11 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    it _last;
-    it _first;
-    Iterable _iterable;
-    size_t _last_distance;
-    mutable BinaryPredicate _compare;
+    it _last{};
+    it _first{};
+    Iterable _iterable{};
+    size_t _last_distance{};
+    mutable BinaryPredicate _compare{};
 
     LZ_CONSTEXPR_CXX_14 void next() {
         using detail::find_if;
@@ -147,6 +150,9 @@ private:
     }
 
 public:
+    constexpr duplicates_iterator(const duplicates_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(const duplicates_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()

@@ -35,7 +35,7 @@ private:
 
     static constexpr auto tup_size = static_cast<std::uint_least8_t>(tuple_size<IterMaybeHomo>::value);
 
-    IterMaybeHomo _iterators;
+    IterMaybeHomo _iterators{};
     // Using uint_least8_t because generally the max number of function parameters is 256
     std::uint_least8_t _index{};
 

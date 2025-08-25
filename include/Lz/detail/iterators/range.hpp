@@ -13,7 +13,7 @@ namespace lz {
 namespace detail {
 
 template<class Floating>
-constexpr bool almost_equal(const Floating a, const Floating b, const Floating epsilon = static_cast<Floating>(1e-6)) {
+LZ_CONSTEXPR_CXX_14 bool almost_equal(const Floating a, const Floating b, const Floating epsilon = static_cast<Floating>(1e-6)) {
     const auto abs_a = a - b;
     return (abs_a < 0 ? -abs_a : abs_a) < epsilon;
 }

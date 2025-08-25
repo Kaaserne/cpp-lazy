@@ -24,16 +24,16 @@ private:
     using value_type_b = typename traits_b::value_type;
     using ref_type_a = typename traits_a::reference;
 
-    using selector_a_ret_val = remove_cvref<func_ret_type<SelectorA, ref_type_a>>;
+    using selector_a_ret_val = remove_cvref_t<func_ret_type<SelectorA, ref_type_a>>;
 
-    basic_iterable<IterB, SB> _iterable_b;
-    iter_a _iter_a;
-    IterB _begin_b;
-    IterableA _iterable_a;
+    basic_iterable<IterB, SB> _iterable_b{};
+    iter_a _iter_a{};
+    IterB _begin_b{};
+    IterableA _iterable_a{};
 
-    mutable SelectorA _selector_a;
-    mutable SelectorB _selector_b;
-    mutable ResultSelector _result_selector;
+    mutable SelectorA _selector_a{};
+    mutable SelectorB _selector_b{};
+    mutable ResultSelector _result_selector{};
 
     LZ_CONSTEXPR_CXX_17 void find_next() {
         using detail::find_if;
@@ -56,9 +56,12 @@ private:
 
 public:
     using reference = decltype(_result_selector(*_iter_a, *_iterable_b.begin()));
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr join_where_iterator(const join_where_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 join_where_iterator& operator=(const join_where_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

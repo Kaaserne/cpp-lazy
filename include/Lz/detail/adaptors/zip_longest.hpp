@@ -49,7 +49,7 @@ struct zip_longest_adaptor {
      * @return A zip_longest_iterable containing the zipped iterables
      **/
     template<class... Iterables>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_longest_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_longest_iterable<remove_ref_t<Iterables>...> operator()(Iterables&&... iterables) const {
         return { std::forward<Iterables>(iterables)... };
     }
 };

@@ -17,8 +17,8 @@ class basic_iterable_impl : public lazy_view {
     using iterator_type = decay_t<I>;
     using sentinel_type = decay_t<S>;
 
-    iterator_type _begin;
-    sentinel_type _end;
+    iterator_type _begin{};
+    sentinel_type _end{};
 
     using traits = std::iterator_traits<iterator_type>;
 
@@ -27,6 +27,9 @@ public:
     using const_iterator = iterator_type;
     using value_type = val_t<iterator_type>;
     using sentinel = sentinel_type;
+
+    constexpr basic_iterable_impl(const basic_iterable_impl&) = default;
+    LZ_CONSTEXPR_CXX_14 basic_iterable_impl& operator=(const basic_iterable_impl&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -305,16 +308,17 @@ LZ_CONSTEXPR_CXX_20 void copy_to_container(Iterable&& iterable, Container& conta
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         lz::copy(std::forward<Iterable>(iterable), std::inserter(container, container.begin()));
     }
+    else if constexpr (has_push_v<Container>) {
+        using ref = ref_iterable_t<Iterable>;
+        prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
+        lz::for_each(std::forward<Iterable>(iterable), [&container](ref value) { container.push(value); });
+    }
     else if constexpr (has_insert_after_v<Container>) {
         using ref = ref_iterable_t<Iterable>;
         prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
         auto it = container.before_begin();
-        lz::for_each(iterable, [&container, it](ref value) mutable { it = container.insert_after(it, value); });
-    }
-    else if constexpr (has_push_v<Container>) {
-        using ref = ref_iterable_t<Iterable>;
-        prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
-        lz::for_each(iterable, [&container](ref value) { container.push(value); });
+        lz::for_each(std::forward<Iterable>(iterable),
+                     [&container, it](ref value) mutable { it = container.insert_after(it, value); });
     }
     else {
         custom_copier_for<Container>{}.copy(std::forward<Iterable>(iterable), container);
@@ -366,7 +370,8 @@ copy_to_container(Iterable&& iterable, Container& container) {
     using ref = ref_iterable_t<Iterable>;
     prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
     auto it = container.before_begin();
-    lz::for_each(iterable, [&container, it](ref value) mutable { it = container.insert_after(it, value); });
+    lz::for_each(std::forward<Iterable>(iterable),
+                 [&container, it](ref value) mutable { it = container.insert_after(it, value); });
 }
 
 // Container has:
@@ -387,7 +392,7 @@ LZ_CONSTEXPR_CXX_20 enable_if_t<!has_push_back<Container>::value && !has_insert<
 copy_to_container(Iterable&& iterable, Container& container) {
     using ref = ref_iterable_t<Iterable>;
     prealloc_container<Iterable, Container>{}.try_reserve(iterable, container);
-    lz::for_each(iterable, [&container](ref value) { container.push(value); });
+    lz::for_each(std::forward<Iterable>(iterable), [&container](ref value) { container.push(value); });
 }
 
 // Last resort: Container has no push_back, insert, insert_after, or push, use custom copier
@@ -405,13 +410,21 @@ struct container_constructor {
 #ifdef LZ_HAS_CXX_17
 
     template<class Iterable, class... Args>
-    [[nodiscard]] constexpr Container construct(Iterable&& iterable, Args&&... args) const {
-        if constexpr (std::is_constructible_v<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>) {
-            return Container(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                             std::forward<Args>(args)...);
+    [[nodiscard]] static constexpr Container construct(Iterable&& iterable, Args&&... args) {
+        using it = iter_t<Iterable>;
+        if constexpr (std::is_constructible<Container, Iterable, remove_cvref_t<Args>...>::value) {
+            return Container{ std::forward<Iterable>(iterable), std::forward<Args>(args)... };
+        }
+        else if constexpr (std::is_constructible_v<Container, it, sentinel_t<Iterable>, remove_cvref_t<Args>...>) {
+            return Container{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
+                              std::forward<Args>(args)... };
+        }
+        else if constexpr (is_ra_v<it> && std::is_constructible_v<Container, it, it, remove_cvref_t<Args>...>) {
+            auto it = std::begin(iterable);
+            return Container{ it, it + (std::end(iterable) - std::begin(iterable)), std::forward<Args>(args)... };
         }
         else {
-            Container container(std::forward<Args>(args)...);
+            Container container{ std::forward<Args>(args)... };
             copy_to_container(std::forward<Iterable>(iterable), container);
             return container;
         }
@@ -420,19 +433,48 @@ struct container_constructor {
 #else
 
     template<class Iterable, class... Args>
-    using can_construct = std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, Args...>;
+    using constructible_from_it_sent =
+        std::is_constructible<Container, iter_t<Iterable>, sentinel_t<Iterable>, remove_cvref_t<Args>...>;
 
     template<class Iterable, class... Args>
-    LZ_NODISCARD constexpr enable_if_t<can_construct<Iterable, Args...>::value, Container>
-    construct(Iterable&& iterable, Args&&... args) const {
-        return Container(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                         std::forward<Args>(args)...);
+    using constructible_from_it_it =
+        std::is_constructible<Container, iter_t<Iterable>, iter_t<Iterable>, remove_cvref_t<Args>...>;
+
+    template<class Iterable, class... Args>
+    using constructible_from_iterable = std::is_constructible<Container, Iterable, remove_cvref_t<Args>...>;
+
+    template<class Iterable, class... Args>
+    LZ_NODISCARD static constexpr enable_if_t<constructible_from_iterable<Iterable, Args...>::value, Container>
+    construct(Iterable&& iterable, Args&&... args) {
+        return Container{ std::forward<Iterable>(iterable), std::forward<Args>(args)... };
     }
 
     template<class Iterable, class... Args>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_20 enable_if_t<!can_construct<Iterable, Args...>::value, Container>
-    construct(Iterable&& iterable, Args&&... args) const {
-        Container container(std::forward<Args>(args)...);
+    LZ_NODISCARD static constexpr enable_if_t<
+        !constructible_from_iterable<Iterable, Args...>::value && constructible_from_it_sent<Iterable, Args...>::value, Container>
+    construct(Iterable&& iterable, Args&&... args) {
+        return Container{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
+                          std::forward<Args>(args)... };
+    }
+
+    template<class Iterable, class... Args>
+    LZ_NODISCARD static LZ_CONSTEXPR_CXX_14
+        enable_if_t<!constructible_from_iterable<Iterable, Args...>::value &&
+                        !constructible_from_it_sent<Iterable, Args...>::value &&
+                        constructible_from_it_it<Iterable, Args...>::value && is_ra<iter_t<Iterable>>::value,
+                    Container>
+        construct(Iterable&& iterable, Args&&... args) {
+        auto it = std::begin(iterable);
+        return Container{ it, it + (std::end(iterable) - std::begin(iterable)), std::forward<Args>(args)... };
+    }
+
+    template<class Iterable, class... Args>
+    LZ_NODISCARD static constexpr enable_if_t<
+        !constructible_from_iterable<Iterable, Args...>::value && !constructible_from_it_sent<Iterable, Args...>::value &&
+            (!constructible_from_it_it<Iterable, Args...>::value || !is_ra<iter_t<Iterable>>::value),
+        Container>
+    construct(Iterable&& iterable, Args&&... args) {
+        Container container{ std::forward<Args>(args)... };
         copy_to_container(std::forward<Iterable>(iterable), container);
         return container;
     }
@@ -446,8 +488,7 @@ struct to_adaptor {
 
     template<class Iterable, class... Args>
     LZ_NODISCARD constexpr Container operator()(Iterable&& iterable, Args&&... args) const {
-        return detail::container_constructor<Container>{}.construct(std::forward<Iterable>(iterable),
-                                                                    std::forward<Args>(args)...);
+        return container_constructor<Container>::construct(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
     }
 };
 
@@ -546,6 +587,10 @@ to(Args&&... args)
  * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
  * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
  * `lz::custom_copier_for` for your custom container if all of the following are true:
+ * - Your custom container does not have a constructor matching:
+ *   - `your_container(iterable, args...)`
+ *   - `your_container(begin, end, args...)` where begin and end may or may not be the same type
+ *   - `your_container(begin, begin + size, args...)` (only if the iterable is random access)
  * - Your custom container does not have a `push_back` method
  * - Your custom container does not have an `insert` method
  * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -606,6 +651,10 @@ template<class Container, class... Args, class Iterable>
  * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
  * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
  * `lz::custom_copier_for` for your custom container if all of the following are true:
+ * - Your custom container does not have a constructor matching:
+ *   - `your_container(iterable, args...)`
+ *   - `your_container(begin, end, args...)` where begin and end may or may not be the same type
+ *   - `your_container(begin, begin + size, args...)` (only if the iterable is random access)
  * - Your custom container does not have a `push_back` method
  * - Your custom container does not have an `insert` method
  * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -728,6 +777,10 @@ to(Args&&... args) {
  * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
  * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
  * `lz::custom_copier_for` for your custom container if all of the following are true:
+ * - Your custom container does not have a constructor matching:
+ *   - `your_container(iterable, args...)`
+ *   - `your_container(begin, end, args...)` where begin and end may or may not be the same type
+ *   - `your_container(begin, begin + size, args...)` (only if the iterable is random access)
  * - Your custom container does not have a `push_back` method
  * - Your custom container does not have an `insert` method
  * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -787,6 +840,10 @@ to(Iterable&& iterable, Args&&... args) {
  * In case you have a custom container, you can specialize `lz::custom_copier_for` to copy the elements to your container.
  * This is useful if you have a custom container that requires a specific way of copying elements. You will need to specialize
  * `lz::custom_copier_for` for your custom container if all of the following are true:
+ * - Your custom container does not have a constructor matching:
+ *   - `your_container(iterable, args...)`
+ *   - `your_container(begin, end, args...)` where begin and end may or may not be the same type
+ *   - `your_container(begin, begin + size, args...)` (only if the iterable is random access)
  * - Your custom container does not have a `push_back` method
  * - Your custom container does not have an `insert` method
  * - Your custom container does not have an `insert_after` method (implicitly also requires `before_begin`)
@@ -880,7 +937,7 @@ operator|(Iterable&& iterable, Adaptor&& adaptor) -> decltype(std::forward<Adapt
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
 LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor)
     -> lz::detail::enable_if_t<lz::detail::is_adaptor<lz::detail::remove_cref_t<Adaptor>>::value &&
-                                   lz::detail::is_iterable<lz::detail::remove_ref<Iterable>>::value,
+                                   lz::detail::is_iterable<lz::detail::remove_ref_t<Iterable>>::value,
                                decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable)))> {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));
 }

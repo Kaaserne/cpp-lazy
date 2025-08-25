@@ -46,5 +46,12 @@ int main() {
     }
     // Output: 21 22 23 24 0 1 2 3 4
     std::cout << '\n';
-    // TODO add reference wrapper
+
+    std::vector<std::reference_wrapper<int>> g{ std::ref(a[0]), std::ref(a[1]) };
+    auto concat4 = g | lz::concat(f);
+    for (std::reference_wrapper<int> i : concat4) {
+        std::cout << i << ' ';
+        // or fmt::print("{} ", i);
+    }
+
 }

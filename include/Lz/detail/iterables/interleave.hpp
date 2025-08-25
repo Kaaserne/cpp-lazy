@@ -25,14 +25,14 @@ class interleave_iterable {
     using is = make_index_sequence<sizeof...(Iterables)>;
 
     template<class Iterable2, size_t... Is>
-    static interleave_iterable<remove_ref<Iterable2>, Iterables...>
+    static interleave_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, interleave_iterable<Iterables...>&& interleaved, index_sequence<Is...>) {
         using std::get;
         return { std::forward<Iterable2>(iterable2), std::move(get<Is>(interleaved._iterables))... };
     }
 
     template<class Iterable2, size_t... Is>
-    static interleave_iterable<remove_ref<Iterable2>, Iterables...>
+    static interleave_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const interleave_iterable<Iterables...>& interleaved, index_sequence<Is...>) {
         using std::get;
         return { std::forward<Iterable2>(iterable2), get<Is>(interleaved._iterables)... };
@@ -136,13 +136,13 @@ public:
 #endif
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref<Iterable>, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref_t<Iterable>, Iterables...>
     operator|(Iterable&& iterable, interleave_iterable<Iterables...>&& interleaved) {
         return concat_iterables(std::forward<Iterable>(iterable), std::move(interleaved), is{});
     }
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref<Iterable>, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref_t<Iterable>, Iterables...>
     operator|(Iterable&& iterable, const interleave_iterable<Iterables...>& interleaved) {
         return concat_iterables(std::forward<Iterable>(iterable), interleaved, is{});
     }

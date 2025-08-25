@@ -21,15 +21,19 @@ class unique_iterator
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    iter _iterator;
-    Iterable _iterable;
-    mutable BinaryPredicate _predicate;
+    iter _iterator{};
+    Iterable _iterable{};
+    mutable BinaryPredicate _predicate{};
 
 public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr unique_iterator(const unique_iterator&)  =
+        default;
+    LZ_CONSTEXPR_CXX_14 unique_iterator& operator=(const unique_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

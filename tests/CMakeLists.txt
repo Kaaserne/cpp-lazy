@@ -40,7 +40,7 @@ add_executable(tests
 	chunks.cpp
 	common.cpp
 	concatenate.cpp
-	cstring.cpp
+	c_string.cpp
 	duplicates.cpp
 	enumerate.cpp
 	except.cpp
@@ -85,26 +85,14 @@ target_link_libraries(tests
 		cpp-lazy-ut-helper::cpp-lazy-ut-helper
 		doctest::doctest
 )
-target_include_directories(tests
-	PRIVATE
-		"${CMAKE_CURRENT_LIST_DIR}"
-)
-add_test(
-	NAME tests
-	COMMAND $<TARGET_FILE:tests>
-)
+target_include_directories(tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
+add_test(NAME tests	COMMAND $<TARGET_FILE:tests>)
 target_compile_options(tests
 	PRIVATE
 		$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
+		# -Wmismatched-tags causes internal compiler error for GCC. This in combination with #include <fstream> and #include <sstream> in pch
+		$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings -Wunused-result -Wunused-but-set-variable -Wmissing-declarations -Winvalid-pch -Weffc++ -Wdisabled-optimization -Wsign-conversion -Wcast-align -Wmissing-include-dirs -Wswitch-default -Wredundant-decls -Wundef -Wold-style-cast -Wstrict-overflow=5 -Wsuggest-override -Wtrampolines -Wzero-as-null-pointer-constant -Wuseless-cast -Wvector-operation-performance -Wnull-dereference -Walloc-zero -Walloca -Wduplicated-branches -Wcast-align=strict>
 
-		$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings>
-
-		$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion  -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow -Wformat=2 -Wmismatched-tags -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings>
+		$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Werror -pedantic -pedantic-errors -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++98-compat-bind-to-temporary-copy -Wno-c++98-compat-local-type-template-args -Wno-unsafe-buffer-usage -Wno-padded -Wno-documentation-unknown-command -Wno-switch-enum -ftime-trace>
 )
-
-if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_precompile_headers(tests
-		PUBLIC
-			pch.hpp
-	)
-endif()
+target_precompile_headers(tests PRIVATE pch.hpp)

@@ -10,15 +10,15 @@
 
 namespace lz {
 namespace detail {
-
+// TODO change forward to 'weakest'
 template<class ValueType, class Iterator, class S, class Iterator2, class S2>
 class split_iterator : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType,
                                        fake_ptr_proxy<ValueType>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
-    std::pair<Iterator, Iterator> _sub_range_end;
-    Iterator _sub_range_begin;
-    Iterator2 _to_search;
-    S _end;
-    S2 _to_search_end;
+    std::pair<Iterator, Iterator> _sub_range_end{};
+    Iterator _sub_range_begin{};
+    Iterator2 _to_search{};
+    S _end{};
+    S2 _to_search_end{};
     bool _ends_with_trailing{ true };
 
 public:
@@ -27,6 +27,9 @@ public:
     using reference = value_type;
     using difference_type = diff_type<Iterator>;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr split_iterator(const split_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 split_iterator& operator=(const split_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -64,6 +67,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 split_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        _sub_range_end.first = _end;
         _ends_with_trailing = false;
         return *this;
     }
@@ -134,18 +138,21 @@ public:
         return _sub_range_begin == _end && !_ends_with_trailing;
     }
 };
-
+// TODO change forward to 'weakest'
 template<class ValueType, class Iterator, class S, class T>
 class split_single_iterator
     : public iterator<split_single_iterator<ValueType, Iterator, S, T>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,
                       std::forward_iterator_tag, default_sentinel_t> {
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
-    S _end;
-    T _delimiter;
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
+    S _end{};
+    T _delimiter{};
     bool _ends_with_trailing{ true };
 
 public:
+    constexpr split_single_iterator(const split_single_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 split_single_iterator& operator=(const split_single_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_single_iterator()
@@ -185,6 +192,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 split_single_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        _sub_range_end = _end;
         _ends_with_trailing = false;
         return *this;
     }

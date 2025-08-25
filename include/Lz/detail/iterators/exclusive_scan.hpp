@@ -11,19 +11,22 @@ namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
 class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
                                                 diff_type<Iterator>, std::forward_iterator_tag, default_sentinel_t> {
-    Iterator _iterator;
-    mutable T _reducer;
-    S _end;
+    Iterator _iterator{};
+    mutable T _reducer{};
+    S _end{};
     bool _reached_end{ true };
-    mutable BinaryOp _binary_op;
+    mutable BinaryOp _binary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
 public:
     using reference = T&;
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr exclusive_scan_iterator(const exclusive_scan_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 exclusive_scan_iterator& operator=(const exclusive_scan_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

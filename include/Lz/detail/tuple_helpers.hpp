@@ -64,8 +64,16 @@ struct tuple_size<homogeneous_array<Iterator, N>> {
 // To decrease the usage of std::tuple, we try to use homogeneous_array whenever possible
 // Therefore: if all of the iterator/iterables/value/references are homogeneous, we can use homogeneous_array
 
+template<class... Ts>
+struct maybe_homogenous;
+
+template<>
+struct maybe_homogenous<> {
+    struct type {};
+};
+
 template<class T, class... Ts>
-struct maybe_homogenous {
+struct maybe_homogenous<T, Ts...> {
     using type =
         conditional_t<conjunction<std::is_same<T, Ts>...>::value, homogeneous_array<T, sizeof...(Ts) + 1>, std::tuple<T, Ts...>>;
 };
@@ -201,7 +209,7 @@ struct common_reference2<T&, std::reference_wrapper<U>> {
 };
 
 template<class T, class U>
-struct common_reference2<std::reference_wrapper<U>, T&> {
+struct common_reference2<std::reference_wrapper<T>, U&> {
     using type = std::reference_wrapper<copy_cv_t<T, U>>;
 };
 
@@ -218,7 +226,11 @@ struct common_reference<T> {
 
 template<class T1, class T2, class... Ts>
 struct common_reference<T1, T2, Ts...> {
-    using type = typename common_reference<common_reference2_t<T1, T2>, Ts...>::type;
+    template<class T>
+    using clean_reference_wrapper = conditional_t<is_reference_wrapper<remove_cvref_t<T>>::value, remove_cvref_t<T>, T>;
+
+    using type = typename common_reference<common_reference2_t<clean_reference_wrapper<T1>, clean_reference_wrapper<T2>>,
+                                           clean_reference_wrapper<Ts>...>::type;
 };
 
 template<class Iterator, size_t N>
@@ -272,15 +284,15 @@ public:
     template<class Tuple>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Tuple&& tuple) -> decltype(call(std::forward<Tuple>(tuple),
-                                               make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{});
+                                               make_index_sequence<tuple_size<remove_cvref_t<Tuple>>::value>{})) {
+        return call(std::forward<Tuple>(tuple), make_index_sequence<tuple_size<remove_cvref_t<Tuple>>::value>{});
     }
 
     template<class Tuple>
     LZ_CONSTEXPR_CXX_14 auto
     operator()(Tuple&& tuple) const -> decltype(call(std::forward<Tuple>(tuple),
-                                                     make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{});
+                                                     make_index_sequence<tuple_size<remove_cvref_t<Tuple>>::value>{})) {
+        return call(std::forward<Tuple>(tuple), make_index_sequence<tuple_size<remove_cvref_t<Tuple>>::value>{});
     }
 };
 
@@ -335,17 +347,17 @@ LZ_CONSTEXPR_CXX_14 auto end_maybe_homo_impl(IterableTuple&& iterable_tuple, ind
 template<class IterableTuple>
 LZ_CONSTEXPR_CXX_14 auto begin_maybe_homo(IterableTuple&& iterable_tuple)
     -> decltype(begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                      make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{})) {
+                                      make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{})) {
     return begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                 make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{});
+                                 make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{});
 }
 
 template<class IterableTuple>
 LZ_CONSTEXPR_CXX_14 auto end_maybe_homo(IterableTuple&& iterable_tuple)
     -> decltype(end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                    make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{})) {
+                                    make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{})) {
     return end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                               make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{});
+                               make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{});
 }
 } // namespace detail
 } // namespace lz

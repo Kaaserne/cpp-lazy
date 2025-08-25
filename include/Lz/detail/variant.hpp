@@ -45,7 +45,7 @@ class variant {
 
         ~types() {
         }
-    } _variant;
+    } _variant{};
 
     template<class U, class V>
     void reconstruct(state s, U&& this_variant, V&& other_variant_type) {

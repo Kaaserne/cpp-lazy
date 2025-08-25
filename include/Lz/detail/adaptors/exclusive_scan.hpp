@@ -41,9 +41,9 @@ struct exclusive_scan_adaptor {
      * @return An iterable that performs the exclusive scan on the specified iterable.
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
-    [[nodiscard]] constexpr exclusive_scan_iterable<remove_ref<Iterable>, remove_cvref<T>, BinaryOp>
+    [[nodiscard]] constexpr exclusive_scan_iterable<remove_ref_t<Iterable>, remove_cvref_t<T>, BinaryOp>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const
-        requires(std::invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref<T>>)
+        requires(std::invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref_t<T>>)
     {
         return { std::forward<Iterable>(iterable), std::forward<T>(init), std::move(binary_op) };
     }
@@ -73,8 +73,9 @@ struct exclusive_scan_adaptor {
      * @return An adaptor that can be used in pipe expressions
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
-    [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref<T>, BinaryOp> operator()(T&& init, BinaryOp binary_op = {}) const
-        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>)
+    [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>
+    operator()(T&& init, BinaryOp binary_op = {}) const
+        requires(std::invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>)
     {
         return { std::forward<T>(init), std::move(binary_op) };
     }
@@ -108,8 +109,8 @@ struct exclusive_scan_adaptor {
      * @return An iterable that performs the exclusive scan on the specified iterable.
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
-    LZ_NODISCARD constexpr enable_if_t<is_invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref<T>>::value,
-                                       exclusive_scan_iterable<remove_ref<Iterable>, remove_cvref<T>, BinaryOp>>
+    LZ_NODISCARD constexpr enable_if_t<is_invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref_t<T>>::value,
+                                       exclusive_scan_iterable<remove_ref_t<Iterable>, remove_cvref_t<T>, BinaryOp>>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const {
         return { std::forward<Iterable>(iterable), std::forward<T>(init), std::move(binary_op) };
     }
@@ -141,7 +142,7 @@ struct exclusive_scan_adaptor {
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if_t<is_invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>::value, fn_args_holder<adaptor, remove_cvref<T>, BinaryOp>>
+    enable_if_t<is_invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>::value, fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>>
     operator()(T&& init, BinaryOp binary_op = {}) const {
         return { std::forward<T>(init), std::move(binary_op) };
     }

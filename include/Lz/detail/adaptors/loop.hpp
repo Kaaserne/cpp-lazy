@@ -26,10 +26,10 @@ struct loop_adaptor {
      * @return A loop_iterable that will loop over the input iterable infinitely.
      */
     template<class Iterable>
-    [[nodiscard]] constexpr loop_iterable<remove_ref<Iterable>, true> operator()(Iterable&& iterable) const
-        requires(!std::is_integral_v<remove_cvref<Iterable>>)
+    [[nodiscard]] constexpr loop_iterable<remove_ref_t<Iterable>, true> operator()(Iterable&& iterable) const
+        requires(!std::is_integral_v<remove_cvref_t<Iterable>>)
     {
-        return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
+        return loop_iterable<remove_ref_t<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }
 
 #else
@@ -47,10 +47,10 @@ struct loop_adaptor {
      * @return A loop_iterable that will loop over the input iterable infinitely.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr enable_if_t<!std::is_integral<remove_cvref<Iterable>>::value,
-                                       loop_iterable<remove_ref<Iterable>, true>>
+    LZ_NODISCARD constexpr enable_if_t<!std::is_integral<remove_cvref_t<Iterable>>::value,
+                                       loop_iterable<remove_ref_t<Iterable>, true>>
     operator()(Iterable&& iterable) const {
-        return loop_iterable<remove_ref<Iterable>, true>{ std::forward<Iterable>(iterable) };
+        return loop_iterable<remove_ref_t<Iterable>, true>{ std::forward<Iterable>(iterable) };
     }
 
 #endif
@@ -70,7 +70,8 @@ struct loop_adaptor {
      * @return A loop_iterable that will loop over the input iterable n times.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr loop_iterable<remove_ref<Iterable>, false> operator()(Iterable&& iterable, const size_t amount) const {
+    LZ_NODISCARD constexpr loop_iterable<remove_ref_t<Iterable>, false>
+    operator()(Iterable&& iterable, const size_t amount) const {
         return { std::forward<Iterable>(iterable), amount };
     }
 
@@ -83,7 +84,6 @@ struct loop_adaptor {
      * std::vector<int> vec = { 1, 2, 3, 4 };
      * auto looper = vec | lz::loop(2); // {1, 2, 3, 4, 1, 2, 3, 4}
      * ```
-     * @param iterable The iterable to loop over
      * @param amount The amount of times to loop over the iterable
      * @return An adaptor that can be used in pipe expressions
      */

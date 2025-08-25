@@ -5,7 +5,6 @@
 
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits.hpp>
-#include <iterator>
 #include <limits>
 
 namespace lz {
@@ -24,11 +23,14 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    iter _iterator;
-    Iterable _iterable;
+    iter _iterator{};
+    Iterable _iterable{};
     size_t _offset{};
 
 public:
+    constexpr rotate_iterator(const rotate_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const rotate_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr rotate_iterator()
@@ -110,13 +112,15 @@ public:
         return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
-    constexpr difference_type difference(default_sentinel_t) const {
+    constexpr difference_type difference(const iter&) const {
+        // TODO
         return -static_cast<difference_type>(_offset);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
-        return _offset == other._offset || (_iterator == _iterable.end() && other._iterator == other._iterable.end());
+        return _offset == other._offset || (_iterator == _iterable.end() && other._iterator == other._iterable.end()) ||
+               (_iterator == other._iterator && _offset != 0 && other._offset != 0);
     }
 
     constexpr bool eq(const iter& other) const {

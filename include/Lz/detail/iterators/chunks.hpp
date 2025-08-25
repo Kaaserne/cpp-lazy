@@ -25,10 +25,13 @@ public:
     using pointer = fake_ptr_proxy<value_type>;
     using difference_type = typename iter_traits::difference_type;
 
+    constexpr chunks_iterator(const chunks_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(const chunks_iterator&) = default;
+
 private:
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
-    S _end;
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
+    S _end{};
     size_t _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {

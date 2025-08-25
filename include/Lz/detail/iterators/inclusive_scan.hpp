@@ -11,10 +11,10 @@ namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
 class inclusive_scan_iterator : public iterator<inclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
                                                 diff_type<Iterator>, std::forward_iterator_tag, default_sentinel_t> {
-    Iterator _iterator;
-    mutable T _reducer;
-    S _end;
-    mutable BinaryOp _binary_op;
+    Iterator _iterator{};
+    mutable T _reducer{};
+    S _end{};
+    mutable BinaryOp _binary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -24,6 +24,9 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
     using iterator_category = std::forward_iterator_tag;
+
+    constexpr inclusive_scan_iterator(const inclusive_scan_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator& operator=(const inclusive_scan_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

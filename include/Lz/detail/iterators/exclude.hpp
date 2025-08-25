@@ -22,12 +22,16 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator;
+    Iterator _iterator{};
     difference_type _index{};
     difference_type _from{};
     difference_type _to{};
 
 public:
+    constexpr exclude_iterator(const exclude_iterator&) =
+        default;
+    LZ_CONSTEXPR_CXX_14 exclude_iterator& operator=(const exclude_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterator()

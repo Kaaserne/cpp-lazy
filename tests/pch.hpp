@@ -4,6 +4,7 @@
 #include <array>
 #include <deque>
 #include <forward_list>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <iterator>
@@ -18,3 +19,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#ifndef LZ_STANDALONE
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+#endif

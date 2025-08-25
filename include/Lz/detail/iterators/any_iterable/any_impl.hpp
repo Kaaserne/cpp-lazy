@@ -30,6 +30,9 @@ public:
     using difference_type = DiffType;
     using iterator_category = std::forward_iterator_tag;
 
+    constexpr any_iterator_impl(const any_iterator_impl&) = default;
+    LZ_CONSTEXPR_CXX_14 any_iterator_impl& operator=(const any_iterator_impl&) = default;
+
 #ifdef LZ_HAS_CXX_20
 
     constexpr any_iterator_impl()
@@ -118,6 +121,9 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = DiffType;
     using iterator_category = std::bidirectional_iterator_tag;
+
+    constexpr any_iterator_impl(const any_iterator_impl&) = default;
+    LZ_CONSTEXPR_CXX_14 any_iterator_impl& operator=(const any_iterator_impl&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -211,6 +217,9 @@ public:
     using pointer = fake_ptr_proxy<Reference>;
     using difference_type = DiffType;
     using iterator_category = std::random_access_iterator_tag;
+
+    constexpr any_iterator_impl(const any_iterator_impl&) = default;
+    LZ_CONSTEXPR_CXX_14 any_iterator_impl& operator=(const any_iterator_impl&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

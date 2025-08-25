@@ -14,6 +14,9 @@ class random_iterable : public lazy_view {
     size_t _current{};
 
 public:
+    constexpr random_iterable(const random_iterable&) = default;
+    LZ_CONSTEXPR_CXX_14 random_iterable& operator=(const random_iterable&) = default;
+
     using iterator = random_iterator<Arithmetic, Distribution, Generator, UseSentinel>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
@@ -38,7 +41,7 @@ public:
         _current{ current } {
     }
 
-    LZ_NODISCARD constexpr size_t size() const {
+    LZ_NODISCARD constexpr size_t size() const noexcept{
         return static_cast<size_t>(_current);
     }
 

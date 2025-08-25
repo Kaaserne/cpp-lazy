@@ -36,7 +36,7 @@ struct reference_or_value_type;
 template<>
 struct reference_or_value_type<true /* is lvalue reference */> {
     template<class Ref, class>
-    using type = std::reference_wrapper<remove_ref<Ref>>;
+    using type = std::reference_wrapper<remove_ref_t<Ref>>;
 };
 
 template<>
@@ -85,15 +85,15 @@ public:
 private:
     using is = make_index_sequence<tuple_size<IterMaybeHomo>::value>;
 
-    IterMaybeHomo _iterators;
-    SMaybeHomo _end;
+    IterMaybeHomo _iterators{};
+    SMaybeHomo _end{};
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 auto
-    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref<decltype(get<I>(_iterators))>>,
-                                                            val_t<remove_cvref<decltype(get<I>(_iterators))>>>> {
+    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref_t<decltype(get<I>(_iterators))>>,
+                                                            val_t<remove_cvref_t<decltype(get<I>(_iterators))>>>> {
 
-        using iter_type = remove_cvref<decltype(get<I>(_iterators))>;
+        using iter_type = remove_cvref_t<decltype(get<I>(_iterators))>;
         using ref_or_value_type = optional<reference_or_value_type_t<ref_t<iter_type>, val_t<iter_type>>>;
 
         if (get<I>(_iterators) == get<I>(_end)) {
@@ -212,16 +212,16 @@ private:
     using is = make_index_sequence<tup_size>;
     using difference_tuple = decltype(make_homogeneous_of<difference_type>(is{}));
 
-    IterMaybeHomo _iterators;
-    SMaybeHomo _end;
-    difference_tuple _distances;
+    IterMaybeHomo _iterators{};
+    SMaybeHomo _end{};
+    difference_tuple _distances{};
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 auto
-    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref<decltype(get<I>(_iterators))>>,
-                                                            val_t<remove_cvref<decltype(get<I>(_iterators))>>>> {
+    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref_t<decltype(get<I>(_iterators))>>,
+                                                            val_t<remove_cvref_t<decltype(get<I>(_iterators))>>>> {
 
-        using iter_type = remove_cvref<decltype(get<I>(_iterators))>;
+        using iter_type = remove_cvref_t<decltype(get<I>(_iterators))>;
         using ref_or_value_type = optional<reference_or_value_type_t<ref_t<iter_type>, val_t<iter_type>>>;
 
         if (get<I>(_iterators) == get<I>(_end)) {

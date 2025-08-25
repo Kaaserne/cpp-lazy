@@ -50,7 +50,6 @@ using lines_iterable = detail::lines_iterable<CharT, Iterable>;
 /**
  * @brief Lines iterable helper alias for string_views. string_views are not held by reference, but copied.
  *
- * @tparam Iterable The iterable to split into lines.
  * @tparam CharT The character type of the string to split into lines. Defaults to `char`.
  * ```cpp
  * lz::lines_iterable_sv<> actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
@@ -299,8 +298,8 @@ LZ_INLINE_VAR constexpr detail::get_nths_adaptor<N...> get_nths{};
  * @return A map object that can be iterated over.
  */
 template<class Fn, class... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref<Iterables>...>
-zip_with(Fn fn, Iterables&&... iterables) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref_t<Iterables>...> zip_with(Fn fn,
+                                                                                                    Iterables && ... iterables) {
     return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
 }
 

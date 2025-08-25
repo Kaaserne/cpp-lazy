@@ -20,10 +20,14 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterator _iterator;
+    Iterator _iterator{};
     size_t _n{};
 
 public:
+    constexpr n_take_iterator(const n_take_iterator&) =
+        default;
+    LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(const n_take_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr n_take_iterator()

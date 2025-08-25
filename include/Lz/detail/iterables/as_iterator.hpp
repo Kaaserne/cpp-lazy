@@ -45,6 +45,7 @@ public:
     {
         return static_cast<size_t>(lz::size(_iterable));
     }
+
 #else
 
     template<class T = is_sized<Iterable>>

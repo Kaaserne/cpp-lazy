@@ -1,4 +1,13 @@
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-macros"
+#endif
+
 #define LZ_STANDALONE
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 #include <doctest/doctest.h>
 #include <pch.hpp>

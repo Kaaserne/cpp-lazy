@@ -45,7 +45,7 @@ struct take_every_adaptor {
      * @return A take_every_iterable that can be used to iterate over the taken elements.
      */
     template<class Iterable>
-    [[nodiscard]] constexpr take_every_iterable<remove_ref<Iterable>>
+    [[nodiscard]] constexpr take_every_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, const size_t offset, const size_t start = 0) const
         requires(lz::iterable<Iterable>)
     {
@@ -86,7 +86,7 @@ struct take_every_adaptor {
      * @return A take_every_iterable that can be used to iterate over the taken elements.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, take_every_iterable<remove_ref<Iterable>>>
+    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, take_every_iterable<remove_ref_t<Iterable>>>
     operator()(Iterable&& iterable, const size_t offset, const size_t start = 0) const {
         return { std::forward<Iterable>(iterable), offset, start };
     }

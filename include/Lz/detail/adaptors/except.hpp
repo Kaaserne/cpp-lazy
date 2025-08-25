@@ -31,7 +31,7 @@ struct except_adaptor {
      * @return An iterable that contains every item from @p iterable1 that is not in @p iterable2.
      */
     template<class Iterable1, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr except_iterable<remove_ref<Iterable1>, remove_ref<Iterable2>, BinaryPredicate>
+    LZ_NODISCARD constexpr except_iterable<remove_ref_t<Iterable1>, remove_ref_t<Iterable2>, BinaryPredicate>
     operator()(Iterable1&& iterable1, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable1>(iterable1), std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }

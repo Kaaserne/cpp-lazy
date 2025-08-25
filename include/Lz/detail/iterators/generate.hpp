@@ -18,12 +18,12 @@ class generate_iterator<GeneratorFunc, false>
                       fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
                       default_sentinel_t> {
 
-    mutable GeneratorFunc _func;
+    mutable GeneratorFunc _func{};
     size_t _current{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
@@ -80,11 +80,11 @@ class generate_iterator<GeneratorFunc, true>
                       fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
                       default_sentinel_t> {
 
-    GeneratorFunc _func;
+    mutable GeneratorFunc _func{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 

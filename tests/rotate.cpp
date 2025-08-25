@@ -29,7 +29,8 @@ TEST_CASE("rotate_iterable basic functionality") {
     SUBCASE("Should be correct length") {
         auto beg = rotate.begin();
         REQUIRE(std::distance(beg, rotate.end()) == static_cast<std::ptrdiff_t>(arr.size()));
-        ++beg, ++beg;
+        ++beg;
+        ++beg;
         REQUIRE(std::distance(beg, rotate.end()) == 3);
         ++beg;
         REQUIRE(std::distance(beg, rotate.end()) == 2);

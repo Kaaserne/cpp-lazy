@@ -239,14 +239,14 @@ void generate_while_lz(benchmark::State& state) {
 #ifdef LZ_HAS_CXX_17
         for (auto i : lz::generate_while([&cnt]() -> std::pair<bool, std::size_t> {
                  const auto old_value = cnt++;
-                 return { old_value < size_policy, cnt };
+                 return { cnt, old_value < size_policy };
              })) {
             benchmark::DoNotOptimize(i);
         }
 #else
         auto gen = lz::generate_while([&cnt]() -> std::pair<bool, std::size_t> {
             const auto old_value = cnt++;
-            return { old_value < size_policy, cnt };
+            return { cnt, old_value < size_policy };
         });
         lz::for_each(gen, [](std::size_t i) { benchmark::DoNotOptimize(i); });
 #endif

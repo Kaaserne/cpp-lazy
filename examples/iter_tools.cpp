@@ -186,7 +186,7 @@ int main() {
     // sentinel.
     auto decay_iterable = decay_numbers | lz::iter_decay(std::forward_iterator_tag{});
 
-#ifndef LZ_HAS_CXX_11
+#ifdef LZ_HAS_CXX_17
     for (const auto& d : decay_iterable) {
         std::cout << d << ' ';
     }
@@ -202,7 +202,7 @@ int main() {
     std::vector<int> pad_numbers = { 1, 2, 3 };
     auto padded = pad_numbers | lz::pad(0, 2); // {1, 2, 3, 0, 0} by value
 
-#ifdef LZ_HAS_CXX_11
+#ifndef LZ_HAS_CXX_17
     lz::for_each(padded, [](int p) { std::cout << p << ' '; });
     // 1 2 3 0 0
 #else
@@ -215,7 +215,7 @@ int main() {
 
     auto to_pad = 3;
     auto padded_ref = pad_numbers | lz::pad(std::ref(to_pad), 2); // {1, 2, 3, 3, 3} by reference
-#ifdef LZ_HAS_CXX_11
+#ifndef LZ_HAS_CXX_17
     lz::for_each(padded_ref, [](std::reference_wrapper<int> p) { std::cout << p << ' '; });
     // 1 2 3 3 3
 #else

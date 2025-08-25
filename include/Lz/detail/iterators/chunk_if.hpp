@@ -21,12 +21,15 @@ public:
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
 
+    chunk_if_iterator(const chunk_if_iterator&) = default;
+    chunk_if_iterator& operator=(const chunk_if_iterator&) = default;
+
 private:
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
     bool _ends_with_trailing{ true };
-    S _end;
-    mutable UnaryPredicate _predicate;
+    S _end{};
+    mutable UnaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;
@@ -69,6 +72,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 chunk_if_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        _sub_range_end = _end;
         _ends_with_trailing = false;
         return *this;
     }
@@ -123,7 +127,8 @@ public:
         }
 
         if (_predicate(*prev)) {
-            _sub_range_begin = _sub_range_end = _ends_with_trailing ? std::move(prev) : _sub_range_end;
+            _sub_range_end = _ends_with_trailing ? std::move(prev) : _sub_range_end;
+            _sub_range_begin = _sub_range_end;
             _ends_with_trailing = false;
             return;
         }

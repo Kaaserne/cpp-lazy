@@ -8,8 +8,6 @@
 
 // clang-format off
 
-#include <iterator>
-
 #if defined(LZ_DEBUG_ASSERTIONS)
   #define LZ_USE_DEBUG_ASSERTIONS
 #endif
@@ -71,8 +69,8 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @return The size of the container.
  */
 template<class T, size_t N>
-LZ_NODISCARD constexpr size_t size(const T(&)[N]) noexcept {
-    return N;
+LZ_NODISCARD constexpr size_t size(const T(&c)[N]) noexcept {
+    return static_cast<void>(c), N;
 }
 
 #endif
@@ -121,7 +119,6 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(
  * std::cout << lz::ssize(arr) << '\n'; // prints 5
  * ```
  *
- * @param c The container to get the size from.
  * @return The size of the container.
  */
 template<class T, size_t N>
@@ -138,7 +135,14 @@ namespace detail {
 
 template<class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<std::is_object<T>::value, T*> addressof(T& arg) noexcept {
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
     return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(arg)));
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 }
 
 template<class T>
@@ -220,7 +224,6 @@ template<class I>
 
 template<class I>
 [[nodiscard]] constexpr iter_t<I> next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
-    using diff_type = diff_iterable_t<I>;
 
     auto begin = iterable.begin();
     auto end = iterable.end();
@@ -233,7 +236,8 @@ template<class I>
         return next_fast(std::forward<I>(iterable), n);
     }
     else {
-        for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
+        using diff_type_u = std::make_unsigned_t<diff_iterable_t<I>>;
+        for (diff_type_u i = 0; i < static_cast<diff_type_u>(n) && begin != end; ++i, ++begin) {
         }
         return begin;
     }
@@ -290,12 +294,11 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     enable_if_t<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
-    using diff_type = diff_iterable_t<I>;
-
     auto begin = detail::begin(std::forward<I>(iterable));
     const auto end = detail::end(std::forward<I>(iterable));
 
-    for (diff_type i = 0; i < n && begin != end; ++i, ++begin) {
+    using diff_type_u = typename std::make_unsigned<diff_iterable_t<I>>::type;
+    for (diff_type_u i = 0; i < static_cast<diff_type_u>(n) && begin != end; ++i, ++begin) {
     }
     return begin;
 }
@@ -339,9 +342,9 @@ LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
  * @return The length of the iterable
  */
 template<class Iterable>
-LZ_NODISCARD constexpr diff_iterable_t<detail::decay_t<Iterable>> distance(const Iterable& iterable) {
+LZ_NODISCARD constexpr diff_iterable_t<detail::remove_cvref_t<Iterable>> distance(Iterable && iterable) {
     using std::distance;
-    return distance(iterable.begin(), iterable.end());
+    return distance(detail::begin(iterable), detail::end(iterable));
 }
 
 #ifdef LZ_HAS_CXX_17

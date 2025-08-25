@@ -24,11 +24,15 @@ public:
     using result_type = value_type;
 
 private:
-    mutable Distribution _distribution;
-    decltype(detail::addressof(std::declval<Generator&>())) _generator{ nullptr };
+    mutable Distribution _distribution{};
+    Generator* _generator{ nullptr };
     size_t _current{};
 
 public:
+    constexpr random_iterator(const random_iterator&) =
+        default;
+    LZ_CONSTEXPR_CXX_14 random_iterator& operator=(const random_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr random_iterator()

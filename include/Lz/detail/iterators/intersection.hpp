@@ -21,11 +21,11 @@ class intersection_iterator
     using it1 = iter_t<Iterable1>;
     using it2 = iter_t<Iterable2>;
 
-    it1 _iterator1;
-    it2 _iterator2;
-    Iterable1 _iterable1;
-    Iterable2 _iterable2;
-    mutable BinaryPredicate _compare;
+    it1 _iterator1{};
+    it2 _iterator2{};
+    Iterable1 _iterable1{};
+    Iterable2 _iterable2{};
+    mutable BinaryPredicate _compare{};
 
     using iter_traits = std::iterator_traits<it1>;
 
@@ -54,6 +54,9 @@ public:
     using difference_type = typename iter_traits::difference_type;
     using reference = typename iter_traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr intersection_iterator(const intersection_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(const intersection_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

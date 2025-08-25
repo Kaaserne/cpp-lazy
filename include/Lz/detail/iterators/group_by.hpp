@@ -20,10 +20,10 @@ class group_by_iterator
                       common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
     using it = iter_t<Iterable>;
 
-    it _sub_range_end;
-    it _sub_range_begin;
-    Iterable _iterable;
-    mutable BinaryPredicate _comparer;
+    it _sub_range_end{};
+    it _sub_range_begin{};
+    Iterable _iterable{};
+    mutable BinaryPredicate _comparer{};
 
     using ref_type = ref_t<it>;
 
@@ -44,10 +44,13 @@ class group_by_iterator
     }
 
 public:
-    using value_type = std::pair<remove_cvref<ref_type>, basic_iterable<it>>;
+    using value_type = std::pair<remove_cvref_t<ref_type>, basic_iterable<it>>;
     using reference = std::pair<ref_type, basic_iterable<it>>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = std::ptrdiff_t;
+
+    constexpr group_by_iterator(const group_by_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 group_by_iterator& operator=(const group_by_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

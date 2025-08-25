@@ -39,7 +39,7 @@ TEST_CASE("random_iterable should be random") {
 }
 
 TEST_CASE("random_iterable with custom distro's and custom engine") {
-    static std::random_device rd;
+    std::random_device rd;
     std::mt19937_64 gen(rd());
     std::poisson_distribution<> d(500000);
     lz::random_iterable<int, std::poisson_distribution<>, std::mt19937_64> r = lz::random(d, gen, 3);

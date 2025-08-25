@@ -25,7 +25,7 @@ struct drop_while_adaptor {
      * @return An iterable that drops elements while the predicate returns true
      */
     template<class Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr drop_while_iterable<remove_ref<Iterable>, UnaryPredicate>
+    LZ_NODISCARD constexpr drop_while_iterable<remove_ref_t<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(unary_predicate) };
     }
@@ -49,4 +49,5 @@ struct drop_while_adaptor {
 };
 } // namespace detail
 } // namespace lz
+
 #endif

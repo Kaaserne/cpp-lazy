@@ -60,9 +60,10 @@ struct take_adaptor {
      * @param iter The iterable / iterator to take the first n elements from.
      * @param n The amount of elements to take.
      */
-    template<class Iterable>
-    LZ_NODISCARD constexpr take_iterable<remove_ref<Iterable>> operator()(Iterable&& iter, const size_t n) const {
-        return { std::forward<Iterable>(iter), n };
+    template <class Iterable>
+    LZ_NODISCARD constexpr take_iterable<remove_ref_t<Iterable>>
+    operator()(Iterable &&iter, const size_t n) const {
+      return {std::forward<Iterable>(iter), n};
     }
 
     /**

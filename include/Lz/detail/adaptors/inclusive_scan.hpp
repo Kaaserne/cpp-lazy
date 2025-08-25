@@ -45,7 +45,7 @@ struct inclusive_scan_adaptor {
      * @return An iterable that performs an inclusive scan on the input iterable.
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
-    [[nodiscard]] constexpr inclusive_scan_iterable<remove_ref<Iterable>, T, BinaryOp>
+    [[nodiscard]] constexpr inclusive_scan_iterable<remove_ref_t<Iterable>, T, BinaryOp>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, T, T>)
     {
@@ -80,8 +80,9 @@ struct inclusive_scan_adaptor {
      * @return An adaptor that can be used in pipe expressions.
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
-    [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref<T>, BinaryOp> operator()(T&& init, BinaryOp binary_op = {}) const
-        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>)
+    [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>
+    operator()(T&& init, BinaryOp binary_op = {}) const
+        requires(std::invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>)
     {
         return { std::forward<T>(init), std::move(binary_op) };
     }
@@ -121,7 +122,7 @@ struct inclusive_scan_adaptor {
      */
     template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr 
-    enable_if_t<is_invocable<BinaryOp, T, T>::value, inclusive_scan_iterable<remove_ref<Iterable>, T, BinaryOp>>
+    enable_if_t<is_invocable<BinaryOp, T, T>::value, inclusive_scan_iterable<remove_ref_t<Iterable>, T, BinaryOp>>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const {
         return { std::forward<Iterable>(iterable), std::move(init), std::move(binary_op) };
     }
@@ -154,7 +155,7 @@ struct inclusive_scan_adaptor {
      */
     template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
     LZ_NODISCARD constexpr 
-    enable_if_t<is_invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>::value, fn_args_holder<adaptor, remove_cvref<T>, BinaryOp>>
+    enable_if_t<is_invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>::value, fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>>
     operator()(T&& init, BinaryOp binary_op = {}) const {
         return { std::forward<T>(init), std::move(binary_op) };
     }

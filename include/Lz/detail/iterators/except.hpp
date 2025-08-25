@@ -25,11 +25,14 @@ public:
     using reference = typename iter_traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+    constexpr except_iterator(const except_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 except_iterator& operator=(const except_iterator&) = default;
+
 private:
-    Iterable _iterable;
-    Iterable2 _to_except;
-    iter _iterator;
-    mutable BinaryPredicate _predicate;
+    Iterable _iterable{};
+    Iterable2 _to_except{};
+    iter _iterator{};
+    mutable BinaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
         using detail::find_if;

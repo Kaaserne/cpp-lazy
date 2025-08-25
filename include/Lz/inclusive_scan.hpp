@@ -38,7 +38,7 @@ constexpr detail::inclusive_scan_adaptor inclusive_scan{};
 /**
  * @brief Inclusive scan helper alias.
  * @tparam Iterable The input iterable
- * @tparam The value type of the output (defaults to the value_type of `Iterable`)
+ * @tparam T The value type of the output (defaults to the value_type of `Iterable`)
  * @tparam BinaryOp The binary operation to use (defaults to `std::plus`)
  * ```
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };

@@ -37,11 +37,13 @@ auto get_error_expr(const T& lhs, const U& rhs) {
 
 template<class Iterable>
 void test_operator_minus(const Iterable& it) {
+    const auto size = lz::ssize(it);
+    REQUIRE(size >= 0);
+
     if constexpr (lz::detail::has_sentinel_v<Iterable>) {
         auto begin = it.begin();
         auto end = it.end();
 
-        const auto size = lz::ssize(it);
         for (std::ptrdiff_t i = 0; i < size; ++i) {
             INFO("With i = " << i);
             REQUIRE(end - (begin + i) == size - i);
@@ -52,7 +54,6 @@ void test_operator_minus(const Iterable& it) {
         auto begin = it.begin();
         auto end = it.end();
 
-        const auto size = lz::ssize(it);
         for (std::ptrdiff_t i = 0; i < size; ++i) {
             INFO("With i = " << i);
             REQUIRE((end - i) - begin == size - i);
@@ -72,13 +73,17 @@ void test_operator_minus(const Iterable& it) {
 template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
 void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
+    const auto size = lz::ssize(it);
+    REQUIRE(size >= 0);
+
     if constexpr (lz::detail::has_sentinel_v<Iterable>) {
         auto begin = it.begin();
 
-        for (std::ptrdiff_t i = 0; i < lz::ssize(it) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin + i), *(expected.begin() + i)));
             REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
         }
+
         REQUIRE(begin + lz::ssize(it) == it.end());
 
         std::advance(begin, lz::ssize(it));
@@ -94,11 +99,11 @@ void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, Eq
         auto begin = it.begin();
         auto end = it.end();
 
-        const auto size = lz::ssize(it);
-        for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin + i), *(expected.begin() + i)));
             REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
         }
+
         REQUIRE(begin + size == it.end());
         for (std::ptrdiff_t i = 1; i <= size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(end - i), *(expected.end() - i)));
@@ -111,10 +116,11 @@ void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, Eq
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(end + i), *(expected.begin() + i)));
             REQUIRE(eq_compare(*(end + i), *(expected.begin() + i)));
         }
+
         REQUIRE(end + size == it.end());
         for (std::ptrdiff_t i = 1; i <= size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin - i), *(expected.end() - i)));

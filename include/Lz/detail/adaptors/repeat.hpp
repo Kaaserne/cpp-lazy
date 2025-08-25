@@ -54,4 +54,5 @@ struct repeat_adaptor {
 };
 } // namespace detail
 } // namespace lz
+
 #endif

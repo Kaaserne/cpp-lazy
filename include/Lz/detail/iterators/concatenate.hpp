@@ -18,8 +18,8 @@ class concatenate_iterator
                       fake_ptr_proxy<iter_tuple_common_ref_t<Iterators>>, iter_tuple_diff_type_t<Iterators>,
                       iter_tuple_iter_cat_t<Iterators>, default_sentinel_t> {
 
-    Iterators _iterators;
-    Iterables _iterables;
+    Iterators _iterators{};
+    Iterables _iterables{};
 
     using first_tuple_iterator = std::iterator_traits<first_it_t<Iterators>>;
 

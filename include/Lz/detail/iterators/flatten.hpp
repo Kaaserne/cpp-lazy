@@ -93,7 +93,7 @@ class flatten_wrapper
     using iter = iter_t<Iterable>;
 
     iter _iterator{};
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
     using traits = std::iterator_traits<iter>;
 
@@ -102,6 +102,9 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
+
+    constexpr flatten_wrapper(const flatten_wrapper&) = default;
+    LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(const flatten_wrapper&) = default;
 
     template<class I>
     constexpr flatten_wrapper(I&& iterable, iter it) : _iterator{ std::move(it) }, _iterable{ std::forward<I>(iterable) } {
@@ -169,7 +172,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& other) const {
-        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
+        LZ_ASSERT_COMPATIBLE((_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end()) ||
+                             (_iterable.begin() == iter_t<Iterable>{} && _iterable.end() == sentinel_t<Iterable>{}));
         return _iterator == other._iterator;
     }
 
@@ -215,7 +219,7 @@ template<class, size_t>
 class flatten_iterator;
 
 template<class Iterable, size_t N>
-using inner = flatten_iterator<remove_ref<ref_iterable_t<Iterable>>, N - 1>;
+using inner = flatten_iterator<remove_ref_t<ref_iterable_t<Iterable>>, N - 1>;
 
 template<class Iterable, size_t N>
 using iter_cat = common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>;
@@ -297,8 +301,8 @@ private:
 
 #endif
 
-    flatten_wrapper<Iterable> _outer_iter;
-    this_inner _inner_iter;
+    flatten_wrapper<Iterable> _outer_iter{};
+    this_inner _inner_iter{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -327,7 +331,7 @@ public:
 
     constexpr flatten_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 flatten_iterator operator=(default_sentinel_t) {
+    LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel_t) {
         _inner_iter = lz::default_sentinel;
         _outer_iter = lz::default_sentinel;
         return *this;
@@ -374,6 +378,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_inner_iter;
         this->advance();
     }
@@ -519,7 +524,7 @@ class flatten_iterator<Iterable, 0>
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    flatten_wrapper<Iterable> _iterator;
+    flatten_wrapper<Iterable> _iterator{};
 
 public:
     using pointer = typename traits::pointer;
@@ -595,6 +600,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator;
     }
 

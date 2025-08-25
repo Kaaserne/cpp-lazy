@@ -34,7 +34,7 @@ struct intersection_adaptor {
      * @return An iterable that contains the intersection of the two iterables
      */
     template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    [[nodiscard]] constexpr intersection_iterable<remove_ref<Iterable>, remove_ref<Iterable2>, BinaryPredicate>
+    [[nodiscard]] constexpr intersection_iterable<remove_ref_t<Iterable>, remove_ref_t<Iterable2>, BinaryPredicate>
     operator()(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate compare = {}) const
         requires(lz::iterable<Iterable2>)
     {
@@ -93,7 +93,7 @@ struct intersection_adaptor {
      */
     template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
     LZ_NODISCARD constexpr
-    enable_if_t<is_iterable<Iterable2>::value, intersection_iterable<remove_ref<Iterable>, remove_ref<Iterable2>, BinaryPredicate>>
+    enable_if_t<is_iterable<Iterable2>::value, intersection_iterable<remove_ref_t<Iterable>, remove_ref_t<Iterable2>, BinaryPredicate>>
     operator()(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate compare = {}) const {
         return { std::forward<Iterable>(iterable), std::forward<Iterable2>(iterable2), std::move(compare) };
     }

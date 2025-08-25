@@ -17,15 +17,18 @@ class repeat_iterator;
 template<class T>
 class repeat_iterator<false, T> : public iterator<repeat_iterator<false, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
                                                   std::random_access_iterator_tag, default_sentinel_t> {
-    T _to_repeat;
+    T _to_repeat{};
     size_t _amount{};
 
 public:
     using iterator_category = std::random_access_iterator_tag;
-    using value_type = remove_cvref<T>;
+    using value_type = remove_cvref_t<T>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<T>;
     using reference = T;
+
+    constexpr repeat_iterator(const repeat_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(const repeat_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -76,12 +79,12 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
-        LZ_ASSERT_ADDABLE(value > 0 ? _amount >= static_cast<size_t>(value) : true);
+        LZ_ASSERT_ADDABLE(value < 0 ? true : _amount >= static_cast<size_t>(value));
         _amount -= static_cast<size_t>(value);
     }
 
     constexpr difference_type difference(const repeat_iterator& other) const noexcept {
-        return static_cast<difference_type>(other._amount) - static_cast<difference_type>(_amount);
+        return static_cast<difference_type>(other._amount - _amount);
     }
 
     constexpr difference_type difference(default_sentinel_t) const noexcept {
@@ -92,14 +95,17 @@ public:
 template<class T>
 class repeat_iterator<true, T> : public iterator<repeat_iterator<true, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
                                                  std::forward_iterator_tag, default_sentinel_t> {
-    T _to_repeat;
+    T _to_repeat{};
 
 public:
     using iterator_category = std::forward_iterator_tag;
-    using value_type = remove_cvref<T>;
+    using value_type = remove_cvref_t<T>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<T>;
     using reference = T;
+
+    constexpr repeat_iterator(const repeat_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(const repeat_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

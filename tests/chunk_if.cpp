@@ -5,7 +5,7 @@
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");
-    std::function<bool(char)> func = [](char c) {
+    std::function<bool(char)> func = [](char c) noexcept {
         return c == ';';
     };
 #ifdef LZ_HAS_CXX_11
@@ -34,7 +34,7 @@ TEST_CASE("Chunk if custom value type") {
 TEST_CASE("Chunk if with sentinels") {
     auto cstr = lz::c_string("hello world; this is a message;;");
 
-    std::function<bool(char)> predicate = [](char c) {
+    std::function<bool(char)> predicate = [](char c) noexcept {
         return c == ';';
     };
     lz::chunk_if_iterable<decltype(cstr), decltype(predicate)> chunked = lz::chunk_if(cstr, std::move(predicate));
@@ -49,7 +49,7 @@ TEST_CASE("Chunk if with sentinels") {
 }
 
 TEST_CASE("Non string literal test") {
-    std::function<bool(int)> is_even = [](int i) {
+    std::function<bool(int)> is_even = [](int i) noexcept {
         return i % 2 == 0;
     };
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };

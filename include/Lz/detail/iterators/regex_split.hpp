@@ -28,7 +28,7 @@ public:
     using reference = value_type;
 
 private:
-    RegexTokenIter _current;
+    RegexTokenIter _current{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS

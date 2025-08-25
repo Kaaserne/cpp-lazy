@@ -62,7 +62,7 @@ struct enumerate_adaptor {
      * @return An iterable that enumerates the elements of the input iterable
      */
     template<class Iterable, class IntType = int>
-    LZ_NODISCARD constexpr enumerate_iterable<remove_ref<Iterable>, IntType>
+    LZ_NODISCARD constexpr enumerate_iterable<remove_ref_t<Iterable>, IntType>
     operator()(Iterable&& iterable, const IntType start = 0) const
         requires lz::iterable<Iterable>
     {
@@ -176,7 +176,7 @@ struct enumerate_adaptor {
      * @return An iterable that enumerates the elements of the input iterable
      */
     template<class Iterable, class IntType = int>
-    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, enumerate_iterable<remove_ref<Iterable>, IntType>>
+    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, enumerate_iterable<remove_ref_t<Iterable>, IntType>>
     operator()(Iterable&& iterable, const IntType start = 0) const {
         return { std::forward<Iterable>(iterable), start };
     }

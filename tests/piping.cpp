@@ -10,8 +10,8 @@
 
 TEST_CASE("Iterator chaining") {
     SUBCASE("test 1") {
-        int dummy = 0;
-        auto iterable = lz::range(10) | lz::map([dummy](int i) mutable {
+        unsigned dummy = 0;
+        auto iterable = lz::range(unsigned(10)) | lz::map([dummy](unsigned i) mutable {
                             ++dummy;
                             return std::to_string(i);
                         }) |
@@ -21,8 +21,8 @@ TEST_CASE("Iterator chaining") {
     }
 
     SUBCASE("test 2") {
-        int dummy = 0;
-        auto chunk_iterable = lz::range(10) | lz::chunk_if([dummy](int i) mutable {
+        unsigned dummy = 0;
+        auto chunk_iterable = lz::range(unsigned(10)) | lz::chunk_if([dummy](unsigned i) mutable {
                                   ++dummy;
                                   return i % 2 == 0;
                               });
@@ -33,8 +33,8 @@ TEST_CASE("Iterator chaining") {
     }
 
     SUBCASE("test 3, with to<>") {
-        int dummy = 0;
-        auto iterable = lz::range(10) | lz::map([dummy](int i) mutable {
+        unsigned dummy = 0;
+        auto iterable = lz::range(unsigned(10)) | lz::map([dummy](unsigned i) mutable {
                             ++dummy;
                             return std::to_string(i);
                         }) |
@@ -45,8 +45,8 @@ TEST_CASE("Iterator chaining") {
     }
 
     SUBCASE("test 4, with to<>") {
-        auto chunk_iterable = lz::range(10) | lz::chunk_if([](int i) { return i % 2 == 0; });
-        int dummy = 0;
+        auto chunk_iterable = lz::range(unsigned(10)) | lz::chunk_if([](unsigned i) { return i % 2 == 0; });
+        unsigned dummy = 0;
 
         using chunk_type = decltype(chunk_iterable.begin())::reference;
         auto mapped_chunk = chunk_iterable | lz::map([dummy](chunk_type chunk) mutable {

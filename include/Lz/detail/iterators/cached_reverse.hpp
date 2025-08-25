@@ -16,15 +16,18 @@ class cached_reverse_iterator
                       iter_cat_t<Iterator>, default_sentinel_t> {
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _iterator;
-    Iterator _prev_it;
-    Iterator _begin;
+    Iterator _iterator{};
+    Iterator _prev_it{};
+    Iterator _begin{};
 
 public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr cached_reverse_iterator(const cached_reverse_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 cached_reverse_iterator& operator=(const cached_reverse_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

@@ -96,10 +96,6 @@ target_compile_definitions(cpp-lazy
 		$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
 
-target_compile_features(cpp-lazy 
-	${CPP-LAZY_COMPILE_FEATURES_VISIBLITY} 
-		cxx_std_11
-)
 target_include_directories(cpp-lazy
 	${cpp-lazy_warning_guard}
 		${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
@@ -129,11 +125,11 @@ else ()
 endif ()
 
 write_basic_package_version_file(
-        cpp-lazyConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
-        ARCH_INDEPENDENT)
-
+	cpp-lazyConfigVersion.cmake
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion
+	ARCH_INDEPENDENT
+)
 
 install(EXPORT cpp-lazyTargets
         NAMESPACE cpp-lazy::

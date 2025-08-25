@@ -32,7 +32,7 @@ public:
     constexpr seed_sequence() = default;
 
     explicit seed_sequence(std::random_device& rd) {
-        std::generate(std::begin(_seed), std::end(_seed), [&rd]() { return static_cast<result_type>(rd()); });
+        std::generate(std::begin(_seed), std::end(_seed), [&rd]() { return rd(); });
     }
 
     template<class T>

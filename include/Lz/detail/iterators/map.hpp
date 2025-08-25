@@ -15,17 +15,20 @@ template<class Iterator, class S, class UnaryOp>
 class map_iterator
     : public iterator<map_iterator<Iterator, S, UnaryOp>, func_ret_type_iter<UnaryOp, Iterator>,
                       fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
-    Iterator _iterator;
-    mutable UnaryOp _unary_op;
+    Iterator _iterator{};
+    mutable UnaryOp _unary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
 public:
     using reference = decltype(_unary_op(*_iterator));
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using iterator_category = typename traits::iterator_category;
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr map_iterator(const map_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 map_iterator& operator=(const map_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

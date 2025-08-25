@@ -58,14 +58,14 @@ class cartesian_product_iterable : public lazy_view {
 #endif
 
     template<class Iterable2, size_t... Is>
-    static cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    static cartesian_product_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, cartesian_product_iterable<Iterables...>&& cartesian, index_sequence<Is...>) {
         using std::get;
         return { std::forward<Iterable2>(iterable2), std::move(get<Is>(cartesian._iterables))... };
     }
 
     template<class Iterable2, size_t... Is>
-    static cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    static cartesian_product_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const cartesian_product_iterable<Iterables...>& cartesian, index_sequence<Is...>) {
         using std::get;
         return { std::forward<Iterable2>(iterable2), get<Is>(cartesian._iterables)... };
@@ -190,13 +190,13 @@ public:
 #endif
 
     template<class Iterable2>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref_t<Iterable2>, Iterables...>
     operator|(Iterable2&& iterable2, cartesian_product_iterable<Iterables...>&& cartesian) {
         return concat_iterables(std::forward<Iterable2>(iterable2), std::move(cartesian), is{});
     }
 
     template<class Iterable2>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref<Iterable2>, Iterables...>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend cartesian_product_iterable<remove_ref_t<Iterable2>, Iterables...>
     operator|(Iterable2&& iterable2, const cartesian_product_iterable<Iterables...>& cartesian) {
         return concat_iterables(std::forward<Iterable2>(iterable2), cartesian, is{});
     }

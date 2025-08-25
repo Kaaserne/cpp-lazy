@@ -28,7 +28,7 @@ struct slice_adaptor {
      * @return A slice_iterable that can be used to iterate over the sliced elements.
      */
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 slice_iterable<remove_ref<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 slice_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, const size_t from, const size_t to) const {
         LZ_ASSERT(to > from, "`to` must be greater than `from`");
         return { lz::drop(std::forward<Iterable>(iterable), from), to - from };

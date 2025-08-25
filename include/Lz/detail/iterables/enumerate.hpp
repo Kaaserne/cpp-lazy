@@ -53,7 +53,7 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<size_t>(lz::eager_size(_iterable));
+        return static_cast<size_t>(lz::size(_iterable));
     }
 
 #else

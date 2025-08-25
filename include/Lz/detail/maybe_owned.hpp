@@ -61,7 +61,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr size_t size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr)))
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
         return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
@@ -70,7 +70,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
     }
 
@@ -109,7 +109,7 @@ public:
 template<class Iterable>
 class maybe_owned_impl<Iterable, true> : public lazy_view {
     using it = typename std::remove_cv<Iterable>::type;
-    it _iterable_value;
+    it _iterable_value{};
 
     template<class, bool>
     friend class maybe_owned_impl;
@@ -167,7 +167,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr size_t size() const noexcept(noexcept(lz::size(_iterable_value)))
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
         return static_cast<size_t>(lz::size(_iterable_value));
@@ -176,7 +176,7 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable_value));
     }
 
@@ -217,7 +217,6 @@ using maybe_owned = maybe_owned_impl<Iterable, std::is_base_of<lazy_view, typena
  * iterable. This is done because lazy views are generally cheap to copy, because they contain references to the actual container,
  * rather than the container itself. This class is used in various places in the library to store a reference or a copy of an
  * iterable, depending on the type of the iterable.
- * @tparam Iterable The type of the iterable to store a reference or copy of.
  * Example:
  * ```cpp
  * std::vector<int> vec{ 1, 2, 3 };
@@ -271,8 +270,8 @@ using copied = detail::maybe_owned_impl<Iterable, true>;
  * ```
  */
 template<class Iterable>
-copied<detail::remove_ref<Iterable>> as_copied(Iterable&& iterable) {
-    return copied<detail::remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
+copied<detail::remove_ref_t<Iterable>> as_copied(Iterable&& iterable) {
+    return copied<detail::remove_ref_t<Iterable>>{ std::forward<Iterable>(iterable) };
 }
 } // namespace lz
 

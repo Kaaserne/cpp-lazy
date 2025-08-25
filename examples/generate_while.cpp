@@ -9,7 +9,7 @@ int main() {
         // If `copy` == 4, stop generating values.
         // This function must return a pair like object (e.g. std::pair) where pair::first must
         // be a type that is convertible to bool and where pair::second can be any type
-        return std::make_pair(copy != 4, copy);
+        return std::make_pair(copy, copy != 4);
     });
 
 #ifdef LZ_HAS_CXX_17

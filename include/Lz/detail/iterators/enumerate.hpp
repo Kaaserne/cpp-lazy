@@ -14,7 +14,7 @@ class enumerate_iterator
     : public iterator<enumerate_iterator<Iterator, S, Arithmetic>, std::pair<Arithmetic, ref_t<Iterator>>,
                       fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
 
-    Iterator _iterator;
+    Iterator _iterator{};
     Arithmetic _index{};
 
     using traits = std::iterator_traits<Iterator>;
@@ -24,6 +24,9 @@ public:
     using reference = std::pair<Arithmetic, typename traits::reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr enumerate_iterator(const enumerate_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(const enumerate_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

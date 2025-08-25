@@ -20,8 +20,8 @@ class ra_pairwise_iterator : public iterator<ra_pairwise_iterator<Iterable>, bas
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    iter _sub_begin;
-    Iterable _iterable;
+    iter _sub_begin{};
+    Iterable _iterable{};
     size_t _pair_size{};
 
 public:
@@ -29,6 +29,9 @@ public:
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr ra_pairwise_iterator(const ra_pairwise_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator& operator=(const ra_pairwise_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -54,7 +57,7 @@ public:
         LZ_ASSERT(_pair_size != 0, "Size must be greater than zero");
     }
 
-    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator operator=(default_sentinel_t) {
+    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator& operator=(default_sentinel_t) {
         const auto size = _iterable.end() - _iterable.begin();
         _sub_begin = _iterable.begin() + (size - static_cast<difference_type>(_pair_size) + 1);
         return *this;
@@ -93,7 +96,7 @@ public:
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         LZ_ASSERT_SUB_ADDABLE(offset < 0
                                   ? -offset <= (_sub_begin - _iterable.begin())
-                                  : offset <= (_iterable.end() - _sub_begin) - (static_cast<difference_type>(_pair_size) - 1));
+                                  : offset <= (_iterable.end() - _sub_begin) - (static_cast<difference_type>(_pair_size - 1)));
         _sub_begin += offset;
     }
 
@@ -114,9 +117,9 @@ class bidi_pairwise_iterator : public iterator<bidi_pairwise_iterator<Iterable>,
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    iter _sub_begin;
-    iter _sub_end;
-    Iterable _iterable;
+    iter _sub_begin{};
+    iter _sub_end{};
+    Iterable _iterable{};
     size_t _pair_size{};
 
 public:
@@ -124,6 +127,9 @@ public:
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr bidi_pairwise_iterator(const bidi_pairwise_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator& operator=(const bidi_pairwise_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

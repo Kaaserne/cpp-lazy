@@ -8,7 +8,7 @@
 
 template<class T>
 class custom_container {
-    std::vector<T> _vec;
+    std::vector<T> _vec{};
     std::size_t _expected_capacity{};
 
 public:
@@ -21,6 +21,10 @@ public:
 
     void reserve(std::size_t size) {
         _vec.reserve(size);
+    }
+
+    std::size_t vec_capacity() const {
+        return _vec.capacity();
     }
 
     std::vector<T>& vec() {

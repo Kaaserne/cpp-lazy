@@ -11,7 +11,19 @@
 
 #elif !defined(LZ_STANDALONE)
 
-#include <fmt/core.h>
+// clang-format off
+#if !defined(LZ_STANDALONE)
+  #ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Weffc++"
+    #pragma GCC diagnostic ignored "-Wswitch-default"
+  #endif
+    #include <fmt/core.h>
+  #ifdef __GNUC__
+    #pragma GCC diagnostic pop
+  #endif
+#endif
+// clang-format on
 
 #endif
 

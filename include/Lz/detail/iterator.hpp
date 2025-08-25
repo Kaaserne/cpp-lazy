@@ -14,9 +14,14 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator;
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
-struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
-    using iterator_category = std::forward_iterator_tag;
+struct iterator<Derived, Reference, Pointer, DifferenceType, std::input_iterator_tag, S> {
+    using iterator_category = std::input_iterator_tag;
     using sentinel = S;
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
 
     LZ_CONSTEXPR_CXX_14 Derived& operator++() {
         static_cast<Derived&>(*this).increment();
@@ -28,6 +33,10 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
         static_cast<Derived&>(*this).increment();
         return copy;
     }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
     LZ_NODISCARD constexpr Reference operator*() const {
         return static_cast<const Derived&>(*this).dereference();
@@ -59,10 +68,22 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterat
 };
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
+struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S>
+    : public iterator<Derived, Reference, Pointer, DifferenceType, std::input_iterator_tag, S> {
+    using iterator_category = std::forward_iterator_tag;
+    using sentinel = S;
+};
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S>
     : public iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::bidirectional_iterator_tag;
     using sentinel = S;
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
+#endif
 
     LZ_CONSTEXPR_CXX_14 Derived& operator--() {
         static_cast<Derived&>(*this).decrement();
@@ -74,6 +95,10 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_
         static_cast<Derived&>(*this).decrement();
         return copy;
     }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 };
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>

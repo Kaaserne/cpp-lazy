@@ -12,13 +12,16 @@ namespace detail {
 template<class Iterator, class S, class IterCat>
 class as_iterator_iterator : public iterator<as_iterator_iterator<Iterator, S, IterCat>, Iterator, fake_ptr_proxy<Iterator>,
                                              diff_type<Iterator>, IterCat, S> {
-    Iterator _iterator;
+    Iterator _iterator{};
 
 public:
     using value_type = Iterator;
     using reference = Iterator;
     using pointer = fake_ptr_proxy<Iterator>;
     using difference_type = typename std::iterator_traits<Iterator>::difference_type;
+
+    constexpr as_iterator_iterator(const as_iterator_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const as_iterator_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 

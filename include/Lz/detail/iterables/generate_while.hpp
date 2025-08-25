@@ -11,9 +11,10 @@ namespace detail {
 template<class GeneratorFunc>
 class generate_while_iterable : public lazy_view {
     using fn_return_type = decltype(std::declval<GeneratorFunc>()());
+    using T = tup_element<1, fn_return_type>;
 
+    fn_return_type _init{ T{}, true };
     func_container<GeneratorFunc> _func;
-    fn_return_type _init{};
 
 public:
     using iterator = generate_while_iterator<func_container<GeneratorFunc>>;
@@ -23,7 +24,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr generate_while_iterable()
-        requires(std::default_initializable<GeneratorFunc> && std::is_default_constructible_v<fn_return_type>)
+        requires(std::default_initializable<GeneratorFunc> && std::default_initializable<fn_return_type>)
     = default;
 
 #else
@@ -36,7 +37,7 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 generate_while_iterable(GeneratorFunc func) : _func{ std::move(func) }, _init{ _func() } {
+    LZ_CONSTEXPR_CXX_14 generate_while_iterable(GeneratorFunc func) : _init{ func() }, _func{ std::move(func) } {
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {

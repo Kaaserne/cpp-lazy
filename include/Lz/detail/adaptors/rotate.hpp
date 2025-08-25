@@ -30,7 +30,7 @@ struct rotate_adaptor {
      * @return A rotate_iterable that can be used to iterate over the rotated elements.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr rotate_iterable<remove_ref<Iterable>>
+    LZ_NODISCARD constexpr rotate_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, const diff_iterable_t<Iterable> start) const {
         return { std::forward<Iterable>(iterable), start };
     }

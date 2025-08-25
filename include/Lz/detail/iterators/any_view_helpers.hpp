@@ -41,7 +41,7 @@ private:
         char buffer[SBO_SIZE];
     };
 
-    variant<unique_ptr<any_iter_base>, storage> _storage;
+    variant<unique_ptr<any_iter_base>, storage> _storage{};
 
     void copy_buf_other(const iterator_wrapper& other) noexcept {
         LZ_ASSERT(other._storage.index() == 1, "Invalid storage index");

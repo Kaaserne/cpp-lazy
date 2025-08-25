@@ -45,8 +45,8 @@ public:
     using difference_type = iter_tuple_diff_type_t<iterators>;
 
 private:
-    iterators _iterators;
-    IterablesMaybeHomo _iterables;
+    iterators _iterators{};
+    IterablesMaybeHomo _iterables{};
 
 #ifdef LZ_HAS_CXX_17
 

@@ -33,7 +33,7 @@ struct dimensions<Iterable, detail::enable_if_t<!std::is_array<Iterable>::value>
  */
 template<class Iterable>
 struct dimensions<Iterable, detail::enable_if_t<std::is_array<Iterable>::value>>
-    : std::integral_constant<size_t, std::rank<detail::remove_cvref<Iterable>>::value> {};
+    : std::integral_constant<size_t, std::rank<detail::remove_cvref_t<Iterable>>::value> {};
 
 #ifdef LZ_HAS_CXX_14
 
@@ -74,10 +74,10 @@ struct flatten_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    flatten_iterable<remove_ref<Iterable>, dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>
+    flatten_iterable<remove_ref_t<Iterable>, dimensions<remove_ref_t<Iterable>>::value - !std::is_array<remove_ref_t<Iterable>>::value>
     operator()(Iterable&& iterable) const {
-        using flattener = flatten_iterable<remove_ref<Iterable>, 
-                                           dimensions<remove_ref<Iterable>>::value - !std::is_array<remove_ref<Iterable>>::value>;
+        using flattener = flatten_iterable<remove_ref_t<Iterable>, 
+                                           dimensions<remove_ref_t<Iterable>>::value - !std::is_array<remove_ref_t<Iterable>>::value>;
         using it = iter_t<Iterable>;
 
         static_assert(std::is_default_constructible<it>::value, "underlying iterator needs to be default constructible");

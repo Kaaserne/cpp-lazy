@@ -24,7 +24,7 @@ struct duplicates_adaptor {
      * @return An iterable that returns a pair of each element in the iterable and the number of times it appears in the iterable.
      */
     template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr duplicates_iterable<remove_ref<Iterable>, BinaryPredicate>
+    LZ_NODISCARD constexpr duplicates_iterable<remove_ref_t<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate compare = {}) const {
         return { std::forward<Iterable>(iterable), std::move(compare) };
     }

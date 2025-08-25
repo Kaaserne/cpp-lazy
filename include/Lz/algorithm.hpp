@@ -16,8 +16,7 @@ LZ_MODULE_EXPORT namespace lz {
 
 /**
  * Checks whether [begin, end) is empty.
- * @param begin The beginning of the sequence.
- * @param end The end of the sequence.
+ * @param iterable The iterable to check whether it is empty.
  * @return True if it is empty, false otherwise.
  */
 template<class Iterable>
@@ -49,7 +48,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
  * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the sequence.
  * If the iterable is already at end, an empty optional is returned.
  *
- * @param iterable
+ * @param begin The beginning of the sequence to peek into.
+ * @param end The end of the sequence to peek into.
  * @return A (std::)optional of reference wrapper if the sequence is a reference, value if it is not.
  * detail::end(std::forward<Iterable>(iterable))))
  */
@@ -61,7 +61,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(de
 /**
  * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the sequence.
  * If the iterable is already at end, an empty optional is returned.
- * @param iterable
+ * @param iterable The iterable to peek into.
  * @return A (std::)optional of reference wrapper if the sequence is a reference, value if it is not.
  */
 template<class Iterable>
@@ -288,7 +288,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& it
  * @param default_value The value to return if the element is not found, defaults to `T()`
  * @return The value @p to_find if it is found, otherwise @p default_value
  */
-template<class Iterable, class T, class U = detail::remove_cvref<T>>
+template<class Iterable, class T, class U = detail::remove_cvref_t<T>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default(Iterable&& iterable, T&& to_find,
                                                                           U&& default_value = {}) {
     return detail::find_or_default(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),

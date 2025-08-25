@@ -46,8 +46,8 @@ struct cached_size_adaptor {
      * @return A cached_size_iterable object that can be used to iterate over the elements in the iterable with a cached size.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr cached_size_iterable<remove_ref<Iterable>> operator()(Iterable&& iterable) const {
-        return cached_size_iterable<remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
+    LZ_NODISCARD constexpr cached_size_iterable<remove_ref_t<Iterable>> operator()(Iterable&& iterable) const {
+        return cached_size_iterable<remove_ref_t<Iterable>>{ std::forward<Iterable>(iterable) };
     }
 };
 } // namespace detail

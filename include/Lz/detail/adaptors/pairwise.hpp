@@ -13,7 +13,7 @@ struct pairwise_adaptor {
     using adaptor = pairwise_adaptor;
 
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<remove_ref<Iterable>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, const size_t pair_size) const {
         return { std::forward<Iterable>(iterable), pair_size };
     }

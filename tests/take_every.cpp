@@ -268,7 +268,7 @@ TEST_CASE("take_every_iterable to containers") {
     REQUIRE(take_every.size() == 2);
 
     SUBCASE("To array") {
-        std::array<int, static_cast<std::size_t>(size / offset)> actual = std::move(take_every) | lz::to<std::array<int, offset>>();
+        std::array<int, size / offset> actual = std::move(take_every) | lz::to<std::array<int, offset>>();
         REQUIRE(actual == std::array<int, offset>{ 1, 3 });
     }
 

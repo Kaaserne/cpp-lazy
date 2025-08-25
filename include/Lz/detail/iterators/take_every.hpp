@@ -30,11 +30,14 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    it _iterator;
-    sent _end;
-    size_t _offset;
+    it _iterator{};
+    sent _end{};
+    size_t _offset{};
 
 public:
+    constexpr take_every_iterator(const take_every_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(const take_every_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
@@ -102,12 +105,15 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
-    it _iterator;
-    sent _end;
+    it _iterator{};
+    sent _end{};
     size_t _offset{};
     size_t _distance{};
 
 public:
+    constexpr take_every_iterator(const take_every_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(const take_every_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()
@@ -187,8 +193,8 @@ public:
     using pointer = fake_ptr_proxy<reference>;
 
 private:
-    Iterable _iterable;
-    it _iterator;
+    Iterable _iterable{};
+    it _iterator{};
     size_t _offset{};
 
     LZ_CONSTEXPR_CXX_14 difference_type difference_impl(const sent& iter) const {
@@ -199,6 +205,9 @@ private:
     }
 
 public:
+    constexpr take_every_iterator(const take_every_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 take_every_iterator& operator=(const take_every_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_every_iterator()

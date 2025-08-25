@@ -26,7 +26,7 @@ public:
 
 private:
     using is = make_index_sequence<tuple_size<IterTuple>::value>;
-    IterTuple _iterators;
+    IterTuple _iterators{};
 
     template<size_t... I>
     constexpr reference dereference(index_sequence<I...>) const {

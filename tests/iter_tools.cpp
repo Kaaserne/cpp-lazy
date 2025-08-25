@@ -1,7 +1,7 @@
+#include <Lz/iter_tools.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
-#include <Lz/iter_tools.hpp>
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
@@ -293,6 +293,19 @@ TEST_CASE("Pad") {
                                    std::reference_wrapper<const int>>::value,
                       "");
         static_assert(std::is_same<lz::detail::common_reference_t<int&, std::reference_wrapper<const int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+
+        //
+
+        static_assert(
+            std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>&, int&>, std::reference_wrapper<int>>::value,
+            "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<const std::reference_wrapper<int>&, int&>,
+                                   std::reference_wrapper<int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<const std::reference_wrapper<int>&, const int&>,
                                    std::reference_wrapper<const int>>::value,
                       "");
     }
