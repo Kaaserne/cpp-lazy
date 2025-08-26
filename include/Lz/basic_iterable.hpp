@@ -202,7 +202,7 @@ template<class I, class S>
 LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
     return { std::move(begin), std::move(end) };
 }
-// clang-format on
+    // clang-format on
 }
 
 namespace lz {
@@ -221,6 +221,8 @@ struct prealloc_container<Iterable, Container,
         container.reserve(lz::size(iterable));
     }
 };
+
+#ifndef LZ_HAS_CXX_17
 
 template<class Container, class = void>
 struct has_insert_after : std::false_type {};
@@ -254,19 +256,36 @@ template<class Container>
 struct has_push<Container, void_t<decltype(std::declval<Container>().push(std::declval<typename Container::value_type>()))>>
     : std::true_type {};
 
-#ifdef LZ_HAS_CXX_17
+#else
+
+template<class T, class = void>
+inline constexpr bool has_push_back_v = false;
 
 template<class T>
-inline constexpr bool has_push_back_v = has_push_back<T>::value;
+inline constexpr bool has_push_back_v<T, void_t<decltype(std::declval<T>().push_back(std::declval<typename T::value_type>()))>> =
+    true;
+
+template<class T, class = void>
+inline constexpr bool has_insert_v = false;
 
 template<class T>
-inline constexpr bool has_insert_v = has_insert<T>::value;
+inline constexpr bool has_insert_v<
+    T, void_t<decltype(std::declval<T>().insert(std::declval<typename T::iterator>(), std::declval<typename T::value_type>()))>> =
+    true;
+
+template<class T, class = void>
+inline constexpr bool has_insert_after_v = false;
 
 template<class T>
-inline constexpr bool has_insert_after_v = has_insert_after<T>::value;
+inline constexpr bool
+    has_insert_after_v<T, void_t<decltype(std::declval<T>().insert_after(std::declval<typename T::const_iterator>(),
+                                                                         std::declval<typename T::value_type>()))>> = true;
+
+template<class T, class = void>
+inline constexpr bool has_push_v = false;
 
 template<class T>
-inline constexpr bool has_push_v = has_push<T>::value;
+inline constexpr bool has_push_v<T, void_t<decltype(std::declval<T>().push(std::declval<typename T::value_type>()))>> = true;
 
 #endif
 
@@ -430,8 +449,8 @@ struct container_constructor {
                               std::forward<Args>(args)... };
         }
         else if constexpr (is_ra_v<it> && std::is_constructible_v<Container, it, it, remove_cvref_t<Args>...>) {
-            auto it = std::begin(iterable);
-            return Container{ it, it + (std::end(iterable) - std::begin(iterable)), std::forward<Args>(args)... };
+            auto iter = std::begin(iterable);
+            return Container{ iter, iter + (std::end(iterable) - std::begin(iterable)), std::forward<Args>(args)... };
         }
         else {
             Container container{ std::forward<Args>(args)... };
@@ -899,8 +918,6 @@ to(Iterable&& iterable, Args&&... args) {
 
 #endif
 
-    // clang-format on
-
 /**
  * @brief Converts an iterable to a container, given template parameter `Container`. Can be specialized for custom containers.
  * Example:
@@ -932,6 +949,8 @@ to(Iterable&& iterable, Args&&... args) {
 using detail::custom_copier_for;
 
 } // namespace lz
+
+// clang-format on
 
 #ifdef LZ_HAS_CONCEPTS
 

@@ -582,8 +582,15 @@ LZ_INLINE_VAR constexpr bool has_sentinel_v = has_sentinel<T>::value;
 template<class I, class S>
 LZ_INLINE_VAR constexpr bool is_sentinel_v = is_sentinel<I, S>::value;
 
+template<class T, class = void>
+LZ_INLINE_VAR constexpr bool is_iterable_v = false;
+
 template<class T>
-LZ_INLINE_VAR constexpr bool is_iterable_v = is_iterable<T>::value;
+LZ_INLINE_VAR constexpr bool is_iterable_v<T, void_t<decltype(std::begin(std::declval<T>()), std::end(std::declval<T>()))>> =
+    true;
+
+template<class T, size_t N>
+LZ_INLINE_VAR constexpr bool is_iterable_v<T[N]> = true;
 
 #endif // LZ_HAS_CXX_17
 
@@ -657,10 +664,14 @@ namespace detail {
 template<class T>
 using is_sized = detail::is_sized<T>;
 
-#ifdef LZ_HAS_CXX_14
+#ifdef LZ_HAS_CXX_17
+
+
+template<class T, class = void>
+LZ_INLINE_VAR constexpr bool is_sized_v = false;
 
 template<class T>
-LZ_INLINE_VAR constexpr bool is_sized_v = is_sized<T>::value;
+LZ_INLINE_VAR constexpr bool is_sized_v<T, detail::void_t<decltype(lz::size(std::declval<T>()))>> = true;
 
 #endif
 
