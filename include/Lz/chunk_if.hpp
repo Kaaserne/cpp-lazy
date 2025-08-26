@@ -14,7 +14,7 @@ LZ_MODULE_EXPORT namespace lz {
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
- * the template parameter passed. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * the template parameter passed. If `std::string` or `[lz|std]::string_view` is prefered as its `value_type`, please see
  * `sv_chunk_if`. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
@@ -35,7 +35,7 @@ using t_chunk_if = detail::chunk_if_adaptor<ValueType>;
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
- * the template parameter passed. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * the template parameter passed. If `std::string` or `[lz|std]::string_view` is prefered as its `value_type`, please see
  * `sv_chunk_if`. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
@@ -56,7 +56,7 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<ValueType> t_chunk_if;
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
- * `lz::basic_iterable`. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * `lz::basic_iterable`. If `std::string` or `[lz|std]::string_view` is prefered as its `value_type`, please see
  * `sv_chunk_if`. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:

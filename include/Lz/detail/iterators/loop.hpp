@@ -58,7 +58,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(default_sentinel_t) {
         _rotations_left = 0;
-        // We don't set _iterator to end here otherwise eq will return true
+        _iterator = _iterable.end();
         return *this;
     }
 

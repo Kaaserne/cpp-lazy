@@ -11,6 +11,14 @@ TEST_CASE("repeat_iterable binary operations") {
     lz::repeat_iterable<int> repeater = lz::repeat(20, amount);
     auto expected = { 20, 20, 20, 20, 20 };
 
+    SUBCASE("Operator=(default_sentinel_t)") {
+        auto repeated = lz::repeat(20, 5);
+        auto common = lz::common(repeated);
+        auto expected2 = { 20, 20, 20, 20, 20 };
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::size(common) == lz::size(expected2));
+    }
+
     SUBCASE("Operator++") {
         REQUIRE(lz::equal(repeater, expected));
     }

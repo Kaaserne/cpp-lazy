@@ -66,6 +66,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
@@ -147,6 +148,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        return *this;
     }
 
     constexpr reference dereference() const {

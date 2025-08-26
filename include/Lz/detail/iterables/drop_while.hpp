@@ -11,11 +11,8 @@
 
 namespace lz {
 namespace detail {
-template<class Iterable, class UnaryPredicate, class = void>
-class drop_while_iterable;
-
 template<class Iterable, class UnaryPredicate>
-class drop_while_iterable<Iterable, UnaryPredicate, enable_if_t<!is_ra<iter_t<Iterable>>::value>> : public lazy_view {
+class drop_while_iterable : public lazy_view {
     maybe_owned<Iterable> _iterable;
     func_container<UnaryPredicate> _unary_predicate;
 
@@ -83,73 +80,6 @@ public:
     }
 
 #endif
-};
-// TODO remove this specialization, also edit docs
-template<class Iterable, class UnaryPredicate>
-class drop_while_iterable<Iterable, UnaryPredicate, enable_if_t<is_ra<iter_t<Iterable>>::value>> : public lazy_view {
-    iter_t<Iterable> _begin;
-    sentinel_t<Iterable> _end;
-
-public:
-    using iterator = iter_t<Iterable>;
-    using sentinel = sentinel_t<Iterable>;
-    using const_iterator = iterator;
-    using value_type = val_iterable_t<Iterable>;
-
-#ifdef LZ_HAS_CONCEPTS
-
-    constexpr drop_while_iterable()
-        requires(std::default_initializable<iter_t<Iterable>> && std::default_initializable<sentinel>)
-    = default;
-
-#else
-
-    template<class I = decltype(_begin),
-             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sentinel>::value>>
-    constexpr drop_while_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                             std::is_nothrow_default_constructible<sentinel>::value) {
-    }
-
-#endif
-
-    template<class I>
-    LZ_CONSTEXPR_CXX_14 drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
-        _begin{ lz::find_if_not(iterable, std::move(unary_predicate)) },
-        _end{ std::forward<I>(iterable).end() } {
-    }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr size_t size() const
-        requires(is_ra_v<iterator>)
-    {
-        return static_cast<size_t>(_end - _begin);
-    }
-
-#else
-
-    template<class I = iter_t<Iterable>>
-    LZ_NODISCARD constexpr enable_if_t<is_ra<I>::value, size_t> size() const {
-        return static_cast<size_t>(_end - _begin);
-    }
-
-#endif
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return std::move(_begin);
-    }
-
-    LZ_NODISCARD constexpr iterator begin() const& {
-        return _begin;
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
-        return std::move(_end);
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() const& {
-        return _end;
-    }
 };
 } // namespace detail
 } // namespace lz

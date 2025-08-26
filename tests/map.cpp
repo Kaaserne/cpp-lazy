@@ -19,10 +19,14 @@ TEST_CASE("Map with sentinels") {
     REQUIRE(lz::equal(map, c_str_expected));
 
     SUBCASE("Operator=") {
-        auto begin = map.begin();
-        REQUIRE(begin == map.begin());
-        begin = map.end();
-        REQUIRE(begin == map.end());
+        auto repeater = lz::repeat(20, 5);
+        auto end = repeater.begin();
+        end = repeater.end(); // calls operator=(sentinel)
+        auto begin = repeater.begin();
+        auto common = lz::map(lz::make_basic_iterable(begin, end), [](int i) { return i * 2; });
+
+        auto expected = { 40, 40, 40, 40, 40 };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

@@ -1,5 +1,6 @@
 #include <Lz/map.hpp>
 #include <Lz/string_view.hpp>
+#include <Lz/common.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
@@ -37,17 +38,14 @@ TEST_CASE("CString binary operations") {
         REQUIRE_FALSE(tmp.begin());
     }
 
-    SUBCASE("Operator=") {
-        auto it = c_string.begin();
-        REQUIRE(it == c_string.begin());
-        REQUIRE(it != c_string.end());
-        REQUIRE(c_string.end() != it);
-        REQUIRE(c_string.begin() == it);
-        it = c_string.end();
-        REQUIRE(it == c_string.end());
-        REQUIRE(it != c_string.begin());
-        REQUIRE(c_string.begin() != it);
-        REQUIRE(c_string.end() == it);
+    SUBCASE("Operator=(defatult_sentinel_t)") {
+        const char* s = "hello, world!";
+        auto cstr = lz::c_string(s);
+
+        lz::common_iterable<lz::c_string_iterable<const char>> common = lz::common(cstr);
+
+        auto expected = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

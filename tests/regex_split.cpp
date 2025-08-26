@@ -1,7 +1,7 @@
 #include <doctest/doctest.h>
+#include <Lz/common.hpp>
 #include <pch.hpp>
 #include <Lz/regex_split.hpp>
-#include <regex>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {
     std::regex r1(R"(\s+)");
@@ -39,12 +39,12 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
     }
 
     SUBCASE("Operator=") {
-        std::string s = "Hello, world! How are you?";
-        auto splitter = lz::regex_split(s, r1);
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = std::regex_token_iterator<std::string::const_iterator>{};
-        REQUIRE(it == splitter.end());
+        std::string s = "hello, world! This is a test.";
+        std::regex r("\\s+");
+        auto splitted = lz::regex_split(s, r);
+        auto common = lz::common(splitted);
+        auto expected = { "hello,", "world!", "This", "is", "a", "test." };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

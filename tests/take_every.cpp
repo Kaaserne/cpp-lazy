@@ -1,12 +1,29 @@
+#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take_every.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <Lz/repeat.hpp>
 #include <pch.hpp>
+
+template<class Iterable>
+struct bidi_sentinelled : public lz::lazy_view {
+    Iterable iterable;
+
+    explicit bidi_sentinelled(Iterable i) : iterable(std::move(i)) {
+    }
+
+    lz::iter_t<Iterable> begin() const {
+        return iterable.begin();
+    }
+
+    lz::default_sentinel_t end() const {
+        return lz::default_sentinel;
+    }
+};
 
 TEST_CASE("take_every_iterable with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -15,11 +32,35 @@ TEST_CASE("take_every_iterable with sentinels") {
     auto expected = lz::c_string("Hlo");
     REQUIRE(lz::equal(take_every, expected));
 
-    SUBCASE("Operator=") {
-        auto begin = take_every.begin();
-        REQUIRE(begin == take_every.begin());
-        begin = take_every.end();
-        REQUIRE(begin == take_every.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        SUBCASE("forward") {
+            std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
+            auto take_every2 = lz::take_every(lst, 2);
+            auto common = lz::common(take_every2);
+            auto expected2 = { 1, 3, 5 };
+            REQUIRE(lz::equal(common, expected2));
+        }
+
+        SUBCASE("bidirectional") {
+            std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            auto filtered = list | lz::filter([](int i) { return i % 2 == 0; });
+            // Make it so that it has a sentinel and is bidirectional
+            bidi_sentinelled<decltype(filtered)> t(filtered);
+            auto take_every2 = lz::take_every(t, 2);
+            auto common = lz::common(take_every2);
+            std::vector<int> expected2 = { 2, 6, 10 };
+            REQUIRE(lz::equal(common, expected2));
+        }
+
+        SUBCASE("random access") {
+            auto repeater = lz::repeat(20, 5);
+            auto end = repeater.begin();
+            end = repeater.end(); // calls operator=(sentinel)
+            auto begin = repeater.begin();
+            auto common = lz::take_every(lz::make_basic_iterable(begin, end), 2);
+            auto expected2 = { 20, 20, 20 };
+            REQUIRE(lz::equal(common, expected2));
+        }
     }
 }
 

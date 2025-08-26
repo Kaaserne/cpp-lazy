@@ -1,3 +1,4 @@
+#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
 #include <Lz/map.hpp>
@@ -46,15 +47,27 @@ TEST_CASE("Dimensions & sized") {
 TEST_CASE("Flatten with sentinels") {
     using c_string = decltype(lz::c_string(""));
 
-    std::forward_list<c_string> lst = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
-    lz::flatten_iterable<decltype(lst)> flattened = lz::flatten(lst);
+    std::forward_list<c_string> fwd_list = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"),
+                                             lz::c_string("!") };
+    lz::flatten_iterable<decltype(fwd_list)> flattened = lz::flatten(fwd_list);
     static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
 
-    SUBCASE("Operator= 2D forward") {
-        auto it = flattened.begin();
-        REQUIRE(it == flattened.begin());
-        it = flattened.end();
-        REQUIRE(it == flattened.end());
+    SUBCASE("Operator=(default_sentinel)") {
+        std::forward_list<std::forward_list<int>> lst = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+        auto flat = lst | lz::flatten;
+        auto common = flat | lz::common;
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(expected, common));
+
+        std::forward_list<int> lst2 = { 1, 2, 3, 4, 5, 6 };
+        auto flat2 = lst2 | lz::flatten;
+        auto common2 = flat2 | lz::common;
+        REQUIRE(lz::equal(expected, common2));
+
+        std::forward_list<std::forward_list<std::forward_list<int>>> lst3 = { { { 1, 2 }, { 3 } }, { { 4, 5 }, { 6 } } };
+        auto flat3 = lst3 | lz::flatten;
+        auto common3 = flat3 | lz::common;
+        REQUIRE(lz::equal(expected, common3));
     }
 
     auto str = flattened | lz::to<std::string>();
@@ -365,7 +378,7 @@ TEST_CASE("Should flatten permutations") {
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 1), 2));
         test_procs::test_operator_minus(f);
         REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 2 * 2 * 1 * 2)));
-        
+
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 2), 0));
         test_procs::test_operator_minus(f);
         REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));

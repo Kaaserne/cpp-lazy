@@ -1,9 +1,10 @@
+#include <Lz/common.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
 
 struct eq_pair {
     template<class T1, class T2>
@@ -24,18 +25,19 @@ TEST_CASE("Group by with sentinels") {
 
     REQUIRE(lz::equal(grouper, expected, eq_pair{}));
 
-    SUBCASE("Operator=") {
-        auto it = grouper.begin();
-        REQUIRE(it == grouper.begin());
-        REQUIRE(it != grouper.end());
-        REQUIRE(grouper.end() != it);
-        REQUIRE(grouper.begin() == it);
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::forward_list<int> lst = { 1, 1, 2, 2, 3, 4, 4 };
+        auto grouped = lz::group_by(lst, MAKE_BIN_PRED(equal_to){});
 
-        it = grouper.end();
-        REQUIRE(it == grouper.end());
-        REQUIRE(grouper.end() == it);
-        REQUIRE(grouper.begin() != it);
-        REQUIRE(it != grouper.begin());
+        auto common = lz::common(grouped);
+
+        using reference = lz::ref_iterable_t<decltype(common)>;
+        std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
+                                                                    std::make_pair(2, std::vector<int>{ 2, 2 }),
+                                                                    std::make_pair(3, std::vector<int>{ 3 }),
+                                                                    std::make_pair(4, std::vector<int>{ 4, 4 }) };
+        REQUIRE(lz::equal(common, expected2,
+                          [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
     }
 }
 

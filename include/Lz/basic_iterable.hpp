@@ -48,7 +48,7 @@ public:
 #endif
 
     template<class Iterable>
-    constexpr basic_iterable_impl(Iterable&& iterable) :
+    explicit constexpr basic_iterable_impl(Iterable&& iterable) :
         basic_iterable_impl{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) } {
     }
 
@@ -101,6 +101,14 @@ class sized_iterable_impl : public lazy_view {
     S _end;
     size_t _size{};
 
+    friend struct common_adaptor;
+
+    constexpr sized_iterable_impl(iterator_type begin, sentinel_type end, size_t size) :
+        _begin{ std::move(begin) },
+        _end{ std::move(end) },
+        _size{ size } {
+    }
+
 public:
     using iterator = I;
     using const_iterator = iterator_type;
@@ -124,14 +132,14 @@ public:
 
 #endif
 
-    constexpr sized_iterable_impl(iterator_type begin, S end) :
+    constexpr sized_iterable_impl(iterator_type begin, sentinel_type end) :
         _begin{ std::move(begin) },
         _end{ std::move(end) },
         _size{ static_cast<size_t>(_end - _begin) } {
     }
 
     template<class Iterable>
-    constexpr sized_iterable_impl(Iterable&& iterable) :
+    explicit constexpr sized_iterable_impl(Iterable&& iterable) :
         _begin{ detail::begin(std::forward<Iterable>(iterable)) },
         _end{ detail::end(std::forward<Iterable>(iterable)) },
         _size{ lz::size(iterable) } {
@@ -160,39 +168,41 @@ public:
 } // namespace detail
 } // namespace lz
 
+// clang-format off
 LZ_MODULE_EXPORT namespace lz {
-    /**
-     * @brief A class that can be converted to any container. It only contains the iterators and
-     * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
-     * etc... It contains the size of the iterable.
-     * @tparam It The iterator type.
-     * @tparam S The sentinel type.
-     */
-    template<class It, class S = It>
-    using sized_iterable = detail::sized_iterable_impl<It, S>;
+/**
+ * @brief A class that can be converted to any container. It only contains the iterators and
+ * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
+ * etc... It contains the size of the iterable.
+ * @tparam It The iterator type.
+ * @tparam S The sentinel type.
+ */
+template<class It, class S = It>
+using sized_iterable = detail::sized_iterable_impl<It, S>;
 
-    /**
-     * @brief A class that can be converted to any container. It only contains the iterators and
-     * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
-     * etc... It *may* contain the size of the iterable, depending on the iterator category (needs to be random access).
-     * @tparam It The iterator type.
-     * @tparam S The sentinel type.
-     */
-    template<class It, class S = It>
-    using basic_iterable = detail::basic_iterable_impl<It, S>;
+/**
+ * @brief A class that can be converted to any container. It only contains the iterators and
+ * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
+ * etc... It *may* contain the size of the iterable, depending on the iterator category (needs to be random access).
+ * @tparam It The iterator type.
+ * @tparam S The sentinel type.
+ */
+template<class It, class S = It>
+using basic_iterable = detail::basic_iterable_impl<It, S>;
 
-    /**
-     * @brief Creates a basic_iterable from an iterator and a sentinel. It can be used to create an iterable from a pair of
-     * iterators.
-     *
-     * @param begin The begin iterator.
-     * @param end The end sentinel.
-     * @return A basic_iterable object
-     */
-    template<class I, class S>
-    LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
-        return { std::move(begin), std::move(end) };
-    }
+/**
+ * @brief Creates a basic_iterable from an iterator and a sentinel. It can be used to create an iterable from a pair of
+ * iterators.
+ *
+ * @param begin The begin iterator.
+ * @param end The end sentinel.
+ * @return A basic_iterable object
+ */
+template<class I, class S>
+LZ_NODISCARD constexpr basic_iterable<I, S> make_basic_iterable(I begin, S end) {
+    return { std::move(begin), std::move(end) };
+}
+// clang-format on
 }
 
 namespace lz {

@@ -43,7 +43,7 @@ LZ_INLINE_VAR constexpr detail::common_adaptor common{};
  * ```
  */
 template<class Iterable>
-using common_iterable = detail::common_iterable<Iterable>;
+using common_iterable = decltype(lz::detail::common_adaptor{}(std::declval<Iterable>()));
 
 } // namespace lz
 

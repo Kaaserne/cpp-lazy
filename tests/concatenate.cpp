@@ -1,4 +1,5 @@
 #include <Lz/algorithm.hpp>
+#include <Lz/common.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
@@ -22,17 +23,16 @@ TEST_CASE("Concatenate with sentinels") {
                       'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
     REQUIRE(lz::equal(concat, expected));
 
-    auto it = concat.begin();
-    REQUIRE(it == concat.begin());
-    REQUIRE(it != concat.end());
-    REQUIRE(concat.end() != it);
-    REQUIRE(concat.begin() == it);
+    SUBCASE("operator=(default_sentinel_t)") {
+        std::forward_list<int> a = { 1, 2 };
+        std::forward_list<int> b = { 3, 4 };
+        auto concatenated = lz::concat(a, b);
 
-    it = concat.end();
-    REQUIRE(it == concat.end());
-    REQUIRE(it != concat.begin());
-    REQUIRE(concat.end() == it);
-    REQUIRE(concat.begin() != it);
+        auto common = lz::common(concatenated);
+
+        auto expected2 = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(common, expected2));
+    }
 }
 
 TEST_CASE("Reference tests") {

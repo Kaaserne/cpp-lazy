@@ -1,4 +1,5 @@
 #include <Lz/chunks.hpp>
+#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
@@ -206,18 +207,43 @@ TEST_CASE("Chunks with sentinels / fwd") {
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
 
-    SUBCASE("Operator=") {
-        auto it = even_size.begin();
-        REQUIRE(it == even_size.begin());
-        REQUIRE(it != even_size.end());
-        REQUIRE(even_size.end() != it);
-        REQUIRE(even_size.begin() == it);
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::vector<std::vector<int>> expected;
 
-        it = even_size.end();
-        REQUIRE(it == even_size.end());
-        REQUIRE(it != even_size.begin());
-        REQUIRE(even_size.end() == it);
-        REQUIRE(even_size.begin() != it);
+        SUBCASE("forward") {
+            std::forward_list<int> fwd = { 1, 2, 3, 4, 5 };
+            auto chunked = lz::chunks(fwd, 2);
+            using value_type = lz::val_iterable_t<decltype(chunked)>;
+
+            auto common = lz::common(chunked);
+            expected = { { 1, 2 }, { 3, 4 }, { 5 } };
+
+            REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        }
+
+        SUBCASE("random access") {
+            auto repeater = lz::repeat(20, 5);
+            auto begin = repeater.begin();
+            auto end = repeater.begin();
+            end = repeater.end(); // calls operator=(sentinel)
+            auto repeated_chunk = lz::chunks(lz::make_basic_iterable(begin, end), 2);
+            using value_type_2 = lz::val_iterable_t<decltype(repeated_chunk)>;
+            expected = { { 20, 20 }, { 20, 20 }, { 20 } };
+            REQUIRE(
+                lz::equal(repeated_chunk, expected, [](value_type_2 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        }
+
+        SUBCASE("bidirectional") {
+            std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
+            auto lst_chunked = lz::chunks(lst, 3);
+            auto begin2 = lst_chunked.begin();
+            auto end2 = lst_chunked.begin();
+            end2 = lst_chunked.end(); // calls operator=(sentinel)
+            using value_type_3 = lz::val_iterable_t<decltype(lst_chunked)>;
+            expected = { { 1, 2, 3 }, { 4, 5, 6 } };
+            REQUIRE(lz::equal(lz::make_basic_iterable(begin2, end2), expected,
+                              [](value_type_3 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        }
     }
 
     static_assert(!std::is_same<decltype(uneven_chunksize_even_size.begin()), decltype(uneven_chunksize_even_size.end())>::value,

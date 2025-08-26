@@ -2,6 +2,7 @@
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
+#include <Lz/common.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
@@ -13,11 +14,12 @@ TEST_CASE("rotate_iterable with sentinels") {
     static_assert(!std::is_same<decltype(rotated.begin()), decltype(rotated.end())>::value, "Should be sentinel");
     REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
 
-    SUBCASE("Operator=") {
-        auto begin = rotated.begin();
-        REQUIRE(begin == rotated.begin());
-        begin = rotated.end();
-        REQUIRE(begin == rotated.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
+        auto rotated2 = lz::rotate(lst, 2);
+        auto common = lz::common(rotated2);
+        std::vector<int> expected = { 3, 4, 5, 1, 2 };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

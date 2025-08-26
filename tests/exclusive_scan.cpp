@@ -2,6 +2,7 @@
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <doctest/doctest.h>
+#include <Lz/common.hpp>
 #include <pch.hpp>
 
 TEST_CASE("Exclusive scan with sentinels") {
@@ -12,10 +13,12 @@ TEST_CASE("Exclusive scan with sentinels") {
     REQUIRE(lz::equal(scan, expected));
 
     SUBCASE("Operator=") {
-        auto it = scan.begin();
-        REQUIRE(it == scan.begin());
-        it = scan.end();
-        REQUIRE(it == scan.end());
+        std::vector<int> vec = { 1, 2, 3, 4 };
+        auto exclusive_scan = lz::exclusive_scan(vec);
+        auto common = lz::common(exclusive_scan);
+        auto expected2 = { 0, 1, 3, 6, 10 };
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::size(common) == lz::size(expected2));
     }
 }
 

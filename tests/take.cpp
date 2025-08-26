@@ -18,19 +18,15 @@ TEST_CASE("Take with sentinels") {
     auto vec = take | lz::to<std::vector<char>>();
     REQUIRE(lz::equal(vec, expected));
 
-    SUBCASE("Operator=") {
-        auto it = take.begin();
-        REQUIRE(it == take.begin());
-        it = take.end();
-        REQUIRE(it == take.end());
-    }
-
-    SUBCASE("Operator= for with iterator") {
-        auto t = lz::take(c_string.begin(), 5);
-        auto it = t.begin();
-        REQUIRE(it == t.begin());
-        it = t.end();
-        REQUIRE(it == t.end());
+    SUBCASE("Operator=(default_sentinel_t) for with iterator") {
+        std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
+        auto taken = lz::take(lst.begin(), 3);
+        auto end = taken.begin();
+        end = lz::default_sentinel; // calls operator=(sentinel)
+        auto begin = taken.begin();
+        auto common = lz::make_basic_iterable(begin, end);
+        auto expected2 = { 1, 2, 3 };
+        REQUIRE(lz::equal(common, expected2));
     }
 }
 

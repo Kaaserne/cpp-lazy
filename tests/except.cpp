@@ -3,6 +3,7 @@
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
+#include <Lz/common.hpp>
 #include <pch.hpp>
 
 TEST_CASE("Except tests with sentinels") {
@@ -15,16 +16,12 @@ TEST_CASE("Except tests with sentinels") {
     REQUIRE((except | lz::to<std::string>()) == "Hll, Wrld!");
 
     SUBCASE("Operator=") {
-        auto it = except.begin();
-        REQUIRE(it == except.begin());
-        REQUIRE(it != except.end());
-        REQUIRE(except.end() != it);
-        REQUIRE(except.begin() == it);
-        it = except.end();
-        REQUIRE(it != except.begin());
-        REQUIRE(it == except.end());
-        REQUIRE(except.begin() != it);
-        REQUIRE(except.end() == it);
+        std::forward_list<int> fwd = { 1, 2, 3, 4, 5 };
+        std::forward_list<int> to_except2 = { 2, 4 };
+        auto excepted = lz::except(fwd, to_except2);
+        auto common = lz::common(excepted);
+        auto expected = { 1, 3, 5 };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

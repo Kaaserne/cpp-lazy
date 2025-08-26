@@ -1,4 +1,6 @@
+#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
+#include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
@@ -6,7 +8,6 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
-#include <Lz/map.hpp>
 
 TEST_CASE("Zip longest with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -27,10 +28,18 @@ TEST_CASE("Zip longest with sentinels") {
     REQUIRE(lz::equal(longest, expected));
 
     SUBCASE("Operator=") {
-        auto it = longest.begin();
-        REQUIRE(it == longest.begin());
-        it = longest.end();
-        REQUIRE(it == longest.end());
+        std::forward_list<int> a = { 1, 2, 3 };
+        std::forward_list<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip_longest(a, b);
+
+        auto common = lz::common(zipped);
+
+        auto expected2 = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                          std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),
+                          std::make_tuple(lz::optional<int>{ 3 }, lz::optional<int>{ 6 }),
+                          std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 7 }),
+                          std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 8 }) };
+        REQUIRE(lz::equal(common, expected2));
     }
 }
 

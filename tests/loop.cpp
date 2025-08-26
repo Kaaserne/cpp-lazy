@@ -1,4 +1,5 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <Lz/common.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
@@ -34,7 +35,7 @@ TEST_CASE("loop_iterable tests with sentinels") {
         auto begin = looper_2.begin();
         REQUIRE(begin != looper_2.end());
         begin = looper_2.end();
-        REQUIRE(begin != looper_2.end());
+        REQUIRE(begin == looper_2.end());
     }
 }
 
@@ -62,6 +63,14 @@ TEST_CASE("Basic functionality loop") {
 
 TEST_CASE("Loop with non while true argument") {
     std::vector<int> vec = { 1, 2, 3, 4 };
+
+    SUBCASE("Operator=(default_sentinel_t") {
+        std::forward_list<int> lst = { 1, 2, 3 };
+        auto looped = lz::loop(lst, 2);
+        auto common = lz::common(looped);
+        auto expected = { 1, 2, 3, 1, 2, 3 };
+        REQUIRE(lz::equal(common, expected));
+    }
 
     SUBCASE("Empty") {
         lz::loop_iterable<std::vector<int>> looper = lz::loop(vec, 0);

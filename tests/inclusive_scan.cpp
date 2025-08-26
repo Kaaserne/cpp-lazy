@@ -1,4 +1,5 @@
 #include <doctest/doctest.h>
+#include <Lz/common.hpp>
 #include <pch.hpp>
 #include <Lz/inclusive_scan.hpp>
 #include <Lz/generate.hpp>
@@ -15,11 +16,13 @@ TEST_CASE("Inclusive scan with sentinels") {
         ++begin;
     }
 
-    SUBCASE("Operator=") {
-        begin = scan.begin();
-        REQUIRE(begin == scan.begin());
-        begin = scan.end();
-        REQUIRE(begin == scan.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::vector<int> vec = { 1, 2, 3, 4 };
+        auto inclusive_scan = lz::inclusive_scan(vec);
+        auto common = lz::common(inclusive_scan);
+        auto expected = { 1, 3, 6, 10 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::size(common) == lz::size(expected));
     }
 }
 

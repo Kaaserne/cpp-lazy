@@ -1,5 +1,6 @@
 #include <Lz/intersection.hpp>
 #include <Lz/map.hpp>
+#include <Lz/common.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -18,10 +19,12 @@ TEST_CASE("Intersection tests with sentinels") {
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 
     SUBCASE("Operator=") {
-        auto begin = intersect.begin();
-        REQUIRE(begin == intersect.begin());
-        begin = intersect.end();
-        REQUIRE(begin == intersect.end());
+        std::forward_list<int> a = { 1, 2, 3, 4, 5 };
+        std::forward_list<int> b = { 2, 4, 6 };
+        auto intersected = lz::intersection(a, b);
+        auto common = lz::common(intersected);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

@@ -1,4 +1,6 @@
 #include <Lz/algorithm.hpp>
+#include <Lz/cached_size.hpp> // TODO remove
+#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/pairwise.hpp>
 #include <Lz/repeat.hpp>
@@ -7,6 +9,27 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
+
+TEST_CASE("Operator=(default_sentinel_t)") {
+    std::forward_list<int> lst = { 1, 2, 3, 4, 5 };
+    auto pairwised = lz::pairwise(lst, 3);
+
+    auto common = lz::common(pairwised);
+
+    using value_type = lz::val_iterable_t<decltype(common)>;
+    std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 2, 3, 4 }, { 3, 4, 5 } };
+    REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+
+    auto repeater = lz::repeat(20, 5);
+    auto end = repeater.begin();
+    end = repeater.end(); // calls operator=(sentinel)
+    auto begin = repeater.begin();
+    auto common2 = lz::pairwise(lz::make_basic_iterable(begin, end), 3);
+    using value_type2 = lz::val_iterable_t<decltype(common2)>;
+
+    std::vector<std::vector<int>> expected2 = { { 20, 20, 20 }, { 20, 20, 20 }, { 20, 20, 20 } };
+    REQUIRE(lz::equal(common2, expected2, [](value_type2 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+}
 
 TEST_CASE("Empty or one element") {
     SUBCASE("Empty vector") {
@@ -497,7 +520,7 @@ TEST_CASE("Non sized fwd sentinelled") {
         REQUIRE(it == p.end());
         REQUIRE(p.end() == it);
     }
-    
+
     SUBCASE("Forward") {
         std::vector<std::vector<char>> expected = { { 'a' }, { 'b' }, { 'c' }, { 'd' }, { 'e' } };
         const std::size_t cstr_size = lz::eager_size(cstr);
@@ -527,4 +550,46 @@ TEST_CASE("Non sized fwd sentinelled") {
         REQUIRE(lz::eager_size(it) == cstr_size - 4);
         REQUIRE(lz::equal(it, expected, [](value_type a, const std::vector<char>& b) { return lz::equal(a, b); }));
     }
+}
+
+TEST_CASE("Non sized fwd non sentinelled") {
+    std::forward_list<int> flst{ 1, 2, 3, 4, 5 };
+    auto pairwise = lz::pairwise(flst, 2);
+
+    SUBCASE("Forward") {
+        std::vector<std::vector<int>> expected = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 } };
+        using value_type = typename decltype(pairwise.begin())::value_type;
+
+        REQUIRE(lz::equal(pairwise, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+    }
+}
+
+template<class Iterable>
+struct bidi_sentinelled : public lz::lazy_view {
+    Iterable iterable;
+
+    explicit bidi_sentinelled(Iterable i) : iterable(std::move(i)) {
+    }
+
+    std::size_t size() const {
+        return iterable.size();
+    }
+
+    lz::iter_t<Iterable> begin() const {
+        return iterable.begin();
+    }
+
+    lz::default_sentinel_t end() const {
+        return lz::default_sentinel;
+    }
+};
+
+TEST_CASE("bidi sized sentinel") {
+    std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    auto filtered = list | lz::filter([](int i) { return i % 2 == 0; }) | lz::cache_size;
+    bidi_sentinelled<decltype(filtered)> t(filtered);
+    auto pw = lz::pairwise(t, 2);
+    std::vector<std::vector<int>> expected = { { 2, 4 }, { 4, 6 }, { 6, 8 }, { 8, 10 } };
+    using value_type = typename decltype(pw.begin())::value_type;
+    REQUIRE(lz::equal(pw, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
 }

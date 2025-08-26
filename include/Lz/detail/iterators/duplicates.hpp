@@ -117,7 +117,7 @@ template<class Iterable, class BinaryPredicate>
 class duplicates_iterator<Iterable, BinaryPredicate, enable_if_t<!is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
-                      std::bidirectional_iterator_tag, default_sentinel_t> {
+                      iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<iter_t<Iterable>>;

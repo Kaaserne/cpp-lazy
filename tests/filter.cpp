@@ -1,3 +1,4 @@
+#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
@@ -18,10 +19,11 @@ TEST_CASE("Filter with sentinels") {
     REQUIRE((filter | lz::to<std::vector>()) == expected);
 
     SUBCASE("Operator=") {
-        auto it = filter.begin();
-        REQUIRE(it == filter.begin());
-        it = filter.end();
-        REQUIRE(it == filter.end());
+        std::forward_list<int> lst = { 1, 2, 3, 4, 5 };
+        auto f = lz::filter(lst, [](int i) { return i % 2 == 0; });
+        auto common = f | lz::common;
+        auto expected2 = { 2, 4 };
+        REQUIRE(lz::equal(expected2, common));
     }
 }
 

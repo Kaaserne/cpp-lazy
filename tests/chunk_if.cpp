@@ -1,4 +1,5 @@
 #include <Lz/chunk_if.hpp>
+#include <Lz/common.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
@@ -17,18 +18,25 @@ TEST_CASE("Chunk if custom value type") {
 #endif
     std::vector<std::vector<char>> expected = { {}, { 'h', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, {} };
     REQUIRE(lz::equal(chunked, expected));
+}
 
-    auto it = chunked.begin();
-    REQUIRE(it == chunked.begin());
-    REQUIRE(it != chunked.end());
-    REQUIRE(chunked.end() != it);
-    REQUIRE(chunked.begin() == it);
+TEST_CASE("chunk if operator=(default_sentinel)") {
+    auto fun = [](int a) {
+        return a % 2 == 0;
+    };
 
-    it = chunked.end();
-    REQUIRE(it == chunked.end());
-    REQUIRE(it != chunked.begin());
-    REQUIRE(chunked.end() == it);
-    REQUIRE(chunked.begin() != it);
+    std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+    auto chunked = lz::chunk_if(vec, fun);
+    using value_type = lz::val_iterable_t<decltype(chunked)>;
+    auto common = lz::common(chunked);
+    std::vector<std::vector<int>> expected = { { 1 }, { 3 }, { 5 }, {} };
+    REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+
+    vec = { 1, 2, 3, 4, 5 };
+    chunked = lz::chunk_if(vec, fun);
+    common = lz::common(chunked);
+    expected = { { 1 }, { 3 }, { 5 } };
+    REQUIRE(lz::equal(common, expected, [](value_type a, const auto& b) { return lz::equal(a, b); }));
 }
 
 TEST_CASE("Chunk if with sentinels") {

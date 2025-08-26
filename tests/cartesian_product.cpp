@@ -1,4 +1,5 @@
 #include <Lz/cartesian_product.hpp>
+#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
@@ -23,17 +24,14 @@ TEST_CASE("with sentinel") {
     REQUIRE(lz::equal(cart, expected));
 
     SUBCASE("Operator=") {
-        auto it = cart.begin();
-        REQUIRE(it == cart.begin());
-        REQUIRE(it != cart.end());
-        REQUIRE(cart.end() != it);
-        REQUIRE(cart.begin() == it);
+        std::forward_list<int> a = { 1, 2 };
+        std::forward_list<int> b = { 3, 4 };
+        auto cartesian = lz::cartesian_product(a, b);
 
-        it = cart.end();
-        REQUIRE(it == cart.end());
-        REQUIRE(it != cart.begin());
-        REQUIRE(cart.end() == it);
-        REQUIRE(cart.begin() != it);
+        auto common = lz::common(cartesian);
+
+        auto expected2 = { std::make_tuple(1, 3), std::make_tuple(1, 4), std::make_tuple(2, 3), std::make_tuple(2, 4) };
+        REQUIRE(lz::equal(common, expected2));
     }
 }
 
@@ -203,12 +201,12 @@ TEST_CASE("CartesianProduct to containers") {
                           return std::make_pair(std::get<0>(elm), std::make_pair(std::get<1>(elm), std::get<2>(elm)));
                       }) |
                       lz::to<std::map<int, std::pair<char, char>>>();
-        std::map<int, std::pair<char, char>> expected = {
-            { 1, { 'a', 'a' } }, { 1, { 'a', 'b' } }, { 1, { 'b', 'a' } }, { 1, { 'b', 'b' } }, { 1, { 'c', 'a' } },
-            { 1, { 'c', 'b' } }, { 2, { 'a', 'a' } }, { 2, { 'a', 'b' } }, { 2, { 'b', 'a' } }, { 2, { 'b', 'b' } },
-            { 2, { 'c', 'a' } }, { 2, { 'c', 'b' } }, { 3, { 'a', 'a' } }, { 3, { 'a', 'b' } }, { 3, { 'b', 'a' } },
-            { 3, { 'b', 'b' } }, { 3, { 'c', 'a' } }, { 3, { 'c', 'b' } }
-        };
+        std::map<int, std::pair<char, char>> expected = { { 1, { 'a', 'a' } }, { 1, { 'a', 'b' } }, { 1, { 'b', 'a' } },
+                                                          { 1, { 'b', 'b' } }, { 1, { 'c', 'a' } }, { 1, { 'c', 'b' } },
+                                                          { 2, { 'a', 'a' } }, { 2, { 'a', 'b' } }, { 2, { 'b', 'a' } },
+                                                          { 2, { 'b', 'b' } }, { 2, { 'c', 'a' } }, { 2, { 'c', 'b' } },
+                                                          { 3, { 'a', 'a' } }, { 3, { 'a', 'b' } }, { 3, { 'b', 'a' } },
+                                                          { 3, { 'b', 'b' } }, { 3, { 'c', 'a' } }, { 3, { 'c', 'b' } } };
         REQUIRE(actual == expected);
     }
 

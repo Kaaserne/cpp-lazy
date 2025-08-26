@@ -266,10 +266,12 @@ private:
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
         using std::get;
+        auto rest_it = begin_maybe_homo(_iterables);
+        get<0>(rest_it) = get<0>(end_maybe_homo(_iterables));
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(_iterables).end()), ...);
+        ((get<I>(_iterators) = get<I>(rest_it)), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(_iterables).end()...);
+        decompose(get<I>(_iterators) = get<I>(rest_it)...);
 #endif
     }
 

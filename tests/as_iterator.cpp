@@ -1,4 +1,5 @@
 #include <Lz/as_iterator.hpp>
+#include <Lz/common.hpp>
 #include <Lz/pairwise.hpp>
 #include <Lz/string_view.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
@@ -13,6 +14,16 @@ TEST_CASE("With sentinels") {
         using iterator = decltype(*it.begin());
 
         REQUIRE(lz::equal(it, expected, [](iterator iter, char c) { return *iter == c; }));
+    }
+
+    SUBCASE("operator=(default_sentinel_t)") {
+        auto cstr = lz::c_string("hello, world!");
+        auto as_it = lz::as_iterator(cstr);
+
+        auto common = lz::common(as_it);
+
+        auto expected = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
+        REQUIRE(lz::equal(common, expected, [](decltype(*common.begin()) a, char b) { return *a == b; }));
     }
 
     SUBCASE("Equal to random access iterable") {

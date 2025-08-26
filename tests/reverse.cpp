@@ -1,10 +1,28 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <Lz/filter.hpp>
+#include <Lz/common.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/repeat.hpp>
+
+template<class Iterable>
+struct bidi_sentinelled : public lz::lazy_view {
+    Iterable iterable;
+
+    explicit bidi_sentinelled(Iterable i) : iterable(std::move(i)) {
+    }
+
+    lz::iter_t<Iterable> begin() const {
+        return iterable.begin();
+    }
+
+    lz::default_sentinel_t end() const {
+        return lz::default_sentinel;
+    }
+};
 
 TEST_CASE("Non cached reverse") {
     SUBCASE("Non sentinelled reverse") {
@@ -74,6 +92,16 @@ TEST_CASE("Cached reverse") {
         REQUIRE_FALSE(lz::has_many(rev));
         auto expected = { 1 };
         REQUIRE(lz::equal(rev, expected));
+    }
+
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        auto filtered = list | lz::filter([](int i) { return i % 2 == 0; });
+        // Make it so that it has a sentinel and is bidirectional
+        bidi_sentinelled<decltype(filtered)> t(filtered);
+        auto common = lz::cached_reverse(lz::common(t));
+        std::vector<int> expected = { 10, 8, 6, 4, 2 };
+        REQUIRE(lz::equal(common, expected));
     }
 
     SUBCASE("Non sentinelled operator== sentinel") {

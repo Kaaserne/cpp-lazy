@@ -1,3 +1,4 @@
+#include <Lz/common.hpp>
 #include <Lz/exclude.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
@@ -43,35 +44,11 @@ TEST_CASE("Exclude changing and creating elements") {
     }
 
     SUBCASE("Operator=") {
-        auto it = excluded1.begin();
-        REQUIRE(it == excluded1.begin());
-        it = excluded1.end();
-        REQUIRE(it == excluded1.end());
-
-        it = excluded2.begin();
-        REQUIRE(it == excluded2.begin());
-        it = excluded2.end();
-        REQUIRE(it == excluded2.end());
-
-        it = excluded3.begin();
-        REQUIRE(it == excluded3.begin());
-        it = excluded3.end();
-        REQUIRE(it == excluded3.end());
-
-        auto it2 = excluded_expected1.begin();
-        REQUIRE(it2 == excluded_expected1.begin());
-        it2 = excluded_expected1.end();
-        REQUIRE(it2 == excluded_expected1.end());
-
-        it2 = excluded_expected2.begin();
-        REQUIRE(it2 == excluded_expected2.begin());
-        it2 = excluded_expected2.end();
-        REQUIRE(it2 == excluded_expected2.end());
-
-        it2 = excluded_expected3.begin();
-        REQUIRE(it2 == excluded_expected3.begin());
-        it2 = excluded_expected3.end();
-        REQUIRE(it2 == excluded_expected3.end());
+        std::forward_list<int> fwd = { 1, 2, 3, 4, 5, 6 };
+        auto excluded = lz::exclude(fwd, 2, 5);
+        auto common = lz::common(excluded);
+        auto expected = { 1, 2, 6 };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 
@@ -79,7 +56,7 @@ TEST_CASE("Exclude binary operations") {
     std::array<int, 10> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
     auto excluded1 = arr | lz::exclude(3, 5); // { 1, 2, 3, 6, 7, 8, 9, 10 }
-    auto excluded2 = lz::exclude(arr, 0, 2); // { 3, 4, 5, 6, 7, 8, 9, 10 }
+    auto excluded2 = lz::exclude(arr, 0, 2);  // { 3, 4, 5, 6, 7, 8, 9, 10 }
     auto excluded3 = lz::exclude(arr, 7, 10); // { 1, 2, 3, 4, 5, 6, 7 }
 
     SUBCASE("Operator++") {

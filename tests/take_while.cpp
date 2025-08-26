@@ -1,3 +1,4 @@
+#include <Lz/common.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
@@ -34,10 +35,11 @@ TEST_CASE("Take while with sentinels") {
     REQUIRE(lz::equal(take_while, c_str_expected));
 
     SUBCASE("Operator=") {
-        auto it = take_while.begin();
-        REQUIRE(it == take_while.begin());
-        it = take_while.end();
-        REQUIRE(it == take_while.end());
+        std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
+        auto take_while2 = lz::take_while(lst, [](int i) { return i < 4; });
+        auto common = lz::common(take_while2);
+        auto expected = { 1, 2, 3 };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

@@ -198,10 +198,12 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(end - i), *(expected.end() - i)));
     }
+    INFO("With i = " << size);
     REQUIRE(end - size == it.begin());
 
     std::advance(begin, size);
     std::advance(end, -size);
+    INFO("With i = 0");
     REQUIRE(begin + 0 == begin);
     REQUIRE(end + 0 == end);
 

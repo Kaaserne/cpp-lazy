@@ -1,3 +1,4 @@
+#include <Lz/common.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <doctest/doctest.h>
@@ -22,10 +23,12 @@ TEST_CASE("Generate infinite") {
     REQUIRE(begin != generator.begin());
 
     SUBCASE("Operator=") {
-        REQUIRE(begin != generator.end());
-        begin = generator.end();
-        // Inf never reaches end
-        REQUIRE(begin != generator.end());
+        int i = 0;
+        auto gen = lz::generate([&i]() { return i++; }, 5);
+        auto common = lz::common(gen);
+        auto expected = { 0, 1, 2, 3, 4 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::size(common) == lz::size(expected));
     }
 }
 

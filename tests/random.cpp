@@ -1,9 +1,10 @@
+#include <Lz/common.hpp>
+#include <Lz/map.hpp>
+#include <Lz/random.hpp>
+#include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
 #include <pch.hpp>
-#include <Lz/random.hpp>
-#include <Lz/map.hpp>
-#include <Lz/reverse.hpp>
 #include <random>
 // TODO reverse
 TEST_CASE("random_iterable should be random") {
@@ -22,19 +23,20 @@ TEST_CASE("random_iterable should be random") {
     }
 
     SUBCASE("random_iterable ints") {
-        const auto random_array =
-            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
-        const auto random_array_2 =
-            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
+        const auto random_array = lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) |
+                                  lz::to<std::array<int, size>>();
+        const auto random_array_2 = lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) |
+                                    lz::to<std::array<int, size>>();
         REQUIRE(random_array != random_array_2);
     }
 
     SUBCASE("Operator=") {
-        auto random = lz::random(0., 1., size);
-        auto it = random.begin();
-        REQUIRE(it != random.end());
-        it = random.end();
-        REQUIRE(it == random.end());
+        auto random = lz::random(1, 10, 5);
+        auto common = lz::common(random);
+
+        REQUIRE(lz::size(common) == 5);
+        auto dummy = { 0, 0, 0, 0, 0 };
+        REQUIRE(lz::equal(common, dummy, [](int a, int) { return a <= 10 && a >= 0; }));
     }
 }
 

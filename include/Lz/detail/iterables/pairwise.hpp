@@ -88,6 +88,7 @@ public:
             if (count < _pair_size) {
                 return { _iterable, _iterable.end(), _pair_size };
             }
+            return { _iterable, _iterable.begin(), _pair_size };
         }
         else {
             size_t count = 0;
@@ -97,8 +98,8 @@ public:
             if (it == _iterable.end() && count < _pair_size) {
                 return { _iterable, it, _pair_size };
             }
+            return { _iterable, _iterable.begin(), _pair_size };
         }
-        return { _iterable, _iterable.begin(), _pair_size };
     }
 
     [[nodiscard]] constexpr auto end() const {
@@ -135,7 +136,8 @@ public:
 
     template<class Cat = it_cat>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if_t<!is_ra_tag<Cat>::value && !has_sentinel<Iterable>::value && !is_sized<Iterable>::value, iterator>
+    enable_if_t<
+        !is_ra_tag<Cat>::value && !is_sized<Iterable>::value && !has_sentinel<Iterable>::value && is_bidi_tag<Cat>::value , iterator>
     begin() const {
         size_t count = 0;
         auto it = _iterable.end();
@@ -147,10 +149,12 @@ public:
         return { _iterable, it, _pair_size };
     }
 
-    // clang-format on
+    // clang-format on !ra && !sized && (has_sentinel || !bidi)
 
     template<class Cat = it_cat>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<Cat>::value, iterator> begin() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<
+        !is_bidi_tag<Cat>::value || (!is_ra_tag<Cat>::value && has_sentinel<Iterable>::value), iterator>
+    begin() const {
         size_t count = 0;
         auto it = _iterable.begin();
         for (; count < _pair_size && it != _iterable.end(); ++it, ++count) {

@@ -1,7 +1,8 @@
+#include <Lz/common.hpp>
 #include <Lz/enumerate.hpp>
+#include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <Lz/map.hpp>
 #include <Lz/take.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -26,17 +27,15 @@ TEST_CASE("Enumerate with sentinels") {
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
     REQUIRE(lz::equal(taken, expected, equal_fn{}));
 
-    SUBCASE("Operator=") {
-        auto it = enumerated.begin();
-        REQUIRE(it == enumerated.begin());
-        REQUIRE(enumerated.begin() == it);
-        REQUIRE(it != enumerated.end());
-        REQUIRE(enumerated.end() != it);
-        it = enumerated.end();
-        REQUIRE(it == enumerated.end());
-        REQUIRE(it != enumerated.begin());
-        REQUIRE(enumerated.end() == it);
-        REQUIRE(enumerated.begin() != it);
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::forward_list<int> fwd = { 10, 20, 30 };
+        auto enumerated2 = lz::enumerate(fwd, std::size_t{ 0 });
+
+        auto common = lz::common(enumerated2);
+
+        std::vector<std::pair<std::size_t, int>> expected2 = { std::make_pair(0, 10), std::make_pair(1, 20),
+                                                              std::make_pair(2, 30) };
+        REQUIRE(lz::equal(common, expected2, equal_fn{}));
     }
 }
 
@@ -132,9 +131,8 @@ TEST_CASE("Enumerate to containers") {
 
     SUBCASE("To map") {
         auto enumerator = lz::enumerate(array);
-        auto actual =
-            enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
-            lz::to<std::map<int, std::pair<int, int>>>();
+        auto actual = enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
+                      lz::to<std::map<int, std::pair<int, int>>>();
 
         std::map<int, std::pair<int, int>> expected = {
             std::make_pair(1, std::make_pair(0, 1)),
@@ -147,9 +145,8 @@ TEST_CASE("Enumerate to containers") {
 
     SUBCASE("To unordered map") {
         auto enumerator = lz::enumerate(array);
-        auto actual =
-            enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
-            lz::to<std::unordered_map<int, std::pair<int, int>>>();
+        auto actual = enumerator | lz::map([](const std::pair<int, int> pair) { return std::make_pair(pair.second, pair); }) |
+                      lz::to<std::unordered_map<int, std::pair<int, int>>>();
 
         std::unordered_map<int, std::pair<int, int>> expected = {
             std::make_pair(1, std::make_pair(0, 1)),
@@ -164,7 +161,7 @@ TEST_CASE("Enumerate to containers") {
         std::list<int> to_enumerate = { 1, 2, 3 };
         auto enumerated = lz::enumerate(to_enumerate);
         std::array<std::pair<int, int>, 3> expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
-        using ref_enumerated = lz::ref_iterable_t<decltype(enumerated)>;    
+        using ref_enumerated = lz::ref_iterable_t<decltype(enumerated)>;
         using ref_expected = lz::ref_iterable_t<decltype(expected)>;
         REQUIRE(lz::equal(enumerated, expected,
                           [](ref_enumerated a, ref_expected b) { return a.first == b.first && a.second == b.second; }));

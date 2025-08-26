@@ -5,6 +5,7 @@
 #include <deque>
 #include <forward_list>
 #include <fstream>
+#include <regex>
 #include <functional>
 #include <iostream>
 #include <iterator>

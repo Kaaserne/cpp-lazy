@@ -1,3 +1,4 @@
+#include <Lz/common.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/c_string.hpp>
@@ -32,20 +33,23 @@ TEST_CASE("Join where with sentinels") {
         std::make_tuple('o', 'o'),
         std::make_tuple('o', 'o'),
     };
+
     auto vec = joined | lz::to<std::vector>();
     REQUIRE(vec == expected);
 
     SUBCASE("Operator=") {
-        auto begin = joined.begin();
-        REQUIRE(begin == joined.begin());
-        REQUIRE(begin != joined.end());
-        REQUIRE(joined.begin() == begin);
-        REQUIRE(joined.end() != begin);
-        begin = joined.end();
-        REQUIRE(begin == joined.end());
-        REQUIRE(begin != joined.begin());
-        REQUIRE(joined.end() == begin);
-        REQUIRE(joined.begin() != begin);
+        std::vector<std::pair<int, int>> vec3 = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 } };
+        std::vector<std::pair<int, int>> vec4 = { { 1, 2 }, { 3, 4 }, { 4, 5 }, { 5, 6 } };
+        auto joined2 = lz::join_where(
+            vec3, vec4, [](const auto& a) { return a.first; }, [](const auto& a) { return a.first; },
+            [](const auto& a, const auto& b) { return std::make_pair(a.first, b.second); });
+
+        auto common = lz::common(joined2);
+        using reference = lz::ref_iterable_t<decltype(common)>;
+
+        std::vector<std::pair<int, int>> expected2 = { { 1, 2 }, { 3, 4 }, { 4, 5 } };
+        REQUIRE(lz::equal(common, expected2,
+                          [](reference a, const std::pair<int, int>& b) { return a.first == b.first && a.second == b.second; }));
     }
 }
 
@@ -219,10 +223,10 @@ TEST_CASE("join_where_iterable to containers") {
             { 1, std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) }
         };
 
-        auto actual = joined | lz::map([](const std::tuple<customer, payment_bill>& val) {
-                          return std::make_pair(std::get<1>(val).id, val);
-                      }) |
-                      lz::to<std::map<int, std::tuple<customer, payment_bill>>>();
+        auto actual =
+            joined |
+            lz::map([](const std::tuple<customer, payment_bill>& val) { return std::make_pair(std::get<1>(val).id, val); }) |
+            lz::to<std::map<int, std::tuple<customer, payment_bill>>>();
 
         REQUIRE(lz::equal(expected, actual, [](const pair& a, const pair& b) {
             return a.first == b.first && std::get<1>(a.second).id == std::get<1>(b.second).id &&
@@ -240,10 +244,10 @@ TEST_CASE("join_where_iterable to containers") {
             { 1, std::make_tuple(customer{ 99 }, payment_bill{ 99, 1 }) }
         };
 
-        auto actual = joined | lz::map([](const std::tuple<customer, payment_bill>& val) {
-                          return std::make_pair(std::get<1>(val).id, val);
-                      }) |
-                      lz::to<std::unordered_map<int, std::tuple<customer, payment_bill>>>();
+        auto actual =
+            joined |
+            lz::map([](const std::tuple<customer, payment_bill>& val) { return std::make_pair(std::get<1>(val).id, val); }) |
+            lz::to<std::unordered_map<int, std::tuple<customer, payment_bill>>>();
 
         REQUIRE(lz::equal(expected, actual, [](const pair& a, const pair& b) {
             return a.first == b.first && std::get<1>(a.second).id == std::get<1>(b.second).id &&
