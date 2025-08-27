@@ -17,8 +17,7 @@ namespace detail {
 template<class T>
 [[nodiscard]] constexpr size_t count_dims_fn() {
     if constexpr (is_iterable_v<T>) {
-        using inner = decltype(*std::begin(std::declval<T>()));
-        return 1 + count_dims_fn<inner>();
+        return 1 + count_dims_fn<ref_iterable_t<T>>();
     }
     else {
         return 0;
