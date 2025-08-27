@@ -300,7 +300,7 @@ template<class T>
 using remove_cvref_t = typename std::remove_cv<remove_ref_t<T>>::type;
 
 #endif // LZ_HAS_CXX_20
-
+// TODO concepts
 template<class Iterable>
 LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
     -> enable_if_t<!std::is_array<remove_ref_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
