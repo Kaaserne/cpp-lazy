@@ -171,8 +171,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const flatten_wrapper& other) const {
-        LZ_ASSERT_COMPATIBLE((_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end()) ||
-                             (_iterable.begin() == iter_t<Iterable>{} && _iterable.end() == sentinel_t<Iterable>{}));
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
         return _iterator == other._iterator;
     }
 
@@ -331,7 +330,7 @@ public:
     constexpr flatten_iterator() = default;
 
     LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel_t) {
-        _inner_iter = lz::default_sentinel;
+        _inner_iter = this_inner{};
         _outer_iter = lz::default_sentinel;
         return *this;
     }
