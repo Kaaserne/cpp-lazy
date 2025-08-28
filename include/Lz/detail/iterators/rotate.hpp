@@ -89,22 +89,16 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         LZ_ASSERT_SUB_ADDABLE((n < 0 ? -n : n) <= (_iterable.end() - _iterable.begin()));
+        if (n == 0) {
+            return;
+        }
         _offset += static_cast<size_t>(n);
-        if (n < 0) {
-            n = -n;
-            if (n > _iterator - _iterable.begin()) {
-                _iterator = _iterable.end() - (n - (_iterator - _iterable.begin()));
-            }
-            else {
-                _iterator += -n;
-            }
+        const auto size = _iterable.end() - _iterable.begin();
+        auto pos = (_iterator - _iterable.begin() + n) % size;
+        if (pos < 0) {
+            pos += size;
         }
-        else if (n >= _iterable.end() - _iterator) {
-            _iterator = _iterable.begin() + (n - (_iterable.end() - _iterator));
-        }
-        else {
-            _iterator += n;
-        }
+        _iterator = _iterable.begin() + pos;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
@@ -113,8 +107,7 @@ public:
     }
 
     constexpr difference_type difference(const iter&) const {
-        // TODO
-        return -static_cast<difference_type>(_offset);
+        return (_iterable.begin() - _iterable.end()) + static_cast<difference_type>(_offset);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& other) const {

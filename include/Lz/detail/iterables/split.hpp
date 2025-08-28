@@ -11,7 +11,7 @@ namespace lz {
 namespace detail {
 template<class ValueType, class Iterable, class Iterable2, class = void>
 class split_iterable;
-// TODO maybe add requires
+
 template<class ValueType, class Iterable, class Iterable2>
 class split_iterable<ValueType, Iterable, Iterable2, enable_if_t<is_iterable<Iterable2>::value>> : public lazy_view {
     maybe_owned<Iterable> _iterable;
