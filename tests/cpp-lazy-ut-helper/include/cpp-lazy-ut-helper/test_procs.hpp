@@ -84,16 +84,16 @@ void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, Eq
             REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
         }
 
-        REQUIRE(begin + lz::ssize(it) == it.end());
+        REQUIRE(begin + size == it.end());
 
-        std::advance(begin, lz::ssize(it));
+        std::advance(begin, size);
         REQUIRE(begin + 0 == begin);
 
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(it); ++i) {
+        for (std::ptrdiff_t i = 1; i <= size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin - i), *(expected.end() - i)));
             REQUIRE(eq_compare(*(begin - i), *(expected.end() - i)));
         }
-        REQUIRE(begin - lz::ssize(it) == it.begin());
+        REQUIRE(begin - size == it.begin());
     }
     else {
         auto begin = it.begin();

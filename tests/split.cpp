@@ -1,8 +1,8 @@
-#include <doctest/doctest.h>
 #include <Lz/common.hpp>
-#include <pch.hpp>
-#include <Lz/split.hpp>
 #include <Lz/map.hpp>
+#include <Lz/split.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("Split with custom container") {
     std::string to_split = "Hello world test 123";

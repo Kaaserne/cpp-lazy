@@ -1,8 +1,8 @@
+#include <Lz/range.hpp>
+#include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/reverse.hpp>
-#include <Lz/range.hpp>
 
 TEST_CASE("Range permutations") {
     SUBCASE("1 step, int") {

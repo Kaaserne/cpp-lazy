@@ -1,12 +1,12 @@
+#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/rotate.hpp>
-#include <Lz/common.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");
@@ -56,6 +56,14 @@ TEST_CASE("rotate_iterable basic functionality") {
         auto rotator = lz::rotate(str, 7);
         auto expected = lz::c_string("World!Hello, ");
         REQUIRE(lz::equal(rotator, expected));
+    }
+
+    SUBCASE("Rotate where n == size") {
+        rotate = lz::rotate(arr, lz::size(arr));
+        REQUIRE(rotate.size() == 0);
+        REQUIRE(lz::empty(rotate));
+        REQUIRE(!lz::has_one(rotate));
+        REQUIRE(!lz::has_many(rotate));
     }
 }
 
@@ -143,41 +151,38 @@ TEST_CASE("rotate_iterable binary operations") {
     }
 
     SUBCASE("Operator-") {
-        INFO("test_iterable(rotate)");
         test_procs::test_operator_minus(rotate);
 
         std::vector<int> container = { 1, 2, 3, 4, 5 };
         rotate = lz::rotate(container, 3);
-        INFO("lz::rotate(container, 3)");
         test_procs::test_operator_minus(rotate);
 
         container = { 1, 2, 3, 4 };
         rotate = lz::rotate(container, 2);
-        INFO("lz::rotate(container, 2)");
         test_procs::test_operator_minus(rotate);
     }
 
     SUBCASE("Operator-(default_sentinel_t)") {
-        auto r = lz::repeat(1, 5);
+        auto r = lz::rotate(lz::repeat(1, 5), 2);
         test_procs::test_operator_minus(r);
 
-        r = lz::repeat(1, 0);
+        r = lz::rotate(lz::repeat(1, 0), 0);
         test_procs::test_operator_minus(r);
 
-        r = lz::repeat(1, 1);
+        r = lz::rotate(lz::repeat(1, 1), 1);
         test_procs::test_operator_minus(r);
     }
 
     SUBCASE("Operator+(default_sentinel_t)") {
-        auto r = lz::repeat(0, 5);
+        auto r = lz::rotate(lz::repeat(0, 5), 2);
         std::vector<int> expected = { 0, 0, 0, 0, 0 };
         test_procs::test_operator_plus(r, expected);
 
-        r = lz::repeat(0, 1);
-        expected = { 0 };
+        r = lz::rotate(lz::repeat(0, 1), 1);
+        expected = {};
         test_procs::test_operator_plus(r, expected);
 
-        r = lz::repeat(0, 0);
+        r = lz::rotate(lz::repeat(0, 0), 0);
         expected = {};
         test_procs::test_operator_plus(r, expected);
     }

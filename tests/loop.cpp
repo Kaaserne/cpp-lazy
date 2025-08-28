@@ -1,11 +1,11 @@
-#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <Lz/common.hpp>
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
 #include <Lz/loop.hpp>
-#include <Lz/reverse.hpp>
 #include <Lz/repeat.hpp>
+#include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");

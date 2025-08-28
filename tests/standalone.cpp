@@ -1,10 +1,9 @@
 #define LZ_STANDALONE
 
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/stream.hpp>
 #include <Lz/split.hpp>
-
+#include <Lz/stream.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("Formatting and compile tests") {
     SUBCASE("Compile test") {

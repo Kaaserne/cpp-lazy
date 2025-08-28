@@ -85,7 +85,6 @@ target_link_libraries(tests
 		cpp-lazy-ut-helper::cpp-lazy-ut-helper
 		doctest::doctest
 )
-target_include_directories(tests PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 add_test(NAME tests	COMMAND $<TARGET_FILE:tests>)
 target_compile_options(tests
 	PRIVATE
@@ -95,4 +94,3 @@ target_compile_options(tests
 
 		$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Werror -pedantic -pedantic-errors -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++98-compat-bind-to-temporary-copy -Wno-c++98-compat-local-type-template-args -Wno-unsafe-buffer-usage -Wno-padded -Wno-documentation-unknown-command -Wno-switch-enum -ftime-trace>
 )
-target_precompile_headers(tests PRIVATE pch.hpp)

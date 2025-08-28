@@ -2,9 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 template<class T>
 class custom_container {

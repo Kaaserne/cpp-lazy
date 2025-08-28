@@ -1,8 +1,8 @@
 #include <Lz/common.hpp>
 #include <Lz/generate_while.hpp>
 #include <Lz/map.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Generate while changing and creating elements") {
     const auto compile_test1 = lz::generate_while([]() { return std::make_pair(false, false); });

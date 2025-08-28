@@ -1,7 +1,7 @@
 #include <Lz/detail/maybe_owned.hpp>
 #include <Lz/filter.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 namespace doctest {
 namespace detail {

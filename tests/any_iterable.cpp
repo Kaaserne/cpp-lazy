@@ -3,10 +3,10 @@
 #include <Lz/iter_tools.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Any iterable with sentinels") {
     lz::any_iterable<char, const char&> iterable = "Hello, World!" | lz::c_string;

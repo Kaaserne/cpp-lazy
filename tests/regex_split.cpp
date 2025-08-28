@@ -1,7 +1,7 @@
-#include <doctest/doctest.h>
 #include <Lz/common.hpp>
-#include <pch.hpp>
 #include <Lz/regex_split.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {
     std::regex r1(R"(\s+)");

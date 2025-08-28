@@ -2,9 +2,9 @@
 #include <Lz/common.hpp>
 #include <Lz/pairwise.hpp>
 #include <Lz/string_view.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("With sentinels") {
     SUBCASE("Equal to c_string") {

@@ -1,6 +1,6 @@
 #include <Lz/common.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 // TODO recheck all include files, make smaller if possible
 

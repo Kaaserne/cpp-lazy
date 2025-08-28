@@ -2,9 +2,9 @@
 #include <Lz/map.hpp>
 #include <Lz/random.hpp>
 #include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 #include <random>
 // TODO reverse
 TEST_CASE("random_iterable should be random") {

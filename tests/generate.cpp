@@ -1,8 +1,8 @@
 #include <Lz/common.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Generate infinite") {
     std::function<int()> func = []() {

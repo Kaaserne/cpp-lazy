@@ -1,9 +1,9 @@
+#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/string_view.hpp>
-#include <Lz/common.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Empty or one element c_string") {
     SUBCASE("Empty") {

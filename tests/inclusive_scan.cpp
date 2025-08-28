@@ -1,9 +1,9 @@
-#include <doctest/doctest.h>
 #include <Lz/common.hpp>
-#include <pch.hpp>
-#include <Lz/inclusive_scan.hpp>
 #include <Lz/generate.hpp>
+#include <Lz/inclusive_scan.hpp>
 #include <Lz/map.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("Inclusive scan with sentinels") {
     int x = 1;

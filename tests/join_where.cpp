@@ -1,9 +1,9 @@
 #include <Lz/common.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 struct customer {
     int id;
