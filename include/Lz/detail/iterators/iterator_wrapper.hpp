@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <cstring> // max_align_t
 
-// TODO rename file
 namespace lz {
 namespace detail {
 
