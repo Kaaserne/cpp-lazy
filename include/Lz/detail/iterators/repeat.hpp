@@ -11,11 +11,11 @@
 namespace lz {
 namespace detail {
 
-template<bool /* is infinite loop */, class>
+template<class, bool /* is inf */>
 class repeat_iterator;
 
 template<class T>
-class repeat_iterator<false, T> : public iterator<repeat_iterator<false, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
+class repeat_iterator<T, false> : public iterator<repeat_iterator<T, false>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
                                                   std::random_access_iterator_tag, default_sentinel_t> {
     T _to_repeat{};
     size_t _amount{};
@@ -93,7 +93,7 @@ public:
 };
 
 template<class T>
-class repeat_iterator<true, T> : public iterator<repeat_iterator<true, T>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
+class repeat_iterator<T, true> : public iterator<repeat_iterator<T, true>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
                                                  std::forward_iterator_tag, default_sentinel_t> {
     T _to_repeat{};
 

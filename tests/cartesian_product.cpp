@@ -1,7 +1,8 @@
+#include <Lz/c_string.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/cartesian_product.hpp>
 #include <Lz/common.hpp>
 #include <Lz/map.hpp>
-#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -22,16 +23,39 @@ TEST_CASE("with sentinel") {
                       std::make_tuple('b', 'd'), std::make_tuple('b', 'e'), std::make_tuple('b', 'f'),
                       std::make_tuple('c', 'd'), std::make_tuple('c', 'e'), std::make_tuple('c', 'f') };
     REQUIRE(lz::equal(cart, expected));
+}
 
-    SUBCASE("Operator=") {
+TEST_CASE("Operator=") {
+    auto expected2 = { std::make_tuple(1, 3), std::make_tuple(1, 4), std::make_tuple(2, 3), std::make_tuple(2, 4) };
+
+    SUBCASE("forward") {
         std::forward_list<int> a = { 1, 2 };
         std::forward_list<int> b = { 3, 4 };
         auto cartesian = lz::cartesian_product(a, b);
-
         auto common = lz::common(cartesian);
-
-        auto expected2 = { std::make_tuple(1, 3), std::make_tuple(1, 4), std::make_tuple(2, 3), std::make_tuple(2, 4) };
         REQUIRE(lz::equal(common, expected2));
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> a = { 1, 2 };
+        std::list<int> b = { 3, 4 };
+        auto cartesian = lz::cartesian_product(a, b);
+        auto common = lz::common(make_bidi_sentinelled(cartesian));
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto repeater1 = lz::repeat(1, 2);
+        auto repeater2 = lz::repeat(3, 2);
+        auto cartesian = lz::cartesian_product(repeater1, repeater2);
+        std::vector<std::tuple<int, int>> expected3 = { std::make_tuple(1, 3), std::make_tuple(1, 3), std::make_tuple(1, 3),
+                                                        std::make_tuple(1, 3) };
+        auto ra_op_tester = make_ra_assign_op_tester(cartesian);
+        REQUIRE(lz::equal(ra_op_tester, expected3));
+        REQUIRE(lz::equal(ra_op_tester | lz::reverse, expected3 | lz::reverse));
+        test_procs::test_operator_minus(ra_op_tester);
+        test_procs::test_operator_plus(ra_op_tester, expected3);
     }
 }
 

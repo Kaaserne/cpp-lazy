@@ -1,3 +1,4 @@
+#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/loop.hpp>
 #include <Lz/repeat.hpp>

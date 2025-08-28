@@ -1,3 +1,4 @@
+#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/map.hpp>
@@ -9,7 +10,7 @@
 #include <doctest/doctest.h>
 
 #ifdef __GNUC__
-
+// TODO fix error?
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
 

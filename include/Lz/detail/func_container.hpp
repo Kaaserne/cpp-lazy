@@ -114,7 +114,7 @@ constexpr auto invoke(Pointed C::*member, Object&& object, Args&&... args)
 
 template<class Func>
 class func_container {
-    Func _func;
+    Func _func{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS

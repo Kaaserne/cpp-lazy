@@ -1,3 +1,4 @@
+#include <Lz/c_string.hpp>
 #include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
@@ -8,22 +9,6 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-
-template<class Iterable>
-struct bidi_sentinelled : public lz::lazy_view {
-    Iterable iterable;
-
-    explicit bidi_sentinelled(Iterable i) : iterable(std::move(i)) {
-    }
-
-    lz::iter_t<Iterable> begin() const {
-        return iterable.begin();
-    }
-
-    lz::default_sentinel_t end() const {
-        return lz::default_sentinel;
-    }
-};
 
 TEST_CASE("take_every_iterable with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -45,7 +30,7 @@ TEST_CASE("take_every_iterable with sentinels") {
             std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             auto filtered = list | lz::filter([](int i) { return i % 2 == 0; });
             // Make it so that it has a sentinel and is bidirectional
-            bidi_sentinelled<decltype(filtered)> t(filtered);
+            auto t = make_bidi_sentinelled(filtered);
             auto take_every2 = lz::take_every(t, 2);
             auto common = lz::common(take_every2);
             std::vector<int> expected2 = { 2, 6, 10 };

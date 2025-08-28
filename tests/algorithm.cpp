@@ -1,4 +1,5 @@
 #include <Lz/algorithm.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>

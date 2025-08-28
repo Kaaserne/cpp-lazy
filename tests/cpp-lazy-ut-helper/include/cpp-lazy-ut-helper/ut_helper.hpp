@@ -3,26 +3,73 @@
 #ifndef LZ_UT_HELPER_LIB_C_STRING_HPP
 #define LZ_UT_HELPER_LIB_C_STRING_HPP
 
-#include <Lz/c_string.hpp>
+#include <Lz/filter.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 
-extern template class lz::detail::c_string_iterable<const char>;
-extern template class lz::detail::c_string_iterator<const char>;
+template<class Iterable>
+class bidi_sentinelled : public lz::lazy_view {
+    using iterable = lz::filter_iterable<Iterable, std::function<bool(lz::ref_iterable_t<Iterable>)>>;
+    iterable _iterable;
 
-extern template lz::detail::c_string_iterable<const char>
-lz::detail::c_string_adaptor::operator()<const char>(const char*) const noexcept;
+public:
+    constexpr bidi_sentinelled() = default;
 
-extern template class std::vector<int>;
-extern template class std::vector<char>;
-extern template class std::vector<std::string>;
+    template<class I>
+    explicit bidi_sentinelled(I&& i) :
+        // clang-format off
+        _iterable{ 
+            std::forward<I>(i),
+            std::function<bool(lz::ref_iterable_t<Iterable>)>{ [](lz::ref_iterable_t<Iterable>) { 
+                return true;
+            }}
+        } // clang-format on
+    {
+    }
 
-extern template class std::basic_string<char>;
+    lz::iter_t<iterable> begin() const {
+        return _iterable.begin();
+    }
 
-extern template class std::list<int>;
-
-extern template class std::forward_list<int>;
+    lz::default_sentinel_t end() const {
+        return lz::default_sentinel;
+    }
+};
 
 template<class Iterable>
-class bidi_sentinelled {};
+bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>> make_bidi_sentinelled(Iterable&& iterable) {
+    return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
+}
+
+template<class Iterable>
+class ra_assign_op_tester : public lz::lazy_view {
+    static_assert(!std::is_same<lz::iter_t<Iterable>, lz::sentinel_t<Iterable>>::value, "");
+    lz::maybe_owned<Iterable> _iterable{};
+
+public:
+    constexpr ra_assign_op_tester() = default;
+
+    template<class I>
+    explicit ra_assign_op_tester(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    }
+
+    lz::iter_t<Iterable> begin() const {
+        return _iterable.begin();
+    }
+
+    lz::iter_t<Iterable> end() const {
+        auto end = _iterable.begin();
+        end = _iterable.end();
+        return end;
+    }
+
+    size_t size() const {
+        return lz::size(_iterable);
+    }
+};
+
+template<class Iterable>
+ra_assign_op_tester<lz::detail::remove_cvref_t<Iterable>> make_ra_assign_op_tester(Iterable&& iterable) {
+    return ra_assign_op_tester<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
+}
 
 #endif // LZ_UT_HELPER_LIB_C_STRING_HPP

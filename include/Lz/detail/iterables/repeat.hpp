@@ -9,16 +9,16 @@
 namespace lz {
 namespace detail {
 
-template<bool /* is infinite loop */, class>
+template<class, bool /* is inf */>
 class repeat_iterable;
 
 template<class T>
-class repeat_iterable<false, T> : public lazy_view {
+class repeat_iterable<T, false> : public lazy_view {
     T _value{};
     size_t _amount{};
 
 public:
-    using iterator = repeat_iterator<false, T>;
+    using iterator = repeat_iterator<T, false>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -57,11 +57,11 @@ public:
 };
 
 template<class T>
-class repeat_iterable<true, T> : public lazy_view {
+class repeat_iterable<T, true> : public lazy_view {
     T _value;
 
 public:
-    using iterator = repeat_iterator<true, T>;
+    using iterator = repeat_iterator<T, true>;
     using const_iterator = iterator;
     using value_type = T;
 

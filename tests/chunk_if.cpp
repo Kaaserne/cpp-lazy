@@ -1,3 +1,4 @@
+#include <Lz/c_string.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/common.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>

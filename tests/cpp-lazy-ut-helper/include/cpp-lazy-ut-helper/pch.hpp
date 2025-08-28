@@ -21,7 +21,12 @@
 #include <unordered_set>
 #include <vector>
 
+#ifdef LZ_HAS_CXX_17
+#include <string_view>
+#endif
+
 #ifndef LZ_STANDALONE
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #endif
+
