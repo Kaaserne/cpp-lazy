@@ -22,4 +22,7 @@ extern template class std::list<int>;
 
 extern template class std::forward_list<int>;
 
+template<class Iterable>
+class bidi_sentinelled {};
+
 #endif // LZ_UT_HELPER_LIB_C_STRING_HPP
