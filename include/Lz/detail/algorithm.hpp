@@ -430,8 +430,8 @@ LZ_CONSTEXPR_CXX_14 bool starts_with(Iterator1 begin, S1 end, Iterator2 begin2, 
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate) {
-    std::reverse_iterator<Iterator1> rbegin(std::move(end));
-    std::reverse_iterator<S1> rend(std::move(begin));
+    auto rbegin = std::make_reverse_iterator(std::move(end));
+    auto rend = std::make_reverse_iterator(std::move(begin));
     return starts_with(std::move(rbegin), std::move(rend), std::reverse_iterator<Iterator2>(std::move(end2)),
                        std::reverse_iterator<S2>(std::move(begin2)), std::move(binary_predicate));
 }

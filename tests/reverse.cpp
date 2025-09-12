@@ -23,7 +23,7 @@ TEST_CASE("Non cached reverse") {
     }
 
     SUBCASE("Sentinelled reverse") {
-        auto repeater = lz::repeat(20, 5) | lz::reverse;
+        auto repeater = lz::repeat(20, 5) | lz::common | lz::reverse;
         auto expected = { 20, 20, 20, 20, 20 };
         REQUIRE(lz::size(repeater) == 5);
         REQUIRE(lz::equal(repeater, expected));
@@ -33,7 +33,7 @@ TEST_CASE("Non cached reverse") {
 TEST_CASE("Cached reverse") {
     SUBCASE("Sentinelled cached reverse") {
         auto repeater = lz::repeat(20, 5);
-        auto r = lz::cached_reverse(repeater);
+        auto r = lz::cached_reverse(repeater | lz::common);
 
         auto expected = { 20, 20, 20, 20, 20 };
         REQUIRE(lz::equal(r, expected));
@@ -82,7 +82,7 @@ TEST_CASE("Cached reverse") {
         std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         // Make it so that it has a sentinel and is bidirectional
         auto t = make_bidi_sentinelled(list);
-        auto common = lz::cached_reverse(lz::common(t));
+        auto common = lz::cached_reverse(make_sentinel_assign_op_tester(t));
         std::vector<int> expected = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
         REQUIRE(lz::equal(common, expected));
         REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));

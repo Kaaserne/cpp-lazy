@@ -1,9 +1,10 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
+
 #include <Lz/duplicates.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
@@ -101,7 +102,7 @@ TEST_CASE("Duplicates operator=(default_sentinel_t)") {
         std::forward_list<int> fwd = { 1, 1, 2, 2, 3, 4, 4 };
         auto duplicated = lz::duplicates(fwd);
 
-        auto common = lz::common(duplicated);
+        auto common = make_sentinel_assign_op_tester(duplicated);
 
         std::vector<std::pair<int, std::size_t>> expected = { std::make_pair(1, 2), std::make_pair(2, 2), std::make_pair(3, 1),
                                                               std::make_pair(4, 2) };
@@ -110,16 +111,15 @@ TEST_CASE("Duplicates operator=(default_sentinel_t)") {
             lz::equal(common, expected, [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
     }
 
-    SUBCASE("random access") {
-        auto repeater = lz::repeat(20, 5);
-        auto end = repeater.begin();
-        end = repeater.end(); // calls operator=(sentinel)
-        auto begin = repeater.begin();
-        auto common2 = lz::duplicates(lz::make_basic_iterable(begin, end));
-
-        std::vector<std::pair<int, std::size_t>> expected2 = { std::make_pair(20, 5) };
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 10, 10, 20, 20, 20, 30 };
+        auto common2 = make_sentinel_assign_op_tester(lz::duplicates(make_bidi_sentinelled(vec)));
+        std::vector<std::pair<int, std::size_t>> expected2 = { std::make_pair(10, 2), std::make_pair(20, 3),
+                                                               std::make_pair(30, 1) };
         using reference2 = decltype(*common2.begin());
         REQUIRE(lz::equal(common2, expected2,
+                          [](reference2 a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(lz::reverse(common2), lz::reverse(expected2),
                           [](reference2 a, const auto& b) { return a.first == b.first && a.second == b.second; }));
     }
 }

@@ -24,14 +24,13 @@ LZ_INLINE_VAR constexpr detail::drop_while_adaptor drop_while{};
 /**
  * @brief This is a type alias for the `drop_while` iterable.
  * @tparam Iterable The iterable to drop elements from.
- * @tparam UnaryPredicate The predicate to use for dropping elements.
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
  * auto f = [](int i) { return i < 3; };
  * lz::drop_while_iterable<std::vector<int>, std::function<bool(int)> dropped = lz::drop_while(vec, f);
  */
-template<class Iterable, class UnaryPredicate>
-using drop_while_iterable = detail::drop_while_iterable<Iterable, UnaryPredicate>;
+template<class Iterable>
+using drop_while_iterable = detail::drop_while_iterable<Iterable>;
 
 } // namespace lz
 

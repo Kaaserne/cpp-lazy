@@ -21,8 +21,9 @@ public:
 
     template<class I>
     constexpr maybe_owned_impl(I&& iterable) noexcept : _iterable_ref_ptr{ detail::addressof(iterable) } {
-        static_assert(std::is_lvalue_reference<I>::value, "Can only bind to lvalues. Check if you are passing a temporary "
-                                                          "object, or forgot to add/remove const/volatile qualifiers.");
+        static_assert(std::is_lvalue_reference<I>::value,
+                      "Can only bind to lvalues. Check if you are passing a temporary "
+                      "object, forgot to add/remove const/volatile qualifiers or forgot to inherit from lz::lazy_view.");
     }
 
     template<class T, size_t N>

@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
@@ -21,7 +20,7 @@ TEST_CASE("take_every_iterable with sentinels") {
         SUBCASE("forward") {
             std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
             auto take_every2 = lz::take_every(lst, 2);
-            auto common = lz::common(take_every2);
+            auto common = make_sentinel_assign_op_tester(take_every2);
             auto expected2 = { 1, 3, 5 };
             REQUIRE(lz::equal(common, expected2));
         }
@@ -32,7 +31,7 @@ TEST_CASE("take_every_iterable with sentinels") {
             // Make it so that it has a sentinel and is bidirectional
             auto t = make_bidi_sentinelled(filtered);
             auto take_every2 = lz::take_every(t, 2);
-            auto common = lz::common(take_every2);
+            auto common = make_sentinel_assign_op_tester(take_every2);
             std::vector<int> expected2 = { 2, 6, 10 };
             REQUIRE(lz::equal(common, expected2));
         }

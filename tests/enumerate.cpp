@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
@@ -27,16 +26,43 @@ TEST_CASE("Enumerate with sentinels") {
     auto taken = lz::take(enumerated, 3);
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
     REQUIRE(lz::equal(taken, expected, equal_fn{}));
+}
+// TODO check compile times of enumerate (std::pair)
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        auto cstr = lz::c_string("abc");
+        auto enumerated = lz::enumerate(cstr, std::size_t{ 0 });
+        auto common = make_sentinel_assign_op_tester(enumerated);
+        std::vector<std::pair<std::size_t, char>> expected = { std::make_pair(0, 'a'), std::make_pair(1, 'b'),
+                                                               std::make_pair(2, 'c') };
+        using reference = decltype(*common.begin());
+        REQUIRE(
+            lz::equal(common, expected, [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+    }
 
-    SUBCASE("Operator=(default_sentinel_t)") {
-        std::forward_list<int> fwd = { 10, 20, 30 };
-        auto enumerated2 = lz::enumerate(fwd, std::size_t{ 0 });
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 2, 3 };
+        auto bidi = make_bidi_sentinelled(vec);
+        auto enumerated = make_sentinel_assign_op_tester(lz::enumerate(bidi, 1));
+        auto expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3) };
+        using reference = decltype(*enumerated.begin());
+        REQUIRE(lz::equal(enumerated, expected,
+                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected),
+                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+    }
 
-        auto common = lz::common(enumerated2);
-
-        std::vector<std::pair<std::size_t, int>> expected2 = { std::make_pair(0, 10), std::make_pair(1, 20),
-                                                              std::make_pair(2, 30) };
-        REQUIRE(lz::equal(common, expected2, equal_fn{}));
+    SUBCASE("random access") {
+        auto repeater = lz::repeat(1, 3);
+        auto enumerated = make_sentinel_assign_op_tester(lz::enumerate(repeater, 1));
+        auto expected = { std::make_pair(1, 1), std::make_pair(2, 1), std::make_pair(3, 1) };
+        using reference = decltype(*enumerated.begin());
+        REQUIRE(lz::equal(enumerated, expected,
+                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected),
+                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        test_procs::test_operator_minus(enumerated);
+        test_procs::test_operator_plus(enumerated, expected);
     }
 }
 

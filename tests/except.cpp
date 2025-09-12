@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/except.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
@@ -15,14 +14,29 @@ TEST_CASE("Except tests with sentinels") {
     lz::except_iterable<decltype(c_str), decltype(c_str_to_except)> except = lz::except(c_str, c_str_to_except);
     static_assert(!std::is_same<decltype(except.begin()), decltype(except.end())>::value, "Must be sentinel");
     REQUIRE((except | lz::to<std::string>()) == "Hll, Wrld!");
+}
 
-    SUBCASE("Operator=") {
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
         std::forward_list<int> fwd = { 1, 2, 3, 4, 5 };
         std::forward_list<int> to_except2 = { 2, 4 };
         auto excepted = lz::except(fwd, to_except2);
-        auto common = lz::common(excepted);
+        auto common = make_sentinel_assign_op_tester(excepted);
         auto expected = { 1, 3, 5 };
         REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> lst = { 1, 2, 3, 4, 5 };
+        std::list<int> to_except2 = { 2, 4 };
+        auto lst_sent = make_bidi_sentinelled(lst);
+        auto to_except2_sent = make_bidi_sentinelled(to_except2);
+
+        auto except = lz::except(lst_sent, to_except2_sent);
+        auto common = make_sentinel_assign_op_tester(except);
+        auto expected = { 1, 3, 5 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
     }
 }
 

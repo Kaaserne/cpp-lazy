@@ -10,8 +10,8 @@ namespace lz {
 namespace detail {
 template<class RegexTokenIter, class RegexTokenSentinel>
 class regex_split_iterable : public lazy_view {
-    RegexTokenIter _begin;
-    RegexTokenSentinel _end;
+    RegexTokenIter _begin{};
+    RegexTokenSentinel _end{};
 
 public:
     using iterator = regex_split_iterator<RegexTokenIter, RegexTokenSentinel>;

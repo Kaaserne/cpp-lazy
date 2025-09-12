@@ -10,9 +10,9 @@
 namespace lz {
 namespace detail {
 template<class Iterable, class UnaryOp>
-class map_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    func_container<UnaryOp> _unary_op;
+class map_iterable : public lazy_view { // TODO initialize all members in default ctor -Weffc++
+    maybe_owned<Iterable> _iterable{};
+    func_container<UnaryOp> _unary_op{};
 
     using iter = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;

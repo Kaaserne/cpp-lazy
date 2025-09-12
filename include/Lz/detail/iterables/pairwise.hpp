@@ -11,7 +11,7 @@ namespace detail {
 
 template<class Iterable>
 class pairwise_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     size_t _pair_size{};
 
 public:

@@ -19,8 +19,8 @@ public:
     using sent = sentinel_t<Iterable>;
 
 private:
-    maybe_owned<Iterable> _iterable;
-    func_container<BinaryPredicate> _compare;
+    maybe_owned<Iterable> _iterable{};
+    func_container<BinaryPredicate> _compare{};
 
     static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || has_sentinel<Iterable>::value;
 

@@ -12,7 +12,7 @@ namespace detail {
 
 template<class Iterable, bool Cached>
 class reverse_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
     using inner_iter = iter_t<Iterable>;
     using inner_sent = sentinel_t<Iterable>;
@@ -35,6 +35,7 @@ public:
     }
 
 #endif
+    static_assert(!has_sentinel<Iterable>::value, "Cannot reverse an iterable with a sentinel. Use lz::common first.");
 
     template<class I>
     explicit constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
@@ -60,20 +61,11 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const {
-        if constexpr (Cached && std::is_same_v<inner_iter, inner_sent>) {
+        if constexpr (Cached) {
             return { _iterable.end(), _iterable.begin(), _iterable.end() };
         }
-        else if constexpr (Cached && !std::is_same_v<inner_iter, inner_sent>) {
-            const auto size = _iterable.end() - _iterable.begin();
-            return { _iterable.begin() + size, _iterable.begin(), _iterable.end() };
-        }
-        else if constexpr (std::is_same_v<inner_iter, inner_sent>) {
-            return iterator{ _iterable.end() };
-        }
         else {
-            static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-            const auto size = _iterable.end() - _iterable.begin();
-            return iterator{ _iterable.begin() + size };
+            return iterator{ _iterable.end() };
         }
     }
 
@@ -89,27 +81,14 @@ public:
 #else
 
     template<bool C = Cached>
-    LZ_NODISCARD constexpr enable_if_t<C && std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
+    LZ_NODISCARD constexpr enable_if_t<C, iterator> begin() const {
         return { _iterable.end(), _iterable.begin(), _iterable.end() };
-    }
-
-    template<bool C = Cached>
-    LZ_NODISCARD constexpr enable_if_t<C && !std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
-        static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-        return { _iterable.begin() + (_iterable.end() - _iterable.begin()), _iterable.begin(), _iterable.end() };
     }
 
     // Using constexpr 17 here because cxx 17 has constexpr reverse_iterator
     template<bool C = Cached>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<!C && std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<!C, iterator> begin() const {
         return iterator{ _iterable.end() };
-    }
-
-    template<bool C = Cached>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<!C && !std::is_same<inner_iter, inner_sent>::value, iterator> begin() const {
-        static_assert(is_ra<inner_iter>::value, "Cannot get end for non random access iterators");
-        const auto size = _iterable.end() - _iterable.begin();
-        return iterator{ detail::begin(_iterable) + size };
     }
 
     template<bool C = Cached>

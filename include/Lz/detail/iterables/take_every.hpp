@@ -30,7 +30,7 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     size_t _offset{};
     size_t _start{};
 

@@ -1,6 +1,5 @@
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/pairwise.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
@@ -16,7 +15,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         auto cstr = lz::c_string("hello, world!");
         auto as_it = lz::as_iterator(cstr);
-        auto common = lz::common(as_it);
+        auto common = make_sentinel_assign_op_tester(as_it);
         auto expected = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
         REQUIRE(lz::equal(common, expected, [](decltype(*common.begin()) a, char b) { return *a == b; }));
     }
@@ -24,7 +23,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         auto sentinelled = make_bidi_sentinelled(lst);
-        auto common = lz::common(lz::as_iterator(sentinelled));
+        auto common = make_sentinel_assign_op_tester(lz::as_iterator(sentinelled));
         auto expected = { 1, 2, 3, 4, 5 };
         REQUIRE(lz::equal(common, expected, [](decltype(*common.begin()) a, int b) { return *a == b; }));
         REQUIRE(
@@ -33,8 +32,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
 
     SUBCASE("random access") {
         auto repeat = lz::repeat(20, 5);
-        auto ra_op_tester = make_ra_assign_op_tester(repeat);
-        auto as_it = lz::as_iterator(ra_op_tester);
+        auto as_it = make_sentinel_assign_op_tester(lz::as_iterator(repeat));
         auto expected = { 20, 20, 20, 20, 20 };
         REQUIRE(lz::equal(as_it, expected, [](decltype(*as_it.begin()) a, int b) { return *a == b; }));
         REQUIRE(

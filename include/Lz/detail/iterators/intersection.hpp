@@ -93,6 +93,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 intersection_iterator& operator=(default_sentinel_t) {
         _iterator1 = _iterable1.end();
+        _iterator2 = _iterable2.end();
         return *this;
     }
 
@@ -107,15 +108,17 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
-        ++_iterator2, ++_iterator1;
+        ++_iterator2;
+        ++_iterator1;
         find_next();
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        LZ_ASSERT_DECREMENTABLE(_iterator1 != _iterable1.begin() && _iterator2 != _iterable2.begin());
-        --_iterator2, --_iterator1;
+        LZ_ASSERT_DECREMENTABLE(_iterator1 != _iterable1.begin());
+        --_iterator1;
+        --_iterator2;
 
-        while (_iterator2 != _iterable2.begin() && _iterator1 != _iterable1.begin()) {
+        while (_iterator2 != _iterable2.begin() || _iterator1 != _iterable1.begin()) {
             if (_compare(*_iterator1, *_iterator2)) {
                 --_iterator2;
                 continue;
@@ -125,19 +128,16 @@ public:
             }
             --_iterator1;
         }
-        if (_iterator2 == _iterable2.begin()) {
-            _iterator1 = _iterable1.begin();
-        }
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const intersection_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable1.begin() == other._iterable1.begin() && _iterable1.end() == other._iterable1.end() &&
                              _iterable2.begin() == other._iterable2.begin() && _iterable2.end() == other._iterable2.end());
-        return _iterator1 == other._iterator1;
+        return _iterator1 == other._iterator1 || _iterator2 == other._iterator2;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _iterator1 == _iterable1.end();
+        return _iterator1 == _iterable1.end() || _iterator2 == _iterable2.end();
     }
 };
 } // namespace detail

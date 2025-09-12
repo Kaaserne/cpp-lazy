@@ -11,7 +11,7 @@ namespace detail {
 
 template<class Iterable>
 class common_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
 public:
     using iterator = common_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;

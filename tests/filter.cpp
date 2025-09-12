@@ -1,7 +1,7 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -18,13 +18,25 @@ TEST_CASE("Filter with sentinels") {
     static_assert(!std::is_same<decltype(filter.begin()), decltype(filter.end())>::value, "Must be sentinel");
     std::vector<char> expected = { 'H', 'e', 'l', 'l', ',', ' ', 'W', 'r', 'l', 'd', '!' };
     REQUIRE((filter | lz::to<std::vector>()) == expected);
+}
 
-    SUBCASE("Operator=") {
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
         std::forward_list<int> lst = { 1, 2, 3, 4, 5 };
         auto f = lz::filter(lst, [](int i) { return i % 2 == 0; });
-        auto common = f | lz::common;
-        auto expected2 = { 2, 4 };
-        REQUIRE(lz::equal(expected2, common));
+        auto common = make_sentinel_assign_op_tester(f);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(expected, common));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto vec_sent = make_bidi_sentinelled(vec);
+        auto f = lz::filter(vec_sent, [](int i) { return i % 2 == 0; });
+        auto common = make_sentinel_assign_op_tester(f);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(expected, common));
+        REQUIRE(lz::equal(expected | lz::reverse, common | lz::reverse));
     }
 }
 

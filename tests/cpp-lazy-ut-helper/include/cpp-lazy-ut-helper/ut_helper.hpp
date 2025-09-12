@@ -9,21 +9,29 @@
 template<class Iterable>
 class bidi_sentinelled : public lz::lazy_view {
     using iterable = lz::filter_iterable<Iterable, std::function<bool(lz::ref_iterable_t<Iterable>)>>;
-    iterable _iterable;
+    iterable _iterable{};
 
 public:
-    constexpr bidi_sentinelled() = default;
+    template<class I = Iterable, class = lz::detail::enable_if_t<std::is_default_constructible<I>::value>>
+    constexpr bidi_sentinelled() {
+    }
 
     template<class I>
     explicit bidi_sentinelled(I&& i) :
         // clang-format off
         _iterable{ 
             std::forward<I>(i),
-            std::function<bool(lz::ref_iterable_t<Iterable>)>{ [](lz::ref_iterable_t<Iterable>) { 
+            std::function<bool(lz::ref_iterable_t<Iterable>)>{
+            [](lz::ref_iterable_t<Iterable>) { 
                 return true;
             }}
         } // clang-format on
     {
+    }
+
+    template<class I = Iterable>
+    lz::detail::enable_if_t<lz::detail::is_sized<I>::value, size_t> size() {
+        return lz::size(_iterable);
     }
 
     lz::iter_t<iterable> begin() const {
@@ -41,15 +49,16 @@ bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>> make_bidi_sentinelled(Ite
 }
 
 template<class Iterable>
-class ra_assign_op_tester : public lz::lazy_view {
-    static_assert(!std::is_same<lz::iter_t<Iterable>, lz::sentinel_t<Iterable>>::value, "");
+class sentinel_assign_op_tester : public lz::lazy_view {
     lz::maybe_owned<Iterable> _iterable{};
 
 public:
-    constexpr ra_assign_op_tester() = default;
+    template<class I = Iterable, class = lz::detail::enable_if_t<std::is_default_constructible<I>::value>>
+    constexpr sentinel_assign_op_tester() {
+    }
 
     template<class I>
-    explicit ra_assign_op_tester(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
+    explicit sentinel_assign_op_tester(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
     lz::iter_t<Iterable> begin() const {
@@ -62,14 +71,29 @@ public:
         return end;
     }
 
-    size_t size() const {
+#ifdef LZ_HAS_CONCEPTS
+
+    size_t size() const
+        requires(sized<Iterable>)
+    {
         return lz::size(_iterable);
     }
+
+#else
+
+    template<class T = Iterable>
+    lz::detail::enable_if_t<lz::is_sized<T>::value, size_t> size() const {
+        return lz::size(_iterable);
+    }
+
+#endif
 };
 
 template<class Iterable>
-ra_assign_op_tester<lz::detail::remove_cvref_t<Iterable>> make_ra_assign_op_tester(Iterable&& iterable) {
-    return ra_assign_op_tester<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
+sentinel_assign_op_tester<lz::detail::remove_cvref_t<Iterable>> make_sentinel_assign_op_tester(Iterable&& iterable) {
+    static_assert(!std::is_same<lz::iter_t<Iterable>, lz::sentinel_t<Iterable>>::value, "");
+
+    return sentinel_assign_op_tester<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
 }
 
 #endif // LZ_UT_HELPER_LIB_C_STRING_HPP

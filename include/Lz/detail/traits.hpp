@@ -50,6 +50,30 @@ LZ_INLINE_VAR constexpr default_sentinel_t default_sentinel{};
 namespace lz {
 namespace detail {
 
+// TODO replace? maybe to other header
+template<class T>
+class sentinel_with {
+    T value{};
+
+    template<class, class, class>
+    friend class enumerate_iterable;
+
+    template<class, class>
+    friend class enumerate_iterator;
+
+    template<class, bool>
+    friend class loop_iterable;
+
+    template<class, bool>
+    friend class loop_iterator;
+
+    constexpr sentinel_with(T v) : value{ std::move(v) } {
+    }
+
+public:
+    constexpr sentinel_with() = default;
+};
+
 template<class Derived, class Reference, class Pointer, class DifferenceType, class IterCat, class S>
 struct iterator;
 

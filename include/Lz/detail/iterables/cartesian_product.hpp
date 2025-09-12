@@ -12,7 +12,7 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class cartesian_product_iterable : public lazy_view {
-    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables;
+    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables{};
 
     template<size_t... Is>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<Is...>) const {

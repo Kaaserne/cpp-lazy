@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/interleave.hpp>
 #include <Lz/range.hpp>
 #include <Lz/repeat.hpp>
@@ -8,6 +7,36 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
+
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward list") {
+        std::forward_list<int> a = { 1, 3, 5 };
+        std::forward_list<int> b = { 2, 4, 6 };
+        auto interleaved = lz::interleave(a, b);
+        auto common = make_sentinel_assign_op_tester(interleaved);
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 3, 5 };
+        std::vector<int> b = { 2, 4, 6 };
+        auto interleaved = lz::interleave(make_bidi_sentinelled(a), make_bidi_sentinelled(b));
+        auto common = make_sentinel_assign_op_tester(interleaved);
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto b = lz::repeat(2, 3);
+        auto interleaved = make_sentinel_assign_op_tester(lz::interleave(a, b));
+        auto expected = { 1, 2, 1, 2, 1, 2 };
+        test_procs::test_operator_plus(interleaved, expected);
+        test_procs::test_operator_minus(interleaved);
+    }
+}
 
 TEST_CASE("Interleaved with sentinels permutations") {
     auto str3 = lz::c_string("abc");
@@ -23,15 +52,6 @@ TEST_CASE("Interleaved with sentinels permutations") {
         auto interleaved2 = lz::interleave(str3, range, str4);
         using t2 = decltype(*interleaved2.begin());
         static_assert(std::is_same<t2, char>::value, "Should be char");
-    }
-
-    SUBCASE("Operator=") {
-        std::forward_list<int> a = { 1, 3, 5 };
-        std::forward_list<int> b = { 2, 4, 6 };
-        auto interleaved = lz::interleave(a, b);
-        auto common = lz::common(interleaved);
-        auto expected = { 1, 2, 3, 4, 5, 6 };
-        REQUIRE(lz::equal(common, expected));
     }
 
     SUBCASE("Permutation 1: 3 vs 4 characters and 4 vs 3 characters") {

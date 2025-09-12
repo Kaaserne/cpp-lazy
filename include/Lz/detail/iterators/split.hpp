@@ -183,7 +183,9 @@ public:
         _end{ std::move(end) },
         _delimiter{ std::move(delimiter) } {
         if (_sub_range_begin != _end) {
-            _sub_range_end = detail::find(_sub_range_begin, _end, _delimiter);
+            using std::find;
+            using detail::find;
+            _sub_range_end = find(_sub_range_begin, _end, _delimiter);
         }
         else {
             _ends_with_trailing = false;
@@ -247,7 +249,9 @@ public:
             return;
         }
 
-        _sub_range_end = detail::find(_sub_range_begin, _end, _delimiter);
+        using std::find;
+        using detail::find;
+        _sub_range_end = find(_sub_range_begin, _end, _delimiter);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const split_single_iterator& rhs) const {

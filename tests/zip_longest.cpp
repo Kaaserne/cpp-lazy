@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
@@ -33,7 +32,7 @@ TEST_CASE("Zip longest with sentinels") {
         std::forward_list<int> b = { 4, 5, 6, 7, 8 };
         auto zipped = lz::zip_longest(a, b);
 
-        auto common = lz::common(zipped);
+        auto common = make_sentinel_assign_op_tester(zipped);
 
         auto expected2 = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
                           std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),

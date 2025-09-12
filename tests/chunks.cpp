@@ -1,8 +1,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/chunks.hpp>
-#include <Lz/common.hpp>
-#include <Lz/repeat.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -205,15 +204,14 @@ TEST_CASE("Operator=(default_sentinel_t)") {
         std::forward_list<int> fwd = { 1, 2, 3, 4, 5 };
         auto chunked = lz::chunks(fwd, 2);
         using value_type = lz::val_iterable_t<decltype(chunked)>;
-        auto common = lz::common(chunked);
+        auto common = make_sentinel_assign_op_tester(chunked);
         expected = { { 1, 2 }, { 3, 4 }, { 5 } };
         REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
     }
 
     SUBCASE("random access") {
         auto repeater = lz::repeat(20, 5);
-        auto common = make_ra_assign_op_tester(repeater);
-        auto repeated_chunk = lz::chunks(common, 2);
+        auto repeated_chunk = make_sentinel_assign_op_tester(lz::chunks(repeater, 2));
         using value_type_2 = lz::val_iterable_t<decltype(repeated_chunk)>;
         expected = { { 20, 20 }, { 20, 20 }, { 20 } };
         REQUIRE(lz::equal(repeated_chunk, expected, [](value_type_2 a, const std::vector<int>& b) { return lz::equal(a, b); }));
@@ -227,7 +225,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
         auto bidi_sentinel = make_bidi_sentinelled(lst);
-        auto lst_chunked = lz::chunks(lz::common(bidi_sentinel), 3);
+        auto lst_chunked = make_sentinel_assign_op_tester(lz::chunks(bidi_sentinel, 3));
         using value_type_3 = lz::val_iterable_t<decltype(lst_chunked)>;
         expected = { { 1, 2, 3 }, { 4, 5, 6 } };
         REQUIRE(lz::equal(lst_chunked, expected, [](value_type_3 a, const std::vector<int>& b) { return lz::equal(a, b); }));

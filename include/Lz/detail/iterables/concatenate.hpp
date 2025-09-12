@@ -13,7 +13,7 @@ namespace detail {
 template<class... Iterables>
 class concatenate_iterable : public lazy_view {
     using iterables = maybe_homogeneous_t<maybe_owned<Iterables>...>;
-    iterables _iterables;
+    iterables _iterables{};
 
     template<size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {

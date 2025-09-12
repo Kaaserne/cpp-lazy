@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
@@ -45,7 +44,7 @@ TEST_CASE("Join where with sentinels") {
             vec3, vec4, [](const auto& a) { return a.first; }, [](const auto& a) { return a.first; },
             [](const auto& a, const auto& b) { return std::make_pair(a.first, b.second); });
 
-        auto common = lz::common(joined2);
+        auto common = make_sentinel_assign_op_tester(joined2);
         using reference = lz::ref_iterable_t<decltype(common)>;
 
         std::vector<std::pair<int, int>> expected2 = { { 1, 2 }, { 3, 4 }, { 4, 5 } };

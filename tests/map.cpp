@@ -18,16 +18,31 @@ TEST_CASE("Map with sentinels") {
     static_assert(!std::is_same<decltype(map.end()), decltype(map.begin())>::value, "Should be sentinels");
     auto c_str_expected = lz::c_string("HELLO, WORLD!");
     REQUIRE(lz::equal(map, c_str_expected));
+}
 
-    SUBCASE("Operator=") {
-        auto repeater = lz::repeat(20, 5);
-        auto end = repeater.begin();
-        end = repeater.end(); // calls operator=(sentinel)
-        auto begin = repeater.begin();
-        auto common = lz::map(lz::make_basic_iterable(begin, end), [](int i) { return i * 2; });
-
-        auto expected = { 40, 40, 40, 40, 40 };
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> a = { 1, 3, 5 };
+        auto map = lz::map(a, [](int i) { return i; });
+        auto common = make_sentinel_assign_op_tester(map);
+        auto expected = { 1, 3, 5 };
         REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2, 3, 4, 5 };
+        auto map = lz::map(make_bidi_sentinelled(a), [](int i) { return i; });
+        auto common = make_sentinel_assign_op_tester(map);
+        auto expected = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto map_common = make_sentinel_assign_op_tester(lz::map(a, [](int i) { return i; }));
+        auto expected = { 1, 1, 1 };
+        test_procs::test_operator_plus(map_common, expected);
+        test_procs::test_operator_minus(map_common);
     }
 }
 

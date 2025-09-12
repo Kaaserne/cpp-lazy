@@ -12,8 +12,8 @@ namespace detail {
 
 template<class ValueType, class Iterable, class UnaryPredicate>
 class chunk_if_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    func_container<UnaryPredicate> _predicate;
+    maybe_owned<Iterable> _iterable{};
+    func_container<UnaryPredicate> _predicate{};
 
 public:
     using iterator = chunk_if_iterator<ValueType, iter_t<Iterable>, sentinel_t<Iterable>, func_container<UnaryPredicate>>;

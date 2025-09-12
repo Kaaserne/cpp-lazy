@@ -1,6 +1,7 @@
-#include <Lz/common.hpp>
+
 #include <Lz/regex_split.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {
@@ -38,11 +39,11 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SUBCASE("Operator=") {
+    SUBCASE("Operator=(default_sentinel_t)") {
         std::string s = "hello, world! This is a test.";
         std::regex r("\\s+");
         auto splitted = lz::regex_split(s, r);
-        auto common = lz::common(splitted);
+        auto common = make_sentinel_assign_op_tester(splitted);
         auto expected = { "hello,", "world!", "This", "is", "a", "test." };
         REQUIRE(lz::equal(common, expected));
     }

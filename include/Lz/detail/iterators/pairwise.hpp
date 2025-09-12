@@ -159,6 +159,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator& operator=(default_sentinel_t) {
         _sub_begin = _iterable.end();
+        _sub_end = _iterable.end();
         return *this;
     }
 

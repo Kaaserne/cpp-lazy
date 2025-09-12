@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
@@ -18,14 +17,35 @@ TEST_CASE("Zip with sentinels") {
                                                      std::make_tuple('o', 'd') };
     REQUIRE(lz::equal(zip, expected));
     static_assert(!std::is_same<decltype(zip.begin()), decltype(zip.end())>::value, "Should be sentinel-like");
+}
 
-    SUBCASE("Operator=(default_sentinel_t)") {
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
         std::forward_list<int> a = { 1, 2, 3 };
         std::forward_list<int> b = { 4, 5, 6, 7, 8 };
         auto zipped = lz::zip(a, b);
-        auto common = lz::common(zipped);
+        auto common = make_sentinel_assign_op_tester(zipped);
         auto expected2 = { std::make_tuple(1, 4), std::make_tuple(2, 5), std::make_tuple(3, 6) };
         REQUIRE(lz::equal(common, expected2));
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> a = { 1, 2, 3 };
+        std::list<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip(make_bidi_sentinelled(a), b);
+        auto common = make_sentinel_assign_op_tester(zipped);
+        auto expected2 = { std::make_tuple(1, 4), std::make_tuple(2, 5), std::make_tuple(3, 6) };
+        REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 5);
+        auto b = lz::repeat(2, 3);
+        auto zipped = lz::zip(a, b);
+        auto common = make_sentinel_assign_op_tester(zipped);
+        std::vector<std::tuple<int, int>> expected2 = { std::make_tuple(1, 2), std::make_tuple(1, 2), std::make_tuple(1, 2) };
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected2);
     }
 }
 

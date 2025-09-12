@@ -14,7 +14,7 @@ class zip_iterable : public lazy_view {
     using iter_tuple = maybe_homogeneous_t<iter_t<Iterables>...>;
     using sentinel_tuple = maybe_homogeneous_t<sentinel_t<Iterables>...>;
 
-    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables;
+    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables{};
 
     template<size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {

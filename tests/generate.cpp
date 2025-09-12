@@ -1,7 +1,7 @@
-#include <Lz/common.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("Generate infinite") {
@@ -22,10 +22,10 @@ TEST_CASE("Generate infinite") {
     REQUIRE(begin != generator.end());
     REQUIRE(begin != generator.begin());
 
-    SUBCASE("Operator=") {
+    SUBCASE("Operator=(defatult_sentinel_t)") {
         int i = 0;
         auto gen = lz::generate([&i]() { return i++; }, 5);
-        auto common = lz::common(gen);
+        auto common = make_sentinel_assign_op_tester(gen);
         auto expected = { 0, 1, 2, 3, 4 };
         REQUIRE(lz::equal(common, expected));
         REQUIRE(lz::size(common) == lz::size(expected));

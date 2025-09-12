@@ -96,7 +96,7 @@ public:
         if (_data.index() == rhs._data.index()) {
             return true;
         }
-        return _data.index() == 0 ? get<0>(_data) == get<1>(rhs._data) : get<1>(_data) == get<0>(rhs._data);
+        return _data.index() == 0 ? get<0>(_data).eq(get<1>(rhs._data)) : !get<0>(rhs._data).eq(get<1>(_data));
     }
 };
 } // namespace detail

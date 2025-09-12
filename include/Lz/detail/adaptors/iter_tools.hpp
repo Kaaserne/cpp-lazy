@@ -327,8 +327,8 @@ struct select_adaptor {
     }
 };
 
-template<class Iterable, class UnaryPredicate>
-using drop_back_iterable = lz::reverse_iterable<drop_while_iterable<lz::reverse_iterable<Iterable>, UnaryPredicate>>;
+template<class Iterable>
+using drop_back_iterable = lz::reverse_iterable<drop_while_iterable<lz::reverse_iterable<Iterable>>>;
 
 struct drop_back_while_adaptor {
     using adaptor = drop_back_while_adaptor;
@@ -345,12 +345,10 @@ struct drop_back_while_adaptor {
      * @param predicate The predicate to determine which elements to drop from the back.
      * @return A drop_back_iterable that can be iterated over, containing the elements
      */
-    template <class Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr drop_back_iterable<remove_ref_t<Iterable>,
-                                              UnaryPredicate>
-    operator()(Iterable &&iterable, UnaryPredicate predicate) const {
-      return lz::reverse(lz::drop_while(
-          lz::reverse(std::forward<Iterable>(iterable)), std::move(predicate)));
+    template<class Iterable, class UnaryPredicate>
+    LZ_NODISCARD constexpr drop_back_iterable<remove_ref_t<Iterable>>
+    operator()(Iterable&& iterable, UnaryPredicate predicate) const {
+        return lz::reverse(lz::drop_while(lz::reverse(std::forward<Iterable>(iterable)), std::move(predicate)));
     }
 
     /**
@@ -370,8 +368,8 @@ struct drop_back_while_adaptor {
     }
 };
 
-template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable, UnaryPredicateFirst>, UnaryPredicateLast>;
+template<class Iterable>
+using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable>>;
 
 struct trim_adaptor {
     using adaptor = trim_adaptor;
@@ -388,15 +386,10 @@ struct trim_adaptor {
      * @param last The predicate to determine which elements to drop from the back.
      * @return A trim_iterable that can be iterated over, containing the trimmed elements.
      */
-    template <class Iterable, class UnaryPredicateFirst,
-              class UnaryPredicateLast>
-    LZ_NODISCARD constexpr trim_iterable<
-        remove_ref_t<Iterable>, UnaryPredicateFirst, UnaryPredicateLast>
-    operator()(Iterable &&iterable, UnaryPredicateFirst first,
-               UnaryPredicateLast last) const {
-      return drop_back_while_adaptor{}(
-          lz::drop_while(std::forward<Iterable>(iterable), std::move(first)),
-          std::move(last));
+    template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
+    LZ_NODISCARD constexpr trim_iterable<remove_ref_t<Iterable>>
+    operator()(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) const {
+        return drop_back_while_adaptor{}(lz::drop_while(std::forward<Iterable>(iterable), std::move(first)), std::move(last));
     }
 
     /**
@@ -411,7 +404,7 @@ struct trim_adaptor {
      * string.
      */
     template<class CharT>
-    LZ_NODISCARD constexpr trim_iterable<const std::basic_string<CharT>, trim_fn, trim_fn>
+    LZ_NODISCARD constexpr trim_iterable<const std::basic_string<CharT>>
     operator()(const std::basic_string<CharT>& iterable) const {
         return (*this)(iterable, trim_fn{}, trim_fn{});
     }
@@ -428,7 +421,7 @@ struct trim_adaptor {
      * string.
      */
     template<class CharT>
-    LZ_NODISCARD constexpr trim_iterable<copied_basic_sv<CharT>, trim_fn, trim_fn>
+    LZ_NODISCARD constexpr trim_iterable<copied_basic_sv<CharT>>
     operator()(lz::basic_string_view<CharT> iterable) const {
         return (*this)(copied_basic_sv<CharT>(iterable), trim_fn{}, trim_fn{});
     }

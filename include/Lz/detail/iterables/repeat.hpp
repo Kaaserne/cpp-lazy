@@ -58,7 +58,7 @@ public:
 
 template<class T>
 class repeat_iterable<T, true> : public lazy_view {
-    T _value;
+    T _value{};
 
 public:
     using iterator = repeat_iterator<T, true>;

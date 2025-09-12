@@ -1,14 +1,14 @@
-#include <Lz/common.hpp>
 #include <Lz/generate_while.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("Generate while changing and creating elements") {
     const auto compile_test1 = lz::generate_while([]() { return std::make_pair(false, false); });
     static_cast<void>(compile_test1);
 
-    const int i2 = 0;
+    const unsigned i2 = 0;
     const auto compile_test2 = lz::generate_while([&i2]() {
         static_cast<void>(i2);
         return std::make_pair(false, false);
@@ -17,26 +17,24 @@ TEST_CASE("Generate while changing and creating elements") {
     static_assert(!std::is_same<decltype(compile_test1.begin()), decltype(compile_test1.end())>::value, "Should be sentinel");
 
     SUBCASE("Should be 0, 1, 2, 3") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
         });
-        std::array<int, 4> expected = { 0, 1, 2, 3 };
-        auto actual = generator | lz::to<std::array<int, expected.size()>>();
+        std::array<unsigned, 4> expected = { 0, 1, 2, 3 };
+        auto actual = generator | lz::to<std::array<unsigned, expected.size()>>();
         REQUIRE(expected == actual);
         i = 0;
     }
 
-    SUBCASE("Operator=") {
-        int j = 0;
+    SUBCASE("Operator=(default_sentinel_t)") {
+        unsigned j = 0;
         auto gen = lz::generate_while([&j]() {
             j++;
             return std::make_pair(j, j < 5);
         });
-
-        auto common = lz::common(gen);
-
+        auto common = make_sentinel_assign_op_tester(gen);
         auto expected = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(common, expected));
     }
@@ -44,7 +42,7 @@ TEST_CASE("Generate while changing and creating elements") {
 
 TEST_CASE("Empty or one element generate while") {
     SUBCASE("Empty") {
-        std::function<std::pair<bool, int>()> func = []() {
+        std::function<std::pair<bool, unsigned>()> func = []() {
             return std::make_pair(0, false);
         };
         lz::generate_while_iterable<decltype(func)> generator = lz::generate_while(std::move(func));
@@ -67,21 +65,22 @@ TEST_CASE("Empty or one element generate while") {
 }
 
 TEST_CASE("Generate while binary operations") {
-    auto test = lz::generate_while([]() { return std::make_pair(0, true); });
-    static_assert(std::is_same<decltype(*test.begin()), int>::value, "int and decltype(*generator.begin()) are not the same");
+    auto test = lz::generate_while([]() { return std::make_pair(0u, true); });
+    static_assert(std::is_same<decltype(*test.begin()), unsigned>::value,
+                  "unsigned and decltype(*generator.begin()) are not the same");
 
     SUBCASE("Operator++") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
         });
-        auto expected = std::vector<int>{ 0, 1, 2, 3 };
+        auto expected = std::vector<unsigned>{ 0, 1, 2, 3 };
         REQUIRE(lz::equal(generator, expected));
     }
 
     SUBCASE("Operator== & Operator!=") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
@@ -108,18 +107,18 @@ TEST_CASE("Generate while binary operations") {
 
 TEST_CASE("Generate while to containers") {
     SUBCASE("To array") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
         });
-        std::array<int, 4> expected = { 0, 1, 2, 3 };
-        auto actual = generator | lz::to<std::array<int, 4>>();
+        std::array<unsigned, 4> expected = { 0, 1, 2, 3 };
+        auto actual = generator | lz::to<std::array<unsigned, 4>>();
         REQUIRE(expected == actual);
     }
 
     SUBCASE("To vector") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
@@ -131,41 +130,43 @@ TEST_CASE("Generate while to containers") {
         REQUIRE_FALSE(it == generator.begin());
         REQUIRE(it != generator.begin());
         REQUIRE(generator.begin() != it);
-        std::vector<int> expected = { 0, 1, 2, 3 };
+        std::vector<unsigned> expected = { 0, 1, 2, 3 };
         auto actual = generator | lz::to<std::vector>();
         REQUIRE(expected == actual);
     }
 
     SUBCASE("To other container using to<>()") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
         });
-        std::list<int> expected = { 0, 1, 2, 3 };
-        auto actual = generator | lz::to<std::list<int>>();
+        std::list<unsigned> expected = { 0, 1, 2, 3 };
+        auto actual = generator | lz::to<std::list<unsigned>>();
         REQUIRE(expected == actual);
     }
 
     SUBCASE("To map") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
         });
-        std::map<int, int> expected = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } };
-        auto actual = generator | lz::map([](int x) { return std::make_pair(x, x); }) | lz::to<std::map<int, int>>();
+        std::map<unsigned, unsigned> expected = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } };
+        auto actual =
+            generator | lz::map([](unsigned x) { return std::make_pair(x, x); }) | lz::to<std::map<unsigned, unsigned>>();
         REQUIRE(actual == expected);
     }
 
     SUBCASE("To unordered map") {
-        int i = 0;
+        unsigned i = 0;
         auto generator = lz::generate_while([&i]() {
             auto copy = i++;
             return std::make_pair(copy, copy != 4);
         });
-        std::unordered_map<int, int> expected = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } };
-        auto actual = generator | lz::map([](int x) { return std::make_pair(x, x); }) | lz::to<std::unordered_map<int, int>>();
+        std::unordered_map<unsigned, unsigned> expected = { { 0, 0 }, { 1, 1 }, { 2, 2 }, { 3, 3 } };
+        auto actual = generator | lz::map([](unsigned x) { return std::make_pair(x, x); }) |
+                      lz::to<std::unordered_map<unsigned, unsigned>>();
         REQUIRE(actual == expected);
     }
 }

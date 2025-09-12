@@ -14,8 +14,8 @@ class split_iterable;
 
 template<class ValueType, class Iterable, class Iterable2>
 class split_iterable<ValueType, Iterable, Iterable2, enable_if_t<is_iterable<Iterable2>::value>> : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    maybe_owned<Iterable2> _delimiter;
+    maybe_owned<Iterable> _iterable{};
+    maybe_owned<Iterable2> _delimiter{};
 
 public:
     using const_iterator =

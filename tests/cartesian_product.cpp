@@ -1,8 +1,7 @@
 #include <Lz/c_string.hpp>
-#include <Lz/repeat.hpp>
 #include <Lz/cartesian_product.hpp>
-#include <Lz/common.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -32,7 +31,7 @@ TEST_CASE("Operator=") {
         std::forward_list<int> a = { 1, 2 };
         std::forward_list<int> b = { 3, 4 };
         auto cartesian = lz::cartesian_product(a, b);
-        auto common = lz::common(cartesian);
+        auto common = make_sentinel_assign_op_tester(cartesian);
         REQUIRE(lz::equal(common, expected2));
     }
 
@@ -40,7 +39,7 @@ TEST_CASE("Operator=") {
         std::list<int> a = { 1, 2 };
         std::list<int> b = { 3, 4 };
         auto cartesian = lz::cartesian_product(a, b);
-        auto common = lz::common(make_bidi_sentinelled(cartesian));
+        auto common = make_sentinel_assign_op_tester(make_bidi_sentinelled(cartesian));
         REQUIRE(lz::equal(common, expected2));
         REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
     }
@@ -51,7 +50,7 @@ TEST_CASE("Operator=") {
         auto cartesian = lz::cartesian_product(repeater1, repeater2);
         std::vector<std::tuple<int, int>> expected3 = { std::make_tuple(1, 3), std::make_tuple(1, 3), std::make_tuple(1, 3),
                                                         std::make_tuple(1, 3) };
-        auto ra_op_tester = make_ra_assign_op_tester(cartesian);
+        auto ra_op_tester = make_sentinel_assign_op_tester(cartesian);
         REQUIRE(lz::equal(ra_op_tester, expected3));
         REQUIRE(lz::equal(ra_op_tester | lz::reverse, expected3 | lz::reverse));
         test_procs::test_operator_minus(ra_op_tester);

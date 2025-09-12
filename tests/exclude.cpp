@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/exclude.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
@@ -40,19 +39,39 @@ TEST_CASE("Exclude changing and creating elements") {
     }
 
     SUBCASE("Should be by reference") {
-        *excluded2.begin() = 0;
-        REQUIRE(arr[2] == 0);
-    }
-
-    SUBCASE("Operator=") {
-        std::forward_list<int> fwd = { 1, 2, 3, 4, 5, 6 };
-        auto excluded = lz::exclude(fwd, 2, 5);
-        auto common = lz::common(excluded);
-        auto expected = { 1, 2, 6 };
-        REQUIRE(lz::equal(common, expected));
+        static_assert(std::is_same<decltype(*excluded1.begin()), int&>::value, "Should be int&");
     }
 }
 
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        auto cstr = lz::c_string("Hello, World!");
+        auto excluded = lz::exclude(cstr, 3, 5);
+        auto common = make_sentinel_assign_op_tester(excluded);
+        auto expected = lz::c_string("Hel, World!");
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto vec_sent = make_bidi_sentinelled(vec);
+        auto excluded = lz::exclude(vec_sent, 1, 3);
+        auto common = make_sentinel_assign_op_tester(excluded);
+        auto expected = { 1, 4, 5 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto repeater = lz::repeat(1, 5);
+        auto excluded = make_sentinel_assign_op_tester(lz::exclude(repeater, 1, 3));
+        auto expected = { 1, 1, 1 };
+        REQUIRE(lz::equal(excluded, expected));
+        REQUIRE(lz::equal(excluded | lz::reverse, expected | lz::reverse));
+        test_procs::test_operator_plus(excluded, expected);
+        test_procs::test_operator_minus(excluded);
+    }
+}
 TEST_CASE("Exclude binary operations") {
     std::array<int, 10> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 

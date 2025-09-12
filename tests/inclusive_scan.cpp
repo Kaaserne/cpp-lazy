@@ -1,8 +1,9 @@
-#include <Lz/common.hpp>
+
 #include <Lz/generate.hpp>
 #include <Lz/inclusive_scan.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("Inclusive scan with sentinels") {
@@ -19,7 +20,7 @@ TEST_CASE("Inclusive scan with sentinels") {
     SUBCASE("Operator=(default_sentinel_t)") {
         std::vector<int> vec = { 1, 2, 3, 4 };
         auto inclusive_scan = lz::inclusive_scan(vec);
-        auto common = lz::common(inclusive_scan);
+        auto common = make_sentinel_assign_op_tester(inclusive_scan);
         auto expected = { 1, 3, 6, 10 };
         REQUIRE(lz::equal(common, expected));
         REQUIRE(lz::size(common) == lz::size(expected));

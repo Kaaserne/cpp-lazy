@@ -14,7 +14,7 @@ class generate_while_iterable : public lazy_view {
     using T = tup_element<1, fn_return_type>;
 
     fn_return_type _init{ T{}, true };
-    func_container<GeneratorFunc> _func;
+    func_container<GeneratorFunc> _func{};
 
 public:
     using iterator = generate_while_iterator<func_container<GeneratorFunc>>;

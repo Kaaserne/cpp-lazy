@@ -23,6 +23,7 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
 - Tested with very strict GCC/Clang/MSVC flags # TODO: Add link
+- Bidirectional sentinelled iterables can be reversed using `lz::common`
 
 # What is lazy?
 Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could write a for loop:

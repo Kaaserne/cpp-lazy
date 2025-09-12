@@ -13,7 +13,7 @@ class generate_iterable;
 
 template<class GeneratorFunc>
 class generate_iterable<GeneratorFunc, false> : public lazy_view {
-    func_container<GeneratorFunc> _func;
+    func_container<GeneratorFunc> _func{};
     size_t _amount{};
 
 public:

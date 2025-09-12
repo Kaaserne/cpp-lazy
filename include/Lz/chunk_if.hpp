@@ -115,6 +115,21 @@ using chunk_if_iterable = detail::chunk_if_iterable<basic_iterable<iter_t<Iterab
 template<class ValueType, class Iterable, class UnaryPredicate>
 using t_chunk_if_iterable = detail::chunk_if_iterable<ValueType, Iterable, UnaryPredicate>;
 
+/**
+ * @brief Helper alias for the sv_chunk_if_iterable.
+ * @tparam Iterable The type of the input iterable.
+ * @tparam UnaryPredicate The type of the predicate function.
+ * Example:
+ * ```cpp
+ * std::string s = "hello;world;;";
+ * using chunked_t = lz::sv_chunk_if_iterable<std::string, std::function<bool(char)>>;
+ * chunked_t chunked = lz::sv_chunk_if(vec, [](char i) { return i == ';'; });
+ * ```
+ */
+template<class Iterable, class UnaryPredicate>
+using sv_chunk_if_iterable =
+    detail::chunk_if_iterable<lz::basic_iterable<lz::string_view, lz::string_view>, Iterable, UnaryPredicate>;
+
 } // namespace lz
 
 #endif // LZ_CHUNK_IF_HPP

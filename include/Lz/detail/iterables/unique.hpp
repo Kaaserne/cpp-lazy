@@ -12,8 +12,8 @@ namespace lz {
 namespace detail {
 template<class Iterable, class BinaryPredicate>
 class unique_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    func_container<BinaryPredicate> _predicate;
+    maybe_owned<Iterable> _iterable{};
+    func_container<BinaryPredicate> _predicate{};
 
     using it = iter_t<Iterable>;
     using sent = sentinel_t<Iterable>;

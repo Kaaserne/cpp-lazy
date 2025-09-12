@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
@@ -14,13 +13,31 @@ TEST_CASE("rotate_iterable with sentinels") {
     lz::rotate_iterable<decltype(c_str)> rotated = lz::rotate(c_str, 7);
     static_assert(!std::is_same<decltype(rotated.begin()), decltype(rotated.end())>::value, "Should be sentinel");
     REQUIRE((rotated | lz::to<std::string>()) == "World!Hello, ");
+}
 
-    SUBCASE("Operator=(default_sentinel_t)") {
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
         std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
         auto rotated2 = lz::rotate(lst, 2);
-        auto common = lz::common(rotated2);
+        auto common = make_sentinel_assign_op_tester(rotated2);
         std::vector<int> expected = { 3, 4, 5, 1, 2 };
         REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> lst{ 1, 2, 3, 4, 5 };
+        auto rotated2 = lz::rotate(make_bidi_sentinelled(lst), 2);
+        auto common = make_sentinel_assign_op_tester(rotated2);
+        std::vector<int> expected = { 3, 4, 5, 1, 2 };
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto rotated2 = lz::rotate(lz::repeat(5, 5), 2);
+        auto common = make_sentinel_assign_op_tester(rotated2);
+        std::vector<int> expected = { 5, 5, 5, 5, 5 };
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected);
     }
 }
 
@@ -28,16 +45,6 @@ TEST_CASE("rotate_iterable basic functionality") {
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };
     auto rotate = lz::rotate(arr, 2);
     REQUIRE(rotate.size() == arr.size());
-
-    SUBCASE("Should be correct length") {
-        auto beg = rotate.begin();
-        REQUIRE(std::distance(beg, rotate.end()) == static_cast<std::ptrdiff_t>(arr.size()));
-        ++beg;
-        ++beg;
-        REQUIRE(std::distance(beg, rotate.end()) == 3);
-        ++beg;
-        REQUIRE(std::distance(beg, rotate.end()) == 2);
-    }
 
     SUBCASE("With bidirectional iterator") {
         std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
@@ -73,67 +80,13 @@ TEST_CASE("rotate_iterable binary operations") {
     auto rotate = lz::rotate(vec, 3);
 
     SUBCASE("Operator++") {
-        auto begin = rotate.begin();
-        auto end = rotate.end();
-
-        REQUIRE(*begin == 4);
-        REQUIRE(*end == 4);
-        ++begin;
-        REQUIRE(*begin == 1);
-        ++end;
-        REQUIRE(*end == 1);
+        auto expected = { 4, 1, 2, 3 };
+        REQUIRE(lz::equal(rotate, expected));
     }
 
     SUBCASE("Operator--") {
-        auto begin = rotate.begin();
-        auto end = rotate.end();
-        REQUIRE(begin != end);
-        --end;
-        REQUIRE(*end == 3);
-        --end;
-        REQUIRE(*end == 2);
-        --end;
-        REQUIRE(*end == 1);
-        --end;
-        REQUIRE(*end == 4);
-        REQUIRE(begin == end);
-    }
-
-    SUBCASE("Operator== & Operator!=") {
-        auto begin = rotate.begin();
-        auto end = rotate.end();
-        REQUIRE(begin != end);
-        begin = end;
-        REQUIRE(begin == end);
-    }
-
-    SUBCASE("Various ++ and -- operators with begin and end") {
-        std::array<int, 5> container = { 1, 2, 3, 4, 5 };
-        auto rotator = lz::rotate(container, 3);
-
-        auto uneven_begin = rotator.begin();
-        auto uneven_end = rotator.end();
-
-        ++uneven_begin;
-        REQUIRE(*uneven_begin == 5);
-        --uneven_begin;
-        REQUIRE(*uneven_begin == 4);
-        ++uneven_begin;
-
-        ++uneven_begin;
-        REQUIRE(*uneven_begin == 1);
-
-        --uneven_end;
-        REQUIRE(*uneven_end == 3);
-
-        --uneven_end;
-        REQUIRE(*uneven_end == 2);
-
-        --uneven_end;
-        REQUIRE(*uneven_end == 1);
-
-        --uneven_end;
-        REQUIRE(*uneven_end == 5);
+        auto expected = { 4, 1, 2, 3 };
+        REQUIRE(lz::equal(rotate | lz::reverse, expected | lz::reverse));
     }
 
     SUBCASE("Operator+") {

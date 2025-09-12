@@ -11,11 +11,11 @@ namespace lz {
 namespace detail {
 template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
 class join_where_iterable : public lazy_view {
-    maybe_owned<IterableA> _iterable_a;
-    maybe_owned<IterableB> _iterable_b;
-    func_container<SelectorA> _a;
-    func_container<SelectorB> _b;
-    func_container<ResultSelector> _result_selector;
+    maybe_owned<IterableA> _iterable_a{};
+    maybe_owned<IterableB> _iterable_b{};
+    func_container<SelectorA> _a{};
+    func_container<SelectorB> _b{};
+    func_container<ResultSelector> _result_selector{};
 
 public:
     using iterator = join_where_iterator<maybe_owned<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,

@@ -192,8 +192,7 @@ TEST_CASE("Trim variants") {
         std::function<bool(int)> last_pred = [](int i) {
             return i > 4;
         };
-        lz::trim_iterable<decltype(actual), decltype(first_pred), decltype(last_pred)> actual_trim =
-            lz::trim(actual, std::move(first_pred), std::move(last_pred));
+        lz::trim_iterable<decltype(actual)> actual_trim = lz::trim(actual, std::move(first_pred), std::move(last_pred));
         REQUIRE(lz::equal(actual_trim, expected));
     }
 

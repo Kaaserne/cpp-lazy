@@ -11,7 +11,7 @@ namespace detail {
 
 struct pairwise_adaptor {
     using adaptor = pairwise_adaptor;
-
+    // TODO docs
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 pairwise_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, const size_t pair_size) const {

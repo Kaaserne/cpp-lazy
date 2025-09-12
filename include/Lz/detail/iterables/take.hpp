@@ -19,7 +19,7 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    Iterator _iterator;
+    Iterator _iterator{};
     size_t _n{};
 
 public:
@@ -93,7 +93,7 @@ public:
 
 template<class Iterable>
 class take_iterable<Iterable, enable_if_t<is_iterable<Iterable>::value>> : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     size_t _n{};
 
     using inner_sentinel = sentinel_t<Iterable>;

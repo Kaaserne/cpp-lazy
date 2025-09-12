@@ -11,9 +11,9 @@ namespace lz {
 namespace detail {
 template<class Iterable, class Iterable2, class BinaryPredicate>
 class intersection_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    maybe_owned<Iterable2> _iterable2;
-    func_container<BinaryPredicate> _compare;
+    maybe_owned<Iterable> _iterable{};
+    maybe_owned<Iterable2> _iterable2{};
+    func_container<BinaryPredicate> _compare{};
 
 public:
     using iterator = intersection_iterator<maybe_owned<Iterable>, maybe_owned<Iterable2>, func_container<BinaryPredicate>>;

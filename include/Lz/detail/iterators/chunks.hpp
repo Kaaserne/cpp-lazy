@@ -9,18 +9,21 @@
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class = void>
+template<class Iterable, class = void>
 class chunks_iterator;
 
-template<class Iterator, class S>
-class chunks_iterator<Iterator, S, enable_if_t<is_fwd<Iterator>::value && !is_bidi<Iterator>::value>>
-    : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
+template<class Iterable>
+class chunks_iterator<Iterable, enable_if_t<!is_bidi<iter_t<Iterable>>::value>>
+    : public iterator<chunks_iterator<Iterable>, basic_iterable<iter_t<Iterable>>,
+                      fake_ptr_proxy<basic_iterable<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>,
+                      default_sentinel_t> {
 
-    using iter_traits = std::iterator_traits<Iterator>;
+    using iter = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+    using iter_traits = std::iterator_traits<iter>;
 
 public:
-    using value_type = basic_iterable<Iterator>;
+    using value_type = basic_iterable<iter>;
     using reference = value_type;
     using pointer = fake_ptr_proxy<value_type>;
     using difference_type = typename iter_traits::difference_type;
@@ -29,9 +32,9 @@ public:
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(const chunks_iterator&) = default;
 
 private:
-    Iterator _sub_range_begin{};
-    Iterator _sub_range_end{};
-    S _end{};
+    iter _sub_range_begin{};
+    iter _sub_range_end{};
+    sentinel_t<Iterable> _end{};
     size_t _chunk_size{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
@@ -48,17 +51,17 @@ public:
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    template<class I = iter,
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
     constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<S>::value) {
+                                         std::is_nothrow_default_constructible<sent>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(Iterator it, S end, const size_t chunk_size) :
-        _sub_range_begin{ it },
-        _sub_range_end{ std::move(it) },
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(iter i, sent end, const size_t chunk_size) :
+        _sub_range_begin{ i },
+        _sub_range_end{ std::move(i) },
         _end{ std::move(end) },
         _chunk_size{ chunk_size } {
         next_chunk();
@@ -94,32 +97,40 @@ public:
     }
 };
 
-template<class Iterator, class S>
-class chunks_iterator<Iterator, S, enable_if_t<is_bidi<Iterator>::value && !is_ra<Iterator>::value>>
-    : public iterator<chunks_iterator<Iterator, S>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
+template<class Iterable>
+class chunks_iterator<Iterable, enable_if_t<is_bidi<iter_t<Iterable>>::value && !is_ra<iter_t<Iterable>>::value>>
+    : public iterator<chunks_iterator<Iterable>, basic_iterable<iter_t<Iterable>>,
+                      fake_ptr_proxy<basic_iterable<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>,
+                      default_sentinel_t> {
 
-    using iter_traits = std::iterator_traits<Iterator>;
+    using iter = iter_t<Iterable>;
+    using sent = sentinel_t<Iterable>;
+    using iter_traits = std::iterator_traits<iter>;
 
 public:
-    using value_type = basic_iterable<Iterator>;
+    using value_type = basic_iterable<iter>;
     using reference = value_type;
     using pointer = fake_ptr_proxy<value_type>;
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
-    S _end;
+    iter _sub_range_begin{};
+    iter _sub_range_end{};
+    Iterable _iterable{};
     size_t _chunk_size{};
     size_t _distance{};
 
     LZ_CONSTEXPR_CXX_14 void next_chunk() {
-        for (size_t count = 0; count < _chunk_size && _sub_range_end != _end; count++, ++_sub_range_end, ++_distance) {
+        for (size_t count = 0; count < _chunk_size && _sub_range_end != _iterable.end(); count++, ++_sub_range_end, ++_distance) {
         }
     }
 
 public:
+    // TODO
+
+    template<class T>
+    static constexpr bool eagerly_sent_assignable = !is_sized<T>::value && !is_ra<iter_t<T>>::value;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator()
@@ -128,28 +139,43 @@ public:
 
 #else
 
-    template<class I = Iterator,
-             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value>>
+    template<class I = iter,
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<sent>::value>>
     constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                         std::is_nothrow_default_constructible<S>::value) {
+                                         std::is_nothrow_default_constructible<sent>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14
-    chunks_iterator(Iterator begin, S end, const size_t chunk_size, const size_t cur_distance) :
-        _sub_range_begin{ begin },
-        _sub_range_end{ std::move(begin) },
-        _end{ std::move(end) },
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, iter it, const size_t chunk_size) :
+        _sub_range_begin{ it },
+        _sub_range_end{ std::move(it) },
+        _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size },
-        _distance{ cur_distance } {
+        _distance{ it == _iterable.end() ? lz::eager_size(_iterable) : 0 } {
         next_chunk();
     }
+// TODO check all eager_size impls for input_iterator_tag
+#ifdef LZ_HAS_CONCEPTS
 
-    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
-        _sub_range_begin = _end;
+    constexpr chunks_iterator& operator=(default_sentinel_t)
+        requires(is_bidi<iter>::value)
+    {
+        _sub_range_begin = _iterable.end();
+        _distance = lz::eager_size(_iterable);
         return *this;
     }
+
+#else
+
+    LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
+        _sub_range_begin = _iterable.end();
+        _distance = lz::eager_size(_iterable);
+        return *this;
+    }
+
+#endif
 
     constexpr reference dereference() const {
         return { _sub_range_begin, _sub_range_end };
@@ -160,7 +186,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
-        LZ_ASSERT_INCREMENTABLE(_sub_range_begin != _end);
+        LZ_ASSERT_INCREMENTABLE(_sub_range_begin != _iterable.end());
         _sub_range_begin = _sub_range_end;
         next_chunk();
     }
@@ -177,31 +203,33 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const chunks_iterator& rhs) const {
-        LZ_ASSERT_COMPATIBLE(_chunk_size == rhs._chunk_size && _end == rhs._end);
+        LZ_ASSERT_COMPATIBLE(_chunk_size == rhs._chunk_size && _iterable.end() == rhs._iterable.end() &&
+                             _iterable.begin() == rhs._iterable.begin());
         return _sub_range_begin == rhs._sub_range_begin;
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return _sub_range_begin == _end;
+        return _sub_range_begin == _iterable.end();
     }
 };
 
-template<class Iterable, class Iterator>
-class chunks_iterator<Iterable, Iterator, enable_if_t<is_ra<Iterator>::value>>
-    : public iterator<chunks_iterator<Iterable, Iterator>, basic_iterable<Iterator>, fake_ptr_proxy<basic_iterable<Iterator>>,
-                      diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
-
-    using iter_traits = std::iterator_traits<Iterator>;
+template<class Iterable>
+class chunks_iterator<Iterable, enable_if_t<is_ra<iter_t<Iterable>>::value>>
+    : public iterator<chunks_iterator<Iterable>, basic_iterable<iter_t<Iterable>>,
+                      fake_ptr_proxy<basic_iterable<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>,
+                      default_sentinel_t> {
+    using iter = iter_t<Iterable>;
+    using iter_traits = std::iterator_traits<iter>;
 
 public:
-    using value_type = basic_iterable<Iterator>;
+    using value_type = basic_iterable<iter>;
     using reference = value_type;
     using pointer = fake_ptr_proxy<value_type>;
     using difference_type = typename iter_traits::difference_type;
 
 private:
-    Iterator _sub_range_begin;
-    Iterable _iterable;
+    iter _sub_range_begin{};
+    Iterable _iterable{};
     size_t _chunk_size{};
 
 public:
@@ -213,7 +241,7 @@ public:
 
 #else
 
-    template<class I = Iterator,
+    template<class I = iter,
              class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
     constexpr chunks_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<Iterable>::value) {
@@ -222,7 +250,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, Iterator it, const size_t chunk_size) :
+    LZ_CONSTEXPR_CXX_14 chunks_iterator(I&& iterable, iter it, const size_t chunk_size) :
         _sub_range_begin{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _chunk_size{ chunk_size } {

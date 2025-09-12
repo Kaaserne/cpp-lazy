@@ -1,6 +1,5 @@
 #include <Lz/c_string.hpp>
 #include <Lz/chunk_if.hpp>
-#include <Lz/common.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
@@ -29,13 +28,13 @@ TEST_CASE("chunk if operator=(default_sentinel)") {
     std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
     auto chunked = lz::chunk_if(vec, fun);
     using value_type = lz::val_iterable_t<decltype(chunked)>;
-    auto common = lz::common(chunked);
+    auto common = make_sentinel_assign_op_tester(chunked);
     std::vector<std::vector<int>> expected = { { 1 }, { 3 }, { 5 }, {} };
     REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
 
     vec = { 1, 2, 3, 4, 5 };
     chunked = lz::chunk_if(vec, fun);
-    common = lz::common(chunked);
+    common = make_sentinel_assign_op_tester(chunked);
     expected = { { 1 }, { 3 }, { 5 } };
     REQUIRE(lz::equal(common, expected, [](value_type a, const auto& b) { return lz::equal(a, b); }));
 }

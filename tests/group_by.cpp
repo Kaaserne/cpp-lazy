@@ -1,9 +1,10 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
@@ -25,19 +26,35 @@ TEST_CASE("Group by with sentinels") {
                       std::make_pair('c', lz::c_string("cccc")), std::make_pair('d', lz::c_string("d")) };
 
     REQUIRE(lz::equal(grouper, expected, eq_pair{}));
+}
 
-    SUBCASE("Operator=(default_sentinel_t)") {
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
         std::forward_list<int> lst = { 1, 1, 2, 2, 3, 4, 4 };
         auto grouped = lz::group_by(lst, MAKE_BIN_PRED(equal_to){});
-
-        auto common = lz::common(grouped);
-
+        auto common = make_sentinel_assign_op_tester(grouped);
         using reference = lz::ref_iterable_t<decltype(common)>;
         std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
                                                                     std::make_pair(2, std::vector<int>{ 2, 2 }),
                                                                     std::make_pair(3, std::vector<int>{ 3 }),
                                                                     std::make_pair(4, std::vector<int>{ 4, 4 }) };
         REQUIRE(lz::equal(common, expected2,
+                          [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 1, 2, 2, 3, 4, 4 };
+        auto bidi_sentinelled = make_bidi_sentinelled(vec);
+        auto grouped = lz::group_by(bidi_sentinelled, MAKE_BIN_PRED(equal_to){});
+        auto common = make_sentinel_assign_op_tester(grouped);
+        using reference = lz::ref_iterable_t<decltype(common)>;
+        std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
+                                                                    std::make_pair(2, std::vector<int>{ 2, 2 }),
+                                                                    std::make_pair(3, std::vector<int>{ 3 }),
+                                                                    std::make_pair(4, std::vector<int>{ 4, 4 }) };
+        REQUIRE(lz::equal(common, expected2,
+                          [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
+        REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse,
                           [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
     }
 }

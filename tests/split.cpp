@@ -1,7 +1,8 @@
-#include <Lz/common.hpp>
+
 #include <Lz/map.hpp>
 #include <Lz/split.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("Split with custom container") {
@@ -87,23 +88,41 @@ TEST_CASE("Splitter permutations") {
     }
 
     SUBCASE("Operator=(default_sentinel_t)") {
-        const std::string s = "hello, world! This is a test.";
+        SUBCASE("not ending with delim") {
+            const std::string s = "hello, world! This is a test.";
 
-        SUBCASE("single") {
-            auto splitted = lz::sv_split(s, ' ');
-            auto common = lz::common(splitted);
-            auto expected = { "hello,", "world!", "This", "is", "a", "test." };
-            REQUIRE(lz::equal(common, expected));
+            SUBCASE("single") {
+                auto splitted = lz::sv_split(s, ' ');
+                auto common = make_sentinel_assign_op_tester(splitted);
+                auto expected = { "hello,", "world!", "This", "is", "a", "test." };
+                REQUIRE(lz::equal(common, expected));
+            }
+
+            SUBCASE("multiple") {
+                auto splitted2 = lz::sv_split(s, ", ");
+                auto common2 = make_sentinel_assign_op_tester(splitted2);
+                auto expected2 = { "hello", "world! This is a test." };
+                REQUIRE(lz::equal(common2, expected2));
+            }
         }
 
-        SUBCASE("multiple") {
-            auto splitted2 = lz::sv_split(s, ", ");
-            auto common2 = lz::common(splitted2);
-            auto expected2 = { "hello", "world! This is a test." };
-            REQUIRE(lz::equal(common2, expected2));
-        }
+        SUBCASE("ending with delim") {
+            SUBCASE("single") {
+                const std::string s = "hello, world! This is a test. ";
+                auto splitted = lz::sv_split(s, ' ');
+                auto common = make_sentinel_assign_op_tester(splitted);
+                auto expected = { "hello,", "world!", "This", "is", "a", "test.", "" };
+                REQUIRE(lz::equal(common, expected));
+            }
 
-        // TODO add single and multiple with ending delim
+            SUBCASE("multiple") {
+                const std::string s = "hello, world! This is a test, ";
+                auto splitted2 = lz::sv_split(s, ", ");
+                auto common2 = make_sentinel_assign_op_tester(splitted2);
+                auto expected = { "hello", "world! This is a test", "" };
+                REQUIRE(lz::equal(common2, expected));
+            }
+        }
     }
 }
 

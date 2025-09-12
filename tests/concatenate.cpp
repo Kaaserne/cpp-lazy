@@ -1,10 +1,8 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
 #include <Lz/range.hpp>
-#include <Lz/c_string.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/string_view.hpp>
@@ -31,7 +29,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
         std::forward_list<int> a = { 1, 2 };
         std::forward_list<int> b = { 3, 4 };
         auto concatenated = lz::concat(a, b);
-        auto common = lz::common(concatenated);
+        auto common = make_sentinel_assign_op_tester(concatenated);
         auto expected2 = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(common, expected2));
     }
@@ -41,7 +39,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
         std::list<int> b = { 3, 4 };
         auto concatenated = lz::concat(a, b);
         auto bidi_sentinel = make_bidi_sentinelled(concatenated);
-        auto common = lz::common(bidi_sentinel);
+        auto common = make_sentinel_assign_op_tester(bidi_sentinel);
         auto expected2 = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(common, expected2));
         REQUIRE(lz::equal(lz::reverse(common), lz::reverse(expected2)));
@@ -51,7 +49,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
         auto repeater1 = lz::repeat(1, 2);
         auto repeater2 = lz::repeat(3, 2);
         auto concatenated = lz::concat(repeater1, repeater2);
-        auto common = make_ra_assign_op_tester(concatenated);
+        auto common = make_sentinel_assign_op_tester(concatenated);
         auto expected2 = { 1, 1, 3, 3 };
         REQUIRE(lz::equal(common, expected2));
         REQUIRE(lz::equal(lz::reverse(common), lz::reverse(expected2)));

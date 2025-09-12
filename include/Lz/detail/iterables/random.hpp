@@ -9,7 +9,7 @@ namespace lz {
 namespace detail {
 template<class Arithmetic, class Distribution, class Generator, bool UseSentinel>
 class random_iterable : public lazy_view {
-    Distribution _distribution;
+    Distribution _distribution{};
     Generator* _generator{ nullptr };
     size_t _current{};
 

@@ -20,7 +20,7 @@ public:
 private:
     using diff = diff_type<iterator>;
 
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     size_t _n{};
 
 public:

@@ -1,8 +1,8 @@
-#include <Lz/common.hpp>
 #include <Lz/exclusive_scan.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("Exclusive scan with sentinels") {
@@ -11,11 +11,13 @@ TEST_CASE("Exclusive scan with sentinels") {
     lz::exclusive_scan_iterable<decltype(generator)> scan = lz::exclusive_scan(generator, 0);
     std::vector<int> expected = { 0, 0, 1, 3, 6, 10 };
     REQUIRE(lz::equal(scan, expected));
+}
 
+TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("Operator=") {
         std::vector<int> vec = { 1, 2, 3, 4 };
         auto exclusive_scan = lz::exclusive_scan(vec);
-        auto common = lz::common(exclusive_scan);
+        auto common = make_sentinel_assign_op_tester(exclusive_scan);
         auto expected2 = { 0, 1, 3, 6, 10 };
         REQUIRE(lz::equal(common, expected2));
         REQUIRE(lz::size(common) == lz::size(expected2));

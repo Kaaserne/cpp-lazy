@@ -93,7 +93,7 @@ class flatten_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
     using inner_sentinel = sentinel_t<Iterable>;
 
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
 public:
     using iterator = flatten_iterator<Iterable, Dims>;

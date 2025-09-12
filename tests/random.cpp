@@ -1,9 +1,10 @@
-#include <Lz/common.hpp>
+
 #include <Lz/map.hpp>
 #include <Lz/random.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 #include <random>
 // TODO reverse
@@ -30,13 +31,16 @@ TEST_CASE("random_iterable should be random") {
         REQUIRE(random_array != random_array_2);
     }
 
-    SUBCASE("Operator=") {
+    SUBCASE("Operator=(default_sentinel_t)") {
         auto random = lz::random(1, 10, 5);
-        auto common = lz::common(random);
+        auto common = make_sentinel_assign_op_tester(random);
 
         REQUIRE(lz::size(common) == 5);
         auto dummy = { 0, 0, 0, 0, 0 };
         REQUIRE(lz::equal(common, dummy, [](int a, int) { return a <= 10 && a >= 0; }));
+        REQUIRE(lz::equal(common | lz::reverse, dummy, [](int a, int) { return a <= 10 && a >= 0; }));
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, dummy, [](int a, int) { return a <= 10 && a >= 0; });
     }
 }
 

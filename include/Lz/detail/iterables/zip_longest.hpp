@@ -11,7 +11,7 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_longest_iterable : public lazy_view {
-    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables;
+    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables{};
 
     using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
     using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;

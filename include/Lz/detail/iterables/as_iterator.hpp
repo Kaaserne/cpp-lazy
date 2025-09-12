@@ -11,7 +11,7 @@ namespace detail {
 
 template<class Iterable, class IterCat>
 class as_iterator_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
     using sentinel = sentinel_t<Iterable>;
 
@@ -73,12 +73,12 @@ public:
 #else
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel>::value, iterator> end() const& {
+    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel>::value, iterator> end() const { // TODO remove all &&
         return iterator{ _iterable.end() };
     }
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if_t<is_sentinel<I, sentinel>::value, sentinel> end() const& {
+    LZ_NODISCARD constexpr enable_if_t<is_sentinel<I, sentinel>::value, sentinel> end() const {
         return _iterable.end();
     }
 

@@ -14,7 +14,7 @@ namespace detail {
 // To prevent inclusion of <array> in the header, we define a trivial homogeneous array ourselves
 template<class T, size_t N>
 struct homogeneous_array {
-    T array[N];
+    T array[N]{};
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool friend operator==(const homogeneous_array& lhs, const homogeneous_array& rhs) {
         for (size_t i = 0; i < N; ++i) {

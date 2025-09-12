@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
@@ -38,7 +37,7 @@ TEST_CASE("Take while with sentinels") {
     SUBCASE("Operator=") {
         std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
         auto take_while2 = lz::take_while(lst, [](int i) { return i < 4; });
-        auto common = lz::common(take_while2);
+        auto common = make_sentinel_assign_op_tester(take_while2);
         auto expected = { 1, 2, 3 };
         REQUIRE(lz::equal(common, expected));
     }
@@ -51,6 +50,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE(lz::empty(drop_while));
         REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE_FALSE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 0);
     }
 
     SUBCASE("One element true") {
@@ -59,6 +59,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE(lz::empty(drop_while));
         REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE_FALSE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 0);
     }
 
     SUBCASE("One element false") {
@@ -67,6 +68,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE_FALSE(lz::empty(drop_while));
         REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 1);
     }
 
     SUBCASE("Many elements both true") {
@@ -75,6 +77,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE(lz::empty(drop_while));
         REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE_FALSE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 0);
     }
 
     SUBCASE("Many elements first true") {
@@ -83,6 +86,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE_FALSE(lz::empty(drop_while));
         REQUIRE_FALSE(lz::has_many(drop_while));
         REQUIRE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 1);
     }
 
     SUBCASE("Many elements first false") {
@@ -91,6 +95,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE_FALSE(lz::empty(drop_while));
         REQUIRE(lz::has_many(drop_while));
         REQUIRE_FALSE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 2);
     }
 
     SUBCASE("Many elements all false") {
@@ -99,6 +104,7 @@ TEST_CASE("Empty or one element drop while") {
         REQUIRE_FALSE(lz::empty(drop_while));
         REQUIRE(lz::has_many(drop_while));
         REQUIRE_FALSE(lz::has_one(drop_while));
+        REQUIRE(lz::size(drop_while) == 2);
     }
 }
 

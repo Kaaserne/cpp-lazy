@@ -12,8 +12,8 @@ namespace detail {
 
 template<class Iterable, class BinaryPredicate>
 class group_by_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    func_container<BinaryPredicate> _binary_predicate;
+    maybe_owned<Iterable> _iterable{};
+    func_container<BinaryPredicate> _binary_predicate{};
 
 public:
     using iterator = group_by_iterator<maybe_owned<Iterable>, func_container<BinaryPredicate>>;

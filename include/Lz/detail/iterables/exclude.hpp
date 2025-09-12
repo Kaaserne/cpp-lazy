@@ -10,7 +10,7 @@ namespace lz {
 namespace detail {
 template<class Iterable>
 class exclude_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     diff_iterable_t<Iterable> _from{};
     diff_iterable_t<Iterable> _to{};
 
@@ -18,7 +18,7 @@ class exclude_iterable : public lazy_view {
     using sent = sentinel_t<Iterable>;
 
 public:
-    using iterator = exclude_iterator<it, sent>;
+    using iterator = exclude_iterator<maybe_owned<Iterable>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
     using sentinel = typename iterator::sentinel;
@@ -65,23 +65,19 @@ public:
     }
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return { _iterable.begin(), _iterable.end(), _from, _to, 0 };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)), _iterable.end(), _from, _to, 0 };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
+        return { _iterable, _iterable.begin(), _from, _to, 0 };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable.end(), _iterable.end(), _from, _to,
+            return iterator{ _iterable, _iterable.end(), _from, _to,
                              static_cast<typename iterator::difference_type>(lz::eager_size(_iterable)) };
         }
         else {
-            return _iterable.end();
+            return lz::default_sentinel;
         }
     }
 
@@ -89,12 +85,12 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
-        return { _iterable.end(), _iterable.end(), _from, _to,
+        return { _iterable, _iterable.end(), _from, _to,
                  static_cast<typename iterator::difference_type>(lz::eager_size(_iterable)) };
     }
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const {
-        return _iterable.end();
+        return lz::default_sentinel;
     }
 
 #endif

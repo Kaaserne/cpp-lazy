@@ -162,26 +162,24 @@ using select_iterable = detail::select_iterable<Iterable, SelectorIterable>;
  * @tparam UnaryPredicate The predicate to determine which elements to drop from the back.
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * using drop_back_iterable = lz::drop_back_iterable<std::vector<int>, std::function<bool(int)>>;
+ * using drop_back_iterable = lz::drop_back_iterable<std::vector<int>>;
  * drop_back_iterable dropped = lz::drop_back_while(vec, [](int i) { return i > 3; });
  * ```
  */
 template<class Iterable, class UnaryPredicate>
-using drop_back_iterable = detail::drop_back_iterable<Iterable, UnaryPredicate>;
+using drop_back_iterable = detail::drop_back_iterable<Iterable>;
 
 /**
  * @brief Trim iterable helper alias
  * @tparam Iterable The iterable to trim.
- * @tparam UnaryPredicateFirst The predicate to determine which elements to drop from the front.
- * @tparam UnaryPredicateLast The predicate to determine which elements to drop from the back.
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * using trim_iterable = lz::trim_iterable<std::vector<int>, std::function<bool(int)>, std::function<bool(int)>>;
+ * using trim_iterable = lz::trim_iterable<std::vector<int>>;
  * trim_iterable trimmed = lz::trim(vec, [](int i) { return i < 3; }, [](int i) { return i > 4; });
  * ```
  */
-template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-using trim_iterable = detail::trim_iterable<Iterable, UnaryPredicateFirst, UnaryPredicateLast>;
+template<class Iterable>
+using trim_iterable = detail::trim_iterable<Iterable>;
 
 /**
  * @brief Trim string helper alias
@@ -192,7 +190,7 @@ using trim_iterable = detail::trim_iterable<Iterable, UnaryPredicateFirst, Unary
  * ```
  */
 template<class String>
-using trim_string_iterable = trim_iterable<String, detail::trim_fn, detail::trim_fn>;
+using trim_string_iterable = trim_iterable<String>;
 
 #ifdef LZ_HAS_CXX_11
 

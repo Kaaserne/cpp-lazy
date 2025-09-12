@@ -1,5 +1,4 @@
 #include <Lz/c_string.hpp>
-#include <Lz/common.hpp>
 #include <Lz/map.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/unique.hpp>
@@ -17,7 +16,7 @@ TEST_CASE("Unique using sentinels") {
     SUBCASE("Operator=(default_sentinel_t)") {
         std::forward_list<int> lst{ 1, 1, 2, 2, 3, 4, 4 };
         auto unique2 = lz::unique(lst);
-        auto common = lz::common(unique2);
+        auto common = make_sentinel_assign_op_tester(unique2);
         auto expected2 = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(common, expected2));
     }

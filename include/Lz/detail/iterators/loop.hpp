@@ -86,11 +86,11 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        --_iterator;
         if (_iterator == _iterable.begin()) {
             _iterator = _iterable.end();
             ++_rotations_left;
         }
+        --_iterator;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {

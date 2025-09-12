@@ -12,9 +12,9 @@ namespace lz {
 namespace detail {
 template<class Iterable, class T, class BinaryOp>
 class exclusive_scan_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     T _init{};
-    func_container<BinaryOp> _binary_op;
+    func_container<BinaryOp> _binary_op{};
 
 public:
     using iterator = exclusive_scan_iterator<iter_t<Iterable>, sentinel_t<Iterable>, T, func_container<BinaryOp>>;
