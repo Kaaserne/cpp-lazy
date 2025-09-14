@@ -38,7 +38,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
         std::vector<int> a = { 1, 2 };
         std::list<int> b = { 3, 4 };
         auto concatenated = lz::concat(a, b);
-        auto bidi_sentinel = make_bidi_sentinelled(concatenated);
+        auto bidi_sentinel = make_sized_bidi_sentinelled(concatenated);
         auto common = make_sentinel_assign_op_tester(bidi_sentinel);
         auto expected2 = { 1, 2, 3, 4 };
         REQUIRE(lz::equal(common, expected2));

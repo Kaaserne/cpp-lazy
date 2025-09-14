@@ -36,7 +36,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::vector<int> a = { 1, 2, 3, 4, 5 };
         std::vector<int> b = { 2, 4, 6 };
-        auto intersected = lz::intersection(make_bidi_sentinelled(a), make_bidi_sentinelled(b));
+        auto intersected = lz::intersection(make_sized_bidi_sentinelled(a), make_sized_bidi_sentinelled(b));
         auto common = make_sentinel_assign_op_tester(intersected);
         auto expected = { 2, 4 };
         REQUIRE(lz::equal(common, expected));

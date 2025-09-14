@@ -37,19 +37,20 @@ TEST_CASE("Operator=(default_sentinel_t)") {
                                                                std::make_pair(2, 'c') };
         using reference = decltype(*common.begin());
         REQUIRE(
-            lz::equal(common, expected, [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+            lz::equal(common, expected, [](reference a, const std::pair<size_t, char> b) { return a.first == b.first && a.second == b.second; }));
     }
 
     SUBCASE("bidirectional") {
         std::vector<int> vec = { 1, 2, 3 };
-        auto bidi = make_bidi_sentinelled(vec);
+        auto bidi = make_sized_bidi_sentinelled(vec);
         auto enumerated = make_sentinel_assign_op_tester(lz::enumerate(bidi, 1));
         auto expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3) };
         using reference = decltype(*enumerated.begin());
         REQUIRE(lz::equal(enumerated, expected,
-                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
-        REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected),
-                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+                          [](reference a, const std::pair<size_t, int> b) { return static_cast<size_t>(a.first) == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected), [](reference a, const std::pair<size_t, int> b) {
+            return static_cast<size_t>(a.first) == b.first && a.second == b.second;
+        }));
     }
 
     SUBCASE("random access") {
@@ -57,10 +58,12 @@ TEST_CASE("Operator=(default_sentinel_t)") {
         auto enumerated = make_sentinel_assign_op_tester(lz::enumerate(repeater, 1));
         auto expected = { std::make_pair(1, 1), std::make_pair(2, 1), std::make_pair(3, 1) };
         using reference = decltype(*enumerated.begin());
-        REQUIRE(lz::equal(enumerated, expected,
-                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
-        REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected),
-                          [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(enumerated, expected, [](reference a, const std::pair<size_t, int> b) {
+            return static_cast<size_t>(a.first) == b.first && a.second == b.second;
+        }));
+        REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected), [](reference a, const std::pair<size_t, int> b) {
+            return static_cast<size_t>(a.first) == b.first && a.second == b.second;
+        }));
         test_procs::test_operator_minus(enumerated);
         test_procs::test_operator_plus(enumerated, expected);
     }

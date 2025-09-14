@@ -126,10 +126,6 @@ private:
     }
 
 public:
-    // TODO
-
-    template<class T>
-    static constexpr bool eagerly_sent_assignable = !is_sized<T>::value && !is_ra<iter_t<T>>::value;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -168,7 +164,6 @@ public:
     }
 
 #else
-
     LZ_CONSTEXPR_CXX_14 chunks_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _iterable.end();
         _distance = lz::eager_size(_iterable);

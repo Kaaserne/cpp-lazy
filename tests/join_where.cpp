@@ -41,8 +41,9 @@ TEST_CASE("Join where with sentinels") {
         std::vector<std::pair<int, int>> vec3 = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 } };
         std::vector<std::pair<int, int>> vec4 = { { 1, 2 }, { 3, 4 }, { 4, 5 }, { 5, 6 } };
         auto joined2 = lz::join_where(
-            vec3, vec4, [](const auto& a) { return a.first; }, [](const auto& a) { return a.first; },
-            [](const auto& a, const auto& b) { return std::make_pair(a.first, b.second); });
+            vec3, vec4, [](const std::pair<int, int>& a) { return a.first; },
+            [](const std::pair<int, int>& a) { return a.first; },
+            [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return std::make_pair(a.first, b.second); });
 
         auto common = make_sentinel_assign_op_tester(joined2);
         using reference = lz::ref_iterable_t<decltype(common)>;

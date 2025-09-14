@@ -39,7 +39,7 @@ TEST_CASE("Operator=") {
         std::list<int> a = { 1, 2 };
         std::list<int> b = { 3, 4 };
         auto cartesian = lz::cartesian_product(a, b);
-        auto common = make_sentinel_assign_op_tester(make_bidi_sentinelled(cartesian));
+        auto common = make_sentinel_assign_op_tester(make_sized_bidi_sentinelled(cartesian));
         REQUIRE(lz::equal(common, expected2));
         REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
     }

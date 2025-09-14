@@ -15,6 +15,7 @@ class interleave_iterable : public lazy_view {
 
     using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
     using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;
+    using this_sentinel = sentinel_with<sentinels>;
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
@@ -83,68 +84,40 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { begin_maybe_homo(_iterables) };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { begin_maybe_homo(std::move(_iterables)) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr auto end() const& {
+    [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
             return iterator{ smallest_end_maybe_homo(_iterables, is{}) };
         }
         else {
-            return end_maybe_homo(_iterables);
-        }
-    }
-
-    [[nodiscard]] constexpr auto end() && {
-        if constexpr (!return_sentinel) {
-            return iterator{ smallest_end_maybe_homo(std::move(_iterables), is{}) };
-        }
-        else {
-            return end_maybe_homo(std::move(_iterables));
+            return this_sentinel{ end_maybe_homo(_iterables) };
         }
     }
 
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { smallest_end_maybe_homo(_iterables, is{}) };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() && {
-        return { smallest_end_maybe_homo(std::move(_iterables), is{}) };
-    }
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinels> end() const& {
-        return end_maybe_homo(_iterables);
-    }
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinels> end() && {
-        return end_maybe_homo(std::move(_iterables));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, this_sentinel> end() const {
+        return this_sentinel{ end_maybe_homo(_iterables) };
     }
 
 #endif
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref_t<Iterable>, Iterables...>
-    operator|(Iterable&& iterable, interleave_iterable<Iterables...>&& interleaved) {
+    operator|(Iterable&& iterable,
+              interleave_iterable<Iterables...> interleaved) { // TODO remove const& for std::move copy for all operator|
         return concat_iterables(std::forward<Iterable>(iterable), std::move(interleaved), is{});
-    }
-
-    template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref_t<Iterable>, Iterables...>
-    operator|(Iterable&& iterable, const interleave_iterable<Iterables...>& interleaved) {
-        return concat_iterables(std::forward<Iterable>(iterable), interleaved, is{});
     }
 };
 

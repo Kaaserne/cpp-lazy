@@ -29,8 +29,8 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         std::list<int> to_except2 = { 2, 4 };
-        auto lst_sent = make_bidi_sentinelled(lst);
-        auto to_except2_sent = make_bidi_sentinelled(to_except2);
+        auto lst_sent = make_sized_bidi_sentinelled(lst);
+        auto to_except2_sent = make_sized_bidi_sentinelled(to_except2);
 
         auto except = lz::except(lst_sent, to_except2_sent);
         auto common = make_sentinel_assign_op_tester(except);

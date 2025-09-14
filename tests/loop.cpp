@@ -77,18 +77,18 @@ TEST_CASE("Operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::vector<int> a = { 1, 2, 3, 4, 5 };
-        auto loop = lz::loop(make_bidi_sentinelled(a), 2);
+        auto loop = lz::loop(make_sized_bidi_sentinelled(a), 2);
         auto common = make_sentinel_assign_op_tester(loop);
         auto expected = { 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
         REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
 
         a = {};
-        loop = lz::loop(make_bidi_sentinelled(a), 2);
+        loop = lz::loop(make_sized_bidi_sentinelled(a), 2);
         common = make_sentinel_assign_op_tester(loop);
         REQUIRE(lz::empty(common));
 
         a = { 1, 2, 3, 4, 5 };
-        loop = lz::loop(make_bidi_sentinelled(a), 0);
+        loop = lz::loop(make_sized_bidi_sentinelled(a), 0);
         common = make_sentinel_assign_op_tester(loop);
         REQUIRE(lz::empty(common));
     }

@@ -43,8 +43,8 @@ public:
         return { _begin, _end };
     }
 
-    LZ_NODISCARD constexpr RegexTokenSentinel end() const {
-        return _end;
+    LZ_NODISCARD constexpr sentinel_with<RegexTokenSentinel> end() const {
+        return sentinel_with<RegexTokenIter>{ _end };
     }
 };
 } // namespace detail

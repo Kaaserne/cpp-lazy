@@ -32,7 +32,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::list<int> a = { 1, 2, 3 };
         std::list<int> b = { 4, 5, 6, 7, 8 };
-        auto zipped = lz::zip(make_bidi_sentinelled(a), b);
+        auto zipped = lz::zip(make_sized_bidi_sentinelled(a), b);
         auto common = make_sentinel_assign_op_tester(zipped);
         auto expected2 = { std::make_tuple(1, 4), std::make_tuple(2, 5), std::make_tuple(3, 6) };
         REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
@@ -72,8 +72,7 @@ TEST_CASE("Empty or one element zip") {
         std::vector<int> empty;
         auto empty2 = lz::c_string("");
         auto zipper = lz::zip(empty, empty2);
-        static_assert(std::is_same<decltype(zipper.end()), std::tuple<decltype(empty)::iterator, lz::default_sentinel_t>>::value,
-                      "should be sentinel like");
+        static_assert(!std::is_same<decltype(zipper.end()), decltype(zipper.begin())>::value, "should be sentinel like");
         REQUIRE(lz::empty(zipper));
         REQUIRE_FALSE(lz::has_many(zipper));
         REQUIRE_FALSE(lz::has_one(zipper));

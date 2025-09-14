@@ -36,7 +36,7 @@ TEST_CASE("chunk if operator=(default_sentinel)") {
     chunked = lz::chunk_if(vec, fun);
     common = make_sentinel_assign_op_tester(chunked);
     expected = { { 1 }, { 3 }, { 5 } };
-    REQUIRE(lz::equal(common, expected, [](value_type a, const auto& b) { return lz::equal(a, b); }));
+    REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
 }
 
 TEST_CASE("Chunk if with sentinels") {

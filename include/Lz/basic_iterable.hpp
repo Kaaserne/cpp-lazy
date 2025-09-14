@@ -498,11 +498,12 @@ struct container_constructor {
     }
 
     template<class Iterable, class... Args>
-    LZ_NODISCARD static constexpr enable_if_t<
-        !constructible_from_iterable<Iterable, Args...>::value && !constructible_from_it_sent<Iterable, Args...>::value &&
-            (!constructible_from_it_it<Iterable, Args...>::value || !is_ra<iter_t<Iterable>>::value),
-        Container>
-    construct(Iterable&& iterable, Args&&... args) {
+    LZ_NODISCARD static LZ_CONSTEXPR_CXX_14
+        enable_if_t<!constructible_from_iterable<Iterable, Args...>::value &&
+                        !constructible_from_it_sent<Iterable, Args...>::value &&
+                        (!constructible_from_it_it<Iterable, Args...>::value || !is_ra<iter_t<Iterable>>::value),
+                    Container>
+        construct(Iterable&& iterable, Args&&... args) {
         Container container{ std::forward<Args>(args)... };
         copy_to_container(std::forward<Iterable>(iterable), container);
         return container;
@@ -955,7 +956,7 @@ using detail::custom_copier_for;
 #ifdef LZ_HAS_CONCEPTS
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
-    requires(lz::adaptor<lz::detail::remove_cref_t<Adaptor>> && lz::iterable<lz::detail::remove_ref<Iterable>>)
+    requires(lz::adaptor<lz::detail::remove_cref_t<Adaptor>> && lz::iterable<lz::detail::remove_ref_t<Iterable>>)
 [[nodiscard]] constexpr auto
 operator|(Iterable&& iterable, Adaptor&& adaptor) -> decltype(std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable))) {
     return std::forward<Adaptor>(adaptor)(std::forward<Iterable>(iterable));

@@ -26,20 +26,54 @@ TEST_CASE("Zip longest with sentinels") {
                                   std::make_tuple(lz::nullopt, lz::optional<char>('1'), lz::nullopt) };
 
     REQUIRE(lz::equal(longest, expected));
+}
 
-    SUBCASE("Operator=") {
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
         std::forward_list<int> a = { 1, 2, 3 };
         std::forward_list<int> b = { 4, 5, 6, 7, 8 };
         auto zipped = lz::zip_longest(a, b);
 
         auto common = make_sentinel_assign_op_tester(zipped);
 
-        auto expected2 = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
-                          std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),
-                          std::make_tuple(lz::optional<int>{ 3 }, lz::optional<int>{ 6 }),
-                          std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 7 }),
-                          std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 8 }) };
-        REQUIRE(lz::equal(common, expected2));
+        auto expected = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),
+                           std::make_tuple(lz::optional<int>{ 3 }, lz::optional<int>{ 6 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 7 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 8 }) };
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2, 3 };
+        std::vector<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip_longest(make_sized_bidi_sentinelled(a), b);
+
+        auto common = make_sentinel_assign_op_tester(zipped);
+
+        auto expected = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),
+                           std::make_tuple(lz::optional<int>{ 3 }, lz::optional<int>{ 6 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 7 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 8 }) };
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto b = lz::repeat(4, 5);
+        auto zipped = lz::zip_longest(a, b);
+
+        auto common = make_sentinel_assign_op_tester(zipped);
+
+        auto expected = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 4 }) };
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected);
     }
 }
 

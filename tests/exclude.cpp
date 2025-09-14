@@ -54,7 +54,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
-        auto vec_sent = make_bidi_sentinelled(vec);
+        auto vec_sent = make_sized_bidi_sentinelled(vec);
         auto excluded = lz::exclude(vec_sent, 1, 3);
         auto common = make_sentinel_assign_op_tester(excluded);
         auto expected = { 1, 4, 5 };

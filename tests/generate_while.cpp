@@ -35,7 +35,7 @@ TEST_CASE("Generate while changing and creating elements") {
             return std::make_pair(j, j < 5);
         });
         auto common = make_sentinel_assign_op_tester(gen);
-        auto expected = { 1, 2, 3, 4 };
+        auto expected = { 1u, 2u, 3u, 4u };
         REQUIRE(lz::equal(common, expected));
     }
 }

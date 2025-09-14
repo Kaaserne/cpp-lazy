@@ -59,7 +59,7 @@ TEST_CASE("Common") {
 
     SUBCASE("bidirectional non sized") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };
-        auto filter = make_bidi_sentinelled(lz::filter(vec, [](int) { return true; }));
+        auto filter = make_sized_bidi_sentinelled(lz::filter(vec, [](int) { return true; }));
         auto common = lz::common(filter);
 
         using common_t = decltype(common);
@@ -74,18 +74,19 @@ TEST_CASE("Common") {
     SUBCASE("bidirectional sized") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         auto chunks = lz::chunks(lst, 2);
-        auto sent = make_bidi_sentinelled(chunks) | lz::cache_size;
+        auto sent = make_sized_bidi_sentinelled(chunks) | lz::cache_size;
         auto common = lz::common(sent);
 
         using common_t = decltype(common);
         static_assert(std::is_same<common_t, lz::sized_iterable<lz::iter_t<common_t>, lz::sentinel_t<common_t>>>::value, "");
         static_assert(lz::is_sized<decltype(common)>::value, "");
+        using value_type = decltype(*common.begin());
 
         std::vector<std::vector<int>> expected = { { 1, 2 }, { 3, 4 }, { 5 } };
         REQUIRE(lz::size(common) == 3);
-        REQUIRE(lz::equal(common, expected, [](const auto& a, const auto& b) { return lz::equal(a, b); }));
+        REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
         REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse,
-                          [](const auto& a, const auto& b) { return lz::equal(a, b); }));
+                          [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
     }
 
     SUBCASE("random access non sized") {

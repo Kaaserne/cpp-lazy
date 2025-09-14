@@ -21,7 +21,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
-        auto bidi_sentinelled = make_bidi_sentinelled(lst);
+        auto bidi_sentinelled = make_sized_bidi_sentinelled(lst);
         auto common = make_sentinel_assign_op_tester(lz::pairwise(bidi_sentinelled, 3));
         using value_type = lz::val_iterable_t<decltype(common)>;
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 2, 3, 4 }, { 3, 4, 5 } };
@@ -578,7 +578,7 @@ TEST_CASE("Non sized fwd non sentinelled") {
 TEST_CASE("bidi sized sentinel") {
     std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     auto filtered = list | lz::filter([](int i) { return i % 2 == 0; }) | lz::cache_size;
-    auto t = make_bidi_sentinelled(filtered);
+    auto t = make_sized_bidi_sentinelled(filtered);
     auto pw = lz::pairwise(t, 2);
     std::vector<std::vector<int>> expected = { { 2, 4 }, { 4, 6 }, { 6, 8 }, { 8, 10 } };
     using value_type = typename decltype(pw.begin())::value_type;

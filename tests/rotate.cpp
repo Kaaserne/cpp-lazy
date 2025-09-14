@@ -26,7 +26,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::list<int> lst{ 1, 2, 3, 4, 5 };
-        auto rotated2 = lz::rotate(make_bidi_sentinelled(lst), 2);
+        auto rotated2 = lz::rotate(make_sized_bidi_sentinelled(lst), 2);
         auto common = make_sentinel_assign_op_tester(rotated2);
         std::vector<int> expected = { 3, 4, 5, 1, 2 };
         REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));

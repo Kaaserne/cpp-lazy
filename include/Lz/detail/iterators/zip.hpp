@@ -5,28 +5,34 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/sentinel_with.hpp>
 #include <Lz/detail/traits.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <algorithm>
 
 namespace lz {
 namespace detail {
+// TODO add specialization for bidi sized and one of non sentinelled?
+template<class... Iterables>
+class zip_iterator : public iterator<zip_iterator<Iterables...>, iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                                     fake_ptr_proxy<iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>>,
+                                     iter_tuple_diff_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                                     iter_tuple_iter_cat_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                                     sentinel_with<maybe_homogeneous_t<sentinel_t<Iterables>...>>> {
 
-template<class IterTuple, class SMaybeHomo>
-class zip_iterator : public iterator<zip_iterator<IterTuple, SMaybeHomo>, iter_tuple_ref_type_t<IterTuple>,
-                                     fake_ptr_proxy<iter_tuple_ref_type_t<IterTuple>>, iter_tuple_diff_type_t<IterTuple>,
-                                     iter_tuple_iter_cat_t<IterTuple>, SMaybeHomo> {
+    using iter_tuple = maybe_homogeneous_t<iter_t<Iterables>...>;
 
 public:
-    using iterator_category = iter_tuple_iter_cat_t<IterTuple>;
-    using value_type = iter_tuple_value_type_t<IterTuple>;
-    using difference_type = iter_tuple_diff_type_t<IterTuple>;
-    using reference = iter_tuple_ref_type_t<IterTuple>;
+    using iterator_category = iter_tuple_iter_cat_t<iter_tuple>;
+    using value_type = iter_tuple_value_type_t<iter_tuple>;
+    using difference_type = iter_tuple_diff_type_t<iter_tuple>;
+    using reference = iter_tuple_ref_type_t<iter_tuple>;
     using pointer = fake_ptr_proxy<reference>;
+    using sentinel = sentinel_with<maybe_homogeneous_t<sentinel_t<Iterables>...>>;
 
 private:
-    using is = make_index_sequence<tuple_size<IterTuple>::value>;
-    IterTuple _iterators{};
+    using is = make_index_sequence<tuple_size<iter_tuple>::value>;
+    iter_tuple _iterators{};
 
     template<size_t... I>
     constexpr reference dereference(index_sequence<I...>) const {
@@ -75,9 +81,9 @@ private:
     }
 
     template<size_t... I>
-    LZ_CONSTEXPR_CXX_14 difference_type minus(const SMaybeHomo& other, index_sequence<I...>) const {
+    LZ_CONSTEXPR_CXX_14 difference_type minus(const sentinel& other, index_sequence<I...>) const {
         using std::get;
-        return std::max({ (get<I>(_iterators) - get<I>(other))... });
+        return std::max({ (get<I>(_iterators) - get<I>(other.value))... });
     }
 
     template<class EndIter, size_t... I>
@@ -90,14 +96,29 @@ private:
 #endif
     }
 
-    template<size_t... I>
-    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& other, const index_sequence<I...>&) {
+    template<class cat = iterator_category, size_t... I>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<cat>::value> assign_sentinels(const sentinel& other, index_sequence<I...>) {
         using std::get;
 #ifdef LZ_HAS_CXX_17
         ((get<I>(_iterators) = get<I>(other)), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(other)...);
+        decompose(get<I>(_iterators) = get<I>(other.value)...);
 #endif
+    }
+
+    template<class cat = iterator_category, size_t... I>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<cat>::value && !is_ra_tag<cat>::value>
+    assign_sentinels(const sentinel& other, index_sequence<I...>) {
+        while (*this != other) {
+            ++(*this);
+        }
+    }
+
+    template<class cat = iterator_category, size_t... I>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<cat>::value> assign_sentinels(const sentinel& other, index_sequence<I...>) {
+        using std::get;
+        const auto smallest_iter = other - *this;
+        *this += smallest_iter;
     }
 
 public:
@@ -109,17 +130,17 @@ public:
 
 #else
 
-    template<class I = IterTuple, class = enable_if_t<std::is_default_constructible<I>::value>>
+    template<class I = iter_tuple, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr zip_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 zip_iterator(IterTuple iterators) : _iterators{ std::move(iterators) } {
-        static_assert(tuple_size<IterTuple>::value > 1, "Cannot concat one/zero iterables");
+    LZ_CONSTEXPR_CXX_14 zip_iterator(iter_tuple iterators) : _iterators{ std::move(iterators) } {
+        static_assert(tuple_size<iter_tuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
-    LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const SMaybeHomo& end) {
+    LZ_CONSTEXPR_CXX_14 zip_iterator& operator=(const sentinel& end) {
         assign_sentinels(end, is{});
         return *this;
     }
@@ -148,7 +169,7 @@ public:
         return minus(other, is{});
     }
 
-    LZ_CONSTEXPR_CXX_20 difference_type difference(const SMaybeHomo& other) const {
+    LZ_CONSTEXPR_CXX_20 difference_type difference(const sentinel& other) const {
         return minus(other, is{});
     }
 
@@ -156,8 +177,8 @@ public:
         return eq(other._iterators, is{});
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const SMaybeHomo& other) const {
-        return eq(other, is{});
+    LZ_CONSTEXPR_CXX_14 bool eq(const sentinel& other) const {
+        return eq(other.value, is{});
     }
 };
 } // namespace detail

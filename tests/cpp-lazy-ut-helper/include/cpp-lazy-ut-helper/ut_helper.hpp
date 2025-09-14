@@ -6,7 +6,7 @@
 #include <Lz/filter.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 
-template<class Iterable>
+template<class Iterable, bool EnableSize = true>
 class bidi_sentinelled : public lz::lazy_view {
     using iterable = lz::filter_iterable<Iterable, std::function<bool(lz::ref_iterable_t<Iterable>)>>;
     iterable _iterable{};
@@ -30,7 +30,7 @@ public:
     }
 
     template<class I = Iterable>
-    lz::detail::enable_if_t<lz::detail::is_sized<I>::value, size_t> size() {
+    lz::detail::enable_if_t<lz::detail::is_sized<I>::value && EnableSize, size_t> size() {
         return lz::size(_iterable);
     }
 
@@ -44,7 +44,12 @@ public:
 };
 
 template<class Iterable>
-bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>> make_bidi_sentinelled(Iterable&& iterable) {
+bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>> make_sized_bidi_sentinelled(Iterable&& iterable) {
+    return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
+}
+
+template<class Iterable>
+bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>, false> make_non_sized_bidi_sentinelled(Iterable&& iterable) {
     return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
 }
 

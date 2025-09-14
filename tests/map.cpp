@@ -31,7 +31,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::vector<int> a = { 1, 2, 3, 4, 5 };
-        auto map = lz::map(make_bidi_sentinelled(a), [](int i) { return i; });
+        auto map = lz::map(make_sized_bidi_sentinelled(a), [](int i) { return i; });
         auto common = make_sentinel_assign_op_tester(map);
         auto expected = { 1, 2, 3, 4, 5 };
         REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));

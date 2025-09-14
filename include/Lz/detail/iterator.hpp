@@ -3,7 +3,7 @@
 #ifndef LZ_ITERATOR_HPP
 #define LZ_ITERATOR_HPP
 
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/compiler_checks.hpp>
 #include <iterator>
 
 namespace lz {

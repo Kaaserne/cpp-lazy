@@ -114,7 +114,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::vector<std::vector<int>> vec = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
-        auto vec_sent = make_bidi_sentinelled(vec);
+        auto vec_sent = make_sized_bidi_sentinelled(vec);
         auto flat = lz::flatten(vec_sent);
         auto common = make_sentinel_assign_op_tester(flat);
         auto expected = { 1, 2, 3, 4, 5, 6 };
@@ -122,14 +122,14 @@ TEST_CASE("operator=(default_sentinel_t)") {
         REQUIRE(lz::equal(expected | lz::reverse, common | lz::reverse));
 
         std::vector<int> vec2 = { 1, 2, 3, 4, 5, 6 };
-        auto vec2_sent = make_bidi_sentinelled(vec2);
+        auto vec2_sent = make_sized_bidi_sentinelled(vec2);
         auto flat2 = lz::flatten(vec2_sent);
         auto common2 = make_sentinel_assign_op_tester(flat2);
         REQUIRE(lz::equal(expected, common2));
         REQUIRE(lz::equal(expected | lz::reverse, common2 | lz::reverse));
 
         std::vector<std::vector<std::vector<int>>> vec3 = { { { 1, 2 }, { 3 } }, { { 4, 5 }, { 6 } } };
-        auto vec3_sent = make_bidi_sentinelled(vec3);
+        auto vec3_sent = make_sized_bidi_sentinelled(vec3);
         auto flat3 = lz::flatten(vec3_sent);
         auto common3 = make_sentinel_assign_op_tester(flat3);
         REQUIRE(lz::equal(expected, common3));

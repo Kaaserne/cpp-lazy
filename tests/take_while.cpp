@@ -33,14 +33,14 @@ TEST_CASE("Take while with sentinels") {
     static_assert(!std::is_same<decltype(take_while.begin()), decltype(take_while.end())>::value, "Should be sentinel");
     auto c_str_expected = lz::c_string("Hello, ");
     REQUIRE(lz::equal(take_while, c_str_expected));
+}
 
-    SUBCASE("Operator=") {
-        std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
-        auto take_while2 = lz::take_while(lst, [](int i) { return i < 4; });
-        auto common = make_sentinel_assign_op_tester(take_while2);
-        auto expected = { 1, 2, 3 };
-        REQUIRE(lz::equal(common, expected));
-    }
+TEST_CASE("Operator=") {
+    std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
+    auto take_while2 = lz::take_while(lst, [](int i) { return i < 4; });
+    auto common = make_sentinel_assign_op_tester(take_while2);
+    auto expected = { 1, 2, 3 };
+    REQUIRE(lz::equal(common, expected));
 }
 
 TEST_CASE("Empty or one element drop while") {

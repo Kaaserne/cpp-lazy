@@ -24,8 +24,7 @@ private:
     size_t _n{};
 
 public:
-    constexpr n_take_iterator(const n_take_iterator&) =
-        default;
+    constexpr n_take_iterator(const n_take_iterator&) = default;
     LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(const n_take_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
@@ -45,10 +44,32 @@ public:
     constexpr n_take_iterator(Iterator it, const size_t n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
-    LZ_CONSTEXPR_CXX_14 n_take_iterator& operator=(default_sentinel_t) {
+#ifdef LZ_HAS_CXX_17
+
+    [[nodiscard]] constexpr n_take_iterator& operator=(default_sentinel_t) {
+        if constexpr (is_bidi_v<Iterator>) {
+            _iterator = std::next(_iterator, static_cast<difference_type>(_n));
+        }
         _n = 0;
         return *this;
     }
+
+#else
+
+    template<class I = Iterator>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, n_take_iterator&> operator=(default_sentinel_t) {
+        _iterator = std::next(_iterator, static_cast<difference_type>(_n));
+        _n = 0;
+        return *this;
+    }
+
+    template<class I = Iterator>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<I>::value, n_take_iterator&> operator=(default_sentinel_t) {
+        _n = 0;
+        return *this;
+    }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));

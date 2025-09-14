@@ -29,7 +29,7 @@ TEST_CASE("take_every_iterable with sentinels") {
             std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             auto filtered = list | lz::filter([](int i) { return i % 2 == 0; });
             // Make it so that it has a sentinel and is bidirectional
-            auto t = make_bidi_sentinelled(filtered);
+            auto t = make_sized_bidi_sentinelled(filtered);
             auto take_every2 = lz::take_every(t, 2);
             auto common = make_sentinel_assign_op_tester(take_every2);
             std::vector<int> expected2 = { 2, 6, 10 };

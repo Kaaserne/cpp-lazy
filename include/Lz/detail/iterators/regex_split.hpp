@@ -6,6 +6,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/sentinel_with.hpp>
 #include <Lz/string_view.hpp>
 
 namespace lz {
@@ -20,7 +21,7 @@ template<class RegexTokenIter, class RegexTokenSentinel>
 class regex_split_iterator : public iterator<regex_split_iterator<RegexTokenIter, RegexTokenSentinel>,
                                              basic_string_view<regex_split_val<RegexTokenIter>>,
                                              fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>,
-                                             diff_type<RegexTokenIter>, std::forward_iterator_tag, RegexTokenSentinel> {
+                                             diff_type<RegexTokenIter>, std::forward_iterator_tag, sentinel_with<RegexTokenSentinel>> {
 public:
     using value_type = basic_string_view<regex_split_val<RegexTokenIter>>;
     using difference_type = typename RegexTokenIter::difference_type;
@@ -51,8 +52,8 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 regex_split_iterator& operator=(const RegexTokenSentinel& end) {
-        _current = end;
+    LZ_CONSTEXPR_CXX_14 regex_split_iterator& operator=(sentinel_with<RegexTokenSentinel> end) {
+        _current = std::move(end.value);
         return *this;
     }
 
@@ -72,8 +73,8 @@ public:
         return _current == other._current;
     }
 
-    constexpr bool eq(RegexTokenSentinel end) const {
-        return _current == end;
+    constexpr bool eq(sentinel_with<RegexTokenSentinel> end) const {
+        return _current == end.value;
     }
 };
 

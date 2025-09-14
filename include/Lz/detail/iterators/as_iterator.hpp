@@ -5,13 +5,14 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/sentinel_with.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterator, class S, class IterCat>
 class as_iterator_iterator : public iterator<as_iterator_iterator<Iterator, S, IterCat>, Iterator, fake_ptr_proxy<Iterator>,
-                                             diff_type<Iterator>, IterCat, S> {
+                                             diff_type<Iterator>, IterCat, sentinel_with<S>> {
     Iterator _iterator{};
 
 public:
@@ -40,8 +41,8 @@ public:
     explicit constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const S& other) {
-        _iterator = other;
+    LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const sentinel_with<S>& other) {
+        _iterator = other.value;
         return *this;
     }
 
@@ -73,8 +74,8 @@ public:
         return _iterator == other._iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const S& other) const {
-        return _iterator == other;
+    LZ_CONSTEXPR_CXX_14 bool eq(const sentinel_with<S>& other) const {
+        return _iterator == other.value;
     }
 };
 

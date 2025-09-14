@@ -5,6 +5,7 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/sentinel_with.hpp>
 #include <Lz/detail/traits.hpp>
 
 namespace lz {
@@ -15,7 +16,7 @@ class enumerate_iterator;
 
 // TODO for all operator= which ar enot sentinel_, we want to make an immutable ojbect
 template<class Iterable, class IntType>
-class enumerate_iterator<Iterable, IntType, enable_if<is_bidi<iter_t<Iterable>>::value>>
+class enumerate_iterator<Iterable, IntType, enable_if_t<is_bidi<iter_t<Iterable>>::value>>
     : public iterator<enumerate_iterator<Iterable, IntType>, std::pair<IntType, ref_t<iter_t<Iterable>>>,
                       fake_ptr_proxy<std::pair<IntType, ref_t<iter_t<Iterable>>>>, diff_type<iter_t<Iterable>>,
                       iter_cat_t<iter_t<Iterable>>, sentinel_with<IntType>> {
@@ -39,7 +40,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr enumerate_iterator()
-        requires(std::default_initializable<Iterator> && std::default_initializable<Iterable>)
+        requires(std::default_initializable<iter> && std::default_initializable<Iterable>)
     = default;
 
 #else
@@ -107,7 +108,7 @@ public:
 };
 
 template<class Iterable, class IntType>
-class enumerate_iterator<Iterable, IntType, enable_if<!is_bidi<iter_t<Iterable>>::value>>
+class enumerate_iterator<Iterable, IntType, enable_if_t<!is_bidi<iter_t<Iterable>>::value>>
     : public iterator<enumerate_iterator<Iterable, IntType>, std::pair<IntType, ref_t<iter_t<Iterable>>>,
                       fake_ptr_proxy<std::pair<IntType, ref_t<iter_t<Iterable>>>>, diff_type<iter_t<Iterable>>,
                       iter_cat_t<iter_t<Iterable>>, sentinel_with<sentinel_t<Iterable>>> {
@@ -171,7 +172,7 @@ public:
         return _iterator == other._iterator;
     }
 
-    constexpr bool eq(sentinel_with<iter> other) const {
+    constexpr bool eq(sentinel_with<sentinel_t<Iterable>> other) const {
         return _iterator == other.value;
     }
 };

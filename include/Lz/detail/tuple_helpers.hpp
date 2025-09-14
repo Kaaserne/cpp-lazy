@@ -16,6 +16,24 @@ template<class T, size_t N>
 struct homogeneous_array {
     T array[N]{};
 
+#ifdef LZ_HAS_CXX_11
+
+    template<class U = T, class = enable_if_t<std::is_default_constructible<U>::valu>>
+    constexpr homogeneous_array() noexcept(std::is_nothrow_default_constructible<U>::value) {
+    }
+
+    // GCC/Clang in some modes failed to treat this type as an aggregate when used in
+    // a subobject brace-initializer (seen in initialization of maybe_homogeneous_t
+    // with a parameter pack). Adding an explicit forwarding constructor fixes
+    // "no matching constructor" diagnostics when we attempt: _iterables{ a, b, ... }.
+    // SFINAE ensures we only enable this when exactly N arguments are provided and
+    // each is constructible into T. This preserves copy/move ctor selection.
+    template<class... Us, class = enable_if_t<sizeof...(Us) == N && conjunction<std::is_constructible<T, Us&&>...>::value>>
+    constexpr homogeneous_array(Us&&... us) : array{ T(std::forward<Us>(us))... } {
+    }
+
+#endif
+
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool friend operator==(const homogeneous_array& lhs, const homogeneous_array& rhs) {
         for (size_t i = 0; i < N; ++i) {
             if (!(lhs.array[i] == rhs.array[i])) {
@@ -264,6 +282,20 @@ class tuple_expand {
     Fn _fn;
 
 public:
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr tuple_expand()
+        requires std::default_initializable<Fn>
+    = default;
+
+#else
+
+    template<class F, class = enable_if_t<std::is_default_constructible<F>::value>>
+    constexpr tuple_expand() noexcept(std::is_nothrow_default_constructible<F>::value) {
+    }
+
+#endif
+
     template<class F>
     explicit constexpr tuple_expand(F&& fn) : _fn{ std::forward<F>(fn) } {
     }

@@ -19,7 +19,7 @@ class enumerate_iterable : public lazy_view {
 public:
     using iterator = enumerate_iterator<maybe_owned<Iterable>, IntType>;
     using const_iterator = iterator;
-    using sentinel = sentinel_with<IntType>;
+    using sentinel = typename iterator::sentinel;
     using value_type = typename iterator::value_type;
 
 private:

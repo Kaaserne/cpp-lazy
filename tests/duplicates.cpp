@@ -107,19 +107,22 @@ TEST_CASE("Duplicates operator=(default_sentinel_t)") {
         std::vector<std::pair<int, std::size_t>> expected = { std::make_pair(1, 2), std::make_pair(2, 2), std::make_pair(3, 1),
                                                               std::make_pair(4, 2) };
         using reference = decltype(*common.begin());
-        REQUIRE(
-            lz::equal(common, expected, [](reference a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(common, expected, [](reference a, const std::pair<int, size_t>& b) {
+            return a.first == b.first && a.second == b.second;
+        }));
     }
 
     SUBCASE("bidirectional") {
         std::vector<int> vec = { 10, 10, 20, 20, 20, 30 };
-        auto common2 = make_sentinel_assign_op_tester(lz::duplicates(make_bidi_sentinelled(vec)));
+        auto common2 = make_sentinel_assign_op_tester(lz::duplicates(make_sized_bidi_sentinelled(vec)));
         std::vector<std::pair<int, std::size_t>> expected2 = { std::make_pair(10, 2), std::make_pair(20, 3),
                                                                std::make_pair(30, 1) };
         using reference2 = decltype(*common2.begin());
-        REQUIRE(lz::equal(common2, expected2,
-                          [](reference2 a, const auto& b) { return a.first == b.first && a.second == b.second; }));
-        REQUIRE(lz::equal(lz::reverse(common2), lz::reverse(expected2),
-                          [](reference2 a, const auto& b) { return a.first == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(common2, expected2, [](reference2 a, const std::pair<int, size_t>& b) {
+            return a.first == b.first && a.second == b.second;
+        }));
+        REQUIRE(lz::equal(lz::reverse(common2), lz::reverse(expected2), [](reference2 a, const std::pair<int, size_t>& b) {
+            return a.first == b.first && a.second == b.second;
+        }));
     }
 }

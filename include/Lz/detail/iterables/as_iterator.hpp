@@ -13,13 +13,15 @@ template<class Iterable, class IterCat>
 class as_iterator_iterable : public lazy_view {
     maybe_owned<Iterable> _iterable{};
 
-    using sentinel = sentinel_t<Iterable>;
-
 public:
     using value_type = iter_t<Iterable>;
     using iterator = as_iterator_iterator<value_type, sentinel_t<Iterable>, IterCat>;
     using const_iterator = iterator;
 
+private:
+    using sentinel = typename iterator::sentinel;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr as_iterator_iterable()
@@ -62,7 +64,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     LZ_NODISCARD constexpr auto end() const {
-        if constexpr (!is_sentinel_v<value_type, sentinel>) {
+        if constexpr (!is_sentinel_v<value_type, sentinel_t<Iterable>>) {
             return iterator{ _iterable.end() };
         }
         else {
@@ -73,13 +75,13 @@ public:
 #else
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel>::value, iterator> end() const { // TODO remove all &&
+    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel_t<Iterable>>::value, iterator> end() const { // TODO remove all &&
         return iterator{ _iterable.end() };
     }
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if_t<is_sentinel<I, sentinel>::value, sentinel> end() const {
-        return _iterable.end();
+    LZ_NODISCARD constexpr enable_if_t<is_sentinel<I, sentinel_t<Iterable>>::value, sentinel> end() const {
+        return sentinel{ _iterable.end() };
     }
 
 #endif // LZ_HAS_CXX_17

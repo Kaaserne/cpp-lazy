@@ -44,26 +44,10 @@ public:
         return _n;
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return { _iterator, _n };
     }
 
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(!is_bidi_tag_v<typename iterator::iterator_category>)
-    {
-        return { std::move(_iterator), _n };
-    }
-
-#else
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() && {
-        return { std::move(_iterator), _n };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

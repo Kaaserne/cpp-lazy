@@ -81,7 +81,7 @@ TEST_CASE("Cached reverse") {
     SUBCASE("Operator=(default_sentinel_t)") {
         std::list<int> list{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         // Make it so that it has a sentinel and is bidirectional
-        auto t = make_bidi_sentinelled(list);
+        auto t = make_sized_bidi_sentinelled(list);
         auto common = lz::cached_reverse(make_sentinel_assign_op_tester(t));
         std::vector<int> expected = { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
         REQUIRE(lz::equal(common, expected));

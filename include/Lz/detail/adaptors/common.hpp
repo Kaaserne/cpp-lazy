@@ -197,11 +197,11 @@ struct common_adaptor {
      * @return A common iterable that can be used with algorithms that require a common iterator.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr enable_if_t<!is_ra<iter_t<Iterable>>::value && has_sentinel<Iterable>::value &&
-                                           std::is_assignable<iter_t<Iterable>, sentinel_t<Iterable>>::value &&
-                                           is_sized<Iterable>::value,
-                                       sized_iterable<iter_t<Iterable>>>
-    operator()(Iterable&& iterable) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
+        enable_if_t<!is_ra<iter_t<Iterable>>::value && has_sentinel<Iterable>::value &&
+                        std::is_assignable<iter_t<Iterable>, sentinel_t<Iterable>>::value && is_sized<Iterable>::value,
+                    sized_iterable<iter_t<Iterable>>>
+        operator()(Iterable&& iterable) const {
         auto end = std::begin(iterable);
         end = detail::end(std::forward<Iterable>(iterable));
         return { detail::begin(std::forward<Iterable>(iterable)), end, lz::size(iterable) };

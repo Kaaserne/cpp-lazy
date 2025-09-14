@@ -224,7 +224,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
-        auto bidi_sentinel = make_bidi_sentinelled(lst);
+        auto bidi_sentinel = make_sized_bidi_sentinelled(lst);
         auto lst_chunked = make_sentinel_assign_op_tester(lz::chunks(bidi_sentinel, 3));
         using value_type_3 = lz::val_iterable_t<decltype(lst_chunked)>;
         expected = { { 1, 2, 3 }, { 4, 5, 6 } };

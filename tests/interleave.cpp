@@ -21,7 +21,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::vector<int> a = { 1, 3, 5 };
         std::vector<int> b = { 2, 4, 6 };
-        auto interleaved = lz::interleave(make_bidi_sentinelled(a), make_bidi_sentinelled(b));
+        auto interleaved = lz::interleave(make_sized_bidi_sentinelled(a), make_sized_bidi_sentinelled(b));
         auto common = make_sentinel_assign_op_tester(interleaved);
         auto expected = { 1, 2, 3, 4, 5, 6 };
         REQUIRE(lz::equal(common, expected));

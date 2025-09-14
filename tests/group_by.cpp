@@ -39,12 +39,12 @@ TEST_CASE("operator=(default_sentinel_t)") {
                                                                     std::make_pair(3, std::vector<int>{ 3 }),
                                                                     std::make_pair(4, std::vector<int>{ 4, 4 }) };
         REQUIRE(lz::equal(common, expected2,
-                          [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
+                          [](reference a, const std::pair<int, std::vector<int>>& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
     }
 
     SUBCASE("bidirectional") {
         std::vector<int> vec = { 1, 1, 2, 2, 3, 4, 4 };
-        auto bidi_sentinelled = make_bidi_sentinelled(vec);
+        auto bidi_sentinelled = make_sized_bidi_sentinelled(vec);
         auto grouped = lz::group_by(bidi_sentinelled, MAKE_BIN_PRED(equal_to){});
         auto common = make_sentinel_assign_op_tester(grouped);
         using reference = lz::ref_iterable_t<decltype(common)>;
@@ -52,10 +52,13 @@ TEST_CASE("operator=(default_sentinel_t)") {
                                                                     std::make_pair(2, std::vector<int>{ 2, 2 }),
                                                                     std::make_pair(3, std::vector<int>{ 3 }),
                                                                     std::make_pair(4, std::vector<int>{ 4, 4 }) };
-        REQUIRE(lz::equal(common, expected2,
-                          [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
-        REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse,
-                          [](reference a, const auto& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
+        REQUIRE(lz::equal(common, expected2, [](reference a, const std::pair<int, std::vector<int>>& b) {
+            return a.first == b.first && lz::equal(a.second, b.second);
+        }));
+        REQUIRE(
+            lz::equal(common | lz::reverse, expected2 | lz::reverse, [](reference a, const std::pair<int, std::vector<int>>& b) {
+                return a.first == b.first && lz::equal(a.second, b.second);
+            }));
     }
 }
 

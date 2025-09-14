@@ -22,7 +22,7 @@ TEST_CASE("operator=(default_sentinel_t)") {
 
     SUBCASE("bidirectional") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
-        auto sentinelled = make_bidi_sentinelled(lst);
+        auto sentinelled = make_sized_bidi_sentinelled(lst);
         auto common = make_sentinel_assign_op_tester(lz::as_iterator(sentinelled));
         auto expected = { 1, 2, 3, 4, 5 };
         REQUIRE(lz::equal(common, expected, [](decltype(*common.begin()) a, int b) { return *a == b; }));

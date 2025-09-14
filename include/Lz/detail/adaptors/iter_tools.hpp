@@ -487,7 +487,7 @@ struct iter_decay {
      * IteratorTag.
      */
     template <class Iterable, class IteratorTag>
-    LZ_NODISCARD constexpr map_iterable<
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 map_iterable<
         as_iterator_iterable<remove_ref_t<Iterable>, IteratorTag>, deref_fn>
     operator()(Iterable &&iterable, IteratorTag it) const {
       static_cast<void>(it);
