@@ -300,30 +300,6 @@ template<class T>
 using remove_cvref_t = typename std::remove_cv<remove_ref_t<T>>::type;
 
 #endif // LZ_HAS_CXX_20
-// TODO concepts
-template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).begin()))
-    -> enable_if_t<!std::is_array<remove_ref_t<Iterable>>::value, decltype(std::forward<Iterable>(c).begin())> {
-    return std::forward<Iterable>(c).begin();
-}
-
-template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::forward<Iterable>(c).end()))
-    -> enable_if_t<!std::is_array<remove_ref_t<Iterable>>::value, decltype(std::forward<Iterable>(c).end())> {
-    return std::forward<Iterable>(c).end();
-}
-
-template<class Iterable>
-LZ_NODISCARD constexpr auto begin(Iterable&& c) noexcept(noexcept(std::begin(c)))
-    -> enable_if_t<std::is_array<remove_ref_t<Iterable>>::value, decltype(std::begin(c))> {
-    return std::begin(c);
-}
-
-template<class Iterable>
-LZ_NODISCARD constexpr auto end(Iterable&& c) noexcept(noexcept(std::end(c)))
-    -> enable_if_t<std::is_array<remove_ref_t<Iterable>>::value, decltype(std::end(c))> {
-    return std::end(c);
-}
 } // namespace detail
 } // namespace lz
 
@@ -368,7 +344,7 @@ LZ_NODISCARD constexpr size_t size(const T(&)[N]) noexcept;
  * @tparam Iterable The iterable to get the iterator type from.
  */
 template<class Iterable>
-using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterable>())));
+using iter_t = decltype(std::begin(std::declval<Iterable&>()));
 
 /**
  * @brief Can be used to get the sentinel type of an iterable. Example: `lz::sentinel_t<std::vector<int>>` will return
@@ -376,7 +352,7 @@ using iter_t = decltype(detail::begin(std::forward<Iterable>(std::declval<Iterab
  * @tparam Iterable The iterable to get the sentinel type from.
  */
 template<class Iterable>
-using sentinel_t = decltype(detail::end(std::forward<Iterable>(std::declval<Iterable>())));
+using sentinel_t = decltype(std::end(std::declval<Iterable&>()));
 
 /**
  * @brief Can be used to get the value type of an iterator. Example: `lz::val_t<std::vector<int>::iterator>` will return `int`.

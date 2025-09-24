@@ -61,20 +61,12 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return next_fast_safe(std::move(_iterable), static_cast<diff>(_n));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return next_fast_safe(_iterable, static_cast<diff>(_n));
     }
 
-    LZ_NODISCARD constexpr sentinel end() const& {
+    LZ_NODISCARD constexpr sentinel end() const {
         return _iterable.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
-        return detail::end(std::move(_iterable));
     }
 };
 } // namespace detail

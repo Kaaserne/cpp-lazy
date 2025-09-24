@@ -77,32 +77,18 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const {
         if (!_iterable_ref_ptr) {
             return iter_t<Iterable>{};
         }
         return std::begin(*_iterable_ref_ptr);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
-        if (!_iterable_ref_ptr) {
-            return iter_t<Iterable>{};
-        }
-        return detail::begin(std::move(*_iterable_ref_ptr));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
         if (!_iterable_ref_ptr) {
             return sentinel_t<Iterable>{};
         }
         return std::end(*_iterable_ref_ptr);
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
-        if (!_iterable_ref_ptr) {
-            return sentinel_t<Iterable>{};
-        }
-        return detail::end(std::move(*_iterable_ref_ptr));
     }
 };
 
@@ -183,28 +169,20 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() & {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const {
         return _iterable_value.begin();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
+        return _iterable_value.end();
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() {
         return _iterable_value.begin();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
-        return detail::begin(std::move(_iterable_value));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() & {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() {
         return _iterable_value.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
-        return _iterable_value.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
-        return detail::end(std::move(_iterable_value));
     }
 };
 

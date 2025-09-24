@@ -80,12 +80,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const {
-        if constexpr (store_iterables) {
-            return { _iterables, begin_maybe_homo(_iterables) };
-        }
-        else {
-            return { begin_maybe_homo(_iterables) };
-        }
+        return { begin_maybe_homo(_iterables) };
     }
 
     [[nodiscard]] constexpr auto end() const {

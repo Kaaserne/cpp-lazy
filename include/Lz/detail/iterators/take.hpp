@@ -46,7 +46,7 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr n_take_iterator& operator=(default_sentinel_t) {
+    constexpr n_take_iterator& operator=(default_sentinel_t) {
         if constexpr (is_bidi_v<Iterator>) {
             _iterator = std::next(_iterator, static_cast<difference_type>(_n));
         }

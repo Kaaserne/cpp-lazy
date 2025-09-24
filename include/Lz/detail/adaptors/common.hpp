@@ -47,17 +47,17 @@ struct common_adaptor {
             return std::forward<Iterable>(iterable);
         }
         else if constexpr (is_ra_v<it>) {
-            const auto size = detail::end(std::forward<Iterable>(iterable)) - iterable.begin();
+            const auto size = std::end(iterable) - iterable.begin();
             return basic_iterable<it>{ iterable.begin(), iterable.begin() + size };
         }
         else if constexpr (std::is_assignable_v<it, sentinel_t<Iterable>>) {
             auto end = std::begin(iterable);
-            end = detail::end(std::forward<Iterable>(iterable));
+            end = std::end(iterable);
             if constexpr (is_sized_v<Iterable>) {
-                return sized_iterable<it>{ detail::begin(std::forward<Iterable>(iterable)), end, lz::size(iterable) };
+                return sized_iterable<it>{ std::begin(iterable), end, lz::size(iterable) };
             }
             else {
-                return make_basic_iterable(detail::begin(std::forward<Iterable>(iterable)), end);
+                return make_basic_iterable(std::begin(iterable), end);
             }
         }
         else {
@@ -166,8 +166,8 @@ struct common_adaptor {
                     basic_iterable<iter_t<Iterable>>>
         operator()(Iterable&& iterable) const {
         auto end = std::begin(iterable);
-        end = detail::end(std::forward<Iterable>(iterable));
-        return make_basic_iterable(detail::begin(std::forward<Iterable>(iterable)), end);
+        end = std::end(iterable);
+        return make_basic_iterable(std::begin(iterable), end);
     }
 
     /**
@@ -203,8 +203,8 @@ struct common_adaptor {
                     sized_iterable<iter_t<Iterable>>>
         operator()(Iterable&& iterable) const {
         auto end = std::begin(iterable);
-        end = detail::end(std::forward<Iterable>(iterable));
-        return { detail::begin(std::forward<Iterable>(iterable)), end, lz::size(iterable) };
+        end = std::end(iterable);
+        return { std::begin(iterable), end, lz::size(iterable) };
     }
 
     /**

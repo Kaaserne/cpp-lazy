@@ -49,7 +49,7 @@ public:
 
     template<class Iterable>
     explicit constexpr basic_iterable_impl(Iterable&& iterable) :
-        basic_iterable_impl{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)) } {
+        basic_iterable_impl{ std::begin(iterable), std::end(iterable) } {
     }
 
     constexpr basic_iterable_impl(iterator_type begin, sentinel_type end) : _begin{ std::move(begin) }, _end{ std::move(end) } {
@@ -140,8 +140,8 @@ public:
 
     template<class Iterable>
     explicit constexpr sized_iterable_impl(Iterable&& iterable) :
-        _begin{ detail::begin(std::forward<Iterable>(iterable)) },
-        _end{ detail::end(std::forward<Iterable>(iterable)) },
+        _begin{ std::begin(iterable) },
+        _end{ std::end(iterable) },
         _size{ lz::size(iterable) } {
     }
 
@@ -445,8 +445,7 @@ struct container_constructor {
             return Container{ std::forward<Iterable>(iterable), std::forward<Args>(args)... };
         }
         else if constexpr (std::is_constructible_v<Container, it, sentinel_t<Iterable>, remove_cvref_t<Args>...>) {
-            return Container{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                              std::forward<Args>(args)... };
+            return Container{ std::begin(iterable), std::end(iterable), std::forward<Args>(args)... };
         }
         else if constexpr (is_ra_v<it> && std::is_constructible_v<Container, it, it, remove_cvref_t<Args>...>) {
             auto iter = std::begin(iterable);
@@ -482,8 +481,7 @@ struct container_constructor {
     LZ_NODISCARD static constexpr enable_if_t<
         !constructible_from_iterable<Iterable, Args...>::value && constructible_from_it_sent<Iterable, Args...>::value, Container>
     construct(Iterable&& iterable, Args&&... args) {
-        return Container{ detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                          std::forward<Args>(args)... };
+        return Container{ std::begin(iterable), std::end(iterable), std::forward<Args>(args)... };
     }
 
     template<class Iterable, class... Args>

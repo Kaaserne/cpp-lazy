@@ -86,12 +86,8 @@ public:
         _delimiter{ std::move(delimiter) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable.begin(), _iterable.end(), _delimiter };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_delimiter) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

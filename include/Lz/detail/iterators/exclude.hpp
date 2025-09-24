@@ -38,7 +38,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterator()
-        requires(std::default_initializable<Iterator>)
+        requires(std::default_initializable<Iterator> && std::default_initializable<Iterable>)
     = default;
 
 #else
@@ -68,7 +68,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 exclude_iterator& operator=(default_sentinel_t) {
         _iterator = _iterable.end();
-        if constepxr (is_bidi_v<iter>) {
+        if constexpr (is_bidi_v<iter>) {
             _index = static_cast<difference_type>(lz::eager_size(_iterable));
         }
         return *this;

@@ -21,7 +21,7 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterable>
 LZ_NODISCARD constexpr bool empty(Iterable&& iterable) {
-    return detail::empty(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
+    return detail::empty(std::begin(iterable), std::end(iterable));
 }
 
 /**
@@ -31,7 +31,7 @@ LZ_NODISCARD constexpr bool empty(Iterable&& iterable) {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_one(Iterable&& iterable) {
-    return detail::has_one(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
+    return detail::has_one(std::begin(iterable), std::end(iterable));
 }
 
 /**
@@ -41,17 +41,17 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_one(Iterable&& iterable) {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
-    return detail::has_many(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
+    return detail::has_many(std::begin(iterable), std::end(iterable));
 }
 
 /**
- * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the sequence.
- * If the iterable is already at end, an empty optional is returned.
+ * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the
+ * sequence. If the iterable is already at end, an empty optional is returned.
  *
  * @param begin The beginning of the sequence to peek into.
  * @param end The end of the sequence to peek into.
  * @return A (std::)optional of reference wrapper if the sequence is a reference, value if it is not.
- * detail::end(std::forward<Iterable>(iterable))))
+ * std::end(iterable)))
  */
 template<class Iterator, class S>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(detail::peek(begin, end)) {
@@ -59,15 +59,14 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(de
 }
 
 /**
- * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the sequence.
- * If the iterable is already at end, an empty optional is returned.
+ * @brief Returns an optional reference(_wrapper (if the sequence has an actual reference)) to the next element in the
+ * sequence. If the iterable is already at end, an empty optional is returned.
  * @param iterable The iterable to peek into.
  * @return A (std::)optional of reference wrapper if the sequence is a reference, value if it is not.
  */
 template<class Iterable>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterable&& iterable)
-    -> decltype(lz::peek(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)))) {
-    return lz::peek(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterable && iterable) -> decltype(lz::peek(std::begin(iterable), std::end(iterable))) {
+    return lz::peek(std::begin(iterable), std::end(iterable));
 }
 
 /**
@@ -134,13 +133,11 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T accumulate(Iterable&& iterable, T&& init, Bin
 
     using detail::accumulate;
     using std::accumulate;
-    return accumulate(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                      std::forward<T>(init), std::forward<BinaryOp>(binary_op));
+    return accumulate(std::begin(iterable), std::end(iterable), std::forward<T>(init), std::forward<BinaryOp>(binary_op));
 #else
 
     // CXX20 uses std::move, but everything below 20 does not.
-    return detail::accumulate(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                              std::forward<T>(init), std::forward<BinaryOp>(binary_op));
+    return detail::accumulate(std::begin(iterable), std::end(iterable), std::forward<T>(init), std::forward<BinaryOp>(binary_op));
 
 #endif // LZ_HAS_CXX_20
 }
@@ -156,8 +153,7 @@ template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> max_element(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
     using detail::max_element;
     using std::max_element;
-    return max_element(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                       std::forward<BinaryPredicate>(binary_predicate));
+    return max_element(std::begin(iterable), std::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**
@@ -171,8 +167,7 @@ template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> min_element(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
     using detail::min_element;
     using std::min_element;
-    return min_element(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                       std::forward<BinaryPredicate>(binary_predicate));
+    return min_element(std::begin(iterable), std::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**
@@ -186,8 +181,7 @@ template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using detail::find_if;
     using std::find_if;
-    return find_if(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                   std::forward<UnaryPredicate>(unary_predicate));
+    return find_if(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -201,13 +195,12 @@ template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find(Iterable&& iterable, const T& value) {
     using detail::find;
     using std::find;
-    return find(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), value);
+    return find(std::begin(iterable), std::end(iterable), value);
 }
 
 /**
  * @brief Finds the first element in the range [begin(iterable), end(iterable)) that satisfies the value @p value.
- * Note that when @p iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to
- * reverse the elements.
+ * Does not use `lz::cached_reverse` to reverse the elements (if bidirectional).
  * @param iterable The iterable to find the element in
  * @param value The value to find
  * @return An iterator to the first element that satisfies the unary_predicate or `end(iterable)` if the element is not found
@@ -219,8 +212,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable,
 
 /**
  * @brief Finds the first element in the range [begin(iterable), end(iterable)) that satisfies the unary_predicate @p
- * unary_predicate. Note that when @p iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to
- * reverse the elements.
+ * unary_predicate. Does not use `lz::cached_reverse` to reverse the elements (if bidirectional).
  * @param iterable The iterable to find the element in
  * @param unary_predicate The unary_predicate to find the element with
  * @return An iterator to the first element that satisfies the unary_predicate or `end(iterable)` if the element is not found
@@ -242,9 +234,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if(Iterable&& iterab
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::pair<iter_t<Iterable>, iter_t<Iterable>> search(
-    Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
-    return detail::search(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                          detail::begin(std::forward<Iterable>(iterable2)), detail::end(std::forward<Iterable>(iterable2)),
+    Iterable && iterable, Iterable2 && iterable2, BinaryPredicate&& binary_predicate = {}) {
+    return detail::search(std::begin(iterable), std::end(iterable), std::begin(iterable2), std::end(iterable2),
                           std::forward<BinaryPredicate>(binary_predicate));
 }
 
@@ -261,14 +252,12 @@ template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using detail::find_if_not;
     using std::find_if_not;
-    return find_if_not(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                       std::forward<UnaryPredicate>(unary_predicate));
+    return find_if_not(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the unary_predicate @p
- * unary_predicate. Note that when @p iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to
- * reverse the elements.
+ * unary_predicate. Does not use `lz::cached_reverse` to reverse the elements (if bidirectional).
  *
  * @param iterable The iterable to find the element in
  * @param unary_predicate The unary_predicate to find the element with
@@ -289,10 +278,10 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last_if_not(Iterable&& it
  * @return The value @p to_find if it is found, otherwise @p default_value
  */
 template<class Iterable, class T, class U = detail::remove_cvref_t<T>>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default(Iterable&& iterable, T&& to_find,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default(Iterable && iterable, T && to_find,
                                                                           U&& default_value = {}) {
-    return detail::find_or_default(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                                   std::forward<T>(to_find), std::forward<U>(default_value));
+    return detail::find_or_default(std::begin(iterable), std::end(iterable), std::forward<T>(to_find),
+                                   std::forward<U>(default_value));
 }
 
 /**
@@ -306,24 +295,23 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default(Iterab
  */
 template<class Iterable, class UnaryPredicate, class U = val_iterable_t<Iterable>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_or_default_if(
-    Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value = {}) {
-    return detail::find_or_default_if(detail::begin(std::forward<Iterable>(iterable)),
-                                      detail::end(std::forward<Iterable>(iterable)),
-                                      std::forward<UnaryPredicate>(unary_predicate), std::forward<U>(default_value));
+    Iterable && iterable, UnaryPredicate && unary_predicate, U&& default_value = {}) {
+    return detail::find_or_default_if(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate),
+                                      std::forward<U>(default_value));
 }
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that satisfies the value @p to_find. If the
- * element is found, it returns the value, otherwise it returns @p default_value. Note that when @p iterable has a sentinel,
- * the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
+ * element is found, it returns the value, otherwise it returns @p default_value. Does not use `lz::cached_reverse` to reverse
+ * the elements (if bidirectional).
  * @param iterable The iterable to find the element in
  * @param to_find The value to find
- * @param default_value The value to return when no element matches @p to_find in [begin(iterable), end(iterable)). Defaults to
- * `T()`
+ * @param default_value The value to return when no element matches @p to_find in [begin(iterable), end(iterable)). Defaults
+ * to `T()`
  * @return The value if it is found, otherwise @p default_value
  */
 template<class Iterable, class T, class U = T>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default(Iterable&& iterable, T&& to_find,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default(Iterable && iterable, T && to_find,
                                                                                U&& default_value = {}) {
     return detail::find_last_or_default(std::forward<Iterable>(iterable), std::forward<T>(to_find),
                                         std::forward<U>(default_value));
@@ -331,8 +319,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default(I
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that satisfies the unary_predicate @p
- * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Note that when @p
- * iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
+ * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Does not
+ * use `lz::cached_reverse` to reverse the elements (if bidirectional).
  * @param iterable The iterable to search.
  * @param unary_predicate The search unary_predicate in [begin(iterable), end(iterable)). Must return bool.
  * @param default_value The value to return when no element matches unary_predicate @p unary_predicate in [begin(iterable),
@@ -341,22 +329,23 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default(I
  */
 template<class Iterable, class UnaryPredicate, class U = val_iterable_t<Iterable>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_if(
-    Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value = {}) {
+    Iterable && iterable, UnaryPredicate && unary_predicate, U&& default_value = {}) {
     return detail::find_last_or_default_if(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate),
                                            std::forward<U>(default_value));
 }
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the value @p value. If
- * the element is found, it returns the value, otherwise it returns @p default_value. Does not use `lz::cached_reverse` to reverse
- * the elements.
+ * the element is found, it returns the value, otherwise it returns @p default_value. Does not use `lz::cached_reverse` to
+ * reverse the elements (if bidirectional).
  * @param iterable The iterable to search in
  * @param value The value to search for
- * @param default_value The value to return when no element matches @p value in [begin(iterable), end(iterable)). Defaults to `T()
+ * @param default_value The value to return when no element matches @p value in [begin(iterable), end(iterable)). Defaults to
+ * `T()
  * @return The value if it is found, otherwise @p default_value
  */
 template<class Iterable, class T, class U = T>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_not(Iterable&& iterable, T&& value,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_not(Iterable && iterable, T && value,
                                                                                    U&& default_value = {}) {
     return detail::find_last_or_default_not(std::forward<Iterable>(iterable), std::forward<T>(value),
                                             std::forward<U>(default_value));
@@ -364,8 +353,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_n
 
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the unary_predicate @p
- * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Note that when @p
- * iterable has a sentinel, the entire range is searched. Does not use `lz::cached_reverse` to reverse the elements.
+ * unary_predicate. If the element is found, it returns the value, otherwise it returns @p default_value. Does not use
+ * `lz::cached_reverse` to reverse the elements (if bidirectional).
  * @param iterable The iterable to search in
  * @param unary_predicate The search unary_predicate in [begin(iterable), end(iterable)). Must return bool-like.
  * @param default_value The value to return when no element matches unary_predicate @p unary_predicate in [begin(iterable),
@@ -374,7 +363,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_n
  */
 template<class Iterable, class UnaryPredicate, class U = val_iterable_t<Iterable>>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_if_not(
-    Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value = {}) {
+    Iterable && iterable, UnaryPredicate && unary_predicate, U&& default_value = {}) {
     return detail::find_last_or_default_if_not(std::forward<Iterable>(iterable), std::forward<UnaryPredicate>(unary_predicate),
                                                std::forward<U>(default_value));
 }
@@ -388,8 +377,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 val_iterable_t<Iterable> find_last_or_default_i
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t index_of(Iterable && iterable, const T& value) {
-    return detail::index_of(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                            value);
+    return detail::index_of(std::begin(iterable), std::end(iterable), value);
 }
 
 /**
@@ -402,8 +390,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t index_of(Iterable && iterable, const T& 
  */
 template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t index_of_if(Iterable && iterable, UnaryPredicate && unary_predicate) {
-    return detail::index_of_if(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                               std::forward<UnaryPredicate>(unary_predicate));
+    return detail::index_of_if(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -415,8 +402,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t index_of_if(Iterable && iterable, UnaryP
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterable&& iterable, const T& value) {
-    return detail::contains(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                            value);
+    return detail::contains(std::begin(iterable), std::end(iterable), value);
 }
 
 /**
@@ -428,10 +414,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterable&& iterable, const T& val
  * @return `true` if the value is found, `false` otherwise
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool starts_with(Iterable&& iterable, Iterable2&& iterable2,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool starts_with(Iterable && iterable, Iterable2 && iterable2,
                                                   BinaryPredicate&& binary_predicate = {}) {
-    return detail::starts_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                               detail::begin(std::forward<Iterable>(iterable2)), detail::end(std::forward<Iterable>(iterable2)),
+    return detail::starts_with(std::begin(iterable), std::end(iterable), std::begin(iterable2), std::end(iterable2),
                                std::forward<BinaryPredicate>(binary_predicate));
 }
 
@@ -440,9 +425,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool starts_with(Iterable&& iterable, Iterable2
 /**
  * @brief Checks if the range [begin(iterable), end(iterable)) ends with the bidirectional range [begin(iterable2),
  * end(iterable2)). Needs to know the size of the range if its input iterables aren't bidirectional
- * so it may be worth your while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and going
- * to use this function multiple times. Does not use `lz::cached_reverse` to reverse the elements.
- *
+ * so it may be worth your while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and
+ * going to use this function multiple times. Does not use `lz::cached_reverse` to reverse the elements (if bidirectional).
  * @param iterable The iterable to check
  * @param iterable2 The bidirectional iterable to check for
  * @param binary_predicate The binary binary_predicate to check the values with
@@ -451,13 +435,13 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool starts_with(Iterable&& iterable, Iterable2
 template<class Iterable, class Iterable2, class BinaryPredicate = std::equal_to<>>
 [[nodiscard]] constexpr bool ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
     if constexpr (detail::is_bidi_v<iter_t<Iterable>>) {
-        return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                                 iterable2.begin(), iterable2.end(), std::forward<BinaryPredicate>(binary_predicate));
+        return detail::ends_with(std::begin(iterable), std::end(iterable), iterable2.begin(), iterable2.end(),
+                                 std::forward<BinaryPredicate>(binary_predicate));
     }
     else {
-        return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                                 iterable2.begin(), iterable2.end(), std::forward<BinaryPredicate>(binary_predicate),
-                                 lz::eager_size(iterable), lz::eager_size(iterable2));
+        return detail::ends_with(std::begin(iterable), std::end(iterable), iterable2.begin(), iterable2.end(),
+                                 std::forward<BinaryPredicate>(binary_predicate), lz::eager_size(iterable),
+                                 lz::eager_size(iterable2));
     }
 }
 
@@ -475,15 +459,15 @@ template<class Iterable, class Iterable2, class BinaryPredicate = std::equal_to<
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_bidi<iter_t<Iterable>>::value, bool> ends_with(
     Iterable && iterable, Iterable2 && iterable2, BinaryPredicate&& binary_predicate = {}) {
-    return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                             iterable2.begin(), iterable2.end(), std::forward<BinaryPredicate>(binary_predicate));
+    return detail::ends_with(std::begin(iterable), std::end(iterable), iterable2.begin(), iterable2.end(),
+                             std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**
  * @brief Checks if the range [begin(iterable), end(iterable)) ends with the forward iterable range [begin(iterable2),
- * end(iterable2)). Needs to know the size of the range if its input iterables aren't bidirectional so it may be worth your while
- * to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and going to use this function multiple
- * times.
+ * end(iterable2)). Needs to know the size of the range if its input iterables aren't bidirectional so it may be worth your
+ * while to use `lz::cache_size` if the input iterable @p iterable and @p iterable2 aren't sized and going to use this
+ * function multiple times.
  *
  * @param iterable The iterable to check
  * @param iterable2 The forward iterable to check for
@@ -493,9 +477,9 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_bidi<iter_t<Iter
 template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_bidi<iter_t<Iterable>>::value, bool> ends_with(
     Iterable && iterable, Iterable2 && iterable2, BinaryPredicate&& binary_predicate = {}) {
-    return detail::ends_with(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                             iterable2.begin(), iterable2.end(), std::forward<BinaryPredicate>(binary_predicate),
-                             lz::eager_size(iterable), lz::eager_size(iterable2));
+    return detail::ends_with(std::begin(iterable), std::end(iterable), iterable2.begin(), iterable2.end(),
+                             std::forward<BinaryPredicate>(binary_predicate), lz::eager_size(iterable),
+                             lz::eager_size(iterable2));
 }
 
 #endif // LZ_HAS_CXX_17
@@ -512,8 +496,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_bidi<iter_t<Ite
 template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> partition(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using std::partition;
-    return partition(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                     std::forward<UnaryPredicate>(unary_predicate));
+    return partition(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -524,8 +507,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> partition(Iterable&& iterable,
  */
 template<class Iterable, class BinaryOp = MAKE_BIN_PRED(plus)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterable&& iterable, BinaryOp binary_op = {}) {
-    return detail::mean(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                        std::move(binary_op));
+    return detail::mean(std::begin(iterable), std::end(iterable), std::move(binary_op));
 }
 
 /**
@@ -539,8 +521,7 @@ template<class Iterable, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void for_each(Iterable&& iterable, UnaryOp&& unary_op) {
     using detail::for_each;
     using std::for_each;
-    for_each(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-             std::forward<UnaryOp>(unary_op));
+    for_each(std::begin(iterable), std::end(iterable), std::forward<UnaryOp>(unary_op));
 }
 
 /**
@@ -552,8 +533,7 @@ LZ_CONSTEXPR_CXX_14 void for_each(Iterable&& iterable, UnaryOp&& unary_op) {
  */
 template<class Iterable, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void for_each_while(Iterable&& iterable, UnaryOp&& unary_op) {
-    detail::for_each_while(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                           std::forward<UnaryOp>(unary_op));
+    detail::for_each_while(std::begin(iterable), std::end(iterable), std::forward<UnaryOp>(unary_op));
 }
 
 /**
@@ -566,8 +546,7 @@ LZ_CONSTEXPR_CXX_14 void for_each_while(Iterable&& iterable, UnaryOp&& unary_op)
  */
 template<class Iterable, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterable && iterable, size_t n, UnaryOp && unary_op) {
-    detail::for_each_while_n(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), n,
-                             std::forward<UnaryOp>(unary_op));
+    detail::for_each_while_n(std::begin(iterable), std::end(iterable), n, std::forward<UnaryOp>(unary_op));
 }
 
 /**
@@ -580,7 +559,7 @@ template<class Iterable, class OutputIterator>
 LZ_CONSTEXPR_CXX_14 void copy(Iterable&& iterable, OutputIterator output) {
     using detail::copy;
     using std::copy;
-    copy(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), output);
+    copy(std::begin(iterable), std::end(iterable), output);
 }
 
 /**
@@ -594,8 +573,7 @@ template<class Iterable, class OutputIterator, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void transform(Iterable&& iterable, OutputIterator output, UnaryOp&& unary_op) {
     using detail::transform;
     using std::transform;
-    transform(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), std::move(output),
-              std::forward<UnaryOp>(unary_op));
+    transform(std::begin(iterable), std::end(iterable), std::move(output), std::forward<UnaryOp>(unary_op));
 }
 
 /**
@@ -619,7 +597,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool equal(IterableA&& a, IterableB&& b, Binary
  * @return Iteartor to the first element that satisfies the value or `end(iterable)` if the element is not found
  */
 template<class Iterable, class T, class BinaryPredicate = MAKE_BIN_PRED(less)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& value,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable && iterable, const T& value,
                                                               BinaryPredicate&& binary_predicate = {}) {
     return detail::lower_bound(std::forward<Iterable>(iterable), value, std::forward<BinaryPredicate>(binary_predicate));
 }
@@ -634,7 +612,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> lower_bound(Iterable&& iterabl
  * @return Iteartor to the first element that satisfies the value or `end(iterable)` if the element is not found
  */
 template<class Iterable, class T, class BinaryPredicate = MAKE_BIN_PRED(less)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> upper_bound(Iterable&& iterable, const T& value,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> upper_bound(Iterable && iterable, const T& value,
                                                               BinaryPredicate&& binary_predicate = {}) {
     return detail::upper_bound(std::forward<Iterable>(iterable), value, std::forward<BinaryPredicate>(binary_predicate));
 }
@@ -648,7 +626,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17 iter_t<Iterable> upper_bound(Iterable&& iterabl
  * @return true if the value is found, false otherwise
  */
 template<class Iterable, class T, class BinaryPredicate = MAKE_BIN_PRED(less)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_17 bool binary_search(Iterable&& iterable, const T& value,
+LZ_NODISCARD LZ_CONSTEXPR_CXX_17 bool binary_search(Iterable && iterable, const T& value,
                                                     BinaryPredicate&& binary_predicate = {}) {
     return detail::binary_search(std::forward<Iterable>(iterable), value, std::forward<BinaryPredicate>(binary_predicate));
 }
@@ -664,8 +642,7 @@ template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool all_of(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using detail::all_of;
     using std::all_of;
-    return all_of(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                  std::forward<UnaryPredicate>(unary_predicate));
+    return all_of(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -679,8 +656,7 @@ template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using detail::any_of;
     using std::any_of;
-    return any_of(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                  std::forward<UnaryPredicate>(unary_predicate));
+    return any_of(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -695,8 +671,7 @@ template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool none_of(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using detail::none_of;
     using std::none_of;
-    return none_of(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                   std::forward<UnaryPredicate>(unary_predicate));
+    return none_of(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -712,8 +687,7 @@ template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(equal_to)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> adjacent_find(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
     using detail::adjacent_find;
     using std::adjacent_find;
-    return adjacent_find(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                         std::forward<BinaryPredicate>(binary_predicate));
+    return adjacent_find(std::begin(iterable), std::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 /**
@@ -728,8 +702,7 @@ template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 diff_iterable_t<Iterable> count_if(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
     using detail::count_if;
     using std::count_if;
-    return count_if(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                    std::forward<UnaryPredicate>(unary_predicate));
+    return count_if(std::begin(iterable), std::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
 }
 
 /**
@@ -743,7 +716,7 @@ template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 diff_iterable_t<Iterable> count(Iterable&& iterable, const T& value) {
     using detail::count;
     using std::count;
-    return count(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)), value);
+    return count(std::begin(iterable), std::end(iterable), value);
 }
 
 /**
@@ -757,8 +730,7 @@ template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
     using detail::is_sorted;
     using std::is_sorted;
-    return is_sorted(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                     std::forward<BinaryPredicate>(binary_predicate));
+    return is_sorted(std::begin(iterable), std::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 } // namespace lz

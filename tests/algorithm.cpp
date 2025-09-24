@@ -754,6 +754,7 @@ TEST_CASE("Find last") {
 TEST_CASE("Find last random access") {
     SUBCASE("With non-empty") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 5 };
+        lz::detail::reverse_iterable<std::vector<int>, false> rev{ vec };
         auto pos = lz::find_last_if(vec, [](int i) { return i == 5; });
         REQUIRE(*pos == 5);
         REQUIRE(lz::distance(vec.begin(), pos) == 5);

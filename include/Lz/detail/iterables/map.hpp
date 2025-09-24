@@ -67,55 +67,14 @@ public:
 
 #endif
 
-#ifdef LZ_HAS_CXX_17
-
-    [[nodiscard]] constexpr iterator begin() && {
-        if constexpr (!return_sentinel) {
-            return { detail::begin(std::move(_iterable)), _unary_op };
-        }
-        else {
-            return { detail::begin(std::move(_iterable)), std::move(_unary_op) };
-        }
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> begin() && {
-        return { detail::begin(std::move(_iterable)), _unary_op };
-    }
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        return { detail::begin(std::move(_iterable)), std::move(_unary_op) };
-    }
-
-#endif
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable.begin(), _unary_op };
     }
 
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator end() &&
-        requires(!return_sentinel)
-    {
-        return { detail::end(std::move(_iterable)), _unary_op };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() && {
-        return { detail::end(std::move(_iterable)), _unary_op };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr auto end() const& {
+    [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
             return iterator{ _iterable.end(), _unary_op };
         }
@@ -127,12 +86,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterable.end(), _unary_op };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const {
         return _iterable.end();
     }
 

@@ -23,10 +23,8 @@ namespace detail {
 // ```
 template<class T>
 class sentinel_with {
-    // TODO replace? maybe to other header
-
     T value{};
-    // TODO for all iterators that reutrn an actual iterator, wrap it inside this class
+
     template<class, class>
     friend class enumerate_iterable;
 
@@ -63,7 +61,7 @@ class sentinel_with {
     template<class, class>
     friend class regex_split_iterable;
 
-    constexpr sentinel_with(T v) noexcept(std::is_nothrow_move_constructible<T>::value) : value{ std::move(v) } {
+    explicit constexpr sentinel_with(T v) noexcept(std::is_nothrow_move_constructible<T>::value) : value{ std::move(v) } {
     }
 
 public:

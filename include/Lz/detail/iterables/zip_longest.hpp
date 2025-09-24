@@ -84,22 +84,21 @@ public:
         if constexpr (!is_bidi_tag_v<iter_category>) {
             return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
         }
-        else
+        else {
             using diff = typename iterator::difference_type;
-        return iterator{ _iterables, begin_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
+            return iterator{ _iterables, begin_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
+        }
     }
-}
 
-[[nodiscard]] constexpr auto
-end() const {
-    if constexpr (return_sentinel) {
-        return lz::default_sentinel;
+    [[nodiscard]] constexpr auto end() const {
+        if constexpr (return_sentinel) {
+            return lz::default_sentinel;
+        }
+        else {
+            using diff = typename iterator::difference_type;
+            return iterator{ _iterables, end_maybe_homo(_iterables), iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
+        }
     }
-    else {
-        using diff = typename iterator::difference_type;
-        return iterator{ _iterables, end_maybe_homo(_iterables), iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
-    }
-}
 
 #else
 

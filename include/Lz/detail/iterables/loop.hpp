@@ -123,12 +123,8 @@ public:
     explicit constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin() };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { _iterable, detail::begin(std::move(_iterable)) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const {

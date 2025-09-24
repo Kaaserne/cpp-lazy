@@ -343,9 +343,9 @@ increment_or_decrement_iterator(Iterable&& iterable, const size_t this_size, con
     const auto to_decrement = static_cast<diff_type>(this_size - min);
     const auto to_increment = static_cast<diff_type>(min);
     if (to_increment > to_decrement) {
-        return std::prev(detail::end(std::forward<Iterable>(iterable)), to_decrement);
+        return std::prev(std::end(iterable), to_decrement);
     }
-    return std::next(detail::begin(std::forward<Iterable>(iterable)), to_increment);
+    return std::next(std::begin(iterable), to_increment);
 }
 
 template<size_t... Is, class Iterable>
@@ -366,14 +366,14 @@ iterable_maybe_homo_eager_size_as(IterableTuple&& iterables, index_sequence<Is..
 
 template<class IterableTuple, size_t... I>
 LZ_CONSTEXPR_CXX_14 auto begin_maybe_homo_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
-    -> maybe_homogeneous_t<decltype(detail::begin(get<I>(std::forward<IterableTuple>(iterable_tuple))))...> {
-    return { detail::begin(get<I>(std::forward<IterableTuple>(iterable_tuple)))... };
+    -> maybe_homogeneous_t<decltype(std::begin(get<I>(iterable_tuple)))...> {
+    return { std::begin(get<I>(iterable_tuple))... };
 }
 
 template<class IterableTuple, size_t... I>
 LZ_CONSTEXPR_CXX_14 auto end_maybe_homo_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
-    -> maybe_homogeneous_t<decltype(detail::end(get<I>(std::forward<IterableTuple>(iterable_tuple))))...> {
-    return { detail::end(get<I>(std::forward<IterableTuple>(iterable_tuple)))... };
+    -> maybe_homogeneous_t<decltype(std::end(get<I>(iterable_tuple)))...> {
+    return { std::end(get<I>(iterable_tuple))... };
 }
 
 template<class IterableTuple>

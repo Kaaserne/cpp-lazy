@@ -216,10 +216,10 @@ template<class I>
     if constexpr (is_sized_v<I> && !is_sentinel_v<iter, sentinel_t<I>> && is_bidi_v<iter>) {
         const auto size = lz::ssize(iterable);
         if (n > size / 2) {
-            return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+            return std::prev(std::end(iterable), size - n);
         }
     }
-    return std::next(detail::begin(std::forward<I>(iterable)), n);
+    return std::next(std::begin(iterable), n);
 }
 
 template<class I>
@@ -265,16 +265,16 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17
 
     const auto size = lz::ssize(iterable);
     if (n > size / 2) {
-        return std::prev(detail::end(std::forward<I>(iterable)), size - n);
+        return std::prev(std::end(iterable), size - n);
     }
-    return std::next(detail::begin(std::forward<I>(iterable)), n);
+    return std::next(std::begin(iterable), n);
 }
 
 template<class I>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_17
     enable_if_t<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast(I&& iterable, diff_iterable_t<I> n) {
-    return std::next(detail::begin(std::forward<I>(iterable)), n);
+    return std::next(std::begin(iterable), n);
 }
 
 template<class I>
@@ -284,7 +284,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_17
 
     const auto size = lz::ssize(iterable);
     if (n >= size) {
-        return detail::end(std::forward<I>(iterable));
+        return std::end(iterable);
     }
     return next_fast(std::forward<I>(iterable), n);
 }
@@ -294,8 +294,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     enable_if_t<!is_sized<I>::value || is_sentinel<iter_t<I>, sentinel_t<I>>::value || !is_bidi<iter_t<I>>::value, iter_t<I>>
     next_fast_safe(I&& iterable, const diff_iterable_t<I> n) {
 
-    auto begin = detail::begin(std::forward<I>(iterable));
-    const auto end = detail::end(std::forward<I>(iterable));
+    auto begin = std::begin(iterable);
+    const auto end = std::end(iterable);
 
     using diff_type_u = typename std::make_unsigned<diff_iterable_t<I>>::type;
     for (diff_type_u i = 0; i < static_cast<diff_type_u>(n) && begin != end; ++i, ++begin) {
@@ -344,7 +344,7 @@ LZ_NODISCARD constexpr diff_type<Iterator> distance(Iterator begin, S end) {
 template<class Iterable>
 LZ_NODISCARD constexpr diff_iterable_t<detail::remove_cvref_t<Iterable>> distance(Iterable && iterable) {
     using std::distance;
-    return distance(detail::begin(iterable), detail::end(iterable));
+    return distance(std::begin(iterable), std::end(iterable));
 }
 
 #ifdef LZ_HAS_CXX_17

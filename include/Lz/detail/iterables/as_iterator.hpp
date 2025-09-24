@@ -68,7 +68,7 @@ public:
             return iterator{ _iterable.end() };
         }
         else {
-            return _iterable.end();
+            return sentinel{ _iterable.end() };
         }
     }
 

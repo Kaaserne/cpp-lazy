@@ -61,15 +61,8 @@ public:
         _result_selector{ std::move(result_selector) } {
     }
 
-    constexpr iterator begin() const& {
+    constexpr iterator begin() const {
         return { _iterable_a, _iterable_a.begin(), _iterable_b.begin(), _iterable_b.end(), _a, _b, _result_selector };
-    }
-
-    LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        // clang-format off
-        return { _iterable_a, _iterable_a.begin(), detail::begin(std::move(_iterable_b)),
-                 detail::end(std::move(_iterable_b)), std::move(_a), std::move(_b), std::move(_result_selector) };
-        // clang-format on
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

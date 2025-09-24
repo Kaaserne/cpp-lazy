@@ -71,14 +71,12 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S>
     : public iterator<Derived, Reference, Pointer, DifferenceType, std::input_iterator_tag, S> {
     using iterator_category = std::forward_iterator_tag;
-    using sentinel = S;
 };
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S>
     : public iterator<Derived, Reference, Pointer, DifferenceType, std::forward_iterator_tag, S> {
     using iterator_category = std::bidirectional_iterator_tag;
-    using sentinel = S;
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -105,7 +103,6 @@ template<class Derived, class Reference, class Pointer, class DifferenceType, cl
 struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_iterator_tag, S>
     : public iterator<Derived, Reference, Pointer, DifferenceType, std::bidirectional_iterator_tag, S> {
     using iterator_category = std::random_access_iterator_tag;
-    using sentinel = S;
 
     LZ_CONSTEXPR_CXX_14 Derived& operator+=(const DifferenceType n) {
         static_cast<Derived&>(*this).plus_is(n);
@@ -122,7 +119,7 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return a.difference(d);
     }
 
-    LZ_NODISCARD constexpr DifferenceType operator-(const sentinel& s) const {
+    LZ_NODISCARD constexpr DifferenceType operator-(const S& s) const {
         return static_cast<const Derived&>(*this).difference(s);
     }
 
@@ -157,22 +154,32 @@ struct iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_
         return !(a < d);
     }
 
-    LZ_NODISCARD constexpr bool operator<(const sentinel& s) const {
+    LZ_NODISCARD constexpr bool operator<(const S& s) const {
         return (*this - s) < 0;
     }
 
-    LZ_NODISCARD constexpr bool operator>(const sentinel& s) const {
+    LZ_NODISCARD constexpr bool operator>(const S& s) const {
         return s < *this;
     }
 
-    LZ_NODISCARD constexpr bool operator<=(const sentinel& s) const {
+    LZ_NODISCARD constexpr bool operator<=(const S& s) const {
         return !(s < *this);
     }
 
-    LZ_NODISCARD constexpr bool operator>=(const sentinel& s) const {
+    LZ_NODISCARD constexpr bool operator>=(const S& s) const {
         return !(*this < s);
     }
 };
+
+#ifdef LZ_HAS_CXX_20
+
+template<class Derived, class Reference, class Pointer, class DifferenceType, class S>
+struct iterator<Derived, Reference, Pointer, DifferenceType, std::contiguous_iterator_tag, S>
+    : public iterator<Derived, Reference, Pointer, DifferenceType, std::random_access_iterator_tag, S> {
+    using iterator_category = std::contiguous_iterator_tag;
+};
+
+#endif
 } // namespace detail
 } // namespace lz
 #endif // LZ_ITERATOR_HPP

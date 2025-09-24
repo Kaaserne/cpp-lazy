@@ -53,16 +53,8 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return iterator{ detail::begin(std::move(_iterable)) };
-    }
-
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
         return iterator{ _iterable.begin() };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
-        return iterator{ detail::end(std::move(_iterable)) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {

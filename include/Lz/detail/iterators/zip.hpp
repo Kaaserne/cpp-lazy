@@ -100,7 +100,7 @@ private:
     LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<cat>::value> assign_sentinels(const sentinel& other, index_sequence<I...>) {
         using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(other)), ...);
+        ((get<I>(_iterators) = get<I>(other.value)), ...);
 #else
         decompose(get<I>(_iterators) = get<I>(other.value)...);
 #endif

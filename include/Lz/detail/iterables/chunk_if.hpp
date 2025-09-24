@@ -42,16 +42,8 @@ public:
         _predicate{ std::move(predicate) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        auto begin = detail::begin(std::move(_iterable));
-        auto end = detail::end(std::move(_iterable));
-        const auto is_end = end == begin;
-        return { begin, end, std::move(_predicate), is_end };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        const auto is_end = _iterable.end() == _iterable.begin();
-        return { _iterable.begin(), _iterable.end(), _predicate, is_end };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
+        return { _iterable.begin(), _iterable.end(), _predicate, _iterable.end() == _iterable.begin() };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

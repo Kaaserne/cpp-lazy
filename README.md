@@ -26,58 +26,19 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - Bidirectional sentinelled iterables can be reversed using `lz::common`
 
 # What is lazy?
-Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this library, all the iterators are lazy evaluated. Suppose you want to have a sequence of `n` random numbers. You could write a for loop:
-
+Lazy evaluation is an evaluation strategy which holds the evaluation of an expression until its value is needed. In this library, this is the case for all iterables/iteartors. It holds all the elements that are needed for the operation:
 ```cpp
-std::random_device rd;
-std::std::mt19937 gen(rd());
-std::uniform_int_distribution dist(0, 32);
+std::vector<int> vec = {1, 2, 3, 4, 5};
 
-for (int i = 0; i < n; i++) {
- std::cout << dist(gen); // prints a random number n times, between [0, 32]
+// No evaluation is done here, function is stored and a reference to vec
+auto mapped = lz::map(vec, [](int i) { return i * 2; });
+for (auto i : mapped) { // Evaluation is done here
+  std::cout << i << " "; // prints "2 4 6 8 10 "
 }
 ```
 
-This is actually exactly almost identical as:
-```cpp
-// If standalone:
-std::cout << lz::random(0, 32, n);
 
-// If with fmt:
-fmt::print("{}", lz::random(0, 32, n));
-```
-
-Both methods do not allocate any memory but the second example is a much more convenient way of writing the same thing. Now what if you wanted to do eager evaluation? Well then you could do this:
-
-```cpp
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_int_distribution dist(0, 32);
-std::vector<int> random_numbers;
-std::generate(random_numbers.begin(), random_numbers.end(), [&dist, &gen]{ return dist(gen); });
-```
-
-or, using `cpp-lazy`:
-
-```cpp
-std::vector<int> random_numbers = lz::random(0, 32, n) | lz::to<std::vector>();
-```
-
-`cpp-lazy` is also (semi) compatible with the STL `<algorithm>` library. This means that you can use `std::find`, `std::find_if`, etc. on `lz` iterables, as long as the input iterable is not sentinelled. If the input iterable is sentinelled, you can use `lz::find`, `lz::find_if`, etc instead. `lz` algorithm equivalents will try to use `std::*` equivalents if possible.
-
-```cpp
-auto random = lz::random(0, 32, n);
-// Calls lz::find
-auto pos = lz::find(random, 6) != random.end();
-
-auto common = lz::common_random(0, 32, n);
-// Calls std::find
-auto pos = lz::find(common, 6) != common.end();
-// or (exactly the same as above)
-auto pos = std::find(common.begin(), common.end(), 6) != common.end();
-```
-
-## Basic usage
+# Basic usage
 ```cpp
 #include <Lz/map.hpp>
 #include <vector>
@@ -90,30 +51,21 @@ int main() {
   auto result = arr | lz::map([](int i) { return i + 1; })
                     | lz::to<std::vector>(); // == {2, 3, 4, 5}
 
-  // Some iterables will return sentinels, for instance (specific rules about when sentinels are returned can be found in the documentation):
+  // Some iterables will return sentinels, for instance:
+  // (specific rules about when sentinels are returned can be found in the documentation):
   std::vector<int> vec = {1, 2, 3, 4};
   auto forward = lz::c_string("Hello World"); // .end() returns default_sentinel_t
+
+  // inf_loop = {1, 2, 3, 4, 1, 2, 3, 4, ...}
   auto inf_loop = lz::loop(vec); // .end() returns default_sentinel_t
+
+  // random = {random number between 0 and 32, total of 4 numbers}
   auto random = lz::random(0, 32, 4); // .end() returns default_sentinel_t
-
-  // Some iterables are sized, if the input iterable is also sized:
-  auto sized = lz::map(vec, [](int i) { return i + 1; });
-  auto size = sized.size(); // == 4
-  // forward.size(); // error: forward is not sized, instead use (O(n) time): lz::eager_size(forward)
-
-  // Some iterables require the size of iterables. If the input iterable is not sized,
-  // the sequence will be traversed to get the size using lz::eager_size. The iterable will be documented
-  // appropriately if this requires a sized iterable. Example:
-  auto zipper1 = lz::zip(lz::c_string("ab"), lz::c_string("cd")); // Calling .end() will take O(n) time
-  auto zipper2 = lz::zip(sized, sized); // Calling .end() will take O(1) time
-
-  // You can cache the size if you need to.
-  // More about when to do that in the appropriate iterable documentation
-  // lz:c_string isn't sized, so in order to make it sized, we can use lz::cache_size:
-  auto cached_sizes = lz::zip(lz::c_string("ab") | lz::cache_size, lz::c_string("cd") | lz::cache_size);
-  // cached_sizes.end() will now take O(1) time, instead of zipper1's O(n) time.
 }
 ```
+
+## Philosophy behind cpp-lazy
+// TODO, write about when sentinelled
 
 ## Ownership
 `lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::copied` or `lz::as_copied`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
@@ -255,7 +207,7 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ```
 
 ## With xmake
-Everything higher than version 7.0.2 is supported. Please note that version 9.0.0 has drastic changes in the API (PascalCase/camelCase -> snake_case).
+Everything higher than version 7.0.2 is supported. Please note that version 9.0.0 has drastic changes in the API.
 ```xmake
 add_requires("cpp-lazy >=9.0.0")
 

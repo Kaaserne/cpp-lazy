@@ -45,7 +45,7 @@ public:
     template<class I, class UnaryPredicate>
     constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _begin{ lz::find_if_not(iterable, std::move(unary_predicate)) },
-        _end{ detail::end(std::forward<I>(iterable)) } {
+        _end{ std::end(iterable) } {
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {

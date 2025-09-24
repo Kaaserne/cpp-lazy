@@ -64,7 +64,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const {
-        if constexpr (is_bidi_v<iter>) {
+        if constexpr (is_bidi_tag_v<typename iterator::iterator_category>) {
             return { _iterable, _iterable.begin(), _start };
         }
         else {
@@ -76,23 +76,23 @@ public:
         if constexpr (!return_sentinel) {
             return iterator{ _iterable, _iterable.end(), _start + static_cast<IntType>(lz::eager_size(_iterable)) };
         }
-        else if (is_bidi_v<iter>) {
-            return sentinel{ _iterable.end() };
+        else if constexpr (is_bidi_tag_v<typename iterator::iterator_category>) {
+            return sentinel{ _start };
         }
         else {
-            return sentinel{ _start };
+            return sentinel{ _iterable.end() };
         }
     }
 
 #else
     // TODO write tests for these permutations
-    template<class it = iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<it>::value, iterator> begin() const {
+    template<class it = is_bidi_tag<typename iterator::iterator_category>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<it::value, iterator> begin() const {
         return { _iterable, _iterable.begin(), _start };
     }
 
-    template<class it = iter>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<it>::value, iterator> begin() const {
+    template<class it = is_bidi_tag<typename iterator::iterator_category>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<it::value, iterator> begin() const {
         return { _iterable.begin(), _start };
     }
 
@@ -102,12 +102,13 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R && is_bidi<iter>::value, sentinel> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R && is_bidi_tag<typename iterator::iterator_category>::value, sentinel>
+    end() const {
         return sentinel{ _start };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R && !is_bidi<iter>::value, sentinel> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R && !is_bidi_tag<typename iterator::iterator_category>::value, sentinel> end() const {
         return sentinel{ _iterable.end() };
     }
 
