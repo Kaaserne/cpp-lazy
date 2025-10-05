@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/cartesian_product.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <numeric>
 
@@ -18,7 +19,7 @@ class cartesian_product_iterable : public lazy_view {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<Is...>) const {
         using std::get;
         const size_t sizes[] = { static_cast<size_t>(lz::size(get<Is>(_iterables)))... };
-        return std::accumulate(std::begin(sizes), std::end(sizes), size_t{ 1 }, std::multiplies<size_t>{});
+        return std::accumulate(detail::begin(sizes), detail::end(sizes), size_t{ 1 }, std::multiplies<size_t>{});
     }
 
 #ifdef LZ_HAS_CXX_17
@@ -120,7 +121,7 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         using std::get;
         auto it = begin_maybe_homo(_iterables);
         auto end = end_maybe_homo(_iterables);
@@ -128,33 +129,6 @@ public:
         init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
         return { _iterables, it };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        using std::get;
-        auto it = begin_maybe_homo(_iterables);
-        auto end = end_maybe_homo(_iterables);
-        auto first_at_end = get<0>(it) == get<0>(end);
-        init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
-        return { std::move(_iterables), it };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        using std::get;
-        auto it = begin_maybe_homo(_iterables);
-        auto end = end_maybe_homo(_iterables);
-        auto first_at_end = get<0>(it) == get<0>(end);
-        init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
-        return { std::move(_iterables), it };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

@@ -3,6 +3,7 @@
 #ifndef LZ_ROTATE_ADAPTOR_HPP
 #define LZ_ROTATE_ADAPTOR_HPP
 
+#include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/rotate.hpp>
 
 namespace lz {

@@ -3,10 +3,10 @@
 #ifndef LZ_UNIQUE_ITERABLE_HPP
 #define LZ_UNIQUE_ITERABLE_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/unique.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -50,26 +50,9 @@ public:
         _predicate{ std::move(compare) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin(), _predicate };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable, _iterable.begin(), std::move(_predicate) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        return { _iterable, _iterable.begin(), std::move(_predicate) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

@@ -5,7 +5,6 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
 
 namespace lz {
 namespace detail {

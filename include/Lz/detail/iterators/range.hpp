@@ -5,8 +5,9 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/util/default_sentinel.hpp>
 #include <limits>
 
 namespace lz {

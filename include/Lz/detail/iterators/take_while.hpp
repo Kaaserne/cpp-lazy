@@ -8,16 +8,16 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/iterators/common.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class UnaryPredicate>
-class take_while_iterator
-    : public iterator<take_while_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>,
-                      fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
+class take_while_iterator : public iterator<take_while_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>,
+                                            fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
+                                            bidi_strongest_cat<iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
 

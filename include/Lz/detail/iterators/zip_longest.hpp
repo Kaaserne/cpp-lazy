@@ -3,12 +3,13 @@
 #ifndef LZ_ZIP_LONGEST_ITERATOR_HPP
 #define LZ_ZIP_LONGEST_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/traits/index_sequence.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
-#include <Lz/optional.hpp>
+#include <Lz/util/default_sentinel.hpp>
+#include <Lz/util/optional.hpp>
+#include <algorithm>
 
 namespace lz {
 namespace detail {

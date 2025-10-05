@@ -3,7 +3,7 @@
 #ifndef LZ_CHUNKS_HPP
 #define LZ_CHUNKS_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/chunks.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

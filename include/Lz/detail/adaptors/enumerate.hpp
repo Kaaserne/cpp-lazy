@@ -5,6 +5,7 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/enumerate.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {

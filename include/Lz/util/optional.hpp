@@ -11,7 +11,6 @@
 
 #else // LZ_HAS_CXX_17
 
-#include <Lz/detail/procs.hpp>
 #include <cstdint>
 #include <stdexcept>
 #include <type_traits>

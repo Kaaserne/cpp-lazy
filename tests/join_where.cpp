@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/join_where.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
@@ -46,7 +51,7 @@ TEST_CASE("Join where with sentinels") {
             [](const std::pair<int, int>& a, const std::pair<int, int>& b) { return std::make_pair(a.first, b.second); });
 
         auto common = make_sentinel_assign_op_tester(joined2);
-        using reference = lz::ref_iterable_t<decltype(common)>;
+        using reference = lz::detail::ref_iterable_t<decltype(common)>;
 
         std::vector<std::pair<int, int>> expected2 = { { 1, 2 }, { 3, 4 }, { 4, 5 } };
         REQUIRE(lz::equal(common, expected2,

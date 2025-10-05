@@ -6,11 +6,12 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/map.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable, class UnaryOp>
-class map_iterable : public lazy_view { // TODO initialize all members in default ctor -Weffc++
+class map_iterable : public lazy_view {
     maybe_owned<Iterable> _iterable{};
     func_container<UnaryOp> _unary_op{};
 

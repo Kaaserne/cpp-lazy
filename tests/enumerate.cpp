@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take.hpp>
@@ -191,8 +196,8 @@ TEST_CASE("Enumerate to containers") {
         std::list<int> to_enumerate = { 1, 2, 3 };
         auto enumerated = lz::enumerate(to_enumerate);
         std::array<std::pair<int, int>, 3> expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3) };
-        using ref_enumerated = lz::ref_iterable_t<decltype(enumerated)>;
-        using ref_expected = lz::ref_iterable_t<decltype(expected)>;
+        using ref_enumerated = lz::detail::ref_iterable_t<decltype(enumerated)>;
+        using ref_expected = lz::detail::ref_iterable_t<decltype(expected)>;
         REQUIRE(lz::equal(enumerated, expected,
                           [](ref_enumerated a, ref_expected b) { return a.first == b.first && a.second == b.second; }));
     }

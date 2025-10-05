@@ -5,6 +5,7 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/loop.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
 
 namespace lz {
 namespace detail {

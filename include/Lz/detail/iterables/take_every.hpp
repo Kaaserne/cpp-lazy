@@ -5,6 +5,9 @@
 
 #include <Lz/detail/iterators/take_every.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
+#include <Lz/procs/eager_size.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
@@ -99,7 +102,7 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr iterator begin() const& {
+    [[nodiscard]] constexpr iterator begin() const {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         if constexpr (is_ra_tag_v<typename iterator::iterator_category>) {
             return { _iterable, start_pos, _offset };
@@ -115,46 +118,23 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() const {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { start_pos, _iterable.end(), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator>
-    begin() const& {
+    begin() const {
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { start_pos, _iterable.end(), _offset, _start };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<I>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<I>::value, iterator> begin() const {
         // random access iterator can go both ways O(1), no need to use next_fast_safe
         auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
         return { _iterable, start_pos, _offset };
-    }
-
-#endif
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(!is_bidi_tag_v<typename iterator::iterator_category>)
-    {
-        // forward iterator can only go forward, so next_fast_safe is not needed
-        auto end = _iterable.end();
-        auto start_pos = next_fast_safe(std::move(_iterable), static_cast<typename iterator::difference_type>(_start));
-        return { start_pos, end, _offset };
-    }
-
-#else
-
-    template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() && {
-        // forward iterator can only go forward, so next_fast_safe is not needed
-        auto end = _iterable.end();
-        auto start_pos = next_fast_safe(std::move(_iterable), static_cast<typename iterator::difference_type>(_start));
-        return { start_pos, end, _offset };
     }
 
 #endif

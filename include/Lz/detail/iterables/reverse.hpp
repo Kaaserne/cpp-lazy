@@ -6,6 +6,9 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterators/cached_reverse.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/conditional.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
 
 namespace lz {
 namespace detail {
@@ -35,7 +38,8 @@ public:
     }
 
 #endif
-    static_assert(!has_sentinel<Iterable>::value, "Cannot reverse an iterable with a sentinel. Use lz::common first.");
+    static_assert((has_sentinel<Iterable>::value && is_ra<iterator>::value) || !has_sentinel<Iterable>::value,
+                  "Cannot reverse non-random access iterable with a sentinel. Try to use lz::common first.");
 
     template<class I>
     explicit constexpr reverse_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
@@ -62,7 +66,16 @@ public:
 
     [[nodiscard]] constexpr iterator begin() const {
         if constexpr (Cached) {
-            return { _iterable.end(), _iterable.begin(), _iterable.end() };
+            if constexpr (has_sentinel_v<Iterable>) {
+                auto last = _iterable.begin() + (_iterable.end() - _iterable.begin());
+                return { last, _iterable.begin(), last };
+            }
+            else {
+                return { _iterable.end(), _iterable.begin(), _iterable.end() };
+            }
+        }
+        else if constexpr (has_sentinel_v<Iterable>) {
+            return iterator{ _iterable.begin() + (_iterable.end() - _iterable.begin()) };
         }
         else {
             return iterator{ _iterable.end() };
@@ -71,7 +84,13 @@ public:
 
     [[nodiscard]] constexpr iterator end() const {
         if constexpr (Cached) {
-            return { _iterable.begin(), _iterable.begin(), _iterable.end() };
+            if constexpr (has_sentinel_v<Iterable>) {
+                auto last = _iterable.begin() + (_iterable.end() - _iterable.begin());
+                return { _iterable.begin(), _iterable.begin(), last };
+            }
+            else {
+                return { _iterable.begin(), _iterable.begin(), _iterable.end() };
+            }
         }
         else {
             return iterator{ _iterable.begin() };

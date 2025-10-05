@@ -2,8 +2,8 @@
 
 // clang-format off
 
-#ifndef LZ_COMPILER_CHECK_HPP
-#define LZ_COMPILER_CHECK_HPP
+#ifndef LZ_DETAIL_COMPILER_CHECKS_HPP
+#define LZ_DETAIL_COMPILER_CHECKS_HPP
 
 #define LZ_VERSION_MAJOR 9
 #define LZ_VERSION_MINOR 0
@@ -97,6 +97,13 @@
 #if defined(LZ_HAS_CXX_20) && defined(__cpp_lib_format) && (__cpp_lib_format >= 201907L)
   #define LZ_HAS_FORMAT
 #endif // format
+
+namespace lz {
+namespace detail {
+using size_t = decltype(sizeof(0));
+using ptrdiff_t = decltype(static_cast<char*>(nullptr) - static_cast<char*>(nullptr));
+}
+}
 
 #endif // LZ_COMPILER_CHECK_HPP
 

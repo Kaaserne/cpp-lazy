@@ -5,7 +5,9 @@
 
 #include <Lz/detail/iterators/zip_longest.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {

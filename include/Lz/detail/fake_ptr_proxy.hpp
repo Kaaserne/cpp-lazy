@@ -3,8 +3,8 @@
 #ifndef LZ_FAKE_POINTER_PROXY_HPP
 #define LZ_FAKE_POINTER_PROXY_HPP
 
-#include <Lz/detail/procs.hpp>
 #include <type_traits>
+#include <Lz/detail/procs/addressof.hpp>
 
 namespace lz {
 namespace detail {

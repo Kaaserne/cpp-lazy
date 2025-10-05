@@ -1,6 +1,7 @@
 #include <Lz/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
@@ -516,19 +517,34 @@ TEST_CASE("Front") {
 }
 
 TEST_CASE("Back") {
-    SUBCASE("With non-empty") {
+    SUBCASE("ra") {
         std::vector<int> vec = { 1, 2, 3 };
         REQUIRE(lz::back(vec) == 3);
-    }
-
-    SUBCASE("With one element") {
-        std::vector<int> vec = { 1 };
+        vec = { 1 };
         REQUIRE(lz::back(vec) == 1);
     }
 
     SUBCASE("With sentinel") {
         auto repeater = lz::repeat(20, 5);
         REQUIRE(lz::back(repeater) == 20);
+        repeater = lz::repeat(42, 1);
+        REQUIRE(lz::back(repeater) == 42);
+    }
+
+    SUBCASE("With c-string") {
+        const char* str = "Hello";
+        auto iterable = lz::c_string(str);
+        REQUIRE(lz::back(iterable) == 'o');
+
+        iterable = lz::c_string("A");
+        REQUIRE(lz::back(iterable) == 'A');
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> lst = { 1, 2, 3 };
+        REQUIRE(lz::back(lst) == 3);
+        lst = { 1 };
+        REQUIRE(lz::back(lst) == 1);
     }
 }
 
@@ -1073,7 +1089,7 @@ TEST_CASE("Find or default") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_or_default(iterable, 'H') == char{});
+        REQUIRE(lz::find_or_default(iterable, 'H', char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1099,7 +1115,7 @@ TEST_CASE("Find or default if") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_or_default_if(iterable, [](char c) { return c == 'H'; }) == char{});
+        REQUIRE(lz::find_or_default_if(iterable, [](char c) { return c == 'H'; }, char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1125,7 +1141,7 @@ TEST_CASE("Find last or default") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default(iterable, 'H') == char{});
+        REQUIRE(lz::find_last_or_default(iterable, 'H', char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1148,7 +1164,7 @@ TEST_CASE("Find last or default random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default(vec, 1) == 0);
+        REQUIRE(lz::find_last_or_default(vec, 1, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1173,7 +1189,7 @@ TEST_CASE("Find last or default if") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_if(iterable, [](char c) { return c == 'H'; }) == char{});
+        REQUIRE(lz::find_last_or_default_if(iterable, [](char c) { return c == 'H'; }, char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1196,7 +1212,7 @@ TEST_CASE("Find last or default if random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }) == 0);
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1218,7 +1234,7 @@ TEST_CASE("Find last or default if not random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 1; }) == 0);
+        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 1; }, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1243,7 +1259,7 @@ TEST_CASE("Find last or default if not") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'H'; }) == char{});
+        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'H'; }, char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1269,7 +1285,7 @@ TEST_CASE("Find last or default not") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_not(iterable, 'H') == char{});
+        REQUIRE(lz::find_last_or_default_not(iterable, 'H', char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1292,7 +1308,7 @@ TEST_CASE("Find last or default not random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_not(vec, 1) == 0);
+        REQUIRE(lz::find_last_or_default_not(vec, 1, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1403,7 +1419,7 @@ TEST_CASE("Starts with") {
 
         iterable = lz::c_string("H");
         iterable2 = lz::c_string("");
-        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+        REQUIRE(lz::starts_with(iterable, iterable2));
     }
 
     SUBCASE("Not found c-string") {
@@ -1431,7 +1447,7 @@ TEST_CASE("Starts with") {
 
         iterable = std::string("H");
         iterable2 = std::string("");
-        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+        REQUIRE(lz::starts_with(iterable, iterable2));
     }
 
     SUBCASE("Not found string") {
@@ -1450,6 +1466,9 @@ TEST_CASE("Ends with") {
         iterable2 = lz::c_string("");
         REQUIRE(lz::ends_with(iterable, iterable2));
 
+        iterable = lz::c_string("H");
+        REQUIRE(lz::ends_with(iterable, iterable2));
+
         iterable = lz::c_string("Hello");
         iterable2 = lz::c_string("o");
         REQUIRE(lz::ends_with(iterable, iterable2));
@@ -1465,7 +1484,7 @@ TEST_CASE("Ends with") {
         std::list<char> lst2;
         REQUIRE(lz::ends_with(lst, lst2));
         lst = { 'H' };
-        REQUIRE_FALSE(lz::ends_with(lst, lst2));
+        REQUIRE(lz::ends_with(lst, lst2));
         lst = {};
         lst2 = { 'H' };
         REQUIRE_FALSE(lz::ends_with(lst, lst2));

@@ -3,7 +3,7 @@
 #ifndef LZ_TAKE_WHILE_HPP
 #define LZ_TAKE_WHILE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/take_while.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

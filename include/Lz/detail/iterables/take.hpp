@@ -5,6 +5,11 @@
 
 #include <Lz/detail/iterators/take.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/traits/lazy_view.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {

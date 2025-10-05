@@ -1,4 +1,5 @@
 #include <Lz/c_string.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
 #include <Lz/repeat.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>

@@ -6,7 +6,10 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 #include <limits>
 
 namespace lz {
@@ -90,7 +93,7 @@ public:
 
     constexpr bool eq(default_sentinel_t) const {
         return (_sub_begin + std::min(static_cast<difference_type>(_pair_size) - 1, _iterable.end() - _iterable.begin())) ==
-               std::end(_iterable);
+               detail::end(_iterable);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {

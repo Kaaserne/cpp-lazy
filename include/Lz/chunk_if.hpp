@@ -3,9 +3,9 @@
 #ifndef LZ_CHUNK_IF_HPP
 #define LZ_CHUNK_IF_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/chunk_if.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/procs/chain.hpp>
+#include <Lz/util/string_view.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 

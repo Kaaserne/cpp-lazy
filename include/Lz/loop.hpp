@@ -3,7 +3,7 @@
 #ifndef LZ_LOOP_HPP
 #define LZ_LOOP_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/loop.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

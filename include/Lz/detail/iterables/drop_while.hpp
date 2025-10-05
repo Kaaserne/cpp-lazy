@@ -3,11 +3,10 @@
 #ifndef LZ_DROP_WHILE_ITERABLE_HPP
 #define LZ_DROP_WHILE_ITERABLE_HPP
 
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/find_if_not.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
 
 namespace lz {
 namespace detail {
@@ -45,14 +44,10 @@ public:
     template<class I, class UnaryPredicate>
     constexpr drop_while_iterable(I&& iterable, UnaryPredicate unary_predicate) :
         _begin{ lz::find_if_not(iterable, std::move(unary_predicate)) },
-        _end{ std::end(iterable) } {
+        _end{ detail::end(iterable) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return std::move(_begin);
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return _begin;
     }
 
@@ -75,18 +70,9 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr auto end() const& {
+    [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
             return _end;
-        }
-        else {
-            return lz::default_sentinel;
-        }
-    }
-
-    [[nodiscard]] constexpr auto end() && {
-        if constexpr (!return_sentinel) {
-            return std::move(_end);
         }
         else {
             return lz::default_sentinel;
@@ -96,17 +82,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, sentinel> end() && {
-        return std::move(_end);
-    }
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, sentinel> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, sentinel> end() const {
         return _end;
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const& {
+    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const {
         return lz::default_sentinel;
     }
 

@@ -1,8 +1,12 @@
+#pragma once
+
 #ifndef LZ_DUPLICATES_ADAPTOR_HPP
 #define LZ_DUPLICATES_ADAPTOR_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/duplicates.hpp>
+#include <Lz/detail/procs/operators.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {
@@ -23,7 +27,7 @@ struct duplicates_adaptor {
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
      * @return An iterable that returns a pair of each element in the iterable and the number of times it appears in the iterable.
      */
-    template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable, class BinaryPredicate = less>
     LZ_NODISCARD constexpr duplicates_iterable<remove_ref_t<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate compare = {}) const {
         return { std::forward<Iterable>(iterable), std::move(compare) };
@@ -44,7 +48,7 @@ struct duplicates_adaptor {
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class BinaryPredicate = less>
     [[nodiscard]] constexpr fn_args_holder<adaptor, BinaryPredicate> operator()(BinaryPredicate compare = {}) const
         requires(!iterable<BinaryPredicate>)
     {
@@ -66,7 +70,7 @@ struct duplicates_adaptor {
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class BinaryPredicate = less>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>
     operator()(BinaryPredicate compare = {}) const {
         return { std::move(compare) };

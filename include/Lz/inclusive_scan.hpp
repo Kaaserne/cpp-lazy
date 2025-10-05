@@ -3,8 +3,8 @@
 #ifndef LZ_INCLUSIVE_SCAN_HPP
 #define LZ_INCLUSIVE_SCAN_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/inclusive_scan.hpp>
+#include <Lz/procs/chain.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
@@ -45,7 +45,7 @@ constexpr detail::inclusive_scan_adaptor inclusive_scan{};
  * lz::inclusive_scan_iterable<std::vector<int>> scan = lz::inclusive_scan(vec, 0); // scan = { 1, 3, 6, 10, 15 }
  * ```
 */
-template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+template<class Iterable, class T = detail::val_iterable_t<Iterable>, class BinaryOp = detail::plus>
 using inclusive_scan_iterable = detail::inclusive_scan_iterable<Iterable, T, BinaryOp>;
 
 } // namespace lz

@@ -26,7 +26,7 @@ struct reverse_adaptor {
      * @param iterable The iterable to reverse.
      * @return A (cached_)reverse_iterable object that can be used to iterate over the reversed iterable.
      */
-    template<LZ_CONCEPT_BIDIRECTIONAL_ITERABLE Iterable>
+    template<class Iterable>
     LZ_NODISCARD constexpr reverse_iterable<remove_ref_t<Iterable>, Cached> operator()(Iterable&& iterable) const {
         return reverse_iterable<remove_ref_t<Iterable>, Cached>{ std::forward<Iterable>(iterable) };
     }

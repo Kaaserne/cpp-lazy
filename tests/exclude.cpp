@@ -1,6 +1,8 @@
+#include <Lz/algorithm/equal.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/exclude.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>

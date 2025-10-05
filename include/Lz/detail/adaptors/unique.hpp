@@ -5,6 +5,8 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/unique.hpp>
+#include <Lz/detail/procs/operators.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {
@@ -29,7 +31,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An iterable that contains only unique elements from the input iterable.
      */
-    template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable, class BinaryPredicate = less>
     [[nodiscard]] constexpr unique_iterable<remove_ref_t<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const
         requires(lz::iterable<Iterable>)
@@ -53,7 +55,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class BinaryPredicate = less>
     [[nodiscard]] constexpr fn_args_holder<adaptor, BinaryPredicate> operator()(BinaryPredicate predicate = {}) const
         requires(!iterable<BinaryPredicate>)
     {
@@ -78,7 +80,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An iterable that contains only unique elements from the input iterable.
      */
-    template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable, class BinaryPredicate = less>
     LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, unique_iterable<remove_ref_t<Iterable>, BinaryPredicate>>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
@@ -100,7 +102,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class BinaryPredicate = less>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>
     operator()(BinaryPredicate predicate = {}) const {
         return { std::move(predicate) };

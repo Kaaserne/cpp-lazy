@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
@@ -236,7 +241,7 @@ TEST_CASE("Zip longest iterable to container") {
     }
 
     SUBCASE("To map") {
-        using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
+        using tuple_ref = lz::detail::ref_t<decltype(zipper.begin())>;
         using map_type = std::map<char, lz::optional<unsigned>>;
 
         auto to_map = zipper |
@@ -247,7 +252,7 @@ TEST_CASE("Zip longest iterable to container") {
     }
 
     SUBCASE("To unordered map") {
-        using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
+        using tuple_ref = lz::detail::ref_t<decltype(zipper.begin())>;
         using map_type = std::unordered_map<char, lz::optional<unsigned>>;
 
         auto to_unordered =

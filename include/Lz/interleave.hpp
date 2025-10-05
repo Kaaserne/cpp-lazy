@@ -3,7 +3,7 @@
 #ifndef LZ_INTERLEAVE_HPP
 #define LZ_INTERLEAVE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/interleave.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

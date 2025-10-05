@@ -3,8 +3,9 @@
 #ifndef LZ_ITER_TOOLS_HPP
 #define LZ_ITER_TOOLS_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/iter_tools.hpp>
+#include <Lz/detail/procs/tuple_expand.hpp>
+#include <Lz/procs/chain.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 

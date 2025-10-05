@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/intersection.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -15,7 +20,7 @@ TEST_CASE("Intersection tests with sentinels") {
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 
     std::swap(str, str2);
-    intersect = lz::intersection(str, str2, MAKE_BIN_PRED(less){});
+    intersect = lz::intersection(str, str2, lz::detail::less{});
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 }
 
@@ -57,7 +62,7 @@ TEST_CASE("Empty or one element intersection") {
     SUBCASE("One element 1") {
         std::string a = "h";
         std::string b;
-        auto intersect = a | lz::intersection(b, MAKE_BIN_PRED(less){});
+        auto intersect = a | lz::intersection(b, lz::detail::less{});
         REQUIRE(lz::empty(intersect));
         REQUIRE_FALSE(lz::has_one(intersect));
         REQUIRE_FALSE(lz::has_many(intersect));

@@ -1,3 +1,7 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/common.hpp>
 #include <Lz/filter.hpp>
@@ -28,12 +32,22 @@ TEST_CASE("Non cached reverse") {
         REQUIRE(lz::size(repeater) == 5);
         REQUIRE(lz::equal(repeater, expected));
     }
+
+    SUBCASE("Bidi sentinelled reverse") {
+        auto arr = { 1, 2, 3, 4, 5 };
+        auto bidi_sent = make_sized_bidi_sentinelled(arr);
+        REQUIRE(lz::size(bidi_sent) == lz::size(arr));
+        auto rev = bidi_sent | lz::common | lz::reverse;
+        REQUIRE(lz::size(rev) == lz::size(arr));
+        auto expected = { 5, 4, 3, 2, 1 };
+        REQUIRE(lz::equal(rev, expected));
+    }
 }
 
 TEST_CASE("Cached reverse") {
     SUBCASE("Sentinelled cached reverse") {
         auto repeater = lz::repeat(20, 5);
-        auto r = lz::cached_reverse(repeater | lz::common);
+        auto r = lz::cached_reverse(repeater);
 
         auto expected = { 20, 20, 20, 20, 20 };
         REQUIRE(lz::equal(r, expected));

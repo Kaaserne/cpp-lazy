@@ -4,6 +4,7 @@
 #define LZ_CACHED_SIZE_ITERABLE_HPP
 
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/procs/eager_size.hpp>
 
 namespace lz {
 namespace detail {

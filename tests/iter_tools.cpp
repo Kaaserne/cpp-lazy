@@ -1,3 +1,5 @@
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/iter_tools.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
@@ -225,7 +227,7 @@ TEST_CASE("iter_decay") {
     auto zipped = lz::zip(f1 | lz::iter_decay(std::forward_iterator_tag{}), f2);
 #endif
 
-    static_assert(std::is_same<lz::iter_cat_iterable_t<decltype(zipped)>, std::forward_iterator_tag>::value, "must be forward");
+    static_assert(std::is_same<lz::detail::iter_cat_iterable_t<decltype(zipped)>, std::forward_iterator_tag>::value, "must be forward");
     auto expeted = { std::make_tuple(2, 6), std::make_tuple(4, 8) };
     REQUIRE(lz::equal(zipped, expeted));
 }

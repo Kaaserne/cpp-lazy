@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/drop_while.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take_while.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>

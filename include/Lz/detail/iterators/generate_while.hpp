@@ -5,7 +5,10 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/func_ret_type.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,13 +16,13 @@ namespace detail {
 // 0 is value_type, 1 is bool
 template<class GeneratorFunc>
 class generate_while_iterator
-    : public iterator<generate_while_iterator<GeneratorFunc>, tup_element<0, func_ret_type<GeneratorFunc>>,
-                      fake_ptr_proxy<tup_element<1, func_ret_type<GeneratorFunc>>>, std::ptrdiff_t, std::input_iterator_tag,
-                      default_sentinel_t> {
+    : public iterator<generate_while_iterator<GeneratorFunc>, typename std::tuple_element<0, func_ret_type<GeneratorFunc>>::type,
+                      fake_ptr_proxy<typename std::tuple_element<1, func_ret_type<GeneratorFunc>>::type>, std::ptrdiff_t,
+                      std::input_iterator_tag, default_sentinel_t> {
 
     using fn_return_type = func_ret_type<GeneratorFunc>;
-    using type = tup_element<0, fn_return_type>;
-    using boolean_type = tup_element<1, fn_return_type>;
+    using type = typename std::tuple_element<0, func_ret_type<GeneratorFunc>>::type;
+    using boolean_type = typename std::tuple_element<1, fn_return_type>::type;
 
     fn_return_type _last_returned{ type{}, static_cast<boolean_type>(true) };
     mutable GeneratorFunc _func{};

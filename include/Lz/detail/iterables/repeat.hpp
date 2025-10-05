@@ -5,6 +5,7 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/repeat.hpp>
+
 // todo add extra tests for references
 namespace lz {
 namespace detail {
@@ -43,12 +44,8 @@ public:
         return _amount;
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return { _value, _amount };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_value), _amount };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
@@ -82,12 +79,8 @@ public:
     explicit constexpr repeat_iterable(T value) : _value{ std::forward<T>(value) } {
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return iterator{ _value };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return iterator{ std::move(_value) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

@@ -4,6 +4,7 @@
 #define LZ_REPEAT_ADAPTOR_HPP
 
 #include <Lz/detail/iterables/repeat.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
 
 namespace lz {
 namespace detail {

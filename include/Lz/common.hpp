@@ -3,6 +3,7 @@
 #ifndef LZ_COMMON_HPP
 #define LZ_COMMON_HPP
 
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/common.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

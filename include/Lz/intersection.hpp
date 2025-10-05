@@ -3,8 +3,8 @@
 #ifndef LZ_INTERSECTION_HPP
 #define LZ_INTERSECTION_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/intersection.hpp>
+#include <Lz/procs/chain.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
@@ -45,7 +45,7 @@ LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
  * lz::intersection_iterable<std::string, std::string> intersect = lz::intersection(a, b);
  * ```
  */
-template<class Iterable, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+template<class Iterable, class Iterable2, class BinaryPredicate = detail::less>
 using intersection_iterable = detail::intersection_iterable<Iterable, Iterable2, BinaryPredicate>;
 
 } // namespace lz

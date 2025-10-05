@@ -3,9 +3,13 @@
 #ifndef LZ_FILTER_ITERATOR_HPP
 #define LZ_FILTER_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 #include <algorithm>
 
 namespace lz {
@@ -14,8 +18,7 @@ namespace detail {
 template<class Iterable, class UnaryPredicate>
 class filter_iterator
     : public iterator<filter_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>,
-                      default_sentinel_t> {
+                      diff_type<iter_t<Iterable>>, bidi_strongest_cat<iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -30,9 +33,7 @@ public:
     LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(const filter_iterator&) = default;
 
     LZ_CONSTEXPR_CXX_14 void find() {
-        using detail::find_if;
-        using std::find_if;
-        _iterator = find_if(std::move(_iterator), _iterable.end(), _predicate);
+        _iterator = lz::find_if(std::move(_iterator), _iterable.end(), _predicate);
     }
 
 private:

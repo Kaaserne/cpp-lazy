@@ -3,53 +3,22 @@
 #ifndef LZ_FUNCTION_CONTAINER_HPP
 #define LZ_FUNCTION_CONTAINER_HPP
 
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/procs/addressof.hpp>
+#include <Lz/detail/traits/enable_if.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
 #include <type_traits>
+
+#ifdef LZ_HAS_CXX_17
+#include <functional> // for std::invoke
+#else
+#include <Lz/detail/traits/is_reference_wrapper.hpp>
+#endif
 
 namespace lz {
 namespace detail {
 
-#ifdef LZ_HAS_CXX_17
-
-template<class>
-constexpr bool is_reference_wrapper_v = false;
-
-template<class U>
-constexpr bool is_reference_wrapper_v<std::reference_wrapper<U>> = true;
-
-template<class C, class Pointed, class Object, class... Args>
-constexpr decltype(auto) invoke(Pointed C::*member, Object&& object, Args&&... args) {
-    using object_t = remove_cvref_t<Object>;
-    constexpr bool is_wrapped = is_reference_wrapper_v<object_t>;
-    constexpr bool is_derived_object = std::is_same_v<C, object_t> || std::is_base_of_v<C, object_t>;
-
-    if constexpr (std::is_function_v<Pointed>) {
-        if constexpr (is_derived_object) {
-            return (std::forward<Object>(object).*member)(std::forward<Args>(args)...);
-        }
-        else if constexpr (is_wrapped) {
-            return (object.get().*member)(std::forward<Args>(args)...);
-        }
-        else {
-            return ((*std::forward<Object>(object)).*member)(std::forward<Args>(args)...);
-        }
-    }
-    else {
-        static_assert(std::is_object_v<Pointed> && sizeof...(args) == 0);
-        if constexpr (is_derived_object) {
-            return std::forward<Object>(object).*member;
-        }
-        else if constexpr (is_wrapped) {
-            return object.get().*member;
-        }
-        else {
-            return (*std::forward<Object>(object)).*member;
-        }
-    }
-}
-
-#else
-// TODO write tests
+#ifndef LZ_HAS_CXX_17
 
 template<class C, class Pointed, class Object, class... Args>
 constexpr auto
@@ -159,33 +128,17 @@ public:
 
     template<class... Args>
     [[nodiscard]] constexpr decltype(auto) operator()(Args&&... args) const& {
-        // return invoke(_func, std::forward<Args>(args)...);
-        if constexpr (std::is_member_pointer_v<Func>) {
-            return invoke(_func, std::forward<Args>(args)...);
-        }
-        else {
-            return _func(std::forward<Args>(args)...);
-        }
+        return std::invoke(_func, std::forward<Args>(args)...);
     }
 
     template<class... Args>
     [[nodiscard]] constexpr decltype(auto) operator()(Args&&... args) & {
-        if constexpr (std::is_member_pointer_v<Func>) {
-            return invoke(_func, std::forward<Args>(args)...);
-        }
-        else {
-            return _func(std::forward<Args>(args)...);
-        }
+        return std::invoke(_func, std::forward<Args>(args)...);
     }
 
     template<class... Args>
     [[nodiscard]] constexpr decltype(auto) operator()(Args&&... args) && {
-        if constexpr (std::is_member_pointer_v<Func>) {
-            return invoke(_func, std::forward<Args>(args)...);
-        }
-        else {
-            return std::move(_func)(std::forward<Args>(args)...);
-        }
+        return std::invoke(std::move(_func), std::forward<Args>(args)...);
     }
 
 #else

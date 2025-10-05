@@ -3,8 +3,8 @@
 #ifndef LZ_EXCLUSIVE_SCAN_HPP
 #define LZ_EXCLUSIVE_SCAN_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/exclusive_scan.hpp>
+#include <Lz/procs/chain.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
@@ -42,7 +42,7 @@ LZ_INLINE_VAR constexpr detail::exclusive_scan_adaptor exclusive_scan{};
  * lz::exclusive_scan<std::vector<int>> scan = lz::exclusive_scan_iterable(vec, 0);
  * ```
  */
-template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+template<class Iterable, class T = detail::val_iterable_t<Iterable>, class BinaryOp = detail::plus>
 using exclusive_scan_iterable = detail::exclusive_scan_iterable<Iterable, T, BinaryOp>;
 
 } // namespace lz

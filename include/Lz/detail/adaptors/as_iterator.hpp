@@ -5,6 +5,7 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/as_iterator.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
 
 namespace lz {
 namespace detail {
@@ -36,9 +37,10 @@ struct as_iterator_adaptor {
      * iterable.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr as_iterator_iterable<remove_ref_t<Iterable>, iter_cat_iterable_t<Iterable>>
+    LZ_NODISCARD constexpr as_iterator_iterable<remove_ref_t<Iterable>, detail::iter_cat_iterable_t<Iterable>>
     operator()(Iterable&& iterable) const {
-        return as_iterator_iterable<remove_ref_t<Iterable>, iter_cat_iterable_t<Iterable>>{ std::forward<Iterable>(iterable) };
+        return as_iterator_iterable<remove_ref_t<Iterable>, detail::iter_cat_iterable_t<Iterable>>{ std::forward<Iterable>(
+            iterable) };
     }
 
     /**

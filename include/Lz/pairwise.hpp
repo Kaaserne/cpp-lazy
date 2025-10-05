@@ -3,7 +3,7 @@
 #ifndef LZ_PAIRWISE_HPP
 #define LZ_PAIRWISE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/pairwise.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

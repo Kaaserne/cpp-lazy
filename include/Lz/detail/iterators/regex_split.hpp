@@ -7,7 +7,9 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/sentinel_with.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/string_view.hpp>
 
 namespace lz {
 namespace detail {

@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/loop.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {

@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/regex_split.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {

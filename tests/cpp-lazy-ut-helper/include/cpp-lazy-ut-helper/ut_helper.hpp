@@ -3,12 +3,16 @@
 #ifndef LZ_UT_HELPER_LIB_C_STRING_HPP
 #define LZ_UT_HELPER_LIB_C_STRING_HPP
 
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/filter.hpp>
+#include <Lz/procs/eager_size.hpp>
+#include <Lz/traits/is_sized.hpp>
+#include <Lz/traits/lazy_view.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 
 template<class Iterable, bool EnableSize = true>
 class bidi_sentinelled : public lz::lazy_view {
-    using iterable = lz::filter_iterable<Iterable, std::function<bool(lz::ref_iterable_t<Iterable>)>>;
+    using iterable = lz::filter_iterable<Iterable, std::function<bool(lz::detail::ref_iterable_t<Iterable>)>>;
     iterable _iterable{};
 
 public:
@@ -21,17 +25,17 @@ public:
         // clang-format off
         _iterable{ 
             std::forward<I>(i),
-            std::function<bool(lz::ref_iterable_t<Iterable>)>{
-            [](lz::ref_iterable_t<Iterable>) { 
+            std::function<bool(lz::detail::ref_iterable_t<Iterable>)>{
+            [](lz::detail::ref_iterable_t<Iterable>) { 
                 return true;
             }}
         } // clang-format on
     {
     }
 
-    template<class I = Iterable>
-    lz::detail::enable_if_t<lz::detail::is_sized<I>::value && EnableSize, size_t> size() {
-        return lz::size(_iterable);
+    template<bool E = EnableSize>
+    lz::detail::enable_if_t<E, size_t> size() const {
+        return lz::eager_size(_iterable);
     }
 
     lz::iter_t<iterable> begin() const {
@@ -44,13 +48,13 @@ public:
 };
 
 template<class Iterable>
-bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>> make_sized_bidi_sentinelled(Iterable&& iterable) {
-    return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
+bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>, true> make_sized_bidi_sentinelled(Iterable&& iterable) {
+    return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>, true>(std::forward<Iterable>(iterable));
 }
 
 template<class Iterable>
 bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>, false> make_non_sized_bidi_sentinelled(Iterable&& iterable) {
-    return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>>(std::forward<Iterable>(iterable));
+    return bidi_sentinelled<lz::detail::remove_cvref_t<Iterable>, false>(std::forward<Iterable>(iterable));
 }
 
 template<class Iterable>

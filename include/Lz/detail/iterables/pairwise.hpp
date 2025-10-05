@@ -5,6 +5,9 @@
 
 #include <Lz/detail/iterators/pairwise.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/conditional.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
+
 // TODO make benchmarks and examples
 namespace lz {
 namespace detail {

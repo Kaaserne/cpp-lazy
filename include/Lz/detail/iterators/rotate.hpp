@@ -4,7 +4,11 @@
 #define LZ_ROTATE_ITERATOR_HPP
 
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/enable_if.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/procs/eager_size.hpp>
 
 namespace lz {
 namespace detail {

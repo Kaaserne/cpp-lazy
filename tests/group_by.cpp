@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
@@ -31,9 +36,9 @@ TEST_CASE("Group by with sentinels") {
 TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         std::forward_list<int> lst = { 1, 1, 2, 2, 3, 4, 4 };
-        auto grouped = lz::group_by(lst, MAKE_BIN_PRED(equal_to){});
+        auto grouped = lz::group_by(lst, lz::detail::equal_to{});
         auto common = make_sentinel_assign_op_tester(grouped);
-        using reference = lz::ref_iterable_t<decltype(common)>;
+        using reference = lz::detail::ref_iterable_t<decltype(common)>;
         std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
                                                                     std::make_pair(2, std::vector<int>{ 2, 2 }),
                                                                     std::make_pair(3, std::vector<int>{ 3 }),
@@ -45,9 +50,9 @@ TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("bidirectional") {
         std::vector<int> vec = { 1, 1, 2, 2, 3, 4, 4 };
         auto bidi_sentinelled = make_sized_bidi_sentinelled(vec);
-        auto grouped = lz::group_by(bidi_sentinelled, MAKE_BIN_PRED(equal_to){});
+        auto grouped = lz::group_by(bidi_sentinelled, lz::detail::equal_to{});
         auto common = make_sentinel_assign_op_tester(grouped);
-        using reference = lz::ref_iterable_t<decltype(common)>;
+        using reference = lz::detail::ref_iterable_t<decltype(common)>;
         std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
                                                                     std::make_pair(2, std::vector<int>{ 2, 2 }),
                                                                     std::make_pair(3, std::vector<int>{ 3 }),
@@ -89,7 +94,7 @@ TEST_CASE("group_by changing and creating elements") {
     SUBCASE("Should be correct chunks") {
         std::size_t str_len = 3;
 
-        using value_type = lz::val_iterable_t<decltype(grouper)>;
+        using value_type = lz::detail::val_iterable_t<decltype(grouper)>;
         lz::for_each(grouper, [&str_len](const value_type& g) {
             REQUIRE(g.first.length() == str_len);
             for (const auto& str : g.second) {
@@ -147,7 +152,7 @@ TEST_CASE("group_by binary operations") {
 TEST_CASE("To containers group by") {
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
     auto grouper = vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); });
-    using value_type = lz::val_iterable_t<decltype(grouper)>;
+    using value_type = lz::detail::val_iterable_t<decltype(grouper)>;
     using pair_type = std::pair<std::string, std::vector<std::string>>;
 
     SUBCASE("To array") {

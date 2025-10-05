@@ -1,16 +1,16 @@
 #pragma once
 
-#ifndef LZ_ITERATOR_HPP
-#define LZ_ITERATOR_HPP
+#ifndef LZ_DETAIL_ITERATOR_HPP
+#define LZ_DETAIL_ITERATOR_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/procs/sentinel_operators.hpp>
 #include <iterator>
 
 namespace lz {
-
 namespace detail {
 
-template<class Derived, class Reference, class Pointer, class DifferenceType, class Cat, class S = Derived>
+template<class Derived, class, class, class, class, class S = Derived>
 struct iterator;
 
 template<class Derived, class Reference, class Pointer, class DifferenceType, class S>

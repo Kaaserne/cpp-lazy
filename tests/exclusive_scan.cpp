@@ -1,6 +1,11 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/exclusive_scan.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
@@ -43,7 +48,7 @@ TEST_CASE("exclusive_scan basic functionality") {
 TEST_CASE("Empty or one element exclusive scan") {
     SUBCASE("Empty") {
         std::vector<int> empty;
-        auto scan = empty | lz::exclusive_scan(0, MAKE_BIN_PRED(equal_to){});
+        auto scan = empty | lz::exclusive_scan(0, lz::detail::equal_to{});
         REQUIRE(lz::empty(scan));
         REQUIRE_FALSE(lz::has_one(scan));
         REQUIRE_FALSE(lz::has_many(scan));

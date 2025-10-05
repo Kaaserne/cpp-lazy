@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <limits>
 #include <numeric>
-
+// TODO compile time checks
 namespace lz {
 namespace detail {
 
@@ -159,7 +159,7 @@ private:
         const difference_type distances[] = { static_cast<difference_type>(get<Is>(_iterators) -
                                                                            get<Is>(other._iterators))... };
         const auto sum =
-            std::accumulate(std::begin(distances), std::end(distances), difference_type{ 0 }, std::plus<difference_type>{});
+            std::accumulate(detail::begin(distances), detail::end(distances), difference_type{ 0 }, std::plus<difference_type>{});
         return sum + (static_cast<difference_type>(_index) - static_cast<difference_type>(other._index));
     }
 

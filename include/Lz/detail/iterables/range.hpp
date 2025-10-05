@@ -4,6 +4,7 @@
 #define LZ_RANGE_ITERABLE_HPP
 
 #include <Lz/detail/iterators/range.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {

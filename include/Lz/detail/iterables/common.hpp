@@ -53,11 +53,11 @@ public:
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return iterator{ _iterable.begin() };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const {
         return iterator{ _iterable.end() };
     }
 };

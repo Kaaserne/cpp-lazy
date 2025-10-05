@@ -5,13 +5,14 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/generate_while.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
 template<class GeneratorFunc>
 class generate_while_iterable : public lazy_view {
     using fn_return_type = decltype(std::declval<GeneratorFunc>()());
-    using T = tup_element<1, fn_return_type>;
+    using T = typename std::tuple_element<1, fn_return_type>::type;
 
     fn_return_type _init{ T{}, true };
     func_container<GeneratorFunc> _func{};
@@ -40,12 +41,8 @@ public:
     LZ_CONSTEXPR_CXX_14 generate_while_iterable(GeneratorFunc func) : _init{ func() }, _func{ std::move(func) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _func, _init };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_func), std::move(_init) };
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 default_sentinel_t end() const noexcept {

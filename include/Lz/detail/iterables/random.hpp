@@ -4,6 +4,7 @@
 #define LZ_RANDOM_ITERABLE_HPP
 
 #include <Lz/detail/iterators/random.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {

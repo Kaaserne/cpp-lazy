@@ -3,10 +3,12 @@
 #ifndef LZ_INTERSECTION_ITERATOR_HPP
 #define LZ_INTERSECTION_ITERATOR_HPP
 
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,7 +17,8 @@ template<class Iterable1, class Iterable2, class BinaryPredicate>
 class intersection_iterator
     : public iterator<intersection_iterator<Iterable1, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable1>>,
                       fake_ptr_proxy<ref_t<iter_t<Iterable1>>>, diff_type<iter_t<Iterable1>>,
-                      common_type<iter_cat_t<iter_t<Iterable1>>, iter_cat_t<iter_t<Iterable2>>, std::bidirectional_iterator_tag>,
+                      typename std::common_type<iter_cat_t<iter_t<Iterable1>>, iter_cat_t<iter_t<Iterable2>>,
+                                                std::bidirectional_iterator_tag>::type,
                       default_sentinel_t> {
 
     using it1 = iter_t<Iterable1>;
@@ -30,12 +33,9 @@ class intersection_iterator
     using iter_traits = std::iterator_traits<it1>;
 
     void find_next() {
-        using detail::find_if;
-        using std::find_if;
-
         using ref_type = typename iter_traits::reference;
 
-        _iterator1 = find_if(std::move(_iterator1), _iterable1.end(), [this](ref_type value) {
+        _iterator1 = lz::find_if(std::move(_iterator1), _iterable1.end(), [this](ref_type value) {
             while (_iterator2 != _iterable2.end()) {
                 if (_compare(value, *_iterator2)) {
                     return false;

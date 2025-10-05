@@ -3,9 +3,12 @@
 #ifndef LZ_CHUNK_IF_ITERATOR_HPP
 #define LZ_CHUNK_IF_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -32,9 +35,7 @@ private:
     mutable UnaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
-        using detail::find_if;
-        using std::find_if;
-        _sub_range_end = find_if(_sub_range_end, _end, _predicate);
+        _sub_range_end = lz::find_if(_sub_range_end, _end, _predicate);
     }
 
 public:

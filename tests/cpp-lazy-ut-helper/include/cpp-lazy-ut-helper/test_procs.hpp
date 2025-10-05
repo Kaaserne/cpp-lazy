@@ -3,9 +3,9 @@
 #ifndef LZ_RA_TEST_PROCS_HPP
 #define LZ_RA_TEST_PROCS_HPP
 
-#include <Lz/detail/procs.hpp>
 #include <Lz/stream.hpp>
 #include <doctest/doctest.h>
+#include <Lz/detail/procs/operators.hpp>
 #include <sstream>
 
 namespace test_procs {
@@ -70,7 +70,7 @@ void test_operator_minus(const Iterable& it) {
     }
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
+template<class Iterable, class ExpectedIterable, class EqCompare = lz::detail::equal_to>
 void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
     const auto size = lz::ssize(it);

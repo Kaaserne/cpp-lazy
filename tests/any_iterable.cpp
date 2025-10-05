@@ -1,4 +1,9 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/any_iterable.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/reverse.hpp>

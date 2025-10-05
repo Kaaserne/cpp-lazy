@@ -5,6 +5,8 @@
 
 #include <Lz/detail/iterators/any_iterable/iterator_base.hpp>
 #include <Lz/detail/iterators/common.hpp>
+#include <Lz/detail/traits/conditional.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/unique_ptr.hpp>
 #include <iterator>
 

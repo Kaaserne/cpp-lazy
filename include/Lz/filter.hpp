@@ -3,7 +3,7 @@
 #ifndef LZ_FILTER_HPP
 #define LZ_FILTER_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/filter.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

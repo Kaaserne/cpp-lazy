@@ -6,7 +6,7 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/exclusive_scan.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {

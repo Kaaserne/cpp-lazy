@@ -3,18 +3,22 @@
 #ifndef LZ_EXCEPT_ITERATOR_HPP
 #define LZ_EXCEPT_ITERATOR_HPP
 
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
+#include <Lz/detail/algorithm/lower_bound.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/procs/size.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class Iterable2, class BinaryPredicate>
-class except_iterator
-    : public iterator<except_iterator<Iterable, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable>>,
-                      fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
+class except_iterator : public iterator<except_iterator<Iterable, Iterable2, BinaryPredicate>, ref_t<iter_t<Iterable>>,
+                                        fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
+                                        bidi_strongest_cat<iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
     using iter_traits = std::iterator_traits<iter>;
@@ -35,12 +39,9 @@ private:
     mutable BinaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
-        using detail::find_if;
-        using std::find_if;
-
-        _iterator = find_if(std::move(_iterator), _iterable.end(), [this](reference value) {
-            const auto it =
-                sized_lower_bound(_to_except.begin(), value, _predicate, static_cast<difference_type>(lz::size(_to_except)));
+        _iterator = lz::find_if(std::move(_iterator), _iterable.end(), [this](reference value) {
+            const auto it = algorithm::sized_lower_bound(_to_except.begin(), value, _predicate,
+                                                         static_cast<difference_type>(lz::size(_to_except)));
             return it == _to_except.end() || _predicate(value, *it);
         });
     }
@@ -103,8 +104,8 @@ public:
         LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
         do {
             --_iterator;
-            const auto it =
-                sized_lower_bound(_to_except.begin(), *_iterator, _predicate, static_cast<difference_type>(lz::size(_to_except)));
+            const auto it = algorithm::sized_lower_bound(_to_except.begin(), *_iterator, _predicate,
+                                                         static_cast<difference_type>(lz::size(_to_except)));
             if (it == _to_except.end() || _predicate(*_iterator, *it)) {
                 return;
             }

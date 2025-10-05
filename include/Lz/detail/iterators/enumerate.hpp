@@ -6,7 +6,7 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/sentinel_with.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/procs/eager_size.hpp>
 
 namespace lz {
 namespace detail {

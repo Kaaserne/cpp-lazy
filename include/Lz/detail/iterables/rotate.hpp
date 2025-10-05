@@ -3,9 +3,10 @@
 #ifndef LZ_ROTATE_ITERABLE_HPP
 #define LZ_ROTATE_ITERABLE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
 #include <Lz/detail/iterators/rotate.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -80,7 +81,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable, _start_iter, lz::eager_size(_iterable) };
+            return iterator{ _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_size(_iterable) };
         }
         else {
             return _start_iter;

@@ -1,7 +1,9 @@
+#include <Lz/algorithm/equal.hpp>
 #include <Lz/chunk_if.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/range.hpp>
 #include <Lz/stream.hpp>
 #include <Lz/take.hpp>
@@ -48,7 +50,7 @@ TEST_CASE("Iterator chaining") {
         auto chunk_iterable = lz::range(unsigned(10)) | lz::chunk_if([](unsigned i) { return i % 2 == 0; });
         unsigned dummy = 0;
 
-        using chunk_type = decltype(chunk_iterable.begin())::reference;
+        using chunk_type = typename decltype(chunk_iterable.begin())::reference;
         auto mapped_chunk = chunk_iterable | lz::map([dummy](chunk_type chunk) mutable {
                                 ++dummy;
                                 return lz::format(chunk);

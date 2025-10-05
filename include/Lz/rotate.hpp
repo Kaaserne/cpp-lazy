@@ -3,7 +3,7 @@
 #ifndef LZ_ROTATE_HPP
 #define LZ_ROTATE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/rotate.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

@@ -3,7 +3,6 @@
 #ifndef LZ_TAKE_WHILE_ADAPTOR
 #define LZ_TAKE_WHILE_ADAPTOR
 
-
 #include <Lz/detail/iterables/take_while.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 

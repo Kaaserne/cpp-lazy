@@ -3,7 +3,7 @@
 #ifndef LZ_PAIRWISE_ADAPTOR_HPP
 #define LZ_PAIRWISE_ADAPTOR_HPP
 
-
+#include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/pairwise.hpp>
 
 namespace lz {

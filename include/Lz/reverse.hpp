@@ -3,7 +3,7 @@
 #ifndef LZ_REVERSE_HPP
 #define LZ_REVERSE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/reverse.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

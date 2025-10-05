@@ -6,7 +6,9 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -198,18 +200,9 @@ public:
         return *this == lz::default_sentinel;
     }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4717) // Recursive type
-#endif
-
     constexpr bool eq(default_sentinel_t) const {
         return _iterable.begin() == _iterable.end();
     }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 };
 } // namespace detail
 } // namespace lz

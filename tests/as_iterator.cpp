@@ -1,9 +1,10 @@
+#include <Lz/algorithm/equal.hpp>
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/pairwise.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/util/string_view.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>

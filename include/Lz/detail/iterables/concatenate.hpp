@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/concatenate.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
@@ -19,7 +20,7 @@ class concatenate_iterable : public lazy_view {
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
         using std::get;
         const size_t sizes[] = { static_cast<size_t>(lz::size(get<I>(_iterables)))... };
-        return std::accumulate(std::begin(sizes), std::end(sizes), size_t{ 0 });
+        return std::accumulate(detail::begin(sizes), detail::end(sizes), size_t{ 0 });
     }
 
     template<class Iterable2, size_t... Is>

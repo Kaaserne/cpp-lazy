@@ -3,21 +3,23 @@
 #ifndef LZ_GROUP_BY_ITERATOR_HPP
 #define LZ_GROUP_BY_ITERATOR_HPP
 
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
-#include <algorithm>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class BinaryPredicate>
-class group_by_iterator
-    : public iterator<group_by_iterator<Iterable, BinaryPredicate>,
-                      std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>,
-                      fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>>, std::ptrdiff_t,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
+class group_by_iterator : public iterator<group_by_iterator<Iterable, BinaryPredicate>,
+                                          std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>,
+                                          fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, basic_iterable<iter_t<Iterable>>>>,
+                                          ptrdiff_t, bidi_strongest_cat<iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
     using it = iter_t<Iterable>;
 
     it _sub_range_end{};
@@ -28,10 +30,8 @@ class group_by_iterator
     using ref_type = ref_t<it>;
 
     LZ_CONSTEXPR_CXX_14 void find_next(ref_type last_seen) {
-        using detail::find_if_not;
-        using std::find_if;
-        _sub_range_end = find_if(std::move(_sub_range_end), _iterable.end(),
-                                 [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
+        _sub_range_end = lz::find_if(std::move(_sub_range_end), _iterable.end(),
+                                     [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
     }
 
     LZ_CONSTEXPR_CXX_14 void advance() {

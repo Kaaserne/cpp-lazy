@@ -5,8 +5,8 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
+#include <Lz/util/default_sentinel.hpp>
 #include <numeric>
 
 namespace lz {
@@ -37,7 +37,7 @@ private:
         using std::get;
         const difference_type totals[] = { static_cast<difference_type>(get<I>(_iterators) -
                                                                         get<I>(other._iterators))... };
-        return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });
+        return std::accumulate(detail::begin(totals), detail::end(totals), difference_type{ 0 });
     }
 
     template<size_t... I>
@@ -45,7 +45,7 @@ private:
         using std::get;
         const difference_type totals[] = { static_cast<difference_type>(get<I>(_iterators) -
                                                                         get<I>(_iterables).end())... };
-        return std::accumulate(std::begin(totals), std::end(totals), difference_type{ 0 });
+        return std::accumulate(detail::begin(totals), detail::end(totals), difference_type{ 0 });
     }
 
 #ifdef LZ_HAS_CXX_17

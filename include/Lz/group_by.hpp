@@ -3,7 +3,7 @@
 #ifndef LZ_GROUP_BY_HPP
 #define LZ_GROUP_BY_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/group_by.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

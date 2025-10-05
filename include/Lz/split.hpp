@@ -3,9 +3,10 @@
 #ifndef LZ_STRING_SPLITTER_HPP
 #define LZ_STRING_SPLITTER_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/split.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/procs/chain.hpp>
+#include <Lz/util/string_view.hpp>
 #include <string>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -148,7 +149,8 @@ using split_iterable = detail::split_iterable<ValueType, Iterable, Delimiter>;
  * ```
  */
 template<class Iterable>
-using s_single_split_iterable = split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable, val_iterable_t<Iterable>>;
+using s_single_split_iterable =
+    split_iterable<std::basic_string<detail::val_iterable_t<Iterable>>, Iterable, detail::val_iterable_t<Iterable>>;
 
 /**
  * @brief Split iterable helper alias for string_view delimiter. Returns std::basic_string as value type.
@@ -159,8 +161,8 @@ using s_single_split_iterable = split_iterable<std::basic_string<val_iterable_t<
  * ```
  */
 template<class Iterable>
-using s_multiple_split_iterable = split_iterable<std::basic_string<val_iterable_t<Iterable>>, Iterable,
-                                                 lz::copied<lz::basic_string_view<val_iterable_t<Iterable>>>>;
+using s_multiple_split_iterable = split_iterable<std::basic_string<detail::val_iterable_t<Iterable>>, Iterable,
+                                                 lz::copied<lz::basic_string_view<detail::val_iterable_t<Iterable>>>>;
 
 /**
  * @brief Split iterable helper alias for single character delimiter. Returns lz::basic_string_view as value type.
@@ -172,7 +174,7 @@ using s_multiple_split_iterable = split_iterable<std::basic_string<val_iterable_
  */
 template<class Iterable>
 using sv_single_split_iterable =
-    split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable, val_iterable_t<Iterable>>;
+    split_iterable<lz::basic_string_view<detail::val_iterable_t<Iterable>>, Iterable, detail::val_iterable_t<Iterable>>;
 
 /**
  * @brief Split iterable helper alias for string_view delimiter. Returns lz::basic_string_view as value type.
@@ -183,8 +185,8 @@ using sv_single_split_iterable =
  * ```
  */
 template<class Iterable>
-using sv_multiple_split_iterable = split_iterable<lz::basic_string_view<val_iterable_t<Iterable>>, Iterable,
-                                                  lz::copied<lz::basic_string_view<val_iterable_t<Iterable>>>>;
+using sv_multiple_split_iterable = split_iterable<lz::basic_string_view<detail::val_iterable_t<Iterable>>, Iterable,
+                                                  lz::copied<lz::basic_string_view<detail::val_iterable_t<Iterable>>>>;
 
 } // namespace lz
 

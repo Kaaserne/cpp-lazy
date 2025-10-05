@@ -20,7 +20,6 @@ using variant = std::variant<T, T2>;
 
 #else
 
-#include <Lz/detail/procs.hpp>
 #include <cstdint>
 
 namespace lz {

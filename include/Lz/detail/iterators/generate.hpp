@@ -5,7 +5,10 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/func_ret_type.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,8 +18,7 @@ class generate_iterator;
 template<class GeneratorFunc>
 class generate_iterator<GeneratorFunc, false>
     : public iterator<generate_iterator<GeneratorFunc, false>, func_ret_type<GeneratorFunc>,
-                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
-                      default_sentinel_t> {
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
 
     mutable GeneratorFunc _func{};
     size_t _current{};

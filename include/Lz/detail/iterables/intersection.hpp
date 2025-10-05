@@ -51,26 +51,9 @@ public:
         _compare{ std::move(compare) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable2, _iterable.begin(), _iterable2.begin(), _compare };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable, _iterable2, _iterable.begin(), _iterable2.begin(), std::move(_compare) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        return { _iterable, _iterable2, _iterable.begin(), _iterable2.begin(), std::move(_compare) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

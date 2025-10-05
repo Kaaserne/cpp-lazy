@@ -5,6 +5,7 @@
 
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterables/common.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,7 +16,7 @@ struct common_adaptor {
 
     /**
      * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
-     * must return a different type than its end() function), the iput iterable is returned. . Example:
+     * must return a different type than its end() function), the input iterable is returned. Example:
      * ```cpp
      * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
      * auto common_view = lz::common(c_str);
@@ -47,17 +48,17 @@ struct common_adaptor {
             return std::forward<Iterable>(iterable);
         }
         else if constexpr (is_ra_v<it>) {
-            const auto size = std::end(iterable) - iterable.begin();
+            const auto size = detail::end(iterable) - iterable.begin();
             return basic_iterable<it>{ iterable.begin(), iterable.begin() + size };
         }
         else if constexpr (std::is_assignable_v<it, sentinel_t<Iterable>>) {
-            auto end = std::begin(iterable);
-            end = std::end(iterable);
+            auto end = detail::begin(iterable);
+            end = detail::end(iterable);
             if constexpr (is_sized_v<Iterable>) {
-                return sized_iterable<it>{ std::begin(iterable), end, lz::size(iterable) };
+                return sized_iterable<it>{ detail::begin(iterable), end, lz::size(iterable) };
             }
             else {
-                return make_basic_iterable(std::begin(iterable), end);
+                return make_basic_iterable(detail::begin(iterable), end);
             }
         }
         else {
@@ -69,7 +70,7 @@ struct common_adaptor {
 
     /**
      * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
-     * must return a different type than its end() function), the iput iterable is returned. . Example:
+     * must return a different type than its end() function), the input iterable is returned. Example:
      * ```cpp
      * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
      * auto common_view = lz::common(c_str);
@@ -100,7 +101,7 @@ struct common_adaptor {
 
     /**
      * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
-     * must return a different type than its end() function), the iput iterable is returned. . Example:
+     * must return a different type than its end() function), the input iterable is returned. Example:
      * ```cpp
      * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
      * auto common_view = lz::common(c_str);
@@ -135,7 +136,7 @@ struct common_adaptor {
 
     /**
      * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
-     * must return a different type than its end() function), the iput iterable is returned. . Example:
+     * must return a different type than its end() function), the input iterable is returned. Example:
      * ```cpp
      * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
      * auto common_view = lz::common(c_str);
@@ -165,14 +166,14 @@ struct common_adaptor {
                         std::is_assignable<iter_t<Iterable>, sentinel_t<Iterable>>::value && !is_sized<Iterable>::value,
                     basic_iterable<iter_t<Iterable>>>
         operator()(Iterable&& iterable) const {
-        auto end = std::begin(iterable);
-        end = std::end(iterable);
-        return make_basic_iterable(std::begin(iterable), end);
+        auto end = detail::begin(iterable);
+        end = detail::end(iterable);
+        return make_basic_iterable(detail::begin(iterable), end);
     }
 
     /**
      * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
-     * must return a different type than its end() function), the iput iterable is returned. . Example:
+     * must return a different type than its end() function), the input iterable is returned. Example:
      * ```cpp
      * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
      * auto common_view = lz::common(c_str);
@@ -202,14 +203,14 @@ struct common_adaptor {
                         std::is_assignable<iter_t<Iterable>, sentinel_t<Iterable>>::value && is_sized<Iterable>::value,
                     sized_iterable<iter_t<Iterable>>>
         operator()(Iterable&& iterable) const {
-        auto end = std::begin(iterable);
-        end = std::end(iterable);
-        return { std::begin(iterable), end, lz::size(iterable) };
+        auto end = detail::begin(iterable);
+        end = detail::end(iterable);
+        return { detail::begin(iterable), end, lz::size(iterable) };
     }
 
     /**
      * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
-     * must return a different type than its end() function), the iput iterable is returned. . Example:
+     * must return a different type than its end() function), the input iterable is returned. Example:
      * ```cpp
      * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
      * auto common_view = lz::common(c_str);

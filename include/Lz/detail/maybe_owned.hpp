@@ -3,7 +3,12 @@
 #ifndef LZ_MAYBE_OWNED_HPP
 #define LZ_MAYBE_OWNED_HPP
 
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/addressof.hpp>
+#include <Lz/detail/procs/begin_end.hpp>
+#include <Lz/detail/traits/is_sized.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/traits/iter_type.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
@@ -81,14 +86,14 @@ public:
         if (!_iterable_ref_ptr) {
             return iter_t<Iterable>{};
         }
-        return std::begin(*_iterable_ref_ptr);
+        return detail::begin(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
         if (!_iterable_ref_ptr) {
             return sentinel_t<Iterable>{};
         }
-        return std::end(*_iterable_ref_ptr);
+        return detail::end(*_iterable_ref_ptr);
     }
 };
 

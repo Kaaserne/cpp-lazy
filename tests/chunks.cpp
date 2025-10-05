@@ -1,6 +1,12 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/chunks.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/distance.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
@@ -203,7 +209,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         std::forward_list<int> fwd = { 1, 2, 3, 4, 5 };
         auto chunked = lz::chunks(fwd, 2);
-        using value_type = lz::val_iterable_t<decltype(chunked)>;
+        using value_type = lz::detail::val_iterable_t<decltype(chunked)>;
         auto common = make_sentinel_assign_op_tester(chunked);
         expected = { { 1, 2 }, { 3, 4 }, { 5 } };
         REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
@@ -212,7 +218,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("random access") {
         auto repeater = lz::repeat(20, 5);
         auto repeated_chunk = make_sentinel_assign_op_tester(lz::chunks(repeater, 2));
-        using value_type_2 = lz::val_iterable_t<decltype(repeated_chunk)>;
+        using value_type_2 = lz::detail::val_iterable_t<decltype(repeated_chunk)>;
         expected = { { 20, 20 }, { 20, 20 }, { 20 } };
         REQUIRE(lz::equal(repeated_chunk, expected, [](value_type_2 a, const std::vector<int>& b) { return lz::equal(a, b); }));
         REQUIRE(lz::equal(repeated_chunk | lz::reverse, expected | lz::reverse,
@@ -226,7 +232,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
         std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
         auto bidi_sentinel = make_sized_bidi_sentinelled(lst);
         auto lst_chunked = make_sentinel_assign_op_tester(lz::chunks(bidi_sentinel, 3));
-        using value_type_3 = lz::val_iterable_t<decltype(lst_chunked)>;
+        using value_type_3 = lz::detail::val_iterable_t<decltype(lst_chunked)>;
         expected = { { 1, 2, 3 }, { 4, 5, 6 } };
         REQUIRE(lz::equal(lst_chunked, expected, [](value_type_3 a, const std::vector<int>& b) { return lz::equal(a, b); }));
         REQUIRE(lz::equal(lst_chunked | lz::reverse, expected | lz::reverse,

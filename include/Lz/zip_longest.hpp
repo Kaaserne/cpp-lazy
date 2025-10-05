@@ -3,7 +3,7 @@
 #ifndef LZ_ZIP_LONGEST_HPP
 #define LZ_ZIP_LONGEST_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/zip_longest.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

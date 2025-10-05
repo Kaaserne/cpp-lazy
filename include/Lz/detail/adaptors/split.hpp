@@ -3,9 +3,9 @@
 #ifndef LZ_SPLIT_ADAPTOR_HPP
 #define LZ_SPLIT_ADAPTOR_HPP
 
-#include <Lz/c_string.hpp>
+#include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/split.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/util/string_view.hpp>
 
 namespace lz {
 

@@ -9,13 +9,13 @@
 #pragma clang diagnostic pop
 #endif
 
-#include <Lz/string_view.hpp>
+#include <Lz/util/string_view.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
 
 #if !defined(LZ_HAS_STRING_VIEW)
 
-#include <Lz/string_view.hpp>
+#include <Lz/util/string_view.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("String view basic functionality") {

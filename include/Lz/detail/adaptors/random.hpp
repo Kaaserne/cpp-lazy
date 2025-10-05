@@ -4,6 +4,7 @@
 #define LZ_RANDOM_ADAPTOR_HPP
 
 #include <Lz/detail/iterables/random.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <algorithm>
 #include <random>
 
@@ -21,7 +22,7 @@ private:
     template<class Iter>
     LZ_CONSTEXPR_CXX_20 void create(Iter begin, Iter end) {
         using value_type = val_t<Iter>;
-        std::transform(begin, end, std::begin(_seed), [](const value_type val) { return static_cast<result_type>(val); });
+        std::transform(begin, end, detail::begin(_seed), [](const value_type val) { return static_cast<result_type>(val); });
     }
 
     result_type T(const result_type x) const {
@@ -32,7 +33,7 @@ public:
     constexpr seed_sequence() = default;
 
     explicit seed_sequence(std::random_device& rd) {
-        std::generate(std::begin(_seed), std::end(_seed), [&rd]() { return rd(); });
+        std::generate(detail::begin(_seed), detail::end(_seed), [&rd]() { return rd(); });
     }
 
     template<class T>

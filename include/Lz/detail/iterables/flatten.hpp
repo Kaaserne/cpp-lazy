@@ -3,9 +3,10 @@
 #ifndef LZ_FLATTEN_ITERABLE_HPP
 #define LZ_FLATTEN_ITERABLE_HPP
 
+#include <Lz/algorithm/accumulate.hpp>
 #include <Lz/detail/iterators/flatten.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <numeric>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {
@@ -64,10 +65,8 @@ template<size_t I, class Iterable>
         return static_cast<size_t>(lz::size(iterable));
     }
     else {
-        using lz::detail::accumulate;
-        using std::accumulate;
-        return accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
-                          [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
+        return lz::accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
+                              [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
     }
 }
 
@@ -80,10 +79,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<I == 1, size_t> size_all(Iterable&&
 
 template<size_t I, class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 1), size_t> size_all(Iterable&& iterable) {
-    using lz::detail::accumulate;
-    using std::accumulate;
-    return accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
-                      [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
+    return lz::accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
+                          [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
 }
 
 #endif

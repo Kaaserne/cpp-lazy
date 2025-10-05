@@ -3,7 +3,7 @@
 #ifndef LZ_CACHED_SIZE_HPP
 #define LZ_CACHED_SIZE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/cached_size.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

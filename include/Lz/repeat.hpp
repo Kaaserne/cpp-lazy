@@ -3,7 +3,7 @@
 #ifndef LZ_REPEAT_HPP
 #define LZ_REPEAT_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/repeat.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

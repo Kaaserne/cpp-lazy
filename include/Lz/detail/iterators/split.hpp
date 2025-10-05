@@ -3,17 +3,21 @@
 #ifndef LZ_SPLIT_ITERATOR_HPP
 #define LZ_SPLIT_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find.hpp>
+#include <Lz/algorithm/search.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/operators.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 // TODO change forward to 'weakest'
 template<class ValueType, class Iterator, class S, class Iterator2, class S2>
-class split_iterator : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType,
-                                       fake_ptr_proxy<ValueType>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
+class split_iterator
+    : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,
+                      strongest_cat_t<iter_cat_t<Iterator>, std::forward_iterator_tag>, default_sentinel_t> {
     std::pair<Iterator, Iterator> _sub_range_end{};
     Iterator _sub_range_begin{};
     Iterator2 _to_search{};
@@ -22,7 +26,7 @@ class split_iterator : public iterator<split_iterator<ValueType, Iterator, S, It
     bool _ends_with_trailing{ true };
 
 public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = strongest_cat_t<iter_cat_t<Iterator>, std::forward_iterator_tag>;
     using value_type = ValueType;
     using reference = value_type;
     using difference_type = diff_type<Iterator>;
@@ -58,7 +62,7 @@ public:
         _end{ std::move(end) },
         _to_search_end{ std::move(end2) } {
         if (_sub_range_begin != _end) {
-            _sub_range_end = detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
+            _sub_range_end = lz::search(_sub_range_end.second, _end, _to_search, _to_search_end, detail::equal_to{});
         }
         else {
             _ends_with_trailing = false;
@@ -124,7 +128,7 @@ public:
         _sub_range_end.first = _sub_range_end.second;
         if (_sub_range_end.first != _end) {
             _sub_range_begin = _sub_range_end.first;
-            _sub_range_end = detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
+            _sub_range_end = lz::search(_sub_range_end.second, _end, _to_search, _to_search_end, detail::equal_to{});
         }
     }
 
@@ -142,7 +146,7 @@ public:
 template<class ValueType, class Iterator, class S, class T>
 class split_single_iterator
     : public iterator<split_single_iterator<ValueType, Iterator, S, T>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,
-                      std::forward_iterator_tag, default_sentinel_t> {
+                      strongest_cat_t<iter_cat_t<Iterator>, std::forward_iterator_tag>, default_sentinel_t> {
     Iterator _sub_range_begin{};
     Iterator _sub_range_end{};
     S _end{};
@@ -183,8 +187,8 @@ public:
         _end{ std::move(end) },
         _delimiter{ std::move(delimiter) } {
         if (_sub_range_begin != _end) {
+            using lz::find;
             using std::find;
-            using detail::find;
             _sub_range_end = find(_sub_range_begin, _end, _delimiter);
         }
         else {
@@ -249,8 +253,8 @@ public:
             return;
         }
 
+        using lz::find;
         using std::find;
-        using detail::find;
         _sub_range_end = find(_sub_range_begin, _end, _delimiter);
     }
 

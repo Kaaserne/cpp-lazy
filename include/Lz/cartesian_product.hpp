@@ -3,7 +3,7 @@
 #ifndef LZ_CARTESIAN_PRODUCT_HPP
 #define LZ_CARTESIAN_PRODUCT_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/cartesian_product.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

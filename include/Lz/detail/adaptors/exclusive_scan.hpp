@@ -5,7 +5,10 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/exclusive_scan.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/operators.hpp>
+#include <Lz/detail/traits/is_invocable.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {
@@ -40,7 +43,7 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An iterable that performs the exclusive scan on the specified iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = plus>
     [[nodiscard]] constexpr exclusive_scan_iterable<remove_ref_t<Iterable>, remove_cvref_t<T>, BinaryOp>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref_t<T>>)
@@ -72,7 +75,7 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class T, class BinaryOp = plus>
     [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>
     operator()(T&& init, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>)
@@ -108,7 +111,7 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An iterable that performs the exclusive scan on the specified iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = plus>
     LZ_NODISCARD constexpr enable_if_t<is_invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref_t<T>>::value,
                                        exclusive_scan_iterable<remove_ref_t<Iterable>, remove_cvref_t<T>, BinaryOp>>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const {
@@ -140,7 +143,7 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class T, class BinaryOp = plus>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     enable_if_t<is_invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>::value, fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>>
     operator()(T&& init, BinaryOp binary_op = {}) const {
@@ -159,9 +162,9 @@ LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
     requires(lz::iterable<Iterable>)
 [[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
     -> decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
-                                                     MAKE_BIN_PRED(plus){})) {
+                                                     lz::detail::plus{})) {
     return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
-                                                MAKE_BIN_PRED(plus){});
+                                                lz::detail::plus{});
 }
 
 #else
@@ -169,10 +172,11 @@ LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
 LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
     -> lz::detail::enable_if_t<lz::detail::is_iterable<Iterable>::value,
-                               decltype(lz::detail::exclusive_scan_adaptor{}(
-                                   std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{}, MAKE_BIN_PRED(plus){}))> {
-    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
-                                                MAKE_BIN_PRED(plus){});
+                               decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable),
+                                                                             lz::detail::val_iterable_t<Iterable>{},
+                                                                             lz::detail::plus{}))> {
+    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
+                                                lz::detail::plus{});
 }
 
 #endif

@@ -5,6 +5,8 @@
 
 #include <Lz/detail/iterators/chunks.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
 
 namespace lz {
 namespace detail {
@@ -60,7 +62,7 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr auto begin() const& {
+    [[nodiscard]] constexpr auto begin() const {
         // Also counts for ra
         if constexpr (is_bidi_tag_v<typename iterator::iterator_category>) {
             return iterator{ _iterable, _iterable.begin(), _chunk_size };
@@ -73,12 +75,12 @@ public:
 #else
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() const {
         return { _iterable.begin(), _iterable.end(), _chunk_size };
     }
 
     template<class I = typename iterator::iterator_category>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<I>::value, iterator> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<I>::value, iterator> begin() const {
         return { _iterable, _iterable.begin(), _chunk_size };
     }
 
@@ -86,7 +88,7 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    [[nodiscard]] constexpr auto end() const& {
+    [[nodiscard]] constexpr auto end() const {
         // Also counts for ra
         if constexpr (is_bidi_tag_v<typename iterator::iterator_category> && !is_sentinel_v<inner, sentinel_t<Iterable>>) {
             return iterator{ _iterable, _iterable.end(), _chunk_size };
@@ -101,14 +103,14 @@ public:
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD
         LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<I>::value && !is_sentinel<inner, sentinel_t<Iterable>>::value, iterator>
-        end() const& {
+        end() const {
         return { _iterable, _iterable.end(), _chunk_size };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if_t<!is_bidi_tag<I>::value || is_sentinel<inner, sentinel_t<Iterable>>::value,
                                        default_sentinel_t>
-    end() const& {
+    end() const {
         return {};
     }
 

@@ -1,7 +1,9 @@
+#pragma once
+
 #ifndef LZ_DUPLICATES_HPP
 #define LZ_DUPLICATES_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/duplicates.hpp>
 
 namespace lz {
@@ -29,7 +31,7 @@ LZ_INLINE_VAR constexpr detail::duplicates_adaptor duplicates{};
  * lz::duplicates_iterable<std::forward_list<int>> res = lz::duplicates(list);
  * ```
  */
-template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
+template<class Iterable, class BinaryPredicate = detail::less>
 using duplicates_iterable = detail::duplicates_iterable<Iterable, BinaryPredicate>;
 
 } // namespace lz

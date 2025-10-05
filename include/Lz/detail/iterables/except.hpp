@@ -7,6 +7,7 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/except.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/conditional.hpp>
 
 namespace lz {
 namespace detail {
@@ -55,26 +56,9 @@ public:
         _binary_predicate{ std::move(binary_predicate) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable1, _iterable1.begin(), _iterable2, _binary_predicate };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable1, _iterable1.begin(), std::move(_iterable2), std::move(_binary_predicate) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        return { _iterable1, _iterable1.begin(), std::move(_iterable2), std::move(_binary_predicate) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

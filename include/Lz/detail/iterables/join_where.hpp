@@ -6,6 +6,7 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/join_where.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {

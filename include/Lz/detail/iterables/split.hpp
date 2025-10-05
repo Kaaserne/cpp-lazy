@@ -6,6 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/split.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {

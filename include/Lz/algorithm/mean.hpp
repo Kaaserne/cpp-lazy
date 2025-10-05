@@ -1,0 +1,28 @@
+#pragma once
+
+#ifndef LZ_ALGORITHM_MEAN_HPP
+#define LZ_ALGORITHM_MEAN_HPP
+
+#include <Lz/detail/algorithm/mean.hpp>
+#include <Lz/detail/procs/operators.hpp>
+
+LZ_MODULE_EXPORT namespace lz {
+
+template<class Iterator, class S, class BinaryOp>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterator begin, S end, BinaryOp&& binary_op) {
+    return detail::algorithm::mean(std::move(begin), std::move(end), std::forward<BinaryOp>(binary_op));
+}
+
+/**
+ * Gets the mean of a sequence.
+ * @param iterable The iterable to calculate the mean of.
+ * @param binary_op The binary operator to calculate the mean with.
+ * @return The mean of the container.
+ */
+template<class Iterable, class BinaryOp = detail::plus>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterable&& iterable, BinaryOp&& binary_op = {}) {
+    return mean(detail::begin(iterable), detail::end(iterable), std::forward<BinaryOp>(binary_op));
+}
+
+} // namespace lz
+#endif // LZ_ALGORITHM_MEAN_HPP

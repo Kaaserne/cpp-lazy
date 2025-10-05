@@ -6,6 +6,7 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/take_while.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -50,26 +51,9 @@ public:
         _unary_predicate{ std::move(unary_predicate) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin(), _unary_predicate };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable, _iterable.begin(), std::move(_unary_predicate) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        return { _iterable, _iterable.begin(), std::move(_unary_predicate) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

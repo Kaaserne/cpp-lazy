@@ -6,9 +6,11 @@
 #include <Lz/basic_iterable.hpp> // for operator|
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/traits.hpp>
 #include <ostream>
 #include <string>
+
+#if FMT_VERSION >= 80000
+#endif
 
 // clang-format off
 #if !defined(LZ_STANDALONE)
@@ -19,14 +21,15 @@
   #endif
   #include <fmt/format.h>
   #include <fmt/ostream.h>
-#ifdef __GNUC__
-  #pragma GCC diagnostic pop
-#endif
-// clang-format on
-
+  #include <fmt/ranges.h>
+  #ifdef __GNUC__
+    #pragma GCC diagnostic pop
+  #endif
 #elif defined(LZ_HAS_FORMAT)
-#include <format>
+  #include <format>
 #endif // !defined(LZ_STANDALONE)
+
+// clang-format on
 
 namespace lz {
 namespace detail {

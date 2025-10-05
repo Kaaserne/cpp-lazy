@@ -3,7 +3,7 @@
 #ifndef LZ_GENERATE_WHILE_HPP
 #define LZ_GENERATE_WHILE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/generate_while.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

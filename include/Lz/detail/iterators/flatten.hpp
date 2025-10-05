@@ -3,11 +3,13 @@
 #ifndef LZ_FLATTEN_ITERATOR_HPP
 #define LZ_FLATTEN_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <iterator>
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -47,7 +49,7 @@ struct count_dims_impl<false> {
 template<>
 struct count_dims_impl<true> {
     template<class T>
-    using iterable_type = decltype(*std::begin(std::declval<T>()));
+    using iterable_type = decltype(*detail::begin(std::declval<T>()));
 
 #ifdef LZ_HAS_CXX_11
 
@@ -220,7 +222,7 @@ template<class Iterable, size_t N>
 using inner = flatten_iterator<remove_ref_t<ref_iterable_t<Iterable>>, N - 1>;
 
 template<class Iterable, size_t N>
-using iter_cat = common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>;
+using iter_cat = typename std::common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>::type;
 
 template<class Iterable, size_t N>
 class flatten_iterator
@@ -231,12 +233,10 @@ class flatten_iterator
     using this_inner = inner<Iterable, N>;
 
     LZ_CONSTEXPR_CXX_14 void find_next_non_empty_inner() {
-        using lz::detail::find_if;
-        using std::find_if;
         using ref = decltype(*_outer_iter.iterator());
 
         ++_outer_iter;
-        _outer_iter.iterator(find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
+        _outer_iter.iterator(lz::find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
             _inner_iter = this_inner(inner, inner.begin());
             return _inner_iter.has_next();
         }));

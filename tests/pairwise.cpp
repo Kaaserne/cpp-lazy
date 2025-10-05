@@ -1,4 +1,7 @@
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/filter.hpp>
@@ -14,7 +17,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         std::forward_list<int> lst = { 1, 2, 3, 4, 5 };
         auto common = make_sentinel_assign_op_tester(lz::pairwise(lst, 3));
-        using value_type = lz::val_iterable_t<decltype(common)>;
+        using value_type = lz::detail::val_iterable_t<decltype(common)>;
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 2, 3, 4 }, { 3, 4, 5 } };
         REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
     }
@@ -23,7 +26,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
         std::list<int> lst = { 1, 2, 3, 4, 5 };
         auto bidi_sentinelled = make_sized_bidi_sentinelled(lst);
         auto common = make_sentinel_assign_op_tester(lz::pairwise(bidi_sentinelled, 3));
-        using value_type = lz::val_iterable_t<decltype(common)>;
+        using value_type = lz::detail::val_iterable_t<decltype(common)>;
         std::vector<std::vector<int>> expected = { { 1, 2, 3 }, { 2, 3, 4 }, { 3, 4, 5 } };
         REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
         REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse,
@@ -33,7 +36,7 @@ TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("random access") {
         auto repeater = lz::repeat(20, 5);
         auto common = make_sentinel_assign_op_tester(lz::pairwise(repeater, 3));
-        using value_type2 = lz::val_iterable_t<decltype(common)>;
+        using value_type2 = lz::detail::val_iterable_t<decltype(common)>;
 
         std::vector<std::vector<int>> expected = { { 20, 20, 20 }, { 20, 20, 20 }, { 20, 20, 20 } };
         test_procs::test_operator_plus(common, expected,

@@ -3,7 +3,7 @@
 #ifndef LZ_ENUMERATE_HPP
 #define LZ_ENUMERATE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/enumerate.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

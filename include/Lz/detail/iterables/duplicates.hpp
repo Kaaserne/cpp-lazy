@@ -1,10 +1,12 @@
+#pragma once
+
 #ifndef LZ_DUPLICATES_ITERABLE_HPP
 #define LZ_DUPLICATES_ITERABLE_HPP
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/duplicates.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
@@ -47,26 +49,9 @@ public:
         _compare{ std::move(compare) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin(), _compare };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable, _iterable.begin(), std::move(_compare) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, iterator> begin() && {
-        return { _iterable, _iterable.begin(), std::move(_compare) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 

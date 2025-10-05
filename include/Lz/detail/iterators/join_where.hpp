@@ -3,10 +3,17 @@
 #ifndef LZ_JOIN_WHERE_ITERATOR_HPP
 #define LZ_JOIN_WHERE_ITERATOR_HPP
 
+#include <Lz/algorithm/find_if.hpp>
+#include <Lz/algorithm/lower_bound.hpp>
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/traits/func_ret_type.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,7 +22,7 @@ class join_where_iterator
     : public iterator<join_where_iterator<IterableA, IterB, SB, SelectorA, SelectorB, ResultSelector>,
                       func_ret_type_iters<ResultSelector, iter_t<IterableA>, IterB>,
                       fake_ptr_proxy<func_ret_type_iters<ResultSelector, iter_t<IterableA>, IterB>>, std::ptrdiff_t,
-                      common_type<std::bidirectional_iterator_tag, iter_cat_t<iter_t<IterableA>>>, default_sentinel_t> {
+                      bidi_strongest_cat<iter_cat_t<iter_t<IterableA>>>, default_sentinel_t> {
 private:
     using iter_a = iter_t<IterableA>;
     using traits_a = std::iterator_traits<iter_a>;
@@ -36,10 +43,7 @@ private:
     mutable ResultSelector _result_selector{};
 
     LZ_CONSTEXPR_CXX_17 void find_next() {
-        using detail::find_if;
-        using std::find_if;
-
-        _iter_a = find_if(std::move(_iter_a), _iterable_a.end(), [this](ref_t<iter_a> a) {
+        _iter_a = lz::find_if(std::move(_iter_a), _iterable_a.end(), [this](ref_t<iter_a> a) {
             auto&& to_find = _selector_a(a);
 
             auto pos = lz::lower_bound(_iterable_b, to_find,
