@@ -372,11 +372,11 @@ LZ_MODULE_EXPORT namespace lz {
  * @return The `Container`
  */
 template<class Container, class... Args>
-[[nodiscard]] constexpr detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>
+[[nodiscard]] constexpr detail::fn_args_holder<detail::to_adaptor<Container>, std::decay_t<Args>...>
 to(Args&&... args)
     requires(!lz::iterable<detail::first_arg_t<Args...>>)
 {
-    using Closure = detail::fn_args_holder<detail::to_adaptor<Container>, detail::decay_t<Args>...>;
+    using Closure = detail::fn_args_holder<detail::to_adaptor<Container>, std::decay_t<Args>...>;
     return Closure{ std::forward<Args>(args)... };
 }
 
@@ -401,11 +401,11 @@ to(Args&&... args)
  * @return The `Container`
  */
 template<template<class...> class Container, class... Args>
-[[nodiscard]] constexpr detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>
+[[nodiscard]] constexpr detail::fn_args_holder<detail::template_combiner<Container>, std::decay_t<Args>...>
 to(Args&&... args)
     requires(!lz::iterable<detail::first_arg_t<Args...>>)
 {
-    using Closure = detail::fn_args_holder<detail::template_combiner<Container>, detail::decay_t<Args>...>;
+    using Closure = detail::fn_args_holder<detail::template_combiner<Container>, std::decay_t<Args>...>;
     return Closure{ std::forward<Args>(args)... };
 }
 
@@ -531,11 +531,11 @@ template<class Container, class... Args, class Iterable>
  * @return The `Container`
  */
 template<template<class...> class Container, class... Args, class Iterable>
-[[nodiscard]] constexpr Container<val_iterable_t<Iterable>, Args...>
+[[nodiscard]] constexpr Container<detail::val_iterable_t<Iterable>, Args...>
 to(Iterable&& iterable, Args&&... args)
     requires(lz::iterable<Iterable>)
 {
-    using Cont = Container<val_iterable_t<Iterable>, detail::decay_t<Args>...>;
+    using Cont = Container<detail::val_iterable_t<Iterable>, std::decay_t<Args>...>;
     return to<Cont>(std::forward<Iterable>(iterable), std::forward<Args>(args)...);
 }
 

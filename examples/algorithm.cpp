@@ -1,6 +1,6 @@
-#include <Lz/algorithm.hpp>
-#include <iostream>
+#include <Lz/algorithm/algorithm.hpp>
 #include <Lz/c_string.hpp>
+#include <iostream>
 #include <vector>
 
 int main() {

@@ -119,7 +119,7 @@ Iterating over iterables with sentinels using range-based for loops is possible.
 
 ```cpp
 #include <Lz/c_string.hpp>
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/algorithm.hpp>
 
 int main() {
   auto iterable_with_sentinel = lz::c_string("Hello World");

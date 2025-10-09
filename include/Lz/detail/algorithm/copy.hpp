@@ -19,7 +19,7 @@ template<class Iterator, class S, class OutputIterator>
 constexpr void copy(Iterator begin, S end, OutputIterator out) {
     if constexpr (is_ra_v<Iterator>) {
         auto last = begin + (end - begin);
-        static_cast<void>(std::copy(std::move(begin), std::move(end), std::move(out)));
+        static_cast<void>(std::copy(std::move(begin), std::move(last), std::move(out)));
     }
     else {
         for (; begin != end; ++begin, ++out) {

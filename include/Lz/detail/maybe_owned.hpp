@@ -10,6 +10,10 @@
 #include <Lz/traits/iter_type.hpp>
 #include <Lz/traits/lazy_view.hpp>
 
+#ifdef LZ_HAS_CONCEPTS
+#include <Lz/traits/concepts.hpp>
+#endif
+
 namespace lz {
 namespace detail {
 template<class Iterable, bool /* is base of lazy_view && !is c array */>

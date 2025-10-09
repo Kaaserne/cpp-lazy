@@ -10,8 +10,7 @@
 #include <Lz/detail/procs/begin_end.hpp>
 #include <Lz/procs/size.hpp>
 
-namespace lz {
-namespace detail {
+LZ_MODULE_EXPORT namespace lz {
 
 template<class T>
 concept sized = requires(T&& c) {
@@ -27,7 +26,6 @@ concept iterable = requires(T&& c) {
 template<class T>
 concept adaptor = requires(T) { typename T::adaptor; };
 
-} // namespace detail
 } // namespace lz
 
 #endif // LZ_HAS_CONCEPTS

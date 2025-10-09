@@ -3,7 +3,7 @@
 #ifndef LZ_LZ_HPP
 #define LZ_LZ_HPP
 
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/algorithm.hpp>
 #include <Lz/any_iterable.hpp>
 #include <Lz/as_iterator.hpp>
 #include <Lz/c_string.hpp>

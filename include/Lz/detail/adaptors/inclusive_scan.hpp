@@ -81,7 +81,7 @@ struct inclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      * @return An adaptor that can be used in pipe expressions.
      */
-    template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class T, class BinaryOp = detail::plus>
     [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>
     operator()(T&& init, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>)

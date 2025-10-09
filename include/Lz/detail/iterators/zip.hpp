@@ -127,7 +127,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_iterator()
-        requires(std::default_initializable<IterTuple>)
+        requires(std::default_initializable<iter_tuple>)
     = default;
 
 #else

@@ -9,6 +9,10 @@
 #include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/traits/lazy_view.hpp>
 
+#ifdef LZ_HAS_CONCEPTS
+#include <Lz/traits/concepts.hpp>
+#endif
+
 namespace lz {
 namespace detail {
 template<class... Iterables>
@@ -65,7 +69,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr size_t size() const
-        requires(all_sized)
+        requires(sized<maybe_owned<Iterables>> && ...)
     {
         return size(seq{});
     }

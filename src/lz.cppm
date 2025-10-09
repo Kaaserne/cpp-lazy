@@ -1,9 +1,12 @@
 module;
 
 #include <algorithm>
+#include <cstddef>
 #include <format>
+#include <functional>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <numeric>
 #include <optional>
 #include <ostream>
@@ -32,7 +35,7 @@ export module lz;
 #define LZ_MODULE_EXPORT_SCOPE_END }
 #endif
 
-#include "Lz/algorithm.hpp"
+#include "Lz/algorithm/algorithm.hpp"
 #include "Lz/any_iterable.hpp"
 #include "Lz/c_string.hpp"
 #include "Lz/cached_size.hpp"
@@ -59,7 +62,6 @@ export module lz;
 #include "Lz/join_where.hpp"
 #include "Lz/loop.hpp"
 #include "Lz/map.hpp"
-#include "Lz/optional.hpp"
 #include "Lz/pairwise.hpp"
 #include "Lz/random.hpp"
 #include "Lz/range.hpp"
@@ -70,10 +72,13 @@ export module lz;
 #include "Lz/slice.hpp"
 #include "Lz/split.hpp"
 #include "Lz/stream.hpp"
-#include "Lz/string_view.hpp"
 #include "Lz/take.hpp"
 #include "Lz/take_every.hpp"
 #include "Lz/take_while.hpp"
+#include "Lz/traits/traits.hpp"
 #include "Lz/unique.hpp"
+#include "Lz/util/default_sentinel.hpp"
+#include "Lz/util/optional.hpp"
+#include "Lz/util/string_view.hpp"
 #include "Lz/zip.hpp"
 #include "Lz/zip_longest.hpp"

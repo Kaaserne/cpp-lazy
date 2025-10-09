@@ -16,7 +16,7 @@ void for_each(Iterator begin, S end, Func func) {
         detail::algorithm::for_each(std::move(begin), std::move(end), std::move(func));
     }
     else {
-        static_cast<void>(std::for_each(std::move(begin), std::move(last), std::move(func)));
+        static_cast<void>(std::for_each(std::move(begin), std::move(end), std::move(func)));
     }
 }
 

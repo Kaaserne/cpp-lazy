@@ -42,7 +42,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr exclude_iterator()
-        requires(std::default_initializable<Iterator> && std::default_initializable<Iterable>)
+        requires(std::default_initializable<iter> && std::default_initializable<Iterable>)
     = default;
 
 #else

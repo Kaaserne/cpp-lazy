@@ -4,6 +4,7 @@
 #define LZ_ALGORITHM_ACCUMULATE_HPP
 
 #include <Lz/detail/algorithm/accumulate.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 #ifdef LZ_HAS_CXX_20
 #include <numeric>
@@ -14,7 +15,7 @@ LZ_MODULE_EXPORT namespace lz {
 #ifdef LZ_HAS_CXX_20
 
 template<class Iterator, class S, class T, class UnaryPredicate>
-[[nodiscard]] constexpr Iterator accumulate(Iterator begin, S end, T init, UnaryPredicate unary_predicate) {
+[[nodiscard]] constexpr T accumulate(Iterator begin, S end, T init, UnaryPredicate unary_predicate) {
     if constexpr (detail::is_sentinel_v<Iterator, S>) {
         return detail::algorithm::accumulate(std::move(begin), std::move(end), std::move(init), std::move(unary_predicate));
     }
@@ -39,6 +40,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T accumulate(Iterator begin, S end, T init, Una
     return detail::algorithm::accumulate(std::move(begin), std::move(end), std::move(init), std::move(unary_predicate));
 }
 
+#endif
+
 /**
  * @brief Accumulates the values in the range [begin, end) using the binary operator @p unary_predicate
  *
@@ -52,7 +55,6 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T accumulate(Iterable&& iterable, T init, Unary
     return lz::accumulate(detail::begin(iterable), detail::end(iterable), std::move(init), std::move(unary_predicate));
 }
 
-#endif
 } // namespace lz
 
 #endif

@@ -388,7 +388,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires(std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>)
+        requires(std::default_initializable<iter_maybe_homo> && std::default_initializable<s_maybe_homo>)
     = default;
 
 #else

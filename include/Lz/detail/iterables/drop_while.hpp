@@ -54,7 +54,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     [[nodiscard]] constexpr size_t size() const
-        requires(is_ra_tag_v<iter_cat_t<iterator>>::value)
+        requires(is_ra_tag_v<iter_cat_t<iterator>>)
     {
         return static_cast<size_t>(_end - _begin);
     }

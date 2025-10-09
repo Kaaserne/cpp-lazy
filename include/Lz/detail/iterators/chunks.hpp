@@ -49,7 +49,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator()
-        requires(std::default_initializable<Iterator> && std::default_initializable<S>)
+        requires(std::default_initializable<iter> && std::default_initializable<sent>)
     = default;
 
 #else
@@ -133,7 +133,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator()
-        requires(std::default_initializable<Iterator> && std::default_initializable<S>)
+        requires(std::default_initializable<iter> && std::default_initializable<sent> && std::default_initializable<Iterable>)
     = default;
 
 #else

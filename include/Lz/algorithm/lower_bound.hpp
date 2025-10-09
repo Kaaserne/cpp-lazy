@@ -32,7 +32,7 @@ LZ_CONSTEXPR_CXX_14 Iterator lower_bound(Iterator begin, S end, const T& value, 
 template<class Iterable, class T, class BinaryPredicate = detail::less>
 LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_iterable<Iterable>::value, iter_t<Iterable>>
 lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate = {})
-    requires(detail::is_iterable_v<Iterator>)
+    requires(detail::is_iterable_v<Iterable>)
 {
     return detail::algorithm::lower_bound(std::forward<Iterable>(iterable), value, std::move(binary_predicate));
 }

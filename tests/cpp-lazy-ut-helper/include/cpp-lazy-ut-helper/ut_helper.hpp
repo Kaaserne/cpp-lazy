@@ -10,6 +10,10 @@
 #include <Lz/traits/lazy_view.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
 
+#ifdef LZ_HAS_CONCEPTS
+#include <Lz/traits/concepts.hpp>
+#endif
+
 template<class Iterable, bool EnableSize = true>
 class bidi_sentinelled : public lz::lazy_view {
     using iterable = lz::filter_iterable<Iterable, std::function<bool(lz::detail::ref_iterable_t<Iterable>)>>;
@@ -83,7 +87,7 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     size_t size() const
-        requires(sized<Iterable>)
+        requires(lz::sized<Iterable>)
     {
         return lz::size(_iterable);
     }

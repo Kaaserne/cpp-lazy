@@ -1,4 +1,4 @@
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/algorithm.hpp>
 #include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/procs/to.hpp>

@@ -17,7 +17,7 @@ namespace algorithm {
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class Func>
-constepxr void for_each(Iterator begin, S end, Func func) {
+constexpr void for_each(Iterator begin, S end, Func func) {
     if constexpr (is_ra_v<Iterator>) {
         auto last = begin + (end - begin);
         static_cast<void>(std::for_each(std::move(begin), std::move(last), std::move(func)));

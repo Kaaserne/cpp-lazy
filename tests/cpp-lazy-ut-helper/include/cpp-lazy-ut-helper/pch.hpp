@@ -1,25 +1,29 @@
 #pragma once
 
+#include <Lz/detail/compiler_checks.hpp>
 #include <algorithm>
 #include <array>
 #include <deque>
 #include <forward_list>
 #include <fstream>
-#include <regex>
 #include <functional>
-#include <utility>
 #include <iostream>
 #include <iterator>
 #include <list>
 #include <map>
+#ifndef LZ_HAS_CXX_14
+#include <memory>
+#endif
 #include <numeric>
 #include <queue>
+#include <regex>
 #include <set>
 #include <sstream>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #ifdef LZ_HAS_CXX_17
