@@ -59,7 +59,9 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<size_t>(lz::size(_iterable));
+        const auto s = lz::size(_iterable);
+        LZ_ASSERT(_start_index <= s, "start index is larger than size of iterable");
+        return _start_index == s ? 0 : s;
     }
 
 #else

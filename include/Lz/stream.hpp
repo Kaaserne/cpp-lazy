@@ -16,8 +16,11 @@
 #if !defined(LZ_STANDALONE)
   #ifdef __GNUC__
     #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wall"
+    #pragma GCC diagnostic ignored "-Wextra"
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic ignored "-Wctor-dtor-privacy"
     #pragma GCC diagnostic ignored "-Weffc++"
-    #pragma GCC diagnostic ignored "-Wswitch-default"
   #endif
   #include <fmt/format.h>
   #include <fmt/ostream.h>
