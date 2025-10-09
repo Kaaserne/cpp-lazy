@@ -5,11 +5,9 @@
 
 #include <Lz/detail/algorithm/max_element.hpp>
 #include <Lz/detail/procs/operators.hpp>
-#include <Lz/detail/traits/is_sentinel.hpp>
-
-#ifndef LZ_HAS_CXX_17
 #include <Lz/detail/traits/enable_if.hpp>
-#endif
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
@@ -28,16 +26,18 @@ template<class Iterator, class S, class BinaryPredicate = detail::less>
 #else
 
 template<class Iterator, class S, class BinaryPredicate = detail::less>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_sentinel<Iterator, S>::value, Iterator>
-max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
+LZ_CONSTEXPR_CXX_14
+    detail::enable_if_t<detail::is_sentinel<Iterator, S>::value && !detail::is_iterable<Iterator>::value, Iterator>
+    max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
     return detail::algorithm::max_element(std::move(begin), std::move(end), std::move(binary_predicate));
 }
 
-template<class Iterator, class S, class BinaryPredicate = detail::less>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_sentinel<Iterator, S>::value, Iterator>
-max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
-    return std::max_element(std::move(begin), std::move(end), std::move(binary_predicate));
-}
+ template<class Iterator, class S, class BinaryPredicate = detail::less>
+ LZ_CONSTEXPR_CXX_14
+     detail::enable_if_t<!detail::is_sentinel<Iterator, S>::value && !detail::is_iterable<Iterator>::value, Iterator>
+     max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
+     return std::max_element(std::move(begin), std::move(end), std::move(binary_predicate));
+ }
 
 #endif
 
@@ -48,8 +48,9 @@ max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
  * @return The maximum element in the range, if the range is empty, the return value is `end`
  */
 template<class Iterable, class BinaryPredicate = detail::less>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> max_element(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
-    return lz::max_element(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_iterable<Iterable>::value, iter_t<Iterable>>
+max_element(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
+    return lz::max_element(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
 }
 } // namespace lz
 
