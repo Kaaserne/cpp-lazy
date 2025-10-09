@@ -56,7 +56,7 @@ template<class Iterable, class T, class UnaryPredicate = detail::plus>
  * @return The accumulated value
  */
 template<class Iterator, class S, class T, class UnaryPredicate = detail::plus>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_iterable<Iterable>::value, T>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_iterable<Iterator>::value, T>
 accumulate(Iterator begin, S end, T init, UnaryPredicate unary_predicate = {}) {
     return detail::algorithm::accumulate(std::move(begin), std::move(end), std::move(init), std::move(unary_predicate));
 }
