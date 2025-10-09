@@ -226,7 +226,7 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
 
     auto begin = it.begin();
 
-    for (std::ptrdiff_t i = 0; i + 1 < lz::ssize(it); ++i) {
+    for (std::ptrdiff_t i = 0; static_cast<std::size_t>(i) + 1 < lz::size(it); ++i) {
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
     }
