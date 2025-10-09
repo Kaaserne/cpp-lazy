@@ -19,7 +19,7 @@ constexpr bool empty(Iterator begin, S end) {
  */
 template<class Iterable>
 LZ_NODISCARD constexpr bool empty(Iterable&& iterable) {
-    return empty(detail::begin(iterable), detail::end(iterable));
+    return lz::empty(detail::begin(iterable), detail::end(iterable));
 }
 } // namespace lz
 

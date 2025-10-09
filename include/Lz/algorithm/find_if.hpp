@@ -52,10 +52,8 @@ find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
  * @return Iterator to the first element that satisfies the binary_predicate or `end(iterable)` if the element is not found
  */
 template<class Iterable, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    using lz::find_if;
-    using std::find_if;
-    return find_if(detail::begin(iterable), detail::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    return lz::find_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 } // namespace lz
 

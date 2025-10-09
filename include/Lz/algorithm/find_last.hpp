@@ -21,7 +21,7 @@ LZ_CONSTEXPR_CXX_14 Iterator find_last(Iterator begin, S end, const T& value) {
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable, const T& value) {
-    return find_last(detail::begin(iterable), detail::end(iterable), value);
+    return lz::find_last(detail::begin(iterable), detail::end(iterable), value);
 }
 
 } // namespace lz

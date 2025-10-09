@@ -9,7 +9,7 @@ LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::diff_type<Iterator> count(Iterator begin, S end, const T& value) {
-    return count_if(std::move(begin), std::move(end), [&value](const T& val) { return val == value; });
+    return lz::count_if(std::move(begin), std::move(end), [&value](const T& val) { return val == value; });
 }
 
 /**
@@ -21,7 +21,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::diff_type<Iterator> count(Iterator begi
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::diff_iterable_t<Iterable> count(Iterable&& iterable, const T& value) {
-    return count(detail::begin(iterable), detail::end(iterable), value);
+    return lz::count(detail::begin(iterable), detail::end(iterable), value);
 }
 
 } // namespace lz

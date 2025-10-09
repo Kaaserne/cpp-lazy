@@ -14,6 +14,7 @@
 #ifdef LZ_HAS_CXX_11
 
 #include <utility>
+#include <Lz/detail/procs/assert.hpp>
 
 #endif
 

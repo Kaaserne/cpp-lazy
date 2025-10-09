@@ -23,8 +23,7 @@ LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate un
  */
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 void for_each_while(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return for_each_while(detail::begin(std::forward<Iterable>(iterable)), detail::end(std::forward<Iterable>(iterable)),
-                          std::move(unary_predicate));
+    return for_each_while(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 } // namespace lz
 

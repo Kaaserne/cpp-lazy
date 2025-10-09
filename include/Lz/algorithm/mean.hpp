@@ -9,8 +9,8 @@
 LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class BinaryOp>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterator begin, S end, BinaryOp&& binary_op) {
-    return detail::algorithm::mean(std::move(begin), std::move(end), std::forward<BinaryOp>(binary_op));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterator begin, S end, BinaryOp binary_op) {
+    return detail::algorithm::mean(std::move(begin), std::move(end), std::move(binary_op));
 }
 
 /**
@@ -20,8 +20,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterator begin, S end, BinaryOp&& b
  * @return The mean of the container.
  */
 template<class Iterable, class BinaryOp = detail::plus>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterable&& iterable, BinaryOp&& binary_op = {}) {
-    return mean(detail::begin(iterable), detail::end(iterable), std::forward<BinaryOp>(binary_op));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 double mean(Iterable&& iterable, BinaryOp binary_op = {}) {
+    return lz::mean(detail::begin(iterable), detail::end(iterable), std::move(binary_op));
 }
 
 } // namespace lz

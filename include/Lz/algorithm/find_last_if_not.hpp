@@ -24,8 +24,8 @@ LZ_CONSTEXPR_CXX_14 Iterator find_last_if_not(Iterator begin, S end, UnaryPredic
  */
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 iter_t<Iterable>
-find_last_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate) { // TODO check for all && in algorithm
-    return lz::find_last_if_not(detail::begin(iterable), detail::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
+find_last_if_not(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    return lz::find_last_if_not(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 
 } // namespace lz

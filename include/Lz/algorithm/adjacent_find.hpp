@@ -53,9 +53,7 @@ adjacent_find(Iterator begin, S end, BinaryPredicate binary_predicate) {
  */
 template<class Iterable, class BinaryPredicate = detail::equal_to>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> adjacent_find(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
-    using lz::adjacent_find;
-    using std::adjacent_find;
-    return adjacent_find(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
+    return lz::adjacent_find(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 } // namespace lz

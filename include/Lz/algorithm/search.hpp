@@ -23,9 +23,9 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterator, class S, class Iterator2, class S2, class BinaryPredicate = detail::equal_to>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::pair<Iterator, Iterator>
-search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate&& binary_predicate = {}) {
+search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate = {}) {
     return detail::algorithm::search(std::move(begin), std::move(end), std::move(begin2), std::move(end2),
-                                     std::forward<BinaryPredicate>(binary_predicate));
+                                     std::move(binary_predicate));
 }
 
 /**
@@ -40,9 +40,9 @@ search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate&& binar
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = detail::equal_to>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 std::pair<iter_t<Iterable>, iter_t<Iterable>>
-search(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+search(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) {
     return lz::search(detail::begin(iterable), detail::end(iterable), detail::begin(iterable2), detail::end(iterable2),
-                      std::forward<BinaryPredicate>(binary_predicate));
+                      std::move(binary_predicate));
 }
 
 } // namespace lz

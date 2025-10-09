@@ -10,9 +10,8 @@ LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 Iterator find_if_not(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    using std::find_if;
-    return find_if(std::move(begin), std::move(end),
-                   [&unary_predicate](detail::ref_t<Iterator> value) { return !unary_predicate(value); });
+    return lz::find_if(std::move(begin), std::move(end),
+                       [&unary_predicate](detail::ref_t<Iterator> value) { return !unary_predicate(value); });
 }
 
 /**
@@ -25,10 +24,8 @@ LZ_CONSTEXPR_CXX_14 Iterator find_if_not(Iterator begin, S end, UnaryPredicate u
  * found
  */
 template<class Iterable, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    using lz::find_if_not;
-    using std::find_if_not;
-    return find_if_not(detail::begin(iterable), detail::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if_not(Iterable && iterable, UnaryPredicate unary_predicate) {
+    return lz::find_if_not(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 } // namespace lz
 

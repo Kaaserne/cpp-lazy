@@ -18,7 +18,7 @@ LZ_CONSTEXPR_CXX_14 bool has_many(Iterator begin, S end) {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
-    return has_many(detail::begin(iterable), detail::end(iterable));
+    return lz::has_many(detail::begin(iterable), detail::end(iterable));
 }
 } // namespace lz
 

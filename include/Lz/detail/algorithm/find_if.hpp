@@ -37,13 +37,14 @@ LZ_CONSTEXPR_CXX_14 Iterator find_if(Iterator begin, S end, UnaryPredicate unary
 #else
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if<is_ra<Iterator>::value, Iterator> find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value, Iterator> find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
     auto common_end = begin + (end - begin);
     return std::find_if(std::move(begin), std::move(common_end), std::move(unary_predicate));
 }
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if<!is_ra<Iterator>::value, Iterator> find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, Iterator>
+find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
     for (; begin != end; ++begin) {
         if (unary_predicate(*begin)) {
             break;

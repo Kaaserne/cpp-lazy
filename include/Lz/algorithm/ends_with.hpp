@@ -21,15 +21,15 @@ LZ_MODULE_EXPORT namespace lz {
  * @return `true` if the value is found, `false` otherwise
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = std::equal_to<>>
-[[nodiscard]] constexpr bool ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+[[nodiscard]] constexpr bool ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) {
     if constexpr (detail::is_bidi_v<iter_t<Iterable>>) {
         return detail::algorithm::ends_with(detail::begin(iterable), detail::end(iterable), detail::begin(iterable2),
-                                            detail::end(iterable2), std::forward<BinaryPredicate>(binary_predicate));
+                                            detail::end(iterable2), std::move(binary_predicate));
     }
     else {
         return detail::algorithm::ends_with(detail::begin(iterable), detail::end(iterable), detail::begin(iterable2),
-                                            detail::end(iterable2), std::forward<BinaryPredicate>(binary_predicate),
-                                            lz::eager_size(iterable), lz::eager_size(iterable2));
+                                            detail::end(iterable2), std::move(binary_predicate), lz::eager_size(iterable),
+                                            lz::eager_size(iterable2));
     }
 }
 
@@ -46,9 +46,9 @@ template<class Iterable, class Iterable2, class BinaryPredicate = std::equal_to<
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = detail::equal_to>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_bidi<iter_t<Iterable>>::value, bool>
-ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) {
     return detail::algorithm::ends_with(detail::begin(iterable), detail::end(iterable), detail::begin(iterable2),
-                                        detail::end(iterable2), std::forward<BinaryPredicate>(binary_predicate));
+                                        detail::end(iterable2), std::move(binary_predicate));
 }
 
 /**
@@ -64,9 +64,9 @@ ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_p
  */
 template<class Iterable, class Iterable2, class BinaryPredicate = detail::equal_to>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_bidi<iter_t<Iterable>>::value, bool>
-ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate&& binary_predicate = {}) {
+ends_with(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) {
     return detail::algorithm::ends_with(detail::begin(iterable), detail::end(iterable), detail::begin(iterable2),
-                                        detail::end(iterable2), std::forward<BinaryPredicate>(binary_predicate),
+                                        detail::end(iterable2), std::move(binary_predicate),
                                         lz::eager_size(iterable), lz::eager_size(iterable2));
 }
 

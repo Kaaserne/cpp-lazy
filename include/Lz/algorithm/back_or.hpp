@@ -21,7 +21,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_t<Iterator> back_or(Iterator begin,
  */
 template<class Iterable, class T>
 LZ_NODISCARD constexpr detail::val_iterable_t<Iterable> back_or(Iterable&& iterable, T&& default_value) {
-    return back_or(detail::begin(iterable), detail::end(iterable), std::forward<T>(default_value));
+    return lz::back_or(detail::begin(iterable), detail::end(iterable), std::forward<T>(default_value));
 }
 
 } // namespace lz

@@ -21,8 +21,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterator iterator, S s, UnaryPredic
  * @return true if any of the elements satisfy the unary_predicate, false otherwise
  */
 template<class Iterable, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    return any_of(detail::begin(iterable), detail::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    return lz::any_of(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 
 }

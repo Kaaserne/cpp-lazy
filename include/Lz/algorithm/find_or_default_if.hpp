@@ -10,9 +10,9 @@ LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class UnaryPredicate, class T>
 LZ_CONSTEXPR_CXX_14 detail::val_t<Iterator>
-find_or_default_if(Iterator begin, S end, UnaryPredicate&& unary_predicate, T&& default_value) {
+find_or_default_if(Iterator begin, S end, UnaryPredicate unary_predicate, T&& default_value) {
     using std::find_if;
-    auto pos = find_if(std::move(begin), end, std::forward<UnaryPredicate>(unary_predicate));
+    auto pos = find_if(std::move(begin), end, std::move(unary_predicate));
     return static_cast<detail::val_t<Iterator>>(pos == end ? std::forward<T>(default_value) : *pos);
 }
 
@@ -27,9 +27,9 @@ find_or_default_if(Iterator begin, S end, UnaryPredicate&& unary_predicate, T&& 
  */
 template<class Iterable, class UnaryPredicate, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable> // TODO common_reference?
-find_or_default_if(Iterable&& iterable, UnaryPredicate&& unary_predicate, T&& default_value) {
-    return find_or_default_if(detail::begin(iterable), detail::end(iterable), std::forward<UnaryPredicate>(unary_predicate),
-                              std::forward<T>(default_value));
+find_or_default_if(Iterable&& iterable, UnaryPredicate unary_predicate, T&& default_value) {
+    return lz::find_or_default_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate),
+                                  std::forward<T>(default_value));
 }
 
 } // namespace lz

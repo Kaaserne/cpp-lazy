@@ -107,19 +107,6 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14
     return begin;
 }
 
-template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
-    diff_type<Iterator> dist = 0;
-    for (; begin != end; ++begin, ++dist) {
-    }
-    return dist;
-}
-
-template<class Iterator, class S>
-constexpr enable_if_t<is_ra<Iterator>::value, diff_type<Iterator>> distance_impl(Iterator begin, S end) {
-    return end - begin;
-}
-
 #endif
 
 } // namespace detail

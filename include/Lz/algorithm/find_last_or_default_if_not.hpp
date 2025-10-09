@@ -27,9 +27,9 @@ find_last_or_default_if_not(Iterator begin, S end, UnaryPredicate unary_predicat
  */
 template<class Iterable, class UnaryPredicate, class U>
 LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable>
-find_last_or_default_if_not(Iterable&& iterable, UnaryPredicate&& unary_predicate, U&& default_value) {
-    return find_last_or_default_if_not(detail::begin(iterable), detail::end(iterable),
-                                       std::forward<UnaryPredicate>(unary_predicate), std::forward<U>(default_value));
+find_last_or_default_if_not(Iterable&& iterable, UnaryPredicate unary_predicate, U&& default_value) {
+    return lz::find_last_or_default_if_not(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate),
+                                           std::forward<U>(default_value));
 }
 
 } // namespace lz

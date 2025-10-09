@@ -22,7 +22,7 @@ LZ_CONSTEXPR_CXX_14 size_t index_of_if(Iterator begin, S end, UnaryPredicate una
  */
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 size_t index_of_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return index_of_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
+    return lz::index_of_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 
 } // namespace lz

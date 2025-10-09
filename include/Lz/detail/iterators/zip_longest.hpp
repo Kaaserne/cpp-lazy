@@ -11,6 +11,10 @@
 #include <Lz/util/optional.hpp>
 #include <algorithm>
 
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
+
 namespace lz {
 namespace detail {
 

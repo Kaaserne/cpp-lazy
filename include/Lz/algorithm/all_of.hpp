@@ -9,10 +9,8 @@
 LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 bool all_of(Iterator iterator, S s, UnaryPredicate unary_predicate) {
-    using lz::find_if_not;
-    using std::find_if_not;
-    return find_if_not(std::move(iterator), s, std::move(unary_predicate)) == s;
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool all_of(Iterator iterator, S s, UnaryPredicate unary_predicate) {
+    return lz::find_if_not(std::move(iterator), s, std::move(unary_predicate)) == s;
 }
 
 /**
@@ -24,8 +22,8 @@ LZ_CONSTEXPR_CXX_14 bool all_of(Iterator iterator, S s, UnaryPredicate unary_pre
  * @return true if all elements satisfy the unary_predicate, false otherwise
  */
 template<class Iterable, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool all_of(Iterable&& iterable, UnaryPredicate&& unary_predicate) {
-    return all_of(detail::begin(iterable), detail::end(iterable), std::forward<UnaryPredicate>(unary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool all_of(Iterable&& iterable, UnaryPredicate unary_predicate) {
+    return lz::all_of(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 } // namespace lz
 

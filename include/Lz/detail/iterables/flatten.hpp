@@ -6,6 +6,7 @@
 #include <Lz/algorithm/accumulate.hpp>
 #include <Lz/detail/iterators/flatten.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/conditional.hpp>
 #include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {

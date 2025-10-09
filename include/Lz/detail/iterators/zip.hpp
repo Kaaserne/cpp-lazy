@@ -9,6 +9,9 @@
 #include <Lz/detail/tuple_helpers.hpp>
 #include <algorithm>
 
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
 namespace lz {
 namespace detail {
 // TODO add specialization for bidi sized and one of non sentinelled?

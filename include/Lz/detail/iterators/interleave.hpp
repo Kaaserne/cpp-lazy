@@ -12,6 +12,10 @@
 #include <cstdint>
 #include <limits>
 #include <numeric>
+
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
 // TODO compile time checks
 namespace lz {
 namespace detail {

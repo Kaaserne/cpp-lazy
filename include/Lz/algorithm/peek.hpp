@@ -6,10 +6,11 @@
 #include <Lz/util/optional.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
-template<class Iterator, class S>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(detail::algorithm::peek(begin, end)) {
-    return detail::algorithm::peek(begin, end);
-}
+    template<class Iterator, class S>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin,
+                                               S end) -> decltype(detail::algorithm::peek(std::move(begin), std::move(end))) {
+        return detail::algorithm::peek(std::move(begin), std::move(end));
+    }
 
 /**
  * @brief Returns an optional containing the second element of the given iterable, or nullopt if the iterable has less than

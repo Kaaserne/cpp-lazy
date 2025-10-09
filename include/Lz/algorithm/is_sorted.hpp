@@ -13,6 +13,8 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
+#ifdef LZ_HAS_CXX_17
+
 template<class Iterator, class S, class BinaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
     if constexpr (detail::is_sentinel_v<Iterator, S>) {
@@ -22,6 +24,22 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterator begin, S end, BinaryPre
         return std::is_sorted(std::move(begin), std::move(end), std::move(binary_predicate));
     }
 }
+
+#else
+
+template<class Iterator, class S, class BinaryPredicate>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_sentinel<Iterator, S>::value, bool>
+is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
+    return detail::algorithm::is_sorted(std::move(begin), std::move(end), std::move(binary_predicate));
+}
+
+template<class Iterator, class S, class BinaryPredicate>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_sentinel<Iterator, S>::value, bool>
+is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
+    return std::is_sorted(std::move(begin), std::move(end), std::move(binary_predicate));
+}
+
+#endif
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -44,7 +62,7 @@ template<class Iterable, class BinaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterable&& iterable, BinaryPredicate binary_predicate)
     requires(detail::is_iterable<Iterable>::value)
 {
-    return is_sorted(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
+    return lz::is_sorted(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
 }
 
 #else
@@ -52,7 +70,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterable&& iterable, BinaryPredi
 template<class Iterator, class S>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_iterable<Iterator>::value, bool>
 is_sorted(Iterator begin, S end) {
-    return is_sorted(std::move(begin), std::move(end), detail::less{});
+    return lz::is_sorted(std::move(begin), std::move(end), detail::less{});
 }
 
 /**
@@ -66,7 +84,7 @@ is_sorted(Iterator begin, S end) {
 template<class Iterable, class BinaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_iterable<Iterable>::value, bool>
 is_sorted(Iterable&& iterable, BinaryPredicate binary_predicate) {
-    return is_sorted(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
+    return lz::is_sorted(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
 }
 
 #endif
@@ -79,7 +97,7 @@ is_sorted(Iterable&& iterable, BinaryPredicate binary_predicate) {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterable&& iterable) {
-    return is_sorted(std::forward<Iterable>(iterable), detail::less{});
+    return lz::is_sorted(std::forward<Iterable>(iterable), detail::less{});
 }
 
 } // namespace lz

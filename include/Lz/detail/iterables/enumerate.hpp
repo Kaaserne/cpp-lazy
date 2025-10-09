@@ -93,7 +93,7 @@ public:
     }
 
     template<class it = is_bidi_tag<typename iterator::iterator_category>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<it::value, iterator> begin() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!it::value, iterator> begin() const {
         return { _iterable.begin(), _start };
     }
 

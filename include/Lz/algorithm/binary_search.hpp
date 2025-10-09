@@ -10,7 +10,9 @@ LZ_MODULE_EXPORT namespace lz {
 template<class Iterator, class S, class T, class BinaryPredicate = detail::less>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool
 binary_search(Iterator begin, S end, const T& value, BinaryPredicate binary_predicate = {}) {
-    auto it = lz::lower_bound(std::move(begin), std::move(end), value, binary_predicate);
+    using lz::lower_bound;
+    using std::lower_bound;
+    auto it = lower_bound(std::move(begin), std::move(end), value, binary_predicate);
     return it != end && !binary_predicate(value, *it);
 }
 

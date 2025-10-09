@@ -30,3 +30,9 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #endif
+
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/detail/iterables/reverse.hpp>

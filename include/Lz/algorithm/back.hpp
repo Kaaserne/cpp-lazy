@@ -21,7 +21,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::ref_t<Iterator> back(Iterator begin, S 
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::ref_iterable_t<Iterable> back(Iterable&& iterable) {
-    return detail::algorithm::back(detail::begin(iterable), detail::end(iterable));
+    return lz::back(detail::begin(iterable), detail::end(iterable));
 }
 } // namespace lz
 

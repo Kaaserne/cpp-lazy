@@ -49,7 +49,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T accumulate(Iterator begin, S end, T init, Una
  */
 template<class Iterable, class T, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 T accumulate(Iterable&& iterable, T init, UnaryPredicate unary_predicate) {
-    return accumulate(detail::begin(iterable), detail::end(iterable), std::move(init), std::move(unary_predicate));
+    return lz::accumulate(detail::begin(iterable), detail::end(iterable), std::move(init), std::move(unary_predicate));
 }
 
 #endif

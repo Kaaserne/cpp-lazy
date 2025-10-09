@@ -11,9 +11,7 @@ LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class T>
 LZ_CONSTEXPR_CXX_14 Iterator find(Iterator begin, S end, const T& value) {
-    using std::find_if;
-    using lz::find_if;
-    return find_if(std::move(begin), std::move(end), [&value](detail::ref_t<Iterator> val) { return val == value; });
+    return lz::find_if(std::move(begin), std::move(end), [&value](detail::ref_t<Iterator> val) { return val == value; });
 }
 
 /**
@@ -25,9 +23,7 @@ LZ_CONSTEXPR_CXX_14 Iterator find(Iterator begin, S end, const T& value) {
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find(Iterable&& iterable, const T& value) {
-    using lz::find;
-    using std::find;
-    return find(detail::begin(iterable), detail::end(iterable), value);
+    return lz::find(detail::begin(iterable), detail::end(iterable), value);
 }
 
 } // namespace lz

@@ -100,16 +100,27 @@ public:
 #else
 
     template<bool C = Cached>
-    LZ_NODISCARD constexpr enable_if_t<C, iterator> begin() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<C && has_sentinel<Iterable>::value, iterator> begin() const {
+        auto last = _iterable.begin() + (_iterable.end() - _iterable.begin());
+        return { last, _iterable.begin(), last };
+    }
+
+    template<bool C = Cached>
+    LZ_NODISCARD constexpr enable_if_t<C && !has_sentinel<Iterable>::value, iterator> begin() const {
         return { _iterable.end(), _iterable.begin(), _iterable.end() };
     }
 
-    // Using constexpr 17 here because cxx 17 has constexpr reverse_iterator
     template<bool C = Cached>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<!C, iterator> begin() const {
+    LZ_NODISCARD constexpr enable_if_t<!C && has_sentinel<Iterable>::value, iterator> begin() const {
+        return { _iterable.begin() + (_iterable.end() - _iterable.begin()) };
+    }
+
+    template<bool C = Cached>
+    LZ_NODISCARD constexpr enable_if_t<!C && !has_sentinel<Iterable>::value, iterator> begin() const {
         return iterator{ _iterable.end() };
     }
 
+    // Using constexpr 17 here because cxx 17 has constexpr reverse_iterator
     template<bool C = Cached>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_17 enable_if_t<!C, iterator> end() const {
         return iterator{ _iterable.begin() };

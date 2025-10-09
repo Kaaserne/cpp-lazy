@@ -21,7 +21,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterator begin, S end, const T& v
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterable&& iterable, const T& value) {
-    return contains(detail::begin(iterable), detail::end(iterable), value);
+    return lz::contains(detail::begin(iterable), detail::end(iterable), value);
 }
 
 } // namespace lz

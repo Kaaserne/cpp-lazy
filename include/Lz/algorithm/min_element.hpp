@@ -9,10 +9,8 @@
 LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterator, class S, class BinaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Iterator min_element(Iterator begin, S end, BinaryPredicate&& binary_predicate) {
-    using lz::max_element;
-    using std::max_element;
-    return max_element(
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Iterator min_element(Iterator begin, S end, BinaryPredicate binary_predicate) {
+    return lz::max_element(
         std::move(begin), std::move(end),
         [&binary_predicate](detail::ref_t<Iterator> a, detail::ref_t<Iterator> b) { return !binary_predicate(a, b); });
 }
@@ -25,9 +23,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 Iterator min_element(Iterator begin, S end, Bin
  * @return The minimum element in the range or `end` if the range is empty
  */
 template<class Iterable, class BinaryPredicate = detail::less>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> min_element(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
-    using std::max_element;
-    return min_element(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> min_element(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
+    return lz::min_element(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
 }
 
 } // namespace lz

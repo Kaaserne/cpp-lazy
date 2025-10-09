@@ -50,7 +50,7 @@ class variant {
     void reconstruct(state s, U&& this_variant, V&& other_variant_type) {
         this->~variant();
         _state = s;
-        ::new (detail::addressof(this_variant)) decay_t<U>(std::forward<V>(other_variant_type));
+        ::new (detail::addressof(this_variant)) typename std::decay<U>::type(std::forward<V>(other_variant_type));
     }
 
     template<class V, class V2>

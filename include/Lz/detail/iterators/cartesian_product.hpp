@@ -9,6 +9,10 @@
 #include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/util/default_sentinel.hpp>
 
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
+
 namespace lz {
 namespace detail {
 
