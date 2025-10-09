@@ -4,6 +4,7 @@
 #define LZ_ALGORITHM_ACCUMULATE_HPP
 
 #include <Lz/detail/algorithm/accumulate.hpp>
+#include <Lz/detail/procs/operators.hpp>
 #include <Lz/detail/traits/is_iterable.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
 

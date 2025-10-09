@@ -189,7 +189,7 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
     auto end = it.end();
 
     const auto size = lz::ssize(it);
-    for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+    for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
     }
@@ -207,7 +207,7 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
     REQUIRE(begin + 0 == begin);
     REQUIRE(end + 0 == end);
 
-    for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+    for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(end + i), *(expected.begin() + i)));
     }
