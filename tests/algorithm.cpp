@@ -609,7 +609,7 @@ TEST_CASE("Accumulate") {
     SUBCASE("With non-empty c-string") {
         const char* str = "Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::accumulate(iterable, 0, std::plus<int>()) == 500);
+        REQUIRE(lz::accumulate(iterable, 0) == 500);
     }
 
     SUBCASE("With one element") {
