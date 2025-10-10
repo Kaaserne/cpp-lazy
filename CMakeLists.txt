@@ -58,8 +58,9 @@ else()
 		set(FMT_OS YES CACHE INTERNAL "")
 		set(FMT_INSTALL YES CACHE INTERNAL "" FORCE)
 		include(FetchContent)
+		set(FMT_DEPENDENCY_VERSION 12.0.0)
 		FetchContent_Declare(fmt 
-			URL https://github.com/fmtlib/fmt/archive/refs/tags/12.0.0.tar.gz 
+			URL https://github.com/fmtlib/fmt/archive/refs/tags/${FMT_DEPENDENCY_VERSION}.tar.gz 
 			UPDATE_DISCONNECTED YES 
 			DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 		)
@@ -105,21 +106,24 @@ target_include_directories(cpp-lazy
 # ---- Install ----
 include(CMakePackageConfigHelpers)
 
-set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/")
-set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/")
+set(FMT_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake")
+set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/cpp-lazy")
 
 if (CPP-LAZY_USE_MODULES)
-	install(TARGETS cpp-lazy
+	install(
+		TARGETS cpp-lazy
+		COMPONENT cpp-lazy
         EXPORT cpp-lazyTargets
-        INCLUDES
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-        FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-)
+        INCLUDES DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+	)
 else ()
-	install(TARGETS cpp-lazy
-			EXPORT cpp-lazyTargets
-			INCLUDES
-			DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+	install(
+		TARGETS cpp-lazy
+		COMPONENT cpp-lazy
+		EXPORT cpp-lazyTargets
+		INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
 endif ()
 
 write_basic_package_version_file(
@@ -128,18 +132,27 @@ write_basic_package_version_file(
 	COMPATIBILITY SameMajorVersion
 	ARCH_INDEPENDENT
 )
+configure_package_config_file(
+	"${PROJECT_SOURCE_DIR}/cmake/cpp-lazyConfig.cmake.in"
+	"${PROJECT_BINARY_DIR}/cpp-lazyConfig.cmake"
+	INSTALL_DESTINATION "${cpp-lazy_install_cmakedir}"
+)
 
 install(EXPORT cpp-lazyTargets
+		COMPONENT cpp-lazy
         NAMESPACE cpp-lazy::
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/")
-
+        DESTINATION "${cpp-lazy_install_cmakedir}"
+)
 install(FILES
-        "${PROJECT_SOURCE_DIR}/cmake/cpp-lazyConfig.cmake"
+        "${PROJECT_BINARY_DIR}/cpp-lazyConfig.cmake"
         "${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
-
+		COMPONENT cpp-lazy
+        DESTINATION "${cpp-lazy_install_cmakedir}"
+)
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+		COMPONENT cpp-lazy
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
 
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 

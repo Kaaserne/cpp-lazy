@@ -1,0 +1,19 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if (NOT CPP-LAZY_USE_STANDALONE)
+    if (CPP-LAZY_USE_INSTALLED_FMT)
+        message(STATUS "cpp-lazy: using installed {fmt} library")
+    else ()
+        message(STATUS "cpp-lazy: using bundled {fmt} library")
+        if (NOT DEFINED fmt_DIR)
+            set_and_check(fmt_DIR "${PACKAGE_PREFIX_DIR}/@FMT_INSTALL_CMAKE_DIR@/fmt")
+            message(STATUS "cpp-lazy: fmt_DIR not defined, setting it to the installed location: '${fmt_DIR}'")
+        endif()
+    endif ()
+
+    find_dependency(fmt @FMT_DEPENDENCY_VERSION@ REQUIRED CONFIG)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/cpp-lazyTargets.cmake")
