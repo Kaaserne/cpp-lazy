@@ -105,22 +105,21 @@ target_include_directories(cpp-lazy
 # ---- Install ----
 include(CMakePackageConfigHelpers)
 
-set(cpp-lazy_directory "cpp-lazy")
-set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${cpp-lazy_directory}")
-set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cpp-lazy_directory}")
+set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/")
+set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/")
 
 if (CPP-LAZY_USE_MODULES)
 	install(TARGETS cpp-lazy
         EXPORT cpp-lazyTargets
         INCLUDES
-        DESTINATION "${cpp-lazy_include_directory}"
-        FILE_SET cxx_modules DESTINATION "${cpp-lazy_include_directory}"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+        FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 else ()
 	install(TARGETS cpp-lazy
 			EXPORT cpp-lazyTargets
 			INCLUDES
-			DESTINATION "${cpp-lazy_include_directory}")
+			DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 endif ()
 
 write_basic_package_version_file(
@@ -132,15 +131,15 @@ write_basic_package_version_file(
 
 install(EXPORT cpp-lazyTargets
         NAMESPACE cpp-lazy::
-        DESTINATION "${cpp-lazy_install_cmakedir}")
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/")
 
 install(FILES
         "${PROJECT_SOURCE_DIR}/cmake/cpp-lazyConfig.cmake"
         "${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
-        DESTINATION "${cpp-lazy_install_cmakedir}")
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
 
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-        DESTINATION "${cpp-lazy_include_directory}")
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
 
