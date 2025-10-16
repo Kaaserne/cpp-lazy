@@ -38,6 +38,7 @@ set(examples
     loop
     map
     maybe_owned
+    pairwise
     pipe
     print_and_format
     random

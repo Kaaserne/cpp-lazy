@@ -17,6 +17,7 @@
 #include <Lz/algorithm/ends_with.hpp>
 #include <Lz/algorithm/is_sorted.hpp>
 #include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/nth.hpp>
 #include <Lz/algorithm/find.hpp>
 #include <Lz/algorithm/find_if.hpp>
 #include <Lz/algorithm/find_if_not.hpp>
