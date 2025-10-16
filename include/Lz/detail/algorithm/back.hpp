@@ -22,7 +22,7 @@ template<class Iterator, class S>
 constexpr ref_t<Iterator> back(Iterator begin, S end) {
     LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
 
-    if constexpr (is_ra_v<Iterator>) { // TODO enable_if
+    if constexpr (is_ra_v<Iterator> && is_sentinel_v<Iterator, S>) {
         return *(begin + (end - begin) - 1);
     }
     else if constexpr (is_bidi_v<Iterator> && !is_sentinel_v<Iterator, S>) {
@@ -43,14 +43,14 @@ constexpr ref_t<Iterator> back(Iterator begin, S end) {
 #else
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value, ref_t<Iterator>> back(Iterator begin, S end) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value && is_sentinel<Iterator, S>::value, ref_t<Iterator>> back(Iterator begin, S end) {
     LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
     return *(begin + (end - begin) - 1);
 }
 
 template<class Iterator, class S>
 LZ_CONSTEXPR_CXX_14
-    enable_if_t<is_bidi<Iterator>::value && !is_ra<Iterator>::value && !is_sentinel<Iterator, S>::value, ref_t<Iterator>>
+    enable_if_t<is_bidi<Iterator>::value && !is_sentinel<Iterator, S>::value, ref_t<Iterator>>
     back(Iterator begin, S end) {
     LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
     return *--end;
