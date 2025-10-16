@@ -1,7 +1,18 @@
 #pragma once
 
 #include <Lz/detail/compiler_checks.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
+
 #include <algorithm>
+
+#ifdef __GCC__
+#pragma GCC diagnostic pop
+#endif
+
 #include <array>
 #include <deque>
 #include <forward_list>
