@@ -26,7 +26,7 @@ find_or_default_if(Iterator begin, S end, UnaryPredicate unary_predicate, T&& de
  * @return The value if it is found, otherwise @p default_value
  */
 template<class Iterable, class UnaryPredicate, class T>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable> // TODO common_reference?
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable>
 find_or_default_if(Iterable&& iterable, UnaryPredicate unary_predicate, T&& default_value) {
     return lz::find_or_default_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate),
                                   std::forward<T>(default_value));

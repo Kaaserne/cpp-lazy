@@ -23,7 +23,7 @@ LZ_CONSTEXPR_CXX_14 detail::val_t<Iterator> find_last_or_default(Iterator begin,
  * @return The value @p to_find if it is found, otherwise @p default_value
  */
 template<class Iterable, class T, class U>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable> // TODO common_reference?
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable>
 find_last_or_default(Iterable&& iterable, T&& to_find, U&& default_value) {
     return lz::find_last_or_default(detail::begin(iterable), detail::end(iterable), std::forward<T>(to_find),
                                     std::forward<U>(default_value));
