@@ -13,7 +13,7 @@
 
 namespace lz {
 namespace detail {
-// TODO change forward to 'weakest'
+
 template<class ValueType, class Iterator, class S, class Iterator2, class S2>
 class split_iterator
     : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,
@@ -142,7 +142,7 @@ public:
         return _sub_range_begin == _end && !_ends_with_trailing;
     }
 };
-// TODO change forward to 'weakest'
+
 template<class ValueType, class Iterator, class S, class T>
 class split_single_iterator
     : public iterator<split_single_iterator<ValueType, Iterator, S, T>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,

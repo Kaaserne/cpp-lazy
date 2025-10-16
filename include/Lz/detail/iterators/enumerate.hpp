@@ -62,7 +62,6 @@ public:
 
     LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(sentinel_with<IntType> s) {
         _iterator = _iterable.end();
-        // TODO only store iterable if bidirectional. forward don't need. do this for all eager_size operator=
         _index = s.value + static_cast<IntType>(lz::eager_size(_iterable));
         return *this;
     }
