@@ -14,7 +14,8 @@ LZ_MODULE_EXPORT namespace lz {
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class BinaryPredicate = detail::less>
-[[nodiscard]] constexpr Iterator max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
+[[nodiscard]] constexpr detail::enable_if_t<detail::is_iterable<Iterator>::value, Iterator>
+max_element(Iterator begin, S end, BinaryPredicate binary_predicate = {}) {
     if constexpr (detail::is_sentinel_v<Iterator, S>) {
         return detail::algorithm::max_element(std::move(begin), std::move(end), std::move(binary_predicate));
     }

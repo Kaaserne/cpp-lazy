@@ -12,6 +12,7 @@
 #include <Lz/algorithm/binary_search.hpp>
 #include <Lz/algorithm/contains.hpp>
 #include <Lz/algorithm/count.hpp>
+#include <Lz/algorithm/copy.hpp>
 #include <Lz/algorithm/count_if.hpp>
 #include <Lz/algorithm/empty.hpp>
 #include <Lz/algorithm/ends_with.hpp>
@@ -30,6 +31,7 @@
 #include <Lz/algorithm/find_last_or_default_not.hpp>
 #include <Lz/algorithm/find_or_default.hpp>
 #include <Lz/algorithm/find_or_default_if.hpp>
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/algorithm/for_each_while.hpp>
 #include <Lz/algorithm/for_each_while_n.hpp>
 #include <Lz/algorithm/front.hpp>
