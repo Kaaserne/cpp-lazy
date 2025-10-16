@@ -46,15 +46,7 @@ mismatch(Iterator1 begin1, S1 end1, Iterator2 begin2, S2 end2, BinaryPredicate b
 #else
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate = detail::equal_to>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_sentinel<Iterator1, S1>::value && !detail::is_sentinel<Iterator2, S2>::value,
-                                        std::pair<Iterator1, Iterator2>>
-mismatch(Iterator1 begin1, S1 end1, Iterator2 begin2, S2, BinaryPredicate binary_predicate = {}) {
-    return std::mismatch(std::move(begin1), std::move(end1), std::move(begin2), std::move(binary_predicate));
-}
-
-template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate = detail::equal_to>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_sentinel<Iterator1, S1>::value || detail::is_sentinel<Iterator2, S2>::value,
-                                        std::pair<Iterator1, Iterator2>>
+LZ_CONSTEXPR_CXX_14 std::pair<Iterator1, Iterator2>
 mismatch(Iterator1 begin1, S1 end1, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate = {}) {
     return detail::algorithm::mismatch(std::move(begin1), std::move(end1), std::move(begin2), std::move(end2),
                                        std::move(binary_predicate));
