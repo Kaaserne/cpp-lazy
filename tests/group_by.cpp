@@ -85,7 +85,7 @@ TEST_CASE("Empty or one element group by") {
 }
 
 TEST_CASE("group_by changing and creating elements") {
-    std::vector<std::string> vec = { "done", "hello", "hellp", "i'm" };
+    std::vector<std::string> vec = { "i'm", "done", "hello", "hellp" };
 
     auto grouper = vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); });
     static_assert(lz::detail::is_bidi<decltype(grouper.begin())>::value, "Should be bidirectional iterator");
