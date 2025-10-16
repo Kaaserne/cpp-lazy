@@ -3,7 +3,7 @@
 #ifndef LZ_STREAM_HPP
 #define LZ_STREAM_HPP
 
-#include <Lz/basic_iterable.hpp> // for operator|
+#include <Lz/procs/chain.hpp> // for operator|
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <ostream>
