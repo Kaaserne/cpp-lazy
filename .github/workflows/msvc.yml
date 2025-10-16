@@ -29,6 +29,7 @@ jobs:
         run: cmake -S . -B build/install
           -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
           -D CMAKE_BUILD_TYPE:STRING=Release
+          -D CPP-LAZY_INSTALL:BOOL=ON
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
           -D CMAKE_CXX_COMPILER:STRING=cl.exe

@@ -159,11 +159,13 @@ int main() {
 
 # Installation
 ## Options
-The following CMake options are available:
+The following CMake options are available, all of which are optional:
 - `CPP-LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
 - `CPP-LAZY_LZ_USE_MODULES`: (experimental): Use C++20 modules. Default is `FALSE`
 - `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
 - `CPP-LAZY_USE_INSTALLED_FMT`: Use the system installed version of `{fmt}`. This will not use the bundled version. Default is `FALSE`. `find_package(fmt REQUIRED CONFIG)` will be used (if `CPP-LAZY_USE_STANDALONE` is `FALSE`) and will try to find `fmt` independently so no `-D fmt_DIR=...` is needed. If for some reason `fmt` cannot be found intrinsically, you can still use `-D fmt_DIR=...` to point to the installed version of `fmt`.
+- `CPP-LAZY_INSTALL`: Install cpp-lazy targets and config files. Default is `FALSE`.
+- `CPP-LAZY_FMT_DEP_VERSION`: version of `{fmt}` to use. Used if `CPP-LAZY_USE_INSTALLED_FMT` is `TRUE` or `CPP-LAZY_USE_STANDALONE` is `FALSE`. May be empty.
 
 ### Using `FetchContent`
 The following way is recommended (cpp-lazy version >= 5.0.1). Note that you choose the cpp-lazy-src.zip, and not the source-code.zip/source-code.tar.gz. This prevents you from downloading stuff that you don't need, and thus preventing pollution of the cmake build directory:

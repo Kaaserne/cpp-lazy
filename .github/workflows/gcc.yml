@@ -40,6 +40,7 @@ jobs:
           -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
           -D CMAKE_BUILD_TYPE:STRING=Release
+          -D CPP-LAZY_INSTALL:BOOL=ON
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D "CMAKE_PROJECT_FMT_INCLUDE_BEFORE=$(pwd)/cmake/fmtPICFix.cmake"
 
