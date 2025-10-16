@@ -20,14 +20,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v1
 
-      - name: Run sccache-cache
-        uses: mozilla/sccache-action@main
-        with:
-          version: "v0.8.1"
-
       - name: Configure (install)
         run: cmake -S . -B build/install
-          -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
           -D CMAKE_BUILD_TYPE:STRING=Release
           -D CPP-LAZY_INSTALL:BOOL=ON
           -D CMAKE_INSTALL_PREFIX=build/prefix
@@ -42,7 +36,6 @@ jobs:
 
       - name: Configure tests
         run: cmake -S tests -B build/tests
-          -D CMAKE_CXX_COMPILER_LAUNCHER=sccache
           -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }}
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix

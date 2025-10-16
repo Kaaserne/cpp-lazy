@@ -12,12 +12,8 @@ jobs:
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-
       - name: Configure
         run: cmake -S examples -B build/examples -G Ninja
-          -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
           -D CMAKE_BUILD_TYPE:STRING=Release
 
       - name: Build
