@@ -2,6 +2,7 @@
 #include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
 #include <Lz/procs/to.hpp>
+#include <Lz/range.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
 #include <cpp-lazy-ut-helper/pch.hpp>
@@ -488,7 +489,7 @@ TEST_CASE("Peek") {
     SUBCASE("One element val") {
         auto iterable = lz::c_string("H") | lz::map([](char c) { return c; });
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
-        
+
         REQUIRE_FALSE(lz::peek(iterable).has_value());
         REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
@@ -496,7 +497,7 @@ TEST_CASE("Peek") {
     SUBCASE("Empty val") {
         auto iterable = lz::c_string("") | lz::map([](char c) { return c; });
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
-        
+
         REQUIRE_FALSE(lz::peek(iterable).has_value());
         REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
@@ -602,6 +603,22 @@ TEST_CASE("Distance") {
         const char* str = "";
         auto iterable = lz::c_string(str);
         REQUIRE(lz::distance(iterable.begin(), iterable.end()) == 0);
+    }
+}
+
+TEST_CASE("Nth") {
+    SUBCASE("No sentinel") {
+        auto lst = lz::range(10) | lz::to<std::list>();
+        for (size_t i : lz::range(size_t{ 10 })) {
+            REQUIRE(*lz::nth(lst, static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(i));
+        }
+    }
+
+    SUBCASE("Sentinel") {
+        auto c_str = lz::c_string("abcdefghij");
+        for (size_t i : lz::range(size_t{ 10 })) {
+            REQUIRE(*lz::nth(c_str, static_cast<std::ptrdiff_t>(i)) == 'a' + static_cast<char>(i));
+        }
     }
 }
 
