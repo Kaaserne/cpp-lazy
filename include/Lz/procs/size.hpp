@@ -34,11 +34,10 @@ LZ_NODISCARD constexpr auto size(const Iterable& i) noexcept(noexcept(i.size()))
  * @param c The container to get the size from.
  * @return The size of the container.
  */
-template<class T, size_t N>
-LZ_NODISCARD constexpr size_t size(const T (&c)[N]) noexcept {
+template<class T, detail::size_t N>
+LZ_NODISCARD constexpr detail::size_t size(const T(&c)[N]) noexcept {
     return static_cast<void>(c), N;
 }
-
 
 /**
  * @brief Gets the signed size of a container or iterable if it has a .size() method. Example:
@@ -67,9 +66,9 @@ LZ_NODISCARD constexpr auto ssize(const Iterable& i) noexcept(noexcept(
  *
  * @return The size of the container.
  */
-template<class T, size_t N>
-LZ_NODISCARD constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept {
-    return static_cast<std::ptrdiff_t>(N);
+template<class T, detail::size_t N>
+LZ_NODISCARD constexpr detail::ptrdiff_t ssize(const T(&)[N]) noexcept {
+    return static_cast<detail::ptrdiff_t>(N);
 }
 
 } // namespace lz

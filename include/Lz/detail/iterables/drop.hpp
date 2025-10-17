@@ -5,6 +5,7 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
 
 namespace lz {
 namespace detail {

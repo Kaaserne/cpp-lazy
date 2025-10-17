@@ -10,6 +10,8 @@
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/procs/eager_size.hpp>
 
+#include <limits>
+
 namespace lz {
 namespace detail {
 template<class Iterable>

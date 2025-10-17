@@ -3,6 +3,7 @@
 #ifndef LZ_EXCEPT_ITERATOR_HPP
 #define LZ_EXCEPT_ITERATOR_HPP
 
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/algorithm/lower_bound.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>

@@ -7,6 +7,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {

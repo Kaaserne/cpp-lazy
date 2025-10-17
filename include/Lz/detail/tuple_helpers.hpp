@@ -9,6 +9,7 @@
 #include <Lz/detail/traits/index_sequence.hpp>
 #include <Lz/detail/traits/is_reference_wrapper.hpp>
 #include <Lz/procs/eager_size.hpp>
+#include <algorithm>
 #include <tuple>
 
 namespace lz {

@@ -3,8 +3,8 @@
 #ifndef LZ_REPEAT_ITERABLE_HPP
 #define LZ_REPEAT_ITERABLE_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/repeat.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 // todo add extra tests for references
 namespace lz {

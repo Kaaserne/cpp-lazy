@@ -43,7 +43,7 @@ for_each(Iterator begin, S end, Func func) {
  * @param func The function to apply to each element.
  */
 template<class Iterable, class Func>
-void for_each(const Iterable& iterable, Func func) { // todo replace lz:: and remove && with std::move, std::forward
+void for_each(Iterable&& iterable, Func func) { // TODO replace lz:: and remove && with std::move, std::forward
     lz::for_each(detail::begin(iterable), detail::end(iterable), std::move(func));
 }
 } // namespace lz

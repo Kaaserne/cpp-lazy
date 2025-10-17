@@ -6,6 +6,7 @@
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/util/default_sentinel.hpp>
@@ -139,7 +140,8 @@ public:
 template<class Iterable>
 class loop_iterator<Iterable, true>
     : public iterator<loop_iterator<Iterable, true>, ref_t<iter_t<Iterable>>, fake_ptr_proxy<ref_t<iter_t<Iterable>>>,
-                      diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
+                      diff_type<iter_t<Iterable>>, strongest_cat_t<iter_cat_iterable_t<Iterable>, std::forward_iterator_tag>,
+                      default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -152,7 +154,6 @@ public:
     using value_type = typename traits::value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
-    using iterator_category = typename traits::iterator_category;
 
     constexpr loop_iterator(const loop_iterator&) = default;
     LZ_CONSTEXPR_CXX_14 loop_iterator& operator=(const loop_iterator&) = default;

@@ -3,6 +3,7 @@
 #ifndef LZ_SLICE_ADAPTOR_HPP
 #define LZ_SLICE_ADAPTOR_HPP
 
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/take.hpp>
 

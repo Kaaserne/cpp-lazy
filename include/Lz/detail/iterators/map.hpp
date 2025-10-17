@@ -3,12 +3,13 @@
 #ifndef LZ_MAP_ITERATOR_HPP
 #define LZ_MAP_ITERATOR_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits/func_ret_type.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {

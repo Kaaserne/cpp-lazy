@@ -3,10 +3,10 @@
 #ifndef LZ_TAKE_EVERY_ITERATOR_HPP
 #define LZ_TAKE_EVERY_ITERATOR_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/util/default_sentinel.hpp>

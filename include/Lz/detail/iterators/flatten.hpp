@@ -7,6 +7,7 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/traits/is_iterable.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/util/default_sentinel.hpp>
