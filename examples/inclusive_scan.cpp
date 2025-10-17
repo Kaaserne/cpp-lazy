@@ -1,3 +1,4 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/inclusive_scan.hpp>
 #include <iostream>
 

@@ -1,6 +1,6 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/generate_while.hpp>
 #include <iostream>
-
 
 int main() {
     int i = 0;
@@ -20,8 +20,8 @@ int main() {
     }
     // Output: 0 1 2 3
 #else
-    lz::for_each(generator, [](int i) {
-        std::cout << i << ' ';
+    lz::for_each(generator, [](int idx) {
+        std::cout << idx << ' ';
         // Or use fmt::print("{} ", i);
     });
     // Output: 0 1 2 3

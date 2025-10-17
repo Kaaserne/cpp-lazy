@@ -1,3 +1,4 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/iter_tools.hpp>
 #include <iostream>
 #include <map>
