@@ -49,7 +49,7 @@ jobs:
             -D CPP-LAZY_INSTALL:BOOL=ON \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
-            -D CMAKE_CXX_COMPILER=clang++ \
+            -D CMAKE_CXX_COMPILER=clang++-${{ matrix.verison }} \
             -D "CMAKE_PROJECT_FMT_INCLUDE_BEFORE=$(pwd)/cmake/fmtPICFix.cmake"
 
       - name: Build (install)
@@ -72,7 +72,7 @@ jobs:
             -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
             -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }} \
             -D TEST_INSTALLED_VERSION:BOOL=YES \
-            -D CMAKE_CXX_COMPILER=clang++ \
+            -D CMAKE_CXX_COMPILER=clang++-${{ matrix.verison }} \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
             -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
 

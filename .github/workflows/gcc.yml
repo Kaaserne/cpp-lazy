@@ -39,6 +39,7 @@ jobs:
           -D CPP-LAZY_INSTALL:BOOL=ON
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D "CMAKE_PROJECT_FMT_INCLUDE_BEFORE=$(pwd)/cmake/fmtPICFix.cmake"
+          -D CMAKE_CXX_COMPILER=g++-${{ matrix.version }}
 
       - name: Build (install)
         run: cmake --build build/install -j $(nproc)
@@ -53,6 +54,7 @@ jobs:
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+          -D CMAKE_CXX_COMPILER=g++-${{ matrix.version }}
 
       - name: Build tests
         run: cmake --build build/tests -j $(nproc)
