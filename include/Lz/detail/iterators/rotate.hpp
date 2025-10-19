@@ -129,10 +129,9 @@ public:
         }
         _iterator = _iterable.begin() + pos;
     }
-
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
-        return static_cast<difference_type>(_offset - other._offset);
+        return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
     }
 
     constexpr difference_type difference(const iter&) const {
