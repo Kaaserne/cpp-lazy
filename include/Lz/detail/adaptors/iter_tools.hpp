@@ -541,7 +541,7 @@ struct pad_adaptor {
      */
     template<class Iterable, class T>
     pad_iterable<remove_ref_t<Iterable>, remove_rvalue_reference_t<T>>
-    operator()(Iterable&& iterable, T&& value, const size_t amount) const {
+    operator()(Iterable&& iterable, T&& value, const ptrdiff_t amount) const {
         return lz::concat(std::forward<Iterable>(iterable), lz::repeat(std::forward<T>(value), amount));
     }
 
@@ -556,7 +556,7 @@ struct pad_adaptor {
      * @param amount The amount of times to repeat the value.
      */
     template<class T>
-    fn_args_holder<adaptor, T, size_t> operator()(T&& value, const size_t amount) const {
+    fn_args_holder<adaptor, T, ptrdiff_t> operator()(T&& value, const ptrdiff_t amount) const {
         return { std::forward<T>(value), amount };
     }
 };

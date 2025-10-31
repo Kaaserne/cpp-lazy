@@ -7,7 +7,6 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 template<class Iterator, class S, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate unary_predicate) {
@@ -18,7 +17,6 @@ LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate un
     }
 }
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

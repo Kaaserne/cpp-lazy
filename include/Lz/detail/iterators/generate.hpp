@@ -21,12 +21,12 @@ class generate_iterator<GeneratorFunc, false>
                       fake_ptr_proxy<func_ret_type<GeneratorFunc>>, ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
 
     mutable GeneratorFunc _func{};
-    size_t _current{};
+    ptrdiff_t _current{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
     using value_type = remove_cvref_t<reference>;
-    using difference_type = std::ptrdiff_t;
+    using difference_type = ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
 #ifdef LZ_HAS_CONCEPTS
@@ -43,7 +43,7 @@ public:
 
 #endif
 
-    constexpr generate_iterator(GeneratorFunc generator_func, const size_t amount) :
+    constexpr generate_iterator(GeneratorFunc generator_func, const ptrdiff_t amount) :
         _func{ std::move(generator_func) },
         _current{ amount } {
     }

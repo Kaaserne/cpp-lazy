@@ -18,15 +18,15 @@ template<class, bool /* is inf */>
 class repeat_iterator;
 
 template<class T>
-class repeat_iterator<T, false> : public iterator<repeat_iterator<T, false>, T, fake_ptr_proxy<T>, std::ptrdiff_t,
+class repeat_iterator<T, false> : public iterator<repeat_iterator<T, false>, T, fake_ptr_proxy<T>, ptrdiff_t,
                                                   std::random_access_iterator_tag, default_sentinel_t> {
     T _to_repeat{};
-    size_t _amount{};
+    ptrdiff_t _amount{};
 
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = remove_cvref_t<T>;
-    using difference_type = std::ptrdiff_t;
+    using difference_type = ptrdiff_t;
     using pointer = fake_ptr_proxy<T>;
     using reference = T;
 
@@ -47,7 +47,7 @@ public:
 
 #endif
 
-    constexpr repeat_iterator(T to_repeat, const size_t start) : _to_repeat{ std::forward<T>(to_repeat) }, _amount{ start } {
+    constexpr repeat_iterator(T to_repeat, const ptrdiff_t start) : _to_repeat{ std::forward<T>(to_repeat) }, _amount{ start } {
     }
 
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel_t) {
@@ -82,16 +82,16 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type value) noexcept {
-        LZ_ASSERT_ADDABLE(value < 0 ? true : _amount >= static_cast<size_t>(value));
-        _amount -= static_cast<size_t>(value);
+        LZ_ASSERT_ADDABLE(value < 0 ? true : _amount >= value);
+        _amount -= value;
     }
 
     constexpr difference_type difference(const repeat_iterator& other) const noexcept {
-        return static_cast<difference_type>(other._amount - _amount);
+        return other._amount - _amount;
     }
 
     constexpr difference_type difference(default_sentinel_t) const noexcept {
-        return -static_cast<difference_type>(_amount);
+        return -_amount;
     }
 };
 
@@ -124,7 +124,7 @@ public:
 
 #endif
 
-    explicit constexpr repeat_iterator(const T& to_repeat) : _to_repeat{ to_repeat } {
+    explicit constexpr repeat_iterator(T to_repeat) : _to_repeat{ std::forward<T>(to_repeat) } {
     }
 
     LZ_CONSTEXPR_CXX_14 repeat_iterator& operator=(default_sentinel_t) {

@@ -12,15 +12,13 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class Func>
 constexpr void for_each(Iterator begin, S end, Func func) {
-    if constexpr (is_ra_v<Iterator>) {
-        auto last = begin + (end - begin);
-        static_cast<void>(std::for_each(std::move(begin), std::move(last), std::move(func)));
+    if constexpr (std_algo_compat_v<Iterator, S>) {
+        static_cast<void>(std::for_each(begin, detail::get_end(begin, end), std::move(func)));
     }
     else {
         for (; begin != end; ++begin) {
@@ -32,13 +30,12 @@ constexpr void for_each(Iterator begin, S end, Func func) {
 #else
 
 template<class Iterator, class S, class Func>
-enable_if_t<is_ra<Iterator>::value> for_each(Iterator begin, S end, Func func) {
-    auto last = begin + (end - begin);
-    static_cast<void>(std::for_each(std::move(begin), std::move(last), std::move(func)));
+enable_if_t<std_algo_compat<Iterator, S>::value> for_each(Iterator begin, S end, Func func) {
+    static_cast<void>(std::for_each(begin, detail::get_end(begin, end), std::move(func)));
 }
 
 template<class Iterator, class S, class Func>
-LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value> for_each(Iterator begin, S end, Func func) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<!std_algo_compat<Iterator, S>::value> for_each(Iterator begin, S end, Func func) {
     for (; begin != end; ++begin) {
         func(*begin);
     }
@@ -46,7 +43,6 @@ LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value> for_each(Iterator begin
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

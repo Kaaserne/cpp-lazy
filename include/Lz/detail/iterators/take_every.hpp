@@ -33,7 +33,7 @@ public:
 
     it _iterator{};
     sent _end{};
-    size_t _offset{};
+    difference_type _offset{};
 
 public:
     constexpr take_every_iterator(const take_every_iterator&) = default;
@@ -55,7 +55,7 @@ public:
 
 #endif
 
-    constexpr take_every_iterator(it iter, sent end, const size_t offset) :
+    constexpr take_every_iterator(it iter, sent end, const difference_type offset) :
         _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset } {
@@ -77,7 +77,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
-        for (size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
+        for (difference_type count = 0; _iterator != _end && count < _offset; ++_iterator, ++count) {
         }
     }
 
@@ -108,8 +108,8 @@ public:
 
     it _iterator{};
     sent _end{};
-    size_t _offset{};
-    size_t _distance{};
+    difference_type _offset{};
+    difference_type _distance{};
 
 public:
     constexpr take_every_iterator(const take_every_iterator&) = default;
@@ -131,7 +131,7 @@ public:
 
 #endif
 
-    constexpr take_every_iterator(it iter, sent end, const size_t offset, const size_t distance) :
+    constexpr take_every_iterator(it iter, sent end, const difference_type offset, const difference_type distance) :
         _iterator{ std::move(iter) },
         _end{ std::move(end) },
         _offset{ offset },
@@ -154,7 +154,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
-        for (size_t count = 0; _iterator != _end && count < _offset; ++_iterator, ++count, ++_distance) {
+        for (difference_type count = 0; _iterator != _end && count < _offset; ++_iterator, ++count, ++_distance) {
         }
     }
 
@@ -163,7 +163,7 @@ public:
         const auto start_pos = _distance % _offset;
         const auto adjusted_start_pos = start_pos == 0 ? _offset : start_pos;
 
-        for (size_t count = 0; count < adjusted_start_pos; count++, --_iterator, --_distance) {
+        for (difference_type count = 0; count < adjusted_start_pos; count++, --_iterator, --_distance) {
         }
     }
 
@@ -196,12 +196,12 @@ public:
 private:
     Iterable _iterable{};
     it _iterator{};
-    size_t _offset{};
+    difference_type _offset{};
 
     LZ_CONSTEXPR_CXX_14 difference_type difference_impl(const sent& iter) const {
         const auto remaining = _iterator - iter;
-        const auto quot = static_cast<std::ptrdiff_t>(remaining) / static_cast<std::ptrdiff_t>(_offset);
-        const auto rem = static_cast<std::ptrdiff_t>(remaining) % static_cast<std::ptrdiff_t>(_offset);
+        const auto quot = remaining / _offset;
+        const auto rem = remaining % _offset;
         return rem == 0 ? quot : quot + (remaining < 0 ? -1 : 1);
     }
 
@@ -226,7 +226,7 @@ public:
 #endif
 
     template<class I>
-    constexpr take_every_iterator(I&& iterable, it iter, const size_t offset) :
+    constexpr take_every_iterator(I&& iterable, it iter, const difference_type offset) :
         _iterable{ std::forward<I>(iterable) },
         _iterator{ std::move(iter) },
         _offset{ offset } {
@@ -248,25 +248,24 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
-        const auto distance = static_cast<size_t>(_iterable.end() - _iterator);
+        const auto distance = _iterable.end() - _iterator;
         if (_offset >= distance) {
             _iterator = _iterable.end();
         }
         else {
-            _iterator += static_cast<difference_type>(_offset);
+            _iterator += _offset;
         }
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
         LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
-        const auto remaining = static_cast<size_t>(_iterator - _iterable.begin());
+        const auto remaining = _iterator - _iterable.begin();
         const auto rem = remaining % _offset;
-        _iterator -= rem == 0 ? static_cast<difference_type>(_offset) : static_cast<difference_type>(rem);
+        _iterator -= rem == 0 ? _offset : rem;
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
-        const auto s_offset = static_cast<difference_type>(_offset);
-        const auto to_add = offset * s_offset;
+        const auto to_add = offset * _offset;
 
         if (to_add >= 0) {
             const auto current_distance = _iterable.end() - _iterator;
@@ -274,20 +273,20 @@ public:
                 _iterator += to_add;
                 return;
             }
-            LZ_ASSERT_ADDABLE(to_add - current_distance < s_offset);
+            LZ_ASSERT_ADDABLE(to_add - current_distance < _offset);
             _iterator = _iterable.end();
             return;
         }
 
         const auto current_distance = _iterator - _iterable.begin();
-        const auto remainder = current_distance % s_offset;
+        const auto remainder = current_distance % _offset;
         if (remainder == 0) {
             LZ_ASSERT_SUBTRACTABLE(-to_add <= current_distance);
             _iterator += to_add;
             return;
         }
-        LZ_ASSERT_SUBTRACTABLE(-((offset + 1) * s_offset - remainder) <= current_distance);
-        _iterator += (offset + 1) * s_offset - remainder;
+        LZ_ASSERT_SUBTRACTABLE(-((offset + 1) * _offset - remainder) <= current_distance);
+        _iterator += (offset + 1) * _offset - remainder;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const take_every_iterator& other) const {

@@ -18,7 +18,7 @@ class rotate_iterable : public lazy_view {
 
     maybe_owned<Iterable> _iterable{};
     inner_iter _start_iter{};
-    size_t _start_index{};
+    diff_t _start_index{};
 
 public:
     using iterator = rotate_iterator<maybe_owned<Iterable>>;
@@ -51,7 +51,7 @@ public:
     LZ_CONSTEXPR_CXX_14 rotate_iterable(I&& iterable, const diff_t start) :
         _iterable{ std::forward<I>(iterable) },
         _start_iter{ next_fast_safe(_iterable, start) },
-        _start_index{ static_cast<size_t>(start) } {
+        _start_index{ start } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -69,8 +69,10 @@ public:
     template<class I = Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_sized<I>::value, size_t> size() const {
         const auto s = lz::size(_iterable);
-        LZ_ASSERT(_start_index <= s, "start index is larger than size of iterable");
-        return _start_index == s ? 0 : s;
+        if (s == 0) {
+            return 0;
+        }
+        return static_cast<size_t>(_start_index) == s ? 0 : s;
     }
 
 #endif
@@ -83,7 +85,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_size(_iterable) };
+            return iterator{ _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_ssize(_iterable) };
         }
         else {
             return _start_iter;
@@ -94,7 +96,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
-        return { _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_size(_iterable) };
+        return { _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_ssize(_iterable) };
     }
 
     template<bool R = return_sentinel>

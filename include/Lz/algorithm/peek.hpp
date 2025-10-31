@@ -3,14 +3,8 @@
 
 #include <Lz/detail/algorithm/peek.hpp>
 #include <Lz/detail/compiler_checks.hpp>
-#include <Lz/util/optional.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
-    template<class Iterator, class S>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin,
-                                               S end) -> decltype(detail::algorithm::peek(std::move(begin), std::move(end))) {
-        return detail::algorithm::peek(std::move(begin), std::move(end));
-    }
 
 /**
  * @brief Returns an optional containing the second element of the given iterable, or nullopt if the iterable has less than
@@ -21,9 +15,10 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 auto
-peek(Iterable&& iterable) -> decltype(lz::peek(detail::begin(iterable), detail::end(iterable))) {
-    return lz::peek(detail::begin(iterable), detail::end(iterable));
+peek(Iterable&& iterable) -> decltype(detail::peek(detail::begin(iterable), detail::end(iterable))) {
+    return detail::peek(detail::begin(iterable), detail::end(iterable));
 }
+
 } // namespace lz
 
 #endif

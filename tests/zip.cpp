@@ -60,13 +60,12 @@ TEST_CASE("zip_iterable changing and creating elements") {
 
     SUBCASE("Unequal lengths") {
         std::vector<int> ints = { 1, 2, 3, 4, 5 };
-        std::vector<double> floats = { 1.2, 3.3 };
+        std::vector<size_t> floats = { 1, 3 };
 
         auto zipper = ints | lz::zip(floats);
-        static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, double&>>::value,
+        static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, size_t&>>::value,
                       "should be tuple ref");
-        std::array<std::tuple<int, doctest::Approx>, 2> expected = { std::make_tuple(2, doctest::Approx(3.3)),
-                                                                     std::make_tuple(1, doctest::Approx(1.2)) };
+        std::array<std::tuple<int, size_t>, 2> expected = { std::make_tuple(2, size_t{ 3 }), std::make_tuple(1, size_t{ 1 }) };
         REQUIRE(lz::equal(lz::reverse(zipper), expected));
         REQUIRE(lz::equal(zipper, expected | lz::reverse));
     }
@@ -114,13 +113,13 @@ TEST_CASE("Empty or one element zip") {
 TEST_CASE("zip_iterable binary operations") {
     constexpr std::size_t size = 4;
     std::vector<int> a = { 1, 2, 3, 4 };
-    std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
+    std::vector<size_t> b = { 1, 2, 3, 4 };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
-    std::vector<std::tuple<int, doctest::Approx, short>> expected = { std::make_tuple(1, doctest::Approx(1.), short(1)),
-                                                                      std::make_tuple(2, doctest::Approx(2.), short(2)),
-                                                                      std::make_tuple(3, doctest::Approx(3.), short(3)),
-                                                                      std::make_tuple(4, doctest::Approx(4.), short(4)) };
+    std::vector<std::tuple<int, size_t, short>> expected = { std::make_tuple(1, size_t{ 1 }, short(1)),
+                                                             std::make_tuple(2, size_t{ 2 }, short(2)),
+                                                             std::make_tuple(3, size_t{ 3 }, short(3)),
+                                                             std::make_tuple(4, size_t{ 4 }, short(4)) };
 
     auto zipper = lz::zip(a, b, c);
     auto begin = zipper.begin();

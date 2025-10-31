@@ -3,6 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_MAX_ELEMENT_HPP
 #define LZ_DETAIL_ALGORITHM_MAX_ELEMENT_HPP
 
+#include <Lz/detail/procs/get_end.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <algorithm>
 
@@ -12,15 +13,13 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 Iterator max_element(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    if constexpr (is_ra_v<Iterator>) { //  TODO enable_if
-        auto common_end = begin + (end - begin);
-        return std::max_element(std::move(begin), std::move(common_end), std::move(binary_predicate));
+    if constexpr (std_algo_compat_v<Iterator, S>) {
+        return std::max_element(begin, detail::get_end(begin, end), std::move(binary_predicate));
     }
     else {
         if (begin == end) {
@@ -39,14 +38,13 @@ LZ_CONSTEXPR_CXX_14 Iterator max_element(Iterator begin, S end, BinaryPredicate 
 #else
 
 template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value, Iterator>
+LZ_CONSTEXPR_CXX_14 enable_if_t<std_algo_compat<Iterator, S>::value, Iterator>
 max_element(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    auto common_end = begin + (end - begin);
-    return std::max_element(std::move(begin), std::move(common_end), std::move(binary_predicate));
+    return std::max_element(begin, detail::get_end(begin, end), std::move(binary_predicate));
 }
 
 template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, Iterator>
+LZ_CONSTEXPR_CXX_14 enable_if_t<!std_algo_compat<Iterator, S>::value, Iterator>
 max_element(Iterator begin, S end, BinaryPredicate binary_predicate) {
     if (begin == end) {
         return begin;
@@ -62,7 +60,6 @@ max_element(Iterator begin, S end, BinaryPredicate binary_predicate) {
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

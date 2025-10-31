@@ -45,7 +45,7 @@ LZ_INLINE_VAR constexpr detail::intersection_adaptor intersection{};
  * lz::intersection_iterable<std::string, std::string> intersect = lz::intersection(a, b);
  * ```
  */
-template<class Iterable, class Iterable2, class BinaryPredicate = detail::less>
+template<class Iterable, class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, detail::val_iterable_t<Iterable>)>
 using intersection_iterable = detail::intersection_iterable<Iterable, Iterable2, BinaryPredicate>;
 
 } // namespace lz

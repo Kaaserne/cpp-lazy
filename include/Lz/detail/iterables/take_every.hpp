@@ -33,14 +33,14 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
-    maybe_owned<Iterable> _iterable{};
-    size_t _offset{};
-    size_t _start{};
-
     using diff = typename iterator::difference_type;
 
     static constexpr bool return_sentinel =
         !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter_t<Iterable>, sent>::value;
+
+    maybe_owned<Iterable> _iterable{};
+    diff _offset{};
+    diff _start{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -58,7 +58,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 take_every_iterable(I&& iterable, const size_t offset, const size_t start) :
+    LZ_CONSTEXPR_CXX_14 take_every_iterable(I&& iterable, const diff offset, const diff start) :
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset },
         _start{ start } {
@@ -71,13 +71,13 @@ public:
         requires(sized<Iterable>)
     {
         const auto cur_size = static_cast<size_t>(lz::size(_iterable));
-        if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
+        if (static_cast<diff>(cur_size) - _start <= 0) {
             return 0;
         }
 
-        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size - _start));
-        const auto rem = actual_size % static_cast<diff>(_offset);
-        const auto quot = actual_size / static_cast<diff>(_offset);
+        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size) - _start);
+        const auto rem = actual_size % _offset;
+        const auto quot = actual_size / _offset;
 
         return static_cast<size_t>(quot) + static_cast<size_t>(rem == 0 ? 0 : 1);
     }
@@ -87,13 +87,13 @@ public:
     template<class I = Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_sized<I>::value, size_t> size() const {
         const auto cur_size = static_cast<size_t>(lz::size(_iterable));
-        if (static_cast<diff>(cur_size) - static_cast<diff>(_start) <= 0) {
+        if (static_cast<diff>(cur_size) - _start <= 0) {
             return 0;
         }
 
-        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size - _start));
-        const auto rem = actual_size % static_cast<diff>(_offset);
-        const auto quot = actual_size / static_cast<diff>(_offset);
+        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size) - _start);
+        const auto rem = actual_size % _offset;
+        const auto quot = actual_size / _offset;
 
         return static_cast<size_t>(quot) + static_cast<size_t>(rem == 0 ? 0 : 1);
     }
@@ -103,7 +103,7 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr iterator begin() const {
-        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        auto start_pos = next_fast_safe(_iterable, _start);
         if constexpr (is_ra_tag_v<typename iterator::iterator_category>) {
             return { _iterable, start_pos, _offset };
         }
@@ -119,21 +119,21 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<I>::value, iterator> begin() const {
-        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        auto start_pos = next_fast_safe(_iterable, _start);
         return { start_pos, _iterable.end(), _offset };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_same<I, std::bidirectional_iterator_tag>::value, iterator>
     begin() const {
-        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        auto start_pos = next_fast_safe(_iterable, _start);
         return { start_pos, _iterable.end(), _offset, _start };
     }
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<I>::value, iterator> begin() const {
         // random access iterator can go both ways O(1), no need to use next_fast_safe
-        auto start_pos = next_fast_safe(_iterable, static_cast<typename iterator::difference_type>(_start));
+        auto start_pos = next_fast_safe(_iterable, _start);
         return { _iterable, start_pos, _offset };
     }
 
@@ -146,7 +146,7 @@ public:
             return lz::default_sentinel;
         }
         else if constexpr (!is_ra_tag_v<typename iterator::iterator_category>) {
-            return iterator{ _iterable.end(), _iterable.end(), _offset, lz::eager_size(_iterable) - _start };
+            return iterator{ _iterable.end(), _iterable.end(), _offset, lz::eager_ssize(_iterable) - _start };
         }
         else {
             return iterator{ _iterable, _iterable.end(), _offset };
@@ -165,7 +165,7 @@ public:
         // std::is_same is not the same as is_bidi_tag, explicitly check for bidirectional iterator tag
         enable_if_t<std::is_same<I, std::bidirectional_iterator_tag>::value && !is_sentinel<iter, sent>::value, iterator>
         end() const {
-        return { _iterable.end(), _iterable.end(), _offset, lz::eager_size(_iterable) - _start };
+        return { _iterable.end(), _iterable.end(), _offset, lz::eager_ssize(_iterable) - _start };
     }
 
     template<bool R = return_sentinel> // checks for not bidirectional or if is sentinel

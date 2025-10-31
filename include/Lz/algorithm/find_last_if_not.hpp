@@ -7,12 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 Iterator find_last_if_not(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    return lz::find_last_if(std::forward<Iterator>(begin), std::forward<S>(end),
-                            [&unary_predicate](detail::ref_t<Iterator> value) { return !unary_predicate(value); });
-}
-
 /**
  * @brief Finds the last element in the range [begin(iterable), end(iterable)) that does not satisfy the unary_predicate @p
  * unary_predicate. Does not use `lz::cached_reverse` to reverse the elements (if bidirectional).
@@ -25,7 +19,8 @@ LZ_CONSTEXPR_CXX_14 Iterator find_last_if_not(Iterator begin, S end, UnaryPredic
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 iter_t<Iterable>
 find_last_if_not(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return lz::find_last_if_not(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
+    return lz::find_last_if(std::forward<Iterable>(iterable),
+                            [&unary_predicate](detail::ref_t<iter_t<Iterable>> value) { return !unary_predicate(value); });
 }
 
 } // namespace lz

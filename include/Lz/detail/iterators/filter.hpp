@@ -33,7 +33,7 @@ public:
     LZ_CONSTEXPR_CXX_14 filter_iterator& operator=(const filter_iterator&) = default;
 
     LZ_CONSTEXPR_CXX_14 void find() {
-        _iterator = lz::find_if(std::move(_iterator), _iterable.end(), _predicate);
+        _iterator = detail::find_if(std::move(_iterator), _iterable.end(), _predicate);
     }
 
 private:

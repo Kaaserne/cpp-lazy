@@ -16,34 +16,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-#ifdef LZ_HAS_CXX_17
-
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 Iterator find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    if constexpr (detail::is_sentinel_v<Iterator, S>) {
-        return detail::algorithm::find_if(std::move(begin), std::move(end), std::move(unary_predicate));
-    }
-    else {
-        return std::find_if(std::move(begin), std::move(end), std::move(unary_predicate));
-    }
-}
-
-#else
-
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_sentinel<Iterator, S>::value, Iterator>
-find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    return detail::algorithm::find_if(std::move(begin), std::move(end), std::move(unary_predicate));
-}
-
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_sentinel<Iterator, S>::value, Iterator>
-find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    return std::find_if(std::move(begin), std::move(end), std::move(unary_predicate));
-}
-
-#endif
-
 /**
  * @brief Finds the first element in the range [begin, end) that satisfies the binary_predicate @p binary_predicate
  *
@@ -53,8 +25,9 @@ find_if(Iterator begin, S end, UnaryPredicate unary_predicate) {
  */
 template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return lz::find_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
+    return detail::find_if(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
+
 } // namespace lz
 
 #endif

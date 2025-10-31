@@ -24,7 +24,7 @@ public:
 
 private:
     Iterator _iterator{};
-    size_t _n{};
+    difference_type _n{};
 
 public:
     constexpr n_take_iterator(const n_take_iterator&) = default;
@@ -44,14 +44,14 @@ public:
 
 #endif
 
-    constexpr n_take_iterator(Iterator it, const size_t n) : _iterator{ std::move(it) }, _n{ n } {
+    constexpr n_take_iterator(Iterator it, const difference_type n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
 #ifdef LZ_HAS_CXX_17
 
     constexpr n_take_iterator& operator=(default_sentinel_t) {
         if constexpr (is_bidi_v<Iterator>) {
-            _iterator = std::next(_iterator, static_cast<difference_type>(_n));
+            _iterator = std::next(_iterator, _n);
         }
         _n = 0;
         return *this;
@@ -61,7 +61,7 @@ public:
 
     template<class I = Iterator>
     LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, n_take_iterator&> operator=(default_sentinel_t) {
-        _iterator = std::next(_iterator, static_cast<difference_type>(_n));
+        _iterator = std::next(_iterator, _n);
         _n = 0;
         return *this;
     }
@@ -96,15 +96,15 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
         _iterator += offset;
-        _n -= static_cast<size_t>(offset);
+        _n -= offset;
     }
 
     constexpr difference_type difference(const n_take_iterator& other) const {
-        return static_cast<difference_type>(other._n) - static_cast<difference_type>(_n);
+        return other._n - _n;
     }
 
     constexpr difference_type difference(default_sentinel_t) const {
-        return -static_cast<difference_type>(_n);
+        return -_n;
     }
 
     constexpr bool eq(const n_take_iterator& other) const {

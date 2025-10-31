@@ -235,16 +235,16 @@ TEST_CASE("iter_decay") {
 TEST_CASE("Pad") {
     std::vector<int> v1 = { 1, 2, 3 };
     int value = 0;
-    std::size_t amount = 3;
+    std::ptrdiff_t amount = 3;
     auto padded = lz::pad(v1, std::ref(value), amount);
     static_assert(std::is_same<decltype(*padded.begin()), std::reference_wrapper<int>>::value, "");
     std::vector<int> expected = { 1, 2, 3, 0, 0, 0 };
 
-    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::ssize(padded) == amount + lz::ssize(v1));
     REQUIRE(lz::equal(padded, expected));
 
     padded = v1 | lz::pad(std::ref(value), amount);
-    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::ssize(padded) == amount + lz::ssize(v1));
     REQUIRE(lz::equal(padded, expected));
 
     SUBCASE("reference types") {

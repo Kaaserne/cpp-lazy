@@ -139,7 +139,7 @@ struct random_adaptor {
      */
     template<class Distribution, class Generator>
     LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator, UseSentinel>
-    operator()(const Distribution& distribution, Generator& generator, const size_t amount) const {
+    operator()(const Distribution& distribution, Generator& generator, const ptrdiff_t amount) const {
         return { distribution, generator, amount };
     }
 
@@ -163,7 +163,7 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class T>
-    [[nodiscard]] auto operator()(const T min, const T max, const size_t amount) const {
+    [[nodiscard]] auto operator()(const T min, const T max, const ptrdiff_t amount) const {
         static auto gen = create_engine();
         if constexpr (std::is_integral_v<T>) {
             return (*this)(std::uniform_int_distribution<T>{ min, max }, gen, amount);
@@ -198,7 +198,7 @@ struct random_adaptor {
     template<class Integral>
     LZ_NODISCARD enable_if_t<std::is_integral<Integral>::value,
                              random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
-    operator()(const Integral min, const Integral max, const size_t amount) const {
+    operator()(const Integral min, const Integral max, const ptrdiff_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_int_distribution<Integral>{ min, max }, gen, amount);
     }
@@ -222,7 +222,7 @@ struct random_adaptor {
     template<class Floating>
     LZ_NODISCARD enable_if_t<std::is_floating_point<Floating>::value,
                              random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
-    operator()(const Floating min, const Floating max, const size_t amount) const {
+    operator()(const Floating min, const Floating max, const ptrdiff_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_real_distribution<Floating>{ min, max }, gen, amount);
     }

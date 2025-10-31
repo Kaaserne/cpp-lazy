@@ -4,12 +4,9 @@
 #define LZ_ALGORITHM_HAS_MANY_HPP
 
 #include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/has_one.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
-template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 bool has_many(Iterator begin, S end) {
-    return !lz::empty(begin, end) && !lz::empty(++begin, end);
-}
 
 /**
  * Returns whether the sequence holds >= 2 elements.
@@ -18,7 +15,7 @@ LZ_CONSTEXPR_CXX_14 bool has_many(Iterator begin, S end) {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool has_many(Iterable&& iterable) {
-    return lz::has_many(detail::begin(iterable), detail::end(iterable));
+    return !lz::empty(iterable) && !lz::has_one(iterable);
 }
 } // namespace lz
 

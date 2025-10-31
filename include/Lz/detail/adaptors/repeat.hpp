@@ -30,7 +30,7 @@ struct repeat_adaptor {
      * @return A repeat_iterable that will yield the value @p `amount` times.
      */
     template<class T>
-    LZ_NODISCARD constexpr repeat_iterable<remove_rvalue_reference_t<T>, false> operator()(T&& value, const size_t amount) const {
+    LZ_NODISCARD constexpr repeat_iterable<remove_rvalue_reference_t<T>, false> operator()(T&& value, const ptrdiff_t amount) const {
         return { std::forward<T>(value), amount };
     }
 

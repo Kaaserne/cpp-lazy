@@ -36,21 +36,22 @@ TEST_CASE("Group by with sentinels") {
 TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         std::forward_list<int> lst = { 1, 1, 2, 2, 3, 4, 4 };
-        auto grouped = lz::group_by(lst, lz::detail::equal_to{});
+        auto grouped = lz::group_by(lst, LZ_BIN_OP(equal_to, int){});
         auto common = make_sentinel_assign_op_tester(grouped);
         using reference = lz::detail::ref_iterable_t<decltype(common)>;
         std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
                                                                     std::make_pair(2, std::vector<int>{ 2, 2 }),
                                                                     std::make_pair(3, std::vector<int>{ 3 }),
                                                                     std::make_pair(4, std::vector<int>{ 4, 4 }) };
-        REQUIRE(lz::equal(common, expected2,
-                          [](reference a, const std::pair<int, std::vector<int>>& b) { return a.first == b.first && lz::equal(a.second, b.second); }));
+        REQUIRE(lz::equal(common, expected2, [](reference a, const std::pair<int, std::vector<int>>& b) {
+            return a.first == b.first && lz::equal(a.second, b.second);
+        }));
     }
 
     SUBCASE("bidirectional") {
         std::vector<int> vec = { 1, 1, 2, 2, 3, 4, 4 };
         auto bidi_sentinelled = make_sized_bidi_sentinelled(vec);
-        auto grouped = lz::group_by(bidi_sentinelled, lz::detail::equal_to{});
+        auto grouped = lz::group_by(bidi_sentinelled, LZ_BIN_OP(equal_to, int){});
         auto common = make_sentinel_assign_op_tester(grouped);
         using reference = lz::detail::ref_iterable_t<decltype(common)>;
         std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),

@@ -60,10 +60,9 @@ struct take_adaptor {
      * @param iter The iterable / iterator to take the first n elements from.
      * @param n The amount of elements to take.
      */
-    template <class Iterable>
-    LZ_NODISCARD constexpr take_iterable<remove_ref_t<Iterable>>
-    operator()(Iterable &&iter, const size_t n) const {
-      return {std::forward<Iterable>(iter), n};
+    template<class Iterable>
+    LZ_NODISCARD constexpr take_iterable<remove_ref_t<Iterable>> operator()(Iterable&& iter, const ptrdiff_t n) const {
+        return { std::forward<Iterable>(iter), n };
     }
 
     /**
@@ -103,7 +102,7 @@ struct take_adaptor {
      * @param n The amount of elements to take. Piping only works for iterables, not for iterators such as
      * `std::vector<int>::iterator`.
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t n) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, ptrdiff_t> operator()(const ptrdiff_t n) const {
         return { n };
     }
 };

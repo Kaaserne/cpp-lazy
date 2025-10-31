@@ -45,7 +45,8 @@ constexpr detail::inclusive_scan_adaptor inclusive_scan{};
  * lz::inclusive_scan_iterable<std::vector<int>> scan = lz::inclusive_scan(vec, 0); // scan = { 1, 3, 6, 10, 15 }
  * ```
 */
-template<class Iterable, class T = detail::val_iterable_t<Iterable>, class BinaryOp = detail::plus>
+template<class Iterable, class T = detail::val_iterable_t<Iterable>,
+         class BinaryOp = LZ_BIN_OP(plus, lz::detail::val_iterable_t<Iterable>)>
 using inclusive_scan_iterable = detail::inclusive_scan_iterable<Iterable, T, BinaryOp>;
 
 } // namespace lz

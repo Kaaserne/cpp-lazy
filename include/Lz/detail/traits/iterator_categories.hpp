@@ -38,22 +38,22 @@ using bidi_strongest_cat = strongest_cat_t<Cat, std::bidirectional_iterator_tag>
 #ifdef LZ_HAS_CXX_17
 
 template<class I>
-LZ_INLINE_VAR constexpr bool is_ra_v = is_ra<I>::value;
+constexpr bool is_ra_v = is_ra<I>::value;
 
 template<class I>
-LZ_INLINE_VAR constexpr bool is_bidi_v = is_bidi<I>::value;
+constexpr bool is_bidi_v = is_bidi<I>::value;
 
 template<class I>
-LZ_INLINE_VAR constexpr bool is_fwd_v = is_fwd<I>::value;
+constexpr bool is_fwd_v = is_fwd<I>::value;
 
 template<class Tag>
-LZ_INLINE_VAR constexpr bool is_ra_tag_v = is_ra_tag<Tag>::value;
+constexpr bool is_ra_tag_v = is_ra_tag<Tag>::value;
 
 template<class Tag>
-LZ_INLINE_VAR constexpr bool is_bidi_tag_v = is_bidi_tag<Tag>::value;
+constexpr bool is_bidi_tag_v = is_bidi_tag<Tag>::value;
 
 template<class Tag>
-LZ_INLINE_VAR constexpr bool is_fwd_tag_v = is_fwd_tag<Tag>::value;
+constexpr bool is_fwd_tag_v = is_fwd_tag<Tag>::value;
 
 #endif
 

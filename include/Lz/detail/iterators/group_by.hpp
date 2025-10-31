@@ -30,8 +30,8 @@ class group_by_iterator : public iterator<group_by_iterator<Iterable, BinaryPred
     using ref_type = ref_t<it>;
 
     LZ_CONSTEXPR_CXX_14 void find_next(ref_type last_seen) {
-        _sub_range_end = lz::find_if(std::move(_sub_range_end), _iterable.end(),
-                                     [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
+        _sub_range_end = detail::find_if(std::move(_sub_range_end), _iterable.end(),
+                                         [this, &last_seen](ref_type v) { return !_comparer(v, last_seen); });
     }
 
     LZ_CONSTEXPR_CXX_14 void advance() {

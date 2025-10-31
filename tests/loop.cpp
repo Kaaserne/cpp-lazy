@@ -152,7 +152,7 @@ TEST_CASE("Loop with non while true argument") {
         auto looper = lz::loop(vec, 2);
         std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
         REQUIRE(lz::equal(looper, expected));
-        REQUIRE(lz::equal(looper | lz::reverse, expected | lz::reverse));
+        REQUIRE(lz::equal(looper | lz::reverse, expected | lz::reverse, [](const int a, const int b) { return a == b; }));
     }
 
     SUBCASE("Operator+") {

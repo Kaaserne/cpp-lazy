@@ -40,7 +40,7 @@ LZ_INLINE_VAR constexpr detail::except_adaptor except{};
  * except_t excepted = lz::except(vec, to_except, std::less<int>{});
  * ```
  */
-template<class Iterable1, class Iterable2, class BinaryPredicate = detail::less>
+template<class Iterable1, class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, detail::val_iterable_t<Iterable1>)>
 using except_iterable = detail::except_iterable<Iterable1, Iterable2, BinaryPredicate>;
 
 } // end namespace lz

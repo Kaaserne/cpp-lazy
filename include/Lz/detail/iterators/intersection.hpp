@@ -36,7 +36,7 @@ class intersection_iterator
     void find_next() {
         using ref_type = typename iter_traits::reference;
 
-        _iterator1 = lz::find_if(std::move(_iterator1), _iterable1.end(), [this](ref_type value) {
+        _iterator1 = detail::find_if(std::move(_iterator1), _iterable1.end(), [this](ref_type value) {
             while (_iterator2 != _iterable2.end()) {
                 if (_compare(value, *_iterator2)) {
                     return false;

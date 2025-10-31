@@ -30,7 +30,7 @@ public:
 private:
     iter _iterator{};
     Iterable _iterable{};
-    size_t _offset{};
+    difference_type _offset{};
 
 public:
     constexpr rotate_iterator(const rotate_iterator&) = default;
@@ -53,7 +53,7 @@ public:
 #endif
 
     template<class I>
-    constexpr rotate_iterator(I&& iterable, iter start, const size_t offset) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterator(I&& iterable, iter start, const difference_type offset) :
         _iterator{ std::move(start) },
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset } {
@@ -64,10 +64,10 @@ public:
     constexpr rotate_iterator& operator=(const iter& end) {
         _iterator = end;
         if constexpr (is_bidi_v<iter>) {
-            _offset = lz::eager_size(_iterable);
+            _offset = lz::eager_ssize(_iterable);
         }
         else {
-            _offset = std::numeric_limits<size_t>::max();
+            _offset = std::numeric_limits<difference_type>::max();
         }
         return *this;
     }
@@ -76,14 +76,14 @@ public:
     template<class I = iter>
     LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, rotate_iterator&> operator=(const iter& end) {
         _iterator = end;
-        _offset = lz::eager_size(_iterable);
+        _offset = lz::eager_ssize(_iterable);
         return *this;
     }
 
     template<class I = iter>
     LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<I>::value, rotate_iterator&> operator=(const iter& end) {
         _iterator = end;
-        _offset = std::numeric_limits<size_t>::max();
+        _offset = std::numeric_limits<difference_type>::max();
         return *this;
     }
 
@@ -108,6 +108,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        if (_iterable.begin() == _iterable.end()) {
+            return;
+        }
         if (_iterator == _iterable.begin()) {
             _iterator = _iterable.end();
         }
@@ -121,7 +124,7 @@ public:
         if (n == 0) {
             return;
         }
-        _offset += static_cast<size_t>(n);
+        _offset += n;
         const auto size = _iterable.end() - _iterable.begin();
         auto pos = (_iterator - _iterable.begin() + n) % size;
         if (pos < 0) {
@@ -129,13 +132,14 @@ public:
         }
         _iterator = _iterable.begin() + pos;
     }
+
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
-        return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
+        return _offset - other._offset;
     }
 
     constexpr difference_type difference(const iter&) const {
-        return (_iterable.begin() - _iterable.end()) + static_cast<difference_type>(_offset);
+        return (_iterable.begin() - _iterable.end()) + _offset;
     }
 
     template<class I = iter>

@@ -42,7 +42,8 @@ LZ_INLINE_VAR constexpr detail::exclusive_scan_adaptor exclusive_scan{};
  * lz::exclusive_scan<std::vector<int>> scan = lz::exclusive_scan_iterable(vec, 0);
  * ```
  */
-template<class Iterable, class T = detail::val_iterable_t<Iterable>, class BinaryOp = detail::plus>
+template<class Iterable, class T = detail::val_iterable_t<Iterable>,
+         class BinaryOp = LZ_BIN_OP(plus, detail::val_iterable_t<Iterable>)>
 using exclusive_scan_iterable = detail::exclusive_scan_iterable<Iterable, T, BinaryOp>;
 
 } // namespace lz

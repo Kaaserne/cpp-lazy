@@ -454,9 +454,6 @@ TEST_CASE("Peek") {
 
         REQUIRE(lz::peek(iterable).has_value());
         REQUIRE(lz::peek(iterable).value() == 'e');
-
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).value() == 'e');
     }
 
     SUBCASE("One element ref") {
@@ -464,7 +461,6 @@ TEST_CASE("Peek") {
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
 
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 
     SUBCASE("Empty ref") {
@@ -472,7 +468,6 @@ TEST_CASE("Peek") {
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
 
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 
     SUBCASE("Two elements val") {
@@ -481,9 +476,6 @@ TEST_CASE("Peek") {
 
         REQUIRE(lz::peek(iterable).has_value());
         REQUIRE(lz::peek(iterable).value() == 'e');
-
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).value() == 'e');
     }
 
     SUBCASE("One element val") {
@@ -491,7 +483,6 @@ TEST_CASE("Peek") {
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
 
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 
     SUBCASE("Empty val") {
@@ -499,7 +490,6 @@ TEST_CASE("Peek") {
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
 
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 }
 
@@ -624,9 +614,9 @@ TEST_CASE("Nth") {
 
 TEST_CASE("Accumulate") {
     SUBCASE("With non-empty c-string") {
-        const char* str = "Hello";
+        const wchar_t* str = L"Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::accumulate(iterable, 0) == 500);
+        REQUIRE(lz::accumulate(iterable, wchar_t{}) == L'H' + L'e' + L'l' + L'l' + L'o');
     }
 
     SUBCASE("With one element") {
@@ -1443,6 +1433,9 @@ TEST_CASE("Starts with") {
         auto iterable = lz::c_string("Hello");
         auto iterable2 = lz::c_string("a");
         REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+
+        iterable2 = lz::c_string("Helloa");
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 
     SUBCASE("With non-empty string") {
@@ -1470,6 +1463,9 @@ TEST_CASE("Starts with") {
     SUBCASE("Not found string") {
         auto iterable = std::string("Hello");
         auto iterable2 = std::string("a");
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+
+        iterable2 = std::string("Helloa");
         REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 }

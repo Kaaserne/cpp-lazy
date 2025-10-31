@@ -12,7 +12,7 @@ template<class Arithmetic, class Distribution, class Generator, bool UseSentinel
 class random_iterable : public lazy_view {
     Distribution _distribution{};
     Generator* _generator{ nullptr };
-    size_t _current{};
+    ptrdiff_t _current{};
 
 public:
     constexpr random_iterable(const random_iterable&) = default;
@@ -36,7 +36,7 @@ public:
 
 #endif
 
-    constexpr random_iterable(const Distribution& distribution, Generator& generator, const size_t current) :
+    constexpr random_iterable(const Distribution& distribution, Generator& generator, const ptrdiff_t current) :
         _distribution{ distribution },
         _generator{ &generator },
         _current{ current } {

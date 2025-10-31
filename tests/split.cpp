@@ -216,20 +216,23 @@ TEST_CASE("Splitter binary operations") {
 TEST_CASE("Splitter to containers") {
     std::string to_split = "Hello world test 123 ";
     auto splitter = lz::sv_split(to_split, " ");
+    auto cmp = [](const std::string& a, const lz::string_view& b) {
+        return a == std::string{ b.data(), b.size() };
+    };
 
     SUBCASE("To array") {
         std::array<std::string, 5> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To vector") {
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To other container using to<>()") {
         std::list<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To map") {
@@ -474,20 +477,23 @@ TEST_CASE("One element splitter binary operations") {
 TEST_CASE("One element splitter to containers") {
     std::string to_split = "Hello world test 123 ";
     auto splitter = lz::sv_split(to_split, ' ');
+    auto cmp = [](const std::string& a, const lz::string_view& b) {
+        return a == std::string{ b.data(), b.size() };
+    };
 
     SUBCASE("To array") {
         std::array<std::string, 5> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To vector") {
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To other container using to<>()") {
         std::list<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To map") {

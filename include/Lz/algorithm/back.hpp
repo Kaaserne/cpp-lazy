@@ -7,11 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::ref_t<Iterator> back(Iterator begin, S end) {
-    return detail::algorithm::back(begin, end);
-}
-
 /**
  * @brief Returns a reference to the last element in the given iterable. If the iterable is not a random access or
  * bidirectional iterable, this function will iterate through the entire iterable to find the last element. If the iterable is
@@ -21,7 +16,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::ref_t<Iterator> back(Iterator begin, S 
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::ref_iterable_t<Iterable> back(Iterable&& iterable) {
-    return lz::back(detail::begin(iterable), detail::end(iterable));
+    return detail::back(detail::begin(iterable), detail::end(iterable));
 }
 } // namespace lz
 

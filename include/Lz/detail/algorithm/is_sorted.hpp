@@ -8,18 +8,16 @@
 #ifndef LZ_HAS_CXX_17
 #include <Lz/detail/traits/enable_if.hpp>
 #endif
-
+// TODO remove algorithm:: namespace
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    if constexpr (is_ra_v<Iterator>) {
-        auto last = begin + (end - begin);
-        return std::is_sorted(std::move(begin), std::move(last), std::move(binary_predicate));
+    if constexpr (std_algo_compat_v<Iterator, S>) {
+        return std::is_sorted(begin, detail::get_end(begin, end), std::move(binary_predicate));
     }
     else {
         if (begin == end) {
@@ -38,13 +36,13 @@ LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterator begin, S end, BinaryPredicate binary
 #else
 
 template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value, bool> is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    auto last = begin + (end - begin);
-    return std::is_sorted(std::move(begin), std::move(last), std::move(binary_predicate));
+LZ_CONSTEXPR_CXX_14 enable_if_t<std_algo_compat<Iterator, S>::value, bool>
+is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
+    return std::is_sorted(begin, detail::get_end(begin, end), std::move(binary_predicate));
 }
 
 template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, bool>
+LZ_CONSTEXPR_CXX_14 enable_if_t<!std_algo_compat<Iterator, S>::value, bool>
 is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
     if (begin == end) {
         return true;
@@ -60,7 +58,6 @@ is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

@@ -70,7 +70,7 @@ void test_operator_minus(const Iterable& it) {
     }
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = lz::detail::equal_to>
+template<class Iterable, class ExpectedIterable, class EqCompare = LZ_BIN_OP(equal_to, lz::detail::val_iterable_t<Iterable>)>
 void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
     const auto size = lz::ssize(it);
@@ -180,7 +180,7 @@ lz::detail::enable_if_t<lz::detail::has_sentinel<Iterable>::value> test_operator
     }
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = lz::detail::equal_to>
+template<class Iterable, class ExpectedIterable, class EqCompare = LZ_BIN_OP(equal_to, lz::detail::val_iterable_t<Iterable>)>
 lz::detail::enable_if_t<!lz::detail::has_sentinel<Iterable>::value>
 test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
@@ -219,7 +219,7 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
     REQUIRE(begin - size == it.begin());
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = lz::detail::equal_to>
+template<class Iterable, class ExpectedIterable, class EqCompare = LZ_BIN_OP(equal_to, lz::detail::val_iterable_t<Iterable>)>
 lz::detail::enable_if_t<lz::detail::has_sentinel<Iterable>::value>
 test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));

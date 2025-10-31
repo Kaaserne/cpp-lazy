@@ -9,7 +9,6 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_17 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate) {
@@ -33,7 +32,6 @@ LZ_CONSTEXPR_CXX_14 bool ends_with(Iterator1 begin, S1 end, Iterator2 begin2, S2
     return equal(std::move(begin), std::move(end), std::move(begin2), std::move(end2), std::move(binary_predicate));
 }
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

@@ -9,7 +9,6 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 template<class Iterator, class T, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 Iterator sized_lower_bound(Iterator begin, const T& value, BinaryPredicate binary_predicate,
@@ -31,12 +30,10 @@ LZ_CONSTEXPR_CXX_14 Iterator sized_lower_bound(Iterator begin, const T& value, B
 template<class Iterable, class T, class BinaryPredicate>
 LZ_CONSTEXPR_CXX_14 iter_t<Iterable> lower_bound(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate) {
     using diff = diff_type<iter_t<Iterable>>;
-
-    auto begin = detail::begin(iterable);
-    return sized_lower_bound(std::move(begin), value, std::move(binary_predicate), static_cast<diff>(lz::eager_size(iterable)));
+    return sized_lower_bound(detail::begin(iterable), value, std::move(binary_predicate),
+                             static_cast<diff>(lz::eager_size(iterable)));
 }
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

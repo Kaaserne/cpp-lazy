@@ -14,34 +14,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-#ifdef LZ_HAS_CXX_17
-
-template<class Iterator, class S, class BinaryPredicate>
-[[nodiscard]] constexpr Iterator adjacent_find(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    if constexpr (detail::is_sentinel_v<Iterator, S>) {
-        return detail::algorithm::adjacent_find(std::move(begin), std::move(end), std::move(binary_predicate));
-    }
-    else {
-        return std::adjacent_find(std::move(begin), std::move(end), std::move(binary_predicate));
-    }
-}
-
-#else
-
-template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<detail::is_sentinel<Iterator, S>::value, Iterator>
-adjacent_find(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    return detail::algorithm::adjacent_find(std::move(begin), std::move(end), std::move(binary_predicate));
-}
-
-template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!detail::is_sentinel<Iterator, S>::value, Iterator>
-adjacent_find(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    return std::adjacent_find(std::move(begin), std::move(end), std::move(binary_predicate));
-}
-
-#endif // LZ_HAS_CXX_17
-
 /**
  * @brief Finds the first occurrence of two adjacent elements in the range [begin(iterable), end(iterable)) that satisfy the
  * binary binary_predicate @p binary_predicate
@@ -51,9 +23,9 @@ adjacent_find(Iterator begin, S end, BinaryPredicate binary_predicate) {
  * @return Iterator to the first occurrence of two adjacent elements that satisfy the binary binary_predicate or
  * `end(iterable)` if the elements are not found
  */
-template<class Iterable, class BinaryPredicate = detail::equal_to>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> adjacent_find(Iterable&& iterable, BinaryPredicate&& binary_predicate = {}) {
-    return lz::adjacent_find(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
+template<class Iterable, class BinaryPredicate = LZ_BIN_OP(equal_to, detail::val_iterable_t<Iterable>)>
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> adjacent_find(Iterable && iterable, BinaryPredicate&& binary_predicate = {}) {
+    return detail::adjacent_find(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
 }
 
 } // namespace lz

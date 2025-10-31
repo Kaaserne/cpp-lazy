@@ -72,7 +72,7 @@ struct loop_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD constexpr loop_iterable<remove_ref_t<Iterable>, false>
-    operator()(Iterable&& iterable, const size_t amount) const {
+    operator()(Iterable&& iterable, const diff_iterable_t<Iterable> amount) const {
         return { std::forward<Iterable>(iterable), amount };
     }
 
@@ -88,7 +88,7 @@ struct loop_adaptor {
      * @param amount The amount of times to loop over the iterable
      * @return An adaptor that can be used in pipe expressions
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t amount) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, ptrdiff_t> operator()(const ptrdiff_t amount) const {
         return { amount };
     }
 };

@@ -7,11 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 bool none_of(Iterator iterator, S s, UnaryPredicate unary_predicate) {
-    return !lz::any_of(std::move(iterator), std::move(s), std::move(unary_predicate));
-}
-
 /**
  * @brief Checks whether none of the elements in the range [begin(iterable), end(iterable)) satisfy the unary_predicate @p
  * unary_predicate
@@ -22,7 +17,8 @@ LZ_CONSTEXPR_CXX_14 bool none_of(Iterator iterator, S s, UnaryPredicate unary_pr
  */
 template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool none_of(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return lz::none_of(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
+    return !lz::any_of(std::forward<Iterable>(iterable), std::move(unary_predicate));
 }
+
 } // namespace lz
 #endif // LZ_ALGORITHM_NONE_OF_HPP

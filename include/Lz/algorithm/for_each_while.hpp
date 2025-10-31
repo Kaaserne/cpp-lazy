@@ -8,11 +8,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    return detail::algorithm::for_each_while(std::move(begin), std::move(end), std::move(unary_predicate));
-}
-
 /**
  * @brief Applies the given function to each element in the iterable until the function returns false. @p unary_predicate
  * should return a boolean. If `true` is returned, the next element will be processed. If `false` is returned, the iteration
@@ -23,7 +18,7 @@ LZ_CONSTEXPR_CXX_14 void for_each_while(Iterator begin, S end, UnaryPredicate un
  */
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 void for_each_while(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return for_each_while(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
+    return detail::for_each_while(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
 }
 } // namespace lz
 

@@ -62,7 +62,8 @@ public:
         _end{ std::move(end) },
         _to_search_end{ std::move(end2) } {
         if (_sub_range_begin != _end) {
-            _sub_range_end = lz::search(_sub_range_end.second, _end, _to_search, _to_search_end, detail::equal_to{});
+            _sub_range_end =
+                detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, LZ_BIN_OP(equal_to, val_t<Iterator>){});
         }
         else {
             _ends_with_trailing = false;
@@ -128,7 +129,8 @@ public:
         _sub_range_end.first = _sub_range_end.second;
         if (_sub_range_end.first != _end) {
             _sub_range_begin = _sub_range_end.first;
-            _sub_range_end = lz::search(_sub_range_end.second, _end, _to_search, _to_search_end, detail::equal_to{});
+            _sub_range_end =
+                detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, LZ_BIN_OP(equal_to, val_t<Iterator>){});
         }
     }
 
@@ -187,9 +189,8 @@ public:
         _end{ std::move(end) },
         _delimiter{ std::move(delimiter) } {
         if (_sub_range_begin != _end) {
-            using lz::find;
-            using std::find;
-            _sub_range_end = find(_sub_range_begin, _end, _delimiter);
+            _sub_range_end =
+                detail::find_if(_sub_range_begin, _end, [this](detail::ref_t<Iterator> val) { return _delimiter == val; });
         }
         else {
             _ends_with_trailing = false;
@@ -255,7 +256,8 @@ public:
 
         using lz::find;
         using std::find;
-        _sub_range_end = find(_sub_range_begin, _end, _delimiter);
+        _sub_range_end =
+            detail::find_if(_sub_range_begin, _end, [this](ref_t<Iterator> value) { return value == _delimiter; });
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const split_single_iterator& rhs) const {

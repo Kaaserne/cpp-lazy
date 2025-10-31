@@ -7,11 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class UnaryPredicate>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterator iterator, S s, UnaryPredicate unary_predicate) {
-    return lz::find_if(std::move(iterator), s, std::move(unary_predicate)) != s;
-}
-
 /**
  * @brief Checks whether any of the elements in the range [begin(iterable), end(iterable)) satisfy the unary_predicate @p
  * unary_predicate
@@ -22,8 +17,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterator iterator, S s, UnaryPredic
  */
 template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool any_of(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    return lz::any_of(detail::begin(iterable), detail::end(iterable), std::move(unary_predicate));
+    return lz::find_if(std::forward<Iterable>(iterable), std::move(unary_predicate)) != detail::end(iterable);
 }
 
-}
+} // namespace lz
 #endif

@@ -15,7 +15,7 @@ class generate_iterable;
 template<class GeneratorFunc>
 class generate_iterable<GeneratorFunc, false> : public lazy_view {
     func_container<GeneratorFunc> _func{};
-    size_t _amount{};
+    ptrdiff_t _amount{};
 
 public:
     using iterator = generate_iterator<func_container<GeneratorFunc>, false>;
@@ -36,11 +36,11 @@ public:
 
 #endif
 
-    constexpr generate_iterable(GeneratorFunc func, const size_t amount) : _func{ std::move(func) }, _amount{ amount } {
+    constexpr generate_iterable(GeneratorFunc func, const ptrdiff_t amount) : _func{ std::move(func) }, _amount{ amount } {
     }
 
     LZ_NODISCARD constexpr size_t size() const noexcept {
-        return _amount;
+        return static_cast<size_t>(_amount);
     }
 
     LZ_NODISCARD constexpr iterator begin() const {

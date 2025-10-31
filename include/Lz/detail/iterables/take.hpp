@@ -25,7 +25,7 @@ public:
 
 private:
     Iterator _iterator{};
-    size_t _n{};
+    typename iterator::difference_type _n{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -42,11 +42,11 @@ public:
 
 #endif
 
-    constexpr take_iterable(Iterator it, const size_t n) : _iterator{ std::move(it) }, _n{ n } {
+    constexpr take_iterable(Iterator it, const typename iterator::difference_type n) : _iterator{ std::move(it) }, _n{ n } {
     }
 
     LZ_NODISCARD constexpr size_t size() const noexcept {
-        return _n;
+        return static_cast<size_t>(_n);
     }
 
     LZ_NODISCARD constexpr iterator begin() const {
@@ -58,7 +58,7 @@ public:
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (is_bidi_tag_v<typename iterator::iterator_category>) {
-            return iterator{ std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
+            return iterator{ std::next(_iterator, _n), 0 };
         }
         else {
             return lz::default_sentinel;
@@ -69,7 +69,7 @@ public:
 
     template<class I = typename iterator::iterator_category>
     LZ_NODISCARD constexpr enable_if_t<is_bidi_tag<I>::value, iterator> end() const {
-        return { std::next(_iterator, static_cast<typename iterator::difference_type>(_n)), 0 };
+        return { std::next(_iterator, _n), 0 };
     }
 
     template<class I = typename iterator::iterator_category>
@@ -82,16 +82,16 @@ public:
 
 template<class Iterable>
 class take_iterable<Iterable, enable_if_t<is_iterable<Iterable>::value>> : public lazy_view {
-    maybe_owned<Iterable> _iterable{};
-    size_t _n{};
-
-    using inner_sentinel = sentinel_t<Iterable>;
-
 public:
     using iterator = iter_t<Iterable>;
     using const_iterator = iterator;
     using value_type = val_t<iterator>;
 
+private:
+    maybe_owned<Iterable> _iterable{};
+    diff_type<iterator> _n{};
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_iterable()
@@ -107,7 +107,7 @@ public:
 #endif
 
     template<class I>
-    constexpr take_iterable(I&& iterable, const size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
+    constexpr take_iterable(I&& iterable, const diff_type<iterator> n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -115,14 +115,14 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return std::min(_n, static_cast<size_t>(lz::size(_iterable)));
+        return std::min(static_cast<size_t>(_n), static_cast<size_t>(lz::size(_iterable)));
     }
 
 #else
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
-        return std::min(_n, static_cast<size_t>(lz::size(_iterable)));
+        return std::min(static_cast<size_t>(_n), static_cast<size_t>(lz::size(_iterable)));
     }
 
 #endif

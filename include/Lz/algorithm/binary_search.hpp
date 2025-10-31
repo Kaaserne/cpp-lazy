@@ -7,15 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class T, class BinaryPredicate = detail::less>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool
-binary_search(Iterator begin, S end, const T& value, BinaryPredicate binary_predicate = {}) {
-    using lz::lower_bound;
-    using std::lower_bound;
-    auto it = lower_bound(std::move(begin), std::move(end), value, binary_predicate);
-    return it != end && !binary_predicate(value, *it);
-}
-
 /**
  * @brief Searches for the first occurrence of the value @p value in the range [begin(iterable), end(iterable)) using the
  * binary search algorithm. @p iterable must be sorted beforehand.
@@ -24,11 +15,10 @@ binary_search(Iterator begin, S end, const T& value, BinaryPredicate binary_pred
  * @param binary_predicate Predicate to search the value with
  * @return true if the value is found, false otherwise
  */
-template<class Iterable, class T, class BinaryPredicate = detail::less>
+template<class Iterable, class T, class BinaryPredicate = LZ_BIN_OP(less, detail::val_iterable_t<Iterable>)>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool binary_search(Iterable&& iterable, const T& value, BinaryPredicate binary_predicate = {}) {
-    auto end = detail::end(iterable);
-    auto it = lz::lower_bound(std::forward<Iterable>(iterable), value, binary_predicate);
-    return it != end && !binary_predicate(value, *it);
+    auto it = lz::lower_bound(iterable, value, binary_predicate);
+    return it != detail::end(iterable) && !binary_predicate(value, *it);
 }
 } // namespace lz
 

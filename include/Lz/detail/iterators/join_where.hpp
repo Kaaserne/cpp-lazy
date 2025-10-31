@@ -43,7 +43,7 @@ private:
     mutable ResultSelector _result_selector{};
 
     LZ_CONSTEXPR_CXX_17 void find_next() {
-        _iter_a = lz::find_if(std::move(_iter_a), _iterable_a.end(), [this](ref_t<iter_a> a) {
+        _iter_a = detail::find_if(std::move(_iter_a), _iterable_a.end(), [this](ref_t<iter_a> a) {
             auto&& to_find = _selector_a(a);
 
             auto pos = lz::lower_bound(_iterable_b, to_find,

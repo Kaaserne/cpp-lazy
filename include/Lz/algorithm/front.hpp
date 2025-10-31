@@ -3,6 +3,7 @@
 #ifndef LZ_ALGORITHM_FRONT_HPP
 #define LZ_ALGORITHM_FRONT_HPP
 
+#include <Lz/algorithm/empty.hpp>
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
@@ -19,6 +20,7 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::ref_iterable_t<Iterable> front(Iterable&& iterable) {
+    LZ_ASSERT(!lz::empty(iterable), "Called lz::front on an empty iterable");
     return *detail::begin(iterable);
 }
 

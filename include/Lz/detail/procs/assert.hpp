@@ -58,14 +58,17 @@ assertion_fail(const char* file, const int line, const char* func, const char* m
 
 #else // ^^ defined(LZ_USE_DEBUG_ASSERTIONS) vv !defined(LZ_USE_DEBUG_ASSERTIONS)
 
-#define LZ_ASSERT(CONDITION, MSG)
-#define LZ_ASSERT_INCREMENTABLE(CONDITION)
-#define LZ_ASSERT_DECREMENTABLE(CONDITION)
-#define LZ_ASSERT_DEREFERENCABLE(CONDITION)
-#define LZ_ASSERT_ADDABLE(CONDITION)
-#define LZ_ASSERT_SUBTRACTABLE(CONDITION)
-#define LZ_ASSERT_SUB_ADDABLE(CONDITION)
-#define LZ_ASSERT_COMPATIBLE(CONDITION)
+#define LZ_ASSERT(CONDITION, MSG)                                                                                                \
+    static_cast<void>(CONDITION);                                                                                                \
+    static_cast<void>(MSG)
+
+#define LZ_ASSERT_INCREMENTABLE(CONDITION) static_cast<void>(CONDITION)
+#define LZ_ASSERT_DECREMENTABLE(CONDITION) static_cast<void>(CONDITION)
+#define LZ_ASSERT_DEREFERENCABLE(CONDITION) static_cast<void>(CONDITION)
+#define LZ_ASSERT_ADDABLE(CONDITION) static_cast<void>(CONDITION)
+#define LZ_ASSERT_SUBTRACTABLE(CONDITION) static_cast<void>(CONDITION)
+#define LZ_ASSERT_SUB_ADDABLE(CONDITION) static_cast<void>(CONDITION)
+#define LZ_ASSERT_COMPATIBLE(CONDITION) static_cast<void>(CONDITION)
 
 #endif // defined(LZ_USE_DEBUG_ASSERTIONS)
 

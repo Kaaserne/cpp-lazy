@@ -48,7 +48,7 @@ TEST_CASE("exclusive_scan basic functionality") {
 TEST_CASE("Empty or one element exclusive scan") {
     SUBCASE("Empty") {
         std::vector<int> empty;
-        auto scan = empty | lz::exclusive_scan(0, lz::detail::equal_to{});
+        auto scan = empty | lz::exclusive_scan(0, LZ_BIN_OP(equal_to, int){});
         REQUIRE(lz::empty(scan));
         REQUIRE_FALSE(lz::has_one(scan));
         REQUIRE_FALSE(lz::has_many(scan));

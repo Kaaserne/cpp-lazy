@@ -80,8 +80,8 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<I == 1, size_t> size_all(Iterable&&
 
 template<size_t I, class Iterable>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 1), size_t> size_all(Iterable&& iterable) {
-    return lz::accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
-                          [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
+    return detail::accumulate(iterable.begin(), iterable.end(), size_t{ 0 },
+                              [](size_t sum, ref_iterable_t<Iterable> val) { return sum + size_all<I - 1>(val); });
 }
 
 #endif

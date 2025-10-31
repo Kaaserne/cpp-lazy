@@ -4,6 +4,7 @@
 #define LZ_DETAIL_ALGORITHM_BACK_HPP
 
 #include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/procs/get_end.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
@@ -14,7 +15,6 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
@@ -22,11 +22,9 @@ template<class Iterator, class S>
 constexpr ref_t<Iterator> back(Iterator begin, S end) {
     LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
 
-    if constexpr (is_ra_v<Iterator> && is_sentinel_v<Iterator, S>) {
-        return *(begin + (end - begin) - 1);
-    }
-    else if constexpr (is_bidi_v<Iterator> && !is_sentinel_v<Iterator, S>) {
-        return *--end;
+    if constexpr (std_algo_compat_v<Iterator, S>) {
+        auto last = detail::get_end(begin, end);
+        return *--last;
     }
     else {
         auto prev = begin++;
@@ -43,24 +41,14 @@ constexpr ref_t<Iterator> back(Iterator begin, S end) {
 #else
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value && is_sentinel<Iterator, S>::value, ref_t<Iterator>> back(Iterator begin, S end) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<std_algo_compat<Iterator, S>::value, ref_t<Iterator>> back(Iterator begin, S end) {
     LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
-    return *(begin + (end - begin) - 1);
+    auto last = detail::get_end(begin, end);
+    return *--last;
 }
 
 template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14
-    enable_if_t<is_bidi<Iterator>::value && !is_sentinel<Iterator, S>::value, ref_t<Iterator>>
-    back(Iterator begin, S end) {
-    LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
-    return *--end;
-}
-
-template<class Iterator, class S>
-LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<Iterator>::value ||
-                                    (!is_ra<Iterator>::value && is_bidi<Iterator>::value && is_sentinel<Iterator, S>::value),
-                                ref_t<Iterator>>
-back(Iterator begin, S end) {
+LZ_CONSTEXPR_CXX_14 enable_if_t<!std_algo_compat<Iterator, S>::value, ref_t<Iterator>> back(Iterator begin, S end) {
     LZ_ASSERT(begin != end, "Cannot get back of empty iterable");
 
     auto prev = begin++;
@@ -73,7 +61,6 @@ back(Iterator begin, S end) {
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

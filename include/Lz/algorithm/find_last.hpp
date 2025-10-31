@@ -7,11 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class T>
-LZ_CONSTEXPR_CXX_14 Iterator find_last(Iterator begin, S end, const T& value) {
-    return lz::find_last_if(std::move(begin), std::move(end), [&value](detail::ref_t<Iterator> val) { return val == value; });
-}
-
 /**
  * @brief Finds the first element in the range [begin(iterable), end(iterable)) that satisfies the value @p value.
  * Does not use `lz::cached_reverse` to reverse the elements (if bidirectional).
@@ -21,7 +16,8 @@ LZ_CONSTEXPR_CXX_14 Iterator find_last(Iterator begin, S end, const T& value) {
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> find_last(Iterable&& iterable, const T& value) {
-    return lz::find_last(detail::begin(iterable), detail::end(iterable), value);
+    return lz::find_last_if(std::forward<Iterable>(iterable),
+                            [&value](detail::ref_t<iter_t<Iterable>> val) { return val == value; });
 }
 
 } // namespace lz

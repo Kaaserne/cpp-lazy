@@ -21,7 +21,7 @@ private:
     using diff = diff_type<iterator>;
 
     maybe_owned<Iterable> _iterable{};
-    size_t _n{};
+    diff _n{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -39,7 +39,7 @@ public:
 #endif
 
     template<class I>
-    constexpr drop_iterable(I&& iterable, const size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
+    constexpr drop_iterable(I&& iterable, const diff n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -48,7 +48,7 @@ public:
         requires(sized<Iterable>)
     {
         const auto size = lz::size(_iterable);
-        return size > _n ? size - _n : 0;
+        return size > static_cast<size_t>(_n) ? size - static_cast<size_t>(_n) : 0;
     }
 
 #else
@@ -56,13 +56,13 @@ public:
     template<bool Sized = is_sized<Iterable>::value>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<Sized, size_t> size() const {
         const auto size = lz::size(_iterable);
-        return size > _n ? size - _n : 0;
+        return size > static_cast<size_t>(_n) ? size - static_cast<size_t>(_n) : 0;
     }
 
 #endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        return next_fast_safe(_iterable, static_cast<diff>(_n));
+        return next_fast_safe(_iterable, _n);
     }
 
     LZ_NODISCARD constexpr sentinel end() const {

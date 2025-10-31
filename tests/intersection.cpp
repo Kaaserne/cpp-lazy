@@ -20,7 +20,7 @@ TEST_CASE("Intersection tests with sentinels") {
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 
     std::swap(str, str2);
-    intersect = lz::intersection(str, str2, lz::detail::less{});
+    intersect = lz::intersection(str, str2, LZ_BIN_OP(less, char){});
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 }
 
@@ -62,7 +62,7 @@ TEST_CASE("Empty or one element intersection") {
     SUBCASE("One element 1") {
         std::string a = "h";
         std::string b;
-        auto intersect = a | lz::intersection(b, lz::detail::less{});
+        auto intersect = a | lz::intersection(b, LZ_BIN_OP(less, char){});
         REQUIRE(lz::empty(intersect));
         REQUIRE_FALSE(lz::has_one(intersect));
         REQUIRE_FALSE(lz::has_many(intersect));

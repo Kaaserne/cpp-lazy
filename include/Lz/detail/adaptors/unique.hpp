@@ -31,7 +31,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An iterable that contains only unique elements from the input iterable.
      */
-    template<class Iterable, class BinaryPredicate = less>
+    template<class Iterable, class BinaryPredicate = LZ_BIN_OP(less, void)>
     [[nodiscard]] constexpr unique_iterable<remove_ref_t<Iterable>, BinaryPredicate>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const
         requires(lz::iterable<Iterable>)
@@ -55,7 +55,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = less>
+    template<class BinaryPredicate = LZ_BIN_OP(less, void)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, BinaryPredicate> operator()(BinaryPredicate predicate = {}) const
         requires(!iterable<BinaryPredicate>)
     {
@@ -80,7 +80,7 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An iterable that contains only unique elements from the input iterable.
      */
-    template<class Iterable, class BinaryPredicate = less>
+    template<class Iterable, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable>)>
     LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, unique_iterable<remove_ref_t<Iterable>, BinaryPredicate>>
     operator()(Iterable&& iterable, BinaryPredicate predicate = {}) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
@@ -102,9 +102,9 @@ struct unique_adaptor {
      * @param predicate The predicate to compare the elements with. The default is std::less<>{}
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = less>
+    template<class BinaryPredicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, BinaryPredicate>>
-    operator()(BinaryPredicate predicate = {}) const {
+    operator()(BinaryPredicate predicate) const {
         return { std::move(predicate) };
     }
 
@@ -112,5 +112,30 @@ struct unique_adaptor {
 };
 } // namespace detail
 } // namespace lz
+
+#ifdef LZ_HAS_CONCEPTS
+
+LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
+    requires(lz::iterable<Iterable>)
+[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::unique_adaptor)
+    -> decltype(lz::detail::unique_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
+                                             LZ_BIN_OP(less, val_iterable_t<Iterable>){})) {
+    return lz::detail::unique_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
+                                        LZ_BIN_OP(less, val_iterable_t<Iterable>){});
+}
+
+#else
+
+LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
+LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, lz::detail::unique_adaptor)
+    -> lz::detail::enable_if_t<lz::detail::is_iterable<Iterable>::value,
+                               decltype(lz::detail::unique_adaptor{}(std::forward<Iterable>(iterable),
+                                                                     lz::detail::val_iterable_t<Iterable>{},
+                                                                     LZ_BIN_OP(less, lz::detail::val_iterable_t<Iterable>){}))> {
+    return lz::detail::unique_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
+                                        LZ_BIN_OP(less, lz::detail::val_iterable_t<Iterable>){});
+}
+
+#endif
 
 #endif // LZ_UNIQUE_ADPTOR_HPP

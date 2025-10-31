@@ -44,7 +44,6 @@
 #include <Lz/algorithm/max_element.hpp>
 #include <Lz/algorithm/mean.hpp>
 #include <Lz/algorithm/min_element.hpp>
-#include <Lz/algorithm/mismatch.hpp>
 #include <Lz/algorithm/none_of.hpp>
 #include <Lz/algorithm/partition.hpp>
 #include <Lz/algorithm/peek.hpp>

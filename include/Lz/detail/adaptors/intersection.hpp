@@ -35,7 +35,7 @@ struct intersection_adaptor {
      * @param compare The comparison function. std::less<> by default
      * @return An iterable that contains the intersection of the two iterables
      */
-    template<class Iterable, class Iterable2, class BinaryPredicate = less>
+    template<class Iterable, class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable>)>
     [[nodiscard]] constexpr intersection_iterable<remove_ref_t<Iterable>, remove_ref_t<Iterable2>, BinaryPredicate>
     operator()(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate compare = {}) const
         requires(lz::iterable<Iterable2>)
@@ -61,7 +61,7 @@ struct intersection_adaptor {
      * @param iterable2 The second iterable
      * @param compare The comparison function. std::less<> by default
      */
-    template<class Iterable2, class BinaryPredicate = less>
+    template<class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, Iterable2, BinaryPredicate>
     operator()(Iterable2&& iterable2, BinaryPredicate compare = {}) const
         requires(!iterable<BinaryPredicate>)
@@ -93,7 +93,7 @@ struct intersection_adaptor {
      * @param compare The comparison function. std::less<> by default
      * @return An iterable that contains the intersection of the two iterables
      */
-    template<class Iterable, class Iterable2, class BinaryPredicate = less>
+    template<class Iterable, class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
     LZ_NODISCARD constexpr
     enable_if_t<is_iterable<Iterable2>::value, intersection_iterable<remove_ref_t<Iterable>, remove_ref_t<Iterable2>, BinaryPredicate>>
     operator()(Iterable&& iterable, Iterable2&& iterable2, BinaryPredicate compare = {}) const {
@@ -120,7 +120,7 @@ struct intersection_adaptor {
      * @param iterable2 The second iterable
      * @param compare The comparison function. std::less<> by default
      */
-    template<class Iterable2, class BinaryPredicate = less>
+    template<class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
     LZ_NODISCARD constexpr enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
     operator()(Iterable2&& iterable2, BinaryPredicate compare = {}) const {
         return { std::forward<Iterable2>(iterable2), std::move(compare) };

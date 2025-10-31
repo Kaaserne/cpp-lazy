@@ -7,11 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class T>
-LZ_CONSTEXPR_CXX_14 size_t index_of(Iterator begin, S end, const T& value) {
-    return index_of_if(std::move(begin), std::move(end), [&value](detail::ref_t<Iterator> val) { return val == value; });
-}
-
 /**
  * @brief Returns the index of the first occurrence of the specified value in the iterable. If the value is not found, it
  * returns lz::npos.
@@ -21,7 +16,8 @@ LZ_CONSTEXPR_CXX_14 size_t index_of(Iterator begin, S end, const T& value) {
  */
 template<class Iterable, class T>
 LZ_CONSTEXPR_CXX_14 size_t index_of(Iterable&& iterable, const T& value) {
-    return lz::index_of(detail::begin(iterable), detail::end(iterable), value);
+    return detail::index_of_if(detail::begin(iterable), detail::end(iterable),
+                               [&value](detail::ref_t<iter_t<Iterable>> val) { return val == value; });
 }
 
 } // namespace lz

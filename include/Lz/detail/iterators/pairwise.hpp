@@ -23,16 +23,18 @@ class ra_pairwise_iterator : public iterator<ra_pairwise_iterator<Iterable>, bas
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    iter _sub_begin{};
-    Iterable _iterable{};
-    size_t _pair_size{};
-
 public:
     using value_type = basic_iterable<iter>;
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
+private:
+    iter _sub_begin{};
+    Iterable _iterable{};
+    difference_type _pair_size{};
+
+public:
     constexpr ra_pairwise_iterator(const ra_pairwise_iterator&) = default;
     LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator& operator=(const ra_pairwise_iterator&) = default;
 
@@ -53,7 +55,7 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator(I&& iterable, iter it, const size_t pair_size) :
+    LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator(I&& iterable, iter it, const difference_type pair_size) :
         _sub_begin{ std::move(it) },
         _iterable{ std::forward<I>(iterable) },
         _pair_size{ pair_size } {
@@ -62,13 +64,13 @@ public:
 
     LZ_CONSTEXPR_CXX_14 ra_pairwise_iterator& operator=(default_sentinel_t) {
         const auto size = _iterable.end() - _iterable.begin();
-        _sub_begin = _iterable.begin() + (size - static_cast<difference_type>(_pair_size) + 1);
+        _sub_begin = _iterable.begin() + (size - _pair_size + 1);
         return *this;
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
-        return { _sub_begin, _sub_begin + static_cast<difference_type>(_pair_size) };
+        return { _sub_begin, _sub_begin + _pair_size };
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const {
@@ -92,14 +94,12 @@ public:
     }
 
     constexpr bool eq(default_sentinel_t) const {
-        return (_sub_begin + std::min(static_cast<difference_type>(_pair_size) - 1, _iterable.end() - _iterable.begin())) ==
-               detail::end(_iterable);
+        return (_sub_begin + std::min(_pair_size - 1, _iterable.end() - _iterable.begin())) == detail::end(_iterable);
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset) {
-        LZ_ASSERT_SUB_ADDABLE(offset < 0
-                                  ? -offset <= (_sub_begin - _iterable.begin())
-                                  : offset <= (_iterable.end() - _sub_begin) - (static_cast<difference_type>(_pair_size - 1)));
+        LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= (_sub_begin - _iterable.begin())
+                                         : offset <= (_iterable.end() - _sub_begin) - (_pair_size - 1));
         _sub_begin += offset;
     }
 
@@ -109,7 +109,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(default_sentinel_t) const {
-        return (_sub_begin - _iterable.end()) + (static_cast<difference_type>(_pair_size) - 1);
+        return (_sub_begin - _iterable.end()) + (_pair_size - 1);
     }
 };
 
@@ -120,17 +120,19 @@ class bidi_pairwise_iterator : public iterator<bidi_pairwise_iterator<Iterable>,
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    iter _sub_begin{};
-    iter _sub_end{};
-    Iterable _iterable{};
-    size_t _pair_size{};
-
 public:
     using value_type = basic_iterable<iter>;
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
 
+private:
+    iter _sub_begin{};
+    iter _sub_end{};
+    Iterable _iterable{};
+    difference_type _pair_size{};
+
+public:
     constexpr bidi_pairwise_iterator(const bidi_pairwise_iterator&) = default;
     LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator& operator=(const bidi_pairwise_iterator&) = default;
 
@@ -151,10 +153,9 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator(I&& iterable, iter it, const size_t pair_size) :
+    LZ_CONSTEXPR_CXX_14 bidi_pairwise_iterator(I&& iterable, iter it, const difference_type pair_size) :
         _sub_begin{ std::move(it) },
-        _sub_end{ next_fast_safe(iterable, it == iterable.begin() ? static_cast<difference_type>(pair_size)
-                                                                  : std::numeric_limits<difference_type>::max()) },
+        _sub_end{ next_fast_safe(iterable, it == iterable.begin() ? pair_size : std::numeric_limits<difference_type>::max()) },
         _iterable{ std::forward<I>(iterable) },
         _pair_size{ pair_size } {
         LZ_ASSERT(_pair_size != 0, "Size must be greater than zero");
@@ -188,7 +189,7 @@ public:
     LZ_CONSTEXPR_CXX_14 void decrement() {
         LZ_ASSERT_DECREMENTABLE(_sub_begin != _iterable.begin());
         if (_sub_begin == _iterable.end()) {
-            _sub_begin = std::prev(_sub_begin, static_cast<difference_type>(_pair_size));
+            _sub_begin = std::prev(_sub_begin, _pair_size);
             return;
         }
         --_sub_begin;

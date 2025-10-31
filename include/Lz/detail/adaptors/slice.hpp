@@ -30,7 +30,7 @@ struct slice_adaptor {
      */
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 slice_iterable<remove_ref_t<Iterable>>
-    operator()(Iterable&& iterable, const size_t from, const size_t to) const {
+    operator()(Iterable&& iterable, const ptrdiff_t from, const ptrdiff_t to) const {
         LZ_ASSERT(to > from, "`to` must be greater than `from`");
         return { lz::drop(std::forward<Iterable>(iterable), from), to - from };
     }
@@ -47,8 +47,8 @@ struct slice_adaptor {
      * @param to The end index of the slice
      * @return An adaptor that can be used in pipe expressions
      */
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, size_t, size_t>
-    operator()(const size_t from, const size_t to) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::fn_args_holder<adaptor, ptrdiff_t, ptrdiff_t>
+    operator()(const ptrdiff_t from, const ptrdiff_t to) const {
         return { from, to };
     }
 };

@@ -10,7 +10,6 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 template<class Iterator, class S>
 LZ_CONSTEXPR_CXX_14 Iterator unwrap_reverse_iterator(std::reverse_iterator<Iterator> it, Iterator begin, S end) {
@@ -26,11 +25,7 @@ LZ_CONSTEXPR_CXX_14 Iterator unwrap_reverse_iterator(std::reverse_iterator<Itera
 template<class Iterable, class UnaryPredicate>
 constexpr iter_t<Iterable> find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
     if constexpr (is_bidi_v<iter_t<remove_ref_t<Iterable>>>) {
-        using std::find_if;
-        using lz::find_if;
-
-        reverse_iterable<remove_ref_t<Iterable>, false> rev{ iterable };
-        auto pos = find_if(detail::begin(rev), detail::end(rev), std::move(unary_predicate));
+        auto pos = lz::find_if(reverse_iterable<remove_ref_t<Iterable>, false>{ iterable }, std::move(unary_predicate));
         return unwrap_reverse_iterator(std::move(pos), detail::begin(iterable), detail::end(iterable));
     }
     else {
@@ -55,8 +50,7 @@ constexpr iter_t<Iterable> find_last_if(Iterable&& iterable, UnaryPredicate unar
 template<class Iterable, class UnaryPredicate>
 LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<iter_t<Iterable>>::value, iter_t<Iterable>>
 find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    reverse_iterable<remove_ref_t<Iterable>, false> rev{ iterable };
-    auto pos = find_if(detail::begin(rev), detail::end(rev), std::move(unary_predicate));
+    auto pos = lz::find_if(reverse_iterable<remove_ref_t<Iterable>, false>{ iterable }, std::move(unary_predicate));
     return unwrap_reverse_iterator(std::move(pos), detail::begin(iterable), detail::end(iterable));
 }
 
@@ -80,7 +74,6 @@ find_last_if(Iterable&& iterable, UnaryPredicate unary_predicate) {
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

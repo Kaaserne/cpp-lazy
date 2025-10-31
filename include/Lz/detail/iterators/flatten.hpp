@@ -237,7 +237,7 @@ class flatten_iterator
         using ref = decltype(*_outer_iter.iterator());
 
         ++_outer_iter;
-        _outer_iter.iterator(lz::find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
+        _outer_iter.iterator(detail::find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
             _inner_iter = this_inner(inner, inner.begin());
             return _inner_iter.has_next();
         }));

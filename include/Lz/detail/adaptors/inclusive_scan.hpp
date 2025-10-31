@@ -46,7 +46,7 @@ struct inclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      * @return An iterable that performs an inclusive scan on the input iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = plus>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = LZ_BIN_OP(val_iterable_t<Iterable>, plus)>
     [[nodiscard]] constexpr inclusive_scan_iterable<remove_ref_t<Iterable>, T, BinaryOp>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, T, T>)
@@ -81,7 +81,7 @@ struct inclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      * @return An adaptor that can be used in pipe expressions.
      */
-    template<class T, class BinaryOp = detail::plus>
+    template<class T, class BinaryOp = LZ_BIN_OP(plus, T)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>
     operator()(T&& init, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>)
@@ -122,7 +122,7 @@ struct inclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      * @return An iterable that performs an inclusive scan on the input iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = plus>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = LZ_BIN_OP(plus, val_iterable_t<Iterable>)>
     LZ_NODISCARD constexpr 
     enable_if_t<is_invocable<BinaryOp, T, T>::value, inclusive_scan_iterable<remove_ref_t<Iterable>, T, BinaryOp>>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const {
@@ -155,7 +155,7 @@ struct inclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      * @return An adaptor that can be used in pipe expressions.
      */
-    template<class T, class BinaryOp = plus>
+    template<class T, class BinaryOp = LZ_BIN_OP(plus, T)>
     LZ_NODISCARD constexpr 
     enable_if_t<is_invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>::value, fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>>
     operator()(T&& init, BinaryOp binary_op = {}) const {
@@ -175,9 +175,9 @@ LZ_MODULE_EXPORT template<class Iterable>
     requires(lz::iterable<Iterable>)
 [[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::inclusive_scan_adaptor)
     -> decltype(lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                                     lz::detail::plus{})) {
+                                                     LZ_BIN_OP(plus, val_iterable_t<Iterable>){})) {
     return lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                                lz::detail::plus{});
+                                                LZ_BIN_OP(plus, val_iterable_t<Iterable>){});
 }
 
 #else
@@ -187,9 +187,9 @@ LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, lz::detail::inclusive
     -> lz::detail::enable_if_t<lz::detail::is_iterable<Iterable>::value,
                                decltype(lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable),
                                                                              lz::detail::val_iterable_t<Iterable>{},
-                                                                             lz::detail::plus{}))> {
+                                                                             LZ_BIN_OP(plus, lz::detail::val_iterable_t<Iterable>){}))> {
     return lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                                lz::detail::plus{});
+                                                LZ_BIN_OP(plus, lz::detail::val_iterable_t<Iterable>){});
 }
 
 #endif

@@ -16,7 +16,7 @@ class repeat_iterable;
 template<class T>
 class repeat_iterable<T, false> : public lazy_view {
     T _value{};
-    size_t _amount{};
+    ptrdiff_t _amount{};
 
 public:
     using iterator = repeat_iterator<T, false>;
@@ -37,11 +37,11 @@ public:
 
 #endif
 
-    constexpr repeat_iterable(T value, const size_t amount) : _value{ std::forward<T>(value) }, _amount{ amount } {
+    constexpr repeat_iterable(T value, const ptrdiff_t amount) : _value{ std::forward<T>(value) }, _amount{ amount } {
     }
 
     LZ_NODISCARD constexpr size_t size() const noexcept {
-        return _amount;
+        return static_cast<size_t>(_amount);
     }
 
     LZ_NODISCARD constexpr iterator begin() const {

@@ -31,7 +31,7 @@ LZ_INLINE_VAR constexpr detail::duplicates_adaptor duplicates{};
  * lz::duplicates_iterable<std::forward_list<int>> res = lz::duplicates(list);
  * ```
  */
-template<class Iterable, class BinaryPredicate = detail::less>
+template<class Iterable, class BinaryPredicate = LZ_BIN_OP(less, detail::val_iterable_t<Iterable>)>
 using duplicates_iterable = detail::duplicates_iterable<Iterable, BinaryPredicate>;
 
 } // namespace lz

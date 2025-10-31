@@ -8,11 +8,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class UnaryOp>
-LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterator begin, S end, size_t n, UnaryOp unary_op) {
-    detail::algorithm::for_each_while_n(std::move(begin), std::move(end), n, std::move(unary_op));
-}
-
 /**
  * @brief Keeps iterating over @p iterable while @p binary_predicate returns true and @p n < distance(begin(iterable),
  * end(iterable)).
@@ -23,7 +18,7 @@ LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterator begin, S end, size_t n, Unary
  */
 template<class Iterable, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void for_each_while_n(Iterable&& iterable, size_t n, UnaryOp unary_op) {
-    lz::for_each_while_n(detail::begin(iterable), detail::end(iterable), n, std::move(unary_op));
+    detail::for_each_while_n(std::forward<Iterable>(iterable), n, std::move(unary_op));
 }
 
 } // namespace lz

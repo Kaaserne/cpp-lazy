@@ -3,6 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_TRANSFORM_HPP
 #define LZ_DETAIL_ALGORITHM_TRANSFORM_HPP
 
+#include <Lz/detail/procs/get_end.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <algorithm>
 
@@ -12,15 +13,13 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class OutputIterator, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void transform(Iterator begin, S end, OutputIterator output, UnaryOp unary_op) {
-    if constexpr (is_ra_v<Iterator>) {
-        auto last = begin + (end - begin); // TODO make generic func for this
-        static_cast<void>(std::transform(std::move(begin), std::move(last), std::move(output), std::move(unary_op)));
+    if constexpr (std_algo_compat_v<Iterator>) {
+        static_cast<void>(std::transform(begin, detail::get_end(begin, end), output, std::move(unary_op)));
     }
     else {
         for (; begin != end; ++begin, ++output) {
@@ -32,14 +31,13 @@ LZ_CONSTEXPR_CXX_14 void transform(Iterator begin, S end, OutputIterator output,
 #else
 
 template<class Iterator, class S, class OutputIterator, class UnaryOp>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<is_ra<Iterator>::value>
+LZ_CONSTEXPR_CXX_14 detail::enable_if_t<std_algo_compat<Iterator, S>::value>
 transform(Iterator begin, S end, OutputIterator output, UnaryOp unary_op) {
-    auto last = begin + (end - begin);
-    static_cast<void>(std::transform(std::move(begin), std::move(last), std::move(output), std::move(unary_op)));
+    static_cast<void>(std::transform(begin, detail::get_end(begin, end), output, std::move(unary_op)));
 }
 
 template<class Iterator, class S, class OutputIterator, class UnaryOp>
-LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!is_ra<Iterator>::value>
+LZ_CONSTEXPR_CXX_14 detail::enable_if_t<!std_algo_compat<Iterator, S>::value>
 transform(Iterator begin, S end, OutputIterator output, UnaryOp unary_op) {
     for (; begin != end; ++begin, ++output) {
         *output = unary_op(*begin);
@@ -48,7 +46,6 @@ transform(Iterator begin, S end, OutputIterator output, UnaryOp unary_op) {
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

@@ -51,8 +51,9 @@ TEST_CASE("Operator=(default_sentinel_t)") {
         auto enumerated = make_sentinel_assign_op_tester(lz::enumerate(bidi, 1));
         auto expected = { std::make_pair(1, 1), std::make_pair(2, 2), std::make_pair(3, 3) };
         using reference = decltype(*enumerated.begin());
-        REQUIRE(lz::equal(enumerated, expected,
-                          [](reference a, const std::pair<size_t, int> b) { return static_cast<size_t>(a.first) == b.first && a.second == b.second; }));
+        REQUIRE(lz::equal(enumerated, expected, [](reference a, const std::pair<size_t, int> b) {
+            return static_cast<size_t>(a.first) == b.first && a.second == b.second;
+        }));
         REQUIRE(lz::equal(lz::reverse(enumerated), lz::reverse(expected), [](reference a, const std::pair<size_t, int> b) {
             return static_cast<size_t>(a.first) == b.first && a.second == b.second;
         }));

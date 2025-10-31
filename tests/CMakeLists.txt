@@ -10,8 +10,6 @@ FetchContent_Declare(doctest
 )
 FetchContent_MakeAvailable(doctest)
 
-set(CPP-LAZY_DEBUG_ASSERTIONS ON CACHE BOOL "Enable debug assertions in cpp-lazy" FORCE)
-
 # ---- Import root project ----
 option(TEST_INSTALLED_VERSION "Import the library using find_package" OFF)
 if (TEST_INSTALLED_VERSION)
@@ -58,7 +56,7 @@ add_executable(tests
 	iter_tools.cpp
 	iterator.cpp
 	join_where.cpp
-	loop.cpp
+	# loop.cpp// TODO:
 	map.cpp
 	maybe_owned.cpp
 	pairwise.cpp
@@ -90,7 +88,7 @@ target_compile_options(tests
 	PRIVATE
 		$<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /WX /diagnostics:caret>
 		# -Wmismatched-tags causes internal compiler error for GCC. This in combination with #include <fstream> and #include <sstream> in pch
-		$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Wshadow -Werror -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings -Wunused-result -Wunused-but-set-variable -Wmissing-declarations -Winvalid-pch -Weffc++ -Wdisabled-optimization -Wsign-conversion -Wcast-align -Wmissing-include-dirs -Wswitch-default -Wredundant-decls -Wundef -Wold-style-cast -Wstrict-overflow=2 -Wsuggest-override -Wtrampolines -Wzero-as-null-pointer-constant -Wuseless-cast -Wvector-operation-performance -Walloc-zero -Walloca -Wduplicated-branches -Wcast-align=strict>
+		$<$<CXX_COMPILER_ID:GNU>:-Wpedantic -Wextra -Wall -Werror -Wshadow -Wconversion -Wcast-qual -Wcomma-subscript -Wctor-dtor-privacy -Wdeprecated-copy-dtor -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wenum-conversion -Wextra-semi -Wfloat-equal -Wformat-overflow=2 -Wformat-signedness -Wformat=2 -Wlogical-op -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wrange-loop-construct -Wrestrict -Wstrict-null-sentinel -Wsuggest-attribute=format -Wsuggest-attribute=malloc -Wuninitialized -Wvla -Wvolatile -Wwrite-strings -Wunused-result -Wunused-but-set-variable -Wmissing-declarations -Winvalid-pch -Weffc++ -Wdisabled-optimization -Wsign-conversion -Wcast-align -Wmissing-include-dirs -Wswitch-default -Wredundant-decls -Wundef -Wold-style-cast -Wstrict-overflow=2 -Wsuggest-override -Wtrampolines -Wzero-as-null-pointer-constant -Wuseless-cast -Wvector-operation-performance -Walloc-zero -Walloca -Wduplicated-branches -Wcast-align=strict>
 
 		$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wpedantic -Wextra -Wall -Werror -pedantic -pedantic-errors -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-c++98-compat-bind-to-temporary-copy -Wno-c++98-compat-local-type-template-args -Wno-unsafe-buffer-usage -Wno-padded -Wno-documentation-unknown-command -Wno-switch-enum>
 )

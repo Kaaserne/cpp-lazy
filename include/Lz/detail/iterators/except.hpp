@@ -40,9 +40,9 @@ private:
     mutable BinaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
-        _iterator = lz::find_if(std::move(_iterator), _iterable.end(), [this](reference value) {
-            const auto it = algorithm::sized_lower_bound(_to_except.begin(), value, _predicate,
-                                                         static_cast<difference_type>(lz::size(_to_except)));
+        _iterator = detail::find_if(std::move(_iterator), _iterable.end(), [this](reference value) {
+            const auto it = detail::sized_lower_bound(_to_except.begin(), value, _predicate,
+                                                      static_cast<difference_type>(lz::size(_to_except)));
             return it == _to_except.end() || _predicate(value, *it);
         });
     }
@@ -105,8 +105,8 @@ public:
         LZ_ASSERT_DECREMENTABLE(_iterator != _iterable.begin());
         do {
             --_iterator;
-            const auto it = algorithm::sized_lower_bound(_to_except.begin(), *_iterator, _predicate,
-                                                         static_cast<difference_type>(lz::size(_to_except)));
+            const auto it = detail::sized_lower_bound(_to_except.begin(), *_iterator, _predicate,
+                                                      static_cast<difference_type>(lz::size(_to_except)));
             if (it == _to_except.end() || _predicate(*_iterator, *it)) {
                 return;
             }

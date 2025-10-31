@@ -7,14 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class T, class U>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_t<Iterator>
-find_last_or_default_not(Iterator begin, S end, T&& value, U&& default_value) {
-    return lz::find_last_or_default_if(
-        std::move(begin), std::move(end), [&value](detail::ref_t<Iterator> val) { return !(val == value); },
-        std::forward<U>(default_value));
-}
-
 /**
  * @brief Find the last element in the iterable that is not equal to the given value. If no such element is found, return the
  * default value.
@@ -27,8 +19,9 @@ find_last_or_default_not(Iterator begin, S end, T&& value, U&& default_value) {
 template<class Iterable, class T, class U>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 detail::val_iterable_t<Iterable>
 find_last_or_default_not(Iterable&& iterable, T&& value, U&& default_value) {
-    return find_last_or_default_not(detail::begin(iterable), detail::end(iterable), std::forward<T>(value),
-                                    std::forward<U>(default_value));
+    return lz::find_last_or_default_if(
+        std::forward<Iterable>(iterable), [&value](detail::ref_t<iter_t<Iterable>> val) { return !(val == value); },
+        std::forward<U>(default_value));
 }
 
 } // namespace lz

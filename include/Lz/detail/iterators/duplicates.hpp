@@ -38,7 +38,8 @@ private:
     mutable BinaryPredicate _compare{};
 
     LZ_CONSTEXPR_CXX_14 void next() {
-        _last = lz::find_if(_first, _iterable.end(), [this](typename traits::reference val) { return _compare(*_first, val); });
+        _last =
+            detail::find_if(_first, _iterable.end(), [this](typename traits::reference val) { return _compare(*_first, val); });
     }
 
 public:
@@ -133,12 +134,12 @@ private:
     it _last{};
     it _first{};
     Iterable _iterable{};
-    size_t _last_distance{};
+    difference_type _last_distance{};
     mutable BinaryPredicate _compare{};
 
     LZ_CONSTEXPR_CXX_14 void next() {
         _last_distance = 0;
-        _last = lz::find_if(_first, _iterable.end(), [this](typename traits::reference val) {
+        _last = detail::find_if(_first, _iterable.end(), [this](typename traits::reference val) {
             const auto condition = _compare(*_first, val);
             if (!condition) {
                 ++_last_distance;

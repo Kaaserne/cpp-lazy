@@ -75,9 +75,9 @@ TEST_CASE("Creating a complex any iterable, std::forward_iterator_tag") {
 
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::forward_iterator_tag> view =
 #ifdef LZ_HAS_CXX_11
-        vec | lz::as<int&>{} | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(lz::ssize(vec));
 #else
-        vec | lz::as<int&> | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&> | lz::enumerate | lz::take(lz::ssize(vec));
 #endif
 
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),
@@ -90,9 +90,9 @@ TEST_CASE("Creating a complex any iterable, std::bidirectional_iterator_tag") {
 
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::bidirectional_iterator_tag> view =
 #ifdef LZ_HAS_CXX_11
-        vec | lz::as<int&>{} | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(lz::ssize(vec));
 #else
-        vec | lz::as<int&> | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&> | lz::enumerate | lz::take(lz::ssize(vec));
 #endif
 
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),
@@ -105,9 +105,9 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
 
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::random_access_iterator_tag> view =
 #ifdef LZ_HAS_CXX_11
-        vec | lz::as<int&>{} | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(lz::ssize(vec));
 #else
-        vec | lz::as<int&> | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&> | lz::enumerate | lz::take(lz::ssize(vec));
 #endif
 
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),

@@ -10,7 +10,6 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
@@ -43,17 +42,12 @@ get_value_or_reference(Iterator begin) {
 
 template<class Iterator, class S>
 LZ_CONSTEXPR_CXX_14 auto peek(Iterator begin, S end) -> decltype(get_value_or_reference(begin)) {
-    if (begin == end) {
-        return nullopt;
-    }
-    ++begin;
-    if (begin == end) {
+    if (begin == end || ++begin == end) {
         return nullopt;
     }
     return get_value_or_reference(begin);
 }
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

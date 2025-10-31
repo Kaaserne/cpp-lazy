@@ -35,7 +35,7 @@ private:
     mutable UnaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
-        _sub_range_end = lz::find_if(_sub_range_end, _end, _predicate);
+        _sub_range_end = detail::find_if(_sub_range_end, _end, _predicate);
     }
 
 public:

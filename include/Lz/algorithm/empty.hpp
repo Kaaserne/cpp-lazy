@@ -7,10 +7,6 @@
 #include <Lz/detail/procs/begin_end.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
-template<class Iterator, class S>
-constexpr bool empty(Iterator begin, S end) {
-    return begin == end;
-}
 
 /**
  * Checks whether [begin, end) is empty.
@@ -19,8 +15,9 @@ constexpr bool empty(Iterator begin, S end) {
  */
 template<class Iterable>
 LZ_NODISCARD constexpr bool empty(Iterable&& iterable) {
-    return lz::empty(detail::begin(iterable), detail::end(iterable));
+    return detail::begin(iterable) == detail::end(iterable);
 }
+
 } // namespace lz
 
 #endif

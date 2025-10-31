@@ -7,11 +7,6 @@
 
 LZ_MODULE_EXPORT namespace lz {
 
-template<class Iterator, class S, class T>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterator begin, S end, const T& value) {
-    return lz::find(std::move(begin), std::move(end), value) != end;
-}
-
 /**
  * @brief Checks if the range [begin(iterable), end(iterable)) contains the value @p value
  *
@@ -21,7 +16,7 @@ LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterator begin, S end, const T& v
  */
 template<class Iterable, class T>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool contains(Iterable&& iterable, const T& value) {
-    return lz::contains(detail::begin(iterable), detail::end(iterable), value);
+    return lz::find(std::forward<Iterable>(iterable), value) != detail::end(iterable);
 }
 
 } // namespace lz

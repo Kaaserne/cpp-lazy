@@ -14,9 +14,6 @@ class loop_iterable;
 
 template<class Iterable>
 class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
-    maybe_owned<Iterable> _iterable{};
-    size_t _amount{};
-
 public:
     using iterator = loop_iterator<maybe_owned<Iterable>, false>;
     using const_iterator = iterator;
@@ -25,6 +22,9 @@ public:
 private:
     static constexpr bool return_sentinel =
         !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value;
+
+    maybe_owned<Iterable> _iterable{};
+    typename iterator::difference_type _amount{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -42,7 +42,9 @@ public:
 #endif
 
     template<class I>
-    constexpr loop_iterable(I&& iterable, const size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
+    constexpr loop_iterable(I&& iterable, const typename iterator::difference_type amount) :
+        _iterable{ std::forward<I>(iterable) },
+        _amount{ amount } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -50,14 +52,14 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return _amount * static_cast<size_t>(lz::size(_iterable));
+        return static_cast<size_t>(_amount) * static_cast<size_t>(lz::size(_iterable));
     }
 
 #else
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
-        return _amount * static_cast<size_t>(lz::size(_iterable));
+        return static_cast<size_t>(_amount) * static_cast<size_t>(lz::size(_iterable));
     }
 
 #endif

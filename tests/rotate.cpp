@@ -12,7 +12,7 @@
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-
+// TODO add algorithm overloads withtou predicate arg so std variants can be optimzed sometimes
 TEST_CASE("rotate_iterable with sentinels") {
     auto c_str = lz::c_string("Hello, World!");
     lz::rotate_iterable<decltype(c_str)> rotated = lz::rotate(c_str, 7);

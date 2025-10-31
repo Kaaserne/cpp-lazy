@@ -4,38 +4,12 @@
 #define LZ_DETAIL_PROCS_OPERATORS_HPP
 
 #include <Lz/detail/compiler_checks.hpp>
+#include <functional>
 
-namespace lz {
-namespace detail {
-
-struct less {
-    template<class T, class U>
-    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const
-        noexcept(noexcept(static_cast<T&&>(lhs) < static_cast<U&&>(rhs))) -> decltype(static_cast<T&&>(lhs) <
-                                                                                      static_cast<U&&>(rhs)) {
-        return static_cast<T&&>(lhs) < static_cast<U&&>(rhs);
-    }
-};
-
-struct equal_to {
-    template<class T, class U>
-    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const
-        noexcept(noexcept(static_cast<T&&>(lhs) == static_cast<U&&>(rhs))) -> decltype(static_cast<T&&>(lhs) ==
-                                                                                       static_cast<U&&>(rhs)) {
-        return static_cast<T&&>(lhs) == static_cast<U&&>(rhs);
-    }
-};
-
-struct plus {
-    template<class T, class U>
-    LZ_NODISCARD constexpr auto operator()(T&& lhs, U&& rhs) const
-        noexcept(noexcept(static_cast<T&&>(lhs) + static_cast<U&&>(rhs))) -> decltype(static_cast<T&&>(lhs) +
-                                                                                      static_cast<U&&>(rhs)) {
-        return static_cast<T&&>(lhs) + static_cast<U&&>(rhs);
-    }
-};
-
-} // namespace detail
-} // namespace lz
+#ifdef LZ_HAS_CXX_14
+#define LZ_BIN_OP(OP, T) std::OP<>
+#else
+#define LZ_BIN_OP(OP, T) std::OP<T>
+#endif
 
 #endif // LZ_DETAIL_PROCS_OPERATORS_HPP

@@ -12,15 +12,13 @@
 
 namespace lz {
 namespace detail {
-namespace algorithm {
 
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class UnaryPredicate>
 constexpr Iterator partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    if constexpr (is_ra_v<Iterator>) {
-        auto last = begin + (end - begin);
-        return std::partition(std::move(begin), std::move(last), std::move(unary_predicate));
+    if constexpr (std_algo_compat_v<Iterator, S>) {
+        return std::partition(begin, detail::get_end(begin, end), std::move(unary_predicate));
     }
     else {
         begin = lz::find_if_not(begin, end, std::move(unary_predicate));
@@ -43,16 +41,15 @@ constexpr Iterator partition(Iterator begin, S end, UnaryPredicate unary_predica
 #else
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value, Iterator>
+LZ_CONSTEXPR_CXX_14 enable_if_t<std_algo_compat<Iterator, S>::value, Iterator>
 partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    auto last = begin + (end - begin);
-    return std::partition(std::move(begin), std::move(last), std::move(unary_predicate));
+    return std::partition(begin, detail::get_end(begin, end), std::move(unary_predicate));
 }
 
 template<class Iterator, class S, class UnaryPredicate>
-LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, Iterator>
+LZ_CONSTEXPR_CXX_14 enable_if_t<!std_algo_compat<Iterator, S>::value, Iterator>
 partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
-    begin = lz::find_if_not(begin, end, unary_predicate);
+    begin = detail::find_if(begin, end, [&unary_predicate](detail::ref_t<Iterator> value) { return !unary_predicate(value); });
     if (begin == end) {
         return begin;
     }
@@ -70,7 +67,6 @@ partition(Iterator begin, S end, UnaryPredicate unary_predicate) {
 
 #endif
 
-} // namespace algorithm
 } // namespace detail
 } // namespace lz
 

@@ -44,10 +44,10 @@ struct chunks_adaptor {
      * @param chunk_size The size of the chunks
      * @return An iterable of iterables, where each inner iterable is a chunk of the original iterable
      **/
-    template <class Iterable>
+    template<class Iterable>
     constexpr chunks_iterable<remove_ref_t<Iterable>>
-    operator()(Iterable &&iterable, size_t chunk_size) const {
-      return {std::forward<Iterable>(iterable), chunk_size};
+    operator()(Iterable&& iterable, diff_iterable_t<Iterable> chunk_size) const {
+        return { std::forward<Iterable>(iterable), chunk_size };
     }
 
     /**
@@ -80,7 +80,7 @@ struct chunks_adaptor {
      * @param chunk_size The size of the chunks
      * @return An adaptor that can be used to chunk the iterable
      **/
-    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, size_t> operator()(const size_t chunk_size) const {
+    LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, ptrdiff_t> operator()(const ptrdiff_t chunk_size) const {
         return { chunk_size };
     }
 };
