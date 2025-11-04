@@ -49,10 +49,25 @@ LZ_NODISCARD
 
 #else
 
-// TODO if constexpr
+/**
+ * Use this function to check if two lz iterators are the same.
+ * @param a An iterable, its underlying value type should have an operator== with `b`
+ * @param b An iterable, its underlying value type should have an operator== with `a`
+ * @param binary_predicate The predicate to check if two elements are equal
+ * @return true if both are equal, false otherwise.
+ */
+template<class IterableA, class IterableB, class BinaryPredicate = LZ_BIN_OP(equal_to, detail::val_iterable_t<IterableA>)>
+[[nodiscard]] constexpr bool equal(IterableA&& a, IterableB&& b, BinaryPredicate binary_predicate = {}) {
+    if constexpr (detail::is_sized_v<IterableA> && detail::is_sized_v<IterableB>) {
+        if (lz::size(a) != lz::size(b)) {
+            return false;
+        }
+    }
+
+    return detail::equal(detail::begin(a), detail::end(a), detail::begin(b), detail::end(b), std::move(binary_predicate));
+}
 
 #endif
 } // namespace lz
 
 #endif
-// TODO remove all begin end overloads, also remove algorithm:: namespace

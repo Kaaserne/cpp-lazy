@@ -100,7 +100,7 @@ struct chunk_if_adaptor<void> {
      * @return An adaptor that can be used with the pipe operator to chunk the iterable.
      */
     template<class UnaryPredicate>
-    constexpr fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate&& predicate) const {
+    constexpr fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate predicate) const {
         return { std::move(predicate) };
     }
 };

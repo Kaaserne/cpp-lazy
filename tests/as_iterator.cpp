@@ -10,7 +10,6 @@
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
-// TODO reduce includes, make smaller files
 
 TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("forward") {

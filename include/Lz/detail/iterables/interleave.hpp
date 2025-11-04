@@ -33,13 +33,6 @@ class interleave_iterable : public lazy_view {
         return { std::forward<Iterable2>(iterable2), std::move(get<Is>(interleaved._iterables))... };
     }
 
-    template<class Iterable2, size_t... Is>
-    static interleave_iterable<remove_ref_t<Iterable2>, Iterables...>
-    concat_iterables(Iterable2&& iterable2, const interleave_iterable<Iterables...>& interleaved, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), get<Is>(interleaved._iterables)... };
-    }
-
 public:
     using iterator = interleave_iterator<iterators, sentinels>;
     using const_iterator = iterator;
@@ -116,8 +109,7 @@ public:
 
     template<class Iterable>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 friend interleave_iterable<remove_ref_t<Iterable>, Iterables...>
-    operator|(Iterable&& iterable,
-              interleave_iterable<Iterables...> interleaved) { // TODO remove const& for std::move copy for all operator|
+    operator|(Iterable&& iterable, interleave_iterable<Iterables...> interleaved) {
         return concat_iterables(std::forward<Iterable>(iterable), std::move(interleaved), is{});
     }
 };

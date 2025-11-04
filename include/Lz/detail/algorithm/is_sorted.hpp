@@ -8,14 +8,14 @@
 #ifndef LZ_HAS_CXX_17
 #include <Lz/detail/traits/enable_if.hpp>
 #endif
-// TODO remove algorithm:: namespace
+
 namespace lz {
 namespace detail {
 
 #ifdef LZ_HAS_CXX_17
 
 template<class Iterator, class S, class BinaryPredicate>
-LZ_CONSTEXPR_CXX_14 bool is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
+constexpr bool is_sorted(Iterator begin, S end, BinaryPredicate binary_predicate) {
     if constexpr (std_algo_compat_v<Iterator, S>) {
         return std::is_sorted(begin, detail::get_end(begin, end), std::move(binary_predicate));
     }

@@ -24,8 +24,8 @@ LZ_MODULE_EXPORT namespace lz {
  * `end(iterable)` if the elements are not found
  */
 template<class Iterable, class BinaryPredicate = LZ_BIN_OP(equal_to, detail::val_iterable_t<Iterable>)>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> adjacent_find(Iterable && iterable, BinaryPredicate&& binary_predicate = {}) {
-    return detail::adjacent_find(detail::begin(iterable), detail::end(iterable), std::forward<BinaryPredicate>(binary_predicate));
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> adjacent_find(Iterable&& iterable, BinaryPredicate binary_predicate = {}) {
+    return detail::adjacent_find(detail::begin(iterable), detail::end(iterable), std::move(binary_predicate));
 }
 
 } // namespace lz

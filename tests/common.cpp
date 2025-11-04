@@ -10,8 +10,6 @@
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
-// TODO recheck all include files, make smaller if possible
-
 class random_access_non_sized : lz::lazy_view {
     lz::repeat_iterable<int> _repeater;
 
@@ -29,7 +27,7 @@ public:
         return _repeater.end();
     }
 };
-// TODO common iterable
+
 TEST_CASE("Common") {
     SUBCASE("No sentinel") {
         std::vector<int> vec = { 1, 2, 3, 4, 5 };

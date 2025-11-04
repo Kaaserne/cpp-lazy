@@ -76,7 +76,7 @@ public:
 #else
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel_t<Iterable>>::value, iterator> end() const { // TODO remove all &&
+    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel_t<Iterable>>::value, iterator> end() const {
         return iterator{ _iterable.end() };
     }
 

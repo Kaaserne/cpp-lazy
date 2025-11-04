@@ -19,7 +19,7 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterator, class S>
 LZ_NODISCARD constexpr detail::diff_type<Iterator> distance(Iterator begin, S end) {
-    return detail::distance_impl(std::move(begin), std::move(end));
+    return detail::distance_impl(begin, end);
 }
 
 /**

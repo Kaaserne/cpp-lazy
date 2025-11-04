@@ -156,7 +156,7 @@ public:
         _distance{ it == _iterable.end() ? lz::eager_ssize(_iterable) : 0 } {
         next_chunk();
     }
-// TODO check all eager_size impls for input_iterator_tag
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr chunks_iterator& operator=(default_sentinel_t)

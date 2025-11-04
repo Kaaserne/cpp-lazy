@@ -18,7 +18,6 @@ LZ_MODULE_EXPORT namespace lz {
  */
 template<class Iterable, class UnaryPredicate>
 LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool all_of(Iterable&& iterable, UnaryPredicate unary_predicate) {
-    // TODO search for "&& .*predicate" to remove it
     return lz::find_if_not(std::forward<Iterable>(iterable), std::move(unary_predicate)) == detail::end(iterable);
 }
 

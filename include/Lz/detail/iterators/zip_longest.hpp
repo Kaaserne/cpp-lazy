@@ -483,8 +483,6 @@ public:
 
 #endif
 
-// TODO: add contiguous iterator
-//
 } // namespace detail
 } // namespace lz
 #endif // LZ_ZIP_LONGEST_ITERATOR_HPP

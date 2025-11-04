@@ -25,16 +25,9 @@ class concatenate_iterable : public lazy_view {
 
     template<class Iterable2, size_t... Is>
     static concatenate_iterable<remove_ref_t<Iterable2>, Iterables...>
-    concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...>&& cat, index_sequence<Is...>) {
+    concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...> cat, index_sequence<Is...>) {
         using std::get;
         return { std::forward<Iterable2>(iterable2), std::move(get<Is>(cat._iterables))... };
-    }
-
-    template<class Iterable2, size_t... Is>
-    static concatenate_iterable<remove_ref_t<Iterable2>, Iterables...>
-    concat_iterables(Iterable2&& iterable2, const concatenate_iterable<Iterables...>& cat, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), get<Is>(cat._iterables)... };
     }
 
     using is = make_index_sequence<sizeof...(Iterables)>;
@@ -116,14 +109,8 @@ public:
 
     template<class Iterable>
     friend concatenate_iterable<remove_ref_t<Iterable>, Iterables...>
-    operator|(Iterable&& iterable, concatenate_iterable<Iterables...>&& concatenate) {
+    operator|(Iterable&& iterable, concatenate_iterable<Iterables...> concatenate) {
         return concat_iterables(std::forward<Iterable>(iterable), std::move(concatenate), is{});
-    }
-
-    template<class Iterable>
-    friend concatenate_iterable<remove_ref_t<Iterable>, Iterables...>
-    operator|(Iterable&& iterable, const concatenate_iterable<Iterables...>& concatenate) {
-        return concat_iterables(std::forward<Iterable>(iterable), concatenate, is{});
     }
 };
 } // namespace detail

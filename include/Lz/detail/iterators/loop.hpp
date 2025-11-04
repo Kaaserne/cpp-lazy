@@ -91,7 +91,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        if (_iterator == _iterable.begin()) {
+        LZ_ASSERT_DECREMENTABLE(_iterable.begin() != _iterable.end());
+        if (_rotations_left == 0 && _iterator == _iterable.begin()) {
             _iterator = _iterable.end();
             ++_rotations_left;
         }
@@ -129,7 +130,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 bool eq(const loop_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
-        return _rotations_left == other._rotations_left || _iterator == other._iterator;
+        return _rotations_left == other._rotations_left && _iterator == other._iterator;
     }
 
     constexpr bool eq(default_sentinel_t) const {

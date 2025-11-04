@@ -108,6 +108,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        // TODO reduce if statement?
         if (_iterable.begin() == _iterable.end()) {
             return;
         }

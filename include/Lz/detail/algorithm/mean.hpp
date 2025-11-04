@@ -9,7 +9,34 @@
 
 namespace lz {
 namespace detail {
-// TODO if constexpr
+
+#ifdef LZ_HAS_CXX_17
+
+template<class Iterator, class S, class BinaryOp>
+constexpr double mean(Iterator begin, S end, BinaryOp binary_op) {
+    if constexpr (is_ra_v<Iterator>) {
+        const auto len = end - begin;
+        return std::accumulate(begin, begin + len, val_t<Iterator>{}, std::move(binary_op)) / static_cast<double>(len);
+    }
+    else {
+        using T = remove_cvref_t<decltype(binary_op(*begin, *begin))>;
+
+        diff_type<Iterator> distance{ 0 };
+        T sum{};
+
+        for (; begin != end; ++begin, ++distance) {
+            sum = binary_op(std::move(sum), *begin);
+        }
+        if (distance == 0) {
+            return 0;
+        }
+
+        return static_cast<double>(sum) / static_cast<double>(distance);
+    }
+}
+
+#else
+
 template<class Iterator, class S, class BinaryOp>
 LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, double> mean(Iterator begin, S end, BinaryOp binary_op) {
     using T = remove_cvref_t<decltype(binary_op(*begin, *begin))>;
@@ -29,9 +56,11 @@ LZ_CONSTEXPR_CXX_14 enable_if_t<!is_ra<Iterator>::value, double> mean(Iterator b
 
 template<class Iterator, class S, class BinaryOp>
 LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra<Iterator>::value, double> mean(Iterator begin, S end, BinaryOp binary_op) {
-    auto len = end - begin;
+    const auto len = end - begin;
     return std::accumulate(begin, begin + len, val_t<Iterator>{}, std::move(binary_op)) / static_cast<double>(len);
 }
+
+#endif
 
 } // namespace detail
 } // namespace lz

@@ -252,8 +252,6 @@ void test_flatten_operators_mm_and_pp(const FlattenIterable& flattened, const Ex
 
 } // namespace
 
-// TODO also write tests for operator-- for sentinels
-
 TEST_CASE("Should flatten permutations") {
     SUBCASE("Flatten 1D") {
         std::vector<int> vec = { 1, 2, 3, 4 };
