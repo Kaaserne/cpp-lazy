@@ -160,8 +160,7 @@ struct exclusive_scan_adaptor {
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
     requires(lz::iterable<Iterable>)
-[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
-    -> decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), std::plus<>{})) {
+[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor) {
     return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
                                                 std::plus<>{});
 }

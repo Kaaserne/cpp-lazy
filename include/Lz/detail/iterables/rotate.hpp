@@ -60,8 +60,10 @@ public:
         requires(sized<Iterable>)
     {
         const auto s = lz::size(_iterable);
-        LZ_ASSERT(_start_index <= s, "start index is larger than size of iterable");
-        return _start_index == s ? 0 : s;
+        if (s == 0) {
+            return 0;
+        }
+        return static_cast<size_t>(_start_index) == s ? 0 : s;
     }
 
 #else
@@ -88,7 +90,7 @@ public:
             return iterator{ _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_ssize(_iterable) };
         }
         else {
-            return _start_iter;
+            return sentinel_with<inner_iter>{ _start_iter };
         }
     }
 
@@ -101,7 +103,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, inner_iter> end() const {
-        return _start_iter; // TODO make this a struct type that is private only
+        return sentinel_with<inner_iter>{ _start_iter };
     }
 
 #endif

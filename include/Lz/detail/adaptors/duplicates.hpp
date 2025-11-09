@@ -48,7 +48,7 @@ struct duplicates_adaptor {
      * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class BinaryPredicate = std : less<>>
+    template<class BinaryPredicate = std::less<>>
     [[nodiscard]] constexpr fn_args_holder<adaptor, BinaryPredicate> operator()(BinaryPredicate compare = {}) const
         requires(!iterable<BinaryPredicate>)
     {
@@ -100,11 +100,9 @@ struct duplicates_adaptor {
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
     requires(lz::iterable<Iterable>)
-[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
-    -> decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                                     LZ_BIN_OP(less, lz::detail::val_iterable_t<Iterable>){})) {
-    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                                LZ_BIN_OP(less, lz::detail::val_iterable_t<Iterable>){});
+[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::duplicates_adaptor) {
+    return lz::detail::duplicates_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
+                                            LZ_BIN_OP(less, lz::detail::val_iterable_t<Iterable>){});
 }
 
 #else

@@ -25,7 +25,7 @@ std_search(Iterator begin, Iterator end, Iterator2 begin2, Iterator2 end2, Binar
 template<class Iterator, class S, class Iterator2, class S2, class BinaryPredicate>
 constexpr std::pair<Iterator, Iterator>
 search(Iterator begin, S end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate) {
-    if constexpr (std_algo_compat2<Iterator, S, Iterator2, S2>::value) {
+    if constexpr (std_algo_compat2_v<Iterator, S, Iterator2, S2>) {
         auto end_common = detail::get_end(begin, end);
         auto end2_common = detail::get_end(begin2, end2);
         return std_search(begin, end_common, begin2, end2_common, std::move(binary_predicate));

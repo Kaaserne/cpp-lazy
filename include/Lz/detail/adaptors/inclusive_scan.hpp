@@ -46,7 +46,7 @@ struct inclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. The default is std::plus.
      * @return An iterable that performs an inclusive scan on the input iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = LZ_BIN_OP(val_iterable_t<Iterable>, plus)>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = LZ_BIN_OP(plus, val_iterable_t<Iterable>)>
     [[nodiscard]] constexpr inclusive_scan_iterable<remove_ref_t<Iterable>, T, BinaryOp>
     operator()(Iterable&& iterable, T init = {}, BinaryOp binary_op = {}) const
         requires(std::invocable<BinaryOp, T, T>)
@@ -173,9 +173,7 @@ struct inclusive_scan_adaptor {
 
 LZ_MODULE_EXPORT template<class Iterable>
     requires(lz::iterable<Iterable>)
-[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::inclusive_scan_adaptor)
-    -> decltype(lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                                     LZ_BIN_OP(plus, val_iterable_t<Iterable>){})) {
+[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::inclusive_scan_adaptor) {
     return lz::detail::inclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
                                                 LZ_BIN_OP(plus, val_iterable_t<Iterable>){});
 }

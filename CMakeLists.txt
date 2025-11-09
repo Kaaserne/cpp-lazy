@@ -70,7 +70,7 @@ else()
 endif()
 
 message(STATUS "cpp-lazy: standalone version: ${CPP-LAZY_USE_STANDALONE}.")
-message(STATUS "cpp-lazy: Debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
+message(STATUS "cpp-lazy: debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
 
 # ---- Declare library ----
 add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
@@ -147,9 +147,11 @@ if (CPP-LAZY_INSTALL)
 			"${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
 			DESTINATION "${cpp-lazy_install_cmakedir}"
 	)
-	install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-			DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-	)
+	if (NOT CPP-LAZY_USE_MODULES)
+		install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+				DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+		)
+	endif()
 	include(CPack)
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
 	set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")

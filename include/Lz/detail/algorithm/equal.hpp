@@ -15,7 +15,7 @@ namespace detail {
 
 template<class Iterator1, class S1, class Iterator2, class S2, class BinaryPredicate>
 constexpr bool equal(Iterator1 begin, S1 end, Iterator2 begin2, S2 end2, BinaryPredicate binary_predicate) {
-    if constexpr (std_algo_compat2<Iterator1, S1, Iterator2, S2>::value) {
+    if constexpr (std_algo_compat2_v<Iterator1, S1, Iterator2, S2>) {
         auto last1 = detail::get_end(begin, end);
         auto last2 = detail::get_end(begin2, end2);
         return std_equal_helper(begin, last1, begin2, last2, std::move(binary_predicate));

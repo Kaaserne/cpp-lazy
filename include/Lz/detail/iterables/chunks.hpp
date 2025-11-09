@@ -52,7 +52,8 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<size_t>(lz::size(_iterable) + (_chunk_size - 1)) / _chunk_size;
+        return static_cast<size_t>((lz::size(_iterable) + (static_cast<size_t>(_chunk_size) - 1)) /
+                                   static_cast<size_t>(_chunk_size));
     }
 
 #else

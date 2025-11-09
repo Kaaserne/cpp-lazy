@@ -59,7 +59,7 @@ struct except_adaptor {
      * @param binary_predicate The binary predicate to use for comparison.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class Iterable2, class BinaryPredicate = less>
+    template<class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, Iterable2, BinaryPredicate>
     operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const
         requires(!lz::iterable<BinaryPredicate>)

@@ -23,8 +23,11 @@ constexpr bool std_equal_helper(Iterator1 begin, S1 end, Iterator2 begin2, S2 en
     return std::equal(begin, end, begin2, end2, std::move(binary_predicate));
 }
 
-template<class I>
-inline constexpr bool std_algo_compat_v = std::bool_constant<std_algo_compat<I>::value>;
+template<class I, class S>
+inline constexpr bool std_algo_compat_v = std_algo_compat<I, S>::value;
+
+template<class I1, class S1, class I2, class S2>
+inline constexpr bool std_algo_compat2_v = std_algo_compat2<I1, S1, I2, S2>::value;
 
 #else
 

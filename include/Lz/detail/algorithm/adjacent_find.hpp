@@ -21,7 +21,7 @@ namespace detail {
 
 template<class Iterator, class S, class BinaryPredicate>
 constexpr Iterator adjacent_find(Iterator begin, S end, BinaryPredicate binary_predicate) {
-    if constexpr (std_algo_compat_v<Iterator>) {
+    if constexpr (std_algo_compat_v<Iterator, S>) {
         return std::adjacent_find(begin, detail::get_end(begin, end), std::move(binary_predicate));
     }
     else {

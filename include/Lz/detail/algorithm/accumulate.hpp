@@ -5,6 +5,7 @@
 
 #include <Lz/detail/compiler_checks.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/std_algo_compat.hpp>
 
 #ifdef LZ_HAS_CXX_20
 #include <Lz/detail/procs/get_end.hpp>

@@ -21,7 +21,8 @@ constexpr Iterator partition(Iterator begin, S end, UnaryPredicate unary_predica
         return std::partition(begin, detail::get_end(begin, end), std::move(unary_predicate));
     }
     else {
-        begin = lz::find_if_not(begin, end, std::move(unary_predicate));
+        begin =
+            detail::find_if(begin, end, [p = std::move(unary_predicate)](detail::ref_t<Iterator> value) { return !p(value); });
         if (begin == end) {
             return begin;
         }

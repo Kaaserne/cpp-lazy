@@ -9,7 +9,7 @@
 LZ_MODULE_EXPORT namespace lz {
 
 template<class Iterable, class Func>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 void for_each(Iterable&& iterable, Func func) {
+LZ_CONSTEXPR_CXX_14 void for_each(Iterable&& iterable, Func func) {
     detail::for_each(detail::begin(iterable), detail::end(iterable), std::move(func));
 }
 

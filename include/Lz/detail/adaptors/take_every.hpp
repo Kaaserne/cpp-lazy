@@ -47,7 +47,7 @@ struct take_every_adaptor {
      */
     template<class Iterable>
     [[nodiscard]] constexpr take_every_iterable<remove_ref_t<Iterable>>
-    operator()(Iterable&& iterable, const size_t offset, const size_t start = 0) const
+    operator()(Iterable&& iterable, const diff_iterable_t<Iterable> offset, const diff_iterable_t<Iterable> start = 0) const
         requires(lz::iterable<Iterable>)
     {
         return { std::forward<Iterable>(iterable), offset, start };

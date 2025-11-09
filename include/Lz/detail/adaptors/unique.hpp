@@ -117,9 +117,7 @@ struct unique_adaptor {
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
     requires(lz::iterable<Iterable>)
-[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::unique_adaptor)
-    -> decltype(lz::detail::unique_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
-                                             LZ_BIN_OP(less, val_iterable_t<Iterable>){})) {
+[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::unique_adaptor) {
     return lz::detail::unique_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
                                         LZ_BIN_OP(less, val_iterable_t<Iterable>){});
 }

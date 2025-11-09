@@ -14,7 +14,6 @@ namespace detail {
 template<class Iterable, class IntType, class = void>
 class enumerate_iterator;
 
-// TODO for all operator= which ar enot sentinel_, we want to make an immutable ojbect
 template<class Iterable, class IntType>
 class enumerate_iterator<Iterable, IntType, enable_if_t<is_bidi<iter_t<Iterable>>::value>>
     : public iterator<enumerate_iterator<Iterable, IntType>, std::pair<IntType, ref_t<iter_t<Iterable>>>,
@@ -171,7 +170,7 @@ public:
         return _iterator == other._iterator;
     }
 
-    constexpr bool eq(sentinel_with<sentinel_t<Iterable>> other) const {
+    constexpr bool eq(const sentinel_with<sentinel_t<Iterable>>& other) const {
         return _iterator == other.value;
     }
 };

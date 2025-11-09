@@ -17,7 +17,7 @@ namespace detail {
 
 template<class Iterator, class S, class OutputIterator>
 constexpr void copy(Iterator begin, S end, OutputIterator out) {
-    if constexpr (std_algo_compat_v<Iterator>) {
+    if constexpr (std_algo_compat_v<Iterator, S>) {
         static_cast<void>(std::copy(begin, detail::get_end(begin, end), out));
     }
     else {

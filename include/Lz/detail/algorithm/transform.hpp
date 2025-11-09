@@ -18,7 +18,7 @@ namespace detail {
 
 template<class Iterator, class S, class OutputIterator, class UnaryOp>
 LZ_CONSTEXPR_CXX_14 void transform(Iterator begin, S end, OutputIterator output, UnaryOp unary_op) {
-    if constexpr (std_algo_compat_v<Iterator>) {
+    if constexpr (std_algo_compat_v<Iterator, S>) {
         static_cast<void>(std::transform(begin, detail::get_end(begin, end), output, std::move(unary_op)));
     }
     else {

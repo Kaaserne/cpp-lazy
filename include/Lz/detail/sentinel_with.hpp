@@ -61,6 +61,12 @@ class sentinel_with {
     template<class, class>
     friend class regex_split_iterable;
 
+    template<class>
+    friend class rotate_iterator;
+
+    template<class>
+    friend class rotate_iterable;
+
     explicit constexpr sentinel_with(T v) noexcept(std::is_nothrow_move_constructible<T>::value) : value{ std::move(v) } {
     }
 

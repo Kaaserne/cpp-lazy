@@ -86,14 +86,13 @@ public:
     }
 
 #else
-    // TODO write tests for these permutations
-    template<class it = is_bidi_tag<typename iterator::iterator_category>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<it::value, iterator> begin() const {
+    template<class T = is_bidi_tag<typename iterator::iterator_category>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<T::value, iterator> begin() const {
         return { _iterable, _iterable.begin(), _start };
     }
 
-    template<class it = is_bidi_tag<typename iterator::iterator_category>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!it::value, iterator> begin() const {
+    template<class T = is_bidi_tag<typename iterator::iterator_category>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!T::value, iterator> begin() const {
         return { _iterable.begin(), _start };
     }
 

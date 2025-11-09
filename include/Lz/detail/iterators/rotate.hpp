@@ -5,18 +5,19 @@
 
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/sentinel_with.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/procs/eager_size.hpp>
-
 #include <limits>
 
 namespace lz {
 namespace detail {
 template<class Iterable>
-class rotate_iterator : public iterator<rotate_iterator<Iterable>, ref_t<iter_t<Iterable>>, ptr_t<iter_t<Iterable>>,
-                                        diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, iter_t<Iterable>> {
+class rotate_iterator
+    : public iterator<rotate_iterator<Iterable>, ref_t<iter_t<Iterable>>, ptr_t<iter_t<Iterable>>, diff_type<iter_t<Iterable>>,
+                      iter_cat_t<iter_t<Iterable>>, sentinel_with<iter_t<Iterable>>> {
 
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
@@ -61,8 +62,8 @@ public:
 
 #ifdef LZ_HAS_CXX_17
 
-    constexpr rotate_iterator& operator=(const iter& end) {
-        _iterator = end;
+    constexpr rotate_iterator& operator=(const sentinel_with<iter_t<Iterable>>& end) {
+        _iterator = end.value;
         if constexpr (is_bidi_v<iter>) {
             _offset = lz::eager_ssize(_iterable);
         }
@@ -74,15 +75,15 @@ public:
 #else
 
     template<class I = iter>
-    LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, rotate_iterator&> operator=(const iter& end) {
-        _iterator = end;
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, rotate_iterator&> operator=(const sentinel_with<iter_t<Iterable>>& end) {
+        _iterator = end.value;
         _offset = lz::eager_ssize(_iterable);
         return *this;
     }
 
     template<class I = iter>
-    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<I>::value, rotate_iterator&> operator=(const iter& end) {
-        _iterator = end;
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<I>::value, rotate_iterator&> operator=(const sentinel_with<iter_t<Iterable>>& end) {
+        _iterator = end.value;
         _offset = std::numeric_limits<difference_type>::max();
         return *this;
     }
@@ -108,7 +109,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
-        // TODO reduce if statement?
         if (_iterable.begin() == _iterable.end()) {
             return;
         }
@@ -139,7 +139,7 @@ public:
         return _offset - other._offset;
     }
 
-    constexpr difference_type difference(const iter&) const {
+    constexpr difference_type difference(const sentinel_with<iter_t<Iterable>>&) const {
         return (_iterable.begin() - _iterable.end()) + _offset;
     }
 
@@ -155,8 +155,8 @@ public:
         return _offset == other._offset;
     }
 
-    constexpr bool eq(const iter& other) const {
-        return (_offset != 0 || _iterator == _iterable.end()) && _iterator == other;
+    constexpr bool eq(const sentinel_with<iter_t<Iterable>>& other) const {
+        return (_offset != 0 || _iterator == _iterable.end()) && _iterator == other.value;
     }
 };
 } // namespace detail
