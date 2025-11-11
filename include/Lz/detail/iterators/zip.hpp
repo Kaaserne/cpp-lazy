@@ -108,7 +108,6 @@ private:
 #endif
     }
 
-    // TODO add specialization for bidi sized and one of non sentinelled?j
     template<class cat = iterator_category, size_t... I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<cat>::value && !is_ra_tag<cat>::value>
     assign_sentinels(const sentinel& other, index_sequence<I...>) {
@@ -119,8 +118,7 @@ private:
 
     template<class cat = iterator_category, size_t... I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<cat>::value> assign_sentinels(const sentinel& other, index_sequence<I...>) {
-        const auto smallest_iter = other - *this;
-        *this += smallest_iter;
+        *this += (other - *this);
     }
 
 public:
@@ -138,7 +136,7 @@ public:
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 zip_iterator(iter_tuple iterators) : _iterators{ std::move(iterators) } {
+    constexpr zip_iterator(iter_tuple iterators) : _iterators{ std::move(iterators) } {
         static_assert(tuple_size<iter_tuple>::value > 1, "Cannot concat one/zero iterables");
     }
 
