@@ -1,12 +1,19 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
+#include <Lz/common.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/flatten.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Dimensions & sized") {
     int arr[3];
@@ -46,16 +53,10 @@ TEST_CASE("Dimensions & sized") {
 TEST_CASE("Flatten with sentinels") {
     using c_string = decltype(lz::c_string(""));
 
-    std::forward_list<c_string> lst = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"), lz::c_string("!") };
-    lz::flatten_iterable<decltype(lst)> flattened = lz::flatten(lst);
+    std::forward_list<c_string> fwd_list = { lz::c_string("Hello"), lz::c_string(", "), lz::c_string("World"),
+                                             lz::c_string("!") };
+    lz::flatten_iterable<decltype(fwd_list)> flattened = lz::flatten(fwd_list);
     static_assert(lz::detail::is_fwd<decltype(flattened.begin())>::value, "Flattened should be fwd");
-
-    SUBCASE("Operator= 2D forward") {
-        auto it = flattened.begin();
-        REQUIRE(it == flattened.begin());
-        it = flattened.end();
-        REQUIRE(it == flattened.end());
-    }
 
     auto str = flattened | lz::to<std::string>();
     REQUIRE(str == "Hello, World!");
@@ -94,6 +95,75 @@ TEST_CASE("Flatten with sentinels") {
         REQUIRE(it == flattened_lst.begin());
         it = flattened_lst.end();
         REQUIRE(it == flattened_array.end());
+    }
+}
+
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<std::forward_list<int>> lst = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+        auto flat = lst | lz::flatten;
+        auto common = make_sentinel_assign_op_tester(flat);
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(expected, common));
+
+        std::forward_list<int> lst2 = { 1, 2, 3, 4, 5, 6 };
+        auto flat2 = lst2 | lz::flatten;
+        auto common2 = make_sentinel_assign_op_tester(flat2);
+        REQUIRE(lz::equal(expected, common2));
+
+        std::forward_list<std::forward_list<std::forward_list<int>>> lst3 = { { { 1, 2 }, { 3 } }, { { 4, 5 }, { 6 } } };
+        auto flat3 = lst3 | lz::flatten;
+        auto common3 = make_sentinel_assign_op_tester(flat3);
+        REQUIRE(lz::equal(expected, common3));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<std::vector<int>> vec = { { 1, 2 }, { 3, 4 }, { 5, 6 } };
+        auto vec_sent = make_sized_bidi_sentinelled(vec);
+        auto flat = lz::flatten(vec_sent);
+        auto common = make_sentinel_assign_op_tester(flat);
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(expected, common));
+        REQUIRE(lz::equal(expected | lz::reverse, common | lz::reverse));
+
+        std::vector<int> vec2 = { 1, 2, 3, 4, 5, 6 };
+        auto vec2_sent = make_sized_bidi_sentinelled(vec2);
+        auto flat2 = lz::flatten(vec2_sent);
+        auto common2 = make_sentinel_assign_op_tester(flat2);
+        REQUIRE(lz::equal(expected, common2));
+        REQUIRE(lz::equal(expected | lz::reverse, common2 | lz::reverse));
+
+        std::vector<std::vector<std::vector<int>>> vec3 = { { { 1, 2 }, { 3 } }, { { 4, 5 }, { 6 } } };
+        auto vec3_sent = make_sized_bidi_sentinelled(vec3);
+        auto flat3 = lz::flatten(vec3_sent);
+        auto common3 = make_sentinel_assign_op_tester(flat3);
+        REQUIRE(lz::equal(expected, common3));
+        REQUIRE(lz::equal(expected | lz::reverse, common3 | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto repeater = lz::repeat(1, 5);
+        auto flat = make_sentinel_assign_op_tester(lz::flatten(repeater));
+        auto expected = { 1, 1, 1, 1, 1 };
+        REQUIRE(lz::equal(expected, flat));
+        REQUIRE(lz::equal(expected | lz::reverse, flat | lz::reverse));
+        test_procs::test_operator_minus(flat);
+        test_procs::test_operator_plus(flat, expected);
+
+        auto repeater2 = lz::repeat(lz::repeat(1, 2), 3);
+        auto flat2 = make_sentinel_assign_op_tester(lz::flatten(repeater2));
+        auto expected2 = { 1, 1, 1, 1, 1, 1 };
+        REQUIRE(lz::equal(expected2, flat2));
+        REQUIRE(lz::equal(expected2 | lz::reverse, flat2 | lz::reverse));
+        test_procs::test_operator_minus(flat2);
+        test_procs::test_operator_plus(flat2, expected2);
+
+        auto repeater3 = lz::repeat(lz::repeat(lz::repeat(1, 2), 2), 2);
+        auto flat3 = make_sentinel_assign_op_tester(lz::flatten(repeater3));
+        auto expected3 = { 1, 1, 1, 1, 1, 1, 1, 1 };
+        REQUIRE(lz::equal(expected3, flat3));
+        REQUIRE(lz::equal(expected3 | lz::reverse, flat3 | lz::reverse));
+        test_procs::test_operator_minus(flat3);
     }
 }
 
@@ -181,8 +251,6 @@ void test_flatten_operators_mm_and_pp(const FlattenIterable& flattened, const Ex
 }
 
 } // namespace
-
-// TODO also write tests for operator-- for sentinels
 
 TEST_CASE("Should flatten permutations") {
     SUBCASE("Flatten 1D") {
@@ -321,66 +389,102 @@ TEST_CASE("Should flatten permutations") {
 
     SUBCASE("Flatten with 1D sentinels") {
         auto f = lz::flatten(lz::repeat(1, 10));
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(1, 10)));
+        REQUIRE(lz::equal(f, lz::repeat(1, 10)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(1, 10)));
+        std::vector<int> expected = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
         test_procs::test_operator_minus(f);
+        test_procs::test_operator_plus(f, expected);
 
+        expected = {};
         f = lz::flatten(lz::repeat(1, 0));
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(1, 0)));
+        REQUIRE(lz::equal(f, lz::repeat(1, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(1, 0)));
         test_procs::test_operator_minus(f);
+        test_procs::test_operator_plus(f, expected);
     }
 
     SUBCASE("Flatten with 2D sentinels") {
+        std::vector<int> expected = { 5, 5, 5, 5, 5, 5, 5, 5, 5 };
         auto f = lz::flatten(lz::repeat(lz::repeat(5, 3), 3));
-        test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 3 * 3)));
 
+        test_procs::test_operator_minus(f);
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 3 * 3)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 3 * 3)));
+
+        expected = {};
         f = lz::flatten(lz::repeat(lz::repeat(5, 3), 0));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
 
         f = lz::flatten(lz::repeat(lz::repeat(5, 0), 3));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
     }
 
     SUBCASE("Flatten with 3D sentinels") {
+        auto expected = lz::repeat(5, 3 * 3 * 3) | lz::to<std::vector>();
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 3), 3));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 3 * 3 * 3)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 3 * 3 * 3)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 3 * 3 * 3)));
 
+        expected = {};
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 3), 0));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
 
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 3), 0), 3));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
 
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(5, 0), 3), 3));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
     }
 
     SUBCASE("Flatten with 4D sentinels") {
+        auto expected = lz::repeat(5, 2 * 2 * 1 * 2) | lz::to<std::vector>();
         auto f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 1), 2));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 2 * 2 * 1 * 2)));
-        
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 2 * 2 * 1 * 2)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 2 * 2 * 1 * 2)));
+
+        expected = {};
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 2), 0));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
 
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 2), 2), 0), 2));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
 
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 0), 0), 2), 2));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
 
         f = lz::flatten(lz::repeat(lz::repeat(lz::repeat(lz::repeat(5, 0), 2), 2), 2));
         test_procs::test_operator_minus(f);
-        REQUIRE(lz::equal(f | lz::reverse, lz::repeat(5, 0)));
+        test_procs::test_operator_plus(f, expected);
+        REQUIRE(lz::equal(f, lz::repeat(5, 0)));
+        REQUIRE(lz::equal(f | lz::common | lz::reverse, lz::repeat(5, 0)));
     }
 
     SUBCASE("Should be by ref") {

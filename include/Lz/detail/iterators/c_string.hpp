@@ -4,7 +4,8 @@
 #define LZ_C_STRING_ITERATOR_HPP
 
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -21,6 +22,8 @@ public:
     using reference = C&;
 
     constexpr c_string_iterator() noexcept = default;
+    constexpr c_string_iterator(const c_string_iterator&) noexcept = default;
+    LZ_CONSTEXPR_CXX_14 c_string_iterator& operator=(const c_string_iterator&) noexcept = default;
 
     explicit constexpr c_string_iterator(C* it) noexcept : _it{ it } {
     }
@@ -31,17 +34,18 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const noexcept {
-        LZ_ASSERT(_it != nullptr, "Cannot dereference nullptr");
+        LZ_ASSERT_DEREFERENCABLE(_it != nullptr);
         return *_it;
     }
 
     LZ_CONSTEXPR_CXX_14 pointer arrow() const noexcept {
-        LZ_ASSERT(_it != nullptr, "Cannot dereference nullptr");
+        LZ_ASSERT_DEREFERENCABLE(_it != nullptr);
         return _it;
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() noexcept {
-        LZ_ASSERT(_it != nullptr, "Cannot increment nullptr");
+        LZ_ASSERT_INCREMENTABLE(_it != nullptr);
+        LZ_ASSERT_INCREMENTABLE(*_it != '\0');
         ++_it;
     }
 

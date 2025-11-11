@@ -3,9 +3,10 @@
 #ifndef LZ_ROTATE_ITERABLE_HPP
 #define LZ_ROTATE_ITERABLE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
 #include <Lz/detail/iterators/rotate.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,9 +16,9 @@ class rotate_iterable : public lazy_view {
     using inner_iter = iter_t<Iterable>;
     using diff_t = diff_type<inner_iter>;
 
-    maybe_owned<Iterable> _iterable;
-    inner_iter _start_iter;
-    size_t _start_index{};
+    maybe_owned<Iterable> _iterable{};
+    inner_iter _start_iter{};
+    diff_t _start_index{};
 
 public:
     using iterator = rotate_iterator<maybe_owned<Iterable>>;
@@ -39,7 +40,7 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<inner_iter>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<inner_iter>::value>>
     constexpr rotate_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<inner_iter>::value) {
     }
@@ -50,7 +51,7 @@ public:
     LZ_CONSTEXPR_CXX_14 rotate_iterable(I&& iterable, const diff_t start) :
         _iterable{ std::forward<I>(iterable) },
         _start_iter{ next_fast_safe(_iterable, start) },
-        _start_index{ static_cast<size_t>(start) } {
+        _start_index{ start } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -58,60 +59,51 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return static_cast<size_t>(lz::size(_iterable));
+        const auto s = lz::size(_iterable);
+        if (s == 0) {
+            return 0;
+        }
+        return static_cast<size_t>(_start_index) == s ? 0 : s;
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
-        return static_cast<size_t>(lz::size(_iterable));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_sized<I>::value, size_t> size() const {
+        const auto s = lz::size(_iterable);
+        if (s == 0) {
+            return 0;
+        }
+        return static_cast<size_t>(_start_index) == s ? 0 : s;
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : 0 };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() const
-        requires(return_sentinel)
-    {
-        return { std::move(_iterable), std::move(_start_iter), _start_iter == _iterable.end() ? _start_index : 0 };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { std::move(_iterable), std::move(_start_iter), _start_iter == _iterable.end() ? _start_index : 0 };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable, _start_iter, lz::eager_size(_iterable) };
+            return iterator{ _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_ssize(_iterable) };
         }
         else {
-            return _start_iter;
+            return sentinel_with<inner_iter>{ _start_iter };
         }
     }
 
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
-        return { _iterable, _start_iter, lz::eager_size(_iterable) };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
+        return { _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_ssize(_iterable) };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, inner_iter> end() const {
-        return _start_iter;
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const {
+        return sentinel{ _start_iter };
     }
 
 #endif

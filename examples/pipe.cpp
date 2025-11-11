@@ -1,3 +1,4 @@
+#include <Lz/algorithm/all_of.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/map.hpp>

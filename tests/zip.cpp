@@ -1,11 +1,17 @@
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Zip with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -16,21 +22,35 @@ TEST_CASE("Zip with sentinels") {
                                                      std::make_tuple('o', 'd') };
     REQUIRE(lz::equal(zip, expected));
     static_assert(!std::is_same<decltype(zip.begin()), decltype(zip.end())>::value, "Should be sentinel-like");
+}
 
-    SUBCASE("Operator=") {
-        auto it = zip.begin();
-        REQUIRE(it == zip.begin());
-        using sentinel = decltype(zip.end());
-        it = sentinel{ cstr.end(), cstr2.end() };
-        REQUIRE(it == zip.end());
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> a = { 1, 2, 3 };
+        std::forward_list<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip(a, b);
+        auto common = make_sentinel_assign_op_tester(zipped);
+        auto expected2 = { std::make_tuple(1, 4), std::make_tuple(2, 5), std::make_tuple(3, 6) };
+        REQUIRE(lz::equal(common, expected2));
+    }
 
-        std::vector<int> ints = { 1, 2, 3, 4 };
-        auto zipper = lz::zip(cstr, ints);
-        using sentinel2 = decltype(zipper.end());
-        auto it2 = zipper.begin();
-        REQUIRE(it2 == zipper.begin());
-        it2 = sentinel2{ cstr.end(), ints.end() };
-        REQUIRE(it2 == zipper.end());
+    SUBCASE("bidirectional") {
+        std::list<int> a = { 1, 2, 3 };
+        std::list<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip(make_sized_bidi_sentinelled(a), b);
+        auto common = make_sentinel_assign_op_tester(zipped);
+        auto expected2 = { std::make_tuple(1, 4), std::make_tuple(2, 5), std::make_tuple(3, 6) };
+        REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 5);
+        auto b = lz::repeat(2, 3);
+        auto zipped = lz::zip(a, b);
+        auto common = make_sentinel_assign_op_tester(zipped);
+        std::vector<std::tuple<int, int>> expected2 = { std::make_tuple(1, 2), std::make_tuple(1, 2), std::make_tuple(1, 2) };
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected2);
     }
 }
 
@@ -40,13 +60,12 @@ TEST_CASE("zip_iterable changing and creating elements") {
 
     SUBCASE("Unequal lengths") {
         std::vector<int> ints = { 1, 2, 3, 4, 5 };
-        std::vector<double> floats = { 1.2, 3.3 };
+        std::vector<size_t> floats = { 1, 3 };
 
         auto zipper = ints | lz::zip(floats);
-        static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, double&>>::value,
+        static_assert(std::is_same<typename decltype(zipper.begin())::reference, std::tuple<int&, size_t&>>::value,
                       "should be tuple ref");
-        std::array<std::tuple<int, doctest::Approx>, 2> expected = { std::make_tuple(2, doctest::Approx(3.3)),
-                                                                     std::make_tuple(1, doctest::Approx(1.2)) };
+        std::array<std::tuple<int, size_t>, 2> expected = { std::make_tuple(2, size_t{ 3 }), std::make_tuple(1, size_t{ 1 }) };
         REQUIRE(lz::equal(lz::reverse(zipper), expected));
         REQUIRE(lz::equal(zipper, expected | lz::reverse));
     }
@@ -57,8 +76,7 @@ TEST_CASE("Empty or one element zip") {
         std::vector<int> empty;
         auto empty2 = lz::c_string("");
         auto zipper = lz::zip(empty, empty2);
-        static_assert(std::is_same<decltype(zipper.end()), std::tuple<decltype(empty)::iterator, lz::default_sentinel_t>>::value,
-                      "should be sentinel like");
+        static_assert(!std::is_same<decltype(zipper.end()), decltype(zipper.begin())>::value, "should be sentinel like");
         REQUIRE(lz::empty(zipper));
         REQUIRE_FALSE(lz::has_many(zipper));
         REQUIRE_FALSE(lz::has_one(zipper));
@@ -95,13 +113,13 @@ TEST_CASE("Empty or one element zip") {
 TEST_CASE("zip_iterable binary operations") {
     constexpr std::size_t size = 4;
     std::vector<int> a = { 1, 2, 3, 4 };
-    std::vector<float> b = { 1.f, 2.f, 3.f, 4.f };
+    std::vector<size_t> b = { 1, 2, 3, 4 };
     std::array<short, size> c = { 1, 2, 3, 4 };
 
-    std::vector<std::tuple<int, doctest::Approx, short>> expected = { std::make_tuple(1, doctest::Approx(1.), short(1)),
-                                                                      std::make_tuple(2, doctest::Approx(2.), short(2)),
-                                                                      std::make_tuple(3, doctest::Approx(3.), short(3)),
-                                                                      std::make_tuple(4, doctest::Approx(4.), short(4)) };
+    std::vector<std::tuple<int, size_t, short>> expected = { std::make_tuple(1, size_t{ 1 }, short(1)),
+                                                             std::make_tuple(2, size_t{ 2 }, short(2)),
+                                                             std::make_tuple(3, size_t{ 3 }, short(3)),
+                                                             std::make_tuple(4, size_t{ 4 }, short(4)) };
 
     auto zipper = lz::zip(a, b, c);
     auto begin = zipper.begin();

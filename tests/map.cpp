@@ -1,10 +1,16 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 struct TestStruct {
     std::string test_field_str;
@@ -17,12 +23,31 @@ TEST_CASE("Map with sentinels") {
     static_assert(!std::is_same<decltype(map.end()), decltype(map.begin())>::value, "Should be sentinels");
     auto c_str_expected = lz::c_string("HELLO, WORLD!");
     REQUIRE(lz::equal(map, c_str_expected));
+}
 
-    SUBCASE("Operator=") {
-        auto begin = map.begin();
-        REQUIRE(begin == map.begin());
-        begin = map.end();
-        REQUIRE(begin == map.end());
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> a = { 1, 3, 5 };
+        auto map = lz::map(a, [](int i) { return i; });
+        auto common = make_sentinel_assign_op_tester(map);
+        auto expected = { 1, 3, 5 };
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2, 3, 4, 5 };
+        auto map = lz::map(make_sized_bidi_sentinelled(a), [](int i) { return i; });
+        auto common = make_sentinel_assign_op_tester(map);
+        auto expected = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto map_common = make_sentinel_assign_op_tester(lz::map(a, [](int i) { return i; }));
+        auto expected = { 1, 1, 1 };
+        test_procs::test_operator_plus(map_common, expected);
+        test_procs::test_operator_minus(map_common);
     }
 }
 

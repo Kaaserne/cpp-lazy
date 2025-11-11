@@ -3,7 +3,7 @@
 #ifndef LZ_EXCLUDE_HPP
 #define LZ_EXCLUDE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/exclude.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

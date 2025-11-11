@@ -1,10 +1,14 @@
+#pragma once
+
 #ifndef LZ_DUPLICATES_ITERATOR_HPP
 #define LZ_DUPLICATES_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <utility>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,10 +17,10 @@ template<class Iterable, class BinaryPredicate, class = void>
 class duplicates_iterator;
 
 template<class Iterable, class BinaryPredicate>
-class duplicates_iterator<Iterable, BinaryPredicate, enable_if<is_ra<iter_t<Iterable>>::value>>
+class duplicates_iterator<Iterable, BinaryPredicate, enable_if_t<is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
+                      bidi_strongest_cat<iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<it>;
@@ -28,19 +32,20 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    it _last;
-    it _first;
-    Iterable _iterable;
-    mutable BinaryPredicate _compare;
+    it _last{};
+    it _first{};
+    Iterable _iterable{};
+    mutable BinaryPredicate _compare{};
 
     LZ_CONSTEXPR_CXX_14 void next() {
-        using detail::find_if;
-        using std::find_if;
-
-        _last = find_if(_first, _iterable.end(), [this](typename traits::reference val) { return _compare(*_first, val); });
+        _last =
+            detail::find_if(_first, _iterable.end(), [this](typename traits::reference val) { return _compare(*_first, val); });
     }
 
 public:
+    constexpr duplicates_iterator(const duplicates_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(const duplicates_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()
@@ -51,8 +56,8 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<it>::value &&
                                              std::is_nothrow_default_constructible<Iterable>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {
@@ -111,10 +116,10 @@ public:
 };
 
 template<class Iterable, class BinaryPredicate>
-class duplicates_iterator<Iterable, BinaryPredicate, enable_if<!is_ra<iter_t<Iterable>>::value>>
+class duplicates_iterator<Iterable, BinaryPredicate, enable_if_t<!is_ra<iter_t<Iterable>>::value>>
     : public iterator<duplicates_iterator<Iterable, BinaryPredicate>, std::pair<ref_t<iter_t<Iterable>>, size_t>,
                       fake_ptr_proxy<std::pair<ref_t<iter_t<Iterable>>, size_t>>, diff_type<iter_t<Iterable>>,
-                      std::bidirectional_iterator_tag, default_sentinel_t> {
+                      iter_cat_t<iter_t<Iterable>>, default_sentinel_t> {
 
     using it = iter_t<Iterable>;
     using traits = std::iterator_traits<iter_t<Iterable>>;
@@ -126,18 +131,15 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    it _last;
-    it _first;
-    Iterable _iterable;
-    size_t _last_distance;
-    mutable BinaryPredicate _compare;
+    it _last{};
+    it _first{};
+    Iterable _iterable{};
+    difference_type _last_distance{};
+    mutable BinaryPredicate _compare{};
 
     LZ_CONSTEXPR_CXX_14 void next() {
-        using detail::find_if;
-        using std::find_if;
-
         _last_distance = 0;
-        _last = find_if(_first, _iterable.end(), [this](typename traits::reference val) {
+        _last = detail::find_if(_first, _iterable.end(), [this](typename traits::reference val) {
             const auto condition = _compare(*_first, val);
             if (!condition) {
                 ++_last_distance;
@@ -147,6 +149,9 @@ private:
     }
 
 public:
+    constexpr duplicates_iterator(const duplicates_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 duplicates_iterator& operator=(const duplicates_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr duplicates_iterator()
@@ -157,8 +162,8 @@ public:
 #else
 
     template<class I = it,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<Iterable>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {

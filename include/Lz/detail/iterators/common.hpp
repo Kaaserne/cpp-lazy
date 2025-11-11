@@ -5,7 +5,11 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/detail/variant.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,7 +17,7 @@ namespace detail {
 template<class Iterator, class S>
 class common_iterator : public iterator<common_iterator<Iterator, S>, ref_t<Iterator>, fake_ptr_proxy<ref_t<Iterator>>,
                                         diff_type<Iterator>, iter_cat_t<Iterator>, default_sentinel_t> {
-    variant<Iterator, S> _data;
+    variant<Iterator, S> _data{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -96,7 +100,7 @@ public:
         if (_data.index() == rhs._data.index()) {
             return true;
         }
-        return _data.index() == 0 ? get<0>(_data) == get<1>(rhs._data) : get<1>(_data) == get<0>(rhs._data);
+        return _data.index() == 0 ? get<0>(_data).eq(get<1>(rhs._data)) : !get<0>(rhs._data).eq(get<1>(_data));
     }
 };
 } // namespace detail

@@ -1,5 +1,5 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/exclusive_scan.hpp>
-
 #include <iostream>
 
 int main() {

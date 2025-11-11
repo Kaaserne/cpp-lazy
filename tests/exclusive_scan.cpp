@@ -1,8 +1,14 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/exclusive_scan.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Exclusive scan with sentinels") {
     int i = 0;
@@ -10,12 +16,16 @@ TEST_CASE("Exclusive scan with sentinels") {
     lz::exclusive_scan_iterable<decltype(generator)> scan = lz::exclusive_scan(generator, 0);
     std::vector<int> expected = { 0, 0, 1, 3, 6, 10 };
     REQUIRE(lz::equal(scan, expected));
+}
 
+TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("Operator=") {
-        auto it = scan.begin();
-        REQUIRE(it == scan.begin());
-        it = scan.end();
-        REQUIRE(it == scan.end());
+        std::vector<int> vec = { 1, 2, 3, 4 };
+        auto exclusive_scan = lz::exclusive_scan(vec);
+        auto common = make_sentinel_assign_op_tester(exclusive_scan);
+        auto expected2 = { 0, 1, 3, 6, 10 };
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::size(common) == lz::size(expected2));
     }
 }
 
@@ -38,7 +48,7 @@ TEST_CASE("exclusive_scan basic functionality") {
 TEST_CASE("Empty or one element exclusive scan") {
     SUBCASE("Empty") {
         std::vector<int> empty;
-        auto scan = empty | lz::exclusive_scan(0, MAKE_BIN_PRED(equal_to){});
+        auto scan = empty | lz::exclusive_scan(0, LZ_BIN_OP(equal_to, int){});
         REQUIRE(lz::empty(scan));
         REQUIRE_FALSE(lz::has_one(scan));
         REQUIRE_FALSE(lz::has_many(scan));

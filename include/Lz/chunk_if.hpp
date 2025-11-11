@@ -3,9 +3,9 @@
 #ifndef LZ_CHUNK_IF_HPP
 #define LZ_CHUNK_IF_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/chunk_if.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/procs/chain.hpp>
+#include <Lz/util/string_view.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
@@ -14,7 +14,7 @@ LZ_MODULE_EXPORT namespace lz {
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
- * the template parameter passed. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * the template parameter passed. If `std::string` or `[lz|std]::string_view` is prefered as its `value_type`, please see
  * `sv_chunk_if`. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
@@ -35,7 +35,7 @@ using t_chunk_if = detail::chunk_if_adaptor<ValueType>;
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
- * the template parameter passed. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * the template parameter passed. If `std::string` or `[lz|std]::string_view` is prefered as its `value_type`, please see
  * `sv_chunk_if`. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
@@ -56,7 +56,7 @@ LZ_INLINE_VAR constexpr detail::chunk_if_adaptor<ValueType> t_chunk_if;
 /**
  * @brief This adaptor is used to make chunks of the iterable, based on a condition returned by the function passed. The iterator
  * category is forward, and returns a sentinel. It returns an iterable of iterables, with its value_type being
- * `lz::basic_iterable`. If `std::string` or `[lz|std]::string_view` is preffed as its `value_type`, please see
+ * `lz::basic_iterable`. If `std::string` or `[lz|std]::string_view` is prefered as its `value_type`, please see
  * `sv_chunk_if`. This iterable does not contain a .size() method. Iterable is forward only.
  *
  * Example:
@@ -114,6 +114,21 @@ using chunk_if_iterable = detail::chunk_if_iterable<basic_iterable<iter_t<Iterab
  */
 template<class ValueType, class Iterable, class UnaryPredicate>
 using t_chunk_if_iterable = detail::chunk_if_iterable<ValueType, Iterable, UnaryPredicate>;
+
+/**
+ * @brief Helper alias for the sv_chunk_if_iterable.
+ * @tparam Iterable The type of the input iterable.
+ * @tparam UnaryPredicate The type of the predicate function.
+ * Example:
+ * ```cpp
+ * std::string s = "hello;world;;";
+ * using chunked_t = lz::sv_chunk_if_iterable<std::string, std::function<bool(char)>>;
+ * chunked_t chunked = lz::sv_chunk_if(vec, [](char i) { return i == ';'; });
+ * ```
+ */
+template<class Iterable, class UnaryPredicate>
+using sv_chunk_if_iterable =
+    detail::chunk_if_iterable<lz::basic_iterable<lz::string_view, lz::string_view>, Iterable, UnaryPredicate>;
 
 } // namespace lz
 

@@ -3,11 +3,13 @@
 #ifndef LZ_MAP_ITERATOR_HPP
 #define LZ_MAP_ITERATOR_HPP
 
-#include <Lz/basic_iterable.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/traits/func_ret_type.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,17 +17,20 @@ template<class Iterator, class S, class UnaryOp>
 class map_iterator
     : public iterator<map_iterator<Iterator, S, UnaryOp>, func_ret_type_iter<UnaryOp, Iterator>,
                       fake_ptr_proxy<func_ret_type_iter<UnaryOp, Iterator>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
-    Iterator _iterator;
-    mutable UnaryOp _unary_op;
+    Iterator _iterator{};
+    mutable UnaryOp _unary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
 public:
     using reference = decltype(_unary_op(*_iterator));
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using iterator_category = typename traits::iterator_category;
     using difference_type = typename traits::difference_type;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr map_iterator(const map_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 map_iterator& operator=(const map_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -36,7 +41,7 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryOp>::value>>
     constexpr map_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
                                       std::is_nothrow_default_constructible<UnaryOp>::value) {
     }

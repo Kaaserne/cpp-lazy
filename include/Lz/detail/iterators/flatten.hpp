@@ -3,11 +3,14 @@
 #ifndef LZ_FLATTEN_ITERATOR_HPP
 #define LZ_FLATTEN_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <iterator>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -17,8 +20,7 @@ namespace detail {
 template<class T>
 [[nodiscard]] constexpr size_t count_dims_fn() {
     if constexpr (is_iterable_v<T>) {
-        using inner = decltype(*std::begin(std::declval<T>()));
-        return 1 + count_dims_fn<inner>();
+        return 1 + count_dims_fn<ref_iterable_t<T>>();
     }
     else {
         return 0;
@@ -48,7 +50,7 @@ struct count_dims_impl<false> {
 template<>
 struct count_dims_impl<true> {
     template<class T>
-    using iterable_type = decltype(*std::begin(std::declval<T>()));
+    using iterable_type = decltype(*detail::begin(std::declval<T>()));
 
 #ifdef LZ_HAS_CXX_11
 
@@ -93,7 +95,7 @@ class flatten_wrapper
     using iter = iter_t<Iterable>;
 
     iter _iterator{};
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
     using traits = std::iterator_traits<iter>;
 
@@ -102,6 +104,9 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
+
+    constexpr flatten_wrapper(const flatten_wrapper&) = default;
+    LZ_CONSTEXPR_CXX_14 flatten_wrapper& operator=(const flatten_wrapper&) = default;
 
     template<class I>
     constexpr flatten_wrapper(I&& iterable, iter it) : _iterator{ std::move(it) }, _iterable{ std::forward<I>(iterable) } {
@@ -115,8 +120,8 @@ public:
 
 #else
 
-    template<class I = iter, class = enable_if<std::is_default_constructible<I>::value &&
-                                               std::is_default_constructible<maybe_owned<Iterable>>::value>>
+    template<class I = iter, class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                 std::is_default_constructible<maybe_owned<Iterable>>::value>>
     constexpr flatten_wrapper() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value) {
     }
@@ -215,10 +220,10 @@ template<class, size_t>
 class flatten_iterator;
 
 template<class Iterable, size_t N>
-using inner = flatten_iterator<remove_ref<ref_iterable_t<Iterable>>, N - 1>;
+using inner = flatten_iterator<remove_ref_t<ref_iterable_t<Iterable>>, N - 1>;
 
 template<class Iterable, size_t N>
-using iter_cat = common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>;
+using iter_cat = typename std::common_type<iter_cat_t<inner<Iterable, N>>, iter_cat_t<flatten_wrapper<Iterable>>>::type;
 
 template<class Iterable, size_t N>
 class flatten_iterator
@@ -229,12 +234,10 @@ class flatten_iterator
     using this_inner = inner<Iterable, N>;
 
     LZ_CONSTEXPR_CXX_14 void find_next_non_empty_inner() {
-        using lz::detail::find_if;
-        using std::find_if;
         using ref = decltype(*_outer_iter.iterator());
 
         ++_outer_iter;
-        _outer_iter.iterator(find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
+        _outer_iter.iterator(detail::find_if(_outer_iter.iterator(), _outer_iter.end(), [this](ref inner) {
             _inner_iter = this_inner(inner, inner.begin());
             return _inner_iter.has_next();
         }));
@@ -284,21 +287,21 @@ private:
 #else
 
     template<class I = iter_t<Iterable>>
-    LZ_CONSTEXPR_CXX_14 enable_if<!is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
         _inner_iter = this_inner(*_outer_iter, (*_outer_iter).end());
     }
 
     template<class I = iter_t<Iterable>>
-    LZ_CONSTEXPR_CXX_14 enable_if<is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_sentinel<I, sentinel_t<Iterable>>::value> previous_outer() {
         --_outer_iter;
         _inner_iter = this_inner(*_outer_iter, (*_outer_iter).begin() + ((*_outer_iter).end() - (*_outer_iter).begin()));
     }
 
 #endif
 
-    flatten_wrapper<Iterable> _outer_iter;
-    this_inner _inner_iter;
+    flatten_wrapper<Iterable> _outer_iter{};
+    this_inner _inner_iter{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -310,7 +313,7 @@ public:
 #else
 
     template<class I = decltype(_outer_iter),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<this_inner>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<this_inner>::value>>
     constexpr flatten_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                           std::is_nothrow_default_constructible<this_inner>::value) {
     }
@@ -327,8 +330,8 @@ public:
 
     constexpr flatten_iterator() = default;
 
-    LZ_CONSTEXPR_CXX_14 flatten_iterator operator=(default_sentinel_t) {
-        _inner_iter = lz::default_sentinel;
+    LZ_CONSTEXPR_CXX_14 flatten_iterator& operator=(default_sentinel_t) {
+        _inner_iter = this_inner{};
         _outer_iter = lz::default_sentinel;
         return *this;
     }
@@ -374,6 +377,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_inner_iter;
         this->advance();
     }
@@ -519,7 +523,7 @@ class flatten_iterator<Iterable, 0>
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
 
-    flatten_wrapper<Iterable> _iterator;
+    flatten_wrapper<Iterable> _iterator{};
 
 public:
     using pointer = typename traits::pointer;
@@ -535,7 +539,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterator), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterator), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr flatten_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -595,6 +599,7 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void increment() {
+        LZ_ASSERT_INCREMENTABLE(!eq(lz::default_sentinel));
         ++_iterator;
     }
 

@@ -1,14 +1,17 @@
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/algorithm.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/range.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/stream.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 template<class T>
 class custom_container {
-    std::vector<T> _vec;
+    std::vector<T> _vec{};
     std::size_t _expected_capacity{};
 
 public:
@@ -21,6 +24,10 @@ public:
 
     void reserve(std::size_t size) {
         _vec.reserve(size);
+    }
+
+    std::size_t vec_capacity() const {
+        return _vec.capacity();
     }
 
     std::vector<T>& vec() {
@@ -447,9 +454,6 @@ TEST_CASE("Peek") {
 
         REQUIRE(lz::peek(iterable).has_value());
         REQUIRE(lz::peek(iterable).value() == 'e');
-
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).value() == 'e');
     }
 
     SUBCASE("One element ref") {
@@ -457,7 +461,6 @@ TEST_CASE("Peek") {
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
 
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 
     SUBCASE("Empty ref") {
@@ -465,7 +468,6 @@ TEST_CASE("Peek") {
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<std::reference_wrapper<const char>>>::value, "");
 
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 
     SUBCASE("Two elements val") {
@@ -474,25 +476,20 @@ TEST_CASE("Peek") {
 
         REQUIRE(lz::peek(iterable).has_value());
         REQUIRE(lz::peek(iterable).value() == 'e');
-
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
-        REQUIRE(lz::peek(std::begin(iterable), std::end(iterable)).value() == 'e');
     }
 
     SUBCASE("One element val") {
         auto iterable = lz::c_string("H") | lz::map([](char c) { return c; });
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
-        
+
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 
     SUBCASE("Empty val") {
         auto iterable = lz::c_string("") | lz::map([](char c) { return c; });
         static_assert(std::is_same<decltype(lz::peek(iterable)), lz::optional<char>>::value, "");
-        
+
         REQUIRE_FALSE(lz::peek(iterable).has_value());
-        REQUIRE_FALSE(lz::peek(std::begin(iterable), std::end(iterable)).has_value());
     }
 }
 
@@ -511,19 +508,34 @@ TEST_CASE("Front") {
 }
 
 TEST_CASE("Back") {
-    SUBCASE("With non-empty") {
+    SUBCASE("ra") {
         std::vector<int> vec = { 1, 2, 3 };
         REQUIRE(lz::back(vec) == 3);
-    }
-
-    SUBCASE("With one element") {
-        std::vector<int> vec = { 1 };
+        vec = { 1 };
         REQUIRE(lz::back(vec) == 1);
     }
 
     SUBCASE("With sentinel") {
         auto repeater = lz::repeat(20, 5);
         REQUIRE(lz::back(repeater) == 20);
+        repeater = lz::repeat(42, 1);
+        REQUIRE(lz::back(repeater) == 42);
+    }
+
+    SUBCASE("With c-string") {
+        const char* str = "Hello";
+        auto iterable = lz::c_string(str);
+        REQUIRE(lz::back(iterable) == 'o');
+
+        iterable = lz::c_string("A");
+        REQUIRE(lz::back(iterable) == 'A');
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> lst = { 1, 2, 3 };
+        REQUIRE(lz::back(lst) == 3);
+        lst = { 1 };
+        REQUIRE(lz::back(lst) == 1);
     }
 }
 
@@ -584,11 +596,27 @@ TEST_CASE("Distance") {
     }
 }
 
+TEST_CASE("Nth") {
+    SUBCASE("No sentinel") {
+        auto lst = lz::range(10) | lz::to<std::list>();
+        for (size_t i : lz::range(size_t{ 10 })) {
+            REQUIRE(*lz::nth(lst, static_cast<std::ptrdiff_t>(i)) == static_cast<std::ptrdiff_t>(i));
+        }
+    }
+
+    SUBCASE("Sentinel") {
+        auto c_str = lz::c_string("abcdefghij");
+        for (size_t i : lz::range(size_t{ 10 })) {
+            REQUIRE(*lz::nth(c_str, static_cast<std::ptrdiff_t>(i)) == 'a' + static_cast<char>(i));
+        }
+    }
+}
+
 TEST_CASE("Accumulate") {
     SUBCASE("With non-empty c-string") {
-        const char* str = "Hello";
+        const wchar_t* str = L"Hello";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::accumulate(iterable, 0, std::plus<int>()) == 500);
+        REQUIRE(lz::accumulate(iterable, wchar_t{}) == L'H' + L'e' + L'l' + L'l' + L'o');
     }
 
     SUBCASE("With one element") {
@@ -749,6 +777,7 @@ TEST_CASE("Find last") {
 TEST_CASE("Find last random access") {
     SUBCASE("With non-empty") {
         std::vector<int> vec = { 1, 2, 3, 4, 5, 5 };
+        lz::detail::reverse_iterable<std::vector<int>, false> rev{ vec };
         auto pos = lz::find_last_if(vec, [](int i) { return i == 5; });
         REQUIRE(*pos == 5);
         REQUIRE(lz::distance(vec.begin(), pos) == 5);
@@ -1067,7 +1096,7 @@ TEST_CASE("Find or default") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_or_default(iterable, 'H') == char{});
+        REQUIRE(lz::find_or_default(iterable, 'H', char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1093,7 +1122,7 @@ TEST_CASE("Find or default if") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_or_default_if(iterable, [](char c) { return c == 'H'; }) == char{});
+        REQUIRE(lz::find_or_default_if(iterable, [](char c) { return c == 'H'; }, char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1119,7 +1148,7 @@ TEST_CASE("Find last or default") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default(iterable, 'H') == char{});
+        REQUIRE(lz::find_last_or_default(iterable, 'H', char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1142,7 +1171,7 @@ TEST_CASE("Find last or default random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default(vec, 1) == 0);
+        REQUIRE(lz::find_last_or_default(vec, 1, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1167,7 +1196,7 @@ TEST_CASE("Find last or default if") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_if(iterable, [](char c) { return c == 'H'; }) == char{});
+        REQUIRE(lz::find_last_or_default_if(iterable, [](char c) { return c == 'H'; }, char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1190,7 +1219,7 @@ TEST_CASE("Find last or default if random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }) == 0);
+        REQUIRE(lz::find_last_or_default_if(vec, [](int i) { return i == 1; }, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1212,7 +1241,7 @@ TEST_CASE("Find last or default if not random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 1; }) == 0);
+        REQUIRE(lz::find_last_or_default_if_not(vec, [](int i) { return i == 1; }, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1237,7 +1266,7 @@ TEST_CASE("Find last or default if not") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'H'; }) == char{});
+        REQUIRE(lz::find_last_or_default_if_not(iterable, [](char c) { return c == 'H'; }, char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1263,7 +1292,7 @@ TEST_CASE("Find last or default not") {
     SUBCASE("With empty c-string") {
         const char* str = "";
         auto iterable = lz::c_string(str);
-        REQUIRE(lz::find_last_or_default_not(iterable, 'H') == char{});
+        REQUIRE(lz::find_last_or_default_not(iterable, 'H', char{}) == char{});
     }
 
     SUBCASE("Not found c-string") {
@@ -1286,7 +1315,7 @@ TEST_CASE("Find last or default not random access") {
 
     SUBCASE("With empty") {
         std::vector<int> vec = {};
-        REQUIRE(lz::find_last_or_default_not(vec, 1) == 0);
+        REQUIRE(lz::find_last_or_default_not(vec, 1, int{}) == 0);
     }
 
     SUBCASE("Not found") {
@@ -1397,12 +1426,15 @@ TEST_CASE("Starts with") {
 
         iterable = lz::c_string("H");
         iterable2 = lz::c_string("");
-        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+        REQUIRE(lz::starts_with(iterable, iterable2));
     }
 
     SUBCASE("Not found c-string") {
         auto iterable = lz::c_string("Hello");
         auto iterable2 = lz::c_string("a");
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+
+        iterable2 = lz::c_string("Helloa");
         REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 
@@ -1425,12 +1457,15 @@ TEST_CASE("Starts with") {
 
         iterable = std::string("H");
         iterable2 = std::string("");
-        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+        REQUIRE(lz::starts_with(iterable, iterable2));
     }
 
     SUBCASE("Not found string") {
         auto iterable = std::string("Hello");
         auto iterable2 = std::string("a");
+        REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
+
+        iterable2 = std::string("Helloa");
         REQUIRE_FALSE(lz::starts_with(iterable, iterable2));
     }
 }
@@ -1442,6 +1477,9 @@ TEST_CASE("Ends with") {
         REQUIRE_FALSE(lz::ends_with(iterable, iterable2));
 
         iterable2 = lz::c_string("");
+        REQUIRE(lz::ends_with(iterable, iterable2));
+
+        iterable = lz::c_string("H");
         REQUIRE(lz::ends_with(iterable, iterable2));
 
         iterable = lz::c_string("Hello");
@@ -1459,7 +1497,7 @@ TEST_CASE("Ends with") {
         std::list<char> lst2;
         REQUIRE(lz::ends_with(lst, lst2));
         lst = { 'H' };
-        REQUIRE_FALSE(lz::ends_with(lst, lst2));
+        REQUIRE(lz::ends_with(lst, lst2));
         lst = {};
         lst2 = { 'H' };
         REQUIRE_FALSE(lz::ends_with(lst, lst2));

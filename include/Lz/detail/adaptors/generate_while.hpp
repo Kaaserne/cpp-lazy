@@ -14,16 +14,16 @@ struct generate_while_adaptor {
      * @brief Generates elements while the predicate returns true. The predicate must return an object that is compatible with
      * std::get. The first element (std::get<0>) must be an object convertible to bool, the second element (std::get<1>) can be
      * any type. This iterable does not contain a .size() member function. Its end() function returns a sentinel, rather than an
-     * actual iterator object. Example:
+     * actual iterator object. It returns a (std::)input_iterator(_tag). Example:
      * ```cpp
      * int i = 0;
      * auto generator = lz::generate_while([&i]() {
      *    auto copy = i++;
-     *    return std::make_pair(copy != 4, copy);
+     *    return std::make_pair(copy, copy != 4);
      * }); // { 0, 1, 2, 3 }
      * // or (cxx 14)
      * auto generator = lz::generate_while([i = 0]() {
-     *   auto pair = std::make_pair(i != 4, i);
+     *   auto pair = std::make_pair(i, i != 4);
      *    ++i;
      *   return pair;
      * }); // { 0, 1, 2, 3 }
@@ -35,8 +35,8 @@ struct generate_while_adaptor {
     template<class GeneratorFunc>
     LZ_NODISCARD constexpr generate_while_iterable<GeneratorFunc> operator()(GeneratorFunc generator_func) const {
         using pair = decltype(generator_func());
-        using pair_first = decltype(std::get<0>(std::declval<pair>()));
-        static_assert(std::is_convertible<remove_cvref<pair_first>, bool>::value,
+        using pair_first = decltype(std::get<1>(std::declval<pair>()));
+        static_assert(std::is_convertible<remove_cvref_t<pair_first>, bool>::value,
                       "Function must return a std::pair compatible object (i.e. object::first, object::second), where "
                       "object::first"
                       "returns a bool like object.");

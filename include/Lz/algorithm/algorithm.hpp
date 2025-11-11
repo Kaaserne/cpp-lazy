@@ -1,0 +1,55 @@
+#pragma once
+
+#ifndef LZ_ALGORITHM_UNDERSCORE_HPP
+#define LZ_ALGORITHM_UNDERSCORE_HPP
+
+#include <Lz/algorithm/accumulate.hpp>
+#include <Lz/algorithm/adjacent_find.hpp>
+#include <Lz/algorithm/all_of.hpp>
+#include <Lz/algorithm/any_of.hpp>
+#include <Lz/algorithm/back.hpp>
+#include <Lz/algorithm/back_or.hpp>
+#include <Lz/algorithm/binary_search.hpp>
+#include <Lz/algorithm/contains.hpp>
+#include <Lz/algorithm/count.hpp>
+#include <Lz/algorithm/copy.hpp>
+#include <Lz/algorithm/count_if.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/ends_with.hpp>
+#include <Lz/algorithm/is_sorted.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/nth.hpp>
+#include <Lz/algorithm/find.hpp>
+#include <Lz/algorithm/find_if.hpp>
+#include <Lz/algorithm/find_if_not.hpp>
+#include <Lz/algorithm/find_last.hpp>
+#include <Lz/algorithm/find_last_if.hpp>
+#include <Lz/algorithm/find_last_if_not.hpp>
+#include <Lz/algorithm/find_last_or_default.hpp>
+#include <Lz/algorithm/find_last_or_default_if.hpp>
+#include <Lz/algorithm/find_last_or_default_if_not.hpp>
+#include <Lz/algorithm/find_last_or_default_not.hpp>
+#include <Lz/algorithm/find_or_default.hpp>
+#include <Lz/algorithm/find_or_default_if.hpp>
+#include <Lz/algorithm/for_each.hpp>
+#include <Lz/algorithm/for_each_while.hpp>
+#include <Lz/algorithm/for_each_while_n.hpp>
+#include <Lz/algorithm/front.hpp>
+#include <Lz/algorithm/front_or.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/algorithm/index_of.hpp>
+#include <Lz/algorithm/index_of_if.hpp>
+#include <Lz/algorithm/lower_bound.hpp>
+#include <Lz/algorithm/max_element.hpp>
+#include <Lz/algorithm/mean.hpp>
+#include <Lz/algorithm/min_element.hpp>
+#include <Lz/algorithm/none_of.hpp>
+#include <Lz/algorithm/partition.hpp>
+#include <Lz/algorithm/peek.hpp>
+#include <Lz/algorithm/search.hpp>
+#include <Lz/algorithm/starts_with.hpp>
+#include <Lz/algorithm/transform.hpp>
+#include <Lz/algorithm/upper_bound.hpp>
+
+#endif

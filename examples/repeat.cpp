@@ -1,3 +1,4 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/repeat.hpp>
 #include <iostream>
 

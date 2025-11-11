@@ -4,12 +4,13 @@
 #define LZ_CACHED_SIZE_ITERABLE_HPP
 
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/procs/eager_size.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterable>
 class cached_size_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     size_t _size{};
 
 public:
@@ -25,7 +26,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr cached_size_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -41,20 +42,12 @@ public:
         return _size;
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return _iterable.begin();
     }
 
-    LZ_NODISCARD constexpr sentinel end() const& {
+    LZ_NODISCARD constexpr sentinel end() const {
         return _iterable.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return detail::begin(std::move(_iterable));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
-        return detail::end(std::move(_iterable));
     }
 };
 } // namespace detail

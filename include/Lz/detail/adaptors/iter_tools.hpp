@@ -6,6 +6,7 @@
 #include <Lz/as_iterator.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
+#include <Lz/detail/procs/tuple_expand.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/drop.hpp>
 #include <Lz/drop_while.hpp>
@@ -14,7 +15,7 @@
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/split.hpp>
-#include <Lz/string_view.hpp>
+#include <Lz/util/string_view.hpp>
 #include <Lz/zip.hpp>
 #include <cctype>
 
@@ -31,7 +32,7 @@ struct convert_fn {
 template<size_t N>
 struct get_fn {
     template<class T>
-    LZ_NODISCARD constexpr auto operator()(T&& gettable) const noexcept -> decltype(std::get<N>(std::forward<T>(gettable))) {
+    LZ_NODISCARD constexpr auto operator()(T&& gettable) const -> decltype(std::get<N>(std::forward<T>(gettable))) {
         return std::get<N>(std::forward<T>(gettable));
     }
 };
@@ -45,7 +46,7 @@ struct trim_fn {
 
 struct deref_fn {
     template<class T>
-    LZ_NODISCARD constexpr auto operator()(T&& t) const noexcept(noexcept(*std::forward<T>(t))) -> decltype(*std::forward<T>(t)) {
+    LZ_NODISCARD constexpr auto operator()(T&& t) const -> decltype(*std::forward<T>(t)) {
         return *std::forward<T>(t);
     }
 };
@@ -69,22 +70,25 @@ struct unzip_with_adaptor {
      * @return An iterable that contains the results of applying the predicate to each tuple element.
      */
     template<class Iterable, class Predicate>
-    LZ_NODISCARD constexpr unzip_with_iterable<remove_ref<Iterable>, Predicate>
+    LZ_NODISCARD constexpr unzip_with_iterable<remove_ref_t<Iterable>, Predicate>
     operator()(Iterable&& iterable, Predicate predicate) const {
         return lz::map(std::forward<Iterable>(iterable), make_expand_fn(std::move(predicate)));
     }
 
     /**
-     * @brief Unzips an iterable of tuple-like elements using the provided predicate function. The predicate function should take
-     * the same number of arguments as the number of elements in the tuples and return a value. Example:
+     * @brief Unzips an iterable of tuple-like elements using the provided
+     * predicate function. The predicate function should take the same number of
+     * arguments as the number of elements in the tuples and return a value.
+     * Example:
      * ```cpp
-     * std::vector<std::tuple<int, int>> zipped = { std::make_tuple(1, 6), std::make_tuple(2, 7), std::make_tuple(3, 8) };
-     * auto unzipped = zipped | lz::unzip_with([](int a, int b) { return a + b; }); // {7, 9, 11}
+     * std::vector<std::tuple<int, int>> zipped = { std::make_tuple(1, 6),
+     * std::make_tuple(2, 7), std::make_tuple(3, 8) }; auto unzipped = zipped |
+     * lz::unzip_with([](int a, int b) { return a + b; }); // {7, 9, 11}
      * ```
      *
-     * @param iterable The iterable to unzip.
      * @param predicate The function that will be applied to each tuple element.
-     * @return An iterable that contains the results of applying the predicate to each tuple element.
+     * @return An iterable that contains the results of applying the predicate
+     * to each tuple element.
      */
     template<class Predicate>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, Predicate> operator()(Predicate predicate) const {
@@ -116,7 +120,7 @@ struct lines_adaptor {
      * @return A lines_iterable that can be iterated over, containing the substrings.
      */
     template<class String>
-    LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref<String>> operator()(String&& string) const {
+    LZ_NODISCARD constexpr lines_iterable<val_iterable_t<String>, remove_ref_t<String>> operator()(String&& string) const {
         using char_type = val_iterable_t<String>;
         return lz::sv_split(std::forward<String>(string), static_cast<char_type>('\n'));
     }
@@ -141,26 +145,30 @@ struct lines_adaptor {
 template<class Iterable, class T>
 using as_iterable = map_iterable<Iterable, convert_fn<T>>;
 
+/**
+ * @tparam T The type to convert the elements to.
+ */
 template<class T>
 struct as_adaptor {
     using adaptor = as_adaptor;
 
     /**
-     * @brief Returns an iterable that converts the elements in the given container to the type @p `T` using `lz::map`.
-     * @tparam T The type to convert the elements to.
-     * Example:
+     * @brief Returns an iterable that converts the elements in the given
+     * container to the type @p `T` using `lz::map`. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
      * auto floats = lz::as<float>(vec); // { 1.f, 2.f, 3.f, 4.f, 5.f }
      * // or
      * auto floats = vec | lz::as<float>; // { 1.f, 2.f, 3.f, 4.f, 5.f }
-     * auto floats = vec | lz::as<float>{}; // { 1.f, 2.f, 3.f, 4.f, 5.f } (for cxx11)
+     * auto floats = vec | lz::as<float>{}; // { 1.f, 2.f, 3.f, 4.f, 5.f } (for
+     * cxx11)
      * ```
      * @param iterable The iterable to convert.
-     * @return An as_iterable that can be iterated over, containing the converted elements.
+     * @return An as_iterable that can be iterated over, containing the
+     * converted elements.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr as_iterable<remove_ref<Iterable>, T> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr as_iterable<remove_ref_t<Iterable>, T> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), convert_fn<T>{});
     }
 };
@@ -185,7 +193,7 @@ struct get_n_adaptor {
      * @return A map iterable that can be iterated over, containing the nth elements of the tuples in the iterable.
      */
     template<class Iterable>
-    LZ_NODISCARD constexpr get_nth_iterable<remove_ref<Iterable>, N> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD constexpr get_nth_iterable<remove_ref_t<Iterable>, N> operator()(Iterable&& iterable) const {
         return lz::map(std::forward<Iterable>(iterable), get_fn<N>{});
     }
 };
@@ -210,7 +218,7 @@ struct get_nths_adaptor {
      * @return A zip iterable that can be iterated over, containing the nth elements of the tuples in the iterable.
      */
     template<class Iterable>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 get_nths_iterable<remove_ref<Iterable>, N...> operator()(Iterable&& iterable) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 get_nths_iterable<remove_ref_t<Iterable>, N...> operator()(Iterable&& iterable) const {
         return lz::zip(get_n_adaptor<N>{}(std::forward<Iterable>(iterable))...);
     }
 };
@@ -234,26 +242,28 @@ struct filter_map_adaptor {
      * @return A filter_map_iterable that can be iterated over, containing the mapped elements.
      */
     template<class Iterable, class UnaryFilterPredicate, class UnaryMapOp>
-    LZ_NODISCARD constexpr filter_map_iterable<remove_ref<Iterable>, UnaryFilterPredicate, UnaryMapOp>
+    LZ_NODISCARD constexpr filter_map_iterable<remove_ref_t<Iterable>, UnaryFilterPredicate, UnaryMapOp>
     operator()(Iterable&& iterable, UnaryFilterPredicate predicate, UnaryMapOp unary_op) const {
         return lz::map(lz::filter(std::forward<Iterable>(iterable), std::move(predicate)), std::move(unary_op));
     }
 
     /**
-     * @brief Filters an iterable using `predicate` and then maps those elements using `fn`, using `lz::filter` and `lz::map`.
-     * Example:
+     * @brief Filters an iterable using `predicate` and then maps those elements
+     * using `fn`, using `lz::filter` and `lz::map`. Example:
      * ```cpp
      * std::vector<int> vec = { 1, 2, 3, 4, 5 };
-     * auto fm = vec | lz::filter_map([](int i) { return i % 2 == 0; }, [](int i) { return i * 2; }); // {4, 8}
+     * auto fm = vec | lz::filter_map([](int i) { return i % 2 == 0; }, [](int
+     * i) { return i * 2; }); // {4, 8}
      * ```
      * @param predicate The predicate to filter the elements with.
-     * @param unary_op The function to map the filtered elements with.
-     * @return A filter_map_iterable that can be iterated over, containing the mapped elements.
+     * @param map_op The function to map the filtered elements with.
+     * @return A filter_map_iterable that can be iterated over, containing the
+     * mapped elements.
      */
     template<class UnaryFilterPredicate, class UnaryMapOp>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, UnaryFilterPredicate, UnaryMapOp>
-    operator()(UnaryFilterPredicate filterPredicate, UnaryMapOp map_op) const {
-        return { std::move(filterPredicate), std::move(map_op) };
+    operator()(UnaryFilterPredicate predicate, UnaryMapOp map_op) const {
+        return { std::move(predicate), std::move(map_op) };
     }
 };
 
@@ -276,7 +286,7 @@ struct select_adaptor {
      * @return A select_iterable that can be iterated over, containing the selected elements.
      */
     template<class Iterable, class SelectorIterable>
-    LZ_NODISCARD constexpr select_iterable<remove_ref<Iterable>, remove_ref<SelectorIterable>>
+    LZ_NODISCARD constexpr select_iterable<remove_ref_t<Iterable>, remove_ref_t<SelectorIterable>>
     operator()(Iterable&& iterable, SelectorIterable&& selectors) const {
         return filter_map_adaptor{}(lz::zip(std::forward<Iterable>(iterable), std::forward<SelectorIterable>(selectors)),
                                     get_fn<1>{}, get_fn<0>{});
@@ -299,8 +309,8 @@ struct select_adaptor {
     }
 };
 
-template<class Iterable, class UnaryPredicate>
-using drop_back_iterable = lz::reverse_iterable<drop_while_iterable<lz::reverse_iterable<Iterable>, UnaryPredicate>>;
+template<class Iterable>
+using drop_back_iterable = lz::reverse_iterable<drop_while_iterable<lz::reverse_iterable<Iterable>>>;
 
 struct drop_back_while_adaptor {
     using adaptor = drop_back_while_adaptor;
@@ -318,7 +328,7 @@ struct drop_back_while_adaptor {
      * @return A drop_back_iterable that can be iterated over, containing the elements
      */
     template<class Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr drop_back_iterable<remove_ref<Iterable>, UnaryPredicate>
+    LZ_NODISCARD constexpr drop_back_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return lz::reverse(lz::drop_while(lz::reverse(std::forward<Iterable>(iterable)), std::move(predicate)));
     }
@@ -340,8 +350,8 @@ struct drop_back_while_adaptor {
     }
 };
 
-template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable, UnaryPredicateFirst>, UnaryPredicateLast>;
+template<class Iterable>
+using trim_iterable = drop_back_iterable<drop_while_iterable<Iterable>>;
 
 struct trim_adaptor {
     using adaptor = trim_adaptor;
@@ -359,7 +369,7 @@ struct trim_adaptor {
      * @return A trim_iterable that can be iterated over, containing the trimmed elements.
      */
     template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-    LZ_NODISCARD constexpr trim_iterable<remove_ref<Iterable>, UnaryPredicateFirst, UnaryPredicateLast>
+    LZ_NODISCARD constexpr trim_iterable<remove_ref_t<Iterable>>
     operator()(Iterable&& iterable, UnaryPredicateFirst first, UnaryPredicateLast last) const {
         return drop_back_while_adaptor{}(lz::drop_while(std::forward<Iterable>(iterable), std::move(first)), std::move(last));
     }
@@ -372,11 +382,11 @@ struct trim_adaptor {
      * auto trimmed = lz::trim(str); // "hello"
      * // or
      * auto trimmed = str | lz::trim; // "hello"
-     * @param iterable The string to trim.
-     * @return A trim_iterable that can be iterated over, containing the trimmed string.
+     * @return A trim_iterable that can be iterated over, containing the trimmed
+     * string.
      */
     template<class CharT>
-    LZ_NODISCARD constexpr trim_iterable<const std::basic_string<CharT>, trim_fn, trim_fn>
+    LZ_NODISCARD constexpr trim_iterable<const std::basic_string<CharT>>
     operator()(const std::basic_string<CharT>& iterable) const {
         return (*this)(iterable, trim_fn{}, trim_fn{});
     }
@@ -389,12 +399,11 @@ struct trim_adaptor {
      * auto trimmed = lz::trim(str); // "hello"
      * // or
      * auto trimmed = str | lz::trim; // "hello"
-     * @param iterable The string to trim.
-     * @return A trim_iterable that can be iterated over, containing the trimmed string.
+     * @return A trim_iterable that can be iterated over, containing the trimmed
+     * string.
      */
     template<class CharT>
-    LZ_NODISCARD constexpr trim_iterable<copied_basic_sv<CharT>, trim_fn, trim_fn>
-    operator()(lz::basic_string_view<CharT> iterable) const {
+    LZ_NODISCARD constexpr trim_iterable<copied_basic_sv<CharT>> operator()(lz::basic_string_view<CharT> iterable) const {
         return (*this)(copied_basic_sv<CharT>(iterable), trim_fn{}, trim_fn{});
     }
 
@@ -420,9 +429,10 @@ struct iter_decay {
     using adaptor = iter_decay;
 
     /**
-     * @brief Decays the given iterable to an iterator category of the given tag @p IteratorTag iterable, using `lz::as_iterator`
-     * and `lz::map` to dereference the iterators. This can be handy to return sentinels at some point or prevent `lz::eager_size`
-     * calls. Example:
+     * @brief Decays the given iterable to an iterator category of the given tag
+     * @p IteratorTag iterable, using `lz::as_iterator` and `lz::map` to
+     * dereference the iterators. This can be handy to return sentinels at some
+     * point or prevent `lz::eager_size` calls. Example:
      * ```cpp
      * auto v1 = {1, 2, 3};
      * auto v2 = {1, 2, 3};
@@ -438,29 +448,37 @@ struct iter_decay {
      * // lz::zip calls lz::eager_size if:
      * // - the iterable is at least bidirectional.
      * // - the iterable is not sentinelled
-     * // f1 and f2 are both bidirectional, so lz::zip will call lz::eager_size on them.
-     * // In this case we don't want to call lz::eager_size because we're not interested in going bidirectionally.
-     * // We can use lz::iter_decay(std::forward_iterator_tag{}) to decay the iterable to a forward iterator
+     * // f1 and f2 are both bidirectional, so lz::zip will call lz::eager_size
+     * on them.
+     * // In this case we don't want to call lz::eager_size because we're not
+     * interested in going bidirectionally.
+     * // We can use lz::iter_decay(std::forward_iterator_tag{}) to decay the
+     * iterable to a forward iterator
      *
-     * iterable auto zipper = lz::zip(lz::iter_decay(f1, std::forward_iterator_tag{}), f2);
+     * iterable auto zipper = lz::zip(lz::iter_decay(f1,
+     * std::forward_iterator_tag{}), f2);
      *
-     * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on .end().
-     * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
+     * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on
+     * .end(). auto end = zipper.end(); // does not call lz::eager_size because
+     * f1 is decayed to a forward iterator.
      * ```
      * @param iterable The iterable to decay.
-     * @param IteratorTag The tag that specifies the iterator category to decay to.
-     * @return An iterable with the iterator category of the given tag @p IteratorTag.
+     * @param it The tag that specifies the iterator category to decay to.
+     * @return An iterable with the iterator category of the given tag @p
+     * IteratorTag.
      */
     template<class Iterable, class IteratorTag>
-    LZ_NODISCARD constexpr map_iterable<as_iterator_iterable<remove_ref<Iterable>, IteratorTag>, deref_fn>
-    operator()(Iterable&& iterable, IteratorTag) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 map_iterable<as_iterator_iterable<remove_ref_t<Iterable>, IteratorTag>, deref_fn>
+    operator()(Iterable&& iterable, IteratorTag it) const {
+        static_cast<void>(it);
         return lz::map(lz::as_iterator(std::forward<Iterable>(iterable), IteratorTag{}), deref_fn{});
     }
 
     /**
-     * @brief Decays the given iterable to an iterator category of the given tag @p IteratorTag iterable, using `lz::as_iterator`
-     * and `lz::map` to dereference the iterators. This can be handy to return sentinels at some point or prevent `lz::eager_size`
-     * calls. Example:
+     * @brief Decays the given iterable to an iterator category of the given tag
+     * @p IteratorTag iterable, using `lz::as_iterator` and `lz::map` to
+     * dereference the iterators. This can be handy to return sentinels at some
+     * point or prevent `lz::eager_size` calls. Example:
      * ```cpp
      * auto v1 = {1, 2, 3};
      * auto v2 = {1, 2, 3};
@@ -476,20 +494,27 @@ struct iter_decay {
      * // lz::zip calls lz::eager_size if:
      * // - the iterable is at least bidirectional.
      * // - the iterable is not sentinelled
-     * // f1 and f2 are both bidirectional, so lz::zip will call lz::eager_size on them.
-     * // In this case we don't want to call lz::eager_size because we're not interested in going bidirectionally.
-     * // We can use lz::iter_decay(iterable, std::forward_iterator_tag{}) to decay the iterables to a forward iterator
+     * // f1 and f2 are both bidirectional, so lz::zip will call lz::eager_size
+     * on them.
+     * // In this case we don't want to call lz::eager_size because we're not
+     * interested in going bidirectionally.
+     * // We can use lz::iter_decay(iterable, std::forward_iterator_tag{}) to
+     * decay the iterables to a forward iterator
      *
-     * iterable auto zipper = lz::zip(f1 | lz::iter_decay(std::forward_iterator_tag{}), f2);
+     * iterable auto zipper = lz::zip(f1 |
+     * lz::iter_decay(std::forward_iterator_tag{}), f2);
      *
-     * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on .end().
-     * auto end = zipper.end(); // does not call lz::eager_size because f1 is decayed to a forward iterator.
+     * // f1 or f2 can be forward, or both, for it not to call lz::eager_size on
+     * .end(). auto end = zipper.end(); // does not call lz::eager_size because
+     * f1 is decayed to a forward iterator.
      * ```
-     * @param IteratorTag The tag that specifies the iterator category to decay to.
-     * @return An iterable with the iterator category of the given tag @p IteratorTag.
+     * @param tag The tag that specifies the iterator category to decay to.
+     * @return An iterable with the iterator category of the given tag @p
+     * IteratorTag.
      */
     template<class IteratorTag>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, IteratorTag> operator()(IteratorTag) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor, IteratorTag> operator()(IteratorTag tag) const {
+        static_cast<void>(tag);
         return {};
     }
 };
@@ -515,8 +540,8 @@ struct pad_adaptor {
      * @param amount The amount of times to repeat the value.
      */
     template<class Iterable, class T>
-    pad_iterable<remove_ref<Iterable>, remove_rvalue_reference_t<T>>
-    operator()(Iterable&& iterable, T&& value, const size_t amount) const {
+    pad_iterable<remove_ref_t<Iterable>, remove_rvalue_reference_t<T>>
+    operator()(Iterable&& iterable, T&& value, const ptrdiff_t amount) const {
         return lz::concat(std::forward<Iterable>(iterable), lz::repeat(std::forward<T>(value), amount));
     }
 
@@ -531,7 +556,7 @@ struct pad_adaptor {
      * @param amount The amount of times to repeat the value.
      */
     template<class T>
-    fn_args_holder<adaptor, T, size_t> operator()(T&& value, const size_t amount) const {
+    fn_args_holder<adaptor, T, ptrdiff_t> operator()(T&& value, const ptrdiff_t amount) const {
         return { std::forward<T>(value), amount };
     }
 };

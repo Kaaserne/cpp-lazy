@@ -3,7 +3,7 @@
 #ifndef LZ_GENERATE_HPP
 #define LZ_GENERATE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/generate.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

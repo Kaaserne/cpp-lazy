@@ -1,15 +1,21 @@
-#include <cpp-lazy-ut-helper/test_procs.hpp>
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/loop.hpp>
-#include <Lz/reverse.hpp>
 #include <Lz/repeat.hpp>
+#include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
-TEST_CASE("loop_iterable tests with sentinels") {
+TEST_CASE("inf loop_iterable tests with sentinels") {
     auto cstr = lz::c_string("Hello");
     lz::loop_iterable_inf<decltype(cstr)> looper = lz::loop(cstr);
     static_assert(!std::is_same<decltype(looper.begin()), decltype(looper.end())>::value, "Should be sentinel");
+
     REQUIRE(*looper.begin() == 'H');
     auto looper_it = looper.begin();
     auto c_str_it = cstr.begin();
@@ -29,12 +35,6 @@ TEST_CASE("loop_iterable tests with sentinels") {
         looper_it = looper.end();
         // inf never stops
         REQUIRE(looper_it != looper.end());
-
-        auto looper_2 = lz::loop(cstr, 3);
-        auto begin = looper_2.begin();
-        REQUIRE(begin != looper_2.end());
-        begin = looper_2.end();
-        REQUIRE(begin != looper_2.end());
     }
 }
 
@@ -60,6 +60,62 @@ TEST_CASE("Basic functionality loop") {
     }
 }
 
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> lst = { 1, 2, 3 };
+        auto looped = lz::loop(lst, 2);
+        auto common = make_sentinel_assign_op_tester(looped);
+        auto expected = { 1, 2, 3, 1, 2, 3 };
+        REQUIRE(lz::equal(common, expected));
+
+        lst = {};
+        looped = lz::loop(lst, 2);
+        common = make_sentinel_assign_op_tester(looped);
+        REQUIRE(lz::empty(common));
+
+        lst = { 1, 2, 3 };
+        looped = lz::loop(lst, 0);
+        common = make_sentinel_assign_op_tester(looped);
+        REQUIRE(lz::empty(common));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2, 3, 4, 5 };
+        auto loop = lz::loop(make_sized_bidi_sentinelled(a), 2);
+        auto common = make_sentinel_assign_op_tester(loop);
+        auto expected = { 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+
+        a = {};
+        loop = lz::loop(make_sized_bidi_sentinelled(a), 2);
+        common = make_sentinel_assign_op_tester(loop);
+        REQUIRE(lz::empty(common));
+
+        a = { 1, 2, 3, 4, 5 };
+        loop = lz::loop(make_sized_bidi_sentinelled(a), 0);
+        common = make_sentinel_assign_op_tester(loop);
+        REQUIRE(lz::empty(common));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto looper_common = make_sentinel_assign_op_tester(lz::loop(a, 2));
+        auto expected = { 1, 1, 1, 1, 1, 1 };
+        test_procs::test_operator_plus(looper_common, expected);
+        test_procs::test_operator_minus(looper_common);
+
+        a = lz::repeat(0, 0);
+        looper_common = make_sentinel_assign_op_tester(lz::loop(a, 2));
+        REQUIRE(lz::empty(looper_common));
+        test_procs::test_operator_minus(looper_common);
+
+        a = lz::repeat(1, 3);
+        looper_common = make_sentinel_assign_op_tester(lz::loop(a, 0));
+        REQUIRE(lz::empty(looper_common));
+        test_procs::test_operator_minus(looper_common);
+    }
+}
+
 TEST_CASE("Loop with non while true argument") {
     std::vector<int> vec = { 1, 2, 3, 4 };
 
@@ -73,6 +129,14 @@ TEST_CASE("Loop with non while true argument") {
         auto looper2 = lz::loop(v, 0);
         REQUIRE(looper2.size() == 0);
         REQUIRE(lz::empty(looper2));
+        REQUIRE(!lz::has_one(looper2));
+        REQUIRE(!lz::has_many(looper2));
+
+        looper2 = lz::loop(v, 2);
+        REQUIRE(looper2.size() == 0);
+        REQUIRE(lz::empty(looper2));
+        REQUIRE(!lz::has_one(looper2));
+        REQUIRE(!lz::has_many(looper2));
     }
 
     SUBCASE("Size") {
@@ -82,6 +146,13 @@ TEST_CASE("Loop with non while true argument") {
         looper = lz::loop(vec, 3);
         CHECK(looper.size() == static_cast<std::size_t>(std::distance(looper.begin(), looper.end())));
         CHECK(looper.size() == 12);
+    }
+
+    SUBCASE("Operator--/++") {
+        auto looper = lz::loop(vec, 2);
+        std::vector<int> expected = { 1, 2, 3, 4, 1, 2, 3, 4 };
+        REQUIRE(lz::equal(looper, expected));
+        REQUIRE(lz::equal(looper | lz::reverse, expected | lz::reverse, [](const int a, const int b) { return a == b; }));
     }
 
     SUBCASE("Operator+") {
@@ -96,6 +167,10 @@ TEST_CASE("Loop with non while true argument") {
         looper = lz::loop(vec, 1);
         expected = { 1, 2, 3, 4 };
         test_procs::test_operator_plus(looper, expected);
+
+        looper = lz::loop(vec, 0);
+        expected = {};
+        test_procs::test_operator_plus(looper, expected);
     }
 
     SUBCASE("Operator-") {
@@ -107,6 +182,9 @@ TEST_CASE("Loop with non while true argument") {
 
         looper = lz::loop(vec, 3);
         test_procs::test_operator_minus(looper);
+
+        looper = lz::loop(vec, 0);
+        test_procs::test_operator_minus(looper);
     }
 
     SUBCASE("Operator-(default_sentinel_t)") {
@@ -117,6 +195,9 @@ TEST_CASE("Loop with non while true argument") {
         test_procs::test_operator_minus(l);
 
         l = lz::loop(lz::repeat(0, 5), 3);
+        test_procs::test_operator_minus(l);
+
+        l = lz::loop(lz::repeat(0, 5), 0);
         test_procs::test_operator_minus(l);
     }
 
@@ -131,6 +212,10 @@ TEST_CASE("Loop with non while true argument") {
 
         l = lz::loop(lz::repeat(0, 5), 3);
         expected = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        test_procs::test_operator_plus(l, expected);
+
+        l = lz::loop(lz::repeat(0, 5), 0);
+        expected = {};
         test_procs::test_operator_plus(l, expected);
     }
 }

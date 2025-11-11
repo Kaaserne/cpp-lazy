@@ -12,9 +12,9 @@ namespace detail {
 
 template<class Iterable, class T, class BinaryOp>
 class inclusive_scan_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
     T _init{};
-    func_container<BinaryOp> _binary_op;
+    func_container<BinaryOp> _binary_op{};
 
 public:
     using iterator = inclusive_scan_iterator<iter_t<Iterable>, sentinel_t<Iterable>, T, func_container<BinaryOp>>;
@@ -31,8 +31,8 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
-                               std::is_default_constructible<BinaryOp>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
+                                 std::is_default_constructible<BinaryOp>::value>>
     constexpr inclusive_scan_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                  std::is_nothrow_default_constructible<T>::value &&
                                                  std::is_nothrow_default_constructible<BinaryOp>::value) {
@@ -58,13 +58,13 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable));
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         auto begin = _iterable.begin();
         auto end = _iterable.end();
 
@@ -73,16 +73,6 @@ public:
             return { begin, end, new_init, _binary_op };
         }
         return { _iterable.begin(), _iterable.end(), _init, _binary_op };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        auto begin = detail::begin(std::move(_iterable));
-        auto end = detail::end(std::move(_iterable));
-
-        if (begin != end) {
-            return { begin, end, _binary_op(std::move(_init), *begin), std::move(_binary_op) };
-        }
-        return { begin, end, std::move(_init), std::move(_binary_op) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

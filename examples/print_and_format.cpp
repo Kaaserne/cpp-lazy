@@ -1,4 +1,5 @@
 #include <Lz/stream.hpp>
+#include <Lz/basic_iterable.hpp>
 #include <iostream>
 #include <vector>
 

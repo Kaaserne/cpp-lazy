@@ -1,11 +1,17 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/chunk_if.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <Lz/procs/to.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Chunk if custom value type") {
     auto str = lz::c_string(";hello;world;");
-    std::function<bool(char)> func = [](char c) {
+    std::function<bool(char)> func = [](char c) noexcept {
         return c == ';';
     };
 #ifdef LZ_HAS_CXX_11
@@ -17,24 +23,31 @@ TEST_CASE("Chunk if custom value type") {
 #endif
     std::vector<std::vector<char>> expected = { {}, { 'h', 'e', 'l', 'l', 'o' }, { 'w', 'o', 'r', 'l', 'd' }, {} };
     REQUIRE(lz::equal(chunked, expected));
+}
 
-    auto it = chunked.begin();
-    REQUIRE(it == chunked.begin());
-    REQUIRE(it != chunked.end());
-    REQUIRE(chunked.end() != it);
-    REQUIRE(chunked.begin() == it);
+TEST_CASE("chunk if operator=(default_sentinel)") {
+    auto fun = [](int a) {
+        return a % 2 == 0;
+    };
 
-    it = chunked.end();
-    REQUIRE(it == chunked.end());
-    REQUIRE(it != chunked.begin());
-    REQUIRE(chunked.end() == it);
-    REQUIRE(chunked.begin() != it);
+    std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+    auto chunked = lz::chunk_if(vec, fun);
+    using value_type = lz::detail::val_iterable_t<decltype(chunked)>;
+    auto common = make_sentinel_assign_op_tester(chunked);
+    std::vector<std::vector<int>> expected = { { 1 }, { 3 }, { 5 }, {} };
+    REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+
+    vec = { 1, 2, 3, 4, 5 };
+    chunked = lz::chunk_if(vec, fun);
+    common = make_sentinel_assign_op_tester(chunked);
+    expected = { { 1 }, { 3 }, { 5 } };
+    REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
 }
 
 TEST_CASE("Chunk if with sentinels") {
     auto cstr = lz::c_string("hello world; this is a message;;");
 
-    std::function<bool(char)> predicate = [](char c) {
+    std::function<bool(char)> predicate = [](char c) noexcept {
         return c == ';';
     };
     lz::chunk_if_iterable<decltype(cstr), decltype(predicate)> chunked = lz::chunk_if(cstr, std::move(predicate));
@@ -49,7 +62,7 @@ TEST_CASE("Chunk if with sentinels") {
 }
 
 TEST_CASE("Non string literal test") {
-    std::function<bool(int)> is_even = [](int i) {
+    std::function<bool(int)> is_even = [](int i) noexcept {
         return i % 2 == 0;
     };
     std::array<int, 5> arr = { 1, 2, 3, 4, 5 };

@@ -3,9 +3,13 @@
 #ifndef LZ_TUPLE_HELPERS_HPP
 #define LZ_TUPLE_HELPERS_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/traits/conjunction.hpp>
+#include <Lz/detail/traits/index_sequence.hpp>
+#include <Lz/detail/traits/is_reference_wrapper.hpp>
+#include <Lz/procs/eager_size.hpp>
+#include <algorithm>
 #include <tuple>
 
 namespace lz {
@@ -15,6 +19,24 @@ namespace detail {
 template<class T, size_t N>
 struct homogeneous_array {
     T array[N];
+
+#ifdef LZ_HAS_CXX_11
+
+    template<class U = T, class = enable_if_t<std::is_default_constructible<U>::valu>>
+    constexpr homogeneous_array() noexcept(std::is_nothrow_default_constructible<U>::value) {
+    }
+
+    // GCC/Clang in some modes failed to treat this type as an aggregate when used in
+    // a subobject brace-initializer (seen in initialization of maybe_homogeneous_t
+    // with a parameter pack). Adding an explicit forwarding constructor fixes
+    // "no matching constructor" diagnostics when we attempt: _iterables{ a, b, ... }.
+    // SFINAE ensures we only enable this when exactly N arguments are provided and
+    // each is constructible into T. This preserves copy/move ctor selection.
+    template<class... Us, class = enable_if_t<sizeof...(Us) == N && conjunction<std::is_constructible<T, Us&&>...>::value>>
+    constexpr homogeneous_array(Us&&... us) : array{ T(std::forward<Us>(us))... } {
+    }
+
+#endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 bool friend operator==(const homogeneous_array& lhs, const homogeneous_array& rhs) {
         for (size_t i = 0; i < N; ++i) {
@@ -64,10 +86,18 @@ struct tuple_size<homogeneous_array<Iterator, N>> {
 // To decrease the usage of std::tuple, we try to use homogeneous_array whenever possible
 // Therefore: if all of the iterator/iterables/value/references are homogeneous, we can use homogeneous_array
 
+template<class... Ts>
+struct maybe_homogenous;
+
+template<>
+struct maybe_homogenous<> {
+    struct type {};
+};
+
 template<class T, class... Ts>
-struct maybe_homogenous {
+struct maybe_homogenous<T, Ts...> {
     using type =
-        conditional<conjunction<std::is_same<T, Ts>...>::value, homogeneous_array<T, sizeof...(Ts) + 1>, std::tuple<T, Ts...>>;
+        conditional_t<conjunction<std::is_same<T, Ts>...>::value, homogeneous_array<T, sizeof...(Ts) + 1>, std::tuple<T, Ts...>>;
 };
 
 template<class... Ts>
@@ -99,7 +129,7 @@ struct iter_tuple_diff_type;
 
 template<class... Iterators>
 struct iter_tuple_diff_type<std::tuple<Iterators...>> {
-    using type = common_type<diff_type<Iterators>...>;
+    using type = typename std::common_type<diff_type<Iterators>...>::type;
 };
 
 template<class Iterator, size_t N>
@@ -115,7 +145,7 @@ struct iter_tuple_iter_cat;
 
 template<class... Iterators>
 struct iter_tuple_iter_cat<std::tuple<Iterators...>> {
-    using type = common_type<iter_cat_t<Iterators>...>;
+    using type = typename std::common_type<iter_cat_t<Iterators>...>::type;
 };
 
 template<class Iterator, size_t N>
@@ -170,14 +200,14 @@ template<class... Ts>
 struct disjunction : std::false_type {};
 
 template<class T, class... Ts>
-struct disjunction<T, Ts...> : conditional<T::value, std::true_type, disjunction<Ts...>> {};
+struct disjunction<T, Ts...> : conditional_t<T::value, std::true_type, disjunction<Ts...>> {};
 
 #endif
 
 template<class T, class U>
 struct copy_cv {
-    using const_applied = conditional<std::is_const<T>::value, const U, U>;
-    using type = conditional<std::is_volatile<T>::value, volatile const_applied, const_applied>;
+    using const_applied = conditional_t<std::is_const<T>::value, const U, U>;
+    using type = conditional_t<std::is_volatile<T>::value, volatile const_applied, const_applied>;
 };
 
 template<class T, class U>
@@ -190,9 +220,9 @@ struct common_reference2 {
     using pure_t = typename std::remove_cv<ref_remove_t>::type;
     using pure_u = typename std::remove_cv<ref_remove_u>::type;
 
-    using type = conditional<std::is_lvalue_reference<T>::value && std::is_lvalue_reference<U>::value &&
-                                 std::is_same<pure_t, pure_u>::value,
-                             copy_cv_t<ref_remove_t, ref_remove_u>&, common_type<pure_t, pure_u>>;
+    using type = conditional_t<std::is_lvalue_reference<T>::value && std::is_lvalue_reference<U>::value &&
+                                   std::is_same<pure_t, pure_u>::value,
+                               copy_cv_t<ref_remove_t, ref_remove_u>&, typename std::common_type<pure_t, pure_u>::type>;
 };
 
 template<class T, class U>
@@ -201,7 +231,7 @@ struct common_reference2<T&, std::reference_wrapper<U>> {
 };
 
 template<class T, class U>
-struct common_reference2<std::reference_wrapper<U>, T&> {
+struct common_reference2<std::reference_wrapper<T>, U&> {
     using type = std::reference_wrapper<copy_cv_t<T, U>>;
 };
 
@@ -218,7 +248,11 @@ struct common_reference<T> {
 
 template<class T1, class T2, class... Ts>
 struct common_reference<T1, T2, Ts...> {
-    using type = typename common_reference<common_reference2_t<T1, T2>, Ts...>::type;
+    template<class T>
+    using clean_reference_wrapper = conditional_t<is_reference_wrapper<remove_cvref_t<T>>::value, remove_cvref_t<T>, T>;
+
+    using type = typename common_reference<common_reference2_t<clean_reference_wrapper<T1>, clean_reference_wrapper<T2>>,
+                                           clean_reference_wrapper<Ts>...>::type;
 };
 
 template<class Iterator, size_t N>
@@ -247,48 +281,6 @@ using iter_tuple_common_ref_t = typename iter_tuple_common_ref<IterTuple>::type;
 
 using std::get;
 
-template<class Fn>
-class tuple_expand {
-    Fn _fn;
-
-public:
-    template<class F>
-    explicit constexpr tuple_expand(F&& fn) : _fn{ std::forward<F>(fn) } {
-    }
-
-private:
-    template<class Tuple, size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence<I...>) -> decltype(_fn(get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(get<I>(std::forward<Tuple>(tuple))...);
-    }
-
-    template<class Tuple, size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto
-    call(Tuple&& tuple, index_sequence<I...>) const -> decltype(_fn(get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(get<I>(std::forward<Tuple>(tuple))...);
-    }
-
-public:
-    template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 auto
-    operator()(Tuple&& tuple) -> decltype(call(std::forward<Tuple>(tuple),
-                                               make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{});
-    }
-
-    template<class Tuple>
-    LZ_CONSTEXPR_CXX_14 auto
-    operator()(Tuple&& tuple) const -> decltype(call(std::forward<Tuple>(tuple),
-                                                     make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{})) {
-        return call(std::forward<Tuple>(tuple), make_index_sequence<tuple_size<remove_cvref<Tuple>>::value>{});
-    }
-};
-
-template<class Fn>
-constexpr tuple_expand<decay_t<Fn>> make_expand_fn(Fn&& fn) {
-    return tuple_expand<decay_t<Fn>>{ std::forward<Fn>(fn) };
-}
-
 template<class Iterable>
 LZ_CONSTEXPR_CXX_17 iter_t<Iterable>
 increment_or_decrement_iterator(Iterable&& iterable, const size_t this_size, const size_t min) {
@@ -299,15 +291,15 @@ increment_or_decrement_iterator(Iterable&& iterable, const size_t this_size, con
     const auto to_decrement = static_cast<diff_type>(this_size - min);
     const auto to_increment = static_cast<diff_type>(min);
     if (to_increment > to_decrement) {
-        return std::prev(detail::end(std::forward<Iterable>(iterable)), to_decrement);
+        return std::prev(detail::end(iterable), to_decrement);
     }
-    return std::next(detail::begin(std::forward<Iterable>(iterable)), to_increment);
+    return std::next(detail::begin(iterable), to_increment);
 }
 
 template<size_t... Is, class Iterable>
 LZ_CONSTEXPR_CXX_17 auto
 smallest_end_maybe_homo(Iterable&& iterable_tuple,
-                        index_sequence<Is...>) -> maybe_homogeneous_t<decltype(std::begin(get<Is>(iterable_tuple)))...> {
+                        index_sequence<Is...>) -> maybe_homogeneous_t<decltype(detail::begin(get<Is>(iterable_tuple)))...> {
     const size_t sizes[] = { static_cast<size_t>(lz::eager_size(get<Is>(iterable_tuple)))... };
     const auto min = std::min({ sizes[Is]... });
 
@@ -321,31 +313,33 @@ iterable_maybe_homo_eager_size_as(IterableTuple&& iterables, index_sequence<Is..
 }
 
 template<class IterableTuple, size_t... I>
-LZ_CONSTEXPR_CXX_14 auto begin_maybe_homo_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
-    -> maybe_homogeneous_t<decltype(detail::begin(get<I>(std::forward<IterableTuple>(iterable_tuple))))...> {
-    return { detail::begin(get<I>(std::forward<IterableTuple>(iterable_tuple)))... };
+LZ_CONSTEXPR_CXX_14 auto
+begin_maybe_homo_impl(IterableTuple&& iterable_tuple,
+                      index_sequence<I...>) -> maybe_homogeneous_t<decltype(detail::begin(get<I>(iterable_tuple)))...> {
+    return { detail::begin(get<I>(iterable_tuple))... };
 }
 
 template<class IterableTuple, size_t... I>
-LZ_CONSTEXPR_CXX_14 auto end_maybe_homo_impl(IterableTuple&& iterable_tuple, index_sequence<I...>)
-    -> maybe_homogeneous_t<decltype(detail::end(get<I>(std::forward<IterableTuple>(iterable_tuple))))...> {
-    return { detail::end(get<I>(std::forward<IterableTuple>(iterable_tuple)))... };
+LZ_CONSTEXPR_CXX_14 auto
+end_maybe_homo_impl(IterableTuple&& iterable_tuple,
+                    index_sequence<I...>) -> maybe_homogeneous_t<decltype(detail::end(get<I>(iterable_tuple)))...> {
+    return { detail::end(get<I>(iterable_tuple))... };
 }
 
 template<class IterableTuple>
 LZ_CONSTEXPR_CXX_14 auto begin_maybe_homo(IterableTuple&& iterable_tuple)
     -> decltype(begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                      make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{})) {
+                                      make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{})) {
     return begin_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                 make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{});
+                                 make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{});
 }
 
 template<class IterableTuple>
 LZ_CONSTEXPR_CXX_14 auto end_maybe_homo(IterableTuple&& iterable_tuple)
     -> decltype(end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                                    make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{})) {
+                                    make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{})) {
     return end_maybe_homo_impl(std::forward<IterableTuple>(iterable_tuple),
-                               make_index_sequence<tuple_size<remove_cvref<IterableTuple>>::value>{});
+                               make_index_sequence<tuple_size<remove_cvref_t<IterableTuple>>::value>{});
 }
 } // namespace detail
 } // namespace lz

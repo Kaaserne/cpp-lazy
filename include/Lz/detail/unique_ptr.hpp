@@ -3,7 +3,7 @@
 #ifndef LZ_UNIQUE_PTR_HPP
 #define LZ_UNIQUE_PTR_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifdef LZ_HAS_CXX_14
 
@@ -14,6 +14,7 @@
 #ifdef LZ_HAS_CXX_11
 
 #include <utility>
+#include <Lz/detail/procs/assert.hpp>
 
 #endif
 

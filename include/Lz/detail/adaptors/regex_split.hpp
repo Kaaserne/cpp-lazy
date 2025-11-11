@@ -13,7 +13,7 @@ struct regex_split_adaptor {
     using adaptor = regex_split_adaptor;
 
     template<class String>
-    using iter = decltype(std::begin(std::declval<const String>()));
+    using iter = decltype(detail::begin(std::declval<const String>()));
 
     template<class String>
     using regex_it = std::regex_token_iterator<iter<String>>;

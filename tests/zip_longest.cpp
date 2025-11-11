@@ -1,12 +1,18 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
+#include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/zip_longest.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/map.hpp>
 
 TEST_CASE("Zip longest with sentinels") {
     auto cstr = lz::c_string("Hello");
@@ -25,12 +31,54 @@ TEST_CASE("Zip longest with sentinels") {
                                   std::make_tuple(lz::nullopt, lz::optional<char>('1'), lz::nullopt) };
 
     REQUIRE(lz::equal(longest, expected));
+}
 
-    SUBCASE("Operator=") {
-        auto it = longest.begin();
-        REQUIRE(it == longest.begin());
-        it = longest.end();
-        REQUIRE(it == longest.end());
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> a = { 1, 2, 3 };
+        std::forward_list<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip_longest(a, b);
+
+        auto common = make_sentinel_assign_op_tester(zipped);
+
+        auto expected = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),
+                           std::make_tuple(lz::optional<int>{ 3 }, lz::optional<int>{ 6 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 7 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 8 }) };
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2, 3 };
+        std::vector<int> b = { 4, 5, 6, 7, 8 };
+        auto zipped = lz::zip_longest(make_sized_bidi_sentinelled(a), b);
+
+        auto common = make_sentinel_assign_op_tester(zipped);
+
+        auto expected = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 2 }, lz::optional<int>{ 5 }),
+                           std::make_tuple(lz::optional<int>{ 3 }, lz::optional<int>{ 6 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 7 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 8 }) };
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto b = lz::repeat(4, 5);
+        auto zipped = lz::zip_longest(a, b);
+
+        auto common = make_sentinel_assign_op_tester(zipped);
+
+        auto expected = { std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{ 1 }, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 4 }),
+                           std::make_tuple(lz::optional<int>{}, lz::optional<int>{ 4 }) };
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected);
     }
 }
 
@@ -193,7 +241,7 @@ TEST_CASE("Zip longest iterable to container") {
     }
 
     SUBCASE("To map") {
-        using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
+        using tuple_ref = lz::detail::ref_t<decltype(zipper.begin())>;
         using map_type = std::map<char, lz::optional<unsigned>>;
 
         auto to_map = zipper |
@@ -204,7 +252,7 @@ TEST_CASE("Zip longest iterable to container") {
     }
 
     SUBCASE("To unordered map") {
-        using tuple_ref = lz::ref_t<decltype(zipper.begin())>;
+        using tuple_ref = lz::detail::ref_t<decltype(zipper.begin())>;
         using map_type = std::unordered_map<char, lz::optional<unsigned>>;
 
         auto to_unordered =

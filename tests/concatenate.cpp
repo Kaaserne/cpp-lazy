@@ -1,14 +1,19 @@
-#include <Lz/algorithm.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/concatenate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/range.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <Lz/string_view.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <Lz/util/string_view.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Concatenate with sentinels") {
     const char* str = "hello, world!";
@@ -21,18 +26,40 @@ TEST_CASE("Concatenate with sentinels") {
     auto expected = { 'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!',
                       'h', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', '!' };
     REQUIRE(lz::equal(concat, expected));
+}
 
-    auto it = concat.begin();
-    REQUIRE(it == concat.begin());
-    REQUIRE(it != concat.end());
-    REQUIRE(concat.end() != it);
-    REQUIRE(concat.begin() == it);
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> a = { 1, 2 };
+        std::forward_list<int> b = { 3, 4 };
+        auto concatenated = lz::concat(a, b);
+        auto common = make_sentinel_assign_op_tester(concatenated);
+        auto expected2 = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(common, expected2));
+    }
 
-    it = concat.end();
-    REQUIRE(it == concat.end());
-    REQUIRE(it != concat.begin());
-    REQUIRE(concat.end() == it);
-    REQUIRE(concat.begin() != it);
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2 };
+        std::list<int> b = { 3, 4 };
+        auto concatenated = lz::concat(a, b);
+        auto bidi_sentinel = make_sized_bidi_sentinelled(concatenated);
+        auto common = make_sentinel_assign_op_tester(bidi_sentinel);
+        auto expected2 = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::equal(lz::reverse(common), lz::reverse(expected2)));
+    }
+
+    SUBCASE("random access") {
+        auto repeater1 = lz::repeat(1, 2);
+        auto repeater2 = lz::repeat(3, 2);
+        auto concatenated = lz::concat(repeater1, repeater2);
+        auto common = make_sentinel_assign_op_tester(concatenated);
+        auto expected2 = { 1, 1, 3, 3 };
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::equal(lz::reverse(common), lz::reverse(expected2)));
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected2);
+    }
 }
 
 TEST_CASE("Reference tests") {

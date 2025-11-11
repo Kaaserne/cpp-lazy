@@ -31,7 +31,7 @@ struct concatenate_adaptor {
      * @return An iterable that yields the concatenated elements of the input iterables.
      */
     template<class... Iterables>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 concatenate_iterable<remove_ref<Iterables>...> operator()(Iterables&&... iterables) const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 concatenate_iterable<remove_ref_t<Iterables>...> operator()(Iterables&&... iterables) const {
         return { std::forward<Iterables>(iterables)... };
     }
 };

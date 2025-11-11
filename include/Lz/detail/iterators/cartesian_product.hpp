@@ -5,8 +5,13 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
+#include <Lz/util/default_sentinel.hpp>
+
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
 
 namespace lz {
 namespace detail {
@@ -45,8 +50,8 @@ public:
     using difference_type = iter_tuple_diff_type_t<iterators>;
 
 private:
-    iterators _iterators;
-    IterablesMaybeHomo _iterables;
+    iterators _iterators{};
+    IterablesMaybeHomo _iterables{};
 
 #ifdef LZ_HAS_CXX_17
 
@@ -107,13 +112,13 @@ private:
 #else
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> next() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> next() {
         using std::get;
         ++get<I>(_iterators);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> next() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 0)> next() {
         using std::get;
         ++get<I>(_iterators);
         if (get<I>(_iterators) == get<I>(_iterables).end()) {
@@ -123,14 +128,14 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> previous() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> previous() {
         using std::get;
         LZ_ASSERT_DECREMENTABLE(get<0>(_iterators) != get<0>(_iterables).begin());
         --get<0>(_iterators);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> previous() {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 0)> previous() {
         using std::get;
         if (get<I>(_iterators) == get<I>(_iterables).begin()) {
             get<I>(_iterators) = get<I>(_iterables).end();
@@ -141,7 +146,7 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> operator_plus_impl(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> operator_plus_impl(const difference_type offset) {
         using std::get;
         LZ_ASSERT_SUB_ADDABLE(offset < 0 ? -offset <= get<0>(_iterators) - get<0>(_iterables).begin()
                                          : offset <= get<0>(_iterables).end() - get<0>(_iterators));
@@ -149,7 +154,7 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0)> operator_plus_impl(const difference_type offset) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 0)> operator_plus_impl(const difference_type offset) {
         using std::get;
         if (offset == 0) {
             return;
@@ -219,7 +224,7 @@ private:
 #else
 
     template<std::ptrdiff_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I >= 0)> iter_compat(const cartesian_product_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I >= 0)> iter_compat(const cartesian_product_iterator& other) const {
         using std::get;
         LZ_ASSERT_COMPATIBLE(get<I>(_iterables).begin() == get<I>(other._iterables).begin() &&
                              get<I>(_iterables).end() == get<I>(other._iterables).end());
@@ -227,11 +232,11 @@ private:
     }
 
     template<std::ptrdiff_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I < 0)> iter_compat(const cartesian_product_iterator&) const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I < 0)> iter_compat(const cartesian_product_iterator&) const noexcept {
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0), difference_type> difference(const cartesian_product_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 0), difference_type> difference(const cartesian_product_iterator& other) const {
         using std::get;
         const auto distance = get<I>(_iterators) - get<I>(other._iterators);
         const auto size = get<I>(_iterables).end() - get<I>(_iterables).begin();
@@ -240,13 +245,13 @@ private:
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, difference_type> difference(const cartesian_product_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0, difference_type> difference(const cartesian_product_iterator& other) const {
         using std::get;
         return get<0>(_iterators) - get<0>(other._iterators);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<(I > 0), difference_type> difference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<(I > 0), difference_type> difference() const {
         using std::get;
         const auto distance = get<I>(_iterators) - get<I>(_iterables).begin();
         const auto size = get<I>(_iterables).end() - get<I>(_iterables).begin();
@@ -254,7 +259,7 @@ private:
     }
 
     template<size_t I>
-    constexpr enable_if<I == 0, difference_type> difference() const {
+    constexpr enable_if_t<I == 0, difference_type> difference() const {
         using std::get;
         return get<I>(_iterators) - get<I>(_iterables).end();
     }
@@ -266,10 +271,12 @@ private:
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
         using std::get;
+        auto rest_it = begin_maybe_homo(_iterables);
+        get<0>(rest_it) = get<0>(end_maybe_homo(_iterables));
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(_iterables).end()), ...);
+        ((get<I>(_iterators) = get<I>(rest_it)), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(_iterables).end()...);
+        decompose(get<I>(_iterators) = get<I>(rest_it)...);
 #endif
     }
 
@@ -282,8 +289,8 @@ public:
 
 #else
 
-    template<class I = iterators, class = enable_if<std::is_default_constructible<I>::value &&
-                                                    std::is_default_constructible<IterablesMaybeHomo>::value>>
+    template<class I = iterators, class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                      std::is_default_constructible<IterablesMaybeHomo>::value>>
     constexpr cartesian_product_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                     std::is_nothrow_default_constructible<IterablesMaybeHomo>::value) {
     }

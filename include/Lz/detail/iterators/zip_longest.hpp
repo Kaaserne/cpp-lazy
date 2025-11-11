@@ -3,12 +3,18 @@
 #ifndef LZ_ZIP_LONGEST_ITERATOR_HPP
 #define LZ_ZIP_LONGEST_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/index_sequence.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
-#include <Lz/optional.hpp>
+#include <Lz/util/default_sentinel.hpp>
+#include <Lz/util/optional.hpp>
+#include <algorithm>
+
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
 
 namespace lz {
 namespace detail {
@@ -36,7 +42,7 @@ struct reference_or_value_type;
 template<>
 struct reference_or_value_type<true /* is lvalue reference */> {
     template<class Ref, class>
-    using type = std::reference_wrapper<remove_ref<Ref>>;
+    using type = std::reference_wrapper<remove_ref_t<Ref>>;
 };
 
 template<>
@@ -65,35 +71,41 @@ struct optional_iter_tuple_ref_type<homogeneous_array<Iterator, N>> {
 template<class IterTuple>
 using optional_iter_tuple_ref_type_t = typename optional_iter_tuple_ref_type<IterTuple>::type;
 
-template<bool, class, class>
+template<class, class...>
 class zip_longest_iterator;
 
 using std::get;
 
-template<class IterMaybeHomo, class SMaybeHomo>
-class zip_longest_iterator<false /* bidi */, IterMaybeHomo, SMaybeHomo>
-    : public iterator<zip_longest_iterator<false, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type_t<IterMaybeHomo>,
-                      fake_ptr_proxy<optional_iter_tuple_ref_type_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
-                      iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
+template<class... Iterables>
+class zip_longest_iterator<std::input_iterator_tag, Iterables...>
+    : public iterator<zip_longest_iterator<std::input_iterator_tag, Iterables...>,
+                      optional_iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>>,
+                      iter_tuple_diff_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                      iter_tuple_iter_cat_t<maybe_homogeneous_t<iter_t<Iterables>...>>, default_sentinel_t> {
+
+    using iter_maybe_homo = maybe_homogeneous_t<iter_t<Iterables>...>;
+    using s_maybe_homo = maybe_homogeneous_t<sentinel_t<Iterables>...>;
+
 public:
-    using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
-    using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
-    using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
-    using reference = optional_iter_tuple_ref_type_t<IterMaybeHomo>;
+    using iterator_category = iter_tuple_iter_cat_t<iter_maybe_homo>;
+    using value_type = optional_value_type_iter_tuple_t<iter_maybe_homo>;
+    using difference_type = iter_tuple_diff_type_t<iter_maybe_homo>;
+    using reference = optional_iter_tuple_ref_type_t<iter_maybe_homo>;
     using pointer = fake_ptr_proxy<value_type>;
 
 private:
-    using is = make_index_sequence<tuple_size<IterMaybeHomo>::value>;
+    using is = make_index_sequence<tuple_size<iter_maybe_homo>::value>;
 
-    IterMaybeHomo _iterators;
-    SMaybeHomo _end;
+    iter_maybe_homo _iterators{};
+    s_maybe_homo _end{};
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 auto
-    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref<decltype(get<I>(_iterators))>>,
-                                                            val_t<remove_cvref<decltype(get<I>(_iterators))>>>> {
+    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref_t<decltype(get<I>(_iterators))>>,
+                                                            val_t<remove_cvref_t<decltype(get<I>(_iterators))>>>> {
 
-        using iter_type = remove_cvref<decltype(get<I>(_iterators))>;
+        using iter_type = remove_cvref_t<decltype(get<I>(_iterators))>;
         using ref_or_value_type = optional<reference_or_value_type_t<ref_t<iter_type>, val_t<iter_type>>>;
 
         if (get<I>(_iterators) == get<I>(_end)) {
@@ -148,23 +160,23 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires(std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>)
+        requires(std::default_initializable<iter_maybe_homo> && std::default_initializable<s_maybe_homo>)
     = default;
 
 #else
 
-    template<class I = IterMaybeHomo,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
+    template<class I = iter_maybe_homo,
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<s_maybe_homo>::value>>
     constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                              std::is_nothrow_default_constructible<SMaybeHomo>::value) {
+                                              std::is_nothrow_default_constructible<s_maybe_homo>::value) {
     }
 
 #endif
 
-    LZ_CONSTEXPR_CXX_14 zip_longest_iterator(IterMaybeHomo iterators, SMaybeHomo end) :
+    LZ_CONSTEXPR_CXX_14 zip_longest_iterator(iter_maybe_homo iterators, s_maybe_homo end) :
         _iterators{ std::move(iterators) },
         _end{ std::move(end) } {
-        static_assert(tuple_size<IterMaybeHomo>::value > 1, "Cannot concat one/zero iterables");
+        static_assert(tuple_size<iter_maybe_homo>::value > 1, "Cannot concat one/zero iterables");
     }
 
     LZ_CONSTEXPR_CXX_14 zip_longest_iterator& operator=(default_sentinel_t) {
@@ -194,37 +206,53 @@ public:
     }
 };
 
-template<class IterMaybeHomo, class SMaybeHomo>
-class zip_longest_iterator<true /* bidi */, IterMaybeHomo, SMaybeHomo>
-    : public iterator<zip_longest_iterator<true, IterMaybeHomo, SMaybeHomo>, optional_iter_tuple_ref_type_t<IterMaybeHomo>,
-                      fake_ptr_proxy<optional_iter_tuple_ref_type_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
-                      iter_tuple_iter_cat_t<IterMaybeHomo>, default_sentinel_t> {
+template<class... Iterables>
+class zip_longest_iterator<std::forward_iterator_tag, Iterables...>
+    : public zip_longest_iterator<std::input_iterator_tag, Iterables...> {
+    using base = zip_longest_iterator<std::input_iterator_tag, Iterables...>;
+
 public:
-    using iterator_category = iter_tuple_iter_cat_t<IterMaybeHomo>;
-    using value_type = optional_value_type_iter_tuple_t<IterMaybeHomo>;
-    using difference_type = iter_tuple_diff_type_t<IterMaybeHomo>;
-    using reference = optional_iter_tuple_ref_type_t<IterMaybeHomo>;
+    using base::base;
+    using base::operator=;
+};
+
+template<class... Iterables>
+class zip_longest_iterator<std::bidirectional_iterator_tag, Iterables...>
+    : public iterator<zip_longest_iterator<std::bidirectional_iterator_tag, Iterables...>,
+                      optional_iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                      fake_ptr_proxy<optional_iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>>,
+                      iter_tuple_diff_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
+                      iter_tuple_iter_cat_t<maybe_homogeneous_t<iter_t<Iterables>...>>, default_sentinel_t> {
+
+    using iter_maybe_homo = maybe_homogeneous_t<iter_t<Iterables>...>;
+    using s_maybe_homo = maybe_homogeneous_t<sentinel_t<Iterables>...>;
+
+public:
+    using iterator_category = iter_tuple_iter_cat_t<iter_maybe_homo>;
+    using value_type = optional_value_type_iter_tuple_t<iter_maybe_homo>;
+    using difference_type = iter_tuple_diff_type_t<iter_maybe_homo>;
+    using reference = optional_iter_tuple_ref_type_t<iter_maybe_homo>;
     using pointer = fake_ptr_proxy<value_type>;
 
-    static constexpr size_t tup_size = tuple_size<IterMaybeHomo>::value;
+    static constexpr size_t tup_size = tuple_size<iter_maybe_homo>::value;
 
 private:
     using is = make_index_sequence<tup_size>;
     using difference_tuple = decltype(make_homogeneous_of<difference_type>(is{}));
 
-    IterMaybeHomo _iterators;
-    SMaybeHomo _end;
-    difference_tuple _distances;
+    iter_maybe_homo _iterators{};
+    maybe_homogeneous_t<Iterables...> _iterables{};
+    difference_tuple _distances{};
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 auto
-    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref<decltype(get<I>(_iterators))>>,
-                                                            val_t<remove_cvref<decltype(get<I>(_iterators))>>>> {
+    deref_one() const -> optional<reference_or_value_type_t<ref_t<remove_cvref_t<decltype(get<I>(_iterators))>>,
+                                                            val_t<remove_cvref_t<decltype(get<I>(_iterators))>>>> {
 
-        using iter_type = remove_cvref<decltype(get<I>(_iterators))>;
+        using iter_type = remove_cvref_t<decltype(get<I>(_iterators))>;
         using ref_or_value_type = optional<reference_or_value_type_t<ref_t<iter_type>, val_t<iter_type>>>;
 
-        if (get<I>(_iterators) == get<I>(_end)) {
+        if (get<I>(_iterators) == get<I>(_iterables).end()) {
             return lz::nullopt;
         }
 
@@ -239,9 +267,12 @@ private:
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) != get<I>(_end) ? static_cast<void>(++get<I>(_iterators), ++get<I>(_distances)) : (void)(0)), ...);
+        ((get<I>(_iterators) != get<I>(_iterables).end() ? static_cast<void>(++get<I>(_iterators), ++get<I>(_distances))
+                                                         : (void)(0)),
+         ...);
 #else
-        decompose((get<I>(_iterators) != get<I>(_end) ? static_cast<void>(++get<I>(_iterators), ++get<I>(_distances)) : (void)(0),
+        decompose((get<I>(_iterators) != get<I>(_iterables).end() ? static_cast<void>(++get<I>(_iterators), ++get<I>(_distances))
+                                                                  : (void)(0),
                    0)...);
 #endif
     }
@@ -261,7 +292,7 @@ private:
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 void plus_is_one(const difference_type offset) {
         auto& it = get<I>(_iterators);
-        const auto& end = get<I>(_end);
+        const auto end = get<I>(_iterables).end();
         auto& distance = get<I>(_distances);
 
         const auto difference = end - it;
@@ -324,29 +355,33 @@ private:
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(index_sequence<I...>) const {
-        return std::min({ static_cast<difference_type>(get<I>(_iterators) - get<I>(_end))... });
+        return std::min({ static_cast<difference_type>(get<I>(_iterators) - get<I>(_iterables).end())... });
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(index_sequence<I...>) const {
 #ifdef LZ_HAS_CXX_17
-        return ((get<I>(_iterators) == get<I>(_end)) && ...);
+        return ((get<I>(_iterators) == get<I>(_iterables).end()) && ...);
 #else
-        return std::min({ get<I>(_iterators) == get<I>(_end)... });
+        return std::min({ get<I>(_iterators) == get<I>(_iterables).end()... });
 #endif
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other, index_sequence<I...>) const {
+        LZ_ASSERT_COMPATIBLE(std::min({ get<I>(_iterables).end() == get<I>(other._iterables).end()... }) &&
+                             std::min({ get<I>(_iterables).begin() == get<I>(other._iterables).begin()... }));
         return _iterators == other._iterators;
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(_end)), ...);
+        ((get<I>(_iterators) = get<I>(_iterables).end()), ...);
+        ((get<I>(_distances) = lz::eager_ssize(get<I>(_iterables))), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(_end)...);
+        decompose(get<I>(_iterators) = get<I>(_iterables).end()...);
+        decompose(get<I>(_distances) = lz::eager_ssize(get<I>(_iterables))...);
 #endif
     }
 
@@ -354,22 +389,23 @@ public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr zip_longest_iterator()
-        requires(std::default_initializable<IterMaybeHomo> && std::default_initializable<SMaybeHomo>)
+        requires(std::default_initializable<iter_maybe_homo> && std::default_initializable<s_maybe_homo>)
     = default;
 
 #else
 
-    template<class I = IterMaybeHomo,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<SMaybeHomo>::value>>
+    template<class I = iter_maybe_homo,
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<s_maybe_homo>::value>>
     constexpr zip_longest_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
-                                              std::is_nothrow_default_constructible<SMaybeHomo>::value) {
+                                              std::is_nothrow_default_constructible<s_maybe_homo>::value) {
     }
 
 #endif
 
-    constexpr zip_longest_iterator(IterMaybeHomo it, SMaybeHomo end, difference_tuple distances) :
+    template<class I>
+    constexpr zip_longest_iterator(I&& iterables, iter_maybe_homo it, difference_tuple distances) :
         _iterators{ std::move(it) },
-        _end{ std::move(end) },
+        _iterables{ std::forward<I>(iterables) },
         _distances{ distances } {
         static_assert(tup_size > 1, "Cannot zip one/zero iterables");
     }
@@ -408,7 +444,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const zip_longest_iterator& other) const {
-        LZ_ASSERT_COMPATIBLE(_end == other._end);
         return minus(other, is{});
     }
 
@@ -417,7 +452,6 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const zip_longest_iterator& other) const {
-        LZ_ASSERT_COMPATIBLE(_end == other._end);
         return eq(other, is{});
     }
 
@@ -425,6 +459,31 @@ public:
         return eq(is{});
     }
 };
+
+template<class... Iterables>
+class zip_longest_iterator<std::random_access_iterator_tag, Iterables...>
+    : public zip_longest_iterator<std::bidirectional_iterator_tag, Iterables...> {
+    using base = zip_longest_iterator<std::bidirectional_iterator_tag, Iterables...>;
+
+public:
+    using base::base;
+    using base::operator=;
+};
+
+#ifdef LZ_HAS_CXX_20
+
+template<class... Iterables>
+class zip_longest_iterator<std::contiguous_iterator_tag, Iterables...>
+    : public zip_longest_iterator<std::random_access_iterator_tag, Iterables...> {
+    using base = zip_longest_iterator<std::random_access_iterator_tag, Iterables...>;
+
+public:
+    using base::base;
+    using base::operator=;
+};
+
+#endif
+
 } // namespace detail
 } // namespace lz
 #endif // LZ_ZIP_LONGEST_ITERATOR_HPP

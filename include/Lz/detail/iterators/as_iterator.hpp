@@ -5,20 +5,25 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/sentinel_with.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterator, class S, class IterCat>
 class as_iterator_iterator : public iterator<as_iterator_iterator<Iterator, S, IterCat>, Iterator, fake_ptr_proxy<Iterator>,
-                                             diff_type<Iterator>, IterCat, S> {
-    Iterator _iterator;
+                                             diff_type<Iterator>, IterCat, sentinel_with<S>> {
+    Iterator _iterator{};
 
 public:
     using value_type = Iterator;
     using reference = Iterator;
     using pointer = fake_ptr_proxy<Iterator>;
     using difference_type = typename std::iterator_traits<Iterator>::difference_type;
+
+    constexpr as_iterator_iterator(const as_iterator_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const as_iterator_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -28,7 +33,7 @@ public:
 
 #else
 
-    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = Iterator, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr as_iterator_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -37,8 +42,8 @@ public:
     explicit constexpr as_iterator_iterator(Iterator it) : _iterator{ std::move(it) } {
     }
 
-    LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const S& other) {
-        _iterator = other;
+    LZ_CONSTEXPR_CXX_14 as_iterator_iterator& operator=(const sentinel_with<S>& other) {
+        _iterator = other.value;
         return *this;
     }
 
@@ -70,8 +75,8 @@ public:
         return _iterator == other._iterator;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const S& other) const {
-        return _iterator == other;
+    LZ_CONSTEXPR_CXX_14 bool eq(const sentinel_with<S>& other) const {
+        return _iterator == other.value;
     }
 };
 

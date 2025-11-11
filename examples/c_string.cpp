@@ -1,4 +1,5 @@
 #include <Lz/c_string.hpp>
+#include <Lz/algorithm/for_each.hpp>
 #include <iostream>
 
 

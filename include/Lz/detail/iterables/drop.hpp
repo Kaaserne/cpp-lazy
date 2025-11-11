@@ -3,10 +3,9 @@
 #ifndef LZ_DROP_ITERABLE_HPP
 #define LZ_DROP_ITERABLE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
-#include <limits>
+#include <Lz/detail/procs/next_fast.hpp>
 
 namespace lz {
 namespace detail {
@@ -21,8 +20,8 @@ public:
 private:
     using diff = diff_type<iterator>;
 
-    maybe_owned<Iterable> _iterable;
-    size_t _n{};
+    maybe_owned<Iterable> _iterable{};
+    diff _n{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -33,14 +32,14 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr drop_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
     template<class I>
-    constexpr drop_iterable(I&& iterable, const size_t n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
+    constexpr drop_iterable(I&& iterable, const diff n) : _iterable{ std::forward<I>(iterable) }, _n{ n } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -48,32 +47,26 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return lz::size(_iterable) > _n ? lz::size(_iterable) - _n : 0;
+        const auto size = lz::size(_iterable);
+        return size > static_cast<size_t>(_n) ? size - static_cast<size_t>(_n) : 0;
     }
 
 #else
 
     template<bool Sized = is_sized<Iterable>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, size_t> size() const {
-        return lz::size(_iterable) > _n ? lz::size(_iterable) - _n : 0;
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<Sized, size_t> size() const {
+        const auto size = lz::size(_iterable);
+        return size > static_cast<size_t>(_n) ? size - static_cast<size_t>(_n) : 0;
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return next_fast_safe(std::move(_iterable), static_cast<diff>(_n));
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
+        return next_fast_safe(_iterable, _n);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        return next_fast_safe(_iterable, static_cast<diff>(_n));
-    }
-
-    LZ_NODISCARD constexpr sentinel end() const& {
+    LZ_NODISCARD constexpr sentinel end() const {
         return _iterable.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel end() && {
-        return detail::end(std::move(_iterable));
     }
 };
 } // namespace detail

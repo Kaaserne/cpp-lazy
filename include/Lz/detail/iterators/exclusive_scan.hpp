@@ -5,25 +5,33 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
 class exclusive_scan_iterator : public iterator<exclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
                                                 diff_type<Iterator>, std::forward_iterator_tag, default_sentinel_t> {
-    Iterator _iterator;
-    mutable T _reducer;
-    S _end;
+    Iterator _iterator{};
+    mutable T _reducer{};
+    S _end{};
     bool _reached_end{ true };
-    mutable BinaryOp _binary_op;
+    mutable BinaryOp _binary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
 public:
     using reference = T&;
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr exclusive_scan_iterator(const exclusive_scan_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 exclusive_scan_iterator& operator=(const exclusive_scan_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -35,8 +43,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<T>::value && std::is_default_constructible<BinaryOp>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<T>::value && std::is_default_constructible<BinaryOp>::value>>
     constexpr exclusive_scan_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                  std::is_nothrow_default_constructible<S>::value &&
                                                  std::is_nothrow_default_constructible<T>::value &&

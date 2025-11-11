@@ -1,9 +1,17 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/group_by.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
 
 struct eq_pair {
     template<class T1, class T2>
@@ -23,19 +31,40 @@ TEST_CASE("Group by with sentinels") {
                       std::make_pair('c', lz::c_string("cccc")), std::make_pair('d', lz::c_string("d")) };
 
     REQUIRE(lz::equal(grouper, expected, eq_pair{}));
+}
 
-    SUBCASE("Operator=") {
-        auto it = grouper.begin();
-        REQUIRE(it == grouper.begin());
-        REQUIRE(it != grouper.end());
-        REQUIRE(grouper.end() != it);
-        REQUIRE(grouper.begin() == it);
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> lst = { 1, 1, 2, 2, 3, 4, 4 };
+        auto grouped = lz::group_by(lst, LZ_BIN_OP(equal_to, int){});
+        auto common = make_sentinel_assign_op_tester(grouped);
+        using reference = lz::detail::ref_iterable_t<decltype(common)>;
+        std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
+                                                                    std::make_pair(2, std::vector<int>{ 2, 2 }),
+                                                                    std::make_pair(3, std::vector<int>{ 3 }),
+                                                                    std::make_pair(4, std::vector<int>{ 4, 4 }) };
+        REQUIRE(lz::equal(common, expected2, [](reference a, const std::pair<int, std::vector<int>>& b) {
+            return a.first == b.first && lz::equal(a.second, b.second);
+        }));
+    }
 
-        it = grouper.end();
-        REQUIRE(it == grouper.end());
-        REQUIRE(grouper.end() == it);
-        REQUIRE(grouper.begin() != it);
-        REQUIRE(it != grouper.begin());
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 1, 2, 2, 3, 4, 4 };
+        auto bidi_sentinelled = make_sized_bidi_sentinelled(vec);
+        auto grouped = lz::group_by(bidi_sentinelled, LZ_BIN_OP(equal_to, int){});
+        auto common = make_sentinel_assign_op_tester(grouped);
+        using reference = lz::detail::ref_iterable_t<decltype(common)>;
+        std::vector<std::pair<int, std::vector<int>>> expected2 = { std::make_pair(1, std::vector<int>{ 1, 1 }),
+                                                                    std::make_pair(2, std::vector<int>{ 2, 2 }),
+                                                                    std::make_pair(3, std::vector<int>{ 3 }),
+                                                                    std::make_pair(4, std::vector<int>{ 4, 4 }) };
+        REQUIRE(lz::equal(common, expected2, [](reference a, const std::pair<int, std::vector<int>>& b) {
+            return a.first == b.first && lz::equal(a.second, b.second);
+        }));
+        REQUIRE(
+            lz::equal(common | lz::reverse, expected2 | lz::reverse, [](reference a, const std::pair<int, std::vector<int>>& b) {
+                return a.first == b.first && lz::equal(a.second, b.second);
+            }));
     }
 }
 
@@ -57,16 +86,15 @@ TEST_CASE("Empty or one element group by") {
 }
 
 TEST_CASE("group_by changing and creating elements") {
-    std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
+    std::vector<std::string> vec = { "i'm", "done", "hello", "hellp" };
 
-    std::sort(vec.begin(), vec.end(), [](const std::string& a, const std::string& b) { return a.length() < b.length(); });
     auto grouper = vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); });
     static_assert(lz::detail::is_bidi<decltype(grouper.begin())>::value, "Should be bidirectional iterator");
 
     SUBCASE("Should be correct chunks") {
         std::size_t str_len = 3;
 
-        using value_type = lz::val_iterable_t<decltype(grouper)>;
+        using value_type = lz::detail::val_iterable_t<decltype(grouper)>;
         lz::for_each(grouper, [&str_len](const value_type& g) {
             REQUIRE(g.first.length() == str_len);
             for (const auto& str : g.second) {
@@ -124,7 +152,7 @@ TEST_CASE("group_by binary operations") {
 TEST_CASE("To containers group by") {
     std::vector<std::string> vec = { "hello", "hellp", "i'm", "done" };
     auto grouper = vec | lz::group_by([](const std::string& a, const std::string& b) { return a.length() == b.length(); });
-    using value_type = lz::val_iterable_t<decltype(grouper)>;
+    using value_type = lz::detail::val_iterable_t<decltype(grouper)>;
     using pair_type = std::pair<std::string, std::vector<std::string>>;
 
     SUBCASE("To array") {

@@ -1,9 +1,15 @@
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/unique.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
-#include <Lz/reverse.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/reverse.hpp>
+#include <Lz/unique.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("Unique using sentinels") {
     auto str = lz::c_string("aabbcccddefgghhj");
@@ -12,11 +18,12 @@ TEST_CASE("Unique using sentinels") {
     auto expected = lz::c_string("abcdefghj");
     REQUIRE(lz::equal(unique, expected));
 
-    SUBCASE("Operator=") {
-        auto it = unique.begin();
-        REQUIRE(it == unique.begin());
-        it = unique.end();
-        REQUIRE(it == unique.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::forward_list<int> lst{ 1, 1, 2, 2, 3, 4, 4 };
+        auto unique2 = lz::unique(lst);
+        auto common = make_sentinel_assign_op_tester(unique2);
+        auto expected2 = { 1, 2, 3, 4 };
+        REQUIRE(lz::equal(common, expected2));
     }
 }
 

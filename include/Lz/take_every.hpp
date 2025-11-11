@@ -3,7 +3,7 @@
 #ifndef LZ_TAKE_EVERY_HPP
 #define LZ_TAKE_EVERY_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/take_every.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

@@ -12,8 +12,8 @@ namespace detail {
 
 template<class Iterable, class BinaryPredicate>
 class group_by_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    func_container<BinaryPredicate> _binary_predicate;
+    maybe_owned<Iterable> _iterable{};
+    func_container<BinaryPredicate> _binary_predicate{};
 
 public:
     using iterator = group_by_iterator<maybe_owned<Iterable>, func_container<BinaryPredicate>>;
@@ -33,8 +33,8 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr group_by_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                            std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
@@ -47,26 +47,9 @@ public:
         _binary_predicate{ std::move(binary_predicate) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin(), _binary_predicate };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable, _iterable.begin(), std::move(_binary_predicate) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { _iterable, _iterable.begin(), std::move(_binary_predicate) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -82,12 +65,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterable, _iterable.end(), _binary_predicate };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, default_sentinel_t> end() const {
         return {};
     }
 

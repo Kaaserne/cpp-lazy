@@ -7,17 +7,18 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/except.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/conditional.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable1, class Iterable2, class BinaryPredicate>
 class except_iterable : public lazy_view {
-    using iterable2_type = conditional<is_sized<Iterable2>::value, maybe_owned<Iterable2>, cached_size_iterable<Iterable2>>;
+    using iterable2_type = conditional_t<is_sized<Iterable2>::value, maybe_owned<Iterable2>, cached_size_iterable<Iterable2>>;
 
-    maybe_owned<Iterable1> _iterable1;
-    iterable2_type _iterable2;
-    func_container<BinaryPredicate> _binary_predicate;
+    maybe_owned<Iterable1> _iterable1{};
+    iterable2_type _iterable2{};
+    func_container<BinaryPredicate> _binary_predicate{};
 
 public:
     using iterator = except_iterator<maybe_owned<Iterable1>, iterable2_type, func_container<BinaryPredicate>>;
@@ -38,9 +39,9 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable1),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<iterable2_type>::value &&
-                               std::is_default_constructible<BinaryPredicate>::value>>
+    template<class I = decltype(_iterable1), class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                                 std::is_default_constructible<iterable2_type>::value &&
+                                                                 std::is_default_constructible<BinaryPredicate>::value>>
     constexpr except_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                          std::is_nothrow_default_constructible<iterable2_type>::value &&
                                          std::is_nothrow_default_constructible<BinaryPredicate>::value) {
@@ -55,26 +56,9 @@ public:
         _binary_predicate{ std::move(binary_predicate) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable1, _iterable1.begin(), _iterable2, _binary_predicate };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable1, _iterable1.begin(), std::move(_iterable2), std::move(_binary_predicate) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { _iterable1, _iterable1.begin(), std::move(_iterable2), std::move(_binary_predicate) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -90,12 +74,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterable1, _iterable1.end(), _iterable2, _binary_predicate };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const noexcept {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, default_sentinel_t> end() const noexcept {
         return default_sentinel;
     }
 

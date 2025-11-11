@@ -1,8 +1,14 @@
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/inclusive_scan.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/generate.hpp>
+#include <Lz/inclusive_scan.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("Inclusive scan with sentinels") {
     int x = 1;
@@ -15,11 +21,13 @@ TEST_CASE("Inclusive scan with sentinels") {
         ++begin;
     }
 
-    SUBCASE("Operator=") {
-        begin = scan.begin();
-        REQUIRE(begin == scan.begin());
-        begin = scan.end();
-        REQUIRE(begin == scan.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::vector<int> vec = { 1, 2, 3, 4 };
+        auto inclusive_scan = lz::inclusive_scan(vec);
+        auto common = make_sentinel_assign_op_tester(inclusive_scan);
+        auto expected = { 1, 3, 6, 10 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::size(common) == lz::size(expected));
     }
 }
 

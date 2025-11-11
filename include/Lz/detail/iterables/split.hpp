@@ -6,6 +6,7 @@
 #include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/split.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,9 +14,9 @@ template<class ValueType, class Iterable, class Iterable2, class = void>
 class split_iterable;
 
 template<class ValueType, class Iterable, class Iterable2>
-class split_iterable<ValueType, Iterable, Iterable2, enable_if<is_iterable<Iterable2>::value>> : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    maybe_owned<Iterable2> _delimiter;
+class split_iterable<ValueType, Iterable, Iterable2, enable_if_t<is_iterable<Iterable2>::value>> : public lazy_view {
+    maybe_owned<Iterable> _iterable{};
+    maybe_owned<Iterable2> _delimiter{};
 
 public:
     using const_iterator =
@@ -31,8 +32,8 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value &&
-                                                              std::is_default_constructible<maybe_owned<Iterable2>>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                                std::is_default_constructible<maybe_owned<Iterable2>>::value>>
     constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
                                         std::is_nothrow_default_constructible<maybe_owned<Iterable2>>::value) {
     }
@@ -55,7 +56,7 @@ public:
 };
 
 template<class ValueType, class Iterable, class T>
-class split_iterable<ValueType, Iterable, T, enable_if<!is_iterable<T>::value>> : public lazy_view {
+class split_iterable<ValueType, Iterable, T, enable_if_t<!is_iterable<T>::value>> : public lazy_view {
     maybe_owned<Iterable> _iterable;
     T _delimiter{};
 
@@ -73,7 +74,7 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value>>
     constexpr split_iterable() noexcept(std::is_nothrow_default_constructible<maybe_owned<Iterable>>::value &&
                                         std::is_nothrow_default_constructible<T>::value) {
     }
@@ -86,12 +87,8 @@ public:
         _delimiter{ std::move(delimiter) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable.begin(), _iterable.end(), _delimiter };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { detail::begin(std::move(_iterable)), detail::end(std::move(_iterable)), std::move(_delimiter) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

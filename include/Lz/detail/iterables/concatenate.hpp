@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/concatenate.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 
 namespace lz {
@@ -13,27 +14,20 @@ namespace detail {
 template<class... Iterables>
 class concatenate_iterable : public lazy_view {
     using iterables = maybe_homogeneous_t<maybe_owned<Iterables>...>;
-    iterables _iterables;
+    iterables _iterables{};
 
     template<size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
         using std::get;
         const size_t sizes[] = { static_cast<size_t>(lz::size(get<I>(_iterables)))... };
-        return std::accumulate(std::begin(sizes), std::end(sizes), size_t{ 0 });
+        return std::accumulate(detail::begin(sizes), detail::end(sizes), size_t{ 0 });
     }
 
     template<class Iterable2, size_t... Is>
-    static concatenate_iterable<remove_ref<Iterable2>, Iterables...>
-    concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...>&& cat, index_sequence<Is...>) {
+    static concatenate_iterable<remove_ref_t<Iterable2>, Iterables...>
+    concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...> cat, index_sequence<Is...>) {
         using std::get;
         return { std::forward<Iterable2>(iterable2), std::move(get<Is>(cat._iterables))... };
-    }
-
-    template<class Iterable2, size_t... Is>
-    static concatenate_iterable<remove_ref<Iterable2>, Iterables...>
-    concat_iterables(Iterable2&& iterable2, const concatenate_iterable<Iterables...>& cat, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), get<Is>(cat._iterables)... };
     }
 
     using is = make_index_sequence<sizeof...(Iterables)>;
@@ -56,7 +50,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterables), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterables), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr concatenate_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -77,7 +71,7 @@ public:
 #else
 
     template<class T = conjunction<is_sized<Iterables>...>>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<T::value, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<T::value, size_t> size() const {
         return size(is{});
     }
 
@@ -101,12 +95,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterables, end_maybe_homo(_iterables) };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, default_sentinel_t> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, default_sentinel_t> end() const {
         return {};
     }
 
@@ -114,15 +108,9 @@ public:
 #endif // LZ_HAS_CXX_17
 
     template<class Iterable>
-    friend concatenate_iterable<remove_ref<Iterable>, Iterables...>
-    operator|(Iterable&& iterable, concatenate_iterable<Iterables...>&& concatenate) {
+    friend concatenate_iterable<remove_ref_t<Iterable>, Iterables...>
+    operator|(Iterable&& iterable, concatenate_iterable<Iterables...> concatenate) {
         return concat_iterables(std::forward<Iterable>(iterable), std::move(concatenate), is{});
-    }
-
-    template<class Iterable>
-    friend concatenate_iterable<remove_ref<Iterable>, Iterables...>
-    operator|(Iterable&& iterable, const concatenate_iterable<Iterables...>& concatenate) {
-        return concat_iterables(std::forward<Iterable>(iterable), concatenate, is{});
     }
 };
 } // namespace detail

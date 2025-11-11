@@ -6,16 +6,17 @@
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/join_where.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 template<class IterableA, class IterableB, class SelectorA, class SelectorB, class ResultSelector>
 class join_where_iterable : public lazy_view {
-    maybe_owned<IterableA> _iterable_a;
-    maybe_owned<IterableB> _iterable_b;
-    func_container<SelectorA> _a;
-    func_container<SelectorB> _b;
-    func_container<ResultSelector> _result_selector;
+    maybe_owned<IterableA> _iterable_a{};
+    maybe_owned<IterableB> _iterable_b{};
+    func_container<SelectorA> _a{};
+    func_container<SelectorB> _b{};
+    func_container<ResultSelector> _result_selector{};
 
 public:
     using iterator = join_where_iterator<maybe_owned<IterableA>, iter_t<IterableB>, sentinel_t<IterableB>,
@@ -40,9 +41,9 @@ public:
 
     template<
         class I = decltype(_iterable_a),
-        class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
-                          std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
-                          std::is_default_constructible<ResultSelector>::value>>
+        class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<IterableB>::value &&
+                            std::is_default_constructible<SelectorA>::value && std::is_default_constructible<SelectorB>::value &&
+                            std::is_default_constructible<ResultSelector>::value>>
     constexpr join_where_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<maybe_owned<IterableB>>::value &&
                                              std::is_nothrow_default_constructible<SelectorA>::value &&
@@ -61,15 +62,8 @@ public:
         _result_selector{ std::move(result_selector) } {
     }
 
-    constexpr iterator begin() const& {
+    constexpr iterator begin() const {
         return { _iterable_a, _iterable_a.begin(), _iterable_b.begin(), _iterable_b.end(), _a, _b, _result_selector };
-    }
-
-    LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        // clang-format off
-        return { _iterable_a, _iterable_a.begin(), detail::begin(std::move(_iterable_b)),
-                 detail::end(std::move(_iterable_b)), std::move(_a), std::move(_b), std::move(_result_selector) };
-        // clang-format on
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

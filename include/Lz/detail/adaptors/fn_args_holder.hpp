@@ -3,7 +3,8 @@
 #ifndef LZ_FN_ARGS_HOLDER_ADAPTOR_HPP
 #define LZ_FN_ARGS_HOLDER_ADAPTOR_HPP
 
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/compiler_config.hpp>
+#include <Lz/detail/traits/index_sequence.hpp>
 #include <tuple>
 
 namespace lz {

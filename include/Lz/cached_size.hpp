@@ -3,7 +3,7 @@
 #ifndef LZ_CACHED_SIZE_HPP
 #define LZ_CACHED_SIZE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/cached_size.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -45,7 +45,6 @@ LZ_INLINE_VAR constexpr detail::cached_size_adaptor cache_size{};
 
 /**
  * @brief Helper alias for the cached_size_iterable.
- * @tparam T The type of the iterable.
  * Example:
  * ```cpp
  * std::vector<int> vec = {1, 2, 3, 4, 5};

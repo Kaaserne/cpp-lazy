@@ -3,27 +3,27 @@
 #ifndef LZ_TAKE_WHILE_ITERATOR_HPP
 #define LZ_TAKE_WHILE_ITERATOR_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/iterators/common.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class UnaryPredicate>
-class take_while_iterator
-    : public iterator<take_while_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>,
-                      fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
-                      common_type<iter_cat_t<iter_t<Iterable>>, std::bidirectional_iterator_tag>, default_sentinel_t> {
+class take_while_iterator : public iterator<take_while_iterator<Iterable, UnaryPredicate>, ref_t<iter_t<Iterable>>,
+                                            fake_ptr_proxy<ref_t<iter_t<Iterable>>>, diff_type<iter_t<Iterable>>,
+                                            bidi_strongest_cat<iter_cat_t<iter_t<Iterable>>>, default_sentinel_t> {
 
     using iter = iter_t<Iterable>;
 
-    iter _iterator;
-    Iterable _iterable;
-    mutable UnaryPredicate _unary_predicate;
+    iter _iterator{};
+    Iterable _iterable{};
+    mutable UnaryPredicate _unary_predicate{};
 
     using traits = std::iterator_traits<iter>;
 
@@ -39,6 +39,9 @@ public:
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
 
+    constexpr take_while_iterator(const take_while_iterator&)  = default;
+    LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(const take_while_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr take_while_iterator()
@@ -48,8 +51,8 @@ public:
 #else
 
     template<class I = iter,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
-                               std::is_default_constructible<UnaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value &&
+                                 std::is_default_constructible<UnaryPredicate>::value>>
     constexpr take_while_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<Iterable>::value &&
                                              std::is_nothrow_default_constructible<UnaryPredicate>::value) {

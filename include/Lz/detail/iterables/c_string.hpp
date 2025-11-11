@@ -4,6 +4,7 @@
 #define LZ_C_STRING_ITERABLE_HPP
 
 #include <Lz/detail/iterators/c_string.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
@@ -32,4 +33,5 @@ public:
 };
 } // namespace detail
 } // namespace lz
+
 #endif // LZ_C_STRING_ITERABLE_HPP

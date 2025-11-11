@@ -3,9 +3,12 @@
 #ifndef LZ_CHUNK_IF_ITERATOR_HPP
 #define LZ_CHUNK_IF_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
+#include <Lz/algorithm/find_if.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -21,17 +24,18 @@ public:
     using reference = value_type;
     using pointer = fake_ptr_proxy<reference>;
 
+    chunk_if_iterator(const chunk_if_iterator&) = default;
+    chunk_if_iterator& operator=(const chunk_if_iterator&) = default;
+
 private:
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
     bool _ends_with_trailing{ true };
-    S _end;
-    mutable UnaryPredicate _predicate;
+    S _end{};
+    mutable UnaryPredicate _predicate{};
 
     LZ_CONSTEXPR_CXX_14 void find_next() {
-        using detail::find_if;
-        using std::find_if;
-        _sub_range_end = find_if(_sub_range_end, _end, _predicate);
+        _sub_range_end = detail::find_if(_sub_range_end, _end, _predicate);
     }
 
 public:
@@ -45,8 +49,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<UnaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<UnaryPredicate>::value>>
     constexpr chunk_if_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                            std::is_nothrow_default_constructible<S>::value &&
                                            std::is_nothrow_default_constructible<UnaryPredicate>::value) {
@@ -69,6 +73,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 chunk_if_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        _sub_range_end = _end;
         _ends_with_trailing = false;
         return *this;
     }
@@ -88,14 +93,14 @@ public:
 #else
 
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { _sub_range_begin, _sub_range_end };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_14 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         static_assert(is_ra<Iterator>::value, "Iterator must be a random access");
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { detail::addressof(*_sub_range_begin), static_cast<size_t>(_sub_range_end - _sub_range_begin) };
@@ -123,7 +128,8 @@ public:
         }
 
         if (_predicate(*prev)) {
-            _sub_range_begin = _sub_range_end = _ends_with_trailing ? std::move(prev) : _sub_range_end;
+            _sub_range_end = _ends_with_trailing ? std::move(prev) : _sub_range_end;
+            _sub_range_begin = _sub_range_end;
             _ends_with_trailing = false;
             return;
         }

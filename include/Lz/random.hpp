@@ -3,7 +3,7 @@
 #ifndef LZ_RANDOM_HPP
 #define LZ_RANDOM_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/random.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -106,6 +106,5 @@ using common_default_random_iterable =
     decltype(std::declval<detail::random_adaptor<false>>()(Arithmetic{}, Arithmetic{}, size_t{}));
 
 } // namespace lz
-
 
 #endif

@@ -1,12 +1,17 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/any_iterable.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/iter_tools.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/take.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Any iterable with sentinels") {
     lz::any_iterable<char, const char&> iterable = "Hello, World!" | lz::c_string;
@@ -70,9 +75,9 @@ TEST_CASE("Creating a complex any iterable, std::forward_iterator_tag") {
 
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::forward_iterator_tag> view =
 #ifdef LZ_HAS_CXX_11
-        vec | lz::as<int&>{} | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(lz::ssize(vec));
 #else
-        vec | lz::as<int&> | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&> | lz::enumerate | lz::take(lz::ssize(vec));
 #endif
 
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),
@@ -85,9 +90,9 @@ TEST_CASE("Creating a complex any iterable, std::bidirectional_iterator_tag") {
 
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::bidirectional_iterator_tag> view =
 #ifdef LZ_HAS_CXX_11
-        vec | lz::as<int&>{} | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(lz::ssize(vec));
 #else
-        vec | lz::as<int&> | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&> | lz::enumerate | lz::take(lz::ssize(vec));
 #endif
 
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),
@@ -100,9 +105,9 @@ TEST_CASE("Creating a complex any iterable, std::random_access_iterator_tag") {
 
     lz::any_iterable<std::pair<int, int>, std::pair<int, int&>, std::random_access_iterator_tag> view =
 #ifdef LZ_HAS_CXX_11
-        vec | lz::as<int&>{} | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&>{} | lz::enumerate | lz::take(lz::ssize(vec));
 #else
-        vec | lz::as<int&> | lz::enumerate | lz::take(vec.size());
+        vec | lz::as<int&> | lz::enumerate | lz::take(lz::ssize(vec));
 #endif
 
     auto expected = { std::make_pair(0, 1), std::make_pair(1, 2), std::make_pair(2, 3),

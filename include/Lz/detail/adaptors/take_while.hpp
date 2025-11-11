@@ -3,7 +3,6 @@
 #ifndef LZ_TAKE_WHILE_ADAPTOR
 #define LZ_TAKE_WHILE_ADAPTOR
 
-
 #include <Lz/detail/iterables/take_while.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 
@@ -25,7 +24,7 @@ struct take_while_adaptor {
      * @return A take_while_iterable that will yield elements from the input iterable while the predicate returns true.
      */
     template<class Iterable, class UnaryPredicate>
-    LZ_NODISCARD constexpr take_while_iterable<remove_ref<Iterable>, UnaryPredicate>
+    LZ_NODISCARD constexpr take_while_iterable<remove_ref_t<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate unary_predicate) const {
         return { std::forward<Iterable>(iterable), std::move(unary_predicate) };
     }
@@ -49,4 +48,5 @@ struct take_while_adaptor {
 
 } // namespace detail
 } // namespace lz
+
 #endif // LZ_TAKE_WHILE_ADAPTOR

@@ -3,8 +3,9 @@
 #ifndef LZ_ITER_TOOLS_HPP
 #define LZ_ITER_TOOLS_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/adaptors/iter_tools.hpp>
+#include <Lz/detail/procs/tuple_expand.hpp>
+#include <Lz/procs/chain.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
@@ -50,7 +51,6 @@ using lines_iterable = detail::lines_iterable<CharT, Iterable>;
 /**
  * @brief Lines iterable helper alias for string_views. string_views are not held by reference, but copied.
  *
- * @tparam Iterable The iterable to split into lines.
  * @tparam CharT The character type of the string to split into lines. Defaults to `char`.
  * ```cpp
  * lz::lines_iterable_sv<> actual = lz::lines(lz::string_view("hello world\nthis is a message\ntesting"));
@@ -163,26 +163,24 @@ using select_iterable = detail::select_iterable<Iterable, SelectorIterable>;
  * @tparam UnaryPredicate The predicate to determine which elements to drop from the back.
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * using drop_back_iterable = lz::drop_back_iterable<std::vector<int>, std::function<bool(int)>>;
+ * using drop_back_iterable = lz::drop_back_iterable<std::vector<int>>;
  * drop_back_iterable dropped = lz::drop_back_while(vec, [](int i) { return i > 3; });
  * ```
  */
 template<class Iterable, class UnaryPredicate>
-using drop_back_iterable = detail::drop_back_iterable<Iterable, UnaryPredicate>;
+using drop_back_iterable = detail::drop_back_iterable<Iterable>;
 
 /**
  * @brief Trim iterable helper alias
  * @tparam Iterable The iterable to trim.
- * @tparam UnaryPredicateFirst The predicate to determine which elements to drop from the front.
- * @tparam UnaryPredicateLast The predicate to determine which elements to drop from the back.
  * ```cpp
  * std::vector<int> vec = { 1, 2, 3, 4, 5 };
- * using trim_iterable = lz::trim_iterable<std::vector<int>, std::function<bool(int)>, std::function<bool(int)>>;
+ * using trim_iterable = lz::trim_iterable<std::vector<int>>;
  * trim_iterable trimmed = lz::trim(vec, [](int i) { return i < 3; }, [](int i) { return i > 4; });
  * ```
  */
-template<class Iterable, class UnaryPredicateFirst, class UnaryPredicateLast>
-using trim_iterable = detail::trim_iterable<Iterable, UnaryPredicateFirst, UnaryPredicateLast>;
+template<class Iterable>
+using trim_iterable = detail::trim_iterable<Iterable>;
 
 /**
  * @brief Trim string helper alias
@@ -193,7 +191,7 @@ using trim_iterable = detail::trim_iterable<Iterable, UnaryPredicateFirst, Unary
  * ```
  */
 template<class String>
-using trim_string_iterable = trim_iterable<String, detail::trim_fn, detail::trim_fn>;
+using trim_string_iterable = trim_iterable<String>;
 
 #ifdef LZ_HAS_CXX_11
 
@@ -299,8 +297,8 @@ LZ_INLINE_VAR constexpr detail::get_nths_adaptor<N...> get_nths{};
  * @return A map object that can be iterated over.
  */
 template<class Fn, class... Iterables>
-LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref<Iterables>...>
-zip_with(Fn fn, Iterables&&... iterables) {
+LZ_NODISCARD LZ_CONSTEXPR_CXX_14 zip_with_iterable<Fn, detail::remove_ref_t<Iterables>...> zip_with(Fn fn,
+                                                                                                    Iterables && ... iterables) {
     return lz::map(lz::zip(std::forward<Iterables>(iterables)...), detail::make_expand_fn(std::move(fn)));
 }
 

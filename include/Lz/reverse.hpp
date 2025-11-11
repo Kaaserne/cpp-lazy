@@ -3,7 +3,7 @@
 #ifndef LZ_REVERSE_HPP
 #define LZ_REVERSE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/reverse.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -44,6 +44,14 @@ LZ_INLINE_VAR constexpr detail::reverse_adaptor<true> cached_reverse{};
 template<class Iterable>
 using reverse_iterable = detail::reverse_iterable<Iterable, false>;
 
+/**
+ * @brief Cached reverse iterable helper alias.
+ * @tparam Iterable The type of the iterable to reverse.
+ * ```cpp
+ * std::vector<int> v = { 1, 2, 3, 4, 5 };
+ * lz::cached_reverse_iterable<std::vector<int>> reversed = lz::cached_reverse(v);
+ * ```
+ */
 template<class Iterable>
 using cached_reverse_iterable = detail::reverse_iterable<Iterable, true>;
 

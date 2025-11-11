@@ -1,10 +1,12 @@
+#pragma once
+
 #ifndef LZ_DUPLICATES_ITERABLE_HPP
 #define LZ_DUPLICATES_ITERABLE_HPP
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/duplicates.hpp>
 #include <Lz/detail/maybe_owned.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
@@ -19,8 +21,8 @@ public:
     using sent = sentinel_t<Iterable>;
 
 private:
-    maybe_owned<Iterable> _iterable;
-    func_container<BinaryPredicate> _compare;
+    maybe_owned<Iterable> _iterable{};
+    func_container<BinaryPredicate> _compare{};
 
     static constexpr bool return_sentinel = !is_bidi_tag<iter_cat_t<iterator>>::value || has_sentinel<Iterable>::value;
 
@@ -33,8 +35,8 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<BinaryPredicate>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value &&
+                                                                std::is_default_constructible<BinaryPredicate>::value>>
     constexpr duplicates_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                              std::is_nothrow_default_constructible<BinaryPredicate>::value) {
     }
@@ -47,26 +49,9 @@ public:
         _compare{ std::move(compare) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin(), _compare };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() &&
-        requires(return_sentinel)
-    {
-        return { _iterable, _iterable.begin(), std::move(_compare) };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        return { _iterable, _iterable.begin(), std::move(_compare) };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -82,12 +67,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return { _iterable, _iterable.end(), _compare };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const {
+    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const {
         return {};
     }
 

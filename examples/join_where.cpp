@@ -1,3 +1,4 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/join_where.hpp>
 #include <algorithm>
 #include <iostream>

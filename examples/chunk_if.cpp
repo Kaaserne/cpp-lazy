@@ -1,4 +1,5 @@
 #include <Lz/chunk_if.hpp>
+#include <Lz/algorithm/for_each.hpp>
 #include <iostream>
 #include <vector>
 
@@ -53,7 +54,7 @@ int main() {
         std::cout << '\n';
     }
 #else
-    using string_iterable = lz::basic_iterable<std::string::const_iterator>;
+    using string_iterable = decltype(chunked)::value_type;
     lz::for_each(chunked, [](string_iterable chunk) {
         for (char c : chunk) {
             std::cout << c;

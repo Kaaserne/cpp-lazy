@@ -1,7 +1,9 @@
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/c_string.hpp>
+#include <Lz/iter_tools.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/iter_tools.hpp>
 
 TEST_CASE("Lines") {
     const lz::string_view expected[] = { "hello world", "this is a message", "testing" };
@@ -192,8 +194,7 @@ TEST_CASE("Trim variants") {
         std::function<bool(int)> last_pred = [](int i) {
             return i > 4;
         };
-        lz::trim_iterable<decltype(actual), decltype(first_pred), decltype(last_pred)> actual_trim =
-            lz::trim(actual, std::move(first_pred), std::move(last_pred));
+        lz::trim_iterable<decltype(actual)> actual_trim = lz::trim(actual, std::move(first_pred), std::move(last_pred));
         REQUIRE(lz::equal(actual_trim, expected));
     }
 
@@ -226,7 +227,7 @@ TEST_CASE("iter_decay") {
     auto zipped = lz::zip(f1 | lz::iter_decay(std::forward_iterator_tag{}), f2);
 #endif
 
-    static_assert(std::is_same<lz::iter_cat_iterable_t<decltype(zipped)>, std::forward_iterator_tag>::value, "must be forward");
+    static_assert(std::is_same<lz::detail::iter_cat_iterable_t<decltype(zipped)>, std::forward_iterator_tag>::value, "must be forward");
     auto expeted = { std::make_tuple(2, 6), std::make_tuple(4, 8) };
     REQUIRE(lz::equal(zipped, expeted));
 }
@@ -234,16 +235,16 @@ TEST_CASE("iter_decay") {
 TEST_CASE("Pad") {
     std::vector<int> v1 = { 1, 2, 3 };
     int value = 0;
-    std::size_t amount = 3;
+    std::ptrdiff_t amount = 3;
     auto padded = lz::pad(v1, std::ref(value), amount);
     static_assert(std::is_same<decltype(*padded.begin()), std::reference_wrapper<int>>::value, "");
     std::vector<int> expected = { 1, 2, 3, 0, 0, 0 };
 
-    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::ssize(padded) == amount + lz::ssize(v1));
     REQUIRE(lz::equal(padded, expected));
 
     padded = v1 | lz::pad(std::ref(value), amount);
-    REQUIRE(lz::size(padded) == amount + v1.size());
+    REQUIRE(lz::ssize(padded) == amount + lz::ssize(v1));
     REQUIRE(lz::equal(padded, expected));
 
     SUBCASE("reference types") {
@@ -293,6 +294,19 @@ TEST_CASE("Pad") {
                                    std::reference_wrapper<const int>>::value,
                       "");
         static_assert(std::is_same<lz::detail::common_reference_t<int&, std::reference_wrapper<const int>>,
+                                   std::reference_wrapper<const int>>::value,
+                      "");
+
+        //
+
+        static_assert(
+            std::is_same<lz::detail::common_reference_t<std::reference_wrapper<int>&, int&>, std::reference_wrapper<int>>::value,
+            "");
+
+        static_assert(std::is_same<lz::detail::common_reference_t<const std::reference_wrapper<int>&, int&>,
+                                   std::reference_wrapper<int>>::value,
+                      "");
+        static_assert(std::is_same<lz::detail::common_reference_t<const std::reference_wrapper<int>&, const int&>,
                                    std::reference_wrapper<const int>>::value,
                       "");
     }

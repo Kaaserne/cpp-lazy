@@ -52,16 +52,17 @@ if (CPP-LAZY_USE_STANDALONE)
 else()
 	if (CPP-LAZY_USE_INSTALLED_FMT)
 		message(STATUS "cpp-lazy: using external {fmt} library")
-		find_package(fmt REQUIRED CONFIG)
+		set(CPP-LAZY_FMT_DEP_VERSION "" CACHE STRING "Version of {fmt} to use")
+		find_package(fmt "${CPP-LAZY_FMT_DEP_VERSION}" REQUIRED CONFIG)
 	else()
 		message(STATUS "cpp-lazy: using bundled {fmt} library")
 		set(FMT_OS YES CACHE INTERNAL "")
 		set(FMT_INSTALL YES CACHE INTERNAL "" FORCE)
 		include(FetchContent)
+		set(CPP-LAZY_FMT_DEP_VERSION 12.0.0 CACHE STRING "Version of {fmt} to use")
 		FetchContent_Declare(fmt 
-			URL https://github.com/fmtlib/fmt/archive/refs/tags/10.2.1.tar.gz 
+			URL https://github.com/fmtlib/fmt/archive/refs/tags/${CPP-LAZY_FMT_DEP_VERSION}.tar.gz 
 			UPDATE_DISCONNECTED YES 
-			URL_MD5 dc09168c94f90ea890257995f2c497a5
 			DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 		)
 		FetchContent_MakeAvailable(fmt)
@@ -69,7 +70,7 @@ else()
 endif()
 
 message(STATUS "cpp-lazy: standalone version: ${CPP-LAZY_USE_STANDALONE}.")
-message(STATUS "cpp-lazy: Debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
+message(STATUS "cpp-lazy: debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
 
 # ---- Declare library ----
 add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
@@ -96,10 +97,6 @@ target_compile_definitions(cpp-lazy
 		$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
 
-target_compile_features(cpp-lazy 
-	${CPP-LAZY_COMPILE_FEATURES_VISIBLITY} 
-		cxx_std_11
-)
 target_include_directories(cpp-lazy
 	${cpp-lazy_warning_guard}
 		${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
@@ -110,54 +107,63 @@ target_include_directories(cpp-lazy
 # ---- Install ----
 include(CMakePackageConfigHelpers)
 
-set(cpp-lazy_directory "cpp-lazy")
-set(cpp-lazy_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${cpp-lazy_directory}")
-set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/${cpp-lazy_directory}")
+set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/cpp-lazy")
 
-if (CPP-LAZY_USE_MODULES)
-	install(TARGETS cpp-lazy
+option(CPP-LAZY_INSTALL "Install cpp-lazy" OFF)
+
+if (CPP-LAZY_USE_MODULES AND CPP-LAZY_INSTALL)
+	install(
+		TARGETS cpp-lazy
         EXPORT cpp-lazyTargets
-        INCLUDES
-        DESTINATION "${cpp-lazy_include_directory}"
-        FILE_SET cxx_modules DESTINATION "${cpp-lazy_include_directory}"
-)
-else ()
-	install(TARGETS cpp-lazy
-			EXPORT cpp-lazyTargets
-			INCLUDES
-			DESTINATION "${cpp-lazy_include_directory}")
-endif ()
+        INCLUDES DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+	)
+elseif (CPP-LAZY_INSTALL)
+	install(
+		TARGETS cpp-lazy
+		EXPORT cpp-lazyTargets
+		INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
+endif()
 
-write_basic_package_version_file(
-        cpp-lazyConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
-        ARCH_INDEPENDENT)
-
-
-install(EXPORT cpp-lazyTargets
-        NAMESPACE cpp-lazy::
-        DESTINATION "${cpp-lazy_install_cmakedir}")
-
-install(FILES
-        "${PROJECT_SOURCE_DIR}/cmake/cpp-lazyConfig.cmake"
-        "${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
-        DESTINATION "${cpp-lazy_install_cmakedir}")
-
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-        DESTINATION "${cpp-lazy_include_directory}")
-
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
-
-include(CPack)
+if (CPP-LAZY_INSTALL)
+	write_basic_package_version_file(
+		cpp-lazyConfigVersion.cmake
+		VERSION ${PROJECT_VERSION}
+		COMPATIBILITY SameMajorVersion
+		ARCH_INDEPENDENT
+	)
+	configure_package_config_file(
+		"${PROJECT_SOURCE_DIR}/cmake/cpp-lazyConfig.cmake.in"
+		"${PROJECT_BINARY_DIR}/cpp-lazyConfig.cmake"
+		INSTALL_DESTINATION "${cpp-lazy_install_cmakedir}"
+	)
+	install(EXPORT cpp-lazyTargets
+			NAMESPACE cpp-lazy::
+			DESTINATION "${cpp-lazy_install_cmakedir}"
+	)
+	install(FILES
+			"${PROJECT_BINARY_DIR}/cpp-lazyConfig.cmake"
+			"${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
+			DESTINATION "${cpp-lazy_install_cmakedir}"
+	)
+	if (NOT CPP-LAZY_USE_MODULES)
+		install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+				DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+		)
+	endif()
+	include(CPack)
+	set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
+	set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
+endif()
 
 # ---- Release configuration zip package, bare essentials ----
 option(CPP-LAZY_BUILD_ESSENTIALS_ZIP OFF)
 if (CPP-LAZY_BUILD_ESSENTIALS_ZIP)
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip"
-		COMMAND ${CMAKE_COMMAND} -E tar c "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip" --format=zip -- include/ CMakeLists.txt LICENSE.md cmake/
+		COMMAND ${CMAKE_COMMAND} -E tar c "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip" --format=zip -- include/ CMakeLists.txt LICENSE.md
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		DEPENDS include/;CMakeLists.txt;LICENSE.md;cmake/
+		DEPENDS include/;CMakeLists.txt;LICENSE.md
 	)
 	add_custom_target(${PROJECT_NAME}_package DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip")
 endif ()

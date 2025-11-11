@@ -5,7 +5,7 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/except.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/operators.hpp>
 
 namespace lz {
 namespace detail {
@@ -30,8 +30,8 @@ struct except_adaptor {
      * @param binary_predicate The binary predicate to use for comparison.
      * @return An iterable that contains every item from @p iterable1 that is not in @p iterable2.
      */
-    template<class Iterable1, class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD constexpr except_iterable<remove_ref<Iterable1>, remove_ref<Iterable2>, BinaryPredicate>
+    template<class Iterable1, class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
+    LZ_NODISCARD constexpr except_iterable<remove_ref_t<Iterable1>, remove_ref_t<Iterable2>, BinaryPredicate>
     operator()(Iterable1&& iterable1, Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable1>(iterable1), std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }
@@ -59,7 +59,7 @@ struct except_adaptor {
      * @param binary_predicate The binary predicate to use for comparison.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
+    template<class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
     [[nodiscard]] constexpr fn_args_holder<adaptor, Iterable2, BinaryPredicate>
     operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const
         requires(!lz::iterable<BinaryPredicate>)
@@ -90,10 +90,10 @@ struct except_adaptor {
      * @param binary_predicate The binary predicate to use for comparison.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class Iterable2, class BinaryPredicate = MAKE_BIN_PRED(less)>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
-    operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
+    template<class Iterable2, class BinaryPredicate = LZ_BIN_OP(less, val_iterable_t<Iterable2>)>
+    LZ_NODISCARD
+        LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<BinaryPredicate>::value, fn_args_holder<adaptor, Iterable2, BinaryPredicate>>
+        operator()(Iterable2&& iterable2, BinaryPredicate binary_predicate = {}) const {
         return { std::forward<Iterable2>(iterable2), std::move(binary_predicate) };
     }
 

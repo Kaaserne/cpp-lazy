@@ -3,7 +3,7 @@
 #ifndef LZ_C_STRING_HPP
 #define LZ_C_STRING_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/c_string.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

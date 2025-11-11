@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/loop.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,9 +14,6 @@ class loop_iterable;
 
 template<class Iterable>
 class loop_iterable<Iterable, false /* is inf loop */> : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    size_t _amount{};
-
 public:
     using iterator = loop_iterator<maybe_owned<Iterable>, false>;
     using const_iterator = iterator;
@@ -24,6 +22,9 @@ public:
 private:
     static constexpr bool return_sentinel =
         !is_bidi_tag<typename iterator::iterator_category>::value || is_sentinel<iter_t<Iterable>, sentinel_t<Iterable>>::value;
+
+    maybe_owned<Iterable> _iterable{};
+    typename iterator::difference_type _amount{};
 
 public:
 #ifdef LZ_HAS_CONCEPTS
@@ -34,14 +35,16 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr loop_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
 #endif
 
     template<class I>
-    constexpr loop_iterable(I&& iterable, const size_t amount) : _iterable{ std::forward<I>(iterable) }, _amount{ amount } {
+    constexpr loop_iterable(I&& iterable, const typename iterator::difference_type amount) :
+        _iterable{ std::forward<I>(iterable) },
+        _amount{ amount } {
     }
 
 #ifdef LZ_HAS_CONCEPTS
@@ -49,53 +52,26 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return _amount * static_cast<size_t>(lz::size(_iterable));
+        return static_cast<size_t>(_amount) * static_cast<size_t>(lz::size(_iterable));
     }
 
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const {
-        return _amount * static_cast<size_t>(lz::size(_iterable));
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
+        return static_cast<size_t>(_amount) * static_cast<size_t>(lz::size(_iterable));
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         auto first = _iterable.begin();
-        if (_amount == 0) {
+        if (_amount == 0 || first == _iterable.end()) {
             first = _iterable.end();
-            return { _iterable, first, _amount };
+            return { _iterable, first, 0 };
         }
         return { _iterable, first, _amount - 1 };
     }
-
-#ifdef LZ_HAS_CONCEPTS
-
-    [[nodiscard]] constexpr iterator begin() &&
-        requires(return_sentinel)
-    {
-        auto first = detail::begin(std::move(_iterable));
-        if (_amount == 0) {
-            first = detail::end(std::move(_iterable));
-            return { _iterable, first, _amount };
-        }
-        return { _iterable, first, _amount - 1 };
-    }
-
-#else
-
-    template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<R, iterator> begin() && {
-        auto first = detail::begin(std::move(_iterable));
-        if (_amount == 0) {
-            first = detail::end(std::move(_iterable));
-            return { _iterable, first, _amount };
-        }
-        return { _iterable, first, _amount - 1 };
-    }
-
-#endif
 
 #ifdef LZ_HAS_CXX_17
 
@@ -111,12 +87,12 @@ public:
 #else
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!R, iterator> end() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
         return iterator{ _iterable, _iterable.end(), 0 };
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD constexpr enable_if<R, default_sentinel_t> end() const {
+    LZ_NODISCARD constexpr enable_if_t<R, default_sentinel_t> end() const {
         return {};
     }
 
@@ -125,7 +101,7 @@ public:
 
 template<class Iterable>
 class loop_iterable<Iterable, true /* is inf loop */> : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
 public:
     using iterator = loop_iterator<maybe_owned<Iterable>, true>;
@@ -140,7 +116,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr loop_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -150,12 +126,8 @@ public:
     explicit constexpr loop_iterable(I&& iterable) : _iterable{ std::forward<I>(iterable) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return { _iterable, _iterable.begin() };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { _iterable, detail::begin(std::move(_iterable)) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const {

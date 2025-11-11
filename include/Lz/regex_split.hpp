@@ -3,7 +3,7 @@
 #ifndef LZ_REGEX_SPLIT_HPP
 #define LZ_REGEX_SPLIT_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/regex_split.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

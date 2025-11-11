@@ -4,6 +4,8 @@
 #define LZ_RANGE_HPP
 
 #include <Lz/detail/adaptors/range.hpp>
+#include <Lz/procs/to.hpp>
+
 
 LZ_MODULE_EXPORT namespace lz {
 

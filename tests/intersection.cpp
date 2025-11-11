@@ -1,10 +1,16 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/intersection.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Intersection tests with sentinels") {
     auto str = lz::c_string("aaaabbcccddee");
@@ -14,14 +20,32 @@ TEST_CASE("Intersection tests with sentinels") {
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
 
     std::swap(str, str2);
-    intersect = lz::intersection(str, str2, MAKE_BIN_PRED(less){});
+    intersect = lz::intersection(str, str2, LZ_BIN_OP(less, char){});
     REQUIRE((intersect | lz::to<std::string>()) == "aabccce");
+}
 
-    SUBCASE("Operator=") {
-        auto begin = intersect.begin();
-        REQUIRE(begin == intersect.begin());
-        begin = intersect.end();
-        REQUIRE(begin == intersect.end());
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> a = { 1, 2, 3, 4, 5 };
+        std::forward_list<int> b = { 2, 4, 6 };
+        auto intersected = lz::intersection(a, b);
+        auto common = make_sentinel_assign_op_tester(intersected);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(common, expected));
+
+        intersected = lz::intersection(b, a);
+        common = make_sentinel_assign_op_tester(intersected);
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 2, 3, 4, 5 };
+        std::vector<int> b = { 2, 4, 6 };
+        auto intersected = lz::intersection(make_sized_bidi_sentinelled(a), make_sized_bidi_sentinelled(b));
+        auto common = make_sentinel_assign_op_tester(intersected);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
     }
 }
 
@@ -38,7 +62,7 @@ TEST_CASE("Empty or one element intersection") {
     SUBCASE("One element 1") {
         std::string a = "h";
         std::string b;
-        auto intersect = a | lz::intersection(b, MAKE_BIN_PRED(less){});
+        auto intersect = a | lz::intersection(b, LZ_BIN_OP(less, char){});
         REQUIRE(lz::empty(intersect));
         REQUIRE_FALSE(lz::has_one(intersect));
         REQUIRE_FALSE(lz::has_many(intersect));
@@ -73,40 +97,22 @@ TEST_CASE("Empty or one element intersection") {
 }
 
 TEST_CASE("Intersection binary operations") {
-    std::string a = "aaaabbcccddee";
-    std::string b = "aabccce";
-
-    SUBCASE("Operator++ 1") {
+    SUBCASE("Operator++/-- 1") {
+        std::string a = "aaaabbcccddee";
+        std::string b = "aabccce";
         auto intersect = lz::intersection(a, b);
-        auto excpected = lz::c_string("aabccce");
-        REQUIRE(lz::equal(intersect, excpected));
-    }
-
-    SUBCASE("Operator-- 1") {
-        auto intersect = lz::intersection(a, b);
-        auto expected = lz::c_string("ecccbaa");
-        REQUIRE(lz::equal(intersect | lz::reverse, expected));
-    }
-
-    SUBCASE("Operator++ 2") {
-        auto intersect = lz::intersection(b, a);
-        auto expected = lz::c_string("aabccce");
+        std::string expected = "aabccce";
         REQUIRE(lz::equal(intersect, expected));
+        REQUIRE(lz::equal(intersect | lz::reverse, expected | lz::reverse));
     }
 
-    SUBCASE("Operator-- 2") {
+    SUBCASE("Operator++/-- 2") {
+        std::string a = "aaaabbcccddee";
+        std::string b = "aabccce";
         auto intersect = lz::intersection(b, a);
-        auto expected = lz::c_string("ecccbaa");
-        REQUIRE(lz::equal(intersect | lz::reverse, expected));
-    }
-
-    SUBCASE("Operator=") {
-        auto intersect = lz::intersection(a, b);
-        auto it = intersect.begin();
-        auto it2 = intersect.end();
-        REQUIRE(it != it2);
-        it2 = it;
-        REQUIRE(it == it2);
+        std::string expected = "aabccce";
+        REQUIRE(lz::equal(intersect, expected));
+        REQUIRE(lz::equal(intersect | lz::reverse, expected | lz::reverse));
     }
 }
 

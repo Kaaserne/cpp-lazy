@@ -3,23 +3,37 @@
 #ifndef LZ_STREAM_HPP
 #define LZ_STREAM_HPP
 
-#include <Lz/basic_iterable.hpp> // for operator|
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/compiler_config.hpp>
+#include <Lz/procs/chain.hpp> // for operator|
+#include <Lz/traits/lazy_view.hpp>
 #include <ostream>
 #include <string>
 
+#if FMT_VERSION >= 80000
+#endif
+
+// clang-format off
 #if !defined(LZ_STANDALONE)
-
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-
+  #ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wall"
+    #pragma GCC diagnostic ignored "-Wextra"
+    #pragma GCC diagnostic ignored "-Wpedantic"
+    #pragma GCC diagnostic ignored "-Wctor-dtor-privacy"
+    #pragma GCC diagnostic ignored "-Weffc++"
+  #endif
+  #include <fmt/format.h>
+  #include <fmt/ostream.h>
+  #include <fmt/ranges.h>
+  #ifdef __GNUC__
+    #pragma GCC diagnostic pop
+  #endif
 #elif defined(LZ_HAS_FORMAT)
-
-#include <format>
-
+  #include <format>
 #endif // !defined(LZ_STANDALONE)
+
+// clang-format on
 
 namespace lz {
 namespace detail {
@@ -30,8 +44,8 @@ struct iterable_formatter {
 #if !defined(LZ_STANDALONE) || defined(LZ_HAS_FORMAT)
 
     /**
-     * @brief Function that can be used to format an iterable to an output stream. Only defined if c++ 20 or if using `{fmt}`.
-     * Example:
+     * @brief Function that can be used to format an iterable to an output
+     * stream. Only defined if c++ 20 or if using `{fmt}`. Example:
      * ```cpp
      * std::vector<int> vec = { 2, 4 };
      * lz::format(vec, std::cout, ", ", "{}"); // prints: 2, 4
@@ -44,7 +58,6 @@ struct iterable_formatter {
      * @param stream The output stream to write to
      * @param separator The separator to use between elements. Default is ", "
      * @param format The format to use for each element. Default is "{}"
-     * @return The stream object
      */
     template<class Iterable>
     void
@@ -91,15 +104,15 @@ struct iterable_formatter {
 #else
 
     /**
-     * @brief Function that can be used to format an iterable to an output stream. Only defined if c++ 20
-     * is not defined or not using `{fmt}`. Example:
+     * @brief Function that can be used to format an iterable to an output
+     * stream. Only defined if c++ 20 is not defined or not using `{fmt}`.
+     * Example:
      * ```cpp
      * std::vector<int> vec = { 2, 4 };
      * lz::format(vec, std::cout, ", "); // prints: 2, 4
      * lz::format(vec, std::cout, ","); // prints: 2,4
      *
      * @param separator The separator to use between elements. Default is ", "
-     * @return The stream object
      */
     template<class Iterable>
     void operator()(const Iterable& iterable, std::ostream& stream, const char* separator = ", ") const {
@@ -358,7 +371,7 @@ std::ostream& operator<<(std::ostream& stream, const Iterable& iterable)
  * @param iterable The `lz` iterable to output
  */
 LZ_MODULE_EXPORT template<class Iterable>
-lz::detail::enable_if<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
+lz::detail::enable_if_t<std::is_base_of<lz::lazy_view, Iterable>::value, std::ostream&>
 operator<<(std::ostream& stream, const Iterable& iterable) {
     lz::format(iterable, stream);
     return stream;

@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_VARIANT_HPP
 #define LZ_DETAIL_VARIANT_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifdef LZ_HAS_CXX_17
 
@@ -20,7 +20,6 @@ using variant = std::variant<T, T2>;
 
 #else
 
-#include <Lz/detail/procs.hpp>
 #include <cstdint>
 
 namespace lz {
@@ -45,13 +44,13 @@ class variant {
 
         ~types() {
         }
-    } _variant;
+    } _variant{};
 
     template<class U, class V>
     void reconstruct(state s, U&& this_variant, V&& other_variant_type) {
         this->~variant();
         _state = s;
-        ::new (detail::addressof(this_variant)) decay_t<U>(std::forward<V>(other_variant_type));
+        ::new (detail::addressof(this_variant)) typename std::decay<U>::type(std::forward<V>(other_variant_type));
     }
 
     template<class V, class V2>
@@ -133,39 +132,39 @@ public:
     }
 
     template<size_t I, class... Args>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value) {
         this->~variant();
         ::new (detail::addressof(_variant._t)) T(std::forward<Args>(args)...);
         _state = state::t;
     }
 
     template<size_t I, class... Args>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 1> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T2, Args...>::value) {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 1> emplace(Args&&... args) noexcept(std::is_nothrow_constructible<T2, Args...>::value) {
         this->~variant();
         ::new (detail::addressof(_variant._t2)) T2(std::forward<Args>(args)...);
         _state = state::t2;
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, const T&> get() const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0, const T&> get() const noexcept {
         LZ_ASSERT(_state == state::t, "Invalid variant access");
         return _variant._t;
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 const enable_if<I == 1, const T2&> get() const noexcept {
+    LZ_CONSTEXPR_CXX_14 const enable_if_t<I == 1, const T2&> get() const noexcept {
         LZ_ASSERT(_state == state::t2, "Invalid variant access");
         return _variant._t2;
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 0, T&> get() noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0, T&> get() noexcept {
         LZ_ASSERT(_state == state::t, "Invalid variant access");
         return _variant._t;
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == 1, T2&> get() noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == 1, T2&> get() noexcept {
         LZ_ASSERT(_state == state::t2, "Invalid variant access");
         return _variant._t2;
     }

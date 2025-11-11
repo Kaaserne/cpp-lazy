@@ -4,6 +4,7 @@
 #define LZ_RANDOM_ADAPTOR_HPP
 
 #include <Lz/detail/iterables/random.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <algorithm>
 #include <random>
 
@@ -21,7 +22,7 @@ private:
     template<class Iter>
     LZ_CONSTEXPR_CXX_20 void create(Iter begin, Iter end) {
         using value_type = val_t<Iter>;
-        std::transform(begin, end, std::begin(_seed), [](const value_type val) { return static_cast<result_type>(val); });
+        std::transform(begin, end, detail::begin(_seed), [](const value_type val) { return static_cast<result_type>(val); });
     }
 
     result_type T(const result_type x) const {
@@ -32,7 +33,7 @@ public:
     constexpr seed_sequence() = default;
 
     explicit seed_sequence(std::random_device& rd) {
-        std::generate(std::begin(_seed), std::end(_seed), [&rd]() { return static_cast<result_type>(rd()); });
+        std::generate(detail::begin(_seed), detail::end(_seed), [&rd]() { return rd(); });
     }
 
     template<class T>
@@ -138,7 +139,7 @@ struct random_adaptor {
      */
     template<class Distribution, class Generator>
     LZ_NODISCARD constexpr random_iterable<typename Distribution::result_type, Distribution, Generator, UseSentinel>
-    operator()(const Distribution& distribution, Generator& generator, const size_t amount) const {
+    operator()(const Distribution& distribution, Generator& generator, const ptrdiff_t amount) const {
         return { distribution, generator, amount };
     }
 
@@ -162,7 +163,7 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class T>
-    [[nodiscard]] auto operator()(const T min, const T max, const size_t amount) const {
+    [[nodiscard]] auto operator()(const T min, const T max, const ptrdiff_t amount) const {
         static auto gen = create_engine();
         if constexpr (std::is_integral_v<T>) {
             return (*this)(std::uniform_int_distribution<T>{ min, max }, gen, amount);
@@ -195,9 +196,9 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class Integral>
-    LZ_NODISCARD enable_if<std::is_integral<Integral>::value,
-                           random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
-    operator()(const Integral min, const Integral max, const size_t amount) const {
+    LZ_NODISCARD enable_if_t<std::is_integral<Integral>::value,
+                             random_iterable<Integral, std::uniform_int_distribution<Integral>, prng_engine, UseSentinel>>
+    operator()(const Integral min, const Integral max, const ptrdiff_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_int_distribution<Integral>{ min, max }, gen, amount);
     }
@@ -219,9 +220,9 @@ struct random_adaptor {
      * @param amount The amount of random numbers to generate.
      */
     template<class Floating>
-    LZ_NODISCARD enable_if<std::is_floating_point<Floating>::value,
-                           random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
-    operator()(const Floating min, const Floating max, const size_t amount) const {
+    LZ_NODISCARD enable_if_t<std::is_floating_point<Floating>::value,
+                             random_iterable<Floating, std::uniform_real_distribution<Floating>, prng_engine, UseSentinel>>
+    operator()(const Floating min, const Floating max, const ptrdiff_t amount) const {
         static auto gen = create_engine();
         return (*this)(std::uniform_real_distribution<Floating>{ min, max }, gen, amount);
     }

@@ -11,7 +11,7 @@ namespace detail {
 
 template<class Iterable>
 class common_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
+    maybe_owned<Iterable> _iterable{};
 
 public:
     using iterator = common_iterator<iter_t<Iterable>, sentinel_t<Iterable>>;
@@ -26,7 +26,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr common_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -47,25 +47,17 @@ public:
 #else
 
     template<bool Sized = is_sized<Iterable>::value>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<Sized, size_t> size() const {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<Sized, size_t> size() const {
         return lz::size(_iterable);
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return iterator{ detail::begin(std::move(_iterable)) };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
         return iterator{ _iterable.begin() };
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() && {
-        return iterator{ detail::end(std::move(_iterable)) };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator end() const {
         return iterator{ _iterable.end() };
     }
 };

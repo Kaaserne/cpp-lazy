@@ -3,7 +3,7 @@
 #ifndef LZ_JOIN_WHERE_HPP
 #define LZ_JOIN_WHERE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/join_where.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

@@ -3,14 +3,14 @@
 #ifndef LZ_COMMON_HPP
 #define LZ_COMMON_HPP
 
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/common.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 
 /**
- * Creates a common view from an iterator and a sentinel. The iterable must have a sentinel type (i.e. its begin() function
- * must return a different type than its end() function), otherwise a static assertion will fail. If the input iterable is
- * random access, it will return a basic_iterable. Otherwise, it will return a common_iterable. Example:
+ * Creates a common view from an iterator and a sentinel. If the iterable does not have a sentinel (i.e. its begin() function
+ * must return a different type than its end() function), the iput iterable is returned. . Example:
  * ```cpp
  * auto c_str = lz::c_string("Hello, World!"); // begin() and end() return different types
  * auto common_view = lz::common(c_str);
@@ -18,7 +18,7 @@ LZ_MODULE_EXPORT namespace lz {
  * auto common_view = lz::c_string("Hello, World!") | lz::common;
  * // now you can use common_view in <algorithm> functions
  *
- * // random access:
+ *  // random access:
  * auto repeated = lz::repeat(20, 5); // begin() and end() return different types
  * auto common_view = lz::common(repeated); // common_view is a basic_iterable
  * // or
@@ -27,7 +27,7 @@ LZ_MODULE_EXPORT namespace lz {
  * @attention Always try to use lz::common as late as possible. cpp-lazy is implemented in such a way that it will return
  * sentinels if possible to avoid duplicate data. So this for example:
  * ```cpp
- * auto common = lz::c_string("Hello, World!") | lz::common | lz::take(5);
+ *  auto common = lz::c_string("Hello, World!") | lz::common | lz::take(5);
  * ```
  * Will not result in an iterable where its end() and begin() functions return the same type. This is because
  * the common view is created first and then the take view is created. The take view will return another sentinel.
@@ -43,7 +43,7 @@ LZ_INLINE_VAR constexpr detail::common_adaptor common{};
  * ```
  */
 template<class Iterable>
-using common_iterable = detail::common_iterable<Iterable>;
+using common_iterable = decltype(lz::detail::common_adaptor{}(std::declval<Iterable>()));
 
 } // namespace lz
 

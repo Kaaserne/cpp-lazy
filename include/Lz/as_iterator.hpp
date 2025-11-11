@@ -3,7 +3,7 @@
 #ifndef LZ_AS_ITERATOR_HPP
 #define LZ_AS_ITERATOR_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/as_iterator.hpp>
 
 namespace lz {
@@ -29,7 +29,7 @@ LZ_INLINE_VAR constexpr detail::as_iterator_adaptor as_iterator{};
  * @tparam IterCat (Optional) The iterator category to decay the iterable to. If not provided, it will be deduced from the
  * iterable.
  */
-template<class Iterable, class IterCat = iter_cat_iterable_t<Iterable>>
+template<class Iterable, class IterCat = detail::iter_cat_iterable_t<Iterable>>
 using as_iterator_iterable = detail::as_iterator_iterable<Iterable, IterCat>;
 
 } // namespace lz

@@ -5,7 +5,10 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/exclusive_scan.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/operators.hpp>
+#include <Lz/detail/traits/is_invocable.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 namespace lz {
 namespace detail {
@@ -40,10 +43,10 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An iterable that performs the exclusive scan on the specified iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
-    [[nodiscard]] constexpr exclusive_scan_iterable<remove_ref<Iterable>, remove_cvref<T>, BinaryOp>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = LZ_BIN_OP(plus, T)>
+    [[nodiscard]] constexpr exclusive_scan_iterable<remove_ref_t<Iterable>, remove_cvref_t<T>, BinaryOp>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const
-        requires(std::invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref<T>>)
+        requires(std::invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref_t<T>>)
     {
         return { std::forward<Iterable>(iterable), std::forward<T>(init), std::move(binary_op) };
     }
@@ -72,9 +75,10 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
-    [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref<T>, BinaryOp> operator()(T&& init, BinaryOp binary_op = {}) const
-        requires(std::invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>)
+    template<class T, class BinaryOp = LZ_BIN_OP(plus, T)>
+    [[nodiscard]] constexpr fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>
+    operator()(T&& init, BinaryOp binary_op = {}) const
+        requires(std::invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>)
     {
         return { std::forward<T>(init), std::move(binary_op) };
     }
@@ -107,9 +111,9 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An iterable that performs the exclusive scan on the specified iterable.
      */
-    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = MAKE_BIN_PRED(plus)>
-    LZ_NODISCARD constexpr enable_if<is_invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref<T>>::value,
-                                     exclusive_scan_iterable<remove_ref<Iterable>, remove_cvref<T>, BinaryOp>>
+    template<class Iterable, class T = val_iterable_t<Iterable>, class BinaryOp = LZ_BIN_OP(plus, val_iterable_t<Iterable>)>
+    LZ_NODISCARD constexpr enable_if_t<is_invocable<BinaryOp, ref_iterable_t<Iterable>, remove_cvref_t<T>>::value,
+                                       exclusive_scan_iterable<remove_ref_t<Iterable>, remove_cvref_t<T>, BinaryOp>>
     operator()(Iterable&& iterable, T&& init = {}, BinaryOp binary_op = {}) const {
         return { std::forward<Iterable>(iterable), std::forward<T>(init), std::move(binary_op) };
     }
@@ -139,9 +143,9 @@ struct exclusive_scan_adaptor {
      * @param binary_op The binary operation to perform on the elements. Plus by default.
      * @return An adaptor that can be used in pipe expressions
      */
-    template<class T, class BinaryOp = MAKE_BIN_PRED(plus)>
+    template<class T, class BinaryOp = LZ_BIN_OP(plus, T)>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14
-    enable_if<is_invocable<BinaryOp, remove_cvref<T>, remove_cvref<T>>::value, fn_args_holder<adaptor, remove_cvref<T>, BinaryOp>>
+    enable_if_t<is_invocable<BinaryOp, remove_cvref_t<T>, remove_cvref_t<T>>::value, fn_args_holder<adaptor, remove_cvref_t<T>, BinaryOp>>
     operator()(T&& init, BinaryOp binary_op = {}) const {
         return { std::forward<T>(init), std::move(binary_op) };
     }
@@ -156,22 +160,20 @@ struct exclusive_scan_adaptor {
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
     requires(lz::iterable<Iterable>)
-[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
-    -> decltype(lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
-                                                     MAKE_BIN_PRED(plus){})) {
-    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
-                                                MAKE_BIN_PRED(plus){});
+[[nodiscard]] constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor) {
+    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::detail::val_iterable_t<Iterable>{},
+                                                std::plus<>{});
 }
 
 #else
 
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
 LZ_NODISCARD constexpr auto operator|(Iterable&& iterable, lz::detail::exclusive_scan_adaptor)
-    -> lz::detail::enable_if<lz::detail::is_iterable<Iterable>::value,
-                             decltype(lz::detail::exclusive_scan_adaptor{}(
-                                 std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{}, MAKE_BIN_PRED(plus){}))> {
-    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable), lz::val_iterable_t<Iterable>{},
-                                                MAKE_BIN_PRED(plus){});
+    -> lz::detail::enable_if_t<lz::detail::is_iterable<Iterable>::value,
+                               decltype(lz::detail::exclusive_scan_adaptor{}(
+                                   std::forward<Iterable>(iterable), LZ_BIN_OP(plus, lz::detail::val_iterable_t<Iterable>){}))> {
+    return lz::detail::exclusive_scan_adaptor{}(std::forward<Iterable>(iterable),
+                                                LZ_BIN_OP(plus, lz::detail::val_iterable_t<Iterable>){});
 }
 
 #endif

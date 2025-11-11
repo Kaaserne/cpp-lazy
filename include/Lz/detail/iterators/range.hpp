@@ -5,15 +5,16 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/util/default_sentinel.hpp>
 #include <limits>
 
 namespace lz {
 namespace detail {
 
 template<class Floating>
-constexpr bool almost_equal(const Floating a, const Floating b, const Floating epsilon = static_cast<Floating>(1e-6)) {
+LZ_CONSTEXPR_CXX_14 bool almost_equal(const Floating a, const Floating b, const Floating epsilon = static_cast<Floating>(1e-6)) {
     const auto abs_a = a - b;
     return (abs_a < 0 ? -abs_a : abs_a) < epsilon;
 }
@@ -89,7 +90,7 @@ public:
 #else
 
     template<class A = Arithmetic>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& other) const noexcept {
         LZ_ASSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<Arithmetic>::epsilon()));
 
@@ -99,20 +100,20 @@ public:
     }
 
     template<class A = Arithmetic>
-    LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, difference_type>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& other) const noexcept {
         LZ_ASSERT_COMPATIBLE(_step == other._step);
         return static_cast<difference_type>(_index - other._index) / static_cast<difference_type>(_step);
     }
 
     template<class A = Arithmetic>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
         LZ_ASSERT_COMPATIBLE(almost_equal(_step, other._step, std::numeric_limits<A>::epsilon()));
         return almost_equal(_index, other._index);
     }
 
     template<class A = Arithmetic>
-    constexpr enable_if<!std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
+    constexpr enable_if_t<!std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
         return _index == other._index;
     }
 
@@ -188,25 +189,25 @@ public:
 #else
 
     template<class A = Arithmetic>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, difference_type>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& other) const noexcept {
         const auto diff = _index - other._index;
         return static_cast<difference_type>(diff + (diff < 0 ? -0.5 : 0.5));
     }
 
     template<class A = Arithmetic>
-    LZ_CONSTEXPR_CXX_14 enable_if<!std::is_floating_point<A>::value, difference_type>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!std::is_floating_point<A>::value, difference_type>
     difference(const range_iterator& other) const noexcept {
         return static_cast<difference_type>(_index - other._index);
     }
 
     template<class A = Arithmetic>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
         return almost_equal(_index, other._index);
     }
 
     template<class A = Arithmetic>
-    constexpr enable_if<!std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
+    constexpr enable_if_t<!std::is_floating_point<A>::value, bool> eq(const range_iterator& other) const noexcept {
         return _index == other._index;
     }
 

@@ -1,34 +1,49 @@
-#include <cpp-lazy-ut-helper/test_procs.hpp>
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/repeat.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/algorithm/for_each_while.hpp>
 #include <Lz/common.hpp>
-#include <Lz/reverse.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/repeat.hpp>
+#include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("repeat_iterable binary operations") {
     const int amount = 5;
     lz::repeat_iterable<int> repeater = lz::repeat(20, amount);
     auto expected = { 20, 20, 20, 20, 20 };
 
+    SUBCASE("Operator=(default_sentinel_t)") {
+        auto repeated = lz::repeat(20, 5);
+        auto common = make_sentinel_assign_op_tester(repeated);
+        auto expected2 = { 20, 20, 20, 20, 20 };
+        REQUIRE(lz::equal(common, expected2));
+        REQUIRE(lz::size(common) == lz::size(expected2));
+    }
+
     SUBCASE("Operator++") {
         REQUIRE(lz::equal(repeater, expected));
     }
 
     SUBCASE("Operator--") {
-        REQUIRE(lz::equal(repeater | lz::reverse, expected));
+        REQUIRE(lz::equal(repeater | lz::common | lz::reverse, expected));
     }
 
     SUBCASE("Operator+") {
         test_procs::test_operator_plus(repeater, expected);
 
-        auto iterable = lz::common(repeater);
+        auto iterable = make_sentinel_assign_op_tester(repeater);
         test_procs::test_operator_plus(iterable, expected);
     }
 
     SUBCASE("Operator-") {
         test_procs::test_operator_minus(repeater);
-        auto iterable = lz::common(repeater);
+        auto iterable = make_sentinel_assign_op_tester(repeater);
         test_procs::test_operator_minus(iterable);
     }
 }
@@ -39,6 +54,7 @@ TEST_CASE("Empty or one element repeat") {
         REQUIRE(lz::empty(repeater));
         REQUIRE_FALSE(lz::has_one(repeater));
         REQUIRE_FALSE(lz::has_many(repeater));
+        REQUIRE(lz::size(repeater) == 0);
     }
 
     SUBCASE("One element with result") {
@@ -46,6 +62,7 @@ TEST_CASE("Empty or one element repeat") {
         REQUIRE_FALSE(lz::empty(repeater));
         REQUIRE(lz::has_one(repeater));
         REQUIRE_FALSE(lz::has_many(repeater));
+        REQUIRE(lz::size(repeater) == 1);
     }
 }
 

@@ -3,9 +3,9 @@
 #ifndef LZ_RA_TEST_PROCS_HPP
 #define LZ_RA_TEST_PROCS_HPP
 
-#include <Lz/detail/procs.hpp>
 #include <Lz/stream.hpp>
 #include <doctest/doctest.h>
+#include <Lz/detail/procs/operators.hpp>
 #include <sstream>
 
 namespace test_procs {
@@ -37,11 +37,13 @@ auto get_error_expr(const T& lhs, const U& rhs) {
 
 template<class Iterable>
 void test_operator_minus(const Iterable& it) {
+    const auto size = lz::ssize(it);
+    REQUIRE(size >= 0);
+
     if constexpr (lz::detail::has_sentinel_v<Iterable>) {
         auto begin = it.begin();
         auto end = it.end();
 
-        const auto size = lz::ssize(it);
         for (std::ptrdiff_t i = 0; i < size; ++i) {
             INFO("With i = " << i);
             REQUIRE(end - (begin + i) == size - i);
@@ -52,7 +54,6 @@ void test_operator_minus(const Iterable& it) {
         auto begin = it.begin();
         auto end = it.end();
 
-        const auto size = lz::ssize(it);
         for (std::ptrdiff_t i = 0; i < size; ++i) {
             INFO("With i = " << i);
             REQUIRE((end - i) - begin == size - i);
@@ -69,36 +70,40 @@ void test_operator_minus(const Iterable& it) {
     }
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
+template<class Iterable, class ExpectedIterable, class EqCompare = LZ_BIN_OP(equal_to, lz::detail::val_iterable_t<Iterable>)>
 void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
+    const auto size = lz::ssize(it);
+    REQUIRE(size >= 0);
+
     if constexpr (lz::detail::has_sentinel_v<Iterable>) {
         auto begin = it.begin();
 
-        for (std::ptrdiff_t i = 0; i < lz::ssize(it) - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin + i), *(expected.begin() + i)));
             REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
         }
-        REQUIRE(begin + lz::ssize(it) == it.end());
 
-        std::advance(begin, lz::ssize(it));
+        REQUIRE(begin + size == it.end());
+
+        std::advance(begin, size);
         REQUIRE(begin + 0 == begin);
 
-        for (std::ptrdiff_t i = 1; i <= lz::ssize(it); ++i) {
+        for (std::ptrdiff_t i = 1; i <= size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin - i), *(expected.end() - i)));
             REQUIRE(eq_compare(*(begin - i), *(expected.end() - i)));
         }
-        REQUIRE(begin - lz::ssize(it) == it.begin());
+        REQUIRE(begin - size == it.begin());
     }
     else {
         auto begin = it.begin();
         auto end = it.end();
 
-        const auto size = lz::ssize(it);
-        for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin + i), *(expected.begin() + i)));
             REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
         }
+
         REQUIRE(begin + size == it.end());
         for (std::ptrdiff_t i = 1; i <= size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(end - i), *(expected.end() - i)));
@@ -111,10 +116,11 @@ void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, Eq
         REQUIRE(begin + 0 == begin);
         REQUIRE(end + 0 == end);
 
-        for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+        for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(end + i), *(expected.begin() + i)));
             REQUIRE(eq_compare(*(end + i), *(expected.begin() + i)));
         }
+
         REQUIRE(end + size == it.end());
         for (std::ptrdiff_t i = 1; i <= size; ++i) {
             INFO("With i = " << i << " with expr: " << get_error_expr(*(begin - i), *(expected.end() - i)));
@@ -127,20 +133,21 @@ void test_operator_plus(const Iterable& it, const ExpectedIterable& expected, Eq
 #else
 
 template<class T, class U>
-lz::detail::enable_if<has_stream_operator<T>::value && has_stream_operator<U>::value> get_error_expr(const T& lhs, const U& rhs) {
+lz::detail::enable_if_t<has_stream_operator<T>::value && has_stream_operator<U>::value>
+get_error_expr(const T& lhs, const U& rhs) {
     std::ostringstream oss;
     oss << lhs << " != " << rhs;
     return oss.str();
 }
 
 template<class T, class U>
-lz::detail::enable_if<!has_stream_operator<T>::value || !has_stream_operator<U>::value, const char*>
+lz::detail::enable_if_t<!has_stream_operator<T>::value || !has_stream_operator<U>::value, const char*>
 get_error_expr(const T&, const U&) {
     return "? != ?";
 }
 
 template<class Iterable>
-lz::detail::enable_if<!lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
+lz::detail::enable_if_t<!lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
     auto begin = it.begin();
     auto end = it.end();
 
@@ -161,7 +168,7 @@ lz::detail::enable_if<!lz::detail::has_sentinel<Iterable>::value> test_operator_
 }
 
 template<class Iterable>
-lz::detail::enable_if<lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
+lz::detail::enable_if_t<lz::detail::has_sentinel<Iterable>::value> test_operator_minus(const Iterable& it) {
     auto begin = it.begin();
     auto end = it.end();
 
@@ -173,8 +180,8 @@ lz::detail::enable_if<lz::detail::has_sentinel<Iterable>::value> test_operator_m
     }
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
-lz::detail::enable_if<!lz::detail::has_sentinel<Iterable>::value>
+template<class Iterable, class ExpectedIterable, class EqCompare = LZ_BIN_OP(equal_to, lz::detail::val_iterable_t<Iterable>)>
+lz::detail::enable_if_t<!lz::detail::has_sentinel<Iterable>::value>
 test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
 
@@ -182,7 +189,7 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
     auto end = it.end();
 
     const auto size = lz::ssize(it);
-    for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+    for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
     }
@@ -191,14 +198,16 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(end - i), *(expected.end() - i)));
     }
+    INFO("With i = " << size);
     REQUIRE(end - size == it.begin());
 
     std::advance(begin, size);
     std::advance(end, -size);
+    INFO("With i = 0");
     REQUIRE(begin + 0 == begin);
     REQUIRE(end + 0 == end);
 
-    for (std::ptrdiff_t i = 0; i < size - 1; ++i) {
+    for (std::ptrdiff_t i = 0; i + 1 < size; ++i) {
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(end + i), *(expected.begin() + i)));
     }
@@ -210,14 +219,14 @@ test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompa
     REQUIRE(begin - size == it.begin());
 }
 
-template<class Iterable, class ExpectedIterable, class EqCompare = MAKE_BIN_PRED(equal_to)>
-lz::detail::enable_if<lz::detail::has_sentinel<Iterable>::value>
+template<class Iterable, class ExpectedIterable, class EqCompare = LZ_BIN_OP(equal_to, lz::detail::val_iterable_t<Iterable>)>
+lz::detail::enable_if_t<lz::detail::has_sentinel<Iterable>::value>
 test_operator_plus(const Iterable& it, const ExpectedIterable& expected, EqCompare eq_compare = {}) {
     REQUIRE(lz::size(it) == lz::size(expected));
 
     auto begin = it.begin();
 
-    for (std::ptrdiff_t i = 0; i < lz::ssize(it) - 1; ++i) {
+    for (std::ptrdiff_t i = 0; static_cast<std::size_t>(i) + 1 < lz::size(it); ++i) {
         INFO("With i = " << i);
         REQUIRE(eq_compare(*(begin + i), *(expected.begin() + i)));
     }

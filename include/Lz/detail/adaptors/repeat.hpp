@@ -4,6 +4,7 @@
 #define LZ_REPEAT_ADAPTOR_HPP
 
 #include <Lz/detail/iterables/repeat.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
 
 namespace lz {
 namespace detail {
@@ -29,7 +30,7 @@ struct repeat_adaptor {
      * @return A repeat_iterable that will yield the value @p `amount` times.
      */
     template<class T>
-    LZ_NODISCARD constexpr repeat_iterable<false, remove_rvalue_reference_t<T>> operator()(T&& value, const size_t amount) const {
+    LZ_NODISCARD constexpr repeat_iterable<remove_rvalue_reference_t<T>, false> operator()(T&& value, const ptrdiff_t amount) const {
         return { std::forward<T>(value), amount };
     }
 
@@ -48,10 +49,11 @@ struct repeat_adaptor {
      * @return A repeat_iterable that will yield the value infinite times.
      */
     template<class T>
-    LZ_NODISCARD constexpr repeat_iterable<true, T> operator()(T&& value) const {
-        return repeat_iterable<true, T>{ std::forward<T>(value) };
+    LZ_NODISCARD constexpr repeat_iterable<T, true> operator()(T&& value) const {
+        return repeat_iterable<T, true>{ std::forward<T>(value) };
     }
 };
 } // namespace detail
 } // namespace lz
+
 #endif

@@ -5,16 +5,20 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 template<class Iterator, class S, class T, class BinaryOp>
 class inclusive_scan_iterator : public iterator<inclusive_scan_iterator<Iterator, S, T, BinaryOp>, T&, fake_ptr_proxy<T&>,
                                                 diff_type<Iterator>, std::forward_iterator_tag, default_sentinel_t> {
-    Iterator _iterator;
-    mutable T _reducer;
-    S _end;
-    mutable BinaryOp _binary_op;
+    Iterator _iterator{};
+    mutable T _reducer{};
+    S _end{};
+    mutable BinaryOp _binary_op{};
 
     using traits = std::iterator_traits<Iterator>;
 
@@ -24,6 +28,9 @@ public:
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
     using iterator_category = std::forward_iterator_tag;
+
+    constexpr inclusive_scan_iterator(const inclusive_scan_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 inclusive_scan_iterator& operator=(const inclusive_scan_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -35,8 +42,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
-                               std::is_default_constructible<BinaryOp>::value && std::is_default_constructible<S>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<T>::value &&
+                                 std::is_default_constructible<BinaryOp>::value && std::is_default_constructible<S>::value>>
     constexpr inclusive_scan_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                                  std::is_nothrow_default_constructible<T>::value &&
                                                  std::is_nothrow_default_constructible<BinaryOp>::value &&

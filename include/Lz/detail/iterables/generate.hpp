@@ -5,6 +5,7 @@
 
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterators/generate.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {
@@ -13,8 +14,8 @@ class generate_iterable;
 
 template<class GeneratorFunc>
 class generate_iterable<GeneratorFunc, false> : public lazy_view {
-    func_container<GeneratorFunc> _func;
-    size_t _amount{};
+    func_container<GeneratorFunc> _func{};
+    ptrdiff_t _amount{};
 
 public:
     using iterator = generate_iterator<func_container<GeneratorFunc>, false>;
@@ -29,25 +30,21 @@ public:
 
 #else
 
-    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    template<class G = GeneratorFunc, class = enable_if_t<std::is_default_constructible<G>::value>>
     constexpr generate_iterable() noexcept(std::is_nothrow_default_constructible<G>::value) {
     }
 
 #endif
 
-    constexpr generate_iterable(GeneratorFunc func, const size_t amount) : _func{ std::move(func) }, _amount{ amount } {
+    constexpr generate_iterable(GeneratorFunc func, const ptrdiff_t amount) : _func{ std::move(func) }, _amount{ amount } {
     }
 
     LZ_NODISCARD constexpr size_t size() const noexcept {
-        return _amount;
+        return static_cast<size_t>(_amount);
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return { _func, _amount };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_func), _amount };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
@@ -72,7 +69,7 @@ public:
 
 #else
 
-    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    template<class G = GeneratorFunc, class = enable_if_t<std::is_default_constructible<G>::value>>
     constexpr generate_iterable() noexcept(std::is_nothrow_default_constructible<G>::value) {
     }
 
@@ -81,12 +78,8 @@ public:
     explicit constexpr generate_iterable(GeneratorFunc func) : _func{ std::move(func) } {
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return iterator{ _func };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return iterator{ std::move(_func) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

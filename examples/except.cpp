@@ -1,3 +1,4 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/except.hpp>
 #include <iostream>
 #include <vector>

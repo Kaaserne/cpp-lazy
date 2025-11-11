@@ -1,11 +1,18 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/chunks.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/distance.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("empty or one element chunks") {
     SUBCASE("Empty") {
@@ -196,6 +203,43 @@ TEST_CASE("Chunks binary operations bidirectional access") {
     }
 }
 
+TEST_CASE("Operator=(default_sentinel_t)") {
+    std::vector<std::vector<int>> expected;
+
+    SUBCASE("forward") {
+        std::forward_list<int> fwd = { 1, 2, 3, 4, 5 };
+        auto chunked = lz::chunks(fwd, 2);
+        using value_type = lz::detail::val_iterable_t<decltype(chunked)>;
+        auto common = make_sentinel_assign_op_tester(chunked);
+        expected = { { 1, 2 }, { 3, 4 }, { 5 } };
+        REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+    }
+
+    SUBCASE("random access") {
+        auto repeater = lz::repeat(20, 5);
+        auto repeated_chunk = make_sentinel_assign_op_tester(lz::chunks(repeater, 2));
+        using value_type_2 = lz::detail::val_iterable_t<decltype(repeated_chunk)>;
+        expected = { { 20, 20 }, { 20, 20 }, { 20 } };
+        REQUIRE(lz::equal(repeated_chunk, expected, [](value_type_2 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        REQUIRE(lz::equal(repeated_chunk | lz::reverse, expected | lz::reverse,
+                          [](value_type_2 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        test_procs::test_operator_minus(repeated_chunk);
+        test_procs::test_operator_plus(repeated_chunk, expected,
+                                       [](value_type_2 a, const std::vector<int>& b) { return lz::equal(a, b); });
+    }
+
+    SUBCASE("bidirectional") {
+        std::list<int> lst = { 1, 2, 3, 4, 5, 6 };
+        auto bidi_sentinel = make_sized_bidi_sentinelled(lst);
+        auto lst_chunked = make_sentinel_assign_op_tester(lz::chunks(bidi_sentinel, 3));
+        using value_type_3 = lz::detail::val_iterable_t<decltype(lst_chunked)>;
+        expected = { { 1, 2, 3 }, { 4, 5, 6 } };
+        REQUIRE(lz::equal(lst_chunked, expected, [](value_type_3 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        REQUIRE(lz::equal(lst_chunked | lz::reverse, expected | lz::reverse,
+                          [](value_type_3 a, const std::vector<int>& b) { return lz::equal(a, b); }));
+    }
+}
+
 TEST_CASE("Chunks with sentinels / fwd") {
     auto even_size = lz::c_string("12345678");
     auto uneven_size = lz::c_string("1234567");
@@ -205,20 +249,6 @@ TEST_CASE("Chunks with sentinels / fwd") {
 
     auto uneven_chunksize_even_size = lz::chunks(even_size, 3);
     auto even_chunksize_even_size = lz::chunks(even_size, 2);
-
-    SUBCASE("Operator=") {
-        auto it = even_size.begin();
-        REQUIRE(it == even_size.begin());
-        REQUIRE(it != even_size.end());
-        REQUIRE(even_size.end() != it);
-        REQUIRE(even_size.begin() == it);
-
-        it = even_size.end();
-        REQUIRE(it == even_size.end());
-        REQUIRE(it != even_size.begin());
-        REQUIRE(even_size.end() == it);
-        REQUIRE(even_size.begin() != it);
-    }
 
     static_assert(!std::is_same<decltype(uneven_chunksize_even_size.begin()), decltype(uneven_chunksize_even_size.end())>::value,
                   "Should not be sentinel");

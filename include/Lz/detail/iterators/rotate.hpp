@@ -4,15 +4,20 @@
 #define LZ_ROTATE_ITERATOR_HPP
 
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
-#include <iterator>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/sentinel_with.hpp>
+#include <Lz/detail/traits/enable_if.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/procs/eager_size.hpp>
 #include <limits>
 
 namespace lz {
 namespace detail {
 template<class Iterable>
-class rotate_iterator : public iterator<rotate_iterator<Iterable>, ref_t<iter_t<Iterable>>, ptr_t<iter_t<Iterable>>,
-                                        diff_type<iter_t<Iterable>>, iter_cat_t<iter_t<Iterable>>, iter_t<Iterable>> {
+class rotate_iterator
+    : public iterator<rotate_iterator<Iterable>, ref_t<iter_t<Iterable>>, ptr_t<iter_t<Iterable>>, diff_type<iter_t<Iterable>>,
+                      iter_cat_t<iter_t<Iterable>>, sentinel_with<iter_t<Iterable>>> {
 
     using iter = iter_t<Iterable>;
     using traits = std::iterator_traits<iter>;
@@ -24,11 +29,14 @@ public:
     using difference_type = typename traits::difference_type;
 
 private:
-    iter _iterator;
-    Iterable _iterable;
-    size_t _offset{};
+    iter _iterator{};
+    Iterable _iterable{};
+    difference_type _offset{};
 
 public:
+    constexpr rotate_iterator(const rotate_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const rotate_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr rotate_iterator()
@@ -38,7 +46,7 @@ public:
 #else
 
     template<class I = iter,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
     constexpr rotate_iterator() noexcept(std::is_nothrow_default_constructible<iter>::value &&
                                          std::is_nothrow_default_constructible<Iterable>::value) {
     }
@@ -46,17 +54,41 @@ public:
 #endif
 
     template<class I>
-    constexpr rotate_iterator(I&& iterable, iter start, const size_t offset) :
+    LZ_CONSTEXPR_CXX_14 rotate_iterator(I&& iterable, iter start, const difference_type offset) :
         _iterator{ std::move(start) },
         _iterable{ std::forward<I>(iterable) },
         _offset{ offset } {
     }
 
-    LZ_CONSTEXPR_CXX_14 rotate_iterator& operator=(const iter& end) {
-        _iterator = end;
-        _offset = std::numeric_limits<size_t>::max();
+#ifdef LZ_HAS_CXX_17
+
+    constexpr rotate_iterator& operator=(const sentinel_with<iter_t<Iterable>>& end) {
+        _iterator = end.value;
+        if constexpr (is_bidi_v<iter>) {
+            _offset = lz::eager_ssize(_iterable);
+        }
+        else {
+            _offset = std::numeric_limits<difference_type>::max();
+        }
         return *this;
     }
+#else
+
+    template<class I = iter>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, rotate_iterator&> operator=(const sentinel_with<iter_t<Iterable>>& end) {
+        _iterator = end.value;
+        _offset = lz::eager_ssize(_iterable);
+        return *this;
+    }
+
+    template<class I = iter>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<I>::value, rotate_iterator&> operator=(const sentinel_with<iter_t<Iterable>>& end) {
+        _iterator = end.value;
+        _offset = std::numeric_limits<difference_type>::max();
+        return *this;
+    }
+
+#endif
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_iterator != _iterable.end());
@@ -77,6 +109,9 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {
+        if (_iterable.begin() == _iterable.end()) {
+            return;
+        }
         if (_iterator == _iterable.begin()) {
             _iterator = _iterable.end();
         }
@@ -87,40 +122,41 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void plus_is(difference_type n) {
         LZ_ASSERT_SUB_ADDABLE((n < 0 ? -n : n) <= (_iterable.end() - _iterable.begin()));
-        _offset += static_cast<size_t>(n);
-        if (n < 0) {
-            n = -n;
-            if (n > _iterator - _iterable.begin()) {
-                _iterator = _iterable.end() - (n - (_iterator - _iterable.begin()));
-            }
-            else {
-                _iterator += -n;
-            }
+        if (n == 0) {
+            return;
         }
-        else if (n >= _iterable.end() - _iterator) {
-            _iterator = _iterable.begin() + (n - (_iterable.end() - _iterator));
+        _offset += n;
+        const auto size = _iterable.end() - _iterable.begin();
+        auto pos = (_iterator - _iterable.begin() + n) % size;
+        if (pos < 0) {
+            pos += size;
         }
-        else {
-            _iterator += n;
-        }
+        _iterator = _iterable.begin() + pos;
     }
 
     LZ_CONSTEXPR_CXX_14 difference_type difference(const rotate_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
-        return static_cast<difference_type>(_offset) - static_cast<difference_type>(other._offset);
+        return _offset - other._offset;
     }
 
-    constexpr difference_type difference(default_sentinel_t) const {
-        return -static_cast<difference_type>(_offset);
+    constexpr difference_type difference(const sentinel_with<iter_t<Iterable>>&) const {
+        return (_iterable.begin() - _iterable.end()) + _offset;
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const rotate_iterator& other) const {
+    template<class I = iter>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi<I>::value, bool> eq(const rotate_iterator& other) const {
         LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
-        return _offset == other._offset || (_iterator == _iterable.end() && other._iterator == other._iterable.end());
+        return _offset == other._offset || (_iterator == other._iterator && _offset != 0 && other._offset != 0);
     }
 
-    constexpr bool eq(const iter& other) const {
-        return (_offset != 0 || _iterator == _iterable.end()) && _iterator == other;
+    template<class I = iter>
+    LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi<I>::value, bool> eq(const rotate_iterator& other) const {
+        LZ_ASSERT_COMPATIBLE(_iterable.begin() == other._iterable.begin() && _iterable.end() == other._iterable.end());
+        return _offset == other._offset;
+    }
+
+    constexpr bool eq(const sentinel_with<iter_t<Iterable>>& other) const {
+        return (_offset != 0 || _iterator == _iterable.end()) && _iterator == other.value;
     }
 };
 } // namespace detail

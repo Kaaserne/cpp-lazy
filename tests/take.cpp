@@ -1,12 +1,19 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/basic_iterable.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
 #include <Lz/slice.hpp>
 #include <Lz/take.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Take with sentinels") {
     const char* str = "Hello, world!";
@@ -17,33 +24,44 @@ TEST_CASE("Take with sentinels") {
     REQUIRE(lz::equal(take, expected));
     auto vec = take | lz::to<std::vector<char>>();
     REQUIRE(lz::equal(vec, expected));
+}
 
-    SUBCASE("Operator=") {
-        auto it = take.begin();
-        REQUIRE(it == take.begin());
-        it = take.end();
-        REQUIRE(it == take.end());
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("with iterator forward") {
+        std::forward_list<int> lst{ 1, 2, 3, 4, 5 };
+        auto taken = lz::take(lst.begin(), 3);
+        auto end = taken.begin();
+        end = taken.end(); // calls operator=(sentinel)
+        auto begin = taken.begin();
+        auto common = lz::make_basic_iterable(begin, end);
+        auto expected2 = { 1, 2, 3 };
+        REQUIRE(lz::equal(common, expected2));
     }
 
-    SUBCASE("Operator= for with iterator") {
-        auto t = lz::take(c_string.begin(), 5);
-        auto it = t.begin();
-        REQUIRE(it == t.begin());
-        it = t.end();
-        REQUIRE(it == t.end());
+    SUBCASE("with iterator bidirectional") {
+        std::list<int> lst{ 1, 2, 3, 4, 5 };
+        auto taken = lz::take(lst.begin(), 3);
+        auto end = taken.begin();
+        end = lz::default_sentinel; // calls operator=(sentinel)
+        auto begin = taken.begin();
+        auto common = lz::make_basic_iterable(begin, end);
+        auto expected2 = { 1, 2, 3 };
+        REQUIRE(lz::equal(common | lz::reverse, expected2 | lz::reverse));
+    }
+
+    SUBCASE("with iterator random access") {
+        auto rep = lz::repeat(1, 5);
+        auto taken = lz::take(rep.begin(), 3);
+        auto end = taken.begin();
+        end = lz::default_sentinel; // calls operator=(sentinel)
+        auto begin = taken.begin();
+        auto common = lz::make_basic_iterable(begin, end);
+        auto expected = { 1, 1, 1 };
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, expected);
     }
 }
 
-TEST_CASE("Take changing and creating elements") {
-    std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    auto take = lz::take(array, 4);
-    REQUIRE(take.size() == 4);
-    REQUIRE(*take.begin() == 1);
-    REQUIRE(*std::next(take.begin()) == 2);
-    REQUIRE(*std::prev(take.end()) == 4);
-    *take.begin() = 0;
-    REQUIRE(array[0] == 0);
-}
 // TODO check enable ifs in adaptors for ambiguity
 TEST_CASE("Take binary operations where n is smaller than size") {
     std::array<int, 10> array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };

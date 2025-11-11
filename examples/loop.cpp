@@ -1,3 +1,4 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/loop.hpp>
 #include <iostream>
 #include <vector>
@@ -58,6 +59,7 @@ int main() {
     std::cout << '\n';
 
     std::size_t count = 0;
+
     lz::for_each(lz::loop(vec), [&count](int i) {
         std::cout << i << ' ';
         // Without break this would loop forever

@@ -1,11 +1,46 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/interleave.hpp>
-#include <Lz/repeat.hpp>
 #include <Lz/range.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
+
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward list") {
+        std::forward_list<int> a = { 1, 3, 5 };
+        std::forward_list<int> b = { 2, 4, 6 };
+        auto interleaved = lz::interleave(a, b);
+        auto common = make_sentinel_assign_op_tester(interleaved);
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> a = { 1, 3, 5 };
+        std::vector<int> b = { 2, 4, 6 };
+        auto interleaved = lz::interleave(make_sized_bidi_sentinelled(a), make_sized_bidi_sentinelled(b));
+        auto common = make_sentinel_assign_op_tester(interleaved);
+        auto expected = { 1, 2, 3, 4, 5, 6 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto a = lz::repeat(1, 3);
+        auto b = lz::repeat(2, 3);
+        auto interleaved = make_sentinel_assign_op_tester(lz::interleave(a, b));
+        auto expected = { 1, 2, 1, 2, 1, 2 };
+        test_procs::test_operator_plus(interleaved, expected);
+        test_procs::test_operator_minus(interleaved);
+    }
+}
 
 TEST_CASE("Interleaved with sentinels permutations") {
     auto str3 = lz::c_string("abc");
@@ -21,39 +56,6 @@ TEST_CASE("Interleaved with sentinels permutations") {
         auto interleaved2 = lz::interleave(str3, range, str4);
         using t2 = decltype(*interleaved2.begin());
         static_assert(std::is_same<t2, char>::value, "Should be char");
-    }
-
-    SUBCASE("Operator=") {
-        lz::interleave_iterable<decltype(str3), decltype(str4)> interleaved_3_4 = lz::interleave(str3, str4);
-        using t2 = decltype(*interleaved_3_4.begin());
-        static_assert(std::is_same<t2, const char&>::value, "Should be const char&");
-        auto it_3_4 = interleaved_3_4.begin();
-        REQUIRE(it_3_4 == interleaved_3_4.begin());
-        it_3_4 = interleaved_3_4.end();
-        REQUIRE(it_3_4 == interleaved_3_4.end());
-        REQUIRE(it_3_4 == interleaved_3_4.end());
-
-        auto interleaved_4_3 = str4 | lz::interleave(str3);
-        auto it_4_3 = interleaved_4_3.begin();
-        REQUIRE(it_4_3 == interleaved_4_3.begin());
-        it_4_3 = interleaved_4_3.end();
-        REQUIRE(it_4_3 == interleaved_4_3.end());
-        REQUIRE(interleaved_4_3.end() == it_4_3);
-
-        auto interleaved_3_4_5 = lz::interleave(str3, str4, str5);
-        using t = decltype(*interleaved_3_4_5.begin());
-        static_assert(std::is_same<t, const char&>::value, "Should be const char&");
-
-        auto it_3_4_5 = interleaved_3_4_5.begin();
-        REQUIRE(it_3_4_5 == interleaved_3_4_5.begin());
-        it_3_4_5 = interleaved_3_4_5.end();
-        REQUIRE(it_3_4_5 == interleaved_3_4_5.end());
-
-        auto interleaved_5_4_3 = lz::interleave(str5, str4, str3);
-        auto it_5_4_3 = interleaved_5_4_3.begin();
-        REQUIRE(it_5_4_3 == interleaved_5_4_3.begin());
-        it_5_4_3 = interleaved_5_4_3.end();
-        REQUIRE(it_5_4_3 == interleaved_5_4_3.end());
     }
 
     SUBCASE("Permutation 1: 3 vs 4 characters and 4 vs 3 characters") {

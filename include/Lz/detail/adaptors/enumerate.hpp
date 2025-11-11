@@ -5,6 +5,7 @@
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
 #include <Lz/detail/iterables/enumerate.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
 
 namespace lz {
 namespace detail {
@@ -62,7 +63,7 @@ struct enumerate_adaptor {
      * @return An iterable that enumerates the elements of the input iterable
      */
     template<class Iterable, class IntType = int>
-    LZ_NODISCARD constexpr enumerate_iterable<remove_ref<Iterable>, IntType>
+    LZ_NODISCARD constexpr enumerate_iterable<remove_ref_t<Iterable>, IntType>
     operator()(Iterable&& iterable, const IntType start = 0) const
         requires lz::iterable<Iterable>
     {
@@ -176,7 +177,7 @@ struct enumerate_adaptor {
      * @return An iterable that enumerates the elements of the input iterable
      */
     template<class Iterable, class IntType = int>
-    LZ_NODISCARD constexpr enable_if<is_iterable<Iterable>::value, enumerate_iterable<remove_ref<Iterable>, IntType>>
+    LZ_NODISCARD constexpr enable_if_t<is_iterable<Iterable>::value, enumerate_iterable<remove_ref_t<Iterable>, IntType>>
     operator()(Iterable&& iterable, const IntType start = 0) const {
         return { std::forward<Iterable>(iterable), start };
     }
@@ -230,7 +231,7 @@ struct enumerate_adaptor {
      * @return An adaptor that can be used with a pipe operator
      */
     template<class IntType = int>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if<!is_iterable<IntType>::value, fn_args_holder<adaptor, IntType>>
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_iterable<IntType>::value, fn_args_holder<adaptor, IntType>>
     operator()(const IntType start = 0) const {
         return { start };
     }

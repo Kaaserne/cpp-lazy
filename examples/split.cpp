@@ -1,9 +1,9 @@
-#include "Lz/string_view.hpp"
-
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/split.hpp>
+#include <Lz/util/string_view.hpp>
+#include <array>
 #include <iostream>
 #include <vector>
-#include <array>
 
 int main() {
     // With split you can split an iterable on a delimiter or an iterable delimiter (multiple delimiters)

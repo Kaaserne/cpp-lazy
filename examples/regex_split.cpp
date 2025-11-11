@@ -1,8 +1,7 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/regex_split.hpp>
 #include <iostream>
 #include <string>
-#include <vector>
-
 
 int main() {
     std::string input = "Hello,World!This,is,a,test";

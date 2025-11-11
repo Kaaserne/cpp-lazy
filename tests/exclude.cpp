@@ -1,11 +1,14 @@
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/exclude.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Exclude with sentinels") {
     auto cstr = lz::c_string("a string to exclude");
@@ -38,48 +41,44 @@ TEST_CASE("Exclude changing and creating elements") {
     }
 
     SUBCASE("Should be by reference") {
-        *excluded2.begin() = 0;
-        REQUIRE(arr[2] == 0);
-    }
-
-    SUBCASE("Operator=") {
-        auto it = excluded1.begin();
-        REQUIRE(it == excluded1.begin());
-        it = excluded1.end();
-        REQUIRE(it == excluded1.end());
-
-        it = excluded2.begin();
-        REQUIRE(it == excluded2.begin());
-        it = excluded2.end();
-        REQUIRE(it == excluded2.end());
-
-        it = excluded3.begin();
-        REQUIRE(it == excluded3.begin());
-        it = excluded3.end();
-        REQUIRE(it == excluded3.end());
-
-        auto it2 = excluded_expected1.begin();
-        REQUIRE(it2 == excluded_expected1.begin());
-        it2 = excluded_expected1.end();
-        REQUIRE(it2 == excluded_expected1.end());
-
-        it2 = excluded_expected2.begin();
-        REQUIRE(it2 == excluded_expected2.begin());
-        it2 = excluded_expected2.end();
-        REQUIRE(it2 == excluded_expected2.end());
-
-        it2 = excluded_expected3.begin();
-        REQUIRE(it2 == excluded_expected3.begin());
-        it2 = excluded_expected3.end();
-        REQUIRE(it2 == excluded_expected3.end());
+        static_assert(std::is_same<decltype(*excluded1.begin()), int&>::value, "Should be int&");
     }
 }
 
+TEST_CASE("Operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        auto cstr = lz::c_string("Hello, World!");
+        auto excluded = lz::exclude(cstr, 3, 5);
+        auto common = make_sentinel_assign_op_tester(excluded);
+        auto expected = lz::c_string("Hel, World!");
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto vec_sent = make_sized_bidi_sentinelled(vec);
+        auto excluded = lz::exclude(vec_sent, 1, 3);
+        auto common = make_sentinel_assign_op_tester(excluded);
+        auto expected = { 1, 4, 5 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
+    }
+
+    SUBCASE("random access") {
+        auto repeater = lz::repeat(1, 5);
+        auto excluded = make_sentinel_assign_op_tester(lz::exclude(repeater, 1, 3));
+        auto expected = { 1, 1, 1 };
+        REQUIRE(lz::equal(excluded, expected));
+        REQUIRE(lz::equal(excluded | lz::reverse, expected | lz::reverse));
+        test_procs::test_operator_plus(excluded, expected);
+        test_procs::test_operator_minus(excluded);
+    }
+}
 TEST_CASE("Exclude binary operations") {
     std::array<int, 10> arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
     auto excluded1 = arr | lz::exclude(3, 5); // { 1, 2, 3, 6, 7, 8, 9, 10 }
-    auto excluded2 = lz::exclude(arr, 0, 2); // { 3, 4, 5, 6, 7, 8, 9, 10 }
+    auto excluded2 = lz::exclude(arr, 0, 2);  // { 3, 4, 5, 6, 7, 8, 9, 10 }
     auto excluded3 = lz::exclude(arr, 7, 10); // { 1, 2, 3, 4, 5, 6, 7 }
 
     SUBCASE("Operator++") {

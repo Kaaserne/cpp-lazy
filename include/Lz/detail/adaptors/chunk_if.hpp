@@ -35,7 +35,7 @@ struct chunk_if_adaptor {
      * @return An iterable of type T, where T is constructible from the begin and end iterators of the input iterable.
      */
     template<class Iterable, class UnaryPredicate>
-    constexpr chunk_if_iterable<ValueType, remove_ref<Iterable>, UnaryPredicate>
+    constexpr chunk_if_iterable<ValueType, remove_ref_t<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::forward<Iterable>(iterable), std::move(predicate) };
     }
@@ -83,7 +83,7 @@ struct chunk_if_adaptor<void> {
      * @return An iterable of iterables, where each inner iterable is a chunk based on the predicate.
      */
     template<class Iterable, class UnaryPredicate>
-    constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>, iter_t<Iterable>>, remove_ref<Iterable>, UnaryPredicate>
+    constexpr chunk_if_iterable<basic_iterable<iter_t<Iterable>, iter_t<Iterable>>, remove_ref_t<Iterable>, UnaryPredicate>
     operator()(Iterable&& iterable, UnaryPredicate predicate) const {
         return { std::move(iterable), std::move(predicate) };
     }
@@ -100,7 +100,7 @@ struct chunk_if_adaptor<void> {
      * @return An adaptor that can be used with the pipe operator to chunk the iterable.
      */
     template<class UnaryPredicate>
-    constexpr fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate&& predicate) const {
+    constexpr fn_args_holder<adaptor, UnaryPredicate> operator()(UnaryPredicate predicate) const {
         return { std::move(predicate) };
     }
 };

@@ -3,7 +3,7 @@
 #ifndef LZ_REPEAT_HPP
 #define LZ_REPEAT_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/repeat.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -32,7 +32,7 @@ LZ_INLINE_VAR constexpr detail::repeat_adaptor repeat{};
  * ```
  */
 template<class T>
-using repeat_iterable_inf = detail::repeat_iterable<true, T>;
+using repeat_iterable_inf = detail::repeat_iterable<T, true>;
 
 /**
  * @brief Repeat finite helper alias type.
@@ -44,7 +44,7 @@ using repeat_iterable_inf = detail::repeat_iterable<true, T>;
  * ```
  */
 template<class T>
-using repeat_iterable = detail::repeat_iterable<false, T>;
+using repeat_iterable = detail::repeat_iterable<T, false>;
 
 } // namespace lz
 

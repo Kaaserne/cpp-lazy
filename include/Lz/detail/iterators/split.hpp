@@ -3,30 +3,37 @@
 #ifndef LZ_SPLIT_ITERATOR_HPP
 #define LZ_SPLIT_ITERATOR_HPP
 
-#include <Lz/detail/algorithm.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/algorithm/find.hpp>
+#include <Lz/algorithm/search.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/operators.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class ValueType, class Iterator, class S, class Iterator2, class S2>
-class split_iterator : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType,
-                                       fake_ptr_proxy<ValueType>, std::ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
-    std::pair<Iterator, Iterator> _sub_range_end;
-    Iterator _sub_range_begin;
-    Iterator2 _to_search;
-    S _end;
-    S2 _to_search_end;
+class split_iterator
+    : public iterator<split_iterator<ValueType, Iterator, S, Iterator2, S2>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,
+                      strongest_cat_t<iter_cat_t<Iterator>, std::forward_iterator_tag>, default_sentinel_t> {
+    std::pair<Iterator, Iterator> _sub_range_end{};
+    Iterator _sub_range_begin{};
+    Iterator2 _to_search{};
+    S _end{};
+    S2 _to_search_end{};
     bool _ends_with_trailing{ true };
 
 public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = strongest_cat_t<iter_cat_t<Iterator>, std::forward_iterator_tag>;
     using value_type = ValueType;
     using reference = value_type;
     using difference_type = diff_type<Iterator>;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr split_iterator(const split_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 split_iterator& operator=(const split_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -38,8 +45,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<Iterator2>::value && std::is_default_constructible<S2>::value>>
     constexpr split_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
                                         std::is_nothrow_default_constructible<S>::value &&
                                         std::is_nothrow_default_constructible<Iterator2>::value &&
@@ -55,7 +62,8 @@ public:
         _end{ std::move(end) },
         _to_search_end{ std::move(end2) } {
         if (_sub_range_begin != _end) {
-            _sub_range_end = detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
+            _sub_range_end =
+                detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, LZ_BIN_OP(equal_to, val_t<Iterator>){});
         }
         else {
             _ends_with_trailing = false;
@@ -64,6 +72,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 split_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        _sub_range_end.first = _end;
         _ends_with_trailing = false;
         return *this;
     }
@@ -84,14 +93,14 @@ public:
 #else
 
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _end);
         return { _sub_range_begin, _sub_range_end.first };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_17 enable_if_t<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _end);
         return { detail::addressof(*_sub_range_begin),
                  static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end.first)) };
@@ -120,7 +129,8 @@ public:
         _sub_range_end.first = _sub_range_end.second;
         if (_sub_range_end.first != _end) {
             _sub_range_begin = _sub_range_end.first;
-            _sub_range_end = detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, MAKE_BIN_PRED(equal_to){});
+            _sub_range_end =
+                detail::search(_sub_range_end.second, _end, _to_search, _to_search_end, LZ_BIN_OP(equal_to, val_t<Iterator>){});
         }
     }
 
@@ -138,14 +148,17 @@ public:
 template<class ValueType, class Iterator, class S, class T>
 class split_single_iterator
     : public iterator<split_single_iterator<ValueType, Iterator, S, T>, ValueType, fake_ptr_proxy<ValueType>, std::ptrdiff_t,
-                      std::forward_iterator_tag, default_sentinel_t> {
-    Iterator _sub_range_begin;
-    Iterator _sub_range_end;
-    S _end;
-    T _delimiter;
+                      strongest_cat_t<iter_cat_t<Iterator>, std::forward_iterator_tag>, default_sentinel_t> {
+    Iterator _sub_range_begin{};
+    Iterator _sub_range_end{};
+    S _end{};
+    T _delimiter{};
     bool _ends_with_trailing{ true };
 
 public:
+    constexpr split_single_iterator(const split_single_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 split_single_iterator& operator=(const split_single_iterator&) = default;
+
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr split_single_iterator()
@@ -155,8 +168,8 @@ public:
 #else
 
     template<class I = Iterator,
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
-                               std::is_default_constructible<T>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<S>::value &&
+                                 std::is_default_constructible<T>::value>>
     constexpr split_single_iterator() noexcept(std::is_nothrow_default_constructible<Iterator>::value &&
                                                std::is_nothrow_default_constructible<S>::value &&
                                                std::is_nothrow_default_constructible<T>::value) {
@@ -176,7 +189,8 @@ public:
         _end{ std::move(end) },
         _delimiter{ std::move(delimiter) } {
         if (_sub_range_begin != _end) {
-            _sub_range_end = detail::find(_sub_range_begin, _end, _delimiter);
+            _sub_range_end =
+                detail::find_if(_sub_range_begin, _end, [this](detail::ref_t<Iterator> val) { return _delimiter == val; });
         }
         else {
             _ends_with_trailing = false;
@@ -185,6 +199,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 split_single_iterator& operator=(default_sentinel_t) {
         _sub_range_begin = _end;
+        _sub_range_end = _end;
         _ends_with_trailing = false;
         return *this;
     }
@@ -204,14 +219,14 @@ public:
 #else
 
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_14 enable_if<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { _sub_range_begin, _sub_range_end };
     }
 
     // Overload for std::string, [std/lz]::string_view
     template<class V = ValueType>
-    LZ_CONSTEXPR_CXX_17 enable_if<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_17 enable_if_t<!std::is_constructible<V, Iterator, Iterator>::value, reference> dereference() const {
         LZ_ASSERT_DEREFERENCABLE(!eq(lz::default_sentinel));
         return { detail::addressof(*_sub_range_begin), static_cast<size_t>(std::distance(_sub_range_begin, _sub_range_end)) };
     }
@@ -239,7 +254,10 @@ public:
             return;
         }
 
-        _sub_range_end = detail::find(_sub_range_begin, _end, _delimiter);
+        using lz::find;
+        using std::find;
+        _sub_range_end =
+            detail::find_if(_sub_range_begin, _end, [this](ref_t<Iterator> value) { return value == _delimiter; });
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const split_single_iterator& rhs) const {

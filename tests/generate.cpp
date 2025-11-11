@@ -1,7 +1,13 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Generate infinite") {
     std::function<int()> func = []() {
@@ -21,11 +27,13 @@ TEST_CASE("Generate infinite") {
     REQUIRE(begin != generator.end());
     REQUIRE(begin != generator.begin());
 
-    SUBCASE("Operator=") {
-        REQUIRE(begin != generator.end());
-        begin = generator.end();
-        // Inf never reaches end
-        REQUIRE(begin != generator.end());
+    SUBCASE("Operator=(defatult_sentinel_t)") {
+        int i = 0;
+        auto gen = lz::generate([&i]() { return i++; }, 5);
+        auto common = make_sentinel_assign_op_tester(gen);
+        auto expected = { 0, 1, 2, 3, 4 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::size(common) == lz::size(expected));
     }
 }
 

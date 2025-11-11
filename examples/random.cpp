@@ -1,6 +1,6 @@
+#include <Lz/algorithm/for_each.hpp>
 #include <Lz/random.hpp>
 #include <iostream>
-
 
 int main() {
     const float min = 0;

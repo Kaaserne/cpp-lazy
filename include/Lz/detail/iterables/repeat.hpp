@@ -3,22 +3,23 @@
 #ifndef LZ_REPEAT_ITERABLE_HPP
 #define LZ_REPEAT_ITERABLE_HPP
 
-#include <Lz/basic_iterable.hpp>
 #include <Lz/detail/iterators/repeat.hpp>
+#include <Lz/traits/lazy_view.hpp>
+
 // todo add extra tests for references
 namespace lz {
 namespace detail {
 
-template<bool /* is infinite loop */, class>
+template<class, bool /* is inf */>
 class repeat_iterable;
 
 template<class T>
-class repeat_iterable<false, T> : public lazy_view {
+class repeat_iterable<T, false> : public lazy_view {
     T _value{};
-    size_t _amount{};
+    ptrdiff_t _amount{};
 
 public:
-    using iterator = repeat_iterator<false, T>;
+    using iterator = repeat_iterator<T, false>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -30,25 +31,21 @@ public:
 
 #else
 
-    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    template<class U = T, class = enable_if_t<std::is_default_constructible<U>::value>>
     constexpr repeat_iterable() noexcept(std::is_nothrow_default_constructible<U>::value) {
     }
 
 #endif
 
-    constexpr repeat_iterable(T value, const size_t amount) : _value{ std::forward<T>(value) }, _amount{ amount } {
+    constexpr repeat_iterable(T value, const ptrdiff_t amount) : _value{ std::forward<T>(value) }, _amount{ amount } {
     }
 
     LZ_NODISCARD constexpr size_t size() const noexcept {
-        return _amount;
+        return static_cast<size_t>(_amount);
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return { _value, _amount };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return { std::move(_value), _amount };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {
@@ -57,11 +54,11 @@ public:
 };
 
 template<class T>
-class repeat_iterable<true, T> : public lazy_view {
-    T _value;
+class repeat_iterable<T, true> : public lazy_view {
+    T _value{};
 
 public:
-    using iterator = repeat_iterator<true, T>;
+    using iterator = repeat_iterator<T, true>;
     using const_iterator = iterator;
     using value_type = T;
 
@@ -73,7 +70,7 @@ public:
 
 #else
 
-    template<class U = T, class = enable_if<std::is_default_constructible<U>::value>>
+    template<class U = T, class = enable_if_t<std::is_default_constructible<U>::value>>
     constexpr repeat_iterable() noexcept(std::is_nothrow_default_constructible<U>::value) {
     }
 
@@ -82,12 +79,8 @@ public:
     explicit constexpr repeat_iterable(T value) : _value{ std::forward<T>(value) } {
     }
 
-    LZ_NODISCARD constexpr iterator begin() const& {
+    LZ_NODISCARD constexpr iterator begin() const {
         return iterator{ _value };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        return iterator{ std::move(_value) };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

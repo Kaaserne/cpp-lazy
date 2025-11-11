@@ -1,10 +1,12 @@
+#include <Lz/algorithm/equal.hpp>
 #include <Lz/cached_size.hpp>
 #include <Lz/chunks.hpp>
 #include <Lz/enumerate.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/range.hpp>
+#include <Lz/traits/is_sized.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Correct size") {
     auto to_filter = lz::range(10);
@@ -26,8 +28,8 @@ TEST_CASE("Correct size i.c.m. with other iterators") {
     REQUIRE(iterable.size() == 2);
     std::vector<std::pair<int, std::vector<int>>> expected{ { 0, { 0, 2, 4 } }, { 1, { 6, 8 } } };
 
-    using r1 = lz::ref_iterable_t<decltype(iterable)>;
-    using r2 = lz::ref_iterable_t<decltype(expected)>;
+    using r1 = lz::detail::ref_iterable_t<decltype(iterable)>;
+    using r2 = lz::detail::ref_iterable_t<decltype(expected)>;
 
     REQUIRE(lz::equal(iterable, expected, [](r1 p1, r2 p2) { return p1.first == p2.first && lz::equal(p1.second, p2.second); }));
 }

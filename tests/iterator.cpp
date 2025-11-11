@@ -1,7 +1,9 @@
+#include <Lz/c_string.hpp>
+#include <Lz/detail/procs/next_fast.hpp>
 #include <Lz/repeat.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Sentinel operators") {
     SUBCASE("Operator==") {
@@ -181,16 +183,6 @@ TEST_CASE("Helper functions") {
         REQUIRE(next == std::end(repeat));
     }
 
-    SUBCASE("next_fast_safe bidi") {
-        std::list<int> lst = { 1, 2, 3, 4, 5 };
-        auto next = lz::detail::next_fast_safe(lst, 2);
-        REQUIRE(next == std::next(lst.begin(), 2));
-        REQUIRE(*next == 3);
-
-        next = lz::detail::next_fast_safe(lst, lz::ssize(lst) + 1);
-        REQUIRE(next == std::end(lst));
-    }
-
     SUBCASE("next_fast_safe fwd") {
         auto cstr = lz::c_string("Hel1o");
         auto next = lz::detail::next_fast_safe(cstr, 2);
@@ -199,5 +191,15 @@ TEST_CASE("Helper functions") {
 
         next = lz::detail::next_fast_safe(cstr, lz::distance(cstr) + 1);
         REQUIRE(next == std::end(cstr));
+    }
+
+    SUBCASE("next_fast_safe bidi") {
+        std::list<int> lst = { 1, 2, 3, 4, 5 };
+        auto next = lz::detail::next_fast_safe(lst, 2);
+        REQUIRE(next == std::next(lst.begin(), 2));
+        REQUIRE(*next == 3);
+
+        next = lz::detail::next_fast_safe(lst, lz::ssize(lst) + 1);
+        REQUIRE(next == std::end(lst));
     }
 }

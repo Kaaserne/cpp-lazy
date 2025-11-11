@@ -53,7 +53,7 @@ struct interleave_adaptor {
      * @return An iterable that interleaves the elements of the given iterables.
      */
     template<class Iterable, class... Iterables>
-    LZ_NODISCARD constexpr interleave_iterable<remove_ref<Iterable>, remove_ref<Iterables>...>
+    LZ_NODISCARD constexpr interleave_iterable<remove_ref_t<Iterable>, remove_ref_t<Iterables>...>
     operator()(Iterable&& iterable, Iterables&&... iterables) const {
         return { std::forward<Iterable>(iterable), std::forward<Iterables>(iterables)... };
     }

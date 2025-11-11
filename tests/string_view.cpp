@@ -1,12 +1,21 @@
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-macros"
+#endif
+
 #define LZ_STANDALONE
 
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
+#include <Lz/util/string_view.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/string_view.hpp>
 
 #if !defined(LZ_HAS_STRING_VIEW)
 
-#include <Lz/string_view.hpp>
+#include <Lz/util/string_view.hpp>
 #include <doctest/doctest.h>
 
 TEST_CASE("String view basic functionality") {

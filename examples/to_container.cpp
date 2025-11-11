@@ -1,5 +1,7 @@
+#include <Lz/algorithm/transform.hpp>
 #include <Lz/generate.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
 #include <iostream>
 #include <list>
 #include <map>

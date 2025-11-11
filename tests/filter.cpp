@@ -1,10 +1,17 @@
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/c_string.hpp>
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/repeat.hpp>
 #include <Lz/reverse.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
 #include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
 TEST_CASE("Filter with sentinels") {
     const char* str = "Hello, World!";
@@ -16,12 +23,25 @@ TEST_CASE("Filter with sentinels") {
     static_assert(!std::is_same<decltype(filter.begin()), decltype(filter.end())>::value, "Must be sentinel");
     std::vector<char> expected = { 'H', 'e', 'l', 'l', ',', ' ', 'W', 'r', 'l', 'd', '!' };
     REQUIRE((filter | lz::to<std::vector>()) == expected);
+}
 
-    SUBCASE("Operator=") {
-        auto it = filter.begin();
-        REQUIRE(it == filter.begin());
-        it = filter.end();
-        REQUIRE(it == filter.end());
+TEST_CASE("operator=(default_sentinel_t)") {
+    SUBCASE("forward") {
+        std::forward_list<int> lst = { 1, 2, 3, 4, 5 };
+        auto f = lz::filter(lst, [](int i) { return i % 2 == 0; });
+        auto common = make_sentinel_assign_op_tester(f);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(expected, common));
+    }
+
+    SUBCASE("bidirectional") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto vec_sent = make_sized_bidi_sentinelled(vec);
+        auto f = lz::filter(vec_sent, [](int i) { return i % 2 == 0; });
+        auto common = make_sentinel_assign_op_tester(f);
+        auto expected = { 2, 4 };
+        REQUIRE(lz::equal(expected, common));
+        REQUIRE(lz::equal(expected | lz::reverse, common | lz::reverse));
     }
 }
 

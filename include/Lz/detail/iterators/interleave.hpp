@@ -3,14 +3,19 @@
 #ifndef LZ_INTERLEAVED_ITERATOR_HPP
 #define LZ_INTERLEAVED_ITERATOR_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/sentinel_with.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <numeric>
+
+#ifndef LZ_HAS_CXX_17
+#include <Lz/detail/procs/decompose.hpp>
+#endif
 
 namespace lz {
 namespace detail {
@@ -19,7 +24,7 @@ template<class IterMaybeHomo, class SMaybeHomo>
 class interleave_iterator
     : public iterator<interleave_iterator<IterMaybeHomo, SMaybeHomo>, iter_tuple_common_ref_t<IterMaybeHomo>,
                       fake_ptr_proxy<iter_tuple_common_ref_t<IterMaybeHomo>>, iter_tuple_diff_type_t<IterMaybeHomo>,
-                      iter_tuple_iter_cat_t<IterMaybeHomo>, SMaybeHomo> {
+                      iter_tuple_iter_cat_t<IterMaybeHomo>, sentinel_with<SMaybeHomo>> {
 
     using traits = std::iterator_traits<first_it_t<IterMaybeHomo>>;
 
@@ -35,7 +40,7 @@ private:
 
     static constexpr auto tup_size = static_cast<std::uint_least8_t>(tuple_size<IterMaybeHomo>::value);
 
-    IterMaybeHomo _iterators;
+    IterMaybeHomo _iterators{};
     // Using uint_least8_t because generally the max number of function parameters is 256
     std::uint_least8_t _index{};
 
@@ -44,13 +49,13 @@ private:
 #ifdef LZ_HAS_CXX_17
 
     template<size_t I>
-    constexpr bool eq(const SMaybeHomo& other) const {
+    constexpr bool eq(const sentinel_with<SMaybeHomo>& other) const {
         using std::get;
         if constexpr (I != tup_size - 1) {
-            return get<I>(_iterators) == get<I>(other) ? _index == 0 : eq<I + 1>(other);
+            return get<I>(_iterators) == get<I>(other.value) ? _index == 0 : eq<I + 1>(other);
         }
         else {
-            return get<I>(_iterators) == get<I>(other);
+            return get<I>(_iterators) == get<I>(other.value);
         }
     }
 
@@ -68,25 +73,25 @@ private:
 #else
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, bool> eq(const SMaybeHomo& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, bool> eq(const sentinel_with<SMaybeHomo>& other) const {
         using std::get;
-        return get<I>(_iterators) == get<I>(other) ? _index == 0 : eq<I + 1>(other);
+        return get<I>(_iterators) == get<I>(other.value) ? _index == 0 : eq<I + 1>(other);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, bool> eq(const SMaybeHomo& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, bool> eq(const sentinel_with<SMaybeHomo>& other) const {
         using std::get;
-        return get<I>(_iterators) == get<I>(other);
+        return get<I>(_iterators) == get<I>(other.value);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, bool> eq(const interleave_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, bool> eq(const interleave_iterator& other) const {
         using std::get;
         return get<I>(_iterators) == get<I>(other._iterators) ? _index == other._index : eq<I + 1>(other);
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, bool> eq(const interleave_iterator& other) const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, bool> eq(const interleave_iterator& other) const {
         using std::get;
         return get<I>(_iterators) == get<I>(other._iterators) && _index == other._index;
     }
@@ -139,13 +144,13 @@ private:
 #else
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I != tup_size - 1, reference> dereference() const {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, reference> dereference() const {
         using std::get;
         return _index == I ? *get<I>(_iterators) : dereference<I + 1>();
     }
 
     template<size_t I>
-    LZ_CONSTEXPR_CXX_14 enable_if<I == tup_size - 1, reference> dereference() const noexcept {
+    LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, reference> dereference() const noexcept {
         using std::get;
         return *get<I>(_iterators);
     }
@@ -158,14 +163,14 @@ private:
         const difference_type distances[] = { static_cast<difference_type>(get<Is>(_iterators) -
                                                                            get<Is>(other._iterators))... };
         const auto sum =
-            std::accumulate(std::begin(distances), std::end(distances), difference_type{ 0 }, std::plus<difference_type>{});
+            std::accumulate(detail::begin(distances), detail::end(distances), difference_type{ 0 }, std::plus<difference_type>{});
         return sum + (static_cast<difference_type>(_index) - static_cast<difference_type>(other._index));
     }
 
     template<size_t... Is>
-    LZ_CONSTEXPR_CXX_20 difference_type difference(const SMaybeHomo& other, index_sequence<Is...>) const {
+    LZ_CONSTEXPR_CXX_20 difference_type difference(const sentinel_with<SMaybeHomo>& other, index_sequence<Is...>) const {
         using std::get;
-        const difference_type distances[] = { static_cast<difference_type>(get<Is>(_iterators) - get<Is>(other))... };
+        const difference_type distances[] = { static_cast<difference_type>(get<Is>(_iterators) - get<Is>(other.value))... };
         const auto sum = std::max({ distances[Is]... }) * static_cast<difference_type>(tup_size);
         return sum + static_cast<difference_type>(_index);
     }
@@ -184,12 +189,12 @@ private:
     }
 
     template<size_t... I>
-    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const SMaybeHomo& end, index_sequence<I...>) {
+    LZ_CONSTEXPR_CXX_14 void assign_sentinels(const sentinel_with<SMaybeHomo>& end, index_sequence<I...>) {
         using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(end)), ...);
+        ((get<I>(_iterators) = get<I>(end.value)), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(end)...);
+        decompose(get<I>(_iterators) = get<I>(end.value)...);
 #endif
     }
 
@@ -202,7 +207,7 @@ public:
 
 #else
 
-    template<class I = IterMaybeHomo, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = IterMaybeHomo, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr interleave_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -212,7 +217,7 @@ public:
         static_assert(tup_size > 1, "interleaved_iterator must have at least two iterators");
     }
 
-    LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const SMaybeHomo& end) {
+    LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const sentinel_with<SMaybeHomo>& end) {
         assign_sentinels(end, is{});
         _index = 0;
         return *this;
@@ -238,7 +243,7 @@ public:
         return difference(other, is{});
     }
 
-    LZ_CONSTEXPR_CXX_14 difference_type difference(const SMaybeHomo& other) const {
+    LZ_CONSTEXPR_CXX_14 difference_type difference(const sentinel_with<SMaybeHomo>& other) const {
         return difference(other, is{});
     }
 
@@ -274,7 +279,7 @@ public:
         return eq<0>(other);
     }
 
-    LZ_CONSTEXPR_CXX_14 bool eq(const SMaybeHomo& last) const {
+    LZ_CONSTEXPR_CXX_14 bool eq(const sentinel_with<SMaybeHomo>& last) const {
         return eq<0>(last);
     }
 };

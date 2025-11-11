@@ -1,96 +1,108 @@
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/cached_size.hpp>
+#include <Lz/chunk_if.hpp>
+#include <Lz/chunks.hpp>
 #include <Lz/common.hpp>
-#include <Lz/map.hpp>
+#include <Lz/generate.hpp>
 #include <Lz/repeat.hpp>
-#include <cpp-lazy-ut-helper/c_string.hpp>
-#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
-#include <pch.hpp>
 
-TEST_CASE("Basic common_iterable test") {
-    const char* s = "hello, world!";
-    auto cstr = lz::c_string(s);
-    lz::common_iterable<lz::c_string_iterable<const char>> common = lz::common(cstr);
-    REQUIRE(common.begin() != common.end());
-    REQUIRE(common.end() != common.begin());
-    REQUIRE(std::find(common.begin(), common.end(), 'h') == common.begin());
-    REQUIRE(lz::equal(common, cstr));
-}
+class random_access_non_sized : lz::lazy_view {
+    lz::repeat_iterable<int> _repeater;
 
-TEST_CASE("common_iterable binary operations fwd") {
-    const char* a = "hello ";
-    auto c_string_view = lz::c_string(a);
-    auto common = lz::common(c_string_view);
+public:
+    random_access_non_sized() = default;
 
-    SUBCASE("Operator++") {
-        REQUIRE(lz::equal(common, c_string_view));
+    explicit random_access_non_sized(lz::repeat_iterable<int> rep) : _repeater{ rep } {
     }
 
-    SUBCASE("Operator== & operator!=") {
-        auto it = common.begin();
-        REQUIRE(it != common.end());
-        REQUIRE(common.end() != it);
-        it = common.end();
-        REQUIRE(it == common.end());
-        REQUIRE(common.end() != common.begin());
-    }
-}
-
-TEST_CASE("common_iterable random access") {
-    auto repeater = lz::repeat(20, 5);
-    REQUIRE(repeater.size() == 5);
-    auto common = lz::common(repeater);
-    static_assert(std::is_same<decltype(common), lz::basic_iterable<lz::iter_t<decltype(repeater)>>>::value, "");
-    static_assert(lz::detail::is_ra<lz::iter_t<decltype(repeater)>>::value, "");
-
-    SUBCASE("Operator++") {
-        REQUIRE(lz::equal(common, repeater));
-    }
-}
-
-TEST_CASE("common_iterable empty or one element") {
-    SUBCASE("Empty") {
-        auto c_str = lz::c_string("");
-        auto common = lz::common(c_str);
-        REQUIRE(lz::empty(common));
-        REQUIRE_FALSE(lz::has_one(common));
-        REQUIRE_FALSE(lz::has_many(common));
+    lz::iter_t<lz::repeat_iterable<int>> begin() const {
+        return _repeater.begin();
     }
 
-    SUBCASE("One element") {
-        auto c_str = lz::c_string("a");
-        auto common = lz::common(c_str);
-        REQUIRE_FALSE(lz::empty(common));
-        REQUIRE(lz::has_one(common));
-        REQUIRE_FALSE(lz::has_many(common));
+    lz::sentinel_t<lz::repeat_iterable<int>> end() const {
+        return _repeater.end();
     }
-}
+};
 
-TEST_CASE("common_iterable to containers") {
-    const char* a = "hello ";
-    auto c_string_view = lz::c_string(a);
-    auto common = lz::common(c_string_view);
-
-    SUBCASE("To array") {
-        REQUIRE((common | lz::to<std::array<char, 6>>()) == std::array<char, 6>{ 'h', 'e', 'l', 'l', 'o', ' ' });
+TEST_CASE("Common") {
+    SUBCASE("No sentinel") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto&& common = lz::common(vec);
+        static_assert(std::is_same<decltype(common), std::vector<int>&>::value, "");
+        REQUIRE(lz::equal(common, vec));
     }
 
-    SUBCASE("To vector") {
-        REQUIRE((common | lz::to<std::vector>()) == std::vector<char>{ 'h', 'e', 'l', 'l', 'o', ' ' });
+    SUBCASE("forward non sized") {
+        std::string str = "hello, world!";
+        auto chunk = lz::sv_chunk_if(str, [](char c) { return c == ','; });
+        auto common = lz::common(chunk);
+        static_assert(std::is_same<decltype(common), lz::basic_iterable<lz::iter_t<decltype(common)>>>::value, "");
+        std::vector<lz::string_view> expected = { "hello", " world!" };
+        static_assert(!lz::is_sized<decltype(common)>::value, "");
+        REQUIRE(lz::equal(common, expected));
     }
 
-    SUBCASE("To other container using to<>()") {
-        REQUIRE((common | lz::to<std::list<char>>()) == std::list<char>{ 'h', 'e', 'l', 'l', 'o', ' ' });
+    SUBCASE("forward sized") {
+        auto gen = lz::generate([]() { return 1; }, 3);
+        auto expected = { 1, 1, 1 };
+        auto common = lz::common(gen);
+        static_assert(std::is_same<decltype(common), lz::sized_iterable<lz::iter_t<decltype(gen)>>>::value, "");
+        REQUIRE(lz::size(common) == 3);
+        REQUIRE(lz::equal(common, expected));
     }
 
-    SUBCASE("To map") {
-        REQUIRE((c_string_view | lz::map([](char c) { return std::make_pair(c, c); }) | lz::common |
-                 lz::to<std::map<char, char>>()) ==
-                std::map<char, char>{ { 'h', 'h' }, { 'e', 'e' }, { 'l', 'l' }, { 'o', 'o' }, { ' ', ' ' } });
+    SUBCASE("bidirectional non sized") {
+        std::vector<int> vec = { 1, 2, 3, 4, 5 };
+        auto filter = make_non_sized_bidi_sentinelled(lz::filter(vec, [](int) { return true; }));
+        auto common = lz::common(filter);
+
+        std::vector<int> expected = { 1, 2, 3, 4, 5 };
+        REQUIRE(lz::equal(common, expected));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse));
     }
 
-    SUBCASE("To unordered map") {
-        REQUIRE((c_string_view | lz::map([](char c) { return std::make_pair(c, c); }) | lz::common |
-                 lz::to<std::unordered_map<char, char>>()) ==
-                std::unordered_map<char, char>{ { 'h', 'h' }, { 'e', 'e' }, { 'l', 'l' }, { 'o', 'o' }, { ' ', ' ' } });
+    SUBCASE("bidirectional sized") {
+        std::list<int> lst = { 1, 2, 3, 4, 5 };
+        auto chunks = lz::chunks(lst, 2);
+        auto sent = make_sized_bidi_sentinelled(chunks) | lz::cache_size;
+        auto common = lz::common(sent);
+
+        using common_t = decltype(common);
+        static_assert(std::is_same<common_t, lz::sized_iterable<lz::iter_t<common_t>, lz::sentinel_t<common_t>>>::value, "");
+        static_assert(lz::is_sized<decltype(common)>::value, "");
+        using value_type = decltype(*common.begin());
+
+        std::vector<std::vector<int>> expected = { { 1, 2 }, { 3, 4 }, { 5 } };
+        REQUIRE(lz::size(common) == 3);
+        REQUIRE(lz::equal(common, expected, [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+        REQUIRE(lz::equal(common | lz::reverse, expected | lz::reverse,
+                          [](value_type a, const std::vector<int>& b) { return lz::equal(a, b); }));
+    }
+
+    SUBCASE("random access non sized") {
+        random_access_non_sized non_sized_vec{ lz::repeat(1, 5) };
+        auto common = lz::common(non_sized_vec);
+        static_assert(std::is_same<decltype(common),
+                                   lz::basic_iterable<lz::iter_t<decltype(common)>, lz::sentinel_t<decltype(common)>>>::value,
+                      "");
+        static_assert(lz::is_sized<decltype(common)>::value, ""); // because random access
+        REQUIRE(lz::size(common) == 5);
+        auto expected = { 1, 1, 1, 1, 1 };
+        REQUIRE(lz::equal(common, expected));
+    }
+
+    SUBCASE("random access sized") {
+        auto rep = lz::repeat(1, 5);
+        auto common = lz::common(rep);
+        using common_t = decltype(common);
+        static_assert(std::is_same<common_t, lz::basic_iterable<lz::iter_t<common_t>, lz::sentinel_t<common_t>>>::value, "");
+        static_assert(lz::is_sized<decltype(common)>::value, "");
+        REQUIRE(lz::size(common) == 5);
+        auto expected = { 1, 1, 1, 1, 1 };
+        REQUIRE(lz::equal(common, expected));
     }
 }

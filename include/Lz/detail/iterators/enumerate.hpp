@@ -5,46 +5,63 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/traits.hpp>
+#include <Lz/detail/sentinel_with.hpp>
+#include <Lz/procs/eager_size.hpp>
 
 namespace lz {
 namespace detail {
-template<class Iterator, class S, class Arithmetic>
-class enumerate_iterator
-    : public iterator<enumerate_iterator<Iterator, S, Arithmetic>, std::pair<Arithmetic, ref_t<Iterator>>,
-                      fake_ptr_proxy<std::pair<Arithmetic, ref_t<Iterator>>>, diff_type<Iterator>, iter_cat_t<Iterator>, S> {
 
-    Iterator _iterator;
-    Arithmetic _index{};
+template<class Iterable, class IntType, class = void>
+class enumerate_iterator;
 
-    using traits = std::iterator_traits<Iterator>;
+template<class Iterable, class IntType>
+class enumerate_iterator<Iterable, IntType, enable_if_t<is_bidi<iter_t<Iterable>>::value>>
+    : public iterator<enumerate_iterator<Iterable, IntType>, std::pair<IntType, ref_t<iter_t<Iterable>>>,
+                      fake_ptr_proxy<std::pair<IntType, ref_t<iter_t<Iterable>>>>, diff_type<iter_t<Iterable>>,
+                      iter_cat_t<iter_t<Iterable>>, sentinel_with<IntType>> {
+
+    using iter = iter_t<Iterable>;
+    Iterable _iterable{};
+    iter _iterator{};
+    IntType _index{};
+
+    using traits = std::iterator_traits<iter>;
 
 public:
-    using value_type = std::pair<Arithmetic, typename traits::value_type>;
-    using reference = std::pair<Arithmetic, typename traits::reference>;
+    using value_type = std::pair<IntType, typename traits::value_type>;
+    using reference = std::pair<IntType, typename traits::reference>;
     using pointer = fake_ptr_proxy<reference>;
     using difference_type = typename traits::difference_type;
+
+    constexpr enumerate_iterator(const enumerate_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(const enumerate_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr enumerate_iterator()
-        requires(std::default_initializable<Iterator>)
+        requires(std::default_initializable<iter> && std::default_initializable<Iterable>)
     = default;
 
 #else
 
-    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
-    constexpr enumerate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
+    template<class I = iter,
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<Iterable>::value>>
+    constexpr enumerate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value &&
+                                            std::is_nothrow_default_constructible<Iterable>::value) {
     }
 
 #endif
 
-    constexpr enumerate_iterator(Iterator it, const Arithmetic start) : _iterator{ std::move(it) }, _index{ start } {
+    template<class I>
+    constexpr enumerate_iterator(I&& iterable, iter it, const IntType start) :
+        _iterable{ std::forward<I>(iterable) },
+        _iterator{ std::move(it) },
+        _index{ start } {
     }
 
-    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(const S& end) {
-        _iterator = end;
-        _index = 0;
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(sentinel_with<IntType> s) {
+        _iterator = _iterable.end();
+        _index = s.value + static_cast<IntType>(lz::eager_size(_iterable));
         return *this;
     }
 
@@ -70,12 +87,12 @@ public:
         return _iterator == other._iterator;
     }
 
-    constexpr bool eq(const S& s) const {
-        return _iterator == s;
+    constexpr bool eq(sentinel_with<IntType>) const {
+        return _iterator == _iterable.end();
     }
 
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type n) {
-        _index += static_cast<Arithmetic>(n);
+        _index += static_cast<IntType>(n);
         _iterator += n;
     }
 
@@ -83,8 +100,78 @@ public:
         return _iterator - other._iterator;
     }
 
-    constexpr difference_type difference(const S& other) const {
-        return _iterator - other;
+    constexpr difference_type difference(sentinel_with<IntType>) const {
+        return _iterator - _iterable.end();
+    }
+};
+
+template<class Iterable, class IntType>
+class enumerate_iterator<Iterable, IntType, enable_if_t<!is_bidi<iter_t<Iterable>>::value>>
+    : public iterator<enumerate_iterator<Iterable, IntType>, std::pair<IntType, ref_t<iter_t<Iterable>>>,
+                      fake_ptr_proxy<std::pair<IntType, ref_t<iter_t<Iterable>>>>, diff_type<iter_t<Iterable>>,
+                      iter_cat_t<iter_t<Iterable>>, sentinel_with<sentinel_t<Iterable>>> {
+
+    using iter = iter_t<Iterable>;
+    iter _iterator{};
+    IntType _index{};
+
+    using traits = std::iterator_traits<iter>;
+
+public:
+    using value_type = std::pair<IntType, typename traits::value_type>;
+    using reference = std::pair<IntType, typename traits::reference>;
+    using pointer = fake_ptr_proxy<reference>;
+    using difference_type = typename traits::difference_type;
+
+    constexpr enumerate_iterator(const enumerate_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(const enumerate_iterator&) = default;
+
+#ifdef LZ_HAS_CONCEPTS
+
+    constexpr enumerate_iterator()
+        requires(std::default_initializable<iter>)
+    = default;
+
+#else
+
+    template<class I = iter, class = enable_if_t<std::is_default_constructible<I>::value>>
+    constexpr enumerate_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
+    }
+
+#endif
+
+    constexpr enumerate_iterator(iter it, const IntType start) : _iterator{ std::move(it) }, _index{ start } {
+    }
+
+    LZ_CONSTEXPR_CXX_14 enumerate_iterator& operator=(sentinel_with<sentinel_t<Iterable>> s) {
+        _iterator = std::move(s.value);
+        return *this;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void increment() {
+        ++_index;
+        ++_iterator;
+    }
+
+    LZ_CONSTEXPR_CXX_14 void decrement() {
+        --_index;
+        --_iterator;
+    }
+
+    constexpr reference dereference() const {
+        return { _index, *_iterator };
+    }
+
+    constexpr pointer arrow() const {
+        return fake_ptr_proxy<decltype(**this)>(**this);
+    }
+
+    constexpr bool eq(const enumerate_iterator& other) const {
+        return _iterator == other._iterator;
+    }
+
+    constexpr bool eq(const sentinel_with<sentinel_t<Iterable>>& other) const {
+        return _iterator == other.value;
     }
 };
 } // namespace detail

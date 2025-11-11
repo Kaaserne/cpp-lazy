@@ -1,7 +1,13 @@
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/split.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/split.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("Split with custom container") {
     std::string to_split = "Hello world test 123";
@@ -24,11 +30,6 @@ TEST_CASE("Splitter permutations") {
 
         std::vector<lz::string_view> expected = { "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Starting with one delimiter ending with none") {
@@ -36,11 +37,6 @@ TEST_CASE("Splitter permutations") {
         auto splitter = to_split | lz::s_split(" ");
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Starting with two delimiters ending with none") {
@@ -48,11 +44,6 @@ TEST_CASE("Splitter permutations") {
         auto splitter = to_split | lz::sv_split(" ");
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Ending with one delimiter starting with none") {
@@ -61,11 +52,6 @@ TEST_CASE("Splitter permutations") {
 
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Ending with two delimiters starting with none") {
@@ -73,11 +59,6 @@ TEST_CASE("Splitter permutations") {
         auto splitter = to_split | lz::sv_split(" ");
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "", "" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Starting and ending with one delimiter") {
@@ -87,11 +68,6 @@ TEST_CASE("Splitter permutations") {
                         lz::to<std::vector>();
         std::vector<std::string> expected = { "", "Hello", "world", "test", "123", "" };
         REQUIRE(splitter == expected);
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Starting and ending with two delimiters") {
@@ -99,11 +75,6 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "", "", "Hello", "world", "test", "123", "", "" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("No delimiters at all") {
@@ -111,11 +82,6 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "Hello", "world", "test", "123" };
         REQUIRE(lz::equal(splitter, expected));
-
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
     }
 
     SUBCASE("Multiple delimiters in the middle") {
@@ -123,11 +89,44 @@ TEST_CASE("Splitter permutations") {
         auto splitter = lz::sv_split(to_split, " ");
         std::vector<std::string> expected = { "Hello", "", "world", "", "test", "", "123" };
         REQUIRE(lz::equal(splitter, expected));
+    }
 
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = splitter.end();
-        REQUIRE(it == splitter.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        SUBCASE("not ending with delim") {
+            const std::string s = "hello, world! This is a test.";
+
+            SUBCASE("single") {
+                auto splitted = lz::sv_split(s, ' ');
+                auto common = make_sentinel_assign_op_tester(splitted);
+                auto expected = { "hello,", "world!", "This", "is", "a", "test." };
+                REQUIRE(lz::equal(common, expected));
+            }
+
+            SUBCASE("multiple") {
+                auto splitted2 = lz::sv_split(s, ", ");
+                auto common2 = make_sentinel_assign_op_tester(splitted2);
+                auto expected2 = { "hello", "world! This is a test." };
+                REQUIRE(lz::equal(common2, expected2));
+            }
+        }
+
+        SUBCASE("ending with delim") {
+            SUBCASE("single") {
+                const std::string s = "hello, world! This is a test. ";
+                auto splitted = lz::sv_split(s, ' ');
+                auto common = make_sentinel_assign_op_tester(splitted);
+                auto expected = { "hello,", "world!", "This", "is", "a", "test.", "" };
+                REQUIRE(lz::equal(common, expected));
+            }
+
+            SUBCASE("multiple") {
+                const std::string s = "hello, world! This is a test, ";
+                auto splitted2 = lz::sv_split(s, ", ");
+                auto common2 = make_sentinel_assign_op_tester(splitted2);
+                auto expected = { "hello", "world! This is a test", "" };
+                REQUIRE(lz::equal(common2, expected));
+            }
+        }
     }
 }
 
@@ -217,20 +216,23 @@ TEST_CASE("Splitter binary operations") {
 TEST_CASE("Splitter to containers") {
     std::string to_split = "Hello world test 123 ";
     auto splitter = lz::sv_split(to_split, " ");
+    auto cmp = [](const std::string& a, const lz::string_view& b) {
+        return a == std::string{ b.data(), b.size() };
+    };
 
     SUBCASE("To array") {
         std::array<std::string, 5> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To vector") {
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To other container using to<>()") {
         std::list<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To map") {
@@ -475,20 +477,23 @@ TEST_CASE("One element splitter binary operations") {
 TEST_CASE("One element splitter to containers") {
     std::string to_split = "Hello world test 123 ";
     auto splitter = lz::sv_split(to_split, ' ');
+    auto cmp = [](const std::string& a, const lz::string_view& b) {
+        return a == std::string{ b.data(), b.size() };
+    };
 
     SUBCASE("To array") {
         std::array<std::string, 5> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To vector") {
         std::vector<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To other container using to<>()") {
         std::list<std::string> expected = { "Hello", "world", "test", "123", "" };
-        REQUIRE(lz::equal(expected, splitter));
+        REQUIRE(lz::equal(expected, splitter, cmp));
     }
 
     SUBCASE("To map") {

@@ -1,9 +1,16 @@
-#include <cpp-lazy-ut-helper/test_procs.hpp>
-#include <doctest/doctest.h>
-#include <pch.hpp>
-#include <Lz/random.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/all_of.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
 #include <Lz/map.hpp>
+#include <Lz/procs/to.hpp>
+#include <Lz/random.hpp>
 #include <Lz/reverse.hpp>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/test_procs.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 #include <random>
 // TODO reverse
 TEST_CASE("random_iterable should be random") {
@@ -22,24 +29,28 @@ TEST_CASE("random_iterable should be random") {
     }
 
     SUBCASE("random_iterable ints") {
-        const auto random_array =
-            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
-        const auto random_array_2 =
-            lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) | lz::to<std::array<int, size>>();
+        const auto random_array = lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) |
+                                  lz::to<std::array<int, size>>();
+        const auto random_array_2 = lz::random((std::numeric_limits<int>::min)(), (std::numeric_limits<int>::max)(), size) |
+                                    lz::to<std::array<int, size>>();
         REQUIRE(random_array != random_array_2);
     }
 
-    SUBCASE("Operator=") {
-        auto random = lz::random(0., 1., size);
-        auto it = random.begin();
-        REQUIRE(it != random.end());
-        it = random.end();
-        REQUIRE(it == random.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        auto random = lz::random(1, 10, 5);
+        auto common = make_sentinel_assign_op_tester(random);
+
+        REQUIRE(lz::size(common) == 5);
+        auto dummy = { 0, 0, 0, 0, 0 };
+        REQUIRE(lz::equal(common, dummy, [](int a, int) { return a <= 10 && a >= 0; }));
+        REQUIRE(lz::equal(common | lz::reverse, dummy, [](int a, int) { return a <= 10 && a >= 0; }));
+        test_procs::test_operator_minus(common);
+        test_procs::test_operator_plus(common, dummy, [](int a, int) { return a <= 10 && a >= 0; });
     }
 }
 
 TEST_CASE("random_iterable with custom distro's and custom engine") {
-    static std::random_device rd;
+    std::random_device rd;
     std::mt19937_64 gen(rd());
     std::poisson_distribution<> d(500000);
     lz::random_iterable<int, std::poisson_distribution<>, std::mt19937_64> r = lz::random(d, gen, 3);

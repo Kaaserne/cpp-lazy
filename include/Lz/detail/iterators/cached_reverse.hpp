@@ -5,7 +5,10 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -16,15 +19,18 @@ class cached_reverse_iterator
                       iter_cat_t<Iterator>, default_sentinel_t> {
     using traits = std::iterator_traits<Iterator>;
 
-    Iterator _iterator;
-    Iterator _prev_it;
-    Iterator _begin;
+    Iterator _iterator{};
+    Iterator _prev_it{};
+    Iterator _begin{};
 
 public:
     using value_type = typename traits::value_type;
     using difference_type = typename traits::difference_type;
     using reference = typename traits::reference;
     using pointer = fake_ptr_proxy<reference>;
+
+    constexpr cached_reverse_iterator(const cached_reverse_iterator&) = default;
+    LZ_CONSTEXPR_CXX_14 cached_reverse_iterator& operator=(const cached_reverse_iterator&) = default;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -34,7 +40,7 @@ public:
 
 #else
 
-    template<class I = Iterator, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = Iterator, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr cached_reverse_iterator() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 

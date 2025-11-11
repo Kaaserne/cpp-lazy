@@ -12,8 +12,8 @@ namespace detail {
 
 template<class ValueType, class Iterable, class UnaryPredicate>
 class chunk_if_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-    func_container<UnaryPredicate> _predicate;
+    maybe_owned<Iterable> _iterable{};
+    func_container<UnaryPredicate> _predicate{};
 
 public:
     using iterator = chunk_if_iterator<ValueType, iter_t<Iterable>, sentinel_t<Iterable>, func_container<UnaryPredicate>>;
@@ -29,7 +29,7 @@ public:
 #else
 
     template<class I = decltype(_iterable),
-             class = enable_if<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
+             class = enable_if_t<std::is_default_constructible<I>::value && std::is_default_constructible<UnaryPredicate>::value>>
     constexpr chunk_if_iterable() noexcept(std::is_nothrow_default_constructible<I>::value &&
                                            std::is_nothrow_default_constructible<UnaryPredicate>::value) {
     }
@@ -42,16 +42,8 @@ public:
         _predicate{ std::move(predicate) } {
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() && {
-        auto begin = detail::begin(std::move(_iterable));
-        auto end = detail::end(std::move(_iterable));
-        const auto is_end = end == begin;
-        return { begin, end, std::move(_predicate), is_end };
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const& {
-        const auto is_end = _iterable.end() == _iterable.begin();
-        return { _iterable.begin(), _iterable.end(), _predicate, is_end };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
+        return { _iterable.begin(), _iterable.end(), _predicate, _iterable.end() == _iterable.begin() };
     }
 
     LZ_NODISCARD constexpr default_sentinel_t end() const noexcept {

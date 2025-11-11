@@ -5,21 +5,24 @@
 
 #include <Lz/detail/iterators/as_iterator.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/traits/is_sentinel.hpp>
 
 namespace lz {
 namespace detail {
 
 template<class Iterable, class IterCat>
 class as_iterator_iterable : public lazy_view {
-    maybe_owned<Iterable> _iterable;
-
-    using sentinel = sentinel_t<Iterable>;
+    maybe_owned<Iterable> _iterable{};
 
 public:
     using value_type = iter_t<Iterable>;
     using iterator = as_iterator_iterator<value_type, sentinel_t<Iterable>, IterCat>;
     using const_iterator = iterator;
 
+private:
+    using sentinel = typename iterator::sentinel;
+
+public:
 #ifdef LZ_HAS_CONCEPTS
 
     constexpr as_iterator_iterable()
@@ -28,7 +31,7 @@ public:
 
 #else
 
-    template<class I = decltype(_iterable), class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = decltype(_iterable), class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr as_iterator_iterable() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -45,10 +48,11 @@ public:
     {
         return static_cast<size_t>(lz::size(_iterable));
     }
+
 #else
 
     template<class T = is_sized<Iterable>>
-    LZ_NODISCARD constexpr enable_if<T::value, size_t> size() const {
+    LZ_NODISCARD constexpr enable_if_t<T::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable));
     }
 
@@ -61,24 +65,24 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     LZ_NODISCARD constexpr auto end() const {
-        if constexpr (!is_sentinel_v<value_type, sentinel>) {
+        if constexpr (!is_sentinel_v<value_type, sentinel_t<Iterable>>) {
             return iterator{ _iterable.end() };
         }
         else {
-            return _iterable.end();
+            return sentinel{ _iterable.end() };
         }
     }
 
 #else
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if<!is_sentinel<I, sentinel>::value, iterator> end() const& {
+    LZ_NODISCARD constexpr enable_if_t<!is_sentinel<I, sentinel_t<Iterable>>::value, iterator> end() const {
         return iterator{ _iterable.end() };
     }
 
     template<class I = value_type>
-    LZ_NODISCARD constexpr enable_if<is_sentinel<I, sentinel>::value, sentinel> end() const& {
-        return _iterable.end();
+    LZ_NODISCARD constexpr enable_if_t<is_sentinel<I, sentinel_t<Iterable>>::value, sentinel> end() const {
+        return sentinel{ _iterable.end() };
     }
 
 #endif // LZ_HAS_CXX_17

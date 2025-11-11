@@ -1,7 +1,12 @@
-#include <doctest/doctest.h>
-#include <pch.hpp>
+#include <Lz/algorithm/empty.hpp>
+#include <Lz/algorithm/equal.hpp>
+#include <Lz/algorithm/has_many.hpp>
+#include <Lz/algorithm/has_one.hpp>
+#include <Lz/procs/to.hpp>
 #include <Lz/regex_split.hpp>
-#include <regex>
+#include <cpp-lazy-ut-helper/pch.hpp>
+#include <cpp-lazy-ut-helper/ut_helper.hpp>
+#include <doctest/doctest.h>
 
 TEST_CASE("regex_split_iterable changing and creating elements") {
     std::regex r1(R"(\s+)");
@@ -38,13 +43,13 @@ TEST_CASE("regex_split_iterable changing and creating elements") {
         REQUIRE(lz::equal(actual, expected));
     }
 
-    SUBCASE("Operator=") {
-        std::string s = "Hello, world! How are you?";
-        auto splitter = lz::regex_split(s, r1);
-        auto it = splitter.begin();
-        REQUIRE(it == splitter.begin());
-        it = std::regex_token_iterator<std::string::const_iterator>{};
-        REQUIRE(it == splitter.end());
+    SUBCASE("Operator=(default_sentinel_t)") {
+        std::string s = "hello, world! This is a test.";
+        std::regex r("\\s+");
+        auto splitted = lz::regex_split(s, r);
+        auto common = make_sentinel_assign_op_tester(splitted);
+        auto expected = { "hello,", "world!", "This", "is", "a", "test." };
+        REQUIRE(lz::equal(common, expected));
     }
 }
 

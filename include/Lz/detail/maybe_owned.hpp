@@ -3,7 +3,16 @@
 #ifndef LZ_MAYBE_OWNED_HPP
 #define LZ_MAYBE_OWNED_HPP
 
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/addressof.hpp>
+#include <Lz/detail/procs/begin_end.hpp>
+#include <Lz/detail/traits/is_sized.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/traits/iter_type.hpp>
+#include <Lz/traits/lazy_view.hpp>
+
+#ifdef LZ_HAS_CONCEPTS
+#include <Lz/traits/concepts.hpp>
+#endif
 
 namespace lz {
 namespace detail {
@@ -21,8 +30,9 @@ public:
 
     template<class I>
     constexpr maybe_owned_impl(I&& iterable) noexcept : _iterable_ref_ptr{ detail::addressof(iterable) } {
-        static_assert(std::is_lvalue_reference<I>::value, "Can only bind to lvalues. Check if you are passing a temporary "
-                                                          "object, or forgot to add/remove const/volatile qualifiers.");
+        static_assert(std::is_lvalue_reference<I>::value,
+                      "Can only bind to lvalues. Check if you are passing a temporary "
+                      "object, forgot to add/remove const/volatile qualifiers or forgot to inherit from lz::lazy_view.");
     }
 
     template<class T, size_t N>
@@ -61,7 +71,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr size_t size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr)))
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
         return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
@@ -70,38 +80,24 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(*_iterable_ref_ptr))) {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(*_iterable_ref_ptr));
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const {
         if (!_iterable_ref_ptr) {
             return iter_t<Iterable>{};
         }
-        return std::begin(*_iterable_ref_ptr);
+        return detail::begin(*_iterable_ref_ptr);
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
-        if (!_iterable_ref_ptr) {
-            return iter_t<Iterable>{};
-        }
-        return detail::begin(std::move(*_iterable_ref_ptr));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
         if (!_iterable_ref_ptr) {
             return sentinel_t<Iterable>{};
         }
-        return std::end(*_iterable_ref_ptr);
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
-        if (!_iterable_ref_ptr) {
-            return sentinel_t<Iterable>{};
-        }
-        return detail::end(std::move(*_iterable_ref_ptr));
+        return detail::end(*_iterable_ref_ptr);
     }
 };
 
@@ -109,7 +105,7 @@ public:
 template<class Iterable>
 class maybe_owned_impl<Iterable, true> : public lazy_view {
     using it = typename std::remove_cv<Iterable>::type;
-    it _iterable_value;
+    it _iterable_value{};
 
     template<class, bool>
     friend class maybe_owned_impl;
@@ -125,7 +121,7 @@ public:
 
 #else
 
-    template<class I = it, class = enable_if<std::is_default_constructible<I>::value>>
+    template<class I = it, class = enable_if_t<std::is_default_constructible<I>::value>>
     constexpr maybe_owned_impl() noexcept(std::is_nothrow_default_constructible<I>::value) {
     }
 
@@ -167,7 +163,7 @@ public:
 
 #ifdef LZ_HAS_CONCEPTS
 
-    [[nodiscard]] constexpr size_t size() const noexcept(noexcept(lz::size(_iterable_value)))
+    [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
         return static_cast<size_t>(lz::size(_iterable_value));
@@ -176,34 +172,26 @@ public:
 #else
 
     template<class I = Iterable>
-    LZ_NODISCARD constexpr enable_if<is_sized<I>::value, size_t> size() const noexcept(noexcept(lz::size(_iterable_value))) {
+    LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
         return static_cast<size_t>(lz::size(_iterable_value));
     }
 
 #endif
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() & {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const {
         return _iterable_value.begin();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const& {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
+        return _iterable_value.end();
+    }
+
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() {
         return _iterable_value.begin();
     }
 
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() && {
-        return detail::begin(std::move(_iterable_value));
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() & {
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() {
         return _iterable_value.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const& {
-        return _iterable_value.end();
-    }
-
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() && {
-        return detail::end(std::move(_iterable_value));
     }
 };
 
@@ -217,7 +205,6 @@ using maybe_owned = maybe_owned_impl<Iterable, std::is_base_of<lazy_view, typena
  * iterable. This is done because lazy views are generally cheap to copy, because they contain references to the actual container,
  * rather than the container itself. This class is used in various places in the library to store a reference or a copy of an
  * iterable, depending on the type of the iterable.
- * @tparam Iterable The type of the iterable to store a reference or copy of.
  * Example:
  * ```cpp
  * std::vector<int> vec{ 1, 2, 3 };
@@ -271,8 +258,8 @@ using copied = detail::maybe_owned_impl<Iterable, true>;
  * ```
  */
 template<class Iterable>
-copied<detail::remove_ref<Iterable>> as_copied(Iterable&& iterable) {
-    return copied<detail::remove_ref<Iterable>>{ std::forward<Iterable>(iterable) };
+copied<detail::remove_ref_t<Iterable>> as_copied(Iterable&& iterable) {
+    return copied<detail::remove_ref_t<Iterable>>{ std::forward<Iterable>(iterable) };
 }
 } // namespace lz
 

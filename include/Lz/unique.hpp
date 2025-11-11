@@ -3,7 +3,7 @@
 #ifndef LZ_UNIQUE_HPP
 #define LZ_UNIQUE_HPP
 
-#include <Lz/basic_iterable.hpp>
+#include <Lz/procs/chain.hpp>
 #include <Lz/detail/adaptors/unique.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
@@ -36,7 +36,7 @@ LZ_INLINE_VAR constexpr detail::unique_adaptor unique{};
  * lz::unique_iterable<std::vector> vec_unique = lz::unique(vec);
  * ```
  */
-template<class Iterable, class BinaryPredicate = MAKE_BIN_PRED(less)>
+template<class Iterable, class BinaryPredicate = LZ_BIN_OP(less, detail::val_iterable_t<Iterable>)>
 using unique_iterable = detail::unique_iterable<Iterable, BinaryPredicate>;
 
 } // end namespace lz

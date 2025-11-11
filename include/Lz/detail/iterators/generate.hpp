@@ -5,7 +5,10 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/procs.hpp>
+#include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/traits/func_ret_type.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/util/default_sentinel.hpp>
 
 namespace lz {
 namespace detail {
@@ -15,16 +18,15 @@ class generate_iterator;
 template<class GeneratorFunc>
 class generate_iterator<GeneratorFunc, false>
     : public iterator<generate_iterator<GeneratorFunc, false>, func_ret_type<GeneratorFunc>,
-                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
-                      default_sentinel_t> {
+                      fake_ptr_proxy<func_ret_type<GeneratorFunc>>, ptrdiff_t, std::forward_iterator_tag, default_sentinel_t> {
 
-    mutable GeneratorFunc _func;
-    size_t _current{};
+    mutable GeneratorFunc _func{};
+    ptrdiff_t _current{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = remove_cvref<reference>;
-    using difference_type = std::ptrdiff_t;
+    using value_type = remove_cvref_t<reference>;
+    using difference_type = ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
 #ifdef LZ_HAS_CONCEPTS
@@ -35,13 +37,13 @@ public:
 
 #else
 
-    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    template<class G = GeneratorFunc, class = enable_if_t<std::is_default_constructible<G>::value>>
     constexpr generate_iterator() noexcept(std::is_nothrow_default_constructible<G>::value) {
     }
 
 #endif
 
-    constexpr generate_iterator(GeneratorFunc generator_func, const size_t amount) :
+    constexpr generate_iterator(GeneratorFunc generator_func, const ptrdiff_t amount) :
         _func{ std::move(generator_func) },
         _current{ amount } {
     }
@@ -80,11 +82,11 @@ class generate_iterator<GeneratorFunc, true>
                       fake_ptr_proxy<func_ret_type<GeneratorFunc>>, std::ptrdiff_t, std::forward_iterator_tag,
                       default_sentinel_t> {
 
-    GeneratorFunc _func;
+    mutable GeneratorFunc _func{};
 
 public:
     using reference = func_ret_type<GeneratorFunc>;
-    using value_type = remove_cvref<reference>;
+    using value_type = remove_cvref_t<reference>;
     using difference_type = std::ptrdiff_t;
     using pointer = fake_ptr_proxy<reference>;
 
@@ -96,7 +98,7 @@ public:
 
 #else
 
-    template<class G = GeneratorFunc, class = enable_if<std::is_default_constructible<G>::value>>
+    template<class G = GeneratorFunc, class = enable_if_t<std::is_default_constructible<G>::value>>
     constexpr generate_iterator() {
     }
 
