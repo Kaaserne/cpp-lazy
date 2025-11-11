@@ -9,7 +9,7 @@
 #include <doctest/doctest.h>
 
 auto compare = [](double a, doctest::Approx b) {
-    return a == doctest::Approx(b);
+    return a == b;
 };
 
 TEST_CASE("Range permutations") {

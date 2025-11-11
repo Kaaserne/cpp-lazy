@@ -32,7 +32,7 @@ TEST_CASE("Enumerate with sentinels") {
     std::vector<std::pair<int, char>> expected = { { 0, 'H' }, { 1, 'e' }, { 2, 'l' } };
     REQUIRE(lz::equal(taken, expected, equal_fn{}));
 }
-// TODO check compile times of enumerate (std::pair)
+
 TEST_CASE("Operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         auto cstr = lz::c_string("abc");

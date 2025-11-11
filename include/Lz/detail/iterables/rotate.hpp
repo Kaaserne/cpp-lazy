@@ -102,8 +102,8 @@ public:
     }
 
     template<bool R = return_sentinel>
-    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, inner_iter> end() const {
-        return sentinel_with<inner_iter>{ _start_iter };
+    LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, sentinel> end() const {
+        return sentinel{ _start_iter };
     }
 
 #endif

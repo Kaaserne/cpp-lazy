@@ -12,9 +12,9 @@
 #ifndef LZ_HAS_CXX_17
 #include <Lz/detail/procs/decompose.hpp>
 #endif
+
 namespace lz {
 namespace detail {
-// TODO add specialization for bidi sized and one of non sentinelled?
 template<class... Iterables>
 class zip_iterator : public iterator<zip_iterator<Iterables...>, iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
                                      fake_ptr_proxy<iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>>,
@@ -108,6 +108,7 @@ private:
 #endif
     }
 
+    // TODO add specialization for bidi sized and one of non sentinelled?j
     template<class cat = iterator_category, size_t... I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<cat>::value && !is_ra_tag<cat>::value>
     assign_sentinels(const sentinel& other, index_sequence<I...>) {
@@ -118,7 +119,6 @@ private:
 
     template<class cat = iterator_category, size_t... I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<cat>::value> assign_sentinels(const sentinel& other, index_sequence<I...>) {
-        using std::get;
         const auto smallest_iter = other - *this;
         *this += smallest_iter;
     }
