@@ -11,6 +11,8 @@
 
 #ifdef LZ_HAS_CONCEPTS
 
+#include <Lz/traits/concepts.hpp>
+
 LZ_MODULE_EXPORT template<class Iterable, class Adaptor>
     requires(lz::adaptor<lz::detail::remove_cref_t<Adaptor>> && lz::iterable<lz::detail::remove_ref_t<Iterable>>)
 [[nodiscard]] constexpr auto operator|(Iterable&& iterable, Adaptor&& adaptor) {

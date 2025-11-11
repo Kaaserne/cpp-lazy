@@ -16,6 +16,12 @@
 #include <Lz/detail/traits/void.hpp>
 #include <Lz/procs/size.hpp>
 
+#ifdef LZ_HAS_CONCEPTS
+
+#include <Lz/traits/concepts.hpp>
+
+#endif
+
 namespace lz {
 namespace detail {
 
