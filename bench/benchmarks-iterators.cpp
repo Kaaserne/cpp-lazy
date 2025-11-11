@@ -386,6 +386,16 @@ void map_lz(benchmark::State& state) {
     }
 }
 
+void pairwise_lz(benchmark::State& state) {
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+
+    for (auto _ : state) {
+        for (auto pair : lz::pairwise(arr, 3)) {
+            benchmark::DoNotOptimize(pair);
+        }
+    }
+}
+
 void random_lz(benchmark::State& state) {
     for (auto _ : state) {
 #ifdef LZ_HAS_CXX_17
@@ -713,6 +723,20 @@ void cartesian_product_std(benchmark::State& state) {
     for (auto _ : state) {
         for (auto&& tup : std::views::cartesian_product(a, b)) {
             benchmark::DoNotOptimize(tup);
+        }
+    }
+}
+
+#endif
+
+#if defined(__cpp_lib_ranges_slide) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
+
+void pairwise_std(benchmark::State& state) {
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+
+    for (auto _ : state) {
+        for (auto pair : std::views::slide(arr, 3)) {
+            benchmark::DoNotOptimize(pair);
         }
     }
 }
