@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_TRAITS_IS_SIZED_HPP
 #define LZ_DETAIL_TRAITS_IS_SIZED_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/void.hpp>
 #include <Lz/procs/size.hpp>
 

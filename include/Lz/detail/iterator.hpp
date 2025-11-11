@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_ITERATOR_HPP
 #define LZ_DETAIL_ITERATOR_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/sentinel_operators.hpp>
 #include <iterator>
 

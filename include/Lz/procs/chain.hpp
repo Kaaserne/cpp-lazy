@@ -3,11 +3,11 @@
 #ifndef LZ_PROCS_CHAIN_HPP
 #define LZ_PROCS_CHAIN_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
-#include <Lz/detail/traits/is_iterable.hpp>
-#include <Lz/detail/traits/is_adaptor.hpp>
-#include <Lz/detail/traits/remove_ref.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
+#include <Lz/detail/traits/is_adaptor.hpp>
+#include <Lz/detail/traits/is_iterable.hpp>
+#include <Lz/detail/traits/remove_ref.hpp>
 
 #ifdef LZ_HAS_CONCEPTS
 

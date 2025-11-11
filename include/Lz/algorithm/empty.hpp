@@ -3,7 +3,7 @@
 #ifndef LZ_ALOGORITHM_EMPTY_HPP
 #define LZ_ALOGORITHM_EMPTY_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

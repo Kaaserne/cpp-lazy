@@ -6,6 +6,7 @@
 #include <Lz/detail/algorithm/adjacent_find.hpp>
 #include <Lz/detail/procs/operators.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/traits/iter_type.hpp>
 
 #ifndef LZ_HAS_CXX_17

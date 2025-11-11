@@ -4,7 +4,7 @@
 #define LZ_ALGORITHM_FIND_IF_HPP
 
 #include <Lz/detail/algorithm/find_if.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/traits/iter_type.hpp>
 

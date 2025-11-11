@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_PROCS_SENTINEL_OPERATORS_HPP
 #define LZ_DETAIL_PROCS_SENTINEL_OPERATORS_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 namespace lz {
 namespace detail {

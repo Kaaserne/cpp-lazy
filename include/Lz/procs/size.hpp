@@ -4,7 +4,7 @@
 #ifndef LZ_SIZE_HPP
 #define LZ_SIZE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <type_traits>
 
 LZ_MODULE_EXPORT namespace lz {

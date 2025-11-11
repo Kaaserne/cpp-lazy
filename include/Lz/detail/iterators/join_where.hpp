@@ -6,7 +6,7 @@
 #include <Lz/algorithm/find_if.hpp>
 #include <Lz/algorithm/lower_bound.hpp>
 #include <Lz/basic_iterable.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/traits/func_ret_type.hpp>

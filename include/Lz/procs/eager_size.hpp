@@ -3,7 +3,7 @@
 #ifndef LZ_HEAGER_SIZE_HPP
 #define LZ_HEAGER_SIZE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/is_sized.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/procs/distance.hpp>

@@ -7,6 +7,7 @@
 #include <Lz/detail/procs/operators.hpp>
 #include <Lz/detail/traits/is_iterable.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 #ifdef LZ_HAS_CXX_20
 #include <numeric>

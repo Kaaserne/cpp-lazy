@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_TRAITS_IS_INVOCABLE_HPP
 #define LZ_DETAIL_TRAITS_IS_INVOCABLE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <type_traits>
 
 #if !defined(LZ_HAS_CXX_17)

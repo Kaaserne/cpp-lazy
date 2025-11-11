@@ -3,7 +3,7 @@
 #ifndef LZ_FUNCTION_CONTAINER_HPP
 #define LZ_FUNCTION_CONTAINER_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/addressof.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
 #include <Lz/detail/traits/remove_ref.hpp>

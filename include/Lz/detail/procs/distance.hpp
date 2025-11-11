@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_PROCS_DISTANCE_HPP
 #define LZ_DETAIL_PROCS_DISTANCE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>

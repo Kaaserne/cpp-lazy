@@ -3,7 +3,7 @@
 #ifndef LZ_ALGORITHM_FRONT_OR_HPP
 #define LZ_ALGORITHM_FRONT_OR_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 

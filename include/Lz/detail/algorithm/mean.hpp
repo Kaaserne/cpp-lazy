@@ -7,6 +7,8 @@
 #include <Lz/detail/traits/remove_ref.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 
+#include <numeric>
+
 namespace lz {
 namespace detail {
 

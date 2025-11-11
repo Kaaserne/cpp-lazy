@@ -4,7 +4,7 @@
 #define LZ_DETAIL_ALGORITHM_PARTITION_HPP
 
 #include <Lz/algorithm/find_if_not.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifndef LZ_HAS_CXX_17
 #include <Lz/detail/traits/enable_if.hpp>

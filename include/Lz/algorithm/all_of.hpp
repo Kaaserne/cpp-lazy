@@ -4,7 +4,7 @@
 #define LZ_ALGORITHM_ALL_OF_HPP
 
 #include <Lz/algorithm/find_if_not.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 

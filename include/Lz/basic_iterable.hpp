@@ -3,13 +3,13 @@
 #ifndef LZ_BASIC_ITERABLE_HPP
 #define LZ_BASIC_ITERABLE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/assert.hpp>
-#include <Lz/detail/traits/strict_iterator_traits.hpp>
-#include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
-#include <Lz/traits/lazy_view.hpp>
+#include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/procs/size.hpp>
+#include <Lz/traits/lazy_view.hpp>
 
 namespace lz {
 namespace detail {

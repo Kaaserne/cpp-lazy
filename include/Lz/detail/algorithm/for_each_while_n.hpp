@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_FOR_EACH_WHILE_N_HPP
 #define LZ_DETAIL_ALGORITHM_FOR_EACH_WHILE_N_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/procs/eager_size.hpp>

@@ -3,9 +3,9 @@
 #ifndef LZ_DETAIL_TRAITS_IS_SENTINEL_HPP
 #define LZ_DETAIL_TRAITS_IS_SENTINEL_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
-#include <type_traits>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
+#include <type_traits>
 
 namespace lz {
 namespace detail {

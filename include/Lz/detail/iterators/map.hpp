@@ -3,7 +3,7 @@
 #ifndef LZ_MAP_ITERATOR_HPP
 #define LZ_MAP_ITERATOR_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/iterator.hpp>

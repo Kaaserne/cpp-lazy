@@ -3,7 +3,9 @@
 #ifndef LZ_DETAIL_ALGORITHM_FOR_EACH_HPP
 #define LZ_DETAIL_ALGORITHM_FOR_EACH_HPP
 
+#include <Lz/detail/procs/get_end.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
+#include <Lz/detail/traits/std_algo_compat.hpp>
 #include <algorithm>
 
 #ifndef LZ_HAS_CXX_17

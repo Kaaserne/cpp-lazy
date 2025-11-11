@@ -3,6 +3,7 @@
 #ifndef LZ_DETAIL_PROCS_GET_END_HPP
 #define LZ_DETAIL_PROCS_GET_END_HPP
 
+#include <Lz/detail/compiler_config.hpp>
 
 namespace lz {
 namespace detail {

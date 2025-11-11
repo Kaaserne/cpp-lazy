@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_PEEK_HPP
 #define LZ_DETAIL_ALGORITHM_PEEK_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/remove_ref.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/util/optional.hpp>

@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_TRAITS_ITERATOR_CATEGORIES_HPP
 #define LZ_DETAIL_TRAITS_ITERATOR_CATEGORIES_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
 #include <Lz/traits/iter_type.hpp>
 #include <iterator>

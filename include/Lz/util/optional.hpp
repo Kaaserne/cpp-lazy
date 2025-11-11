@@ -3,7 +3,7 @@
 #ifndef LZ_OPTIONAL_HPP
 #define LZ_OPTIONAL_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifdef LZ_HAS_CXX_17
 

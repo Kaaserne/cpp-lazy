@@ -3,7 +3,7 @@
 #ifndef LZ_ALGORITHM_NPOS_HPP
 #define LZ_ALGORITHM_NPOS_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 

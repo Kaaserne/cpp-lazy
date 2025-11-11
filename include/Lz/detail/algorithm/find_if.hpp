@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_FIND_IF_HPP
 #define LZ_DETAIL_ALGORITHM_FIND_IF_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/get_end.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/std_algo_compat.hpp>

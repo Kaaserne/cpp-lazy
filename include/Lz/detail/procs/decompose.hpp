@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_PROCS_DECOMPOSE_HPP
 #define LZ_DETAIL_PROCS_DECOMPOSE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifndef LZ_HAS_CXX_17
 

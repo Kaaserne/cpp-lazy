@@ -5,7 +5,7 @@
 
 #include <Lz/algorithm/find.hpp>
 #include <Lz/algorithm/search.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs/operators.hpp>

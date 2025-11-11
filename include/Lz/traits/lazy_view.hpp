@@ -3,7 +3,7 @@
 #ifndef LZ_TRAITS_LAZY_VIEW_HPP
 #define LZ_TRAITS_LAZY_VIEW_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 

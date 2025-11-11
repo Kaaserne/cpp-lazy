@@ -6,7 +6,7 @@
 #include <Lz/algorithm/copy.hpp>
 #include <Lz/algorithm/for_each.hpp>
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/enable_if.hpp>
 #include <Lz/detail/traits/first_arg.hpp>
 #include <Lz/detail/traits/is_iterable.hpp>

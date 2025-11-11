@@ -3,7 +3,7 @@
 #ifndef LZ_DEFAULT_SENTINEL_HPP
 #define LZ_DEFAULT_SENTINEL_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 struct default_sentinel_t {

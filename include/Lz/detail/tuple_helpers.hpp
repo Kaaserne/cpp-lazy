@@ -3,7 +3,7 @@
 #ifndef LZ_TUPLE_HELPERS_HPP
 #define LZ_TUPLE_HELPERS_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/traits/conjunction.hpp>
 #include <Lz/detail/traits/index_sequence.hpp>
@@ -18,7 +18,7 @@ namespace detail {
 // To prevent inclusion of <array> in the header, we define a trivial homogeneous array ourselves
 template<class T, size_t N>
 struct homogeneous_array {
-    T array[N]{};
+    T array[N];
 
 #ifdef LZ_HAS_CXX_11
 

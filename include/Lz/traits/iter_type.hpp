@@ -3,7 +3,7 @@
 #ifndef LZ_TRAITS_ITER_TYPE_HPP
 #define LZ_TRAITS_ITER_TYPE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
 #include <utility>
 

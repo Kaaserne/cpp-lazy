@@ -4,7 +4,7 @@
 #define LZ_DETAIL_ALGORITHM_FIND_HPP
 
 #include <Lz/algorithm/find_if.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

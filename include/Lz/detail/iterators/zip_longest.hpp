@@ -5,6 +5,7 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
+#include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/traits/index_sequence.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
 #include <Lz/util/default_sentinel.hpp>

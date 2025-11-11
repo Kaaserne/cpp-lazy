@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_TRAITS_CONCEPTS_HPP
 #define LZ_DETAIL_TRAITS_CONCEPTS_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifdef LZ_HAS_CONCEPTS
 

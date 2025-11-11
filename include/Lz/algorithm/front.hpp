@@ -4,7 +4,7 @@
 #define LZ_ALGORITHM_FRONT_HPP
 
 #include <Lz/algorithm/empty.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/assert.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>

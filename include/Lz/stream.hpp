@@ -4,7 +4,7 @@
 #define LZ_STREAM_HPP
 
 #include <Lz/detail/adaptors/fn_args_holder.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/procs/chain.hpp> // for operator|
 #include <Lz/traits/lazy_view.hpp>
 #include <ostream>

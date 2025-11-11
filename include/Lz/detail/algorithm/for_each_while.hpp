@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_FOR_EACH_WHILE_HPP
 #define LZ_DETAIL_ALGORITHM_FOR_EACH_WHILE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 namespace lz {
 namespace detail {

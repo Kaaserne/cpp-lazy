@@ -4,7 +4,7 @@
 #define LZ_ALGORITHM_IS_SORTED_HPP
 
 #include <Lz/detail/algorithm/is_sorted.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/procs/begin_end.hpp>
 
 LZ_MODULE_EXPORT namespace lz {

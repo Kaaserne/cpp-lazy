@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_TRAITS_STRICT_ITERATOR_TRAITS_HPP
 #define LZ_DETAIL_TRAITS_STRICT_ITERATOR_TRAITS_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/traits/iter_type.hpp>
 
 namespace lz {

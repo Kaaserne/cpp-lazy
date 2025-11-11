@@ -3,7 +3,7 @@
 #ifndef LZ_DROP_ITERABLE_HPP
 #define LZ_DROP_ITERABLE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/maybe_owned.hpp>
 #include <Lz/detail/procs/next_fast.hpp>
 

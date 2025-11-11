@@ -4,7 +4,7 @@
 #define LZ_DROP_WHILE_ITERABLE_HPP
 
 #include <Lz/algorithm/find_if_not.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/func_container.hpp>
 #include <Lz/detail/maybe_owned.hpp>
 #include <Lz/util/default_sentinel.hpp>

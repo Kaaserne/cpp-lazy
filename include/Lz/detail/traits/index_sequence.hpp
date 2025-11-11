@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_TRAITS_INDEX_SEQUENCE_HPP
 #define LZ_DETAIL_TRAITS_INDEX_SEQUENCE_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 #ifndef LZ_HAS_CXX_11
 #include <utility>

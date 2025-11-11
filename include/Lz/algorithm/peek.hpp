@@ -2,7 +2,7 @@
 #define LZ_ALGORITHM_PEEK_HPP
 
 #include <Lz/detail/algorithm/peek.hpp>
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
 

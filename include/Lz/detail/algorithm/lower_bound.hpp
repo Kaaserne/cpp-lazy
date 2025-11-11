@@ -3,7 +3,7 @@
 #ifndef LZ_DETAIL_ALGORITHM_LOWER_BOUND_HPP
 #define LZ_DETAIL_ALGORITHM_LOWER_BOUND_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/procs/eager_size.hpp>
 

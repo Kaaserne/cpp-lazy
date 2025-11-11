@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <algorithm>
 #include <array>
 #include <deque>

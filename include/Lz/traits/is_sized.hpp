@@ -3,7 +3,7 @@
 #ifndef LZ_TRAITS_IS_SIZED_HPP
 #define LZ_TRAITS_IS_SIZED_HPP
 
-#include <Lz/detail/compiler_checks.hpp>
+#include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/traits/is_sized.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
