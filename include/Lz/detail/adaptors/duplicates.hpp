@@ -86,7 +86,6 @@ struct duplicates_adaptor {
      * std::vector<int> input{ 1, 2, 2, 3, 4, 4, 5 };
      * auto dupes = input | lz::duplicates; // { { 1, 1 }, { 2, 2 }, { 3, 1 }, { 4, 2 }, { 5, 1 } }
      * ```
-     * @param compare The binary predicate to compare the elements of the iterable. Defaults to `std::less`.
      * @return An adaptor that can be used in pipe expressions
      */
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 fn_args_holder<adaptor> operator()() const {

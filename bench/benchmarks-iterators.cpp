@@ -70,7 +70,7 @@ void chunk_if_lz(benchmark::State& state) {
         }
 #else
         auto chunk_if = lz::chunk_if(a, [](int i) noexcept { return i == half; });
-        using ref = lz::ref_iterable_t<decltype(chunk_if)>;
+        using ref = lz::detail::ref_iterable_t<decltype(chunk_if)>;
         lz::for_each(chunk_if, [](ref chunk) {
             for (int x : chunk) {
                 benchmark::DoNotOptimize(x);
@@ -86,8 +86,12 @@ void chunk_if_std(benchmark::State& state) {
     auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
     constexpr static auto half = static_cast<int>(size_policy / 2);
 
+    auto eq = [](int, int cur) {
+        return half != cur;
+    };
+
     for (auto _ : state) {
-        for (auto&& x : std::ranges::chunk_by(a, [](int i) noexcept { return i == half; })) {
+        for (auto&& x : std::ranges::views::chunk_by(a, eq)) {
             for (int y : x) {
                 benchmark::DoNotOptimize(y);
             }
@@ -113,7 +117,7 @@ void chunks_lz(benchmark::State& state) {
 void chunks_std(benchmark::State& state) {
     auto a = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
     for (auto _ : state) {
-        for (auto&& chunk : std::views::chunks(a, 8)) {
+        for (auto&& chunk : std::ranges::views::chunk(a, 8)) {
             for (int x : chunk) {
                 benchmark::DoNotOptimize(x);
             }
@@ -281,7 +285,7 @@ void groupy_by_lz(benchmark::State& state) {
         }
 #else
         auto group_by = lz::group_by(arr, [](int a, int b) noexcept { return a == b; });
-        using ref = lz::ref_iterable_t<decltype(group_by)>;
+        using ref = lz::detail::ref_iterable_t<decltype(group_by)>;
         lz::for_each(group_by, [](ref group) {
             benchmark::DoNotOptimize(group.first);
             lz::for_each(group.second, [](int i) { benchmark::DoNotOptimize(i); });
@@ -331,7 +335,7 @@ void intersection_lz(benchmark::State& state) {
 
 #else
         auto intersection = lz::intersection(arr_a, arr_b);
-        using ref = lz::ref_iterable_t<decltype(intersection)>;
+        using ref = lz::detail::ref_iterable_t<decltype(intersection)>;
         lz::for_each(intersection, [](ref val) { benchmark::DoNotOptimize(val); });
 
 #endif
@@ -382,6 +386,16 @@ void map_lz(benchmark::State& state) {
     for (auto _ : state) {
         for (int mapped : lz::map(arr, [](const int i) noexcept { return i == 0 ? 10 : 5; })) {
             benchmark::DoNotOptimize(mapped);
+        }
+    }
+}
+
+void pairwise_lz(benchmark::State& state) {
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+
+    for (auto _ : state) {
+        for (auto pair : lz::pairwise(arr, 3)) {
+            benchmark::DoNotOptimize(pair);
         }
     }
 }
@@ -473,7 +487,7 @@ void split_multiple_lz(benchmark::State& state) {
     std::string to_split = "hello hello hello hello hello he";
 
     for (auto _ : state) {
-        using ref = lz::ref_iterable_t<decltype(lz::split(to_split, "o "))>;
+        using ref = lz::detail::ref_iterable_t<decltype(lz::split(to_split, "o "))>;
 #ifdef LZ_HAS_CXX_17
         for (ref substring : lz::split(to_split, "o ")) {
             benchmark::DoNotOptimize(substring);
@@ -489,7 +503,7 @@ void split_single_lz(benchmark::State& state) {
     std::string to_split = "hello hello hello hello hello he";
 
     for (auto _ : state) {
-        using ref = lz::ref_iterable_t<decltype(lz::split(to_split, ' '))>;
+        using ref = lz::detail::ref_iterable_t<decltype(lz::split(to_split, ' '))>;
 #ifdef LZ_HAS_CXX_17
         for (ref substring : lz::split(to_split, ' ')) {
             benchmark::DoNotOptimize(substring);
@@ -519,7 +533,7 @@ void take_every_std(benchmark::State& state) {
     std::array<int, size_policy * offset> array;
 
     for (auto _ : state) {
-        for (int taken : lz::ranges::stride(array, offset)) {
+        for (int taken : std::views::stride(array, offset)) {
             benchmark::DoNotOptimize(taken);
         }
     }
@@ -719,6 +733,20 @@ void cartesian_product_std(benchmark::State& state) {
 
 #endif
 
+#if defined(__cpp_lib_ranges_slide) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
+
+void pairwise_std(benchmark::State& state) {
+    auto arr = lz::range(static_cast<int>(size_policy)) | lz::to<std::array<int, size_policy>>();
+
+    for (auto _ : state) {
+        for (auto pair : std::views::slide(arr, 3)) {
+            benchmark::DoNotOptimize(pair);
+        }
+    }
+}
+
+#endif
+
 #if defined(__cpp_lib_ranges_repeat) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 20
 
 void repeat_std(benchmark::State& state) {
@@ -819,6 +847,7 @@ BENCHMARK(intersection_lz);
 BENCHMARK(join_where_lz);
 BENCHMARK(loop_lz);
 BENCHMARK(map_lz);
+BENCHMARK(pairwise_lz);
 BENCHMARK(random_lz);
 BENCHMARK(common_random_lz);
 BENCHMARK(range_lz);
@@ -874,6 +903,12 @@ BENCHMARK(split_multiple_std);
 #if defined(__cpp_lib_ranges_stride) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
 
 BENCHMARK(take_every_std);
+
+#endif
+
+#if defined(__cpp_lib_ranges_slide) && LZ_HAS_INCLUDE(<ranges>) && CMAKE_CXX_STANDARD >= 23
+
+BENCHMARK(pairwise_std);
 
 #endif
 
