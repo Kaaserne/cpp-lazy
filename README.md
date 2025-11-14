@@ -22,7 +22,7 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
-- Tested with very strict GCC/Clang/MSVC flags # TODO: Add link
+- Tested with very strict GCC/Clang/MSVC flags (https://github.com/Kaaserne/cpp-lazy/blob/master/tests/CMakeLists.txt#L87)
 - Bidirectional sentinelled iterables can be reversed using `lz::common`
 
 # What is lazy?
@@ -272,3 +272,4 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 The time is equal to one iteration. One iteration includes the creation of the iterable and one iteration of that iterable. Compiled with: gcc version 13.3.0.
 
 <div style="text-align:center"><img src="https://raw.githubusercontent.com/Kaaserne/cpp-lazy/master/bench/benchmarks-iterators-C%2B%2B23.png" /></div>
+
