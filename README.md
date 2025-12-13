@@ -206,16 +206,20 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ```
 
-## Using find_package (after installing)
-// TODO
+## Using find_package
+```cmake
+# Most trivial way:
+find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
+```
 
-## With xmake
-Everything higher than version 7.0.2 is supported. Please note that version 9.0.0 has drastic changes in the API.
-```xmake
-add_requires("cpp-lazy >=9.0.0")
+With options:
+```cmake
+set(CPP-LAZY_USE_STANDALONE NO) # Use {fmt}
+set(CPP-LAZY_USE_INSTALLED_FMT NO) # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+set(CPP-LAZY_USE_MODULES NO) # Do not use C++20 modules, experimental
+set(CPP-LAZY_DEBUG_ASSERTIONS NO) # Disable debug assertions in release mode
 
-target("test")
-    add_packages("cpp-lazy")
+find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
 ```
 
 ## Without CMake
