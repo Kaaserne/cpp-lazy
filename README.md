@@ -22,7 +22,7 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
-- Tested with very strict GCC/Clang/MSVC flags # TODO: Add link
+- [Tested with very strict GCC/Clang/MSVC flags](https://github.com/Kaaserne/cpp-lazy/blob/11a1fd957cba49c57b9bbca7e69f53bd7210e323/tests/CMakeLists.txt#L87)
 - Bidirectional sentinelled iterables can be reversed using `lz::common`
 
 # What is lazy?
@@ -65,7 +65,20 @@ int main() {
 ```
 
 ## Philosophy behind cpp-lazy
-// TODO, write about when sentinelled
+Cpp-lazy is implemented in such a way, that it tries to reduce redundant data usage as much as possible. For instance, if an iterable can determine whether the end is reached by only using the begin iterator ánd is less than a bidirectional iterator, it will return a sentinel instead of storing the end iterator as well. Or, if the iterable is already sentinelled, it will return the same sentinel type as the input iterable.
+
+This is the case for `lz::take(std::forward_list<>{})` for instance, but not for `lz::take(std::list<>{})` or `lz::take(std::vector<>{})`. This is done to reduce memory usage. If you need a symmetrical `begin`/`end` iterator pair, you can use `lz::common`. Use `lz::common` as late as possible in your chain, because every `lz` iterable has the potential to return sentinels instead of storing the `end` iterator. 
+
+```cpp
+a | lz::map(...) | lz::filter(...) | lz::common; // OK
+a | lz::common | lz::map(...) | lz::filter(...); // Not recommended, map or filter could have returned sentinels
+```
+
+`lz::common` tries to make the `begin`/`end` iterator pair symmetrical. Only as last resort it will use `common_iterator<I, S>` which is basically a fancy `[std::]variant` internally. It depends on the following conditions whether `lz::common` will use `common_iterator`:
+- If `begin` and `end` are already the same type, the same instance will be returned;
+- If the iterable passed is random access, `begin + (size_t)distance(begin, end)` will be used to create the `end` iterator;
+- If `begin` is assignable from `end`, assign `end` to `begin` to create the `end` iterator. It will keep its `.size()` if applicable;
+- Otherwise, `common_iterator<I, S>` will be used. As will be the case for all `std::` sentinelled iterables, but not for `lz` sentinelled iterables.
 
 ## Ownership
 `lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::copied` or `lz::as_copied`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
@@ -99,16 +112,20 @@ int main() {
   // str will *not* hold a reference to random, because random is a lazy iterable and is trivial to copy
   auto str = lz::map(random, [](int i) { return std::to_string(i); });
 
-  lz::maybe_owned<std::vector<int>> ref(vec); // Holds a reference to vec
+  lz::maybe_owned<std::vector<int>> ref{ vec }; // Holds a reference to vec
+  lz::maybe_owned<std::vector<int>>::holds_reference; // true
 
   using random_iterable = decltype(random);
-  lz::maybe_owned<random_iterable> ref2(random); // Does NOT hold a reference to random
+  lz::maybe_owned<random_iterable> ref2{ random }; // Does NOT hold a reference to random
+  lz::maybe_owned<random_iterable>::holds_reference; // false
 
   non_lz_iterable non_lz(vec.data(), vec.data() + vec.size());
-  lz::maybe_owned<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
+  lz::maybe_owned<non_lz_iterable> ref{ non_lz }; // Holds a reference of non_lz! Watch out for this!
+  lz::maybe_owned<non_lz_iterable>::holds_reference; // true
 
   // Instead, if you don't want this behaviour, you can use `lz::copied`:
-  lz::copied<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
+  lz::copied<non_lz_iterable> copied{ non_lz }; // Holds a copy of non_lz = cheap to copy
+  lz::copied<non_lz_iterable>::holds_reference; // false
   // Or use the helper function:
   copied = lz::as_copied(non_lz); // Holds a copy of non_lz = cheap to copy
 }
@@ -224,7 +241,7 @@ find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
 
 ## Without CMake
 ### Without `{fmt}`
-- Clone the repository
+- Download the source code from the releases page
 - Specify the include directory to `cpp-lazy/include`.
 - Include files as follows:
 
