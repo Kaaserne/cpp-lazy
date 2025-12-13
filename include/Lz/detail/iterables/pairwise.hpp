@@ -9,7 +9,6 @@
 #include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/procs/size.hpp>
 
-// TODO make benchmarks and examples
 namespace lz {
 namespace detail {
 

@@ -12,7 +12,7 @@
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 #include <random>
-// TODO reverse
+
 TEST_CASE("random_iterable should be random") {
     constexpr std::size_t size = 5;
 
@@ -94,12 +94,9 @@ TEST_CASE("random_iterable binary operations") {
     }
 
     SUBCASE("Operator--") {
-        auto it = random.end();
-        REQUIRE(-lz::distance(it, random.begin()) == 5);
-        --it;
-        REQUIRE(*it >= 0.);
-        REQUIRE(*it <= 1.);
-        REQUIRE(lz::distance(random.begin(), it) == 4);
+        auto rev = lz::reverse(random);
+        REQUIRE(lz::equal(rev, random, [](double a, double) { return a >= 0. && a <= 1.; }));
+        REQUIRE(rev.size() == size);
     }
 
     SUBCASE("Operator== & Operator!=") {

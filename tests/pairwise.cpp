@@ -53,7 +53,7 @@ TEST_CASE("Empty or one element") {
         REQUIRE(lz::empty(it));
         REQUIRE_FALSE(lz::has_many(it));
         REQUIRE_FALSE(lz::has_one(it));
-        REQUIRE(lz::distance(it) == 0); // TODO add lz::distance everywhere for empty
+        REQUIRE(lz::distance(it) == 0);
     }
 
     SUBCASE("Single element vector 1") {

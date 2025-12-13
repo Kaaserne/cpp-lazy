@@ -2,7 +2,7 @@ import lz;
 
 #include <iostream>
 #include <vector>
-// TODO test all modules?
+
 int main() {
     // Example usage of cpp-lazy
     std::vector<int> vec = { 1, 2, 3, 4, 5 };
