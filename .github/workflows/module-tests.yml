@@ -63,7 +63,7 @@ jobs:
         run: cmake -S . -B build -G Ninja
             -D CMAKE_CXX_STANDARD:STRING=20
             -D CMAKE_BUILD_TYPE:STRING=Release
-            -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/prefix
+            -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/install/cpp-lazy
             -D CPP-LAZY_INSTALL:BOOL=ON
             -D CPP-LAZY_USE_MODULES=ON
 
@@ -78,7 +78,7 @@ jobs:
           CC: clang-18
           CXX: clang++-18
         run: cmake -S tests/module_tests -B tests/module_tests/build -G Ninja
-          -D CMAKE_PREFIX_PATH=tests/module_tests/build/prefix
+          -D CMAKE_PREFIX_PATH=tests/module_tests/build/install
           -D CMAKE_CXX_STANDARD:STRING=20
           -D CPP-LAZY_USE_MODULES_FIND_PACKAGE=ON
 
@@ -86,5 +86,5 @@ jobs:
         run: cmake --build tests/module_tests/build
       
       - name: Run module tests (find_package)
-        working-directory: tests/module_tests/build/prefix
+        working-directory: tests/module_tests/build
         run: ./module_test
