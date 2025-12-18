@@ -52,8 +52,7 @@ if (CPP-LAZY_USE_STANDALONE)
 else()
 	if (CPP-LAZY_USE_INSTALLED_FMT)
 		message(STATUS "cpp-lazy: using external {fmt} library")
-		set(CPP-LAZY_FMT_DEP_VERSION "" CACHE STRING "Version of {fmt} to use")
-		find_package(fmt "${CPP-LAZY_FMT_DEP_VERSION}" REQUIRED CONFIG)
+		find_package(fmt REQUIRED CONFIG)
 	else()
 		message(STATUS "cpp-lazy: using bundled {fmt} library")
 		set(FMT_OS YES CACHE INTERNAL "")
@@ -86,22 +85,19 @@ set(IS_LINUX_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
 set(LZ_LINK_LIBBACKTRACE_CONDITION
     $<AND:$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>,${IS_LINUX_COMPILER},${IS_CXX_23}>
 )
-target_link_libraries(cpp-lazy 
-	${CPP-LAZY_LINK_VISIBILITY}
-		$<$<NOT:$<BOOL:${CPP-LAZY_USE_STANDALONE}>>:fmt::fmt>
-		$<${LZ_LINK_LIBBACKTRACE_CONDITION}:stdc++_libbacktrace>
+target_link_libraries(cpp-lazy ${CPP-LAZY_LINK_VISIBILITY}
+	$<$<NOT:$<BOOL:${CPP-LAZY_USE_STANDALONE}>>:fmt::fmt>
+	$<${LZ_LINK_LIBBACKTRACE_CONDITION}:stdc++_libbacktrace>
 )
-target_compile_definitions(cpp-lazy 
-	${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}
-		$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
-		$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
+target_compile_definitions(cpp-lazy ${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}
+	$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
+	$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
 
-target_include_directories(cpp-lazy
-	${cpp-lazy_warning_guard}
-		${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
-        	"$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-			"$<INSTALL_INTERFACE:${CPP-LAZY_INCLUDE_DIR}>"
+target_include_directories(cpp-lazy	${cpp-lazy_warning_guard}
+	${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+		"$<INSTALL_INTERFACE:${CPP-LAZY_INCLUDE_DIR}>"
 )
 
 # ---- Install ----
