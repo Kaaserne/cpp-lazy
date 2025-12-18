@@ -19,7 +19,7 @@ set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installatio
 
 option(CPP-LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
 option(CPP-LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
-option(CPP-LAZY_USE_MODULES "Enable C++20's modules, experimental" NO)
+option(CPP-LAZY_USE_MODULES "Enable C++20's modules" NO)
 
 if (NOT DEFINED CPP-LAZY_DEBUG_ASSERTIONS)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -76,7 +76,12 @@ add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
 add_library(cpp-lazy::cpp-lazy ALIAS cpp-lazy)
 
 if (CPP-LAZY_USE_MODULES)
-	target_sources(cpp-lazy PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES FILES "${CPP-LAZY_SOURCE_FILES}")
+	target_sources(cpp-lazy PUBLIC
+		FILE_SET cxx_modules
+		TYPE
+			CXX_MODULES
+		FILES "${CPP-LAZY_SOURCE_FILES}")
+	target_compile_features(cpp-lazy PRIVATE cxx_std_20)
 endif()
 
 # Link lib stacktrace if debug assertions are enabled, on Linux with C++23 or later
@@ -112,7 +117,8 @@ if (CPP-LAZY_USE_MODULES AND CPP-LAZY_INSTALL)
 		TARGETS cpp-lazy
         EXPORT cpp-lazyTargets
         INCLUDES DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        FILE_SET cxx_modules
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	)
 elseif (CPP-LAZY_INSTALL)
 	install(
@@ -143,11 +149,10 @@ if (CPP-LAZY_INSTALL)
 			"${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
 			DESTINATION "${cpp-lazy_install_cmakedir}"
 	)
-	if (NOT CPP-LAZY_USE_MODULES)
-		install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-				DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-		)
-	endif()
+	
+	install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+			DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
 	include(CPack)
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
 	set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")

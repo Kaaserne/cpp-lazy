@@ -21,7 +21,7 @@ jobs:
           sudo ./llvm.sh 18
           clang++-18 --version
 
-      - name: Configure tests
+      - name: Configure module tests
         env:
           CC: clang-18
           CXX: clang++-18
@@ -30,9 +30,63 @@ jobs:
           -D CPP-LAZY_USE_MODULES=ON
           -D CMAKE_CXX_COMPILER=clang++-18
 
-      - name: Build
+      - name: Build module tests
         run: cmake --build tests/module_tests/build
       
-      - name: Run tests
+      - name: Run module tests
         working-directory: tests/module_tests/build
+        run: ./module_test
+  
+  module_tests_find_package:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+      
+      - name: Add LLVM apt repo and install Clang 18
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget lsb-release gnupg
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 18
+          clang++-18 --version
+      
+      - name: Configure cpp-lazy
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+          cmake -S . -B build -G Ninja
+            -D CMAKE_CXX_STANDARD:STRING=20
+            -D CMAKE_BUILD_TYPE:STRING=Release
+            -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/prefix
+            -D CPP-LAZY_INSTALL:BOOL=ON
+            -D CPP-LAZY_USE_MODULES=ON
+
+      - name: Build & install cpp-lazy
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: |
+          cmake --build build --target install
+
+      - name: Configure module tests (find_package)
+        env:
+          CC: clang-18
+          CXX: clang++-18
+        run: cmake -S tests/module_tests -B tests/module_tests/build -G Ninja
+          -D CMAKE_PREFIX_PATH=tests/module_tests/build/prefix
+          -D CMAKE_CXX_STANDARD:STRING=20
+          -D CPP-LAZY_USE_MODULES_FIND_PACKAGE=ON
+
+      - name: Build module tests (find_package)
+        run: cmake --build tests/module_tests/build
+      
+      - name: Run module tests (find_package)
+        working-directory: tests/module_tests/build/prefix
         run: ./module_test

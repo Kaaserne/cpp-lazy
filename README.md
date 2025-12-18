@@ -176,7 +176,7 @@ int main() {
 ## Options
 The following CMake options are available, all of which are optional:
 - `CPP-LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
-- `CPP-LAZY_LZ_USE_MODULES`: (experimental): Use C++20 modules. Default is `FALSE`
+- `CPP-LAZY_LZ_USE_MODULES`: Use C++20 modules. Default is `FALSE`
 - `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
 - `CPP-LAZY_USE_INSTALLED_FMT`: Use the system installed version of `{fmt}`. This will not use the bundled version. Default is `FALSE`. `find_package(fmt REQUIRED CONFIG)` will be used (if `CPP-LAZY_USE_STANDALONE` is `FALSE`) and will try to find `fmt` independently so no `-D fmt_DIR=...` is needed. If for some reason `fmt` cannot be found intrinsically, you can still use `-D fmt_DIR=...` to point to the installed version of `fmt`.
 - `CPP-LAZY_INSTALL`: Install cpp-lazy targets and config files. Default is `FALSE`.
@@ -200,7 +200,7 @@ FetchContent_Declare(cpp-lazy
 # Optional settings:
 # set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
 # set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules, experimental
+# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
 # set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
 FetchContent_MakeAvailable(cpp-lazy)
 
@@ -220,7 +220,7 @@ FetchContent_Declare(cpp-lazy
 # Optional settings:
 # set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
 # set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules, experimental
+# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
 # set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
 FetchContent_MakeAvailable(cpp-lazy)
 
@@ -238,7 +238,7 @@ With options:
 ```cmake
 set(CPP-LAZY_USE_STANDALONE NO) # Use {fmt}
 set(CPP-LAZY_USE_INSTALLED_FMT NO) # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-set(CPP-LAZY_USE_MODULES NO) # Do not use C++20 modules, experimental
+set(CPP-LAZY_USE_MODULES NO) # Do not use C++20 modules
 set(CPP-LAZY_DEBUG_ASSERTIONS NO) # Disable debug assertions in release mode
 
 find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
