@@ -13,10 +13,10 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class zip_longest_iterable : public lazy_view {
-    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables{};
+    std::tuple<maybe_owned<Iterables>...> _iterables{};
 
-    using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
-    using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;
+    using iterators = std::tuple<iter_t<Iterables>...>;
+    using sentinels = std::tuple<sentinel_t<Iterables>...>;
 
     static constexpr bool bidi = is_bidi_tag<iter_tuple_iter_cat_t<iterators>>::value;
 
@@ -47,15 +47,13 @@ public:
 
     template<size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
-        using std::get;
-        return std::max({ static_cast<size_t>(lz::size(get<I>(_iterables)))... });
+        return max_variadic(static_cast<size_t>(lz::size(std::get<I>(_iterables)))...);
     }
 
     template<class Iterable2, size_t... Is>
     static zip_longest_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, zip_longest_iterable<Iterables...> zipper, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(zipper._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(zipper._iterables))... };
     }
 
 public:
@@ -84,11 +82,11 @@ public:
 
     [[nodiscard]] constexpr iterator begin() const {
         if constexpr (!is_bidi_tag_v<iter_category>) {
-            return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
+            return { begin_tuple(_iterables), end_tuple(_iterables) };
         }
         else {
             using diff = typename iterator::difference_type;
-            return iterator{ _iterables, begin_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
+            return iterator{ _iterables, begin_tuple(_iterables), tuple_of<diff>(is{}) };
         }
     }
 
@@ -98,7 +96,7 @@ public:
         }
         else {
             using diff = typename iterator::difference_type;
-            return iterator{ _iterables, end_maybe_homo(_iterables), iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
+            return iterator{ _iterables, end_tuple(_iterables), iterables_size_tuple<diff>(_iterables, is{}) };
         }
     }
 
@@ -106,19 +104,19 @@ public:
 
     template<class C = iter_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<C>::value, iterator> begin() const {
-        return { begin_maybe_homo(_iterables), end_maybe_homo(_iterables) };
+        return { begin_tuple(_iterables), end_tuple(_iterables) };
     }
 
     template<class C = iter_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_bidi_tag<C>::value, iterator> begin() const {
         using diff = typename iterator::difference_type;
-        return { _iterables, begin_maybe_homo(_iterables), make_homogeneous_of<diff>(is{}) };
+        return { _iterables, begin_tuple(_iterables), tuple_of<diff>(is{}) };
     }
 
     template<class C = iter_category>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!return_sentinel && is_bidi_tag<C>::value, iterator> end() const {
         using diff = typename iterator::difference_type;
-        return iterator{ _iterables, end_maybe_homo(_iterables), iterable_maybe_homo_eager_size_as<diff>(_iterables, is{}) };
+        return iterator{ _iterables, end_tuple(_iterables), iterables_size_tuple<diff>(_iterables, is{}) };
     }
 
     template<bool R = return_sentinel>

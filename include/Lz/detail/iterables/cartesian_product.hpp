@@ -13,12 +13,11 @@ namespace lz {
 namespace detail {
 template<class... Iterables>
 class cartesian_product_iterable : public lazy_view {
-    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables{};
+    std::tuple<maybe_owned<Iterables>...> _iterables{};
 
     template<size_t... Is>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<Is...>) const {
-        using std::get;
-        const size_t sizes[] = { static_cast<size_t>(lz::size(get<Is>(_iterables)))... };
+        const size_t sizes[] = { static_cast<size_t>(lz::size(std::get<Is>(_iterables)))... };
         return std::accumulate(detail::begin(sizes), detail::end(sizes), size_t{ 1 }, std::multiplies<size_t>{});
     }
 
@@ -26,11 +25,10 @@ class cartesian_product_iterable : public lazy_view {
 
     template<std::ptrdiff_t I, class Iterators>
     constexpr void init_iterators(Iterators& it, bool& first_at_end) const {
-        using std::get;
         if constexpr (I >= 0) {
-            const bool this_at_end = get<I>(it) == get<I>(_iterables).end();
+            const bool this_at_end = std::get<I>(it) == std::get<I>(_iterables).end();
             if (this_at_end && !first_at_end) {
-                get<0>(it) = get<0>(_iterables).end();
+                std::get<0>(it) = std::get<0>(_iterables).end();
                 first_at_end = true;
                 return;
             }
@@ -42,10 +40,9 @@ class cartesian_product_iterable : public lazy_view {
 
     template<std::ptrdiff_t I, class Iterators>
     LZ_CONSTEXPR_CXX_14 enable_if_t<(I >= 0)> init_iterators(Iterators& it, bool& first_at_end) const {
-        using std::get;
-        const bool this_at_end = get<I>(it) == get<I>(_iterables).end();
+        const bool this_at_end = std::get<I>(it) == std::get<I>(_iterables).end();
         if (this_at_end && !first_at_end) {
-            get<0>(it) = get<0>(_iterables).end();
+            std::get<0>(it) = std::get<0>(_iterables).end();
             first_at_end = true;
             return;
         }
@@ -61,22 +58,20 @@ class cartesian_product_iterable : public lazy_view {
     template<class Iterable2, size_t... Is>
     static cartesian_product_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, cartesian_product_iterable<Iterables...>&& cartesian, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(cartesian._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(cartesian._iterables))... };
     }
 
     template<class Iterable2, size_t... Is>
     static cartesian_product_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, const cartesian_product_iterable<Iterables...>& cartesian, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), get<Is>(cartesian._iterables)... };
+        return { std::forward<Iterable2>(iterable2), std::get<Is>(cartesian._iterables)... };
     }
 
     static constexpr size_t tuple_size = sizeof...(Iterables);
     using is = make_index_sequence<tuple_size>;
 
 public:
-    using iterator = cartesian_product_iterator<maybe_homogeneous_t<maybe_owned<Iterables>...>>;
+    using iterator = cartesian_product_iterator<std::tuple<maybe_owned<Iterables>...>>;
     using sentinel = typename iterator::sentinel;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
@@ -122,10 +117,9 @@ public:
 #endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        using std::get;
-        auto it = begin_maybe_homo(_iterables);
-        auto end = end_maybe_homo(_iterables);
-        auto first_at_end = get<0>(it) == get<0>(end);
+        auto it = begin_tuple(_iterables);
+        auto end = end_tuple(_iterables);
+        auto first_at_end = std::get<0>(it) == std::get<0>(end);
         init_iterators<static_cast<std::ptrdiff_t>(tuple_size) - 1>(it, first_at_end);
         return { _iterables, it };
     }
@@ -133,11 +127,10 @@ public:
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
-        using std::get;
         if constexpr (!return_sentinel) {
-            auto rest_it = begin_maybe_homo(_iterables);
-            auto end = end_maybe_homo(_iterables);
-            get<0>(rest_it) = get<0>(end);
+            auto rest_it = begin_tuple(_iterables);
+            auto end = end_tuple(_iterables);
+            std::get<0>(rest_it) = std::get<0>(end);
             return iterator{ _iterables, rest_it };
         }
         else {
@@ -149,10 +142,9 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
-        using std::get;
-        auto rest_it = begin_maybe_homo(_iterables);
-        auto end = end_maybe_homo(_iterables);
-        get<0>(rest_it) = get<0>(end);
+        auto rest_it = begin_tuple(_iterables);
+        auto end = end_tuple(_iterables);
+        std::get<0>(rest_it) = std::get<0>(end);
         return iterator{ _iterables, rest_it };
     }
 

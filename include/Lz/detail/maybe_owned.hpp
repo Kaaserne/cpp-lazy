@@ -21,12 +21,17 @@ class maybe_owned_impl;
 
 template<class Iterable>
 class maybe_owned_impl<Iterable, false> : public lazy_view {
-    Iterable* _iterable_ref_ptr{};
+    Iterable* _iterable_ref_ptr{ nullptr };
 
 public:
     static constexpr bool holds_reference = true;
 
     constexpr maybe_owned_impl() noexcept = default;
+
+    constexpr maybe_owned_impl(const maybe_owned_impl<Iterable, false>& other) = default;
+    constexpr maybe_owned_impl(maybe_owned_impl<Iterable, false>&& other) = default;
+    LZ_CONSTEXPR_CXX_14 maybe_owned_impl& operator=(const maybe_owned_impl<Iterable, false>& other) = default;
+    LZ_CONSTEXPR_CXX_14 maybe_owned_impl& operator=(maybe_owned_impl<Iterable, false>&& other) = default;
 
     template<class I>
     constexpr maybe_owned_impl(I&& iterable) noexcept : _iterable_ref_ptr{ detail::addressof(iterable) } {
@@ -107,9 +112,6 @@ class maybe_owned_impl<Iterable, true> : public lazy_view {
     using it = typename std::remove_cv<Iterable>::type;
     it _iterable_value{};
 
-    template<class, bool>
-    friend class maybe_owned_impl;
-
 public:
     static constexpr bool holds_reference = false;
 
@@ -126,6 +128,11 @@ public:
     }
 
 #endif
+
+    constexpr maybe_owned_impl(const maybe_owned_impl<Iterable, true>& other) = default;
+    constexpr maybe_owned_impl(maybe_owned_impl<Iterable, true>&& other) = default;
+    LZ_CONSTEXPR_CXX_14 maybe_owned_impl& operator=(const maybe_owned_impl<Iterable, true>& other) = default;
+    LZ_CONSTEXPR_CXX_14 maybe_owned_impl& operator=(maybe_owned_impl<Iterable, true>&& other) = default;
 
     constexpr maybe_owned_impl(it&& iterable) noexcept(std::is_nothrow_move_constructible<it>::value) :
         _iterable_value{ std::move(iterable) } {
@@ -258,7 +265,7 @@ using copied = detail::maybe_owned_impl<Iterable, true>;
  * ```
  */
 template<class Iterable>
-copied<detail::remove_ref_t<Iterable>> as_copied(Iterable&& iterable) {
+constexpr copied<detail::remove_ref_t<Iterable>> as_copied(Iterable&& iterable) {
     return copied<detail::remove_ref_t<Iterable>>{ std::forward<Iterable>(iterable) };
 }
 } // namespace lz

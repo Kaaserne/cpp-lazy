@@ -90,7 +90,7 @@ public:
             return iterator{ _iterable, _start_iter, _start_iter == _iterable.end() ? _start_index : lz::eager_ssize(_iterable) };
         }
         else {
-            return sentinel_with<inner_iter>{ _start_iter };
+            return sentinel{ _start_iter };
         }
     }
 

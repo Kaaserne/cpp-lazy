@@ -49,8 +49,7 @@ jobs:
             -D CPP-LAZY_INSTALL:BOOL=ON \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
-            -D CMAKE_CXX_COMPILER=clang++-${{ matrix.version }} \
-            -D "CMAKE_PROJECT_FMT_INCLUDE_BEFORE=$(pwd)/cmake/fmtPICFix.cmake"
+            -D CMAKE_CXX_COMPILER=clang++-${{ matrix.version }}
 
       - name: Build (install)
         run: cmake --build build/install -j $(nproc)

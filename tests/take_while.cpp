@@ -13,22 +13,6 @@
 #include <cpp-lazy-ut-helper/ut_helper.hpp>
 #include <doctest/doctest.h>
 
-#ifdef __GNUC__
-// TODO fix error?
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds"
-
-/*
-/usr/include/c++/13/bits/invoke.h:61:36: error: array subscript 10 is outside array bounds of ‘std::array<int, 10> [1]’
-[-Werror=array-bounds=] [build]    61 |     { return std::forward<_Fn>(__f)(std::forward<_Args>(__args)...); } [build]       |
-~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[build] take_while.cpp: In function ‘void
-C_A_T_C_H_T_E_S_T_26()’: [build] take_while.cpp:170:27: note: at offset 40 into object ‘array’ of size
-40 [build]   170 |     std::array<int, size> array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-*/
-
-#endif
-
 TEST_CASE("Take while with sentinels") {
     auto cstr = lz::c_string("Hello, World!");
     std::function<bool(char)> condition = [](char c) {
@@ -229,9 +213,3 @@ TEST_CASE("take_while_iterable to containers") {
         REQUIRE(map == expected);
     }
 }
-
-#ifdef __GNUC__
-
-#pragma GCC diagnostic pop
-
-#endif

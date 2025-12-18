@@ -52,14 +52,14 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        return { _iterable, _iterable.begin(), _unary_predicate };
+        return { _iterable, _unary_predicate, std::true_type{} };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterable, _iterable.end(), _unary_predicate };
+            return iterator{ _iterable, _unary_predicate, std::false_type {} };
         }
         else {
             return lz::default_sentinel;
@@ -70,7 +70,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
-        return { _iterable, _iterable.end(), _unary_predicate };
+        return { _iterable, _unary_predicate, std::false_type{} };
     }
 
     template<bool R = return_sentinel>

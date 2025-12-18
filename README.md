@@ -22,7 +22,7 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - [Easy installation](https://github.com/Kaaserne/cpp-lazy#installation)
 - [Clear Examples](https://github.com/Kaaserne/cpp-lazy/tree/master/examples)
 - Piping/chaining using `|` operator
-- Tested with very strict GCC/Clang/MSVC flags (https://github.com/Kaaserne/cpp-lazy/blob/master/tests/CMakeLists.txt#L87)
+- [Tested with very strict GCC/Clang/MSVC flags](https://github.com/Kaaserne/cpp-lazy/blob/11a1fd957cba49c57b9bbca7e69f53bd7210e323/tests/CMakeLists.txt#L87)
 - Bidirectional sentinelled iterables can be reversed using `lz::common`
 
 # What is lazy?
@@ -65,14 +65,25 @@ int main() {
 ```
 
 ## Philosophy behind cpp-lazy
-// TODO, write about when sentinelled
+Cpp-lazy is implemented in such a way, that it tries to reduce redundant data usage as much as possible. For instance, if an iterable can determine whether the end is reached by only using the begin iterator ánd is less than a bidirectional iterator, it will return a sentinel instead of storing the end iterator as well. Or, if the iterable is already sentinelled, it will return the same sentinel type as the input iterable.
+
+This is the case for `lz::take(std::forward_list<>{})` for instance, but not for `lz::take(std::list<>{})` or `lz::take(std::vector<>{})`. This is done to reduce memory usage. If you need a symmetrical `begin`/`end` iterator pair, you can use `lz::common`. Use `lz::common` as late as possible in your chain, because every `lz` iterable has the potential to return sentinels instead of storing the `end` iterator. 
+
+```cpp
+a | lz::map(...) | lz::filter(...) | lz::common; // OK
+a | lz::common | lz::map(...) | lz::filter(...); // Not recommended, map or filter could have returned sentinels
+```
+
+`lz::common` tries to make the `begin`/`end` iterator pair symmetrical. Only as last resort it will use `common_iterator<I, S>` which is basically a fancy `[std::]variant` internally. It depends on the following conditions whether `lz::common` will use `common_iterator`:
+- If `begin` and `end` are already the same type, the same instance will be returned;
+- If the iterable passed is random access, `begin + (size_t)distance(begin, end)` will be used to create the `end` iterator;
+- If `begin` is assignable from `end`, assign `end` to `begin` to create the `end` iterator. It will keep its `.size()` if applicable;
+- Otherwise, `common_iterator<I, S>` will be used. As will be the case for all `std::` sentinelled iterables, but not for `lz` sentinelled iterables.
 
 ## Ownership
 `lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::copied` or `lz::as_copied`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
 
 ```cpp
-#include <Lz/lz.hpp>
-
 struct non_lz_iterable {
   int* _begin{};
   int* _end{};
@@ -99,16 +110,20 @@ int main() {
   // str will *not* hold a reference to random, because random is a lazy iterable and is trivial to copy
   auto str = lz::map(random, [](int i) { return std::to_string(i); });
 
-  lz::maybe_owned<std::vector<int>> ref(vec); // Holds a reference to vec
+  lz::maybe_owned<std::vector<int>> ref{ vec }; // Holds a reference to vec
+  lz::maybe_owned<std::vector<int>>::holds_reference; // true
 
   using random_iterable = decltype(random);
-  lz::maybe_owned<random_iterable> ref2(random); // Does NOT hold a reference to random
+  lz::maybe_owned<random_iterable> ref2{ random }; // Does NOT hold a reference to random
+  lz::maybe_owned<random_iterable>::holds_reference; // false
 
   non_lz_iterable non_lz(vec.data(), vec.data() + vec.size());
-  lz::maybe_owned<non_lz_iterable> ref(non_lz); // Holds a reference of non_lz! Watch out for this!
+  lz::maybe_owned<non_lz_iterable> ref{ non_lz }; // Holds a reference of non_lz! Watch out for this!
+  lz::maybe_owned<non_lz_iterable>::holds_reference; // true
 
   // Instead, if you don't want this behaviour, you can use `lz::copied`:
-  lz::copied<non_lz_iterable> copied(non_lz); // Holds a copy of non_lz = cheap to copy
+  lz::copied<non_lz_iterable> copied{ non_lz }; // Holds a copy of non_lz = cheap to copy
+  lz::copied<non_lz_iterable>::holds_reference; // false
   // Or use the helper function:
   copied = lz::as_copied(non_lz); // Holds a copy of non_lz = cheap to copy
 }
@@ -161,7 +176,7 @@ int main() {
 ## Options
 The following CMake options are available, all of which are optional:
 - `CPP-LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
-- `CPP-LAZY_LZ_USE_MODULES`: (experimental): Use C++20 modules. Default is `FALSE`
+- `CPP-LAZY_LZ_USE_MODULES`: Use C++20 modules. Default is `FALSE`
 - `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
 - `CPP-LAZY_USE_INSTALLED_FMT`: Use the system installed version of `{fmt}`. This will not use the bundled version. Default is `FALSE`. `find_package(fmt REQUIRED CONFIG)` will be used (if `CPP-LAZY_USE_STANDALONE` is `FALSE`) and will try to find `fmt` independently so no `-D fmt_DIR=...` is needed. If for some reason `fmt` cannot be found intrinsically, you can still use `-D fmt_DIR=...` to point to the installed version of `fmt`.
 - `CPP-LAZY_INSTALL`: Install cpp-lazy targets and config files. Default is `FALSE`.
@@ -182,6 +197,11 @@ FetchContent_Declare(cpp-lazy
         # If using CMake >= 3.24, preferably set <bool> to TRUE
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
 )
+# Optional settings:
+# set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
+# set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
+# set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -190,9 +210,6 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 
 An alternative ('less' recommended), add to your `CMakeLists.txt` the following:
 ```cmake
-# Uncomment this line to use the cpp-lazy standalone version
-# set(CPP-LAZY_USE_STANDALONE TRUE)
-
 include(FetchContent)
 FetchContent_Declare(cpp-lazy
         GIT_REPOSITORY https://github.com/Kaaserne/cpp-lazy
@@ -200,27 +217,36 @@ FetchContent_Declare(cpp-lazy
         # If using CMake >= 3.24, preferably set <bool> to TRUE
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
 )
+# Optional settings:
+# set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
+# set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
+# set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ```
 
-## Using find_package (after installing)
-// TODO
+## Using find_package
+```cmake
+# Most trivial way:
+find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
+```
 
-## With xmake
-Everything higher than version 7.0.2 is supported. Please note that version 9.0.0 has drastic changes in the API.
-```xmake
-add_requires("cpp-lazy >=9.0.0")
+With options:
+```cmake
+set(CPP-LAZY_USE_STANDALONE NO) # Use {fmt}
+set(CPP-LAZY_USE_INSTALLED_FMT NO) # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+set(CPP-LAZY_USE_MODULES NO) # Do not use C++20 modules
+set(CPP-LAZY_DEBUG_ASSERTIONS NO) # Disable debug assertions in release mode
 
-target("test")
-    add_packages("cpp-lazy")
+find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
 ```
 
 ## Without CMake
 ### Without `{fmt}`
-- Clone the repository
+- Download the source code from the releases page
 - Specify the include directory to `cpp-lazy/include`.
 - Include files as follows:
 

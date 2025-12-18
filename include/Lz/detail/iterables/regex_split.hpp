@@ -9,6 +9,7 @@
 
 namespace lz {
 namespace detail {
+
 template<class RegexTokenIter, class RegexTokenSentinel>
 class regex_split_iterable : public lazy_view {
     RegexTokenIter _begin{};
@@ -18,6 +19,7 @@ public:
     using iterator = regex_split_iterator<RegexTokenIter, RegexTokenSentinel>;
     using const_iterator = iterator;
     using value_type = typename RegexTokenIter::value_type;
+    using sentinel = typename iterator::sentinel;
 
 #ifdef LZ_HAS_CONCEPTS
 
@@ -44,8 +46,8 @@ public:
         return { _begin, _end };
     }
 
-    LZ_NODISCARD constexpr sentinel_with<RegexTokenSentinel> end() const {
-        return sentinel_with<RegexTokenIter>{ _end };
+    LZ_NODISCARD constexpr sentinel end() const {
+        return sentinel{ _end };
     }
 };
 } // namespace detail

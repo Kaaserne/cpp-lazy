@@ -19,7 +19,7 @@ set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installatio
 
 option(CPP-LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
 option(CPP-LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
-option(CPP-LAZY_USE_MODULES "Enable C++20's modules, experimental" NO)
+option(CPP-LAZY_USE_MODULES "Enable C++20's modules" NO)
 
 if (NOT DEFINED CPP-LAZY_DEBUG_ASSERTIONS)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -52,8 +52,7 @@ if (CPP-LAZY_USE_STANDALONE)
 else()
 	if (CPP-LAZY_USE_INSTALLED_FMT)
 		message(STATUS "cpp-lazy: using external {fmt} library")
-		set(CPP-LAZY_FMT_DEP_VERSION "" CACHE STRING "Version of {fmt} to use")
-		find_package(fmt "${CPP-LAZY_FMT_DEP_VERSION}" REQUIRED CONFIG)
+		find_package(fmt REQUIRED CONFIG)
 	else()
 		message(STATUS "cpp-lazy: using bundled {fmt} library")
 		set(FMT_OS YES CACHE INTERNAL "")
@@ -77,7 +76,12 @@ add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
 add_library(cpp-lazy::cpp-lazy ALIAS cpp-lazy)
 
 if (CPP-LAZY_USE_MODULES)
-	target_sources(cpp-lazy PUBLIC FILE_SET cxx_modules TYPE CXX_MODULES FILES "${CPP-LAZY_SOURCE_FILES}")
+	target_sources(cpp-lazy PUBLIC
+		FILE_SET cxx_modules
+		TYPE
+			CXX_MODULES
+		FILES "${CPP-LAZY_SOURCE_FILES}")
+	target_compile_features(cpp-lazy PRIVATE cxx_std_20)
 endif()
 
 # Link lib stacktrace if debug assertions are enabled, on Linux with C++23 or later
@@ -86,22 +90,19 @@ set(IS_LINUX_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
 set(LZ_LINK_LIBBACKTRACE_CONDITION
     $<AND:$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>,${IS_LINUX_COMPILER},${IS_CXX_23}>
 )
-target_link_libraries(cpp-lazy 
-	${CPP-LAZY_LINK_VISIBILITY}
-		$<$<NOT:$<BOOL:${CPP-LAZY_USE_STANDALONE}>>:fmt::fmt>
-		$<${LZ_LINK_LIBBACKTRACE_CONDITION}:stdc++_libbacktrace>
+target_link_libraries(cpp-lazy ${CPP-LAZY_LINK_VISIBILITY}
+	$<$<NOT:$<BOOL:${CPP-LAZY_USE_STANDALONE}>>:fmt::fmt>
+	$<${LZ_LINK_LIBBACKTRACE_CONDITION}:stdc++_libbacktrace>
 )
-target_compile_definitions(cpp-lazy 
-	${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}
-		$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
-		$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
+target_compile_definitions(cpp-lazy ${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}
+	$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
+	$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
 
-target_include_directories(cpp-lazy
-	${cpp-lazy_warning_guard}
-		${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
-        	"$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-			"$<INSTALL_INTERFACE:${CPP-LAZY_INCLUDE_DIR}>"
+target_include_directories(cpp-lazy	${cpp-lazy_warning_guard}
+	${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+		"$<INSTALL_INTERFACE:${CPP-LAZY_INCLUDE_DIR}>"
 )
 
 # ---- Install ----
@@ -116,7 +117,8 @@ if (CPP-LAZY_USE_MODULES AND CPP-LAZY_INSTALL)
 		TARGETS cpp-lazy
         EXPORT cpp-lazyTargets
         INCLUDES DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        FILE_SET cxx_modules DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        FILE_SET cxx_modules
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	)
 elseif (CPP-LAZY_INSTALL)
 	install(
@@ -147,11 +149,10 @@ if (CPP-LAZY_INSTALL)
 			"${PROJECT_BINARY_DIR}/cpp-lazyConfigVersion.cmake"
 			DESTINATION "${cpp-lazy_install_cmakedir}"
 	)
-	if (NOT CPP-LAZY_USE_MODULES)
-		install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-				DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-		)
-	endif()
+	
+	install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+			DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	)
 	include(CPack)
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
 	set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
@@ -161,9 +162,9 @@ endif()
 option(CPP-LAZY_BUILD_ESSENTIALS_ZIP OFF)
 if (CPP-LAZY_BUILD_ESSENTIALS_ZIP)
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip"
-		COMMAND ${CMAKE_COMMAND} -E tar c "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip" --format=zip -- include/ CMakeLists.txt LICENSE.md
+		COMMAND ${CMAKE_COMMAND} -E tar c "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip" --format=zip -- src/ include/ CMakeLists.txt LICENSE.md
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		DEPENDS include/;CMakeLists.txt;LICENSE.md
+		DEPENDS src/;include/;CMakeLists.txt;LICENSE.md
 	)
 	add_custom_target(${PROJECT_NAME}_package DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip")
 endif ()

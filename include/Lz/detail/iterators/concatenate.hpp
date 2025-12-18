@@ -39,17 +39,17 @@ public:
 private:
     template<size_t... I>
     LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>, const concatenate_iterator& other) const {
-        using std::get;
-        const difference_type totals[] = { static_cast<difference_type>(get<I>(_iterators) -
-                                                                        get<I>(other._iterators))... };
+
+        const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
+                                                                        std::get<I>(other._iterators))... };
         return std::accumulate(detail::begin(totals), detail::end(totals), difference_type{ 0 });
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_20 difference_type minus(index_sequence<I...>) const {
-        using std::get;
-        const difference_type totals[] = { static_cast<difference_type>(get<I>(_iterators) -
-                                                                        get<I>(_iterables).end())... };
+
+        const difference_type totals[] = { static_cast<difference_type>(std::get<I>(_iterators) -
+                                                                        std::get<I>(_iterables).end())... };
         return std::accumulate(detail::begin(totals), detail::end(totals), difference_type{ 0 });
     }
 
@@ -57,10 +57,10 @@ private:
 
     template<size_t I>
     constexpr void min_is_n(const difference_type offset) {
-        using std::get;
+
         if constexpr (I != 0) {
-            auto& current = get<I>(_iterators);
-            auto begin = get<I>(_iterables).begin();
+            auto& current = std::get<I>(_iterators);
+            auto begin = std::get<I>(_iterables).begin();
 
             if (current != begin) {
                 const auto dist = current - begin;
@@ -77,18 +77,18 @@ private:
             }
         }
         else {
-            LZ_ASSERT_SUBTRACTABLE(offset <= get<0>(_iterators) - get<0>(_iterables).begin());
-            auto& current = get<0>(_iterators);
+            LZ_ASSERT_SUBTRACTABLE(offset <= std::get<0>(_iterators) - std::get<0>(_iterables).begin());
+            auto& current = std::get<0>(_iterators);
             current -= offset;
         }
     }
 
     template<size_t I>
     constexpr void plus_is_n(const difference_type offset) {
-        using std::get;
+
         if constexpr (I != tup_size) {
-            auto& current = get<I>(_iterators);
-            const auto current_end = get<I>(_iterables).end();
+            auto& current = std::get<I>(_iterators);
+            const auto current_end = std::get<I>(_iterables).end();
             const auto dist = current_end - current;
 
             if (dist > offset) {
@@ -107,10 +107,10 @@ private:
 
     template<size_t I>
     constexpr void minus_minus() {
-        using std::get;
+
         if constexpr (I != 0) {
-            auto& current = get<I>(_iterators);
-            if (current != get<I>(_iterables).begin()) {
+            auto& current = std::get<I>(_iterators);
+            if (current != std::get<I>(_iterables).begin()) {
                 --current;
             }
             else {
@@ -118,21 +118,21 @@ private:
             }
         }
         else {
-            LZ_ASSERT_DECREMENTABLE(get<0>(_iterators) != get<0>(_iterables).begin());
-            --get<0>(_iterators);
+            LZ_ASSERT_DECREMENTABLE(std::get<0>(_iterators) != std::get<0>(_iterables).begin());
+            --std::get<0>(_iterators);
         }
     }
 
     template<size_t I>
     constexpr reference deref() const {
-        using std::get;
+
         if constexpr (I == tup_size - 1) {
-            LZ_ASSERT_DEREFERENCABLE(get<I>(_iterators) != get<I>(_iterables).end());
-            return *get<I>(_iterators);
+            LZ_ASSERT_DEREFERENCABLE(std::get<I>(_iterators) != std::get<I>(_iterables).end());
+            return *std::get<I>(_iterators);
         }
         else {
-            if (get<I>(_iterators) != get<I>(_iterables).end()) {
-                return *get<I>(_iterators);
+            if (std::get<I>(_iterators) != std::get<I>(_iterables).end()) {
+                return *std::get<I>(_iterators);
             }
             else {
                 return deref<I + 1>();
@@ -142,29 +142,29 @@ private:
 
     template<size_t I>
     constexpr void plus_plus() {
-        using std::get;
+
         if constexpr (I != tup_size) {
-            if (get<I>(_iterators) != get<I>(_iterables).end()) {
-                ++get<I>(_iterators);
+            if (std::get<I>(_iterators) != std::get<I>(_iterables).end()) {
+                ++std::get<I>(_iterators);
             }
             else {
                 plus_plus<I + 1>();
             }
         }
         else {
-            LZ_ASSERT_INCREMENTABLE(get<tup_size - 1>(_iterators) != get<tup_size - 1>(_iterables).end());
+            LZ_ASSERT_INCREMENTABLE(std::get<tup_size - 1>(_iterators) != std::get<tup_size - 1>(_iterables).end());
         }
     }
 
     template<size_t I, class EndIter>
     constexpr bool iter_equal_to(const EndIter& end) const {
-        using std::get;
+
         if constexpr (I != tup_size - 1) {
-            const auto has_value = get<I>(_iterators) == get<I>(end);
+            const auto has_value = std::get<I>(_iterators) == std::get<I>(end);
             return has_value ? iter_equal_to<I + 1>(end) : has_value;
         }
         else {
-            return get<I>(_iterators) == get<I>(end);
+            return std::get<I>(_iterators) == std::get<I>(end);
         }
     }
 
@@ -172,9 +172,9 @@ private:
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I != 0> min_is_n(const difference_type offset) {
-        using std::get;
-        auto& current = get<I>(_iterators);
-        auto begin = get<I>(_iterables).begin();
+
+        auto& current = std::get<I>(_iterators);
+        auto begin = std::get<I>(_iterables).begin();
 
         if (current != begin) {
             const auto dist = current - begin;
@@ -193,17 +193,17 @@ private:
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> min_is_n(const difference_type offset) {
-        using std::get;
-        auto& current = get<0>(_iterators);
-        LZ_ASSERT_SUBTRACTABLE(offset <= current - get<0>(_iterables).begin());
+
+        auto& current = std::get<0>(_iterators);
+        LZ_ASSERT_SUBTRACTABLE(offset <= current - std::get<0>(_iterables).begin());
         current -= offset;
     }
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size> plus_is_n(const difference_type offset) {
-        using std::get;
-        auto& current = get<I>(_iterators);
-        const auto& current_end = get<I>(_iterables).end();
+
+        auto& current = std::get<I>(_iterators);
+        const auto& current_end = std::get<I>(_iterables).end();
         const auto dist = current_end - current;
 
         if (dist > offset) {
@@ -223,9 +223,9 @@ private:
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I != 0> minus_minus() {
-        using std::get;
-        auto& current = get<I>(_iterators);
-        if (current != get<I>(_iterables).begin()) {
+
+        auto& current = std::get<I>(_iterators);
+        if (current != std::get<I>(_iterables).begin()) {
             --current;
         }
         else {
@@ -235,22 +235,22 @@ private:
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I == 0> minus_minus() {
-        using std::get;
-        LZ_ASSERT_DECREMENTABLE(get<0>(_iterables).begin() != get<0>(_iterables).end());
-        --get<0>(_iterators);
+
+        LZ_ASSERT_DECREMENTABLE(std::get<0>(_iterables).begin() != std::get<0>(_iterables).end());
+        --std::get<0>(_iterators);
     }
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I == tup_size - 1, reference> deref() const {
-        using std::get;
-        return *get<I>(_iterators);
+
+        return *std::get<I>(_iterators);
     }
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I != tup_size - 1, reference> deref() const {
-        using std::get;
-        if (get<I>(_iterators) != get<I>(_iterables).end()) {
-            return *get<I>(_iterators);
+
+        if (std::get<I>(_iterators) != std::get<I>(_iterables).end()) {
+            return *std::get<I>(_iterators);
         }
         else {
             return deref<I + 1>();
@@ -259,9 +259,9 @@ private:
 
     template<size_t I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I != tuple_size<Iterators>::value> plus_plus() {
-        using std::get;
-        if (get<I>(_iterators) != get<I>(_iterables).end()) {
-            ++get<I>(_iterators);
+
+        if (std::get<I>(_iterators) != std::get<I>(_iterables).end()) {
+            ++std::get<I>(_iterators);
         }
         else {
             plus_plus<I + 1>();
@@ -274,26 +274,26 @@ private:
 
     template<size_t I, class EndIter>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I != tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
-        using std::get;
-        const auto has_value = get<I>(_iterators) == get<I>(end);
+
+        const auto has_value = std::get<I>(_iterators) == std::get<I>(end);
         return has_value ? iter_equal_to<I + 1>(end) : has_value;
     }
 
     template<size_t I, class EndIter>
     LZ_CONSTEXPR_CXX_14 enable_if_t<I == tuple_size<Iterators>::value - 1, bool> iter_equal_to(const EndIter& end) const {
-        using std::get;
-        return get<I>(_iterators) == get<I>(end);
+
+        return std::get<I>(_iterators) == std::get<I>(end);
     }
 
 #endif // LZ_HAS_CXX_17
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void assign_sentinels(index_sequence<I...>) {
-        using std::get;
+
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(_iterables).end()), ...);
+        ((std::get<I>(_iterators) = std::get<I>(_iterables).end()), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(_iterables).end()...);
+        decompose(std::get<I>(_iterators) = std::get<I>(_iterables).end()...);
 #endif
     }
 
@@ -354,8 +354,8 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_20 difference_type difference(const concatenate_iterator& other) const {
-        LZ_ASSERT_COMPATIBLE(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
-                             end_maybe_homo(_iterables) == end_maybe_homo(other._iterables));
+        LZ_ASSERT_COMPATIBLE(begin_tuple(_iterables) == begin_tuple(other._iterables) &&
+                             end_tuple(_iterables) == end_tuple(other._iterables));
         return minus(make_index_sequence<tup_size>(), other);
     }
 
@@ -364,13 +364,13 @@ public:
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(const concatenate_iterator& other) const {
-        LZ_ASSERT_COMPATIBLE(begin_maybe_homo(_iterables) == begin_maybe_homo(other._iterables) &&
-                             end_maybe_homo(_iterables) == end_maybe_homo(other._iterables));
+        LZ_ASSERT_COMPATIBLE(begin_tuple(_iterables) == begin_tuple(other._iterables) &&
+                             end_tuple(_iterables) == end_tuple(other._iterables));
         return iter_equal_to<0>(other._iterators);
     }
 
     LZ_CONSTEXPR_CXX_14 bool eq(default_sentinel_t) const {
-        return iter_equal_to<0>(end_maybe_homo(_iterables));
+        return iter_equal_to<0>(end_tuple(_iterables));
     }
 };
 

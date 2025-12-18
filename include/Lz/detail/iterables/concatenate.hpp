@@ -13,27 +13,25 @@ namespace detail {
 
 template<class... Iterables>
 class concatenate_iterable : public lazy_view {
-    using iterables = maybe_homogeneous_t<maybe_owned<Iterables>...>;
+    using iterables = std::tuple<maybe_owned<Iterables>...>;
     iterables _iterables{};
 
     template<size_t... I>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
-        using std::get;
-        const size_t sizes[] = { static_cast<size_t>(lz::size(get<I>(_iterables)))... };
+        const size_t sizes[] = { static_cast<size_t>(lz::size(std::get<I>(_iterables)))... };
         return std::accumulate(detail::begin(sizes), detail::end(sizes), size_t{ 0 });
     }
 
     template<class Iterable2, size_t... Is>
     static concatenate_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, concatenate_iterable<Iterables...> cat, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(cat._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(cat._iterables))... };
     }
 
     using is = make_index_sequence<sizeof...(Iterables)>;
 
 public:
-    using iterator = concatenate_iterator<iterables, maybe_homogeneous_t<iter_t<Iterables>...>>;
+    using iterator = concatenate_iterator<iterables, std::tuple<iter_t<Iterables>...>>;
     using const_iterator = iterator;
     using value_type = typename iterator::value_type;
 
@@ -78,14 +76,14 @@ public:
 #endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        return { _iterables, begin_maybe_homo(_iterables) };
+        return { _iterables, begin_tuple(_iterables) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ _iterables, end_maybe_homo(_iterables) };
+            return iterator{ _iterables, end_tuple(_iterables) };
         }
         else {
             return lz::default_sentinel;
@@ -96,7 +94,7 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
-        return { _iterables, end_maybe_homo(_iterables) };
+        return { _iterables, end_tuple(_iterables) };
     }
 
     template<bool R = return_sentinel>

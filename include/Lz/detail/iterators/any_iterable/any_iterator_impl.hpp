@@ -8,7 +8,6 @@
 #include <Lz/detail/traits/conditional.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/detail/unique_ptr.hpp>
-#include <iterator>
 
 namespace lz {
 namespace detail {
