@@ -12,16 +12,14 @@ namespace detail {
 
 template<class... Iterables>
 class interleave_iterable : public lazy_view {
-    maybe_homogeneous_t<maybe_owned<Iterables>...> _iterables{};
+    std::tuple<maybe_owned<Iterables>...> _iterables{};
 
-    using iterators = maybe_homogeneous_t<iter_t<Iterables>...>;
-    using sentinels = maybe_homogeneous_t<sentinel_t<Iterables>...>;
-    using this_sentinel = sentinel_with<sentinels>;
+    using iterators = std::tuple<iter_t<Iterables>...>;
+    using sentinels = std::tuple<sentinel_t<Iterables>...>;
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 size_t size(index_sequence<I...>) const {
-        using std::get;
-        return std::min({ static_cast<size_t>(get<I>(_iterables).size())... }) * sizeof...(Iterables);
+        return min_variadic(static_cast<size_t>(std::get<I>(_iterables).size())...) * sizeof...(Iterables);
     }
 
     using is = make_index_sequence<sizeof...(Iterables)>;
@@ -29,8 +27,7 @@ class interleave_iterable : public lazy_view {
     template<class Iterable2, size_t... Is>
     static interleave_iterable<remove_ref_t<Iterable2>, Iterables...>
     concat_iterables(Iterable2&& iterable2, interleave_iterable<Iterables...>&& interleaved, index_sequence<Is...>) {
-        using std::get;
-        return { std::forward<Iterable2>(iterable2), std::move(get<Is>(interleaved._iterables))... };
+        return { std::forward<Iterable2>(iterable2), std::move(std::get<Is>(interleaved._iterables))... };
     }
 
 public:
@@ -39,6 +36,7 @@ public:
     using value_type = typename iterator::value_type;
 
 private:
+    using this_sentinel = typename iterator::sentinel;
     static constexpr bool return_sentinel =
         !is_bidi_tag<typename iterator::iterator_category>::value || disjunction<has_sentinel<Iterables>...>::value;
 
@@ -79,17 +77,17 @@ public:
 #endif
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iterator begin() const {
-        return { begin_maybe_homo(_iterables) };
+        return { begin_tuple(_iterables) };
     }
 
 #ifdef LZ_HAS_CXX_17
 
     [[nodiscard]] constexpr auto end() const {
         if constexpr (!return_sentinel) {
-            return iterator{ smallest_end_maybe_homo(_iterables, is{}) };
+            return iterator{ smallest_end_tuple(_iterables, is{}) };
         }
         else {
-            return this_sentinel{ end_maybe_homo(_iterables) };
+            return this_sentinel{ end_tuple(_iterables) };
         }
     }
 
@@ -97,12 +95,12 @@ public:
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<!R, iterator> end() const {
-        return { smallest_end_maybe_homo(_iterables, is{}) };
+        return { smallest_end_tuple(_iterables, is{}) };
     }
 
     template<bool R = return_sentinel>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<R, this_sentinel> end() const {
-        return this_sentinel{ end_maybe_homo(_iterables) };
+        return this_sentinel{ end_tuple(_iterables) };
     }
 
 #endif

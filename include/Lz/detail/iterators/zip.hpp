@@ -5,9 +5,8 @@
 
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/sentinel_with.hpp>
+#include <Lz/detail/procs/min_max.hpp>
 #include <Lz/detail/tuple_helpers.hpp>
-#include <algorithm>
 
 #ifndef LZ_HAS_CXX_17
 #include <Lz/detail/procs/decompose.hpp>
@@ -15,14 +14,40 @@
 
 namespace lz {
 namespace detail {
-template<class... Iterables>
-class zip_iterator : public iterator<zip_iterator<Iterables...>, iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
-                                     fake_ptr_proxy<iter_tuple_ref_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>>,
-                                     iter_tuple_diff_type_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
-                                     iter_tuple_iter_cat_t<maybe_homogeneous_t<iter_t<Iterables>...>>,
-                                     sentinel_with<maybe_homogeneous_t<sentinel_t<Iterables>...>>> {
 
-    using iter_tuple = maybe_homogeneous_t<iter_t<Iterables>...>;
+template<class T>
+class zip_sentinel {
+    T value{};
+
+    template<class...>
+    friend class zip_iterator;
+
+    template<class...>
+    friend class zip_iterable;
+
+    explicit constexpr zip_sentinel(T v) noexcept(std::is_nothrow_move_constructible<T>::value) : value{ std::move(v) } {
+    }
+
+public:
+#ifdef LZ_HAS_CXX_20
+    constexpr zip_sentinel()
+        requires(std::default_initializable<T>)
+    = default;
+#else
+    template<class I = T, class = enable_if_t<std::is_default_constructible<I>::value>>
+    constexpr zip_sentinel() noexcept(std::is_nothrow_default_constructible<I>::value) {
+    }
+#endif
+};
+
+template<class... Iterables>
+class zip_iterator : public iterator<zip_iterator<Iterables...>, iter_tuple_ref_type_t<std::tuple<iter_t<Iterables>...>>,
+                                     fake_ptr_proxy<iter_tuple_ref_type_t<std::tuple<iter_t<Iterables>...>>>,
+                                     iter_tuple_diff_type_t<std::tuple<iter_t<Iterables>...>>,
+                                     iter_tuple_iter_cat_t<std::tuple<iter_t<Iterables>...>>,
+                                     zip_sentinel<std::tuple<sentinel_t<Iterables>...>>> {
+
+    using iter_tuple = std::tuple<iter_t<Iterables>...>;
 
 public:
     using iterator_category = iter_tuple_iter_cat_t<iter_tuple>;
@@ -30,7 +55,7 @@ public:
     using difference_type = iter_tuple_diff_type_t<iter_tuple>;
     using reference = iter_tuple_ref_type_t<iter_tuple>;
     using pointer = fake_ptr_proxy<reference>;
-    using sentinel = sentinel_with<maybe_homogeneous_t<sentinel_t<Iterables>...>>;
+    using sentinel = zip_sentinel<std::tuple<sentinel_t<Iterables>...>>;
 
 private:
     using is = make_index_sequence<tuple_size<iter_tuple>::value>;
@@ -38,73 +63,65 @@ private:
 
     template<size_t... I>
     constexpr reference dereference(index_sequence<I...>) const {
-        using std::get;
-        return reference{ *get<I>(_iterators)... };
+        return reference{ *std::get<I>(_iterators)... };
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void increment(index_sequence<I...>) {
-        using std::get;
 #ifdef LZ_HAS_CXX_17
-        (++get<I>(_iterators), ...);
+        (++std::get<I>(_iterators), ...);
 #else
-        decompose(++get<I>(_iterators)...);
+        decompose(++std::get<I>(_iterators)...);
 #endif
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void decrement(index_sequence<I...>) {
-        using std::get;
 #ifdef LZ_HAS_CXX_17
-        (--get<I>(_iterators), ...);
+        (--std::get<I>(_iterators), ...);
 #else
-        decompose(--get<I>(_iterators)...);
+        decompose(--std::get<I>(_iterators)...);
 #endif
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 void plus_is(const difference_type offset, index_sequence<I...>) {
-        using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) += offset), ...);
+        ((std::get<I>(_iterators) += offset), ...);
 #else
-        decompose(get<I>(_iterators) += offset...);
+        decompose(std::get<I>(_iterators) += offset...);
 #endif
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(const zip_iterator& other, index_sequence<I...>) const {
-        using std::get;
-        const auto max = std::max({ (get<I>(_iterators) - get<I>(other._iterators))... });
+        const auto max = max_variadic(static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other._iterators))...);
         if (max > 0) {
             return max;
         }
-        return std::min({ (get<I>(_iterators) - get<I>(other._iterators))... });
+        return min_variadic(static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other._iterators))...);
     }
 
     template<size_t... I>
     LZ_CONSTEXPR_CXX_14 difference_type minus(const sentinel& other, index_sequence<I...>) const {
-        using std::get;
-        return std::max({ (get<I>(_iterators) - get<I>(other.value))... });
+        return max_variadic(static_cast<difference_type>(std::get<I>(_iterators) - std::get<I>(other.value))...);
     }
 
     template<class EndIter, size_t... I>
     LZ_CONSTEXPR_CXX_14 bool eq(const EndIter& other, index_sequence<I...>) const {
-        using std::get;
 #ifdef LZ_HAS_CXX_17
-        return ((get<I>(_iterators) == get<I>(other)) || ...);
+        return ((std::get<I>(_iterators) == std::get<I>(other)) || ...);
 #else
-        return std::max({ (get<I>(_iterators) == get<I>(other))... });
+        return max_variadic(static_cast<bool>(std::get<I>(_iterators) == std::get<I>(other))...);
 #endif
     }
 
     template<class cat = iterator_category, size_t... I>
     LZ_CONSTEXPR_CXX_14 enable_if_t<!is_bidi_tag<cat>::value> assign_sentinels(const sentinel& other, index_sequence<I...>) {
-        using std::get;
 #ifdef LZ_HAS_CXX_17
-        ((get<I>(_iterators) = get<I>(other.value)), ...);
+        ((std::get<I>(_iterators) = std::get<I>(other.value)), ...);
 #else
-        decompose(get<I>(_iterators) = get<I>(other.value)...);
+        decompose(std::get<I>(_iterators) = std::get<I>(other.value)...);
 #endif
     }
 

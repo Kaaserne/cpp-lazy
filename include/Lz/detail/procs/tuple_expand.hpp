@@ -16,8 +16,6 @@
 namespace lz {
 namespace detail {
 
-using std::get;
-
 template<class Fn>
 class tuple_expand {
     Fn _fn;
@@ -43,14 +41,14 @@ public:
 
 private:
     template<class Tuple, size_t... I>
-    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence<I...>) -> decltype(_fn(get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(get<I>(std::forward<Tuple>(tuple))...);
+    LZ_CONSTEXPR_CXX_14 auto call(Tuple&& tuple, index_sequence<I...>) -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
+        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
     }
 
     template<class Tuple, size_t... I>
     LZ_CONSTEXPR_CXX_14 auto
-    call(Tuple&& tuple, index_sequence<I...>) const -> decltype(_fn(get<I>(std::forward<Tuple>(tuple))...)) {
-        return _fn(get<I>(std::forward<Tuple>(tuple))...);
+    call(Tuple&& tuple, index_sequence<I...>) const -> decltype(_fn(std::get<I>(std::forward<Tuple>(tuple))...)) {
+        return _fn(std::get<I>(std::forward<Tuple>(tuple))...);
     }
 
 public:
