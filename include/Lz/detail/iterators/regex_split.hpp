@@ -6,13 +6,38 @@
 #include <Lz/detail/compiler_config.hpp>
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
-#include <Lz/detail/sentinel_with.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
 #include <Lz/detail/traits/strict_iterator_traits.hpp>
 #include <Lz/util/string_view.hpp>
 
 namespace lz {
 namespace detail {
+
+template<class T>
+class regex_split_sentinel {
+    T value{};
+
+    template<class, class>
+    friend class regex_split_iterator;
+
+    template<class, class>
+    friend class regex_split_iterable;
+
+    explicit constexpr regex_split_sentinel(T v) noexcept(std::is_nothrow_move_constructible<T>::value) : value{ std::move(v) } {
+    }
+
+public:
+#ifdef LZ_HAS_CXX_20
+    constexpr regex_split_sentinel()
+        requires(std::default_initializable<T>)
+    = default;
+#else
+    template<class I = T, class = enable_if_t<std::is_default_constructible<I>::value>>
+    constexpr regex_split_sentinel() noexcept(std::is_nothrow_default_constructible<I>::value) {
+    }
+#endif
+};
+
 template<class RegexTokenIter>
 using regex_split_value_type = basic_string_view<typename RegexTokenIter::regex_type::value_type>;
 
@@ -20,10 +45,11 @@ template<class RegexTokenIter>
 using regex_split_val = typename val_t<RegexTokenIter>::string_type::value_type;
 
 template<class RegexTokenIter, class RegexTokenSentinel>
-class regex_split_iterator : public iterator<regex_split_iterator<RegexTokenIter, RegexTokenSentinel>,
-                                             basic_string_view<regex_split_val<RegexTokenIter>>,
-                                             fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>,
-                                             diff_type<RegexTokenIter>, std::forward_iterator_tag, sentinel_with<RegexTokenSentinel>> {
+class regex_split_iterator
+    : public iterator<regex_split_iterator<RegexTokenIter, RegexTokenSentinel>,
+                      basic_string_view<regex_split_val<RegexTokenIter>>,
+                      fake_ptr_proxy<basic_string_view<regex_split_val<RegexTokenIter>>>, diff_type<RegexTokenIter>,
+                      std::forward_iterator_tag, regex_split_sentinel<RegexTokenSentinel>> {
 public:
     using value_type = basic_string_view<regex_split_val<RegexTokenIter>>;
     using difference_type = typename RegexTokenIter::difference_type;
@@ -54,7 +80,7 @@ public:
         }
     }
 
-    LZ_CONSTEXPR_CXX_14 regex_split_iterator& operator=(sentinel_with<RegexTokenSentinel> end) {
+    LZ_CONSTEXPR_CXX_14 regex_split_iterator& operator=(regex_split_sentinel<RegexTokenSentinel> end) {
         _current = std::move(end.value);
         return *this;
     }
@@ -75,7 +101,7 @@ public:
         return _current == other._current;
     }
 
-    constexpr bool eq(sentinel_with<RegexTokenSentinel> end) const {
+    constexpr bool eq(regex_split_sentinel<RegexTokenSentinel> end) const {
         return _current == end.value;
     }
 };
