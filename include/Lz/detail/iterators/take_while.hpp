@@ -61,13 +61,18 @@ public:
 #endif
 
     template<class I>
-    LZ_CONSTEXPR_CXX_14 take_while_iterator(I&& iterable, iter it, UnaryPredicate unary_predicate) :
-        _iterator{ std::move(it) },
+    LZ_CONSTEXPR_CXX_14 take_while_iterator(I&& iterable, UnaryPredicate unary_predicate, std::true_type /* is_begin */) :
+        _iterator{ std::begin(iterable) },
         _iterable{ std::forward<I>(iterable) },
         _unary_predicate{ std::move(unary_predicate) } {
-        if (_iterator == _iterable.begin()) {
-            incremented_check();
-        }
+        incremented_check();
+    }
+
+    template<class I>
+    LZ_CONSTEXPR_CXX_14 take_while_iterator(I&& iterable, UnaryPredicate unary_predicate, std::false_type /* is_begin */) :
+        _iterator{ std::end(iterable) },
+        _iterable{ std::forward<I>(iterable) },
+        _unary_predicate{ std::move(unary_predicate) } {
     }
 
     LZ_CONSTEXPR_CXX_14 take_while_iterator& operator=(default_sentinel_t) {
