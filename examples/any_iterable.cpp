@@ -2,6 +2,7 @@
 #include <Lz/filter.hpp>
 #include <Lz/map.hpp>
 #include <iostream>
+#include <vector>
 
 namespace {
 
