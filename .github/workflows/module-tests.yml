@@ -60,8 +60,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
-        run: |
-          cmake -S . -B build -G Ninja
+        run: cmake -S . -B build -G Ninja
             -D CMAKE_CXX_STANDARD:STRING=20
             -D CMAKE_BUILD_TYPE:STRING=Release
             -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/prefix
@@ -72,8 +71,7 @@ jobs:
         env:
           CC: clang-18
           CXX: clang++-18
-        run: |
-          cmake --build build --target install
+        run: cmake --build build --target install
 
       - name: Configure module tests (find_package)
         env:
