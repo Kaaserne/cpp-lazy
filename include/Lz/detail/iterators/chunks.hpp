@@ -7,6 +7,7 @@
 #include <Lz/detail/fake_ptr_proxy.hpp>
 #include <Lz/detail/iterator.hpp>
 #include <Lz/detail/procs/assert.hpp>
+#include <Lz/detail/procs/min_max.hpp>
 #include <Lz/procs/eager_size.hpp>
 #include <Lz/util/default_sentinel.hpp>
 
@@ -262,7 +263,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 reference dereference() const {
         LZ_ASSERT_DEREFERENCABLE(_sub_range_begin != _iterable.end());
-        auto sub_range_end = _sub_range_begin + std::min(_chunk_size, _iterable.end() - _sub_range_begin);
+        auto sub_range_end = _sub_range_begin + detail::min_variadic2(_chunk_size, _iterable.end() - _sub_range_begin);
         return { _sub_range_begin, sub_range_end };
     }
 
@@ -272,7 +273,7 @@ public:
 
     LZ_CONSTEXPR_CXX_14 void increment() {
         LZ_ASSERT_INCREMENTABLE(_sub_range_begin != _iterable.end());
-        _sub_range_begin += (std::min(_chunk_size, _iterable.end() - _sub_range_begin));
+        _sub_range_begin += (detail::min_variadic2(_chunk_size, _iterable.end() - _sub_range_begin));
     }
 
     LZ_CONSTEXPR_CXX_14 void decrement() {

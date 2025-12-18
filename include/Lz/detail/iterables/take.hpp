@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/take.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/min_max.hpp>
 #include <Lz/detail/procs/next_fast.hpp>
 #include <Lz/detail/traits/is_iterable.hpp>
 #include <Lz/detail/traits/iterator_categories.hpp>
@@ -115,14 +116,14 @@ public:
     [[nodiscard]] constexpr size_t size() const
         requires(sized<Iterable>)
     {
-        return std::min(static_cast<size_t>(_n), static_cast<size_t>(lz::size(_iterable)));
+        return detail::min_variadic2(static_cast<size_t>(_n), static_cast<size_t>(lz::size(_iterable)));
     }
 
 #else
 
     template<class I = Iterable>
     LZ_NODISCARD constexpr enable_if_t<is_sized<I>::value, size_t> size() const {
-        return std::min(static_cast<size_t>(_n), static_cast<size_t>(lz::size(_iterable)));
+        return detail::min_variadic2(static_cast<size_t>(_n), static_cast<size_t>(lz::size(_iterable)));
     }
 
 #endif

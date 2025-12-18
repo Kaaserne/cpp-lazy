@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/take_every.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/min_max.hpp>
 #include <Lz/detail/procs/next_fast.hpp>
 #include <Lz/procs/eager_size.hpp>
 #include <Lz/traits/lazy_view.hpp>
@@ -75,7 +76,7 @@ public:
             return 0;
         }
 
-        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size) - _start);
+        const auto actual_size = detail::max_variadic2(diff{ 1 }, static_cast<diff>(cur_size) - _start);
         const auto rem = actual_size % _offset;
         const auto quot = actual_size / _offset;
 
@@ -91,7 +92,7 @@ public:
             return 0;
         }
 
-        const auto actual_size = std::max(diff{ 1 }, static_cast<diff>(cur_size) - _start);
+        const auto actual_size = detail::max_variadic2(diff{ 1 }, static_cast<diff>(cur_size) - _start);
         const auto rem = actual_size % _offset;
         const auto quot = actual_size / _offset;
 

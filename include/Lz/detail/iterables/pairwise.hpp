@@ -5,6 +5,7 @@
 
 #include <Lz/detail/iterators/pairwise.hpp>
 #include <Lz/detail/maybe_owned.hpp>
+#include <Lz/detail/procs/min_max.hpp>
 #include <Lz/detail/traits/conditional.hpp>
 #include <Lz/detail/traits/is_sentinel.hpp>
 #include <Lz/procs/size.hpp>
@@ -110,7 +111,7 @@ public:
             return default_sentinel;
         }
         else if constexpr (is_ra_tag_v<it_cat>) {
-            const auto end_offset = std::min(_pair_size - 1, _iterable.end() - _iterable.begin());
+            const auto end_offset = detail::min_variadic2(_pair_size - 1, _iterable.end() - _iterable.begin());
             return iterator{ _iterable, _iterable.end() - end_offset, _pair_size };
         }
         else {
@@ -175,7 +176,7 @@ public:
 
     template<class Cat = it_cat>
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 enable_if_t<is_ra_tag<Cat>::value && !return_sentinel, iterator> end() const {
-        const auto end_offset = std::min(_pair_size - 1, _iterable.end() - _iterable.begin());
+        const auto end_offset = detail::min_variadic2(_pair_size - 1, _iterable.end() - _iterable.begin());
         return iterator{ _iterable, _iterable.end() - end_offset, _pair_size };
     }
 
