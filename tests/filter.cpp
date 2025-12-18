@@ -25,10 +25,16 @@ TEST_CASE("Filter with sentinels") {
     REQUIRE((filter | lz::to<std::vector>()) == expected);
 }
 
+namespace {
+bool pred(int i) {
+    return i % 2 == 0;
+}
+} // namespace
+
 TEST_CASE("operator=(default_sentinel_t)") {
     SUBCASE("forward") {
         std::forward_list<int> lst = { 1, 2, 3, 4, 5 };
-        auto f = lz::filter(lst, [](int i) { return i % 2 == 0; });
+        auto f = lz::filter(lst, pred);
         auto common = make_sentinel_assign_op_tester(f);
         auto expected = { 2, 4 };
         REQUIRE(lz::equal(expected, common));
@@ -45,10 +51,16 @@ TEST_CASE("operator=(default_sentinel_t)") {
     }
 }
 
+struct my_pred {
+    bool operator()(int i) const {
+        return i % 2 == 0;
+    }
+};
+
 TEST_CASE("Empty or one element filter") {
     SUBCASE("Empty") {
         std::list<int> empty;
-        auto filter = lz::filter(empty, [](int i) { return i != 0; });
+        auto filter = lz::filter(empty, my_pred{});
         REQUIRE(lz::empty(filter));
         REQUIRE_FALSE(lz::has_one(filter));
         REQUIRE_FALSE(lz::has_many(filter));
