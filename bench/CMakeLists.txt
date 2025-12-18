@@ -21,7 +21,7 @@ FetchContent_MakeAvailable(benchmark)
 
 target_link_libraries(Benchmark
     PRIVATE
-        cpp-lazy
+        cpp-lazy::cpp-lazy
         benchmark::benchmark
 )
 
