@@ -63,7 +63,7 @@ jobs:
         run: cmake -S . -B build -G Ninja
             -D CMAKE_CXX_STANDARD:STRING=20
             -D CMAKE_BUILD_TYPE:STRING=Release
-            -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/install/cpp-lazy
+            -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/install
             -D CPP-LAZY_INSTALL:BOOL=ON
             -D CPP-LAZY_USE_MODULES=ON
 
