@@ -199,6 +199,11 @@ FetchContent_Declare(cpp-lazy
         # If using CMake >= 3.24, preferably set <bool> to TRUE
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
 )
+# Optional settings:
+# set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
+# set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules, experimental
+# set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -207,9 +212,6 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 
 An alternative ('less' recommended), add to your `CMakeLists.txt` the following:
 ```cmake
-# Uncomment this line to use the cpp-lazy standalone version
-# set(CPP-LAZY_USE_STANDALONE TRUE)
-
 include(FetchContent)
 FetchContent_Declare(cpp-lazy
         GIT_REPOSITORY https://github.com/Kaaserne/cpp-lazy
@@ -217,6 +219,11 @@ FetchContent_Declare(cpp-lazy
         # If using CMake >= 3.24, preferably set <bool> to TRUE
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
 )
+# Optional settings:
+# set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
+# set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules, experimental
+# set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(${PROJECT_NAME} main.cpp)
