@@ -84,8 +84,6 @@ a | lz::common | lz::map(...) | lz::filter(...); // Not recommended, map or filt
 `lz` iterables will hold a reference to the input iterable if the input iterable is *not* inherited from `lz::lazy_view`. This means that the `lz` iterables will hold a reference to (but not excluded to) containers such as `std::vector`, `std::array` and `std::string`, as they do not inherit from `lz::lazy_view`. This is done by the class `lz::maybe_owned`. This can be altered using `lz::copied` or `lz::as_copied`. This will copy the input iterable instead of holding a reference to it. This is useful for cheap to copy iterables that are not inherited from `lz::lazy_view` (for example `boost::iterator_range`).
 
 ```cpp
-#include <Lz/lz.hpp>
-
 struct non_lz_iterable {
   int* _begin{};
   int* _end{};
