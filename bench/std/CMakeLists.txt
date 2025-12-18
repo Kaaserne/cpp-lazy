@@ -8,6 +8,6 @@ add_executable(CompileTimeBenchmarks compile-times.cpp)
 target_compile_options(CompileTimeBenchmarks
     PRIVATE
         $<$<CXX_COMPILER_ID:GNU>:-ftime-report>
-        $<$<CXX_COMPILER_ID:Clang>:-ftime-report>
+        $<$<CXX_COMPILER_ID:Clang>:-ftime-report -ftime-trace>
 )
 target_compile_features(CompileTimeBenchmarks PRIVATE cxx_std_23)
