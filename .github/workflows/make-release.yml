@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Configure project
-        run: cmake -DCPP-LAZY_BUILD_ESSENTIALS_ZIP:BOOL=ON -S . -B build
+        run: cmake -DCPP_LAZY_BUILD_ESSENTIALS_ZIP:BOOL=ON -S . -B build
 
       - name: Package bare essentials release
         run: cmake --build build --target cpp-lazy_package

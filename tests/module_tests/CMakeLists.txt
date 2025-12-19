@@ -3,9 +3,9 @@ project(ModuleTests LANGUAGES CXX)
 
 include(FetchContent)
 
-option(CPP-LAZY_USE_MODULES_FIND_PACKAGE "Use find_package to locate cpp-lazy" OFF)
+option(CPP_LAZY_USE_MODULES_FIND_PACKAGE "Use find_package to locate cpp-lazy" OFF)
 
-if (CPP-LAZY_USE_MODULES_FIND_PACKAGE)
+if (CPP_LAZY_USE_MODULES_FIND_PACKAGE)
     find_package(cpp-lazy REQUIRED CONFIG)
 else()
     FetchContent_Declare(cpp-lazy SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../..")
