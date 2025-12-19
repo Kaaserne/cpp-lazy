@@ -46,7 +46,7 @@ jobs:
           cmake -S . -B build/install -G Ninja \
             -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }} \
             -D CMAKE_CXX_FLAGS=$CXX_FLAGS \
-            -D CPP-LAZY_INSTALL:BOOL=ON \
+            -D CPP_LAZY_INSTALL:BOOL=ON \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
             -D CMAKE_CXX_COMPILER=clang++-${{ matrix.version }}
@@ -69,7 +69,7 @@ jobs:
           cmake -S tests -B build/tests -G Ninja \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
-            -D CPP-LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }} \
+            -D CPP_LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }} \
             -D TEST_INSTALLED_VERSION:BOOL=YES \
             -D CMAKE_CXX_COMPILER=clang++-${{ matrix.version }} \
             -D CMAKE_INSTALL_PREFIX=build/prefix \

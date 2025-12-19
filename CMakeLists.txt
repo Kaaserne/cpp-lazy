@@ -15,52 +15,53 @@ if(cpp-lazy_INCLUDE_WITHOUT_SYSTEM)
 endif()
 
 include(GNUInstallDirs)
-set(CPP-LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installation directory of the include files")
+set(CPP_LAZY_INCLUDE_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE STRING "Installation directory of the include files")
 
-option(CPP-LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
-option(CPP-LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
-option(CPP-LAZY_USE_MODULES "Enable C++20's modules" NO)
+option(CPP_LAZY_USE_STANDALONE "Standalone library without {fmt}" NO)
+option(CPP_LAZY_USE_INSTALLED_FMT "Import {fmt} using find_package" NO)
+option(CPP_LAZY_USE_MODULES "Enable C++20's modules" NO)
 
-if (NOT DEFINED CPP-LAZY_DEBUG_ASSERTIONS)
+if (NOT DEFINED CPP_LAZY_DEBUG_ASSERTIONS)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(CPP-LAZY_DEBUG_ASSERTIONS ON)
+        set(CPP_LAZY_DEBUG_ASSERTIONS ON)
     else()
-        set(CPP-LAZY_DEBUG_ASSERTIONS OFF)
+        set(CPP_LAZY_DEBUG_ASSERTIONS OFF)
     endif()
 endif()
-option(CPP-LAZY_DEBUG_ASSERTIONS "Debug assertions" ${CPP-LAZY_DEBUG_ASSERTIONS})
+option(CPP_LAZY_DEBUG_ASSERTIONS "Debug assertions" ${CPP_LAZY_DEBUG_ASSERTIONS})
 
-if (CPP-LAZY_USE_MODULES)
+if (CPP_LAZY_USE_MODULES)
 	message(STATUS "cpp-lazy: using C++20 modules")
-	set(CPP-LAZY_SOURCE_FILES "src/lz.cppm")
-	set(CPP-LAZY_LINK_VISIBILITY "PUBLIC")
-	set(CPP-LAZY_COMPILE_FEATURES_VISIBLITY "PUBLIC")
-	set(CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY "PRIVATE")
-	set(CPP-LAZY_COMPILE_INCLUDE_VISIBLITY "PUBLIC")
+	set(CPP_LAZY_SOURCE_FILES "src/lz.cppm")
+	set(CPP_LAZY_LINK_VISIBILITY "PUBLIC")
+	set(CPP_LAZY_COMPILE_FEATURES_VISIBLITY "PUBLIC")
+	set(CPP_LAZY_COMPILE_DEFINITIONS_VISIBLITY "PRIVATE")
+	set(CPP_LAZY_COMPILE_INCLUDE_VISIBLITY "PUBLIC")
 	set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 else()
-	set(CPP-LAZY_LIB_TYPE "INTERFACE")
-	set(CPP-LAZY_LINK_VISIBILITY "INTERFACE")
-	set(CPP-LAZY_COMPILE_FEATURES_VISIBLITY "INTERFACE")
-	set(CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY "INTERFACE")
-	set(CPP-LAZY_COMPILE_INCLUDE_VISIBLITY "INTERFACE")
+	set(CPP_LAZY_LIB_TYPE "INTERFACE")
+	set(CPP_LAZY_LINK_VISIBILITY "INTERFACE")
+	set(CPP_LAZY_COMPILE_FEATURES_VISIBLITY "INTERFACE")
+	set(CPP_LAZY_COMPILE_DEFINITIONS_VISIBLITY "INTERFACE")
+	set(CPP_LAZY_COMPILE_INCLUDE_VISIBLITY "INTERFACE")
 endif()
 
 # ---- Import {fmt} ----
-if (CPP-LAZY_USE_STANDALONE)
+if (CPP_LAZY_USE_STANDALONE)
 	message(STATUS "cpp-lazy: using standalone version")
 else()
-	if (CPP-LAZY_USE_INSTALLED_FMT)
+	if (CPP_LAZY_USE_INSTALLED_FMT)
 		message(STATUS "cpp-lazy: using external {fmt} library")
-		find_package(fmt REQUIRED CONFIG)
+		set(CPP_LAZY_FMT_DEP_VERSION "" CACHE STRING "Version of {fmt} to use")
+		find_package(fmt ${CPP_LAZY_FMT_DEP_VERSION} REQUIRED CONFIG)
 	else()
 		message(STATUS "cpp-lazy: using bundled {fmt} library")
 		set(FMT_OS YES CACHE INTERNAL "")
 		set(FMT_INSTALL YES CACHE INTERNAL "" FORCE)
 		include(FetchContent)
-		set(CPP-LAZY_FMT_DEP_VERSION 12.0.0 CACHE STRING "Version of {fmt} to use")
+		set(CPP_LAZY_FMT_DEP_VERSION 12.0.0 CACHE STRING "Version of {fmt} to use")
 		FetchContent_Declare(fmt 
-			URL https://github.com/fmtlib/fmt/archive/refs/tags/${CPP-LAZY_FMT_DEP_VERSION}.tar.gz 
+			URL https://github.com/fmtlib/fmt/archive/refs/tags/${CPP_LAZY_FMT_DEP_VERSION}.tar.gz 
 			UPDATE_DISCONNECTED YES 
 			DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 		)
@@ -68,19 +69,19 @@ else()
 	endif()
 endif()
 
-message(STATUS "cpp-lazy: standalone version: ${CPP-LAZY_USE_STANDALONE}.")
-message(STATUS "cpp-lazy: debug assertions: ${CPP-LAZY_DEBUG_ASSERTIONS}.")
+message(STATUS "cpp-lazy: standalone version: ${CPP_LAZY_USE_STANDALONE}.")
+message(STATUS "cpp-lazy: debug assertions: ${CPP_LAZY_DEBUG_ASSERTIONS}.")
 
 # ---- Declare library ----
-add_library(cpp-lazy ${CPP-LAZY_LIB_TYPE} "${CPP-LAZY_SOURCE_FILES}")
+add_library(cpp-lazy ${CPP_LAZY_LIB_TYPE} "${CPP_LAZY_SOURCE_FILES}")
 add_library(cpp-lazy::cpp-lazy ALIAS cpp-lazy)
 
-if (CPP-LAZY_USE_MODULES)
+if (CPP_LAZY_USE_MODULES)
 	target_sources(cpp-lazy PUBLIC
 		FILE_SET cxx_modules
 		TYPE
 			CXX_MODULES
-		FILES "${CPP-LAZY_SOURCE_FILES}")
+		FILES "${CPP_LAZY_SOURCE_FILES}")
 	target_compile_features(cpp-lazy PRIVATE cxx_std_20)
 endif()
 
@@ -88,21 +89,21 @@ endif()
 set(IS_CXX_23 $<VERSION_GREATER_EQUAL:${CMAKE_CXX_STANDARD},23>)
 set(IS_LINUX_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
 set(LZ_LINK_LIBBACKTRACE_CONDITION
-    $<AND:$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>,${IS_LINUX_COMPILER},${IS_CXX_23}>
+    $<AND:$<BOOL:${CPP_LAZY_DEBUG_ASSERTIONS}>,${IS_LINUX_COMPILER},${IS_CXX_23}>
 )
-target_link_libraries(cpp-lazy ${CPP-LAZY_LINK_VISIBILITY}
-	$<$<NOT:$<BOOL:${CPP-LAZY_USE_STANDALONE}>>:fmt::fmt>
+target_link_libraries(cpp-lazy ${CPP_LAZY_LINK_VISIBILITY}
+	$<$<NOT:$<BOOL:${CPP_LAZY_USE_STANDALONE}>>:fmt::fmt>
 	$<${LZ_LINK_LIBBACKTRACE_CONDITION}:stdc++_libbacktrace>
 )
-target_compile_definitions(cpp-lazy ${CPP-LAZY_COMPILE_DEFINITIONS_VISIBLITY}
-	$<$<BOOL:${CPP-LAZY_USE_STANDALONE}>:LZ_STANDALONE>
-	$<$<BOOL:${CPP-LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
+target_compile_definitions(cpp-lazy ${CPP_LAZY_COMPILE_DEFINITIONS_VISIBLITY}
+	$<$<BOOL:${CPP_LAZY_USE_STANDALONE}>:LZ_STANDALONE>
+	$<$<BOOL:${CPP_LAZY_DEBUG_ASSERTIONS}>:LZ_DEBUG_ASSERTIONS>
 )
 
 target_include_directories(cpp-lazy	${cpp-lazy_warning_guard}
-	${CPP-LAZY_COMPILE_INCLUDE_VISIBLITY}
+	${CPP_LAZY_COMPILE_INCLUDE_VISIBLITY}
         "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-		"$<INSTALL_INTERFACE:${CPP-LAZY_INCLUDE_DIR}>"
+		"$<INSTALL_INTERFACE:${CPP_LAZY_INCLUDE_DIR}>"
 )
 
 # ---- Install ----
@@ -110,9 +111,9 @@ include(CMakePackageConfigHelpers)
 
 set(cpp-lazy_install_cmakedir "${CMAKE_INSTALL_LIBDIR}/cmake/cpp-lazy")
 
-option(CPP-LAZY_INSTALL "Install cpp-lazy" OFF)
+option(CPP_LAZY_INSTALL "Install cpp-lazy" OFF)
 
-if (CPP-LAZY_USE_MODULES AND CPP-LAZY_INSTALL)
+if (CPP_LAZY_USE_MODULES AND CPP_LAZY_INSTALL)
 	install(
 		TARGETS cpp-lazy
         EXPORT cpp-lazyTargets
@@ -120,7 +121,7 @@ if (CPP-LAZY_USE_MODULES AND CPP-LAZY_INSTALL)
         FILE_SET cxx_modules
 		DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	)
-elseif (CPP-LAZY_INSTALL)
+elseif (CPP_LAZY_INSTALL)
 	install(
 		TARGETS cpp-lazy
 		EXPORT cpp-lazyTargets
@@ -128,7 +129,7 @@ elseif (CPP-LAZY_INSTALL)
 	)
 endif()
 
-if (CPP-LAZY_INSTALL)
+if (CPP_LAZY_INSTALL)
 	write_basic_package_version_file(
 		cpp-lazyConfigVersion.cmake
 		VERSION ${PROJECT_VERSION}
@@ -159,8 +160,8 @@ if (CPP-LAZY_INSTALL)
 endif()
 
 # ---- Release configuration zip package, bare essentials ----
-option(CPP-LAZY_BUILD_ESSENTIALS_ZIP OFF)
-if (CPP-LAZY_BUILD_ESSENTIALS_ZIP)
+option(CPP_LAZY_BUILD_ESSENTIALS_ZIP OFF)
+if (CPP_LAZY_BUILD_ESSENTIALS_ZIP)
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip"
 		COMMAND ${CMAKE_COMMAND} -E tar c "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip" --format=zip -- src/ include/ CMakeLists.txt LICENSE.md cmake/
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

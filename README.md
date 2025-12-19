@@ -15,7 +15,7 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 - C++11/14/17/20 compatible
 - C++20's module compatible
 - Easy printing/formatting using `lz::format`, `fmt::print` or `std::cout`
-- One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP-LAZY_USE_STANDALONE=TRUE`/`set(CPP-LAZY_USE_STANDALONE TRUE)` in CMake
+- One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP_LAZY_USE_STANDALONE=TRUE`/`set(CPP_LAZY_USE_STANDALONE TRUE)` in CMake
 - STL compatible (if the input iterable is not sentinelled, otherwise use `lz::*` equivalents)
 - Little overhead, as little data usage as possible
 - Any compiler with at least C++11 support should be suitable
@@ -175,19 +175,19 @@ int main() {
 # Installation
 ## Options
 The following CMake options are available, all of which are optional:
-- `CPP-LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
-- `CPP-LAZY_LZ_USE_MODULES`: Use C++20 modules. Default is `FALSE`
-- `CPP-LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
-- `CPP-LAZY_USE_INSTALLED_FMT`: Use the system installed version of `{fmt}`. This will not use the bundled version. Default is `FALSE`. `find_package(fmt REQUIRED CONFIG)` will be used (if `CPP-LAZY_USE_STANDALONE` is `FALSE`) and will try to find `fmt` independently so no `-D fmt_DIR=...` is needed. If for some reason `fmt` cannot be found intrinsically, you can still use `-D fmt_DIR=...` to point to the installed version of `fmt`.
-- `CPP-LAZY_INSTALL`: Install cpp-lazy targets and config files. Default is `FALSE`.
-- `CPP-LAZY_FMT_DEP_VERSION`: version of `{fmt}` to use. Used if `CPP-LAZY_USE_INSTALLED_FMT` is `TRUE` or `CPP-LAZY_USE_STANDALONE` is `FALSE`. May be empty.
+- `CPP_LAZY_USE_STANDALONE`: Use the standalone version of cpp-lazy. This will not use the library `{fmt}`. Default is `FALSE`
+- `CPP_LAZY_LZ_USE_MODULES`: Use C++20 modules. Default is `FALSE`
+- `CPP_LAZY_DEBUG_ASSERTIONS`: Enable debug assertions. Default is `TRUE` for debug mode, `FALSE` for release.
+- `CPP_LAZY_USE_INSTALLED_FMT`: Use the system installed version of `{fmt}`. This will not use the bundled version. Default is `FALSE` and uses `find_package`. Use `CPP_LAZY_FMT_DEP_VERSION` to specify the version of `{fmt}` to use if needed.
+- `CPP_LAZY_INSTALL`: Install cpp-lazy targets and config files. Default is `FALSE`.
+- `CPP_LAZY_FMT_DEP_VERSION`: version of `{fmt}` to use. Used if `CPP_LAZY_USE_INSTALLED_FMT` is `TRUE` or `CPP_LAZY_USE_STANDALONE` is `FALSE`. May be empty.
 
 ### Using `FetchContent`
 The following way is recommended (cpp-lazy version >= 5.0.1). Note that you choose the cpp-lazy-src.zip, and not the source-code.zip/source-code.tar.gz. This prevents you from downloading stuff that you don't need, and thus preventing pollution of the cmake build directory:
 ```cmake
 
-# Uncomment this line to use the cpp-lazy standalone version or use -D CPP-LAZY_USE_STANDALONE=TRUE
-# set(CPP-LAZY_USE_STANDALONE TRUE)
+# Uncomment this line to use the cpp-lazy standalone version or use -D CPP_LAZY_USE_STANDALONE=TRUE
+# set(CPP_LAZY_USE_STANDALONE TRUE)
 
 include(FetchContent)
 FetchContent_Declare(cpp-lazy
@@ -198,10 +198,11 @@ FetchContent_Declare(cpp-lazy
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
 )
 # Optional settings:
-# set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
-# set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
-# set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
+# set(CPP_LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
+# set(CPP_LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+# set(CPP_LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
+# set(CPP_LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
+# set(CPP_LAZY_FMT_DEP_VERSION "" CACHE STRING "") # Specify version of {fmt} to use if needed
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -218,10 +219,11 @@ FetchContent_Declare(cpp-lazy
         # DOWNLOAD_EXTRACT_TIMESTAMP <bool>
 )
 # Optional settings:
-# set(CPP-LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
-# set(CPP-LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-# set(CPP-LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
-# set(CPP-LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
+# set(CPP_LAZY_USE_STANDALONE NO CACHE BOOL "") # Use {fmt}
+# set(CPP_LAZY_USE_INSTALLED_FMT NO CACHE BOOL "") # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+# set(CPP_LAZY_USE_MODULES NO CACHE BOOL "") # Do not use C++20 modules
+# set(CPP_LAZY_DEBUG_ASSERTIONS NO CACHE BOOL "") # Disable debug assertions in release mode
+# set(CPP_LAZY_FMT_DEP_VERSION "" CACHE STRING "") # Specify version of {fmt} to use. Only relevant if CPP_LAZY_USE_INSTALLED_FMT is YES
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(${PROJECT_NAME} main.cpp)
@@ -236,10 +238,11 @@ find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
 
 With options:
 ```cmake
-set(CPP-LAZY_USE_STANDALONE NO) # Use {fmt}
-set(CPP-LAZY_USE_INSTALLED_FMT NO) # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-set(CPP-LAZY_USE_MODULES NO) # Do not use C++20 modules
-set(CPP-LAZY_DEBUG_ASSERTIONS NO) # Disable debug assertions in release mode
+set(CPP_LAZY_USE_STANDALONE NO) # Use {fmt}
+set(CPP_LAZY_USE_INSTALLED_FMT NO) # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
+set(CPP_LAZY_USE_MODULES NO) # Do not use C++20 modules
+set(CPP_LAZY_DEBUG_ASSERTIONS NO) # Disable debug assertions in release mode
+set(CPP_LAZY_FMT_DEP_VERSION "") # Specify version of {fmt} to use. Only relevant if CPP_LAZY_USE_INSTALLED_FMT is YES
 
 find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
 ```

@@ -7,7 +7,7 @@ include(FetchContent)
 FetchContent_Declare(cpp-lazy
     SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../../"
 )
-set(CPP-LAZY_USE_STANDALONE ON CACHE BOOL "" FORCE)
+set(CPP_LAZY_USE_STANDALONE ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(cpp-lazy)
 
 add_executable(CompileTimeBenchmarks compile-times.cpp)
