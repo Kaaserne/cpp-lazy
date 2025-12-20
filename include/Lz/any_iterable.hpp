@@ -11,37 +11,37 @@
 #include <Lz/traits/lazy_view.hpp>
 
 LZ_MODULE_EXPORT namespace lz {
-    /**
-     * @brief Class that can contain any type of view. For example: a container or another view. Use this when you cannot use
-     * `auto`. Please be aware that this implementation uses type erasure and therefore is a little bit slower than using
-     * `auto`/specifying the "actual" type. For e.g.
-     * ```cpp
-     * // Preferred:
-     * lz::filter_iterable<std::vector<int>::iterator, lambdafunction> f = lz::filter( // stuff...
-     * // Or
-     * auto f = lz::filter( // stuff
-     * // Versus (slower):
-     * lz::any_iterable<int> f = lz::filter( // stuff...
-     * // or
-     * auto f = lz::make_any_iterable(lz::filter( // stuff...
-     * ```
-     *
-     * @tparam T The value_type of the iterator. For example: std::vector<int>::value_type = int, which requires a
-     * lz::any_iterable<int>
-     * @tparam Reference The reference of the iterator. In most cases T&, but with generative iterators it's oftentimes just T.
-     * @tparam IterCat The iterator category. `std::forward_iterator_tag` by default.
-     * @tparam DiffType The difference_type. It is used for the return type of iterator - iterator
-     */
-    template<class T, class Reference = T&, class IterCat = std::forward_iterator_tag, class DiffType = std::ptrdiff_t>
-    class any_iterable : public lazy_view {
-    private:
-        using it = detail::iterator_wrapper<T, Reference, IterCat, DiffType>;
+/**
+ * @brief Class that can contain any type of view. For example: a container or another view. Use this when you cannot use
+ * `auto`. Please be aware that this implementation uses type erasure and therefore is a little bit slower than using
+ * `auto`/specifying the "actual" type. For e.g.
+ * ```cpp
+ * // Preferred:
+ * lz::filter_iterable<std::vector<int>::iterator, lambdafunction> f = lz::filter( // stuff...
+ * // Or
+ * auto f = lz::filter( // stuff
+ * // Versus (slower):
+ * lz::any_iterable<int> f = lz::filter( // stuff...
+ * // or
+ * auto f = lz::make_any_iterable(lz::filter( // stuff...
+ * ```
+ *
+ * @tparam T The value_type of the iterator. For example: std::vector<int>::value_type = int, which requires a
+ * lz::any_iterable<int>
+ * @tparam Reference The reference of the iterator. In most cases T&, but with generative iterators it's oftentimes just T.
+ * @tparam IterCat The iterator category. `std::forward_iterator_tag` by default.
+ * @tparam DiffType The difference_type. It is used for the return type of iterator - iterator
+ */
+template<class T, class Reference = T&, class IterCat = std::forward_iterator_tag, class DiffType = std::ptrdiff_t>
+class any_iterable : public lazy_view {
+private:
+    using it = detail::iterator_wrapper<T, Reference, IterCat, DiffType>;
 
-        template<class Iterable>
-        using any_iter_impl = detail::any_iterator_impl<iter_t<Iterable>, sentinel_t<Iterable>, T, Reference, IterCat, DiffType>;
+    template<class Iterable>
+    using any_iter_impl = detail::any_iterator_impl<iter_t<Iterable>, sentinel_t<Iterable>, T, Reference, IterCat, DiffType>;
 
-        it _begin;
-        it _end;
+    it _begin;
+    it _end;
 
 #ifndef LZ_HAS_CONCEPTS
 
@@ -141,7 +141,7 @@ public:
     }
 
 #endif
-    };
+};
 
 /**
  * Creates an any_iterable object from an iterable. This is useful when you cannot use `auto` or when you want to store

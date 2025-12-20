@@ -154,8 +154,8 @@ public:
 } // namespace detail
 } // namespace lz
 
-// clang-format off
 LZ_MODULE_EXPORT namespace lz {
+
 /**
  * @brief A class that can be converted to any container. It only contains the iterators and
  * can be used in pipe expressions, converted to a container with `to<Container>()`, used in algorithms, for-each loops,
