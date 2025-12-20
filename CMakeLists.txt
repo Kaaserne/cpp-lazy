@@ -32,6 +32,7 @@ option(CPP_LAZY_DEBUG_ASSERTIONS "Debug assertions" ${CPP_LAZY_DEBUG_ASSERTIONS}
 
 if (CPP_LAZY_USE_MODULES)
 	message(STATUS "cpp-lazy: using C++20 modules")
+	set(CMAKE_DEBUG_POSTFIX "d")
 	set(CPP_LAZY_SOURCE_FILES "src/lz.cppm")
 	set(CPP_LAZY_LINK_VISIBILITY "PUBLIC")
 	set(CPP_LAZY_COMPILE_FEATURES_VISIBLITY "PUBLIC")
@@ -165,7 +166,7 @@ if (CPP_LAZY_BUILD_ESSENTIALS_ZIP)
 	add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip"
 		COMMAND ${CMAKE_COMMAND} -E tar c "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip" --format=zip -- src/ include/ CMakeLists.txt LICENSE.md cmake/
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		DEPENDS src/;include/;CMakeLists.txt;LICENSE.md
+		DEPENDS src/;include/;CMakeLists.txt;LICENSE.md;cmake/
 	)
 	add_custom_target(${PROJECT_NAME}_package DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-src.zip")
 endif ()
