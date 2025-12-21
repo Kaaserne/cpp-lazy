@@ -1,0 +1,12 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CPP_LAZY_INCLUDE_DIR@
+
+Name: cpp-lazy
+Description: A fast C++ header-only library for lazy evaluation and function tools
+Version: @PROJECT_VERSION@
+Requires: @PC_REQUIRES@
+Libs: -L${libdir} @PC_LIBS@
+Libs.private: @PC_LIBS_PRIVATE@
+Cflags: -I${includedir}
