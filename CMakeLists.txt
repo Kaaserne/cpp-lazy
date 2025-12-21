@@ -88,9 +88,9 @@ endif()
 
 # Link lib stacktrace if debug assertions are enabled, on Linux with C++23 or later
 set(IS_CXX_23 $<VERSION_GREATER_EQUAL:${CMAKE_CXX_STANDARD},23>)
-set(IS_LINUX_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
+set(IS_GNU_LIKE_COMPILER $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
 set(LZ_LINK_LIBBACKTRACE_CONDITION
-    $<AND:$<BOOL:${CPP_LAZY_DEBUG_ASSERTIONS}>,${IS_LINUX_COMPILER},${IS_CXX_23}>
+    $<AND:$<BOOL:${CPP_LAZY_DEBUG_ASSERTIONS}>,${IS_GNU_LIKE_COMPILER},${IS_CXX_23}>
 )
 target_link_libraries(cpp-lazy ${CPP_LAZY_LINK_VISIBILITY}
 	$<$<NOT:$<BOOL:${CPP_LAZY_USE_STANDALONE}>>:fmt::fmt>
@@ -131,6 +131,33 @@ elseif (CPP_LAZY_INSTALL)
 endif()
 
 if (CPP_LAZY_INSTALL)
+	# ---- pkg-config (.pc) ----
+	set(PC_REQUIRES "")
+	if (NOT CPP_LAZY_USE_STANDALONE)
+		set(PC_REQUIRES "fmt")
+	endif()
+
+	set(PC_LIBS "")
+	set(PC_LIBS_PRIVATE "")
+	if (CPP_LAZY_USE_MODULES)
+		set(PC_LIBS "-lcpp-lazy")
+	endif()
+	if (CPP_LAZY_DEBUG_ASSERTIONS AND IS_GNU_LIKE_COMPILER)
+		set(PC_LIBS_PRIVATE "${PC_LIBS_PRIVATE} -lstdc++_libbacktrace")
+	endif()
+
+	configure_file(
+		"${PROJECT_SOURCE_DIR}/cmake/cpp-lazy.pc.in"
+		"${PROJECT_BINARY_DIR}/cpp-lazy.pc"
+		@ONLY
+	)
+
+	install(
+		FILES "${PROJECT_BINARY_DIR}/cpp-lazy.pc"
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+	)
+
+	# ---- CMake config files ----
 	write_basic_package_version_file(
 		cpp-lazyConfigVersion.cmake
 		VERSION ${PROJECT_VERSION}
@@ -142,6 +169,7 @@ if (CPP_LAZY_INSTALL)
 		"${PROJECT_BINARY_DIR}/cpp-lazyConfig.cmake"
 		INSTALL_DESTINATION "${cpp-lazy_install_cmakedir}"
 	)
+
 	install(EXPORT cpp-lazyTargets
 			NAMESPACE cpp-lazy::
 			DESTINATION "${cpp-lazy_install_cmakedir}"
