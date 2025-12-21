@@ -60,7 +60,7 @@ else()
 		set(FMT_OS YES CACHE INTERNAL "")
 		set(FMT_INSTALL YES CACHE INTERNAL "" FORCE)
 		include(FetchContent)
-		set(CPP_LAZY_FMT_DEP_VERSION 12.0.0 CACHE STRING "Version of {fmt} to use")
+		set(CPP_LAZY_FMT_DEP_VERSION 12.1.0 CACHE STRING "Version of {fmt} to use")
 		FetchContent_Declare(fmt 
 			URL https://github.com/fmtlib/fmt/archive/refs/tags/${CPP_LAZY_FMT_DEP_VERSION}.tar.gz 
 			UPDATE_DISCONNECTED YES 
