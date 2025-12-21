@@ -14,9 +14,6 @@ jobs:
       
       - name: Configure project
         run: cmake -E tar c cpp-lazy-src.zip --format=zip -- src/ include/ CMakeLists.txt LICENSE.md cmake/
-
-      - name: Package bare essentials release
-        run: cmake --build build --target cpp-lazy_package
       
       - name: Add package to release
         uses: svenstaro/upload-release-action@v2
