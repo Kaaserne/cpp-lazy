@@ -14,6 +14,7 @@ The library uses one optional dependency: the library `{fmt}`, more of which can
 # Features
 - C++11/14/17/20 compatible
 - C++20's module compatible
+- `pkgconfig` compatible
 - Easy printing/formatting using `lz::format`, `fmt::print` or `std::cout`
 - One optional dependency ([`{fmt}`](https://github.com/fmtlib/fmt)), can be turned off by using option `CPP_LAZY_USE_STANDALONE=TRUE`/`set(CPP_LAZY_USE_STANDALONE TRUE)` in CMake
 - STL compatible (if the input iterable is not sentinelled, otherwise use `lz::*` equivalents)
@@ -302,5 +303,6 @@ The time is equal to one iteration. One iteration includes the creation of the i
 
 <div style="text-align:center"><img src="https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-23.png?raw=true" />
 </div>
+
 
 
