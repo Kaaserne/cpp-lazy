@@ -299,10 +299,11 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ```
 
 # Benchmarks
-The time is equal to one iteration. One iteration includes the creation of the iterable and one iteration of that iterable. Compiled with: gcc version 13.3.0.
+The time is equal to one iteration. One iteration excludes the creation of the iterable and includes one iteration of that iterable. Compiled with: gcc version 13.3.0.
 
 <div style="text-align:center"><img src="https://github.com/Kaaserne/cpp-lazy/blob/master/bench/benchmarks-iterators-23.png?raw=true" />
 </div>
+
 
 
 
