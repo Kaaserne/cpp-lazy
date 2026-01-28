@@ -31,6 +31,8 @@
   #endif
 #elif defined(LZ_HAS_FORMAT)
   #include <format>
+#else
+  #include <sstream>
 #endif // !defined(LZ_STANDALONE)
 
 // clang-format on
