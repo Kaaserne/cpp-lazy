@@ -38,14 +38,12 @@ jobs:
       run: sudo apt-get install -y gcc-${{ matrix.version }} g++-${{ matrix.version }}
 
     - name: Configure (install)
-      env:
-        CC: gcc-${{ matrix.version }}
-        CXX: g++-${{ matrix.version }}
       run: cmake -S . -B build/install -G Ninja
         -D CPP_LAZY_INSTALL:BOOL=ON
         -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
         -D CMAKE_BUILD_TYPE:STRING=Release
         -D CMAKE_INSTALL_PREFIX=build/prefix
+        -D CMAKE_CXX_COMPILER=g++-${{ matrix.version }}
 
     - name: Build (install)
       run: cmake --build build/install -j $(nproc)
@@ -56,7 +54,6 @@ jobs:
     - name: Configure tests
       run: cmake -S tests -B build/tests -G Ninja
         -D CMAKE_BUILD_TYPE:STRING=Release
-        -D CPP_LAZY_DOCTEST_VERSION:STRING=${{ env.DOCTEST_VERSION }}
         -D TEST_INSTALLED_VERSION:BOOL=YES
         -D CMAKE_INSTALL_PREFIX=build/prefix
         -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}

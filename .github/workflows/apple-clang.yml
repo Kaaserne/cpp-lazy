@@ -1,0 +1,54 @@
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+
+on:
+  workflow_call:
+
+jobs:
+  apple-clang:
+    name: apple-clang-${{ matrix.version }} (C++${{ matrix.standard }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        standard: [11, 14, 17, 20, 23]
+
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v1
+    
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Configure (install)
+        run: |
+          cmake -S . -B build/install -G Ninja \
+            -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }} \
+            -D CPP_LAZY_INSTALL:BOOL=ON \
+            -D CMAKE_BUILD_TYPE:STRING=Release \
+            -D CMAKE_INSTALL_PREFIX=build/prefix \
+            -D CMAKE_CXX_COMPILER=clang++
+
+      - name: Build (install)
+        run: cmake --build build/install -j $(sysctl -n hw.ncpu)
+
+      - name: Install
+        run: cmake --install build/install
+
+      - name: Configure tests
+        run: |
+          cmake -S tests -B build/tests -G Ninja \
+            -D CMAKE_BUILD_TYPE:STRING=Release \
+            -D TEST_INSTALLED_VERSION:BOOL=YES \
+            -D CMAKE_CXX_COMPILER=clang++ \
+            -D CMAKE_INSTALL_PREFIX=build/prefix \
+            -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
+
+      - name: Build tests
+        run: cmake --build build/tests -j $(sysctl -n hw.ncpu)
+
+      - name: Run tests
+        working-directory: build/tests
+        run: ctest -VV --output-on-failure -j $(sysctl -n hw.ncpu)

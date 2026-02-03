@@ -22,9 +22,6 @@ jobs:
           clang++-18 --version
 
       - name: Configure module tests
-        env:
-          CC: clang-18
-          CXX: clang++-18
         run: cmake -S tests/module_tests -B tests/module_tests/build -G Ninja
           -D CMAKE_CXX_STANDARD:STRING=20
           -D CPP_LAZY_USE_MODULES=ON
@@ -57,30 +54,23 @@ jobs:
           clang++-18 --version
       
       - name: Configure cpp-lazy
-        env:
-          CC: clang-18
-          CXX: clang++-18
         run: cmake -S . -B build -G Ninja
             -D CMAKE_CXX_STANDARD:STRING=20
             -D CMAKE_BUILD_TYPE:STRING=Release
             -D CMAKE_INSTALL_PREFIX=tests/module_tests/build/install
             -D CPP_LAZY_INSTALL:BOOL=ON
             -D CPP_LAZY_USE_MODULES=ON
+            -D CMAKE_CXX_COMPILER=clang++-18
 
       - name: Build & install cpp-lazy
-        env:
-          CC: clang-18
-          CXX: clang++-18
         run: cmake --build build --target install
 
       - name: Configure module tests (find_package)
-        env:
-          CC: clang-18
-          CXX: clang++-18
         run: cmake -S tests/module_tests -B tests/module_tests/build -G Ninja
           -D CMAKE_PREFIX_PATH=${{ github.workspace }}/tests/module_tests/build/install
           -D CMAKE_CXX_STANDARD:STRING=20
           -D CPP_LAZY_USE_MODULES_FIND_PACKAGE=ON
+          -D CMAKE_CXX_COMPILER=clang++-18
 
       - name: Build module tests (find_package)
         run: cmake --build tests/module_tests/build

@@ -33,8 +33,6 @@ jobs:
 
       - name: Configure (install)
         env:
-          CC: clang-${{ matrix.version }}
-          CXX: clang-${{ matrix.version }}
         run: |
           sudo apt-get update && sudo apt-get install -y jq
           STDS=$(echo '${{ env.LIBCXX_STANDARDS_JSON }}' | jq -r '.[]' | xargs)
@@ -69,7 +67,6 @@ jobs:
           cmake -S tests -B build/tests -G Ninja \
             -D CMAKE_BUILD_TYPE:STRING=Release \
             -D "CMAKE_CXX_FLAGS=$CXX_FLAGS" \
-            -D CPP_LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }} \
             -D TEST_INSTALLED_VERSION:BOOL=YES \
             -D CMAKE_CXX_COMPILER=clang++-${{ matrix.version }} \
             -D CMAKE_INSTALL_PREFIX=build/prefix \
