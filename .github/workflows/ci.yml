@@ -21,7 +21,7 @@ jobs:
   clang:
     uses: ./.github/workflows/clang.yml
 
-  clang:
+  apple-clang:
     uses: ./.github/workflows/apple-clang.yml
 
   msvc:
