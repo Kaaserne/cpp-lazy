@@ -232,19 +232,8 @@ target_link_libraries(${PROJECT_NAME} cpp-lazy::cpp-lazy)
 ```
 
 ## Using find_package
+First, install the library. Then:
 ```cmake
-# Most trivial way:
-find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
-```
-
-With options:
-```cmake
-set(CPP_LAZY_USE_STANDALONE NO) # Use {fmt}
-set(CPP_LAZY_USE_INSTALLED_FMT NO) # Use bundled {fmt}, NO means use bundled, YES means use system installed {fmt}
-set(CPP_LAZY_USE_MODULES NO) # Do not use C++20 modules
-set(CPP_LAZY_DEBUG_ASSERTIONS NO) # Disable debug assertions in release mode
-set(CPP_LAZY_FMT_DEP_VERSION "") # Specify version of {fmt} to use. Only relevant if CPP_LAZY_USE_INSTALLED_FMT is YES
-
 find_package(cpp-lazy 9.0.0 REQUIRED CONFIG)
 ```
 
