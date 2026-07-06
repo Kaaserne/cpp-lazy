@@ -223,9 +223,9 @@ public:
     }
 
 #endif
+    static_assert(tup_size > 1, "interleaved_iterator must have at least two iterators");
 
-    LZ_CONSTEXPR_CXX_14 interleave_iterator(Iterators iterators) : _iterators{ std::move(iterators) } {
-        static_assert(tup_size > 1, "interleaved_iterator must have at least two iterators");
+    constexpr interleave_iterator(Iterators iterators) : _iterators{ std::move(iterators) } {
     }
 
     LZ_CONSTEXPR_CXX_14 interleave_iterator& operator=(const interleave_sentinel<Sentinels>& end) {

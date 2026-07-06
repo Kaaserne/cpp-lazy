@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2022, windows-2025 ]
+        os: [ windows-2025-vs2026 ]
         standard: [11, 14, 17, 20, 23]
 
     runs-on: ${{ matrix.os }}
@@ -21,12 +21,11 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Configure (install)
-        run: cmake -S . -B build/install
+        run: cmake -S . -B build/install -G Ninja
           -D CMAKE_BUILD_TYPE:STRING=Release
           -D CPP_LAZY_INSTALL:BOOL=ON
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
-          -D CMAKE_CXX_COMPILER:STRING=cl.exe
 
       - name: Build (install)
         run: cmake --build build/install --config Release -j $env:NUMBER_OF_PROCESSORS
@@ -35,12 +34,10 @@ jobs:
         run: cmake --install build/install --config Release
 
       - name: Configure tests
-        run: cmake -S tests -B build/tests
-          -D CPP_LAZY_DOCTEST_VERSION:STRING=${{ vars.DOCTEST_VERSION }}
+        run: cmake -S tests -B build/tests -G Ninja
           -D TEST_INSTALLED_VERSION:BOOL=YES
           -D CMAKE_INSTALL_PREFIX=build/prefix
           -D CMAKE_CXX_STANDARD:STRING=${{ matrix.standard }}
-          -D CMAKE_CXX_COMPILER:STRING=cl.exe
 
       - name: Build tests
         run: cmake --build build/tests --config Release -j $env:NUMBER_OF_PROCESSORS
