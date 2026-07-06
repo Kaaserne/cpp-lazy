@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(LazyTests LANGUAGES CXX)
 
-set(CPP_LAZY_DOCTEST_VERSION "2.4.12")
+set(CPP_LAZY_DOCTEST_VERSION "2.5.2")
 Include(FetchContent)
 FetchContent_Declare(doctest 
 	URL https://github.com/doctest/doctest/archive/refs/tags/v${CPP_LAZY_DOCTEST_VERSION}.tar.gz

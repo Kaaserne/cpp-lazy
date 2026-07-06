@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-env:
-  DOCTEST_VERSION: '2.4.12'
-
 jobs:
   analyze:
     name: Analyze
