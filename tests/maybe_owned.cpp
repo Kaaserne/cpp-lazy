@@ -3,42 +3,6 @@
 #include <cpp-lazy-ut-helper/pch.hpp>
 #include <doctest/doctest.h>
 
-namespace doctest {
-namespace detail {
-// workaround for volatile pointers not being handled correctly by the default filldata
-
-// clang-format off
-
-template<typename T>
-struct filldata<volatile T*> {
-DOCTEST_MSVC_SUPPRESS_WARNING_WITH_PUSH(4180)
-    static void fill(std::ostream* stream, const volatile T* in) {
-        DOCTEST_MSVC_SUPPRESS_WARNING_POP
-        DOCTEST_CLANG_SUPPRESS_WARNING_WITH_PUSH("-Wmicrosoft-cast")
-        filldata<const volatile void*>::fill(stream,
-#if DOCTEST_GCC == 0 || DOCTEST_GCC >= DOCTEST_COMPILER(4, 9, 0)
-                                             reinterpret_cast<const volatile void*>(in)
-#else
-                                             *reinterpret_cast<const volatile void* const*>(&in)
-#endif
-        );
-DOCTEST_CLANG_SUPPRESS_WARNING_POP
-    }
-};
-
-// clang-format on
-template<>
-void filldata<const volatile void*>::fill(std::ostream* stream, const volatile void* in) {
-    if (in) {
-        *stream << in;
-    }
-    else {
-        *stream << "nullptr";
-    }
-}
-} // namespace detail
-} // namespace doctest
-
 TEST_CASE("maybe_owned basic tests") {
     SUBCASE("STD container") {
         std::vector<int> vec{ 1, 2, 3 };
