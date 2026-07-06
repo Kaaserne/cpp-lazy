@@ -91,19 +91,21 @@ public:
 
 #endif
 
+    // warning C4724: potential mod by 0 MSBuild version 18.7.8
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4724)
+#endif
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 iter_t<Iterable> begin() const {
-        if (!_iterable_ref_ptr) {
-            return iter_t<Iterable>{};
-        }
-        return detail::begin(*_iterable_ref_ptr);
+        return _iterable_ref_ptr == nullptr ? iter_t<Iterable>{} : detail::begin(*_iterable_ref_ptr);
     }
 
     LZ_NODISCARD LZ_CONSTEXPR_CXX_14 sentinel_t<Iterable> end() const {
-        if (!_iterable_ref_ptr) {
-            return sentinel_t<Iterable>{};
-        }
-        return detail::end(*_iterable_ref_ptr);
+        return _iterable_ref_ptr == nullptr ? iter_t<Iterable>{} : detail::end(*_iterable_ref_ptr);
     }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 };
 
 // Class that contains a c-array or a view to a maybe_owned_impl<Iterable, true>
